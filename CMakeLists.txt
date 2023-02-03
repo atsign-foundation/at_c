@@ -1,11 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 option(BUILD_ESP_IDF "Build for ESP-IDF" OFF)
-
-# library files
-file(GLOB at_client_files lib/*.c)
-
-message(STATUS "BUILD_ESP_IDF ${BUILD_ESP_IDF}")
+message(STATUS "BUILD_ESP_IDF: ${BUILD_ESP_IDF}")
 
 if(BUILD_ESP_IDF) # build as an ESP-IDF components
   set(COMPONENTS at_client main esptool_py)
@@ -21,8 +17,10 @@ project(
 )
 
 if(NOT BUILD_ESP_IDF) # build for other platforms
+  # library files
   add_subdirectory(deps/mbedtls)
-  add_library(at_client ${at_client_files})
+  add_library(at_client components/at_client/at_client.c)
+
   target_compile_features(at_client PUBLIC c_std_99)
   target_include_directories(at_client PUBLIC include)
   target_link_libraries(at_client PRIVATE mbedtls)
@@ -33,6 +31,7 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   target_include_directories(tests PUBLIC include)
   target_link_libraries(tests PRIVATE at_client)
 
+  # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
     PRIVATE -Wall -Wextra -Wuninitialized -Wpedantic -Werror -Wshadow -Wmissing-include-dirs -Wundef -Winvalid-pch # Essentials
     PRIVATE -Winit-self -Wswitch-enum -Wswitch-default -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k # Control flow
