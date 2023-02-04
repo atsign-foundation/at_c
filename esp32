@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+from os import path, environ
+from sys import argv, path as python_path
+
+# Fix path to include idf tools
+root_dir = path.dirname(path.realpath(__file__))
+idf_dir = root_dir+'/deps/esp-idf'
+python_path.append(idf_dir+'/tools')
+
+commands = ['build', 'clean', 'init', 'project']
+
+def print_usage(exit_code=0):
+    print('Usage: esp32.py <command> [options]')
+    print('Valid commands are: ' + ', '.join(commands))
+    print('To see this prompt again: esp32.py help')
+    exit(exit_code)
+
+def print_project_usage(exit_code=0):
+    print('Usage: esp32.py project <path/to/project>')
+    exit(exit_code)
+
+def build_command():
+  from os import makedirs, getenv
+  if getenv('IDF_PATH') is None:
+    print('IDF_PATH not set. Please run "esp32.py init" first.')
+    exit(1)
+  from idf import init_cli, PROG, SHELL_COMPLETE_VAR
+  makedirs(root_dir+'/lib/esp32', exist_ok=True)
+  idf_cli = init_cli()
+  build_args =['-B', 'build/esp32', '-G', 'Unix Makefiles', 'build','-D', 'BUILD_ESP_IDF=ON']
+  idf_cli(build_args, prog_name=PROG, complete_var=SHELL_COMPLETE_VAR)
+
+def clean_command():
+  from shutil import rmtree
+  rmtree(root_dir+'/build/esp32', ignore_errors=True)
+  rmtree(root_dir+'/lib/esp32', ignore_errors=True)
+  print('Done cleaning...')
+
+def init_command():
+  import idf_tools
+  idf_tools.main(['install'])
+  idf_tools.main(['install-python-env'])
+  from platform import system
+
+  print('\nPlease run the following command to complete setup:')
+  if system() == 'Windows':
+    print('call '+root_dir+'/tools/init-esp32.bat')
+  else:
+    print('. '+root_dir+'/tools/init-esp32.sh')
+
+def project_command(project_path):
+  from distutils.dir_util import copy_tree
+  project_name = path.basename(project_path)
+  print('Creating project '+project_name+'...')
+  copy_tree(root_dir+'/archetypes/esp32', project_path)
+  with open(project_path+'/CMakeLists.txt', 'r') as f:
+    data = f.read()
+  data = data.replace('esp32_archetype', project_name)
+  with open(project_path+'/CMakeLists.txt', 'w') as f:
+    f.write(data)
+  print('Created project '+project_name)
+
+def main():
+  if len(argv) < 2:
+    print_usage(1)
+
+  command = argv[1]
+
+  if command == 'build':
+    build_command()
+  elif command == 'clean':
+    clean_command()
+  elif command == 'init':
+    init_command()
+  elif command == 'project':
+    if len(argv) < 3:
+      print_project_usage(1)
+    project_path = argv[2]
+    project_command(project_path)
+  else:
+    print_usage(1)
+
+if __name__ == '__main__':
+  main()

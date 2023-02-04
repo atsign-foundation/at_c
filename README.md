@@ -4,9 +4,10 @@ Project structure:
 
 `archetypes`: contains useful templates for compiling applications for this library.
 `build`: cmake builds to this folder.
-`components`: definitions for each component.
-`include`: declarations for each component.
+`include`: declarations (header files).
+`src`: definitions (source code).
 `lib`: staticly linked libraries.
+`targets`: additional configuration for build targets.
 `test`: contains the tests.
 
 Usage:
