@@ -6,6 +6,6 @@ cmake_install.cmake
 
 build/
 
-lib/**/lib*.a # Ignore compiled lib files
+lib/**/lib*.a
 
 sdkconfig
