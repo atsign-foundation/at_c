@@ -10,12 +10,9 @@ Project structure:
 `targets`: additional configuration for build targets.
 `test`: contains the tests.
 
-Usage:
+Tools:
 
-Build to the current platform: `make`
+Python based build tools, run with: `./<filename> <command> [options]`
 
-Setup esp32 build tools: `make esp32-tools`
-
-Setup esp32 build environment: `make esp32-env`
-
-Build to esp32: `make esp32`
+`default`: The default build tool, for building on the local platform.
+`esp32`: Used for setting up esp32 environment and building with it.
