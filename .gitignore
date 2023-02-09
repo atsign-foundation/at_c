@@ -11,3 +11,5 @@ lib/**/lib*.a
 sdkconfig
 
 __pycache__/
+
+.pio/
