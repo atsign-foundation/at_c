@@ -12,7 +12,8 @@
 
 ## Tools
 
-Python based build tools, run with: `./<filename> <command> [options]`
+The entire build pipeline can be run via python using `./tool.py`.
+The tool expects a platform `-p`, framework `-f`, and command.
 
-`default`: The default build tool, for building on the local platform.  
-`esp32`: Used for setting up esp32 environment and building with it.
+Example:
+Build for esp32 using espidf framework: `./tool.py -p esp32 -f espidf build`
