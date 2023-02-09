@@ -16,7 +16,17 @@ class CommandHandler(object):
     raise Exception('Not implemented')
     pass
   def build(self, args):
-    raise Exception('Not implemented')
+    if args.clean: self.clean(args)
+    pass
+  def _copy_build(self, args):
+    if args.output is None: pass
+    from glob import glob
+    from shutil import copy
+    from os import path
+    output_dir = path.dirname(args.output)
+    for lib in glob(self.root_dir+'/lib/'+self.dir_name+'/lib*.a'):
+      copy(lib, output_dir)
+    print('Library files copied to ' + output_dir)
     pass
   def clean(self, args):
     from shutil import rmtree

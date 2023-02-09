@@ -14,6 +14,7 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
       print('python -m pip install cmake==3.25.2')
     pass
   def build(self, args):
+    super().build(args)
     from subprocess import check_call
     # Run cmake
     exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name])
@@ -33,6 +34,7 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     from shutil import copy
     for lib in glob(self.root_dir+'/build/'+self.dir_name+'/lib*.a'):
       copy(lib, self.root_dir+'/lib/'+self.dir_name+'/')
+    super()._copy_build(args)
     print('Build successful!')
     pass
   def clean(self, args):

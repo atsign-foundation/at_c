@@ -14,6 +14,11 @@ class ESP32ArduinoCommandHandler(CommandHandler):
       print('python -m pip install platformio==6.1.6')
     pass
   def build(self, args):
+    super().build(args)
+    from subprocess import check_call
+    
+    super()._copy_build(args)
+    print('Build successful!')
     pass
   def clean(self, args):
     return super().clean(args)

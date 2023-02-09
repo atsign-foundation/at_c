@@ -49,6 +49,9 @@ def get_command_parser(parser, namespace):
 def get_additional_args(parser, namespace):
   if namespace.command == 'project':
     parser.add_argument('project_path', help='Path to output directory')
+  if namespace.command == 'build':
+    parser.add_argument('-c','--clean', action='store_true', help='Clean build directory before building')
+    parser.add_argument('-o','--output', help='Output library file path')
   parser.parse_args(namespace=namespace)
   return parser, namespace
 

@@ -17,6 +17,7 @@ class ESP32ESPIDFCommandHandler(CommandHandler):
       print('. '+self.root_dir+'/tools/init-espidf.sh')
     pass
   def build(self, args):
+    super().build(args)
     from os import makedirs, getenv
     if getenv('IDF_PATH') is None:
       print('IDF_PATH not set. Please run "esp32.py init" first.')
@@ -26,6 +27,8 @@ class ESP32ESPIDFCommandHandler(CommandHandler):
     idf_cli = init_cli()
     build_args =['-B', 'build/esp32', '-G', 'Unix Makefiles', 'build','-D', 'BUILD_ESP_IDF=ON']
     idf_cli(build_args, prog_name=PROG, complete_var=SHELL_COMPLETE_VAR)
+    super()._copy_build(args)
+    print('Build successful!')
     pass
   def clean(self, args):
     return super().clean(args)
