@@ -9,3 +9,5 @@ build/
 lib/**/lib*.a
 
 sdkconfig
+
+__pycache__/

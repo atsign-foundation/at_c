@@ -1,7 +1,7 @@
-from command_handler import CommandHandler
+from tools.command_handler import CommandHandler
 class ESP32ESPIDFCommandHandler(CommandHandler):
-  def __init__(self):
-    super().__init__('esp32', 'espidf', 'esp32/espidf')
+  def __init__(self, root_dir):
+    super().__init__('esp32', 'espidf', root_dir)
     pass
   def handle(self, command, args):
     return super().handle(command, args)

@@ -1,7 +1,7 @@
-from command_handler import CommandHandler
+from tools.command_handler import CommandHandler
 class DesktopMbedTLSCommandHandler(CommandHandler):
   def __init__(self, root_dir):
-    super().__init__('desktop', 'mbedtls', 'desktop/mbedtls', root_dir)
+    super().__init__('desktop', 'mbedtls', root_dir)
     pass
   def handle(self, command, args):
     return super().handle(command, args)
@@ -38,4 +38,6 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
   def clean(self, args):
     return super().clean(args)
   def project(self, args):
-    return super().project(args)
+    project_path, project_name = super().project(args)
+    print('Created project '+project_name)
+    pass

@@ -1,8 +1,8 @@
 class CommandHandler(object):
-  def __init__(self, platform, framework, dir_name, root_dir):
+  def __init__(self, platform, framework, root_dir):
     self.platform = platform
     self.framework = framework
-    self.dir_name = dir_name
+    self.dir_name = platform + '_' + framework
     self.root_dir = root_dir
     pass
   def handle(self, command, args):

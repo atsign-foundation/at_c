@@ -65,16 +65,16 @@ def main():
   platform, framework, command, args = parse_args()
   if platform == 'desktop':
     if framework == 'mbedtls':
-      from tools import DesktopMbedTLSCommandHandler
-      handler = DesktopMbedTLSCommandHandler()
+      from tools.desktop_mbedtls_command_handler import DesktopMbedTLSCommandHandler
+      handler = DesktopMbedTLSCommandHandler(root_dir)
     else: raise Exception('Unknown framework: ' + framework)
   elif platform == 'esp32':
     if framework == 'espidf':
-      from tools import ESP32ESPIDFCommandHandler
-      handler = ESP32ESPIDFCommandHandler()
+      from tools.esp32_espidf_command_handler import ESP32ESPIDFCommandHandler
+      handler = ESP32ESPIDFCommandHandler(root_dir)
     elif framework == 'arduino':
-      from tools import ESP32ArduinoCommandHandler
-      handler = ESP32ArduinoCommandHandler()
+      from tools.esp32_arduino_command_handler import ESP32ArduinoCommandHandler
+      handler = ESP32ArduinoCommandHandler(root_dir)
     else: raise Exception('Unknown framework: ' + framework)
   else: raise Exception('Unknown platform: ' + platform)
   handler.handle(command, args)
