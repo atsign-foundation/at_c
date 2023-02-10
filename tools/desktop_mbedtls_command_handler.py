@@ -17,14 +17,14 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     super().build(args)
     from subprocess import check_call
     # Run cmake
-    exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name])
-    if exit_code != 0:
-      print('Unable to build project. Please run "tool.py clean" and try again.')
+    exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name, '-G', 'Unix Makefiles'])
+    if exit_code == 0:
+      super()._build_fail(args)
       return
     # Run make
     exit_code = check_call(['make', '-C', self.root_dir+'/build/'+self.dir_name, 'all'])
-    if exit_code != 0:
-      print('Unable to build project. Please run "tool.py clean" and try again.')
+    if exit_code == 0:
+      super()._build_fail(args)
       return
     # Create lib directory
     from os import makedirs
@@ -34,7 +34,7 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     from shutil import copy
     for lib in glob(self.root_dir+'/build/'+self.dir_name+'/lib*.a'):
       copy(lib, self.root_dir+'/lib/'+self.dir_name+'/')
-    super()._copy_build(args)
+    super()._build_copy(args)
     print('Build successful!')
     pass
   def clean(self, args):

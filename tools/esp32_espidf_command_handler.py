@@ -2,6 +2,9 @@ from tools.command_handler import CommandHandler
 class ESP32ESPIDFCommandHandler(CommandHandler):
   def __init__(self, root_dir):
     super().__init__('esp32', 'espidf', root_dir)
+    from sys import path as python_path
+    idf_dir = root_dir+'/deps/esp-idf'
+    python_path.append(idf_dir+'/tools')
     pass
   def handle(self, command, args):
     return super().handle(command, args)
@@ -18,16 +21,22 @@ class ESP32ESPIDFCommandHandler(CommandHandler):
     pass
   def build(self, args):
     super().build(args)
-    from os import makedirs, getenv
+    from os import getenv
     if getenv('IDF_PATH') is None:
-      print('IDF_PATH not set. Please run "esp32.py init" first.')
+      print('IDF_PATH not set. Please run "./tool.py -p esp32 -f espidf init" first.')
       exit(1)
-    from idf import init_cli, PROG, SHELL_COMPLETE_VAR
-    makedirs(self.root_dir+'/lib/esp32', exist_ok=True)
-    idf_cli = init_cli()
-    build_args =['-B', 'build/esp32', '-G', 'Unix Makefiles', 'build','-D', 'BUILD_ESP_IDF=ON']
-    idf_cli(build_args, prog_name=PROG, complete_var=SHELL_COMPLETE_VAR)
-    super()._copy_build(args)
+    from subprocess import check_call
+    # Run cmake
+    exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name, '-G', 'Unix Makefiles', '-D', 'BUILD_ESP_IDF=ON'])
+    if exit_code == 0:
+      super()._build_fail(args)
+      return
+    # Run make
+    exit_code = check_call(['make', '-C', self.root_dir+'/build/'+self.dir_name, 'all'])
+    if exit_code == 0:
+      super()._build_fail(args)
+      return
+    self._build_copy(args)
     print('Build successful!')
     pass
   def clean(self, args):
@@ -36,7 +45,7 @@ class ESP32ESPIDFCommandHandler(CommandHandler):
     project_path, project_name = super().project(args)
     with open(project_path+'/CMakeLists.txt', 'r') as f:
       data = f.read()
-    data = data.replace('esp32_archetype', project_name)
+    data = data.replace('<project-name>', project_name)
     with open(project_path+'/CMakeLists.txt', 'w') as f:
       f.write(data)
     print('Created project '+project_name)

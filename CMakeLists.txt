@@ -4,8 +4,8 @@ option(BUILD_ESP_IDF "Build for ESP-IDF" OFF)
 
 if(BUILD_ESP_IDF) # build as an ESP-IDF components
   message(STATUS "BUILDING FOR ESP-IDF")
-  set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/targets)
-  set(COMPONENTS at_client esp32 esptool_py)
+  set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/targets/esp32_espidf)
+  set(COMPONENTS at_client esp32_espidf)
   include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 endif()
 
@@ -20,7 +20,9 @@ project(
 if(NOT BUILD_ESP_IDF) # build for other platforms
   # library files
   add_subdirectory(deps/mbedtls)
-  add_library(at_client src/at_client/at_client.c)
+
+  FILE(GLOB_RECURSE sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
+  add_library(at_client ${sources})
 
   target_compile_features(at_client PUBLIC c_std_99)
   target_include_directories(at_client PUBLIC include)

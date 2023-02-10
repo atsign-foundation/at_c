@@ -18,16 +18,20 @@ class CommandHandler(object):
   def build(self, args):
     if args.clean: self.clean(args)
     pass
-  def _copy_build(self, args):
-    if args.output is None: pass
+  def _build_copy(self, args):
+    if args.output is None: return
     from glob import glob
     from shutil import copy
-    from os import path
-    output_dir = path.dirname(args.output)
+    from os import path, makedirs
+    output_dir = path.relpath(args.output)
+    makedirs(output_dir, exist_ok=True)
     for lib in glob(self.root_dir+'/lib/'+self.dir_name+'/lib*.a'):
-      copy(lib, output_dir)
+      copy(lib, args.output)
     print('Library files copied to ' + output_dir)
     pass
+  def _build_fail(self, args):
+      print('Unable to build project. Please run "tool.py -p {} -f {} clean" and try again.'.format(self.platform, self.framework))
+      return
   def clean(self, args):
     from shutil import rmtree
     rmtree(self.root_dir+'/build/'+self.dir_name, ignore_errors=True)
