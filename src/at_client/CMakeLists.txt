@@ -16,4 +16,6 @@ if(ESP_PLATFORM)
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}> ${CMAKE_SOURCE_DIR}/lib/esp32_espidf/lib${COMPONENT_NAME}.a
     COMMENT "Copying built archive file and header to lib/esp32_espidf directory..."
   )
+
 endif()
+

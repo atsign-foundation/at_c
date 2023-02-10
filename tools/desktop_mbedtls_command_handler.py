@@ -17,7 +17,7 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     super().build(args)
     from subprocess import check_call
     # Run cmake
-    exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name, '-G', 'Unix Makefiles'])
+    exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name, '-G', 'Unix Makefiles', '-D', 'BUILD_MBEDTLS=ON'])
     if exit_code != 0:
       super()._build_fail(args)
       return

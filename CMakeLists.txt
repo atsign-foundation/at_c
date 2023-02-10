@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
 option(BUILD_ESP_IDF "Build for ESP-IDF" OFF)
+option(BUILD_ARDUINO "Build for Arduino" OFF)
+option(BUILD_MBEDTLS "Build for mbedTLS" OFF)
 
 if(BUILD_ESP_IDF) # build as an ESP-IDF components
   message(STATUS "BUILDING FOR ESP-IDF")
@@ -14,25 +16,47 @@ project(
   VERSION 1.0.0
   DESCRIPTION "The at_client implemented in C"
   HOMEPAGE_URL https://atsign.com
-  LANGUAGES C
+  LANGUAGES CXX
 )
 
 if(NOT BUILD_ESP_IDF) # build for other platforms
-  # library files
-  add_subdirectory(deps/mbedtls)
+
+  # build libraries
+
+  if(BUILD_MBEDTLS)
+    message(STATUS "BUILDING FOR MBEDTLS")
+    add_subdirectory(deps/mbedtls)
+  endif()
+
+  if(BUILD_ARDUINO)
+    message(STATUS "BUILDING FOR ARDUINO")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/deps/Arduino-CMake-Toolchain/Arduino-toolchain.cmake)
+  endif()
+
+  # setup at_client library
 
   FILE(GLOB_RECURSE sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
   add_library(at_client ${sources})
 
-  target_compile_features(at_client PUBLIC c_std_99)
+  set_target_properties(at_client PROPERTIES LINKER_LANGUAGE CXX)
+  target_compile_features(at_client PUBLIC cxx_std_17)
   target_include_directories(at_client PUBLIC include)
-  target_link_libraries(at_client PRIVATE mbedtls)
+
+  # link libraries
+
+  if(BUILD_MBEDTLS)
+    target_link_libraries(at_client PRIVATE mbedtls)
+  endif()
+
+  if(BUILD_ARDUINO)
+    target_link_arduino_libraries(at_client PRIVATE core )
+  endif()
 
   # tests
-  add_executable(tests test/test.c)
+  # add_executable(tests test/test.c)
 
-  target_include_directories(tests PUBLIC include)
-  target_link_libraries(tests PRIVATE at_client)
+  # target_include_directories(tests PUBLIC include)
+  # target_link_libraries(tests PRIVATE at_client)
 
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
