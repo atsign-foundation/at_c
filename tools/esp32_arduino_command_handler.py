@@ -15,7 +15,7 @@ class ESP32ArduinoCommandHandler(CommandHandler):
     super().build(args)
     from subprocess import check_call
     exit_code = check_call(['platformio', 'run', '--environment', 'esp32_arduino'])
-    if exit_code == 0:
+    if exit_code != 0:
       super()._build_fail(args)
       return
     super()._build_copy(args)
