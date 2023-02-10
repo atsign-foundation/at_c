@@ -7,9 +7,7 @@ TARGET = desktop_mbedtls
 # The location of the library folder, and names of libraries to link:
 LDFLAGS = -Llib -lat_client -lmbedcrypto
 
-.PHONY: all build clean run
-
-all: build
+.PHONY: build clean run
 
 build: desktop_mbedtls
 
