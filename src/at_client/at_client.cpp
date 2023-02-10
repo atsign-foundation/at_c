@@ -1,5 +1,7 @@
 #include "at_client.h"
+#include <iostream>
 
-void test_func()
+void at_client::test_func()
 {
+  std::cout << "Hello from at_client" << std::endl;
 }

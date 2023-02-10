@@ -49,7 +49,7 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   endif()
 
   if(BUILD_ARDUINO)
-    target_link_arduino_libraries(at_client PRIVATE core )
+    target_link_arduino_libraries(at_client PRIVATE core)
   endif()
 
   # tests
