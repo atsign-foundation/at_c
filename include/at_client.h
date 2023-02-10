@@ -2,5 +2,5 @@
 
 namespace at_client
 {
-  void test_func();
+  int make_aes_key(unsigned char key[32]);
 }

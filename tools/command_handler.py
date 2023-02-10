@@ -18,13 +18,19 @@ class CommandHandler(object):
   def build(self, args):
     if args.clean: self.clean(args)
     pass
-  def _build_copy(self, args):
-    if args.output is None: return
+  def _build_copy(self, args, extra_lib_dirs=[]):
     from glob import glob
     from shutil import copy
+    # Copy additional libraries to lib directory
+    for extra_lib_dir in extra_lib_dirs:
+      for lib_dir in glob(extra_lib_dir+'/lib*.a'):
+        copy(lib_dir, self.root_dir+'/lib/'+self.dir_name)
+    # Check if output directory is specified
+    if args.output is None: return
     from os import path, makedirs
     output_dir = path.relpath(args.output)
     makedirs(output_dir, exist_ok=True)
+    # Copy libraries to output directory
     for lib in glob(self.root_dir+'/lib/'+self.dir_name+'/lib*.a'):
       copy(lib, args.output)
     print('Library files copied to ' + output_dir)

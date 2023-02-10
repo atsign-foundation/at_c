@@ -1,0 +1,3 @@
+lib/lib*.a
+src/main.o
+desktop_mbedtls

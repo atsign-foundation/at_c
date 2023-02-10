@@ -39,7 +39,7 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     from shutil import copy
     for lib in glob(self.root_dir+'/build/'+self.dir_name+'/lib*.a'):
       copy(lib, self.root_dir+'/lib/'+self.dir_name+'/')
-    super()._build_copy(args)
+    super()._build_copy(args, extra_lib_dirs=[self.root_dir+'/build/'+self.dir_name+'/deps/mbedtls/library'])
     print('Build successful!')
     pass
   def clean(self, args):
