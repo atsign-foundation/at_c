@@ -27,7 +27,12 @@ class ESP32ESPIDFCommandHandler(CommandHandler):
       exit(1)
     from subprocess import check_call
     # Run cmake
-    exit_code = check_call(['cmake', '-S', self.root_dir, '-B', self.root_dir+'/build/'+self.dir_name, '-G', 'Unix Makefiles', '-D', 'BUILD_ESP_IDF=ON'])
+    exit_code = check_call([
+      'cmake',
+      '-S', self.root_dir,
+      '-B', self.root_dir+'/build/'+self.dir_name,
+      '-D', 'BUILD_ESP_IDF=ON',
+      ])
     if exit_code != 0:
       super()._build_fail(args)
       return
