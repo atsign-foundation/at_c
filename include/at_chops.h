@@ -45,7 +45,7 @@ typedef struct
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void decryptBytes_AES(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void decryptBytesAES(uint8_t *dst, const size_t dlen, size_t *olen,
                              const uint8_t *src, const size_t slen,
                              const AtEncryptionKey *key,
                              const InitialisationVector *iv);
@@ -65,7 +65,7 @@ extern void decryptBytes_AES(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void decryptString_AES(char *dst, const size_t dlen, size_t *olen,
+extern void decryptStringAES(char *dst, const size_t dlen, size_t *olen,
                               const char *src, const size_t slen,
                               const AtEncryptionKey *key,
                               const InitialisationVector *iv);
@@ -84,7 +84,7 @@ extern void decryptString_AES(char *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void encryptBytes_AES(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void encryptBytesAES(uint8_t *dst, const size_t dlen, size_t *olen,
                              const uint8_t *src, const size_t slen,
                              const AtEncryptionKey *key);
 /**
@@ -102,7 +102,7 @@ extern void encryptBytes_AES(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void encryptString_AES(char *dst, const size_t dlen, size_t *olen,
+extern void encryptStringAES(char *dst, const size_t dlen, size_t *olen,
                               const char *src, const size_t slen,
                               const AtEncryptionKey *key);
 
@@ -124,7 +124,7 @@ extern void encryptString_AES(char *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void decryptBytes_ECC(uint8_t *dst, const const size_t dlen, size_t *olen,
+extern void decryptBytesECC(uint8_t *dst, const const size_t dlen, size_t *olen,
                              const uint8_t *src, const size_t slen,
                              const AtEncryptionKey *key,
                              const InitialisationVector *iv);
@@ -144,7 +144,7 @@ extern void decryptBytes_ECC(uint8_t *dst, const const size_t dlen, size_t *olen
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void decryptString_ECC(char *dst, const size_t dlen, size_t *olen,
+extern void decryptStringECC(char *dst, const size_t dlen, size_t *olen,
                               const char *src, const size_t slen,
                               const AtEncryptionKey *key,
                               const InitialisationVector *iv);
@@ -163,7 +163,7 @@ extern void decryptString_ECC(char *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void encryptBytes_ECC(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void encryptBytesECC(uint8_t *dst, const size_t dlen, size_t *olen,
                              const uint8_t *src, const size_t slen,
                              const AtEncryptionKey *key);
 /**
@@ -181,7 +181,7 @@ extern void encryptBytes_ECC(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void encryptString_ECC(char *dst, const size_t dlen, size_t *olen,
+extern void encryptStringECC(char *dst, const size_t dlen, size_t *olen,
                               const char *src, const size_t slen,
                               const AtEncryptionKey *key);
 
@@ -202,7 +202,7 @@ extern void encryptString_ECC(char *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void decryptBytes_RSA(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void decryptBytesRSA(uint8_t *dst, const size_t dlen, size_t *olen,
                              const uint8_t *src, const size_t slen,
                              const AtEncryptionKey *key);
 /**
@@ -220,7 +220,7 @@ extern void decryptBytes_RSA(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void decryptString_RSA(char *dst, const size_t dlen, size_t *olen,
+extern void decryptStringRSA(char *dst, const size_t dlen, size_t *olen,
                               const char *src, const size_t slen,
                               const AtEncryptionKey *key);
 /**
@@ -238,7 +238,7 @@ extern void decryptString_RSA(char *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void encryptBytes_RSA(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void encryptBytesRSA(uint8_t *dst, const size_t dlen, size_t *olen,
                              const uint8_t *src, const size_t slen,
                              const AtEncryptionKey *key);
 /**
@@ -256,7 +256,7 @@ extern void encryptBytes_RSA(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void encryptString_RSA(char *dst, const size_t dlen, size_t *olen,
+extern void encryptStringRSA(char *dst, const size_t dlen, size_t *olen,
                               const char *src, const size_t slen,
                               const AtEncryptionKey *key);
 
@@ -276,7 +276,7 @@ extern void encryptString_RSA(char *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void hash_SHA512(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void hashSHA512(uint8_t *dst, const size_t dlen, size_t *olen,
                         const uint8_t *src, const size_t slen);
 
 // Signing and Verification - RSA/SHA256
@@ -296,7 +296,7 @@ extern void hash_SHA512(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void signBytes_RSA_SHA256(uint8_t *dst, const size_t dlen, size_t *olen,
+extern void signBytesRSA_SHA256(uint8_t *dst, const size_t dlen, size_t *olen,
                                  const uint8_t *src, const size_t slen,
                                  const AtEncryptionKey *key);
 /**
@@ -314,7 +314,7 @@ extern void signBytes_RSA_SHA256(uint8_t *dst, const size_t dlen, size_t *olen,
  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
  *                 the required buffer size in *olen
  */
-extern void signString_RSA_SHA256(char *dst, const size_t dlen, size_t *olen,
+extern void signStringRSA_SHA256(char *dst, const size_t dlen, size_t *olen,
                                   const char *src, const size_t slen,
                                   const AtEncryptionKey *key);
 /**
@@ -328,7 +328,7 @@ extern void signString_RSA_SHA256(char *dst, const size_t dlen, size_t *olen,
  *
  * \return         0 if successful, or an error code
  */
-extern bool verifyBytes_RSA_SHA256(const uint8_t *data, const size_t dlen,
+extern bool verifyBytesRSA_SHA256(const uint8_t *data, const size_t dlen,
                                    const uint8_t *sign, const size_t slen,
                                    const AtEncryptionKey *key);
 /**
@@ -342,6 +342,6 @@ extern bool verifyBytes_RSA_SHA256(const uint8_t *data, const size_t dlen,
  *
  * \return         0 if successful, or an error code
  */
-extern bool verifyString_RSA_SHA256(const char *data, const size_t dlen,
+extern bool verifyStringRSA_SHA256(const char *data, const size_t dlen,
                                     const char *sign, const size_t slen,
                                     const AtEncryptionKey *key);
