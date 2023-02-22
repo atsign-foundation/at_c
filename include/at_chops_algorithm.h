@@ -24,10 +24,7 @@ typedef struct AtEncryptionAlgorithm
 
 typedef struct SymmetricEncryptionAlgorithm
 {
-  uint8_t *(*encrypt)(uint8_t *plainData, size_t plainDataLen);
   uint8_t *(*encrypt)(uint8_t *plainData, size_t plainDataLen, InitialisationVector iv);
-
-  uint8_t *(*decrypt)(uint8_t *encryptedData, size_t encryptedDataLen);
   uint8_t *(*decrypt)(uint8_t *encryptedData, size_t encryptedDataLen, InitialisationVector iv);
 } SymmetricEncryptionAlgorithm;
 
