@@ -5,9 +5,9 @@
 
 namespace AtChopsType
 {
-  struct InitialisationVector
+  typedef struct InitialisationVector
   {
-    size_t iv_len;
+    size_t ivLen;
     DartType::Uint8List iv;
-  };
+  } InitialisationVector;
 }

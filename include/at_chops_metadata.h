@@ -8,59 +8,59 @@ namespace AtChopsMetaData
 {
   // Encryption
 
-  enum AtEncryptionResultType
+  typedef enum AtEncryptionResultType
   {
     bytes,
     string
-  };
+  } AtEncryptionResultType;
 
-  union AtEncryptionResultUnion
+  typedef union AtEncryptionResultUnion
   {
     DartType::Uint8List bytes;
     DartType::String string;
-  };
+  } AtEncryptionResultUnion;
 
-  struct AtEncryptionMetaData
+  typedef struct AtEncryptionMetaData
   {
     DartType::String atEncryptionAlgorithm;
     DartType::String keyName;
     AtChopsKey::EncryptionKeyType encryptionKeyType;
     AtChopsType::InitialisationVector iv;
-  };
+  } AtEncryptionMetaData;
 
-  struct AtEncryptionResult
+  typedef struct AtEncryptionResult
   {
     AtEncryptionResultType atEncryptionResultType;
     AtEncryptionResultUnion result;
     AtEncryptionMetaData atEncryptionMetaData;
-  };
+  } AtEncryptionResult;
 
   // Signing
 
-  enum AtSigningResultType
+  typedef enum AtSigningResultType
   {
     bytes,
     string,
     boolean
-  };
+  } AtSigningResultType;
 
-  union AtSigningResultUnion
+  typedef union AtSigningResultUnion
   {
     DartType::Uint8List bytes;
     DartType::String string;
     bool boolean;
-  };
+  } AtSigningResultUnion;
 
-  struct AtSigningMetaData
+  typedef struct AtSigningMetaData
   {
     DartType::String atSigningAlgorithm;
     AtChopsKey::SigningKeyType signingKeyType;
-  };
+  } AtSigningMetaData;
 
-  struct AtSigningResult
+  typedef struct AtSigningResult
   {
     AtSigningResultType atSigningResultType;
     AtSigningResultUnion result;
     AtSigningMetaData atSigningMetaData;
-  };
+  } AtSigningResult;
 }

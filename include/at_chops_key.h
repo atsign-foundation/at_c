@@ -4,7 +4,7 @@
 
 namespace AtChopsKey
 {
-  enum EncryptionKeyType
+  typedef enum EncryptionKeyType
   {
     rsa2048,
     rsa4096,
@@ -12,32 +12,40 @@ namespace AtChopsKey
     aes128,
     aes192,
     aes256
-  };
+  } EncryptionKeyType;
 
-  enum SigningKeyType
+  typedef enum SigningKeyType
   {
     pkamSha256,
     signingSha256
-  };
+  } SigningKeyType;
 
-  struct AsymmetricKeyPair
+  typedef struct AsymmetricKeyPair
   {
-    DartType::String atPublicKey;
-    DartType::String atPrivateKey;
-  };
+    size_t publicKeyLen;
+    DartType::String publicKey;
+    size_t privateKeyLen;
+    DartType::String privateKey;
+  } AsymmetricKeyPair;
+
+  typedef struct SymmetricKey
+  {
+    size_t keyLen;
+    DartType::String key;
+  } SymmetricKey;
 
   AsymmetricKeyPair createAsymmetricKeyPair(DartType::String publicKey, DartType::String privateKey)
   {
-    return (AsymmetricKeyPair){publicKey, privateKey};
-  };
-
-  struct SymmetricKey
-  {
-    DartType::String key;
+    return (AsymmetricKeyPair){
+        sizeof(publicKey),
+        publicKey,
+        sizeof(privateKey),
+        privateKey,
+    };
   };
 
   SymmetricKey createSymmetricKey(DartType::String key)
   {
-    return (SymmetricKey){key};
+    return (SymmetricKey){sizeof(key), key};
   };
 }
