@@ -21,7 +21,6 @@ void encryptBytes_RSA(uint8_t *data, size_t dataLen, AtEncryptionKey *key);
 void encryptString_RSA(char *data, size_t dataLen, AtEncryptionKey *key);
 
 // Hashing
-char *hash_MD5(uint8_t *signedData, size_t signedDataLen);
 char *hash_SHA512(uint8_t *signedData, size_t signedDataLen);
 
 // Signing and Verification - RSA/SHA256
