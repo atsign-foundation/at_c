@@ -1,7 +1,6 @@
 #pragma once
 
 #include "at_chops_type.h"
-#include <stdbool.h>
 
 // Developer notes
 // The original dart implementation uses the strategy pattern to implement the algorithms.
@@ -11,7 +10,6 @@
 
 namespace AtChopsAlgorithm
 {
-
   typedef union EncryptionAlgorithm
   {
     AtEncryptionAlgorithm atEncryptionAlgorithm;
@@ -38,7 +36,7 @@ namespace AtChopsAlgorithm
   typedef struct AtSigningAlgorithm
   {
     DartType::Uint8List sign(DartType::Uint8List data);
-    bool verify(DartType::Uint8List signedData, DartType::Uint8List signature);
+    DartType::Boolean verify(DartType::Uint8List signedData, DartType::Uint8List signature);
   } AtSigningAlgorithm;
 
   typedef struct AtHashingAlgorithm

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stddef.h>
 #include "dart_type.h"
 
 namespace AtChopsType

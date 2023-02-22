@@ -2,7 +2,6 @@
 
 #include "at_chops_type.h"
 #include "at_chops_key.h"
-#include <stdbool.h>
 
 namespace AtChopsMetaData
 {
@@ -48,7 +47,7 @@ namespace AtChopsMetaData
   {
     DartType::Uint8List bytes;
     DartType::String string;
-    bool boolean;
+    DartType::Boolean boolean;
   } AtSigningResultUnion;
 
   typedef struct AtSigningMetaData
