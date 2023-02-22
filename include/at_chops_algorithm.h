@@ -8,39 +8,36 @@
 // thus we use a struct with function pointers to represent a covariant interface.
 // We use a union to represent the generic type of the algorithm.
 
-namespace AtChopsAlgorithm
+typedef union EncryptionAlgorithm
 {
-  typedef union EncryptionAlgorithm
-  {
-    AtEncryptionAlgorithm atEncryptionAlgorithm;
-    SymmetricEncryptionAlgorithm symmetricEncryptionAlgorithm;
-    AtSigningAlgorithm atSigningAlgorithm;
-    AtHashingAlgorithm atHashingAlgorithm;
-  } EncryptionAlgorithm;
+  AtEncryptionAlgorithm atEncryptionAlgorithm;
+  SymmetricEncryptionAlgorithm symmetricEncryptionAlgorithm;
+  AtSigningAlgorithm atSigningAlgorithm;
+  AtHashingAlgorithm atHashingAlgorithm;
+} EncryptionAlgorithm;
 
-  typedef struct AtEncryptionAlgorithmBase
-  {
-    DartType::Uint8List (*encrypt)(DartType::Uint8List plainData, size_t plainDataLen);
-    DartType::Uint8List (*decrypt)(DartType::Uint8List encryptedData, size_t encryptedDataLen);
-  } AtEncryptionAlgorithm;
+typedef struct AtEncryptionAlgorithm
+{
+  uint8_t *(*encrypt)(uint8_t *plainData, size_t plainDataLen);
+  uint8_t *(*decrypt)(uint8_t *encryptedData, size_t encryptedDataLen);
+} AtEncryptionAlgorithm;
 
-  typedef struct SymmetricEncryptionAlgorithm
-  {
-    DartType::Uint8List (*encrypt)(DartType::Uint8List plainData, size_t plainDataLen);
-    DartType::Uint8List (*encrypt)(DartType::Uint8List plainData, size_t plainDataLen, AtChopsType::InitialisationVector iv);
+typedef struct SymmetricEncryptionAlgorithm
+{
+  uint8_t *(*encrypt)(uint8_t *plainData, size_t plainDataLen);
+  uint8_t *(*encrypt)(uint8_t *plainData, size_t plainDataLen, InitialisationVector iv);
 
-    DartType::Uint8List (*decrypt)(DartType::Uint8List encryptedData, size_t encryptedDataLen);
-    DartType::Uint8List (*decrypt)(DartType::Uint8List encryptedData, size_t encryptedDataLen, AtChopsType::InitialisationVector iv);
-  } SymmetricEncryptionAlgorithm;
+  uint8_t *(*decrypt)(uint8_t *encryptedData, size_t encryptedDataLen);
+  uint8_t *(*decrypt)(uint8_t *encryptedData, size_t encryptedDataLen, InitialisationVector iv);
+} SymmetricEncryptionAlgorithm;
 
-  typedef struct AtSigningAlgorithm
-  {
-    DartType::Uint8List sign(DartType::Uint8List data);
-    DartType::Boolean verify(DartType::Uint8List signedData, DartType::Uint8List signature);
-  } AtSigningAlgorithm;
+typedef struct AtSigningAlgorithm
+{
+  uint8_t *(*sign)(uint8_t *data);
+  bool (*verify)(uint8_t *signedData, uint8_t *signature);
+} AtSigningAlgorithm;
 
-  typedef struct AtHashingAlgorithm
-  {
-    DartType::String hash(DartType::Uint8List data);
-  } AtHashingAlgorithm;
-}
+typedef struct AtHashingAlgorithm
+{
+  char *(*hash)(uint8_t *data);
+} AtHashingAlgorithm;

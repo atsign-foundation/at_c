@@ -1,24 +1,21 @@
 #pragma once
 
-#include "at_chops_algorithm.h"
-#include "at_chops_keys.h"
 #include "at_chops_type.h"
+#include "at_chops_keys.h"
+#include "at_chops_algorithm.h"
 #include "at_chops_metadata.h"
 
-namespace AtChops
-{
-  // AtChops
-  AtChopsMetaData::AtEncryptionResult decryptBytes(DartType::Uint8List data, size_t dataLen, AtChopsMetaData::AtEncryptionMetaData atEncryptionMetaData);
-  AtChopsMetaData::AtEncryptionResult decryptString(DartType::String data, size_t dataLen, AtChopsMetaData::AtEncryptionMetaData atEncryptionMetaData);
+// AtChops
+AtEncryptionResult decryptBytes(uint8_t *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
+AtEncryptionResult decryptString(char *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
 
-  AtChopsMetaData::AtEncryptionResult encryptBytes(DartType::Uint8List data, size_t dataLen, AtChopsMetaData::AtEncryptionMetaData atEncryptionMetaData);
-  AtChopsMetaData::AtEncryptionResult encryptString(DartType::String data, size_t dataLen, AtChopsMetaData::AtEncryptionMetaData atEncryptionMetaData);
+AtEncryptionResult encryptBytes(uint8_t *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
+AtEncryptionResult encryptString(char *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
 
-  DartType::String hash(DartType::Uint8List signedData, size_t signedDataLen, AtChopsAlgorithm::AtHashingAlgorithm atHashingAlgorithm);
+char *hash(uint8_t *signedData, size_t signedDataLen, AtHashingAlgorithm atHashingAlgorithm);
 
-  AtChopsMetaData::AtSigningResult signBytes(DartType::Uint8List data, size_t dataLen, AtChopsMetaData::AtSigningMetaData atSigningMetaData);
-  AtChopsMetaData::AtSigningResult signString(DartType::String data, size_t dataLen, AtChopsMetaData::AtSigningMetaData atSigningMetaData);
+AtSigningResult signBytes(uint8_t data, size_t dataLen, AtSigningMetaData atSigningMetaData);
+AtSigningResult signString(char *data, size_t dataLen, AtSigningMetaData atSigningMetaData);
 
-  AtChopsMetaData::AtSigningResult verifySignatureBytes(DartType::Uint8List data, size_t dataLen, AtChopsMetaData::AtSigningMetaData atSigningMetaData);
-  AtChopsMetaData::AtSigningResult verifySignatureString(DartType::String data, size_t dataLen, AtChopsMetaData::AtSigningMetaData atSigningMetaData);
-}
+AtSigningResult verifySignatureBytes(uint8_t *data, size_t dataLen, AtSigningMetaData atSigningMetaData);
+AtSigningResult verifySignatureString(char *data, size_t dataLen, AtSigningMetaData atSigningMetaData);
