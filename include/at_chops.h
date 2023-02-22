@@ -3,19 +3,31 @@
 #include "at_chops_type.h"
 #include "at_chops_keys.h"
 #include "at_chops_algorithm.h"
-#include "at_chops_metadata.h"
 
-// AtChops
-AtEncryptionResult decryptBytes(uint8_t *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
-AtEncryptionResult decryptString(char *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
+// Encryption and Decryption - AES
+extern void decryptBytes_AES(uint8_t *data, size_t dataLen, AtEncryptionKey *key, InitialisationVector *iv);
+extern void decryptString_AES(char *data, size_t dataLen, AtEncryptionKey *key, InitialisationVector *iv);
+extern void encryptBytes_AES(uint8_t *data, size_t dataLen, AtEncryptionKey *key);
+extern void encryptString_AES(char *data, size_t dataLen, AtEncryptionKey *key);
 
-AtEncryptionResult encryptBytes(uint8_t *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
-AtEncryptionResult encryptString(char *data, size_t dataLen, AtEncryptionMetaData atEncryptionMetaData);
+// Encryption and Decryption - ECC
+extern void decryptBytes_ECC(uint8_t *data, size_t dataLen, AtEncryptionKey *key, InitialisationVector *iv);
+extern void decryptString_ECC(char *data, size_t dataLen, AtEncryptionKey *key, InitialisationVector *iv);
+extern void encryptBytes_ECC(uint8_t *data, size_t dataLen, AtEncryptionKey *key);
+extern void encryptString_ECC(char *data, size_t dataLen, AtEncryptionKey *key);
 
-char *hash(uint8_t *signedData, size_t signedDataLen, AtHashingAlgorithm atHashingAlgorithm);
+// Encryption and Decryption - RSA
+extern void decryptBytes_RSA(uint8_t *data, size_t dataLen, AtEncryptionKey *key);
+extern void decryptString_RSA(char *data, size_t dataLen, AtEncryptionKey *key);
+extern void encryptBytes_RSA(uint8_t *data, size_t dataLen, AtEncryptionKey *key);
+extern void encryptString_RSA(char *data, size_t dataLen, AtEncryptionKey *key);
 
-AtSigningResult signBytes(uint8_t data, size_t dataLen, AtSigningMetaData atSigningMetaData);
-AtSigningResult signString(char *data, size_t dataLen, AtSigningMetaData atSigningMetaData);
+// Hashing
+extern char *hash_MD5(uint8_t *signedData, size_t signedDataLen);
+extern char *hash_SHA512(uint8_t *signedData, size_t signedDataLen);
 
-AtSigningResult verifySignatureBytes(uint8_t *data, size_t dataLen, AtSigningMetaData atSigningMetaData);
-AtSigningResult verifySignatureString(char *data, size_t dataLen, AtSigningMetaData atSigningMetaData);
+// Signing and Verification - RSA/SHA256
+extern void signBytes_RSA_SHA256(uint8_t data, size_t dataLen, AtEncryptionKey *key);
+extern void signString_RSA_SHA256(char *data, size_t dataLen, AtEncryptionKey *key);
+extern void verifySignatureBytes_RSA_SHA256(uint8_t *data, size_t dataLen, uint8_t *signature, size_t signatureLen, AtEncryptionKey *key);
+extern void verifySignatureString_RSA_SHA256(char *data, size_t dataLen, char *signature, size_t signatureLen, AtEncryptionKey *key);

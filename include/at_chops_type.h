@@ -4,7 +4,13 @@
 #include <stdint.h>  // uint8_t
 #include <stdbool.h> // bool
 
-typedef enum EncryptionKeyType
+typedef struct
+{
+  size_t vecLen;
+  uint8_t vec[];
+} InitialisationVector;
+
+typedef enum
 {
   rsa2048,
   rsa4096,
@@ -14,14 +20,9 @@ typedef enum EncryptionKeyType
   aes256
 } EncryptionKeyType;
 
-typedef enum SigningKeyType
+typedef struct
 {
-  pkamSha256,
-  signingSha256
-} SigningKeyType;
-
-typedef struct InitialisationVector
-{
-  size_t ivLen;
-  uint8_t *iv;
-} InitialisationVector;
+  EncryptionKeyType keyType;
+  size_t keyLen;
+  char key[];
+} AtEncryptionKey;
