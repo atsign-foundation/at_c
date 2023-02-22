@@ -18,7 +18,7 @@ namespace AtChopsAlgorithm
     AtHashingAlgorithm atHashingAlgorithm;
   } EncryptionAlgorithm;
 
-  typedef struct AtEncryptionAlgorithm
+  typedef struct AtEncryptionAlgorithmBase
   {
     DartType::Uint8List (*encrypt)(DartType::Uint8List plainData, size_t plainDataLen);
     DartType::Uint8List (*decrypt)(DartType::Uint8List encryptedData, size_t encryptedDataLen);

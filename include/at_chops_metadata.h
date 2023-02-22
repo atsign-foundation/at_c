@@ -1,7 +1,8 @@
 #pragma once
 
 #include "at_chops_type.h"
-#include "at_chops_key.h"
+#include "at_chops_keys.h"
+#include "at_chops_algorithm.h"
 
 namespace AtChopsMetaData
 {
@@ -21,9 +22,10 @@ namespace AtChopsMetaData
 
   typedef struct AtEncryptionMetaData
   {
-    DartType::String atEncryptionAlgorithm;
+    AtChopsAlgorithm::EncryptionAlgorithm encryptionAlgorithm;
+    size_t keyLen;
     DartType::String keyName;
-    AtChopsKey::EncryptionKeyType encryptionKeyType;
+    AtChopsType::EncryptionKeyType encryptionKeyType;
     AtChopsType::InitialisationVector iv;
   } AtEncryptionMetaData;
 
@@ -53,7 +55,7 @@ namespace AtChopsMetaData
   typedef struct AtSigningMetaData
   {
     DartType::String atSigningAlgorithm;
-    AtChopsKey::SigningKeyType signingKeyType;
+    AtChopsType::SigningKeyType signingKeyType;
   } AtSigningMetaData;
 
   typedef struct AtSigningResult
