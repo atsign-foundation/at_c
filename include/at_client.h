@@ -1,6 +1,13 @@
 #pragma once
 
-namespace AtClient
+#ifdef __cplusplus
+extern "C"
 {
-  int make_aes_key(unsigned char key[32]);
+#endif
+
+#define AT_ROOT_DOMAIN "root.atsign.org"
+#define AT_ROOT_PORT 64
+
+#ifdef __cplusplus
 }
+#endif
