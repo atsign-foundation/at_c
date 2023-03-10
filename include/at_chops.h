@@ -5,10 +5,7 @@ extern "C"
 {
 #endif
 
-#include <stddef.h>  // size_t
-#include <stdint.h>  // uint8_t
-#include <stdint.h>  // int
-#include <stdbool.h> // bool
+#include <stddef.h>
 
 // Header Definitions
 // Bit 0 : 0 = symmetric, 1 = asymmetric
@@ -42,52 +39,94 @@ extern "C"
 #define AT_KEYSTORE_KEYLEN_ECC_224 0b001 000 00
 
 // Bits 0-1
-#define AT_KEYSTORE_TYPE_ASYMMETRIC_PRIVATE (uint8_t)(AT_KEYSTORE_TYPE_ASYMMETRIC | AT_KEYSTORE_TYPE_PRIVATE)
-#define AT_KEYSTORE_TYPE_ASYMMETRIC_PUBLIC (uint8_t)(AT_KEYSTORE_TYPE_ASYMMETRIC | AT_KEYSTORE_TYPE_PUBLIC)
+#define AT_KEYSTORE_TYPE_ASYMMETRIC_PRIVATE (unsigned char)(AT_KEYSTORE_TYPE_ASYMMETRIC | AT_KEYSTORE_TYPE_PRIVATE)
+#define AT_KEYSTORE_TYPE_ASYMMETRIC_PUBLIC (unsigned char)(AT_KEYSTORE_TYPE_ASYMMETRIC | AT_KEYSTORE_TYPE_PUBLIC)
 
 // Bits 0-4
-#define AT_KEYSTORE_TYPE_AES (uint8_t)(AT_KEYSTORE_ALGORITHM_AES | AT_KEYSTORE_TYPE_SYMMETRIC)
+#define AT_KEYSTORE_TYPE_AES (unsigned char)(AT_KEYSTORE_ALGORITHM_AES | AT_KEYSTORE_TYPE_SYMMETRIC)
 
-#define AT_KEYSTORE_TYPE_RSA_PRIVATE (uint8_t)(AT_KEYSTORE_ALGORITHM_RSA | AT_KEYSTORE_TYPE_ASYMMETRIC_PRIVATE)
-#define AT_KEYSTORE_TYPE_RSA_PUBLIC (uint8_t)(AT_KEYSTORE_ALGORITHM_RSA | AT_KEYSTORE_TYPE_ASYMMETRIC_PUBLIC)
+#define AT_KEYSTORE_TYPE_RSA_PRIVATE (unsigned char)(AT_KEYSTORE_ALGORITHM_RSA | AT_KEYSTORE_TYPE_ASYMMETRIC_PRIVATE)
+#define AT_KEYSTORE_TYPE_RSA_PUBLIC (unsigned char)(AT_KEYSTORE_ALGORITHM_RSA | AT_KEYSTORE_TYPE_ASYMMETRIC_PUBLIC)
 
-#define AT_KEYSTORE_TYPE_ECC_PRIVATE (uint8_t)(AT_KEYSTORE_ALGORITHM_ECC | AT_KEYSTORE_TYPE_ASYMMETRIC_PRIVATE)
-#define AT_KEYSTORE_TYPE_ECC_PUBLIC (uint8_t)(AT_KEYSTORE_ALGORITHM_ECC | AT_KEYSTORE_TYPE_ASYMMETRIC_PUBLIC)
+#define AT_KEYSTORE_TYPE_ECC_PRIVATE (unsigned char)(AT_KEYSTORE_ALGORITHM_ECC | AT_KEYSTORE_TYPE_ASYMMETRIC_PRIVATE)
+#define AT_KEYSTORE_TYPE_ECC_PUBLIC (unsigned char)(AT_KEYSTORE_ALGORITHM_ECC | AT_KEYSTORE_TYPE_ASYMMETRIC_PUBLIC)
 
 // Bits 0-7
-#define AT_KEYSTORE_TYPE_AES_128 (uint8_t)(AT_KEYSTORE_TYPE_AES | AT_KEYSTORE_KEYLEN_AES_128)
-#define AT_KEYSTORE_TYPE_AES_192 (uint8_t)(AT_KEYSTORE_TYPE_AES | AT_KEYSTORE_KEYLEN_AES_192)
-#define AT_KEYSTORE_TYPE_AES_256 (uint8_t)(AT_KEYSTORE_TYPE_AES | AT_KEYSTORE_KEYLEN_AES_256)
+#define AT_KEYSTORE_TYPE_AES_128 (unsigned char)(AT_KEYSTORE_TYPE_AES | AT_KEYSTORE_KEYLEN_AES_128)
+#define AT_KEYSTORE_TYPE_AES_192 (unsigned char)(AT_KEYSTORE_TYPE_AES | AT_KEYSTORE_KEYLEN_AES_192)
+#define AT_KEYSTORE_TYPE_AES_256 (unsigned char)(AT_KEYSTORE_TYPE_AES | AT_KEYSTORE_KEYLEN_AES_256)
 
-#define AT_KEYSTORE_TYPE_RSA_2048_PRIVATE (uint8_t)(AT_KEYSTORE_TYPE_RSA_PRIVATE | AT_KEYSTORE_KEYLEN_RSA_2048)
-#define AT_KEYSTORE_TYPE_RSA_2048_PUBLIC (uint8_t)(AT_KEYSTORE_TYPE_RSA_PUBLIC | AT_KEYSTORE_KEYLEN_RSA_2048)
-#define AT_KEYSTORE_TYPE_RSA_4096_PRIVATE (uint8_t)(AT_KEYSTORE_TYPE_RSA_PRIVATE | AT_KEYSTORE_KEYLEN_RSA_4096)
-#define AT_KEYSTORE_TYPE_RSA_4096_PUBLIC (uint8_t)(AT_KEYSTORE_TYPE_RSA_PUBLIC | AT_KEYSTORE_KEYLEN_RSA_4096)
+#define AT_KEYSTORE_TYPE_RSA_2048_PRIVATE (unsigned char)(AT_KEYSTORE_TYPE_RSA_PRIVATE | AT_KEYSTORE_KEYLEN_RSA_2048)
+#define AT_KEYSTORE_TYPE_RSA_2048_PUBLIC (unsigned char)(AT_KEYSTORE_TYPE_RSA_PUBLIC | AT_KEYSTORE_KEYLEN_RSA_2048)
+#define AT_KEYSTORE_TYPE_RSA_4096_PRIVATE (unsigned char)(AT_KEYSTORE_TYPE_RSA_PRIVATE | AT_KEYSTORE_KEYLEN_RSA_4096)
+#define AT_KEYSTORE_TYPE_RSA_4096_PUBLIC (unsigned char)(AT_KEYSTORE_TYPE_RSA_PUBLIC | AT_KEYSTORE_KEYLEN_RSA_4096)
 
-#define AT_KEYSTORE_TYPE_ECC_112_PRIVATE (uint8_t)(AT_KEYSTORE_TYPE_ECC_PRIVATE | AT_KEYSTORE_KEYLEN_ECC_112)
-#define AT_KEYSTORE_TYPE_ECC_112_PUBLIC (uint8_t)(AT_KEYSTORE_TYPE_ECC_PUBLIC | AT_KEYSTORE_KEYLEN_ECC_112)
-#define AT_KEYSTORE_TYPE_ECC_224_PRIVATE (uint8_t)(AT_KEYSTORE_TYPE_ECC_PRIVATE | AT_KEYSTORE_KEYLEN_ECC_224)
-#define AT_KEYSTORE_TYPE_ECC_224_PUBLIC (uint8_t)(AT_KEYSTORE_TYPE_ECC_PUBLIC | AT_KEYSTORE_KEYLEN_ECC_224)
+#define AT_KEYSTORE_TYPE_ECC_112_PRIVATE (unsigned char)(AT_KEYSTORE_TYPE_ECC_PRIVATE | AT_KEYSTORE_KEYLEN_ECC_112)
+#define AT_KEYSTORE_TYPE_ECC_112_PUBLIC (unsigned char)(AT_KEYSTORE_TYPE_ECC_PUBLIC | AT_KEYSTORE_KEYLEN_ECC_112)
+#define AT_KEYSTORE_TYPE_ECC_224_PRIVATE (unsigned char)(AT_KEYSTORE_TYPE_ECC_PRIVATE | AT_KEYSTORE_KEYLEN_ECC_224)
+#define AT_KEYSTORE_TYPE_ECC_224_PUBLIC (unsigned char)(AT_KEYSTORE_TYPE_ECC_PUBLIC | AT_KEYSTORE_KEYLEN_ECC_224)
 
   typedef struct
   {
-    uint8_t header;
-    size_t size;
+    unsigned char header;
     void *key;
   } AtEncryptionKey;
 
   typedef struct
   {
-    uint8_t header;
-    size_t size;
+    unsigned char header;
     void *ctx;
   } AtEncryptionContext;
 
   typedef struct
   {
     size_t vecLen;
-    uint8_t vec[];
+    unsigned char vec[];
   } InitialisationVector; // TODO determine if this is still needed now that context has been added
+
+  // Base64 Encode and Decode
+
+  /**
+   * \brief          Encode a buffer into base64 format
+   *
+   * \param dst      destination buffer
+   * \param dlen     size of the destination buffer
+   * \param olen     number of bytes written
+   * \param src      source buffer
+   * \param slen     amount of data to be encoded
+   *
+   * \return         0 if successful, or MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL.
+   *                 *olen is always updated to reflect the amount
+   *                 of data that has (or would have) been written.
+   *                 If that length cannot be represented, then no data is
+   *                 written to the buffer and *olen is set to the maximum
+   *                 length representable as a size_t.
+   *
+   * \note           Call this function with dlen = 0 to obtain the
+   *                 required buffer size in *olen
+   */
+  extern int base64Encode(unsigned char *dst, size_t dlen, size_t *olen,
+                          const unsigned char *src, size_t slen);
+
+  /**
+   * \brief          Decode a base64-formatted buffer
+   *
+   * \param dst      destination buffer (can be NULL for checking size)
+   * \param dlen     size of the destination buffer
+   * \param olen     number of bytes written
+   * \param src      source buffer
+   * \param slen     amount of data to be decoded
+   *
+   * \return         0 if successful, MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL, or
+   *                 MBEDTLS_ERR_BASE64_INVALID_CHARACTER if the input data is
+   *                 not correct. *olen is always updated to reflect the amount
+   *                 of data that has (or would have) been written.
+   *
+   * \note           Call this function with *dst = NULL or dlen = 0 to obtain
+   *                 the required buffer size in *olen
+   */
+  extern int base64Decode(unsigned char *dst, size_t dlen, size_t *olen,
+                          const unsigned char *src, size_t slen);
 
   // Encryption and Decryption - AES
 
@@ -118,8 +157,8 @@ extern "C"
    *                 the required buffer size in *olen
    */
   extern int
-  decryptBytesAES(uint8_t *dst, const size_t dlen, size_t *olen,
-                  const uint8_t *src, const size_t slen,
+  decryptBytesAES(unsigned char *dst, const size_t dlen, size_t *olen,
+                  const unsigned char *src, const size_t slen,
                   const AtEncryptionKey *key,
                   const InitialisationVector *iv);
   /**
@@ -157,8 +196,8 @@ extern "C"
    * \note           Call this function with *dst = NULL or dlen = 0 to obtain
    *                 the required buffer size in *olen
    */
-  extern int encryptBytesAES(uint8_t *dst, const size_t dlen, size_t *olen,
-                             const uint8_t *src, const size_t slen,
+  extern int encryptBytesAES(unsigned char *dst, const size_t dlen, size_t *olen,
+                             const unsigned char *src, const size_t slen,
                              const AtEncryptionKey *key);
   /**
    * \brief          Encrypts a buffer using AES
@@ -198,8 +237,8 @@ extern "C"
   //  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
   //  *                 the required buffer size in *olen
   //  */
-  // extern int decryptBytesECC(uint8_t *dst, const const size_t dlen, size_t *olen,
-  //                             const uint8_t *src, const size_t slen,
+  // extern int decryptBytesECC(unsigned char *dst, const const size_t dlen, size_t *olen,
+  //                             const unsigned char *src, const size_t slen,
   //                             const AtEncryptionKey *key,
   //                             const InitialisationVector *iv);
   // /**
@@ -237,8 +276,8 @@ extern "C"
   //  * \note           Call this function with *dst = NULL or dlen = 0 to obtain
   //  *                 the required buffer size in *olen
   //  */
-  // extern int encryptBytesECC(uint8_t *dst, const size_t dlen, size_t *olen,
-  //                             const uint8_t *src, const size_t slen,
+  // extern int encryptBytesECC(unsigned char *dst, const size_t dlen, size_t *olen,
+  //                             const unsigned char *src, const size_t slen,
   //                             const AtEncryptionKey *key);
   // /**
   //  * \brief          Encrypts a buffer using ECC
@@ -286,8 +325,8 @@ extern "C"
    * \note           Call this function with *dst = NULL or dlen = 0 to obtain
    *                 the required buffer size in *olen
    */
-  extern int decryptBytesRSA(uint8_t *dst, const size_t dlen, size_t *olen,
-                             const uint8_t *src, const size_t slen,
+  extern int decryptBytesRSA(unsigned char *dst, const size_t dlen, size_t *olen,
+                             const unsigned char *src, const size_t slen,
                              const AtEncryptionKey *key);
   /**
    * \brief          Decrypts a buffer using RSA
@@ -322,8 +361,8 @@ extern "C"
    * \note           Call this function with *dst = NULL or dlen = 0 to obtain
    *                 the required buffer size in *olen
    */
-  extern int encryptBytesRSA(uint8_t *dst, const size_t dlen, size_t *olen,
-                             const uint8_t *src, const size_t slen,
+  extern int encryptBytesRSA(unsigned char *dst, const size_t dlen, size_t *olen,
+                             const unsigned char *src, const size_t slen,
                              const AtEncryptionKey *key);
   /**
    * \brief          Encrypts a buffer using RSA
@@ -360,8 +399,8 @@ extern "C"
    * \note           Call this function with *dst = NULL or dlen = 0 to obtain
    *                 the required buffer size in *olen
    */
-  extern int hashSHA512(uint8_t *dst, const size_t dlen, size_t *olen,
-                        const uint8_t *src, const size_t slen);
+  extern int hashSHA512(unsigned char *dst, const size_t dlen, size_t *olen,
+                        const unsigned char *src, const size_t slen);
 
   // Signing and Verification - RSA/SHA256
 
@@ -380,8 +419,8 @@ extern "C"
    * \note           Call this function with *dst = NULL or dlen = 0 to obtain
    *                 the required buffer size in *olen
    */
-  extern int signBytesRSA_SHA256(uint8_t *dst, const size_t dlen, size_t *olen,
-                                 const uint8_t *src, const size_t slen,
+  extern int signBytesRSA_SHA256(unsigned char *dst, const size_t dlen, size_t *olen,
+                                 const unsigned char *src, const size_t slen,
                                  const AtEncryptionKey *key);
   /**
    * \brief          Signs a buffer using RSA and SHA256
@@ -412,8 +451,8 @@ extern "C"
    *
    * \return         0 if successful, or an error code
    */
-  extern int verifyBytesRSA_SHA256(const uint8_t *data, const size_t dlen,
-                                   const uint8_t *sign, const size_t slen,
+  extern int verifyBytesRSA_SHA256(const unsigned char *data, const size_t dlen,
+                                   const unsigned char *sign, const size_t slen,
                                    const AtEncryptionKey *key);
   /**
    * \brief          Verifies data against a signature using RSA and SHA256
