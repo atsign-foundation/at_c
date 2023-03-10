@@ -8,7 +8,7 @@ if(BUILD_ESP_IDF) # build as an ESP-IDF components
   add_compile_definitions(BUILD_ESP_IDF)
   message(STATUS "BUILDING FOR ESP-IDF")
   set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/targets/esp32_espidf)
-  set(COMPONENTS at_client esp32_espidf)
+  set(COMPONENTS at_client at_chops esp32_espidf)
   include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 endif()
 
@@ -38,8 +38,12 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
 
   # setup at_client library
 
-  FILE(GLOB_RECURSE sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
-  add_library(at_client ${sources})
+  FILE(GLOB_RECURSE at_client_sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
+  add_library(at_client ${at_client_sources})
+
+  # setup at_chops library
+  FILE(GLOB_RECURSE at_chops_sources ${CMAKE_SOURCE_DIR}/src/at_chops/*.*)
+  add_library(at_chops ${at_chops_sources})
 
   set_target_properties(at_client PROPERTIES LINKER_LANGUAGE CXX)
   set(CMAKE_CXX_STANDARD 17)
@@ -49,14 +53,16 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   # link libraries
 
   if(BUILD_MBEDTLS)
-    target_link_libraries(at_client PRIVATE mbedtls)
-    target_link_libraries(at_client PRIVATE mbedx509)
-    target_link_libraries(at_client PRIVATE mbedcrypto)
+    target_link_libraries(at_chops PRIVATE mbedtls)
+    target_link_libraries(at_chops PRIVATE mbedx509)
+    target_link_libraries(at_chops PRIVATE mbedcrypto)
   endif()
 
   if(BUILD_ARDUINO)
-    target_link_arduino_libraries(at_client PRIVATE core)
+    target_link_arduino_libraries(at_chops PRIVATE core)
   endif()
+
+  target_link_libraries(at_client PRIVATE at_chops)
 
   # tests
   # add_executable(tests test/test.c)

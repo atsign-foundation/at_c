@@ -8,7 +8,9 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/deps/mbedtls/include"
             ],
-            "compilerPath": "/usr/bin/clang"
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c99",
+            "cppStandard": "c++17"
         }
     ],
     "version": 4
