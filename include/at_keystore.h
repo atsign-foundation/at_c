@@ -71,31 +71,16 @@ extern "C"
   typedef struct
   {
     uint8_t header;
-    size_t klen;
-    char *key;
+    size_t size;
+    void *key;
   } AtEncryptionKey;
 
-  // TODO optimize keypair for n,e,d,p,q
-
   typedef struct
   {
-    AtEncryptionKey *pubKey;
-    AtEncryptionKey *privKey;
-  } AtEncryptionKeyPair;
-
-  typedef union
-  {
-    AtEncryptionKey *key;
-    AtEncryptionKeyPair *keyPair;
-  } AtEncryptionKeyEntry;
-
-  typedef struct
-  {
+    uint8_t header;
     size_t size;
-    char *names[32];
-    bool *type; // AT_KEYSTORE_DEF_SYMMETRIC | AT_KEYSTORE_DEF_ASYMMETRIC
-    AtEncryptionKeyEntry *entry;
-  } AtEncryptionKeyStore;
+    void *ctx;
+  } AtEncryptionContext;
 
 #ifdef __cplusplus
 }
