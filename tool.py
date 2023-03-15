@@ -13,7 +13,7 @@ available_frameworks = {
   'esp32': ['espidf', 'arduino']
 }
 
-base_commands = ['init', 'build', 'clean', 'project']
+base_commands = ['init', 'build', 'clean', 'project']#, 'test']
 
 available_commands = {
   'desktop': {
