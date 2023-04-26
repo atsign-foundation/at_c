@@ -17,7 +17,7 @@ project(
   VERSION 1.0.0
   DESCRIPTION "The at_client implemented in C"
   HOMEPAGE_URL https://atsign.com
-  LANGUAGES CXX
+  LANGUAGES C
 )
 
 if(NOT BUILD_ESP_IDF) # build for other platforms
@@ -45,13 +45,14 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   FILE(GLOB_RECURSE at_chops_sources ${CMAKE_SOURCE_DIR}/src/at_chops/*.*)
   add_library(at_chops ${at_chops_sources})
 
-  set_target_properties(at_client PROPERTIES LINKER_LANGUAGE CXX)
-  set(CMAKE_CXX_STANDARD 17)
-  target_compile_features(at_client PRIVATE cxx_std_17)
+  set_target_properties(at_client PROPERTIES LINKER_LANGUAGE C)
+  set(CMAKE_C_STANDARD 99)
+  target_compile_features(at_client PRIVATE c_std_99)
+
+  target_include_directories(at_chops PUBLIC include)
   target_include_directories(at_client PUBLIC include)
 
   # link libraries
-
   if(BUILD_MBEDTLS)
     target_link_libraries(at_chops PRIVATE mbedtls)
     target_link_libraries(at_chops PRIVATE mbedx509)
@@ -65,10 +66,19 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   target_link_libraries(at_client PRIVATE at_chops)
 
   # tests
-  # add_executable(tests test/test.c)
+  enable_testing()
 
-  # target_include_directories(tests PUBLIC include)
-  # target_link_libraries(tests PRIVATE at_client)
+  add_executable(test_base64 test/base64.c)
+  target_link_libraries(test_base64 PRIVATE at_client)
+  add_test(
+    NAME BASE64
+    COMMAND $<TARGET_FILE:test_base64>)
+
+  add_executable(test_aes_ctr test/aes_ctr.c)
+  target_link_libraries(test_aes_ctr PRIVATE at_client)
+  add_test(
+    NAME AES_CTR
+    COMMAND $<TARGET_FILE:test_aes_ctr>)
 
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags

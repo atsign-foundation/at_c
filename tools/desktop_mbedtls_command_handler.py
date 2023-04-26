@@ -34,11 +34,14 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     # Create lib directory
     from os import makedirs
     makedirs(self.root_dir+'/lib/'+self.dir_name, exist_ok=True)
+    makedirs(self.root_dir+'/test/'+self.dir_name, exist_ok=True)
     # Copy libraries to lib directory
     from glob import glob
     from shutil import copy
     for lib in glob(self.root_dir+'/build/'+self.dir_name+'/lib*.a'):
       copy(lib, self.root_dir+'/lib/'+self.dir_name+'/')
+    for lib in glob(self.root_dir+'/build/'+self.dir_name+'/test_*'):
+      copy(lib, self.root_dir+'/test/'+self.dir_name+'/')
     super()._build_copy(args, extra_lib_dirs=[self.root_dir+'/build/'+self.dir_name+'/deps/mbedtls/library'])
     print('Build successful!')
     pass
@@ -48,3 +51,5 @@ class DesktopMbedTLSCommandHandler(CommandHandler):
     project_path, project_name = super().project(args)
     print('Created project '+project_name)
     pass
+  def test(self, args):
+    return super().test(args)

@@ -10,6 +10,7 @@ class CommandHandler(object):
     elif command == 'build': self.build(args)
     elif command == 'clean': self.clean(args)
     elif command == 'project': self.project(args)
+    elif command == 'test': self.test(args)
     else: raise Exception('Unknown command: ' + command)
     pass
   def init(self, args):
@@ -52,3 +53,17 @@ class CommandHandler(object):
     print('Creating project '+project_name+'...')
     copy_tree(self.root_dir+'/archetypes/'+self.dir_name, project_path)
     return project_path, project_name
+  def test(self, args):
+    from subprocess import run
+    from glob import glob
+    from os.path import basename
+    count_failed = 0
+    for test in glob(self.root_dir+'/test/'+self.dir_name+'/test_*'):
+      res = run([test])
+      if res.returncode != 0:
+        count_failed += 1
+        print(basename(test) +' exited with code '+str(res.returncode))
+    if count_failed == 0:
+      print('All tests passed!')
+    else:
+      print(str(count_failed)+' tests failed!')
