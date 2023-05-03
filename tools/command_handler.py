@@ -58,12 +58,18 @@ class CommandHandler(object):
     from glob import glob
     from os.path import basename
     count_failed = 0
+    print('\nRunning tests...')
     for test in glob(self.root_dir+'/test/'+self.dir_name+'/test_*'):
       res = run([test])
-      if res.returncode != 0:
+      if res.returncode == 0:
+        print(basename(test) +' passed!')
+      else:
         count_failed += 1
         print(basename(test) +' exited with code '+str(res.returncode))
+    print()
     if count_failed == 0:
       print('All tests passed!')
+    elif count_failed == 1:
+      print(str(count_failed)+' test failed!')
     else:
       print(str(count_failed)+' tests failed!')

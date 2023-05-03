@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "at_client.h"
 #include <string.h>
-#include <stdbool.h>
 
 int main()
 {
@@ -13,7 +12,7 @@ int main()
   unsigned long *olen;
 
   // decode
-  int retval = base64Decode(decoded, dlen, olen, (const unsigned char *)encoded, strlen(encoded));
+  int retval = base64_decode(decoded, dlen, olen, (const unsigned char *)encoded, strlen(encoded));
   if (retval != 0)
   {
     printf("Decode failed\n");
@@ -23,7 +22,7 @@ int main()
   const int dolen = *olen;
 
   // encode
-  retval = base64Encode(dst, dlen, olen, (const unsigned char *)decoded, dolen);
+  retval = base64_encode(dst, dlen, olen, (const unsigned char *)decoded, dolen);
   if (retval != 0)
   {
     printf("Encode failed\n");
