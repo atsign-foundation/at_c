@@ -49,8 +49,10 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   set(CMAKE_C_STANDARD 99)
   target_compile_features(at_client PRIVATE c_std_99)
 
-  target_include_directories(at_chops PUBLIC include)
-  target_include_directories(at_client PUBLIC include)
+  target_include_directories(at_chops PUBLIC ${CMAKE_SOURCE_DIR}/include)
+  target_include_directories(at_chops PUBLIC ${CMAKE_SOURCE_DIR}/include/at_chops)
+  target_include_directories(at_client PUBLIC ${CMAKE_SOURCE_DIR}/include)
+  target_include_directories(at_client PUBLIC ${CMAKE_SOURCE_DIR}/include/at_client)
 
   # link libraries
   if(BUILD_MBEDTLS)
