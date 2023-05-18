@@ -43,6 +43,7 @@ class CommandHandler(object):
     from shutil import rmtree
     rmtree(self.root_dir+'/build/'+self.dir_name, ignore_errors=True)
     rmtree(self.root_dir+'/lib/'+self.dir_name, ignore_errors=True)
+    rmtree(self.root_dir+'/test/'+self.dir_name, ignore_errors=True)
     print('Done cleaning!')
     pass
   def project(self, args):
