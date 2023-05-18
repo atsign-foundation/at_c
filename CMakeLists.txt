@@ -68,13 +68,13 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   # tests
   enable_testing()
 
-  add_executable(test_base64 test/base64.c)
+  add_executable(test_base64 test/test_base64.c)
   target_link_libraries(test_base64 PRIVATE at_client)
   add_test(
     NAME BASE64
     COMMAND $<TARGET_FILE:test_base64>)
 
-  add_executable(test_aes_ctr test/aes_ctr.c)
+  add_executable(test_aes_ctr test/test_aes_ctr.c)
   target_link_libraries(test_aes_ctr PRIVATE at_client)
   add_test(
     NAME AES_CTR
