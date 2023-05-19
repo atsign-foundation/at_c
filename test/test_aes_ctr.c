@@ -28,13 +28,13 @@ int main()
 
     result = atchops_aes256ctr_encrypt(aes_key, (const unsigned char *) plaintext);
     strcpy(ciphertext, result->res);
-    // printf("encrypted: ", ciphertext);
+    // printf("encrypted: ");
     // printf("%s\n", ciphertext);
     // printx((const unsigned char *)ciphertext, strlen(ciphertext));
     // printf("encrypted-len: %lu\n", result->reslen);
 
     result = atchops_aes256ctr_decrypt(aes_key, (const unsigned char *) ciphertext);
-    // printf("decrypted: ", result->res);
+    // printf("decrypted: ");
     // printf("%s\n", result->res);
     // printx((const unsigned char *)result->res, result->reslen);
     // printf("decrypted-len: %lu\n", result->reslen);
