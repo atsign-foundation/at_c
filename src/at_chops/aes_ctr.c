@@ -8,8 +8,8 @@ extern "C"
 #include <stdlib.h>
 #include <string.h>
 #include <mbedtls/aes.h>
-#include "aes_ctr.h"
-#include "base64.h"
+#include "at_chops/aes_ctr.h"
+#include "at_chops/base64.h"
 
 #define AES_KEY_BITS 256
 #define AES_KEY_BYTES AES_KEY_BITS / 8
