@@ -5,8 +5,8 @@
             "configurationProvider": "ms-vscode.cmake-tools",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/deps/mbedtls/include"
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/deps/mbedtls/include/**"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c99",
