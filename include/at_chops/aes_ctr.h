@@ -9,8 +9,8 @@ extern "C"
 #include <string.h>
 
 typedef struct {
-    unsigned char *res; // result of the encryption/decryption
     size_t reslen; // length of the result written
+    unsigned char *res; // result of the encryption/decryption
 } AESResult;
 
 /**
