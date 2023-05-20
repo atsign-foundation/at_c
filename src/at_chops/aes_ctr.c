@@ -98,7 +98,7 @@ AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const AESKeySize ke
     return aes_result;
 }
 
-AESResult *atchops_aes256ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext)
+AESResult *atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext)
 {
     AESResult *result = malloc(sizeof(AESResult));
 

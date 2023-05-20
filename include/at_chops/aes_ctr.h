@@ -8,6 +8,8 @@ extern "C"
 
 #include <string.h>
 
+#define IV_AMOUNT_BYTES 16
+
 typedef enum {
     AES_128 = 128,
     AES_192 = 192,
@@ -26,7 +28,7 @@ typedef struct {
  * @param plaintext the plain text to encryt, must be null terminated `\0`
  * @return AESResult* the result of the encryption
  */
-AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext);
+AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext);
 
 /**
  * @brief AES 256 CTR decrypt cipher text
@@ -35,7 +37,7 @@ AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const AESKeySize ke
  * @param ciphertext the base64 encoded cipher text, must be null terminated `\0`
  * @return AESResult* the result of the decrytion
  */
-AESResult *atchops_aes256ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext);
+AESResult *atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext);
 
 #ifdef __cplusplus
 }
