@@ -5,8 +5,6 @@ extern "C"
 {
 #endif
 
-#include "at_chops.h"
-
 #define AT_ROOT_DOMAIN "root.atsign.org"
 #define AT_ROOT_PORT 64
 
