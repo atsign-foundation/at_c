@@ -18,7 +18,7 @@ extern "C"
 #define MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION 5000
 #define MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION 10000 // the max length of base64 encoded text (should be more than enough)
 
-AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const unsigned char *plaintext )
+AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext )
 {
     size_t plaintext_len = strlen(plaintext);
 
@@ -48,7 +48,7 @@ AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const unsigned char
     // printf("Plaintext Padded: \"%s\"\n", plaintext_padded);
 
     // initialize AES key
-    unsigned char key[AES_KEY_BYTES];
+    unsigned char key[key_size/8];
     size_t keylen = sizeof(key);
     size_t *writtenlen = malloc(sizeof(size_t));
 
@@ -57,7 +57,7 @@ AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const unsigned char
     // initialize AES context
     mbedtls_aes_context *ctx = malloc(sizeof(mbedtls_aes_context));
     mbedtls_aes_init(ctx);
-    mbedtls_aes_setkey_enc(ctx, key, AES_KEY_BITS);
+    mbedtls_aes_setkey_enc(ctx, key, key_size);
 
     size_t *iv_ctr = malloc(sizeof(unsigned int));
     unsigned char *iv = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
@@ -98,13 +98,13 @@ AESResult *atchops_aes256ctr_encrypt(const char *key_base64, const unsigned char
     return aes_result;
 }
 
-AESResult *atchops_aes256ctr_decrypt(const char *key_base64, const unsigned char *ciphertext)
+AESResult *atchops_aes256ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext)
 {
     AESResult *result = malloc(sizeof(AESResult));
 
     // initialize AES key
 
-    unsigned char key[AES_KEY_BYTES];
+    unsigned char key[key_size/8];
     size_t keylen = sizeof(key);
 
     size_t *writtenlen = malloc(sizeof(size_t));
@@ -113,7 +113,7 @@ AESResult *atchops_aes256ctr_decrypt(const char *key_base64, const unsigned char
     // initialize AES context
     mbedtls_aes_context *ctx = malloc(sizeof(mbedtls_aes_context));
     mbedtls_aes_init(ctx);
-    mbedtls_aes_setkey_enc(ctx, key, AES_KEY_BITS);
+    mbedtls_aes_setkey_enc(ctx, key, key_size);
 
     // decode the base64 ciphertext
     size_t dstlen = MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION;
