@@ -26,14 +26,14 @@ int main()
 
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * 1000);
 
-    result = atchops_aes256ctr_encrypt(aes_key, AES_256, (const unsigned char *) plaintext);
+    result = atchops_aes_ctr_encrypt(aes_key, AES_256, (const unsigned char *) plaintext);
     strcpy(ciphertext, result->res);
     // printf("encrypted: ");
     // printf("%s\n", ciphertext);
     // printx((const unsigned char *)ciphertext, strlen(ciphertext));
     // printf("encrypted-len: %lu\n", result->reslen);
 
-    result = atchops_aes256ctr_decrypt(aes_key, AES_256, (const unsigned char *) ciphertext);
+    result = atchops_aes_ctr_decrypt(aes_key, AES_256, (const unsigned char *) ciphertext);
     // printf("decrypted: ");
     // printf("%s\n", result->res);
     // printx((const unsigned char *)result->res, result->reslen);

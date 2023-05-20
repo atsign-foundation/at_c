@@ -19,6 +19,7 @@ typedef enum {
 typedef struct {
     size_t reslen; // length of the result written
     unsigned char *res; // result of the encryption/decryption
+    int status; // status code of the operation
 } AESResult;
 
 /**
