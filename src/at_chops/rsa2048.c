@@ -344,16 +344,16 @@ extern "C"
         mbedtls_rsa_context rsa;
         mbedtls_rsa_init(&rsa);
 
-        printf("\nn: %lu\n", privatekeystruct->n->len);
-        printx(privatekeystruct->n->n, privatekeystruct->n->len);
-        printf("\ne: %lu\n", privatekeystruct->e->len);
-        printx(privatekeystruct->e->e, privatekeystruct->e->len);
-        printf("\nd: %lu\n", privatekeystruct->d->len);
-        printx(privatekeystruct->d->d, privatekeystruct->d->len);
-        printf("\np: %lu\n", privatekeystruct->p->len);
-        printx(privatekeystruct->p->p, privatekeystruct->p->len);
-        printf("\nq: %lu\n", privatekeystruct->q->len);
-        printx(privatekeystruct->q->q, privatekeystruct->q->len);
+        // printf("\nn: %lu\n", privatekeystruct->n->len);
+        // printx(privatekeystruct->n->n, privatekeystruct->n->len);
+        // printf("\ne: %lu\n", privatekeystruct->e->len);
+        // printx(privatekeystruct->e->e, privatekeystruct->e->len);
+        // printf("\nd: %lu\n", privatekeystruct->d->len);
+        // printx(privatekeystruct->d->d, privatekeystruct->d->len);
+        // printf("\np: %lu\n", privatekeystruct->p->len);
+        // printx(privatekeystruct->p->p, privatekeystruct->p->len);
+        // printf("\nq: %lu\n", privatekeystruct->q->len);
+        // printx(privatekeystruct->q->q, privatekeystruct->q->len);
 
         ret = mbedtls_rsa_import_raw(&rsa, 
             privatekeystruct->n->n, privatekeystruct->n->len, 
@@ -365,14 +365,13 @@ extern "C"
         printf("rsa import: %d\n", ret);
         if (ret != 0) goto ret;
 
+        ret = mbedtls_rsa_complete(&rsa);
+        printf("rsa complete: %d\n", ret);
+        if (ret != 0) goto ret;
+
         ret = mbedtls_rsa_check_privkey(&rsa);
         printf("rsa check privkey: %d\n", ret);
         if (ret != 0) goto ret;
-
-        printf("1\n");
-
-        unsigned char *buf = malloc(sizeof(unsigned char) * 1000);
-        printf("2\n");
 
         mbedtls_entropy_context entropy_ctx;
         mbedtls_entropy_init(&entropy_ctx);
@@ -381,19 +380,20 @@ extern "C"
         mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
         mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, "rsa_encrypt", strlen("rsa_encrypt"));
 
-        printf("check up: %d\n", mbedtls_rsa_self_test(0));
+        printf("mbedtls_rsa_self_test: %d\n", mbedtls_rsa_self_test(0));
 
         printf("hashlen: %lu\n", hashlen);
         printf("hash: ");
         printx(hash, hashlen);
+        unsigned char *buf = malloc(sizeof(unsigned char) * 1000);
         ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, buf);
-        printf("3. ret: %d\n", ret);
+        printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
         if (ret != 0) goto ret;
 
-        printf("signaturelen: %lu\n", *signaturelen);
-        for (int i = 0; i < *signaturelen; i++)
+        printf("buflen: %lu\n", strlen(buf));
+        for (int i = 0; i < strlen(buf); i++)
         {
-            printf("%02x ", *(*signature + i));
+            printf("%02x ", *(buf+i));
         }
         printf("\n");
 
