@@ -16,7 +16,6 @@ extern "C"
 #define IV_AMOUNT_BYTES 16
 
 #define MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION 5000
-#define MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION 10000 // the max length of base64 encoded text (should be more than enough)
 
 AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext )
 {
