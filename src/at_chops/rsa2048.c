@@ -301,34 +301,31 @@ extern "C"
     }
     }
 
-    int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_rsa2048_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen)
+    int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen)
     {
         int ret = 1;
 
         mbedtls_md_context_t md_ctx;
         mbedtls_md_init(&md_ctx);
 
-        mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256; // TODO dynamic
+        mbedtls_md_type_t md_type = mdtype; // TODO dynamic
 
         ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(md_type), 0);
-        if (ret != 0)
-            goto ret;
+        if (ret != 0) goto ret;
+
 
         ret = mbedtls_md_starts(&md_ctx);
-        if (ret != 0)
-            goto ret;
+        if (ret != 0) goto ret;
 
         ret = mbedtls_md_update(&md_ctx, message, messagelen);
-        if (ret != 0)
-            goto ret;
+        if (ret != 0) goto ret;
 
         const size_t hashlen = mbedtls_md_get_size(mbedtls_md_info_from_type(md_type));
         printf("hashlen: %lu\n", hashlen);
         unsigned char *hash = malloc(sizeof(unsigned char) * hashlen);
 
         ret = mbedtls_md_finish(&md_ctx, hash);
-        if (ret != 0)
-            goto ret;
+        if (ret != 0) goto ret;
 
         mbedtls_md_free(&md_ctx);
 
@@ -356,13 +353,12 @@ extern "C"
         // printf("\nq: %lu\n", privatekeystruct->q->len);
         // printx(privatekeystruct->q->q, privatekeystruct->q->len);
 
-        ret = mbedtls_rsa_import_raw(&rsa, 
-            privatekeystruct->n->n, privatekeystruct->n->len, 
-            privatekeystruct->p->p, privatekeystruct->p->len, 
-            privatekeystruct->q->q, privatekeystruct->q->len,
-            privatekeystruct->d->d, privatekeystruct->d->len, 
-            privatekeystruct->e->e, privatekeystruct->e->len 
-            );
+        ret = mbedtls_rsa_import_raw(&rsa,
+                                     privatekeystruct->n->n, privatekeystruct->n->len,
+                                     privatekeystruct->p->p, privatekeystruct->p->len,
+                                     privatekeystruct->q->q, privatekeystruct->q->len,
+                                     privatekeystruct->d->d, privatekeystruct->d->len,
+                                     privatekeystruct->e->e, privatekeystruct->e->len);
         printf("rsa import: %d\n", ret);
         if (ret != 0) goto ret;
 
@@ -381,7 +377,8 @@ extern "C"
         mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
         ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, "rsa_sign", strlen("rsa_sign"));
         printf("mbedtls_ctr_drbg_seed: %d\n", ret);
-        if (ret != 0) goto ret;
+        if (ret != 0)
+            goto ret;
 
         printf("mbedtls_rsa_self_test: %d\n", mbedtls_rsa_self_test(0));
 
@@ -389,7 +386,7 @@ extern "C"
         printf("hash: ");
         printx(hash, hashlen);
         int buflen = 256;
-        unsigned char *buf = malloc(sizeof(unsigned char) * buflen+1); // +1 for null terminator
+        unsigned char *buf = malloc(sizeof(unsigned char) * buflen + 1); // +1 for null terminator
         ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, buf);
         printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
         if (ret != 0) goto ret;
@@ -397,7 +394,7 @@ extern "C"
         printf("buflen: %lu\n", buflen);
         for (int i = 0; i < buflen; i++)
         {
-            printf("%02x ", *(buf+i));
+            printf("%02x ", *(buf + i));
         }
         printf("\n");
 
@@ -416,10 +413,10 @@ extern "C"
 
         goto ret;
 
-        ret:
-        {
-            return ret;
-        }
+    ret:
+    {
+        return ret;
+    }
     }
 
     // todo

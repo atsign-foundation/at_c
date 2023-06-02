@@ -70,26 +70,32 @@ int main()
     // encrypt test
     // ====
 
-    const unsigned char* plaintext = "lemonade";
-    size_t plaintextlen = strlen(plaintext);
+    // const unsigned char* plaintext = "lemonade";
+    // size_t plaintextlen = strlen(plaintext);
 
-    const size_t ciphertextlen = 1000;
-    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
-    size_t *ciphertextolen = malloc(sizeof(size_t));
+    // const size_t ciphertextlen = 1000;
+    // unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    // size_t *ciphertextolen = malloc(sizeof(size_t));
 
-    ret = atchops_rsa2048_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, ciphertextolen);
-    if (ret != 0) goto ret;
+    // ret = atchops_rsa2048_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, ciphertextolen);
+    // if (ret != 0) goto ret;
 
     // =====
     // signing
     // =====
 
-    unsigned char *signature;
-    size_t *signaturelen;
+    unsigned char *signature = malloc(sizeof(unsigned char) * 5000);
+    size_t *signaturelen = malloc(sizeof(size_t));
     const unsigned char *message = "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182";
     const size_t messagelen = strlen(message);
 
-    ret = atchops_rsa2048_sign(privatekeystruct, SHA256, &signature, signaturelen, message, messagelen);
+    ret = atchops_rsa2048_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, message, messagelen);
+    if(ret != 0) goto ret;
+
+    printf("signature len: %lu\n", *signaturelen);
+    printf("signature: %s\n", signature);
+
+    ret = strncmp(signature, "AwsKWNqRHiCtdNJ0U5GXZ1H5obptEWVR1+A1kPhot4cdLfmulvBVXRaBIrP+jd2TSP2J/KNAgv2BDLH7DXUibdTnzJaKm/QKAjpwpuShnV6Y9KSWTnomBw9x9OWDkVrBzSo5rOFpHHOTZJhp4ygStKEzZDa108g8uP5PpkfzntO2eIVEOdMHoL9/yAkuYJcz+VmCH+1AJtCdeKfhjfmlk0bP72fwsait6pA3TW0iEll9ptZmlLjNtCTi982h1yNprh+XtrjMz7ClbJChQf3LLHiJMZ+7r4yKTrehdBVfxQoNNw9r2D7TBRaY8bXYwMombMHRuu0oVbqNU1jEs60NGQ==", *signaturelen);
     if(ret != 0) goto ret;
 
     // TODO signature to use mpi_ constant A buffer length of #MBEDTLS_MPI_MAX_SIZE is always safe.

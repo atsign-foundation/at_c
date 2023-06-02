@@ -47,10 +47,15 @@ typedef struct {
 } atchops_rsa2048_privatekey;
 
 typedef enum {
-    SHA256,
-    SHA384,
-    SHA512
-} atchops_rsa2048_md_type;
+    ATCHOPS_MD_NONE=0,    /**< None. */
+    ATCHOPS_MD_MD5,       /**< The MD5 message digest. */
+    ATCHOPS_MD_SHA1,      /**< The SHA-1 message digest. */
+    ATCHOPS_MD_SHA224,    /**< The SHA-224 message digest. */
+    ATCHOPS_MD_SHA256,    /**< The SHA-256 message digest. */
+    ATCHOPS_MD_SHA384,    /**< The SHA-384 message digest. */
+    ATCHOPS_MD_SHA512,    /**< The SHA-512 message digest. */
+    ATCHOPS_MD_RIPEMD160,
+} atchops_md_type;
 
 void printx(unsigned char *data, size_t len);
 
@@ -66,7 +71,7 @@ int atchops_rsa2048_populate_publickey(const unsigned char *publickeybase64, con
 
 int atchops_rsa2048_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct);
 
-int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_rsa2048_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen);
+int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen);
 
 // todo
 // int atchops_rsa2048_verify(atchops_rsa2048_publickey *publickeystruct, const unsigned char *signature, const size_t signaturelen, );
