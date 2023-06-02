@@ -323,6 +323,7 @@ extern "C"
             goto ret;
 
         const size_t hashlen = mbedtls_md_get_size(mbedtls_md_info_from_type(md_type));
+        printf("hashlen: %lu\n", hashlen);
         unsigned char *hash = malloc(sizeof(unsigned char) * hashlen);
 
         ret = mbedtls_md_finish(&md_ctx, hash);
@@ -378,31 +379,47 @@ extern "C"
 
         mbedtls_ctr_drbg_context ctr_drbg_ctx;
         mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
-        mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, "rsa_encrypt", strlen("rsa_encrypt"));
+        ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, "rsa_sign", strlen("rsa_sign"));
+        printf("mbedtls_ctr_drbg_seed: %d\n", ret);
+        if (ret != 0) goto ret;
 
         printf("mbedtls_rsa_self_test: %d\n", mbedtls_rsa_self_test(0));
 
         printf("hashlen: %lu\n", hashlen);
         printf("hash: ");
         printx(hash, hashlen);
-        unsigned char *buf = malloc(sizeof(unsigned char) * 1000);
+        int buflen = 256;
+        unsigned char *buf = malloc(sizeof(unsigned char) * buflen+1); // +1 for null terminator
         ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, buf);
         printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
         if (ret != 0) goto ret;
 
-        printf("buflen: %lu\n", strlen(buf));
-        for (int i = 0; i < strlen(buf); i++)
+        printf("buflen: %lu\n", buflen);
+        for (int i = 0; i < buflen; i++)
         {
             printf("%02x ", *(buf+i));
         }
         printf("\n");
 
+        // base64 encode
+        size_t *writtenlen = malloc(sizeof(size_t));
+        unsigned char *dst = malloc(sizeof(unsigned char) * MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION);
+        ret = atchops_base64_encode(dst, MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION, writtenlen, buf, buflen);
+        if (ret != 0) goto ret;
+
+        // append null terminator
+        *(dst + *writtenlen) = '\0';
+        printf("Challenge: %s\n", dst);
+
+        *signature = dst;
+        *signaturelen = *writtenlen;
+
         goto ret;
 
-    ret:
-    {
-        return ret;
-    }
+        ret:
+        {
+            return ret;
+        }
     }
 
     // todo

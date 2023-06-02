@@ -15,7 +15,7 @@ int main()
     atchops_rsa2048_privatekey_init(&privatekeystruct);
 
     ret = atchops_rsa2048_populate_privatekey(privatekeybase64, privatekeybase64len, privatekeystruct);
-    if (ret != 0) goto end;
+    if (ret != 0) goto ret;
     // printf("ret: %d\n", ret);
 
     // // print n e d p q lengths
@@ -51,7 +51,7 @@ int main()
     atchops_rsa2048_publickey_init(&publickeystruct);
 
     ret = atchops_rsa2048_populate_publickey(publickeybase64, publickeybase64len, publickeystruct);
-    if (ret != 0) goto end;
+    if (ret != 0) goto ret;
 
     // print n e lengths
     // printf("n len: %lu\n", publickeystruct->n->len);
@@ -78,7 +78,7 @@ int main()
     size_t *ciphertextolen = malloc(sizeof(size_t));
 
     ret = atchops_rsa2048_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, ciphertextolen);
-    if (ret != 0) goto end;
+    if (ret != 0) goto ret;
 
     // =====
     // signing
@@ -86,13 +86,22 @@ int main()
 
     unsigned char *signature;
     size_t *signaturelen;
-    const unsigned char *message = "lemonade";
+    const unsigned char *message = "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182";
     const size_t messagelen = strlen(message);
 
     ret = atchops_rsa2048_sign(privatekeystruct, SHA256, &signature, signaturelen, message, messagelen);
-    goto end;
+    if(ret != 0) goto ret;
+
+    // TODO signature to use mpi_ constant A buffer length of #MBEDTLS_MPI_MAX_SIZE is always safe.
+
+    // unsigned char *signature_str = malloc(sizeof(unsigned char) * ((*signaturelen) + 1));
+    // memcpy(signature_str, signature, *signaturelen);
+    // signature_str[*signaturelen] = '\0';
+    // printf("Signature: %s\n", signature_str);
+    
+    goto ret;
         
-    end: {
+    ret: {
         return ret;
     }
 }
