@@ -13,11 +13,11 @@ available_frameworks = {
   'esp32': ['espidf', 'arduino']
 }
 
-base_commands = ['init', 'build', 'clean', 'project']
+base_commands = ['init', 'build', 'clean', 'project']#, 'test']
 
 available_commands = {
   'desktop': {
-    'mbedtls': base_commands,
+    'mbedtls': base_commands + ['test'],
   },
   'esp32': {
     'espidf': base_commands, # + ['flash', 'monitor']

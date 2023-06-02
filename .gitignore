@@ -15,3 +15,5 @@ sdkconfig
 __pycache__/
 
 .pio/
+
+test/*/test_*

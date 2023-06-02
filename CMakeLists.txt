@@ -8,7 +8,7 @@ if(BUILD_ESP_IDF) # build as an ESP-IDF components
   add_compile_definitions(BUILD_ESP_IDF)
   message(STATUS "BUILDING FOR ESP-IDF")
   set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/targets/esp32_espidf)
-  set(COMPONENTS at_client esp32_espidf)
+  set(COMPONENTS at_client at_chops esp32_espidf)
   include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 endif()
 
@@ -17,7 +17,7 @@ project(
   VERSION 1.0.0
   DESCRIPTION "The at_client implemented in C"
   HOMEPAGE_URL https://atsign.com
-  LANGUAGES CXX
+  LANGUAGES C
 )
 
 if(NOT BUILD_ESP_IDF) # build for other platforms
@@ -38,31 +38,55 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
 
   # setup at_client library
 
-  FILE(GLOB_RECURSE sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
-  add_library(at_client ${sources})
+  FILE(GLOB_RECURSE at_client_sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
+  add_library(at_client ${at_client_sources})
 
-  set_target_properties(at_client PROPERTIES LINKER_LANGUAGE CXX)
-  set(CMAKE_CXX_STANDARD 17)
-  target_compile_features(at_client PRIVATE cxx_std_17)
-  target_include_directories(at_client PUBLIC include)
+  # setup at_chops library
+  FILE(GLOB_RECURSE at_chops_sources ${CMAKE_SOURCE_DIR}/src/at_chops/*.*)
+  add_library(at_chops ${at_chops_sources})
+
+  set_target_properties(at_client PROPERTIES LINKER_LANGUAGE C)
+  set(CMAKE_C_STANDARD 99)
+  target_compile_features(at_client PRIVATE c_std_99)
+
+  target_include_directories(at_chops PUBLIC ${CMAKE_SOURCE_DIR}/include)
+  target_include_directories(at_chops PUBLIC ${CMAKE_SOURCE_DIR}/include/at_chops)
+  target_include_directories(at_client PUBLIC ${CMAKE_SOURCE_DIR}/include)
+  target_include_directories(at_client PUBLIC ${CMAKE_SOURCE_DIR}/include/at_client)
 
   # link libraries
-
   if(BUILD_MBEDTLS)
-    target_link_libraries(at_client PRIVATE mbedtls)
-    target_link_libraries(at_client PRIVATE mbedx509)
-    target_link_libraries(at_client PRIVATE mbedcrypto)
+    target_link_libraries(at_chops PRIVATE mbedtls)
+    target_link_libraries(at_chops PRIVATE mbedx509)
+    target_link_libraries(at_chops PRIVATE mbedcrypto)
   endif()
 
   if(BUILD_ARDUINO)
-    target_link_arduino_libraries(at_client PRIVATE core)
+    target_link_arduino_libraries(at_chops PRIVATE core)
   endif()
 
-  # tests
-  # add_executable(tests test/test.c)
+  target_link_libraries(at_client PRIVATE at_chops)
 
-  # target_include_directories(tests PUBLIC include)
-  # target_link_libraries(tests PRIVATE at_client)
+  # tests
+  enable_testing()
+
+  add_executable(test_base64 test/test_base64.c)
+  target_link_libraries(test_base64 PRIVATE at_client)
+  add_test(
+    NAME BASE64
+    COMMAND $<TARGET_FILE:test_base64>)
+
+  add_executable(test_aes_ctr test/test_aes_ctr.c)
+  target_link_libraries(test_aes_ctr PRIVATE at_client)
+  add_test(
+    NAME AES_CTR
+    COMMAND $<TARGET_FILE:test_aes_ctr>)
+
+  add_executable(test_main test/test_main.c)
+  target_link_libraries(test_main PRIVATE at_client)
+  add_test(
+    NAME MAIN
+    COMMAND $<TARGET_FILE:test_main>)
 
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
