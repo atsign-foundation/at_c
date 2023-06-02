@@ -8,6 +8,8 @@ extern "C"
 #define AT_ROOT_DOMAIN "root.atsign.org"
 #define AT_ROOT_PORT 64
 
+#include "at_chops.h"
+
 #ifdef __cplusplus
 }
 #endif
