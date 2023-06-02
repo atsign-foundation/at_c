@@ -28,23 +28,23 @@ void copy(unsigned char *dst, unsigned char *src, size_t len)
         dst[i] = src[i];
     }
 }
-void atchops_rsa2048_publickey_init(RSA2048_PublicKey **publickeystruct)
+void atchops_rsa2048_publickey_init(atchops_rsa2048_publickey **publickeystruct)
 {
-    *publickeystruct = malloc(sizeof(RSA2048_PublicKey));
+    *publickeystruct = malloc(sizeof(atchops_rsa2048_publickey));
     (*publickeystruct)->n = malloc(sizeof(n_param));
     (*publickeystruct)->e = malloc(sizeof(e_param));
 }
 
-void atchops_rsa2048_privatekey_init(RSA2048_PrivateKey **privatekeystruct)
+void atchops_rsa2048_privatekey_init(atchops_rsa2048_privatekey **privatekeystruct)
 {
-    *privatekeystruct = malloc(sizeof(RSA2048_PrivateKey));
+    *privatekeystruct = malloc(sizeof(atchops_rsa2048_privatekey));
     (*privatekeystruct)->n = malloc(sizeof(n_param));
     (*privatekeystruct)->e = malloc(sizeof(e_param));
     (*privatekeystruct)->d = malloc(sizeof(d_param));
     (*privatekeystruct)->p = malloc(sizeof(p_param));
     (*privatekeystruct)->q = malloc(sizeof(q_param));
 }
-void atchops_rsa2048_publickey_free(RSA2048_PublicKey *publickeystruct)
+void atchops_rsa2048_publickey_free(atchops_rsa2048_publickey *publickeystruct)
 {
     free(publickeystruct->n->n);
     free(publickeystruct->n);
@@ -53,7 +53,7 @@ void atchops_rsa2048_publickey_free(RSA2048_PublicKey *publickeystruct)
     free(publickeystruct);
 }
 
-void atchops_rsa2048_privatekey_free(RSA2048_PrivateKey *privatekeystruct)
+void atchops_rsa2048_privatekey_free(atchops_rsa2048_privatekey *privatekeystruct)
 {
     free(privatekeystruct->n->n);
     free(privatekeystruct->n);
@@ -68,7 +68,7 @@ void atchops_rsa2048_privatekey_free(RSA2048_PrivateKey *privatekeystruct)
     free(privatekeystruct);
 }
 
-int atchops_rsa2048_populate_publickey(const unsigned char *publickeybase64, const size_t publickeybase64len, RSA2048_PublicKey *publickeystruct)
+int atchops_rsa2048_populate_publickey(const unsigned char *publickeybase64, const size_t publickeybase64len, atchops_rsa2048_publickey *publickeystruct)
 {
     int ret = 1;
 
@@ -155,7 +155,7 @@ int atchops_rsa2048_populate_publickey(const unsigned char *publickeybase64, con
         return ret;
     }
 }
-int atchops_rsa2048_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, RSA2048_PrivateKey *privatekeystruct)
+int atchops_rsa2048_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct)
 {
     int ret;
     // printf("Public Key: %s\n", publickey);
@@ -287,29 +287,40 @@ int atchops_rsa2048_populate_privatekey(const unsigned char *privatekeybase64, c
     }
 }
 
-int atchops_rsa2048_encrypt(RSA2048_PublicKey *publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, unsigned char *ciphertext, const size_t ciphertextlen, size_t *ciphertextolen)
+int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_rsa2048_md_type mdtype, unsigned char *signature, const size_t signaturelen, size_t *writtenlen, const unsigned char *message, const size_t messagelen)
 {
     int ret = 1;
 
-    mbedtls_mpi *n;
-    mbedtls_mpi *e;
+    mbedtls_mpi *n = malloc(sizeof(mbedtls_mpi));
+    mbedtls_mpi *e = malloc(sizeof(mbedtls_mpi));
+    mbedtls_mpi *d = malloc(sizeof(mbedtls_mpi));
+    mbedtls_mpi *p = malloc(sizeof(mbedtls_mpi));
+    mbedtls_mpi *q = malloc(sizeof(mbedtls_mpi));
 
     mbedtls_mpi_init(n);
     mbedtls_mpi_init(e);
+    mbedtls_mpi_init(d);
+    mbedtls_mpi_init(p);
+    mbedtls_mpi_init(q);
 
-    unsigned char *nbuf = malloc(sizeof(unsigned char) * publickeystruct->n->len+1);
-    unsigned char *ebuf = malloc(sizeof(unsigned char) * publickeystruct->e->len+1);
+    ret = mbedtls_mpi_read_binary(n, privatekeystruct->n->n, privatekeystruct->n->len);
+    if (ret != 0) goto ret;
 
-    copy(nbuf, publickeystruct->n->n, publickeystruct->n->len);
-    copy(ebuf, publickeystruct->e->e, publickeystruct->e->len);
+    ret = mbedtls_mpi_read_binary(e, privatekeystruct->e->e, privatekeystruct->e->len);
+    if (ret != 0) goto ret;
 
-    nbuf[publickeystruct->n->len] = '\0';
-    ebuf[publickeystruct->e->len] = '\0';
+    ret = mbedtls_mpi_read_binary(d, privatekeystruct->d->d, privatekeystruct->d->len);
+    if (ret != 0) goto ret;
 
-    mbedtls_mpi_read_string(n, 16, nbuf);
-    mbedtls_mpi_read_string(e, 16, ebuf);
+    ret = mbedtls_mpi_read_binary(p, privatekeystruct->p->p, privatekeystruct->p->len);
+    if (ret != 0) goto ret;
 
-    mbedtls_rsa_context *rsa;
+    ret = mbedtls_mpi_read_binary(q, privatekeystruct->q->q, privatekeystruct->q->len);
+    if (ret != 0) goto ret;
+
+    mbedtls_md_context_t md_ctx;
+    mbedtls_md_init(&md_ctx);
+    // mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(md_type), 0);
 
     goto ret;
 
@@ -318,7 +329,41 @@ int atchops_rsa2048_encrypt(RSA2048_PublicKey *publickeystruct, const unsigned c
     }
 }
 
-atchops_rsa2048_decrypt(RSA2048_PrivateKey *privatekeystruct, const unsigned char *ciphertext, const size_t ciphertextlen, unsigned char *plaintext, const size_t *plaintextlen, size_t *plaintextolen)
+// todo
+// verify
+
+int atchops_rsa2048_encrypt(atchops_rsa2048_publickey *publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, unsigned char *ciphertext, const size_t ciphertextlen, size_t *ciphertextolen)
+{
+    int ret = 1;
+
+    printf("starting encrypt..\n");
+
+    mbedtls_mpi *n = malloc(sizeof(mbedtls_mpi));
+    mbedtls_mpi *e = malloc(sizeof(mbedtls_mpi));
+
+    mbedtls_mpi_init(n);
+    mbedtls_mpi_init(e);
+
+    ret = mbedtls_mpi_read_binary(n, publickeystruct->n->n, publickeystruct->n->len);
+    if (ret != 0) goto ret;
+
+    ret = mbedtls_mpi_read_binary(e, publickeystruct->e->e, publickeystruct->e->len);
+    if (ret != 0) goto ret;
+
+    mbedtls_rsa_context rsa;
+    mbedtls_rsa_init(&rsa);
+
+    ret = mbedtls_rsa_import(&rsa, n, NULL, NULL, NULL, e);
+    if (ret != 0) goto ret;
+
+    goto ret;
+
+    ret: {
+        return ret;
+    }
+}
+
+int atchops_rsa2048_decrypt(atchops_rsa2048_privatekey *privatekeystruct, const unsigned char *ciphertext, const size_t ciphertextlen, unsigned char *plaintext, const size_t *plaintextlen, size_t *plaintextolen)
 {
     int ret = 1;
 
