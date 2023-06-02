@@ -1,10 +1,10 @@
 #pragma once
 
-#ifdef BUILD_MBEDTLS
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+// #ifdef BUILD_MBEDTLS
+// #ifdef __cplusplus
+// extern "C"
+// {
+// #endif
 
 #include <string.h>
 
@@ -17,9 +17,9 @@ typedef enum {
 } AESKeySize;
 
 typedef struct {
+    int status; // status code of the operation
     size_t reslen; // length of the result written
     unsigned char *res; // result of the encryption/decryption
-    int status; // status code of the operation
 } AESResult;
 
 /**
@@ -40,7 +40,7 @@ AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_
  */
 AESResult *atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext);
 
-#ifdef __cplusplus
-}
-#endif
-#endif
+// #ifdef __cplusplus
+// }
+// #endif
+// #endif
