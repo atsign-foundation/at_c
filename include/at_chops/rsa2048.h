@@ -66,7 +66,7 @@ int atchops_rsa2048_populate_publickey(const unsigned char *publickeybase64, con
 
 int atchops_rsa2048_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct);
 
-int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_rsa2048_md_type mdtype, unsigned char *signature, const size_t signaturelen, size_t *writtenlen, const unsigned char *message, const size_t messagelen);
+int atchops_rsa2048_sign(atchops_rsa2048_privatekey *privatekeystruct, atchops_rsa2048_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen);
 
 // todo
 // int atchops_rsa2048_verify(atchops_rsa2048_publickey *publickeystruct, const unsigned char *signature, const size_t signaturelen, );

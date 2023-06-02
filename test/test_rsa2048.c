@@ -80,6 +80,16 @@ int main()
     ret = atchops_rsa2048_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, ciphertextolen);
     if (ret != 0) goto end;
 
+    // =====
+    // signing
+    // =====
+
+    unsigned char *signature;
+    size_t *signaturelen;
+    const unsigned char *message = "lemonade";
+    const size_t messagelen = strlen(message);
+
+    ret = atchops_rsa2048_sign(privatekeystruct, SHA256, &signature, signaturelen, message, messagelen);
     goto end;
         
     end: {
