@@ -12,10 +12,9 @@ int main()
     size_t privatekeybase64len = strlen(privatekeybase64);
     
     RSA2048_PrivateKey *privatekeystruct;
-    ret = atchops_rsa2048_privatekey_init(&privatekeystruct);
-    if (ret != 0) goto end;
+    atchops_rsa2048_privatekey_init(&privatekeystruct);
 
-    ret = atchops_populate_privatekey(privatekeybase64, privatekeybase64len, privatekeystruct);
+    ret = atchops_rsa2048_populate_privatekey(privatekeybase64, privatekeybase64len, privatekeystruct);
     if (ret != 0) goto end;
     // printf("ret: %d\n", ret);
 
@@ -38,7 +37,47 @@ int main()
     // printf("q: ");
     // printx(privatekeystruct->q->q, privatekeystruct->q->len);
 
-    ret = atchops_rsa2048_privatekey_free(privatekeystruct);
+    atchops_rsa2048_privatekey_free(privatekeystruct);
+
+    // =====
+    // public key test
+    // ====
+
+    const unsigned char *publickeybase64 = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuuD88vWQ3Zunves9w5o3pLQ+7ClKONAMftVQ9dirJt6VD0xg5DNzX+EqdgE3MumWwkR0hFrce3T3wvx9ae8kvSjlS7QJsfGk9EjYk/lhrHJbISP5/1z/owo8a6WMH+J7YF9ouqeoZaP2YlvIt/gMsocPLmLlTFMjB7+9BGqEzdPjeUBfZe+C5C2C+3F8n2Wsgz02ScWyxdlhKEM+GViYYBZONBHgcNN44i4P09IcNYG0tM/ex4WbP0D7U2g0fRCWKtu3mWoERWenpu3rK4406ZhmkyZrWYxKJleqPxDrXbyJkXtbVYiNtg1hgCovOwQRl0eWa98aEVz0sqRy6i7DQIDAQAB";
+
+    size_t publickeybase64len = strlen(publickeybase64);
+
+    RSA2048_PublicKey *publickeystruct;
+    atchops_rsa2048_publickey_init(&publickeystruct);
+
+    ret = atchops_rsa2048_populate_publickey(publickeybase64, publickeybase64len, publickeystruct);
+    if (ret != 0) goto end;
+
+    // print n e lengths
+    // printf("n len: %lu\n", publickeystruct->n->len);
+    // printf("e len: %lu\n", publickeystruct->e->len);
+
+    // print n e
+    // printf("n: ");
+    // printx(publickeystruct->n->n, publickeystruct->n->len);
+    // printf("e: ");
+    // printx(publickeystruct->e->e, publickeystruct->e->len);
+
+    atchops_rsa2048_publickey_free(publickeystruct);
+
+
+    // =====
+    // encrypt test
+    // ====
+
+    const unsigned char* plaintext = "lemonade";
+    size_t plaintextlen = strlen(plaintext);
+
+    const size_t ciphertextlen = 1000;
+    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    size_t *ciphertextolen = malloc(sizeof(size_t));
+
+    ret = atchops_rsa2048_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, ciphertextolen);
     if (ret != 0) goto end;
 
     goto end;

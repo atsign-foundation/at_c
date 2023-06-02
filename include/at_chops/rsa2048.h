@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef BUILD_MBEDTLS
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <ctype.h>
 
 typedef struct n_param {
@@ -44,10 +50,21 @@ void printx(unsigned char *data, size_t len);
 
 void copy(unsigned char *dst, unsigned char *src, size_t len);
 
+void atchops_rsa2048_publickey_init(RSA2048_PublicKey **publickeystruct);
 void atchops_rsa2048_privatekey_init(RSA2048_PrivateKey **privatekeystruct);
 
+void atchops_rsa2048_publickey_free(RSA2048_PublicKey *publickeystruct);
 void atchops_rsa2048_privatekey_free(RSA2048_PrivateKey *privatekeystruct);
 
-int atchops_populate_publickey(const unsigned char *publickeybase64, const size_t publickeybase64len, RSA2048_PublicKey *publickeystruct);
+int atchops_rsa2048_populate_publickey(const unsigned char *publickeybase64, const size_t publickeybase64len, RSA2048_PublicKey *publickeystruct);
 
-int atchops_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, RSA2048_PrivateKey *privatekeystruct);
+int atchops_rsa2048_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, RSA2048_PrivateKey *privatekeystruct);
+
+int atchops_rsa2048_encrypt(RSA2048_PublicKey *publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, unsigned char *ciphertext, const size_t ciphertextlen, size_t *ciphertextolen);
+
+int atchops_rsa2048_decrypt(RSA2048_PrivateKey *privatekeystruct, const unsigned char *ciphertext, const size_t ciphertextlen, unsigned char *plaintext, const size_t *plaintextlen, size_t *plaintextolen);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
