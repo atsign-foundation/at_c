@@ -82,6 +82,12 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     NAME AES_CTR
     COMMAND $<TARGET_FILE:test_aes_ctr>)
 
+  add_executable(test_rsa2048 test/test_rsa2048.c)
+  target_link_libraries(test_rsa2048 PRIVATE at_client)
+  add_test(
+    NAME RSA2048
+    COMMAND $<TARGET_FILE:test_rsa2048>)
+
   add_executable(test_main test/test_main.c)
   target_link_libraries(test_main PRIVATE at_client)
   add_test(
