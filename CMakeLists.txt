@@ -82,17 +82,23 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     NAME AES_CTR
     COMMAND $<TARGET_FILE:test_aes_ctr>)
 
-  add_executable(test_rsa2048 test/test_rsa2048.c)
-  target_link_libraries(test_rsa2048 PRIVATE at_client)
+  add_executable(test_rsa2048publicpopulate test/test_rsa2048publicpopulate.c)
+  target_link_libraries(test_rsa2048publicpopulate PRIVATE at_client)
   add_test(
-    NAME RSA2048
-    COMMAND $<TARGET_FILE:test_rsa2048>)
+    NAME RSA2048_PUBLICPOPULATE
+    COMMAND $<TARGET_FILE:test_rsa2048publicpopulate>)
 
-  add_executable(test_main test/test_main.c)
-  target_link_libraries(test_main PRIVATE at_client)
+  add_executable(test_rsa2048privatepopulate test/test_rsa2048privatepopulate.c)
+  target_link_libraries(test_rsa2048privatepopulate PRIVATE at_client)
   add_test(
-    NAME MAIN
-    COMMAND $<TARGET_FILE:test_main>)
+    NAME RSA2048_PRIVATEPOPULATE
+    COMMAND $<TARGET_FILE:test_rsa2048privatepopulate>)
+
+#   add_executable(test_main test/test_main.c)
+#   target_link_libraries(test_main PRIVATE at_client)
+#   add_test(
+#     NAME MAIN
+#     COMMAND $<TARGET_FILE:test_main>)
 
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
