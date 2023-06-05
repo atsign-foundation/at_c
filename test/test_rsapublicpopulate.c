@@ -1,5 +1,5 @@
 
-#include "at_chops/rsa2048.h"
+#include "at_chops/rsa.h"
 #include "at_chops/byteutil.h"
 #include <stdio.h>
 #include <string.h>
@@ -14,7 +14,7 @@ int main()
     const unsigned char *publickeybase64 = PUBLIC_KEY_BASE64;
 
     atchops_rsa2048_publickey publickeystruct;
-    ret = atchops_rsa2048_populate_publickey(publickeybase64, publickeybase64len, &publickeystruct);
+    ret = atchops_rsa_populate_publickey(publickeybase64, publickeybase64len, &publickeystruct);
     if (ret != 0)
     {
         goto ret;

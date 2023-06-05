@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "at_chops/rsa2048.h"
+#include "at_chops/rsa.h"
 #include "at_chops/base64.h"
 
 int main()
@@ -14,7 +14,7 @@ int main()
     // atchops_rsa2048_privatekey *privatekeystruct;
     // atchops_rsa2048_privatekey_init(&privatekeystruct);
 
-    // ret = atchops_rsa2048_populate_privatekey(privatekeybase64, privatekeybase64len, privatekeystruct);
+    // ret = atchops_rsa_populate_privatekey(privatekeybase64, privatekeybase64len, privatekeystruct);
     // if (ret != 0) goto ret;
     // printf("ret: %d\n", ret);
 
@@ -50,7 +50,7 @@ int main()
     // atchops_rsa2048_publickey *publickeystruct;
     // atchops_rsa2048_publickey_init(&publickeystruct);
 
-    // ret = atchops_rsa2048_populate_publickey(publickeybase64, publickeybase64len, publickeystruct);
+    // ret = atchops_rsa_populate_publickey(publickeybase64, publickeybase64len, publickeystruct);
     // if (ret != 0) goto ret;
 
     // print n e lengths
@@ -89,7 +89,7 @@ int main()
     // const unsigned char *message = "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182";
     // const size_t messagelen = strlen(message);
 
-    // ret = atchops_rsa2048_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, message, messagelen);
+    // ret = atchops_rsa_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, message, messagelen);
     // if(ret != 0) goto ret;
 
     // printf("signature len: %lu\n", *signaturelen);

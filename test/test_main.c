@@ -13,7 +13,7 @@ int main()
 
     // atchops_rsa2048_privatekey *privatekeystruct;
     // atchops_rsa2048_privatekey_init(&privatekeystruct);
-    // atchops_rsa2048_populate_privatekey(privatekey, strlen(privatekey), privatekeystruct);
+    // atchops_rsa_populate_privatekey(privatekey, strlen(privatekey), privatekeystruct);
 
     // const size_t challengelen = 1000;
     // unsigned char *challenge = malloc(sizeof(unsigned char) * challengelen);
@@ -26,7 +26,7 @@ int main()
     // size_t *signaturelen = malloc(sizeof(size_t));
     // unsigned char *signature = malloc(sizeof(unsigned char) * 5000);
 
-    // ret = atchops_rsa2048_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, challenge, strlen(challenge));
+    // ret = atchops_rsa_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, challenge, strlen(challenge));
     // if(ret != 0) goto ret;
 
     // printf("Signature: %s\n", signature);
