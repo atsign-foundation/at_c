@@ -49,19 +49,19 @@ int main()
         goto ret;
     }
 
-    // printf("n: ");
+    // printf("n: %lu\n", privatekeystruct.n_param.len);
     // printx(privatekeystruct.n_param.n, privatekeystruct.n_param.len);
 
-    // printf("e: ");
+    // printf("e: %lu\n", privatekeystruct.e_param.len);
     // printx(privatekeystruct.e_param.e, privatekeystruct.e_param.len);
 
-    // printf("d: ");
+    // printf("d: %lu\n", privatekeystruct.d_param.len);
     // printx(privatekeystruct.d_param.d, privatekeystruct.d_param.len);
 
-    // printf("p: ");
+    // printf("p: %lu\n", privatekeystruct.p_param.len);
     // printx(privatekeystruct.p_param.p, privatekeystruct.p_param.len);
 
-    // printf("q: ");
+    // printf("q: %lu\n", privatekeystruct.q_param.len);
     // printx(privatekeystruct.q_param.q, privatekeystruct.q_param.len);
 
     goto ret;
