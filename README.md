@@ -55,11 +55,11 @@ int main()
 3. Add your test to `CMakeLists.txt`. Example:
 
 ```cmake
-add_executable(test_my_test test/my_test.c)
-target_link_libraries(test_my_test PRIVATE at_client)
+add_executable(my_test test/my_test.c)
+target_link_libraries(my_test PRIVATE at_client)
 add_test(
   NAME MY_TEST
-  COMMAND $<TARGET_FILE:test_my_test>)
+  COMMAND $<TARGET_FILE:my_test>)
 ```
 
 4. Build and test
