@@ -61,3 +61,10 @@ add_test(
   NAME MY_TEST
   COMMAND $<TARGET_FILE:test_my_test>)
 ```
+
+4. Build and test
+
+```sh
+python3 tool.py -p <platform> -f <framework> build
+python3 tool.py -p <platform> -f <framework> test
+```
