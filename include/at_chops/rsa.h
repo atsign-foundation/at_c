@@ -8,42 +8,22 @@ extern "C"
 
 #include <ctype.h>
 
-typedef struct n_param {
+typedef struct rsa_param {
     size_t len;
-    unsigned char *n; // hex byte array of the number
-} n_param;
-
-typedef struct e_param {
-    size_t len;
-    unsigned char *e; // hex byte array of the number
-} e_param;
-
-typedef struct d_param {
-    size_t len;
-    unsigned char *d; // hex byte array of the number
-} d_param;
-
-typedef struct p_param {
-    size_t len;
-    unsigned char *p; // hex byte array of the number
-} p_param;
-
-typedef struct q_param {
-    size_t len;
-    unsigned char *q; // hex byte array of the number
-} q_param;
+    unsigned char *num; // hex byte array of the number
+}
 
 typedef struct {
-    n_param n_param; // modulus
-    e_param e_param; // public exponent
+    rsa_param n_param; // modulus
+    rsa_param e_param; // public exponent
 } atchops_rsa2048_publickey;
 
 typedef struct {
-    n_param n_param; // modulus
-    e_param e_param; // public exponent
-    d_param d_param; // private exponent
-    p_param p_param; // prime 1
-    q_param q_param; // prime 2
+    rsa_param n_param; // modulus
+    rsa_param e_param; // public exponent
+    rsa_param d_param; // private exponent
+    rsa_param p_param; // prime 1
+    rsa_param q_param; // prime 2
 } atchops_rsa2048_privatekey;
 
 typedef enum {
