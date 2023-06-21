@@ -10,7 +10,7 @@ extern "C"
 
 typedef struct rsa_param {
     size_t len;
-    unsigned char *num; // hex byte array of the number
+    unsigned char *value; // hex byte array of the number
 }
 
 typedef struct {

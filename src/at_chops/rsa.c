@@ -210,32 +210,32 @@ extern "C"
 
         // printf("n\n");
         privatekeystruct->n_param.len = current->buf.len;
-        privatekeystruct->n_param.n = malloc(sizeof(unsigned char) * privatekeystruct->n_param.len);
-        copy(privatekeystruct->n_param.n, current->buf.p, privatekeystruct->n_param.len);
+        privatekeystruct->n_param.value = malloc(sizeof(unsigned char) * privatekeystruct->n_param.len);
+        copy(privatekeystruct->n_param.value, current->buf.p, privatekeystruct->n_param.len);
 
         // printf("e\n");
         current = current->next;
         privatekeystruct->e_param.len = current->buf.len;
-        privatekeystruct->e_param.e = malloc(sizeof(unsigned char) * privatekeystruct->e_param.len);
-        copy(privatekeystruct->e_param.e, current->buf.p, privatekeystruct->e_param.len);
+        privatekeystruct->e_param.value = malloc(sizeof(unsigned char) * privatekeystruct->e_param.len);
+        copy(privatekeystruct->e_param.value, current->buf.p, privatekeystruct->e_param.len);
 
         // printf("d\n");
         current = current->next;
         privatekeystruct->d_param.len = current->buf.len;
-        privatekeystruct->d_param.d = malloc(sizeof(unsigned char) * privatekeystruct->d_param.len);
-        copy(privatekeystruct->d_param.d, current->buf.p, privatekeystruct->d_param.len);
+        privatekeystruct->d_param.value = malloc(sizeof(unsigned char) * privatekeystruct->d_param.len);
+        copy(privatekeystruct->d_param.value, current->buf.p, privatekeystruct->d_param.len);
 
         // printf("p\n");
         current = current->next;
         privatekeystruct->p_param.len = current->buf.len;
-        privatekeystruct->p_param.p = malloc(sizeof(unsigned char) * privatekeystruct->p_param.len);
-        copy(privatekeystruct->p_param.p, current->buf.p, privatekeystruct->p_param.len);
+        privatekeystruct->p_param.value = malloc(sizeof(unsigned char) * privatekeystruct->p_param.len);
+        copy(privatekeystruct->p_param.value, current->buf.p, privatekeystruct->p_param.len);
 
         // printf("q\n");
         current = current->next;
         privatekeystruct->q_param.len = current->buf.len;
-        privatekeystruct->q_param.q = malloc(sizeof(unsigned char) * privatekeystruct->q_param.len);
-        copy(privatekeystruct->q_param.q, current->buf.p, privatekeystruct->q_param.len);
+        privatekeystruct->q_param.value = malloc(sizeof(unsigned char) * privatekeystruct->q_param.len);
+        copy(privatekeystruct->q_param.value, current->buf.p, privatekeystruct->q_param.len);
 
         goto ret;
 
