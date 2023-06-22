@@ -73,18 +73,7 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
 // todo
 // int atchops_rsa2048_verify(atchops_rsa2048_publickey *publickeystruct, const unsigned char *signature, const size_t signaturelen, );
 
-/**
- * @brief Encrypt plain text with a RSA 2048 Public Key
- * 
- * @param publickeystruct 
- * @param plaintext 
- * @param plaintextlen 
- * @param ciphertext 
- * @param ciphertextlen 
- * @param ciphertextolen 
- * @return int 
- */
-int atchops_rsa2048_encrypt(atchops_rsa2048_publickey *publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, unsigned char *ciphertext, const size_t ciphertextlen, size_t *ciphertextolen);
+int atchops_rsa2048_encrypt(atchops_rsa2048_publickey publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
 
 // todo
 // int atchops_rsa2048_decrypt(atchops_rsa2048_privatekey *privatekeystruct, const unsigned char *ciphertext, const size_t ciphertextlen, unsigned char *plaintext, const size_t *plaintextlen, size_t *plaintextolen);

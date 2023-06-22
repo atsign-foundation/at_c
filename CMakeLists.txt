@@ -100,6 +100,12 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     NAME RSA_SIGN
     COMMAND $<TARGET_FILE:test_rsasign>)
 
+  add_executable(test_rsaencrypt test/test_rsaencrypt.c)
+  target_link_libraries(test_rsaencrypt PRIVATE at_client)
+  add_test(
+    NAME RSA_ENCRYPT
+    COMMAND $<TARGET_FILE:test_rsaencrypt>)
+
 #   add_executable(test_main test/test_main.c)
 #   target_link_libraries(test_main PRIVATE at_client)
 #   add_test(
