@@ -11,7 +11,7 @@ extern "C"
 typedef struct rsa_param {
     size_t len;
     unsigned char *value; // hex byte array of the number
-}
+} rsa_param;
 
 typedef struct {
     rsa_param n_param; // modulus

@@ -93,13 +93,13 @@ int atchops_rsa_populate_publickey(const unsigned char *publickeybase64, const s
     // }
 
     publickeystruct->e_param.len = current->buf.len;
-    publickeystruct->e_param.e = malloc(sizeof(unsigned char) * publickeystruct->e_param.len);
-    copy(publickeystruct->e_param.e, current->buf.p, publickeystruct->e_param.len);
+    publickeystruct->e_param.value = malloc(sizeof(unsigned char) * publickeystruct->e_param.len);
+    copy(publickeystruct->e_param.value, current->buf.p, publickeystruct->e_param.len);
 
     current = current->next;
     publickeystruct->n_param.len = current->buf.len;
-    publickeystruct->n_param.n = malloc(sizeof(unsigned char) * publickeystruct->n_param.len);
-    copy(publickeystruct->n_param.n, current->buf.p, publickeystruct->n_param.len);
+    publickeystruct->n_param.value = malloc(sizeof(unsigned char) * publickeystruct->n_param.len);
+    copy(publickeystruct->n_param.value, current->buf.p, publickeystruct->n_param.len);
 
     goto ret;
 
@@ -300,11 +300,11 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
     // printx(privatekeystruct->q->q, privatekeystruct->q->len);
 
     ret = mbedtls_rsa_import_raw(&rsa,
-        privatekeystruct.n_param.n, privatekeystruct.n_param.len,
-        privatekeystruct.p_param.p, privatekeystruct.p_param.len,
-        privatekeystruct.q_param.q, privatekeystruct.q_param.len,
-        privatekeystruct.d_param.d, privatekeystruct.d_param.len,
-        privatekeystruct.e_param.e, privatekeystruct.e_param.len);
+        privatekeystruct.n_param.value, privatekeystruct.n_param.len,
+        privatekeystruct.p_param.value, privatekeystruct.p_param.len,
+        privatekeystruct.q_param.value, privatekeystruct.q_param.len,
+        privatekeystruct.d_param.value, privatekeystruct.d_param.len,
+        privatekeystruct.e_param.value, privatekeystruct.e_param.len);
 
     // printf("rsa import: %d\n", ret);
     if (ret != 0)
@@ -373,6 +373,40 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
 
 int atchops_rsa2048_encrypt(atchops_rsa2048_publickey *publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, unsigned char *ciphertext, const size_t ciphertextlen, size_t *ciphertextolen)
 {
+    int ret = 1;
+
+    mbedtls_rsa_context rsa;
+    mbedtls_rsa_init(&rsa);
+
+    ret = mbedtls_rsa_import_raw(&rsa, publickeystruct->n_param.value, publickeystruct->n_param.len, NULL, NULL, NULL, NULL, NULL, NULL, publickeystruct->e_param.value, publickeystruct->e_param.len);
+    if(ret != 0)
+        goto ret;
+
+    ret = mbedtls_rsa_complete(&rsa);
+    if(ret != 0)
+        goto ret;
+
+    ret = mbedtls_rsa_check_pubkey(&rsa);
+    if(ret != 0)
+        goto ret;
+
+    
+    // base64 encode the plain text
+    unsigned char *dst = malloc(sizeof(unsigned char) * MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION);
+    size_t dstlen = MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION;
+    size_t *olen = malloc(sizeof(size_t));
+    ret = atchops_base64_encode(dst, dstlen, olen, plaintext, plaintextlen);
+    if(ret != 0)
+        goto ret;
+
+    // encrypt the base64 encoded text
+    // mbedtls_rsa_pkcs1_encrypt(&rsa, )
+
+    goto ret;
+    ret: 
+    {
+        return ret;
+    }
 
 }
 
