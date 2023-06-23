@@ -15,9 +15,27 @@
 `test`: contains the test source code files and where test binaries are moved to.
 `tools`: contains tools and scripts, some used by tool.py
 
+## Dependencies
+
+- [CMake](https://cmake.org/) (3.13+)
+- [Python](https://www.python.org/) (3.6+)
+- [Git](https://git-scm.com/)
+
 ## Tools
 
 The entire build pipeline can be run via python using `./tool.py`.
+
+You will need to first update the git submodules:
+
+```sh
+git submodule update --init --recursive
+```
+
+You may also need to install the python dependencies:
+
+```sh
+python3 -m pip install -r requirements.txt
+```
 
 Usage:
 
