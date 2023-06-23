@@ -12,7 +12,7 @@ int atclient_atkeysfile_read(const char* path, const size_t pathlen, atclient_at
    //open file to read
     FILE* file = fopen(path, "r");
     if(file == NULL){
-        perror("Error opening the file");
+        perror("Error opening the file to read");
         return -1;
     }
 
@@ -25,20 +25,27 @@ int atclient_atkeysfile_read(const char* path, const size_t pathlen, atclient_at
         printf("Line saved\n");
 
         token = strtok(line, ","); //start tokenization
-        
+        if(token == NULL){
+            perror("Invalid file format to create token");
+            fclose(file);
+            free(line);
+            return -1;
+        }
+
         //population time: save all values in atclient_atkeys_file
         token = save(token, atsign->aesPkamPublicKey);
         token = save(token, atsign->aesPkamPrivateKey);
         token = save(token, atsign->aesEncryptPublicKey);
         token = save(token, atsign->aesEncryptPrivateKey);
         token = save(token, atsign->selfEncryptionKey);
-        token = save(token, atsign->atSign);
+        token = save(token, atsign->atSign);        
     } else{
         perror("Line not saved\n");
         return -1;
     }
 
     fclose(file);
+    free(line);
 
     return 0;
 }
@@ -46,8 +53,8 @@ int atclient_atkeysfile_read(const char* path, const size_t pathlen, atclient_at
 void atclient_atkeysfile_init(atclient_atkeysfile** atkeysfile){
     *atkeysfile = malloc(sizeof(atclient_atkeysfile));
     if (*atkeysfile == NULL) {
-        perror("Error allocating memory; init failed");
-        //fclose(file);
+        perror("Error allocating memory for atclient_atkeysfile_init");
+        return;
     }
 
     (*atkeysfile)->aesPkamPublicKey = malloc(sizeof(atclient_atkeysfile_entry));
@@ -56,11 +63,6 @@ void atclient_atkeysfile_init(atclient_atkeysfile** atkeysfile){
     (*atkeysfile)->aesEncryptPrivateKey = malloc(sizeof(atclient_atkeysfile_entry));
     (*atkeysfile)->selfEncryptionKey = malloc(sizeof(atclient_atkeysfile_entry));
     (*atkeysfile)->atSign = malloc(sizeof(atclient_atkeysfile_entry));
-
-}
-
-void atclient_atkeysfile_free(atclient_atkeysfile* atkeysfile){
-    free(atkeysfile);
 }
 
 char* save(char* token, atclient_atkeysfile_entry* attribute){
@@ -69,15 +71,26 @@ char* save(char* token, atclient_atkeysfile_entry* attribute){
 
     if (token != NULL) {
         char* temp = strdup(token); //saves temporary substring
+        if(temp == NULL){
+            perror("Error allocating memory for temp");
+            return NULL;
+        }
 
         //find starting index
         char* splitter = strchr(temp, ':'); //find first occurrence of ':'
-        int start = splitter - temp + 2; //change index to the key
+        if(splitter == NULL){
+            perror("Invalid token format");
+            free(temp);
+            return NULL;
+        }
 
+        int start = splitter - temp + 2; //change index to the key
         int length = strlen(temp) - start; //length of actual key
         char* subKey = (char*)malloc((length + 1)*sizeof(char)); //alloc string for actual key
         if(subKey == NULL){
             perror("subKey alloc failed in save\n");
+            free(temp);
+            return NULL;
         }
 
         //save the actual key
@@ -86,12 +99,15 @@ char* save(char* token, atclient_atkeysfile_entry* attribute){
         }else{
             strncpy(subKey, temp+start, length - 2); //strncpy(dest, source at new start position, correct size excluding last")
         }
-            subKey[length] = '\0';    
+        
+        subKey[length] = '\0';    
         
         //save to struct
         attribute->key = subKey; 
         attribute->len = strlen(subKey);
         //printf("Saved key OFFICIAL is %s\n", attribute->key);
+
+        free(temp);
     }else{
         perror("save function did not run");
         return NULL;
@@ -102,21 +118,33 @@ char* save(char* token, atclient_atkeysfile_entry* attribute){
 
 int atclient_atkeysfile_write(const char *path, const size_t len, atclient_atkeysfile *atsign)
 {
-    //writeAtKeys writes a string from a fully populated struct at the given path/
+    //writeAtKeys writes a string from a fully populated struct at the given path
 
     //open file for writing
     FILE* file = fopen(path, "w");
     if(file == NULL){
-        perror("Couldn't open for writing\n");
+        perror("Couldn't open file for writing\n");
         return -1;
     }
 
     //char* line = malloc(sizeof(char)); //for {}
     char* line = malloc(sizeof(char)*3); //for {}
+    if(line == NULL){
+        perror("Error allocating memory for line");
+        fclose(file);
+        return -1;
+    }
+
     strcpy(line, "{");
 
     //get Atsign string
     char* pathCpy = (char*)malloc((strlen(path) + 1) * sizeof(char));
+    if(pathCpy == NULL){
+        perror("Error allocating memory for pathCpy");
+        fclose(file);
+        return -1;
+    }
+
     strcpy(pathCpy, path);
     char* sign = strtok(pathCpy, "_"); 
     printf("The atsign is %s\n", sign);
@@ -133,11 +161,11 @@ int atclient_atkeysfile_write(const char *path, const size_t len, atclient_atkey
 
     //printf("FINAL LINE IS %s\n", line);
 
-
     fprintf(file, "%s", line); //write line to file
     printf("Data written to file\n");
 
     free(line);
+    free(pathCpy);
     fclose(file);
 
     return 0;
@@ -147,6 +175,10 @@ void updateFileLine(char** line, char* type, atclient_atkeysfile_entry* attribut
     
     //save type in format: "type":
     char* newType = (char*)malloc((strlen(type) + 3) * sizeof(char));
+    if(newType == NULL){
+        perror("Error allocating memory for newType");
+        return;
+    }
     strcpy(newType, "\"");
     strcat(newType, type);
     strcat(newType, "\":");
@@ -158,6 +190,10 @@ void updateFileLine(char** line, char* type, atclient_atkeysfile_entry* attribut
 
     //save key in format: "key"
     char* newKey = (char*)malloc((strlen(attribute->key) + 3) * sizeof(char));
+    if(newKey == NULL){
+        perror("Error allocating memory for newKey");
+        return;
+    }
     strcpy(newKey, "\"");
     strcat(newKey, attribute->key);
     strcat(newKey, "\"");
@@ -174,6 +210,7 @@ void updateFileLine(char** line, char* type, atclient_atkeysfile_entry* attribut
     //printf("Updated Line to %s\n", *line);
 }
 
+/* Main function to demonstrate
 int main()
 {
     char* filepath = "@17shiny_key.atKeys";
@@ -190,7 +227,7 @@ int main()
         printf("Struct is fully populated\n");
     }
 
-    printf("STRUCT SAVED %s for the SelfEncryptionKey\n", atsign->aesEncryptPrivateKey->key);
+    printf("STRUCT SAVED %s for the AtSign\n", atsign->atSign->key);
 
     //write populated struct into a txt file
     if(atclient_atkeysfile_write("@17shinyCopy_key.atKeys", strlen("@17shinyCopy_key.atKeys"), atsign) != 0){
@@ -201,4 +238,4 @@ int main()
     }
 
     return 0;
-}
+}*/
