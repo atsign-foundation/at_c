@@ -1,6 +1,6 @@
 [submodule "deps/mbedtls"]
 	path = deps/mbedtls
-	url = https://github.com/Mbed-TLS/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git
 [submodule "deps/esp-idf"]
 	path = deps/esp-idf
 	url = https://github.com/espressif/esp-idf.git
