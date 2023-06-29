@@ -73,10 +73,11 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
 // todo
 // int atchops_rsa2048_verify(atchops_rsa2048_publickey *publickeystruct, const unsigned char *signature, const size_t signaturelen, );
 
+// todo comments
 int atchops_rsa2048_encrypt(atchops_rsa2048_publickey publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
 
-// todo
-// int atchops_rsa2048_decrypt(atchops_rsa2048_privatekey *privatekeystruct, const unsigned char *ciphertext, const size_t ciphertextlen, unsigned char *plaintext, const size_t *plaintextlen, size_t *plaintextolen);
+// todo comments
+int atchops_rsa2048_encrypt(atchops_rsa2048_privatekey privatekeystruct, const unsigned char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen);
 
 #ifdef __cplusplus
 }

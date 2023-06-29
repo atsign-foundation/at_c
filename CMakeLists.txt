@@ -106,6 +106,12 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     NAME RSA_ENCRYPT
     COMMAND $<TARGET_FILE:test_rsaencrypt>)
 
+  add_executable(test_rsadecrypt test/test_rsadecrypt.c)
+  target_link_libraries(test_rsadecrypt PRIVATE at_client)
+  add_test(
+    NAME RSA_DECRYPT
+    COMMAND $<TARGET_FILE:test_rsadecrypt>)
+
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
     PRIVATE -Wall -Wextra -Wuninitialized -Wpedantic -Wshadow -Wmissing-include-dirs -Wundef -Winvalid-pch # Essentials
