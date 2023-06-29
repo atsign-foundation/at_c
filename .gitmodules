@@ -6,4 +6,4 @@
 	url = https://github.com/espressif/esp-idf.git
 [submodule "deps/Arduino-CMake-Toolchain"]
 	path = deps/Arduino-CMake-Toolchain
-	url = https://github.com/a9183756-gh/Arduino-CMake-Toolchain
+	url = https://github.com/a9183756-gh/Arduino-CMake-Toolchain.git
