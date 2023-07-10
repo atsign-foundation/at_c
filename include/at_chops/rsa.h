@@ -45,21 +45,21 @@ typedef enum {
  * @param publickeystruct the public key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_publickey(const unsigned char *publickeybase64, const size_t publickeybase64len, atchops_rsa2048_publickey *publickeystruct);
+int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa2048_publickey *publickeystruct);
 
 /**
  * @brief Populate a private key struct from a base64 string
- * 
+ *
  * @param privatekeybase64 the base64 string representing an RSA 2048 Private Key
  * @param privatekeybase64len the length of the base64 string
  * @param privatekeystruct the private key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_privatekey(const unsigned char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct);
+int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct);
 
 /**
  * @brief Sign a message with an RSA 2048 Private Key
- * 
+ *
  * @param privatekeystruct the private key struct to use for signing
  * @param mdtype the message digest type to use
  * @param signature the signature to populate. Pass in a pointer to a pointer to an unsigned char array. The pointer will be reassigned to the newly allocated array.
@@ -74,11 +74,10 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
 // int atchops_rsa2048_verify(atchops_rsa2048_publickey *publickeystruct, const unsigned char *signature, const size_t signaturelen, );
 
 // todo comments
-int atchops_rsa2048_encrypt(atchops_rsa2048_publickey publickeystruct, const unsigned char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
+int atchops_rsa_encrypt(atchops_rsa2048_publickey publickeystruct, const char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
 
 // todo comments
-int atchops_rsa2048_encrypt(atchops_rsa2048_privatekey privatekeystruct, const unsigned char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen);
-
+int atchops_rsa_decrypt(atchops_rsa2048_privatekey privatekeystruct, const char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen);
 #ifdef __cplusplus
 }
 #endif
