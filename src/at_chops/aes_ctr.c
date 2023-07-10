@@ -16,7 +16,6 @@ extern "C"
 #define IV_AMOUNT_BYTES 16
 
 #define MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION 5000
-#define MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION 10000 // the max length of base64 encoded text (should be more than enough)
 
 AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext )
 {
@@ -64,6 +63,8 @@ AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_
     unsigned char *iv = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
     unsigned char *stream_block = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
     unsigned char *aes_encrypted = malloc(sizeof(unsigned char) * MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
+
+    // maybe base 64 encode it before feeding to cipher
 
     // run encrypt
     result->status = mbedtls_aes_crypt_ctr(ctx, plaintext_paddedlen, iv_ctr, iv, stream_block, plaintext_padded, aes_encrypted);
@@ -141,13 +142,22 @@ AESResult *atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_
 
     // find the value of the pad
     unsigned char pad_val = *(aes_decrypted + aes_decryptedlen - 2);
+    // printf("pad_val: %02x\n", pad_val);
     if(pad_val >= 0x00 && pad_val <= 0x0F || pad_val == 0x10) // https://www.ibm.com/docs/en/zos/2.4.0?topic=rules-pkcs-padding-method
     {
         // eliminate that amount of padding
         aes_decryptedlen -= (pad_val+1);
         *(aes_decrypted+aes_decryptedlen) = '\0';
-    } 
-    
+    }
+
+    // printf("aa");
+    // printf("aa\n");
+    // for(int i = 0; i < aes_decryptedlen + 10; i++)
+    // {
+    //     printf("%02x ", *(aes_decrypted+i));
+    // }
+    // printf("aa\n");
+
     unsigned char *aes_decrypted_unpadded = malloc(sizeof(unsigned char) * aes_decryptedlen);
     for (int i = 0; i < aes_decryptedlen; i++)
     {

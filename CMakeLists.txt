@@ -82,11 +82,35 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     NAME AES_CTR
     COMMAND $<TARGET_FILE:test_aes_ctr>)
 
-  add_executable(test_main test/test_main.c)
-  target_link_libraries(test_main PRIVATE at_client)
+  add_executable(test_rsapublicpopulate test/test_rsapublicpopulate.c)
+  target_link_libraries(test_rsapublicpopulate PRIVATE at_client)
   add_test(
-    NAME MAIN
-    COMMAND $<TARGET_FILE:test_main>)
+    NAME RSA_PUBLICPOPULATE
+    COMMAND $<TARGET_FILE:test_rsapublicpopulate>)
+
+  add_executable(test_rsaprivatepopulate test/test_rsaprivatepopulate.c)
+  target_link_libraries(test_rsaprivatepopulate PRIVATE at_client)
+  add_test(
+    NAME RSA_PRIVATEPOPULATE
+    COMMAND $<TARGET_FILE:test_rsaprivatepopulate>)
+
+  add_executable(test_rsasign test/test_rsasign.c)
+  target_link_libraries(test_rsasign PRIVATE at_client)
+  add_test(
+    NAME RSA_SIGN
+    COMMAND $<TARGET_FILE:test_rsasign>)
+
+  add_executable(test_rsaencrypt test/test_rsaencrypt.c)
+  target_link_libraries(test_rsaencrypt PRIVATE at_client)
+  add_test(
+    NAME RSA_ENCRYPT
+    COMMAND $<TARGET_FILE:test_rsaencrypt>)
+
+  add_executable(test_rsadecrypt test/test_rsadecrypt.c)
+  target_link_libraries(test_rsadecrypt PRIVATE at_client)
+  add_test(
+    NAME RSA_DECRYPT
+    COMMAND $<TARGET_FILE:test_rsadecrypt>)
 
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
