@@ -36,7 +36,7 @@ int main()
     if(ret != 0)
         goto ret;
 
-    printf("ciphertext (base64 encoded): %s\n", ciphertext);
+    // printf("ciphertext (base64 encoded): %s\n", ciphertext);
     // printx(ciphertext, *ciphertextolen);
 
     goto ret;
