@@ -39,11 +39,11 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   # setup at_client library
 
   FILE(GLOB_RECURSE at_client_sources ${CMAKE_SOURCE_DIR}/src/at_client/*.*)
-  add_library(at_client ${at_client_sources})
+  add_library(at_client STATIC ${at_client_sources})
 
   # setup at_chops library
   FILE(GLOB_RECURSE at_chops_sources ${CMAKE_SOURCE_DIR}/src/at_chops/*.*)
-  add_library(at_chops ${at_chops_sources})
+  add_library(at_chops STATIC ${at_chops_sources})
 
   set_target_properties(at_client PROPERTIES LINKER_LANGUAGE C)
   set(CMAKE_C_STANDARD 99)
