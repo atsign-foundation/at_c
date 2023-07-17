@@ -10,7 +10,7 @@
 int main()
 {
     int ret = 1;
-    atchops_rsa2048_privatekey privatekeystruct;
+    atchops_rsa_privatekey privatekeystruct;
 
     const size_t privatekeylen = strlen(PRIVATEKEYBASE64);
     const char *privatekey = PRIVATEKEYBASE64;

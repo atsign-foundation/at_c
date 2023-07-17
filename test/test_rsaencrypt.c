@@ -19,7 +19,7 @@ int main()
     const char *plaintext = PLAINTEXT;
     const size_t plaintextlen = strlen(plaintext);
 
-    atchops_rsa2048_publickey publickeystruct;
+    atchops_rsa_publickey publickeystruct;
 
     // printf("populating public key struct..\n");
     ret = atchops_rsa_populate_publickey(publickey, publickeylen, &publickeystruct);

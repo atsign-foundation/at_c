@@ -17,7 +17,7 @@ typedef struct {
 typedef struct {
     rsa_param n_param; // modulus
     rsa_param e_param; // public exponent
-} atchops_rsa2048_publickey;
+} atchops_rsa_publickey;
 
 typedef struct {
     rsa_param n_param; // modulus
@@ -25,7 +25,7 @@ typedef struct {
     rsa_param d_param; // private exponent
     rsa_param p_param; // prime 1
     rsa_param q_param; // prime 2
-} atchops_rsa2048_privatekey;
+} atchops_rsa_privatekey;
 
 /**
  * @brief Populate a public key struct from a base64 string
@@ -35,7 +35,7 @@ typedef struct {
  * @param publickeystruct the public key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa2048_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa2048_publickey *publickeystruct);
+int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa_publickey *publickeystruct);
 
 /**
  * @brief Populate a private key struct from a base64 string
@@ -45,7 +45,7 @@ int atchops_rsa2048_populate_publickey(const char *publickeybase64, const size_t
  * @param privatekeystruct the private key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa2048_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct);
+int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa_privatekey *privatekeystruct);
 
 /**
  * @brief Sign a message with an RSA 2048 Private Key
@@ -58,7 +58,7 @@ int atchops_rsa2048_populate_privatekey(const char *privatekeybase64, const size
  * @param messagelen the length of the message
  * @return int 0 on success
  */
-int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen);
+int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen);
 
 /**
  * @brief Encrypt a string of text with an RSA 2048 Public Key
@@ -70,7 +70,7 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
  * @param ciphertextolen the output length of the ciphertext
  * @return int 0 on success
  */
-int atchops_rsa_encrypt(atchops_rsa2048_publickey publickeystruct, const char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
+int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
 
 /**
  * @brief Decrypt a string of text with an RSA 2048 Private Key
@@ -82,7 +82,7 @@ int atchops_rsa_encrypt(atchops_rsa2048_publickey publickeystruct, const char *p
  * @param plaintextolen the output length of the plaintext
  * @return int 0 on success
  */
-int atchops_rsa_decrypt(atchops_rsa2048_privatekey privatekeystruct, const char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen);
+int atchops_rsa_decrypt(atchops_rsa_privatekey privatekeystruct, const char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen);
 #ifdef __cplusplus
 }
 #endif

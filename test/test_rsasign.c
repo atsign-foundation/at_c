@@ -18,7 +18,7 @@ int main()
     size_t privatekeybase64len = strlen(PRIVATE_KEY_BASE64);
     const unsigned char *privatekeybase64 = PRIVATE_KEY_BASE64;
 
-    atchops_rsa2048_privatekey privatekeystruct;
+    atchops_rsa_privatekey privatekeystruct;
     ret = atchops_rsa_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
     if (ret != 0)
         goto ret;
