@@ -18,11 +18,11 @@ int main()
     size_t privatekeybase64len = strlen(PRIVATE_KEY_BASE64);
     const unsigned char *privatekeybase64 = PRIVATE_KEY_BASE64;
 
-    atchops_rsa2048_privatekey privatekeystruct;
+    atchops_rsa_privatekey privatekeystruct;
     ret = atchops_rsa_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
     if (ret != 0)
         goto ret;
-    
+
     size_t *signaturelen = malloc(sizeof(size_t));
     unsigned char *signature = malloc(sizeof(unsigned char) * SIGNATURE_BUFFER_LEN);
 
@@ -30,7 +30,7 @@ int main()
     const size_t messagelen = strlen(message);
 
     ret = atchops_rsa_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, message, messagelen);
-    if(ret != 0) 
+    if(ret != 0)
         goto ret;
 
     ret = strncmp(signature, "AwsKWNqRHiCtdNJ0U5GXZ1H5obptEWVR1+A1kPhot4cdLfmulvBVXRaBIrP+jd2TSP2J/KNAgv2BDLH7DXUibdTnzJaKm/QKAjpwpuShnV6Y9KSWTnomBw9x9OWDkVrBzSo5rOFpHHOTZJhp4ygStKEzZDa108g8uP5PpkfzntO2eIVEOdMHoL9/yAkuYJcz+VmCH+1AJtCdeKfhjfmlk0bP72fwsait6pA3TW0iEll9ptZmlLjNtCTi982h1yNprh+XtrjMz7ClbJChQf3LLHiJMZ+7r4yKTrehdBVfxQoNNw9r2D7TBRaY8bXYwMombMHRuu0oVbqNU1jEs60NGQ==", *signaturelen);

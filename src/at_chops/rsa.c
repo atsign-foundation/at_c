@@ -15,8 +15,9 @@ extern "C"
 #include "at_chops/rsa.h"
 #include "at_chops/base64.h"
 #include "at_chops/byteutil.h"
+#include "at_chops/sha.h"
 
-int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa2048_publickey *publickeystruct)
+int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa_publickey *publickeystruct)
 {
     int ret = 0;
 
@@ -108,7 +109,7 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t pub
     }
 }
 
-int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa2048_privatekey *privatekeystruct)
+int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa_privatekey *privatekeystruct)
 {
     int ret = 1;
 
@@ -244,36 +245,15 @@ int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t p
     }
 }
 
-int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen)
+int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen)
 {
     int ret = 1; // error, until successful.
 
-    mbedtls_md_context_t md_ctx;
-    mbedtls_md_init(&md_ctx);
-
-    mbedtls_md_type_t md_type = mdtype; // TODO dynamic
-
-    ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(md_type), 0);
+    const size_t hashlen = 32;
+    unsigned char *hash = malloc(sizeof(char) * hashlen);
+    ret = atchops_sha_hash(message, messagelen, &hash, mdtype);
     if (ret != 0)
         goto ret;
-
-    ret = mbedtls_md_starts(&md_ctx);
-    if (ret != 0)
-        goto ret;
-
-    ret = mbedtls_md_update(&md_ctx, message, messagelen);
-    if (ret != 0)
-        goto ret;
-
-    const size_t hashlen = mbedtls_md_get_size(mbedtls_md_info_from_type(md_type));
-    // printf("hashlen: %lu\n", hashlen);
-    unsigned char *hash = malloc(sizeof(unsigned char) * hashlen);
-
-    ret = mbedtls_md_finish(&md_ctx, hash);
-    if (ret != 0)
-        goto ret;
-
-    mbedtls_md_free(&md_ctx);
 
     // printf("signaturelen: %lu\n", *signaturelen);
     // for(int i = 0; i < *signaturelen; i++)
@@ -370,7 +350,7 @@ int atchops_rsa_sign(atchops_rsa2048_privatekey privatekeystruct, atchops_md_typ
     }
 }
 
-int atchops_rsa_encrypt(atchops_rsa2048_publickey publickeystruct, const char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen)
+int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen)
 {
     int ret = 1;
 
@@ -452,7 +432,7 @@ int atchops_rsa_encrypt(atchops_rsa2048_publickey publickeystruct, const char *p
 
 }
 
-int atchops_rsa_decrypt(atchops_rsa2048_privatekey privatekeystruct, const char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen)
+int atchops_rsa_decrypt(atchops_rsa_privatekey privatekeystruct, const char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen)
 {
     int ret = 1;
 
