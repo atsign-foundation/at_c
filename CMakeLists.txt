@@ -56,9 +56,9 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
 
   # link libraries
   if(BUILD_MBEDTLS)
-    target_link_libraries(at_chops PRIVATE mbedtls)
-    target_link_libraries(at_chops PRIVATE mbedx509)
-    target_link_libraries(at_chops PRIVATE mbedcrypto)
+    target_link_libraries(at_chops PUBLIC mbedtls)
+    target_link_libraries(at_chops PUBLIC mbedx509)
+    target_link_libraries(at_chops PUBLIC mbedcrypto)
   endif()
 
   if(BUILD_ARDUINO)
@@ -80,7 +80,8 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   target_link_libraries(test_aes_ctr PRIVATE at_client)
   add_test(
     NAME AES_CTR
-    COMMAND $<TARGET_FILE:test_aes_ctr>)
+    COMMAND $<TARGET_FILE:test_aes_ctr>
+    )
 
   add_executable(test_rsapublicpopulate test/test_rsapublicpopulate.c)
   target_link_libraries(test_rsapublicpopulate PRIVATE at_client)
@@ -122,6 +123,9 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     PRIVATE -Wwrite-strings -Wstack-protector -fstack-protector -Wpadded -Winline -Wdisabled-optimization # Security
     PRIVATE -Waggregate-return -Wbad-function-cast -Wc++-compat # C specific
   )
+
+  add_executable(main test/test_main.c)
+  target_link_libraries(main PRIVATE at_client)
 
 endif()
 
