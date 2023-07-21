@@ -2,7 +2,7 @@
     "configurations": [
         {
             "name": "default",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "configurationProvider": "ms-vscode.cmake-tools",
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/include/**",
