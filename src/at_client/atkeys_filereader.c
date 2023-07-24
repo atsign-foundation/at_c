@@ -20,7 +20,7 @@ int atclient_atkeysfile_read(const char* path, const size_t pathlen, atclient_at
     char* line = NULL;
     size_t len = 0;
     char* token; //to parse the string with tokenization
-    
+
     if(getline(&line, &len, file) != -1){
         printf("Line saved\n");
 
@@ -38,7 +38,7 @@ int atclient_atkeysfile_read(const char* path, const size_t pathlen, atclient_at
         token = save(token, atsign->aesEncryptPublicKey);
         token = save(token, atsign->aesEncryptPrivateKey);
         token = save(token, atsign->selfEncryptionKey);
-        token = save(token, atsign->atSign);        
+        token = save(token, atsign->atSign);
     } else{
         perror("Line not saved\n");
         return -1;

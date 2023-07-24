@@ -56,9 +56,9 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
 
   # link libraries
   if(BUILD_MBEDTLS)
-    target_link_libraries(at_chops PRIVATE mbedtls)
-    target_link_libraries(at_chops PRIVATE mbedx509)
-    target_link_libraries(at_chops PRIVATE mbedcrypto)
+    target_link_libraries(at_chops PUBLIC mbedtls)
+    target_link_libraries(at_chops PUBLIC mbedx509)
+    target_link_libraries(at_chops PUBLIC mbedcrypto)
   endif()
 
   if(BUILD_ARDUINO)
@@ -80,7 +80,8 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   target_link_libraries(test_aes_ctr PRIVATE at_client)
   add_test(
     NAME AES_CTR
-    COMMAND $<TARGET_FILE:test_aes_ctr>)
+    COMMAND $<TARGET_FILE:test_aes_ctr>
+    )
 
   add_executable(test_rsapublicpopulate test/test_rsapublicpopulate.c)
   target_link_libraries(test_rsapublicpopulate PRIVATE at_client)
@@ -111,6 +112,12 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
   add_test(
     NAME RSA_DECRYPT
     COMMAND $<TARGET_FILE:test_rsadecrypt>)
+
+  add_executable(test_connection test/test_connection.c)
+  target_link_libraries(test_connection PRIVATE at_client)
+  add_test(
+    NAME CONNECTION
+    COMMAND $<TARGET_FILE:test_connection>)
 
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
