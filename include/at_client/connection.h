@@ -1,7 +1,13 @@
 #pragma once
 
-#define ROOT_DOMAIN "root.atsign.org"
-#define ROOT_PORT "64"
+#include <ctype.h>
+
+#define HOST "root.atsign.org"
+#define PORT 64
+
+// #define HOST "245b44d4-a4bd-5f33-b077-c559f956486a.swarm0001.atsign.zone"
+// #define PORT 1722
+
 #define ROOT_CERT                                                        \
     "-----BEGIN CERTIFICATE-----\n"                                      \
     "MIIFFjCCAv6gAwIBAgIRAJErCErPDBinU/bWLiWnX1owDQYJKoZIhvcNAQELBQAw\n" \
@@ -34,16 +40,20 @@
     "nLRbwHOoq7hHwg==\n"                                                 \
     "-----END CERTIFICATE-----\n"
 
-typedef struct {
-    char *host; // assume null-terminated. Example: "root.atsign.org"
-    int port;
-    void *ssl; // mbedtls_ssl_context
-    void *config; // mbedtls_ssl_config
+typedef struct atclient_connection_ctx {
+    char *host; // assume null terminated, example: "root.atsign.org"
+    int port; // example: 64
+    char *cert_pem; // assume null terminated, example: "-----BEGIN CERTIFICATE-----\nMIIF..."
+    void *server_fd;
+    void *ssl;
+    void *conf;
+    void *cacert;
+    void *entropy;
+    void *ctr_drbg;
+    void *saved_session;
 } atclient_connection_ctx;
 
-int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, const int port);
-
-int atclient_connection_send_data(atclient_connection_ctx *ctx, char *dst, size_t *olen, const char *data, const size_t datalen);
-
-int atclient_connection_disconnect(atclient_connection_ctx *ctx);
-
+void atclient_connection_init(atclient_connection_ctx *ctx, const char *host, const int port);
+int atclient_connection_connect(atclient_connection_ctx *ctx);
+int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, const size_t recvlen, size_t *olen, const unsigned char *src, const size_t srclen);
+void atclient_connection_free(atclient_connection_ctx *ctx);

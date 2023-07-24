@@ -113,6 +113,12 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     NAME RSA_DECRYPT
     COMMAND $<TARGET_FILE:test_rsadecrypt>)
 
+  add_executable(test_connection test/test_connection.c)
+  target_link_libraries(test_connection PRIVATE at_client)
+  add_test(
+    NAME CONNECTION
+    COMMAND $<TARGET_FILE:test_connection>)
+
   # compiler flags
   target_compile_options(at_client # https://vladiant.github.io/blog/2021/08/14/cpp-compiler-flags
     PRIVATE -Wall -Wextra -Wuninitialized -Wpedantic -Wshadow -Wmissing-include-dirs -Wundef -Winvalid-pch # Essentials
@@ -123,9 +129,6 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     PRIVATE -Wwrite-strings -Wstack-protector -fstack-protector -Wpadded -Winline -Wdisabled-optimization # Security
     PRIVATE -Waggregate-return -Wbad-function-cast -Wc++-compat # C specific
   )
-
-  add_executable(main test/test_main.c)
-  target_link_libraries(main PRIVATE at_client)
 
 endif()
 

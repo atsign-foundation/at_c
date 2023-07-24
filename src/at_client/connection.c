@@ -1,187 +1,193 @@
+
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <mbedtls/net_sockets.h>
-#include <mbedtls/debug.h>
 #include <mbedtls/ssl.h>
+#include <mbedtls/net_sockets.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
-#include <mbedtls/x509.h>
-#include <mbedtls/base64.h>
+#include "connection.h"
 
-#include "at_client/connection.h"
+static void my_debug(void *ctx, int level, const char *file, int line, const char *str)
+{
+    ((void) level);
+    fprintf( (FILE *) ctx, "%s:%04d: %s", file, line, str );
+    fflush(  (FILE *) ctx  );
+}
 
-int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, const int port)
+void atclient_connection_init(atclient_connection_ctx *ctx, const char *host, const int port)
+{
+    ctx->host = host;
+    ctx->port = port;
+    ctx->cert_pem = ROOT_CERT;
+    ctx->server_fd = malloc(sizeof(mbedtls_net_context));
+    ctx->ssl = malloc(sizeof(mbedtls_ssl_context));
+    ctx->conf = malloc(sizeof(mbedtls_ssl_config));
+    ctx->cacert = malloc(sizeof(mbedtls_x509_crt));
+    ctx->entropy = malloc(sizeof(mbedtls_entropy_context));
+    ctx->ctr_drbg = malloc(sizeof(mbedtls_ctr_drbg_context));
+}
+
+int atclient_connection_connect(atclient_connection_ctx *ctx)
 {
     int ret = 1;
 
-    char* portstr = malloc(sizeof(char) * 4);
-    sprintf(portstr, "%d", port);
+    mbedtls_net_init(ctx->server_fd);
+    mbedtls_ssl_init(ctx->ssl);
+    mbedtls_ssl_config_init(ctx->conf);
+    mbedtls_x509_crt_init(ctx->cacert);
+    mbedtls_entropy_init(ctx->entropy);
+    mbedtls_ctr_drbg_init(ctx->ctr_drbg);
 
-    mbedtls_net_context server_fd;
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
-    mbedtls_ssl_context ssl;
-    mbedtls_ssl_config conf;
-    mbedtls_x509_crt cacert;
+    char *host = ctx->host;
+    char *portstr = malloc(sizeof(char) * 6);
+    sprintf(portstr, "%d", ctx->port);
 
-    mbedtls_net_init(&server_fd);
-    mbedtls_ssl_init(&ssl);
-    mbedtls_ssl_config_init(&conf);
-    mbedtls_x509_crt_init(&cacert);
-    mbedtls_ctr_drbg_init(&ctr_drbg);
-    mbedtls_entropy_init(&entropy);
-
-    // printf("1\n");
-    // printf("ssl: %p\n", ssl);
-    // printf("conf: %p\n", conf);
-
-    ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, NULL, NULL);
+    ret = mbedtls_ctr_drbg_seed(ctx->ctr_drbg, mbedtls_entropy_func, ctx->entropy, NULL, NULL);
+    if(ret != 0)
+    {
+        goto exit;
+    }
     // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
-    }
 
-    ret = mbedtls_x509_crt_parse(&cacert, ROOT_CERT, strlen(ROOT_CERT) + 1);
+    ret = mbedtls_x509_crt_parse(ctx->cacert, ROOT_CERT, strlen(ROOT_CERT) + 1);
+    if(ret != 0)
+    {
+        goto exit;
+    }
     // printf("mbedtls_x509_crt_parse: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
-    }
 
-    ret = mbedtls_net_connect(&server_fd, host, portstr, MBEDTLS_NET_PROTO_TCP);
+    ret = mbedtls_net_connect(ctx->server_fd, host, portstr, MBEDTLS_NET_PROTO_TCP);
+    if(ret != 0)
+    {
+        goto exit;
+    }
     // printf("mbedtls_net_connect: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
-    }
 
-    ret = mbedtls_ssl_config_defaults(&conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
+    ret = mbedtls_ssl_config_defaults(ctx->conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
+    if(ret != 0)
+    {
+        goto exit;
+    }
     // printf("mbedtls_ssl_config_defaults: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
+
+    mbedtls_ssl_conf_ca_chain(ctx->conf, ctx->cacert, NULL);
+    mbedtls_ssl_conf_authmode(ctx->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
+    mbedtls_ssl_conf_rng(ctx->conf, mbedtls_ctr_drbg_random, ctx->ctr_drbg);
+    mbedtls_ssl_conf_dbg(ctx->conf, my_debug, stdout);
+
+    ret = mbedtls_ssl_setup(ctx->ssl, ctx->conf);
+    if(ret != 0)
+    {
+        goto exit;
     }
-
-    mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
-    mbedtls_ssl_conf_ca_chain(&conf, &cacert, NULL);
-    mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
-    // mbedtls_ssl_conf_dbg(conf, my_debug, stdout);
-
-    ret = mbedtls_ssl_setup(&ssl, &conf);
     // printf("mbedtls_ssl_setup: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
-    }
 
-    ret = mbedtls_ssl_set_hostname(&ssl, host);
+    ret = mbedtls_ssl_set_hostname(ctx->ssl, host);
+    if(ret != 0)
+    {
+        goto exit;
+    }
     // printf("mbedtls_ssl_set_hostname: %d\n", ret);
-    if(ret != 0){
-        goto ret;
+
+    mbedtls_ssl_set_bio(ctx->ssl, ctx->server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
+
+    ret = mbedtls_ssl_handshake(ctx->ssl);
+    if(ret != 0)
+    {
+        goto exit;
     }
-
-    mbedtls_ssl_set_bio(&ssl, &server_fd, mbedtls_net_send, mbedtls_net_recv, NULL);
-
-    ret = mbedtls_ssl_handshake(&ssl);
     // printf("mbedtls_ssl_handshake: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
-    }
 
-    ret = mbedtls_ssl_get_verify_result(&ssl);
+    ret = mbedtls_ssl_get_verify_result(ctx->ssl);
+    if(ret != 0)
+    {
+        goto exit;
+    }
     // printf("mbedtls_ssl_get_verify_result: %d\n", ret);
-    if(ret != 0) {
-        goto ret;
+
+    ///////////////////
+    // after connect
+    ///////////////////
+
+    // const size_t readbuflen = 1024;
+    // unsigned char *readbuf;
+
+    // readbuf = malloc(sizeof(unsigned char) * readbuflen);
+    // ret = mbedtls_ssl_read(ctx->ssl, readbuf, readbuflen);
+    // printf("mbedtls_ssl_read: %d\n", ret);
+    // printf("readbuf: \"%s\"\n", readbuf);
+    // free(readbuf);
+
+    // ret = mbedtls_ssl_write(ctx->ssl, "smoothalligator\r\n", 17);
+    // printf("mbedtls_ssl_write: %d\n", ret);
+
+    const size_t readbuflen = 32;
+    unsigned char *readbuf = malloc(sizeof(unsigned char) * readbuflen);
+    ret = mbedtls_ssl_read(ctx->ssl, readbuf, readbuflen);
+    if(ret < 0)
+    {
+        goto exit;
     }
+    // printf("mbedtls_ssl_read: %d\n", ret);
+    free(readbuf);
 
-    ctx->ssl = &ssl;
-    ctx->config = &conf;
+    free(portstr);
 
-    printf("(0) ctx->ssl: %p\n", ctx->ssl);
-    printf("(0) ctx->config: %p\n", ctx->config);
+    // ret = mbedtls_ssl_read(ctx->ssl, NULL, 0);
+    // printf("mbedtls_ssl_read: %d\n", ret);
 
-    size_t read_buflen = 1024;
-
-    unsigned char *read_buf = malloc(sizeof(unsigned char) * read_buflen);
-    ret = mbedtls_ssl_read(&ssl, read_buf, read_buflen); // read the initial @ then forget about it
-    printf("mbedtls_ssl_read: %d\n", ret);
-    printf("\"");
-    for(int i = 0; i < 100; i++) {
-        printf("%c", read_buf[i]);
+    if(ret > 0)
+    {
+        ret = 0;
     }
-    printf("\"\n");
-
-    do {
-        ret = mbedtls_ssl_write(&ssl, "smoothalligator\r\n", 17);
-        if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
-            break;
-        }
-    } while(ret <= 0);
-    printf("mbedtls_ssl_write: %d\n", ret);
-
-    memset(read_buf, 0, read_buflen);
-    ret = mbedtls_ssl_read(&ssl, read_buf, read_buflen);
-    printf("mbedtls_ssl_read: %d\n", ret);
-    printf("\"");
-    for(int i = 0; i < 100; i++) {
-        printf("%c", read_buf[i]);
-    }
-    printf("\"\n");
-
-    goto ret;
-
-    ret: {
+    goto exit;
+    exit: {
         return ret;
     }
 }
 
-int atclient_connection_send_data(atclient_connection_ctx *ctx, char *dst, size_t *olen, const char *data, const size_t datalen)
+int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, const size_t recvlen, size_t *olen, const unsigned char *src, const size_t srclen)
 {
     int ret = 1;
-
-    mbedtls_ssl_context *ssl_ptr = (mbedtls_ssl_context *) ctx->ssl;
-    mbedtls_ssl_config *conf_ptr = (mbedtls_ssl_config *) ctx->config;
-
-    mbedtls_ssl_context ssl = *ssl_ptr;
-    mbedtls_ssl_config conf = *conf_ptr;
-
-    ret = mbedtls_ssl_handshake(&ssl);
-    printf("mbedtls_ssl_handshake: %d\n", ret);
-
-    ret = mbedtls_ssl_get_verify_result(&ssl);
-    printf("mbedtls_ssl_get_verify_result: %d\n", ret);
-
-    ret = mbedtls_ssl_write(&ssl, (unsigned char *) data, datalen);
-    printf("mbedtls_ssl_write: %d\n", ret);
-
-    size_t read_buflen = 1024;
-    unsigned char read_buf[read_buflen];
-
-    printf("reading..\n");
-
-    do {
-        ret = mbedtls_ssl_read(&ssl, read_buf, read_buflen);
-    } while (ret <= 0);
-    printf("mbedtls_ssl_read: %d\n", ret);
-    size_t l = 0;
-    char c;
-    while((c = read_buf[l++]) != '\n');
-
-    printf("l: %zu\n", l);
-    printf("\"");
-    for(int i = 0; i < l; i++){
-        printf("%c", read_buf[i]);
+    ret = mbedtls_ssl_write(ctx->ssl, src, srclen);
+    if(ret < 0)
+    {
+        goto exit;
     }
-    printf("\"\n");
-    goto ret;
-    ret: {
+    // printf("mbedtls_ssl_write: %d\n", ret);
+
+    ret = mbedtls_ssl_read(ctx->ssl, recv, recvlen);
+    if(ret < 0)
+    {
+        goto exit;
+    }
+    // printf("mbedtls_ssl_read: %d\n", ret);
+
+    *olen = 0;
+    while(recv[(*olen)++] != '\r');
+    (*olen)--; // remove \r
+
+    if(ret > 0)
+    {
+        ret = 0;
+    }
+
+    goto exit;
+
+    exit: {
         return ret;
     }
 }
 
-int atclient_connection_disconnect(atclient_connection_ctx *ctx)
-{
-    int ret = 1;
 
-    goto ret;
-    ret: {
-        return ret;
-    }
+void atclient_connection_free(atclient_connection_ctx *ctx)
+{
+    free(ctx->server_fd);
+    free(ctx->entropy);
+    free(ctx->ctr_drbg);
+    free(ctx->ssl);
+    free(ctx->conf);
+    free(ctx->cacert);
+    free(ctx);
 }
