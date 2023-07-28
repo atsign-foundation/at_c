@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <mbedtls/md.h>
-#include <mbedtls/md5.h>
 #include "at_chops/sha.h"
 
 int atchops_sha_hash(const char *input, size_t inputlen, unsigned char **output, atchops_md_type mdtype)
