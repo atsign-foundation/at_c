@@ -26,10 +26,9 @@ typedef struct atclient_atkeysfile {
     atclient_atkeysfile_entry *aes_encrypt_public_key;
     atclient_atkeysfile_entry *aes_encrypt_private_key;
     atclient_atkeysfile_entry *self_encryption_key;
-    atclient_atkeysfile_entry *atsign;
 } atclient_atkeysfile;
 
-void atclient_atkeysfile_init(atclient_atkeysfile* atkeysfile);
-int atclient_atkeysfile_read(const char *path, const size_t pathlen, atclient_atkeysfile *atsign);
-int atclient_atkeysfile_write(const char *path, const size_t pathlen, atclient_atkeysfile *atsign);
-void atclient_atkeysfile_free(atclient_atkeysfile* atkeysfile);
+void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile);
+int atclient_atkeysfile_read(const char *path, atclient_atkeysfile *atkeysfile);
+int atclient_atkeysfile_write(const char *path, const char *atsign, atclient_atkeysfile *atkeysfile);
+void atclient_atkeysfile_free(atclient_atkeysfile *atkeysfile);

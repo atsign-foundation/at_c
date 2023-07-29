@@ -34,11 +34,6 @@ void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile)
     atkeysfile->self_encryption_key->len = KEY_CHAR_AES256_MAX_LEN;
     atkeysfile->self_encryption_key->key = malloc(sizeof(char) * atkeysfile->self_encryption_key->len);
     memset(atkeysfile->self_encryption_key->key, 0, atkeysfile->self_encryption_key->len);
-
-    atkeysfile->atsign = malloc(sizeof(atclient_atkeysfile_entry));
-    atkeysfile->atsign->len = KEY_CHAR_ATSIGN_MAX_LEN;
-    atkeysfile->atsign->key = malloc(sizeof(char) * atkeysfile->atsign->len);
-    memset(atkeysfile->atsign->key, 0, atkeysfile->atsign->len);
 }
 
 enum currently_viewing
@@ -51,7 +46,7 @@ enum currently_viewing
     SELF_ENCRYPTION_KEY
 };
 
-int atclient_atkeysfile_read(const char *path, const size_t pathlen, atclient_atkeysfile *atkeysfile)
+int atclient_atkeysfile_read(const char *path, atclient_atkeysfile *atkeysfile)
 {
     int ret = 1;
 
@@ -64,9 +59,9 @@ int atclient_atkeysfile_read(const char *path, const size_t pathlen, atclient_at
     }
 
     char c;
-    size_t i = 0;
+    short i = 0;
 
-    size_t word_max_len = 5000;
+    short word_max_len = 50;
     char *word = malloc(sizeof(char) * word_max_len);
     memset(word, 0, word_max_len);
 
@@ -83,7 +78,7 @@ int atclient_atkeysfile_read(const char *path, const size_t pathlen, atclient_at
             i = 0;
             continue;
         }
-        else if(c == ',')
+        else if (c == ',')
         {
             curr = NONE;
             continue;
@@ -155,6 +150,9 @@ int atclient_atkeysfile_read(const char *path, const size_t pathlen, atclient_at
     }
 
     fclose(file);
+    free(word);
+
+    ret = 0;
 
     goto exit;
 
@@ -164,10 +162,52 @@ exit:
 }
 }
 
-int atclient_atkeysfile_write(const char *path, const size_t pathlen, atclient_atkeysfile *atkeysfile)
+int atclient_atkeysfile_write(const char *path, const char *atsign, atclient_atkeysfile *atkeysfile)
 {
     int ret = 1;
 
+    printf("writing to path: %s\n", path);
+
+    FILE *file = fopen(path, "w+");
+
+    if (file == NULL)
+    {
+        printf("Error opening file!\n");
+        ret = 1;
+        goto exit;
+    }
+
+
+    fputs("{\"", file);                                    // {"
+    fputs(TOKEN_AES_PKAM_PUBLIC_KEY, file);                // aesPkamPublicKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_pkam_public_key->key, file);     // <aesPkamPublicKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_AES_PKAM_PRIVATE_KEY, file);               // aesPkamPrivateKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_pkam_private_key->key, file);    // <aesPkamPrivateKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_AES_ENCRYPT_PUBLIC_KEY, file);             // aesEncryptPublicKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_encrypt_public_key->key, file);  // <aesEncryptPublicKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_AES_ENCRYPT_PRIVATE_KEY, file);            // aesEncryptPrivateKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_encrypt_private_key->key, file); // <aesEncryptPrivateKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_SELF_ENCRYPTION_KEY, file);                // selfEncryptionKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->self_encryption_key->key, file);     // <selfEncryptionKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(atsign, file);                                   // @alice
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->self_encryption_key->key, file);     // <selfEncryptionKey>
+    fputs("\"}", file);                                    // "}
+
+
+    fclose(file);
+
+    ret = 0;
     goto exit;
 
 exit:
@@ -192,7 +232,4 @@ void atclient_atkeysfile_free(atclient_atkeysfile *atkeysfile)
 
     free(atkeysfile->self_encryption_key->key);
     free(atkeysfile->self_encryption_key);
-
-    free(atkeysfile->atsign->key);
-    free(atkeysfile->atsign);
 }
