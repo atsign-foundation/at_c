@@ -172,7 +172,7 @@ int atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, c
     {
         *p++ = *(aes_decrypted_unpadded + i);
     }
-    plaintextolen = aes_decryptedlen;
+    *plaintextolen = aes_decryptedlen;
 
     mbedtls_aes_free(ctx);
     free(iv_ctr);
