@@ -15,10 +15,10 @@ static void my_debug(void *ctx, int level, const char *file, int line, const cha
     fflush(  (FILE *) ctx  );
 }
 
-void atclient_connection_init(atclient_connection_ctx *ctx, const char *host, const int port)
+void atclient_connection_init(atclient_connection_ctx *ctx)
 {
-    ctx->host = host;
-    ctx->port = port;
+    ctx->host = NULL;
+    ctx->port = NULL;
     ctx->cert_pem = ROOT_CERT;
     ctx->server_fd = malloc(sizeof(mbedtls_net_context));
     ctx->ssl = malloc(sizeof(mbedtls_ssl_context));
@@ -28,9 +28,12 @@ void atclient_connection_init(atclient_connection_ctx *ctx, const char *host, co
     ctx->ctr_drbg = malloc(sizeof(mbedtls_ctr_drbg_context));
 }
 
-int atclient_connection_connect(atclient_connection_ctx *ctx)
+int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, const int port)
 {
     int ret = 1;
+
+    ctx->host = host;
+    ctx->port = port;
 
     mbedtls_net_init(ctx->server_fd);
     mbedtls_ssl_init(ctx->ssl);
@@ -39,7 +42,6 @@ int atclient_connection_connect(atclient_connection_ctx *ctx)
     mbedtls_entropy_init(ctx->entropy);
     mbedtls_ctr_drbg_init(ctx->ctr_drbg);
 
-    char *host = ctx->host;
     char *portstr = malloc(sizeof(char) * 6);
     sprintf(portstr, "%d", ctx->port);
 
@@ -122,7 +124,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx)
     // ret = mbedtls_ssl_write(ctx->ssl, "smoothalligator\r\n", 17);
     // printf("mbedtls_ssl_write: %d\n", ret);
 
-    const size_t readbuflen = 32;
+    const size_t readbuflen = 128;
     unsigned char *readbuf = malloc(sizeof(unsigned char) * readbuflen);
     ret = mbedtls_ssl_read(ctx->ssl, readbuf, readbuflen);
     if(ret < 0)
@@ -130,6 +132,16 @@ int atclient_connection_connect(atclient_connection_ctx *ctx)
         goto exit;
     }
     // printf("mbedtls_ssl_read: %d\n", ret);
+
+    mbedtls_ssl_write(ctx->ssl, "\n", 1);
+
+    ret = mbedtls_ssl_read(ctx->ssl, readbuf, readbuflen);
+    if(ret < 0)
+    {
+        goto exit;
+    }
+
+    
     free(readbuf);
 
     free(portstr);
@@ -165,8 +177,10 @@ int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, 
     // printf("mbedtls_ssl_read: %d\n", ret);
 
     *olen = 0;
-    while(recv[(*olen)++] != '\r');
-    (*olen)--; // remove \r
+    while(recv[(*olen)] != '\r' && recv[(*olen)] != '\n')
+    {
+        *olen = *olen + 1;
+    }
 
     if(ret > 0)
     {
