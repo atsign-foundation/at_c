@@ -14,33 +14,37 @@ void printx(const unsigned char *str, size_t len)
 
 int main()
 {
-    int retval = 0;
     const char *aes_key = "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="; // 32 byte key == 256 bits
     const char *plaintext = "i like to eat pizza !! ++";
+    const size_t plaintextlen = strlen(plaintext);
+
+    size_t olen = 0;
     // printf("plaintext: ");
     // printf("%s\n", plaintext);
     // printx((const unsigned char *)plaintext, strlen(plaintext));
     // printf("plaintext-len: %lu\n", strlen(plaintext));
 
-    AESResult *result = malloc(sizeof(AESResult));
+    int ret = 1;
 
-    unsigned char *ciphertext = malloc(sizeof(unsigned char) * 1000);
+    size_t ciphertextlen = 1024;
+    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
 
-    result = atchops_aes_ctr_encrypt(aes_key, AES_256, (const unsigned char *) plaintext);
-    strcpy(ciphertext, result->res);
+    ret = atchops_aes_ctr_encrypt(aes_key, AES_256, (const unsigned char *) plaintext, plaintextlen, &olen, ciphertext, ciphertextlen);
     // printf("encrypted: ");
     // printf("%s\n", ciphertext);
-    // printx((const unsigned char *)ciphertext, strlen(ciphertext));
-    // printf("encrypted-len: %lu\n", result->reslen);
+    // printx((const unsigned char *)ciphertext, olen);
+    // printf("encrypted-len: %lu\n", olen);
 
-    result = atchops_aes_ctr_decrypt(aes_key, AES_256, (const unsigned char *) ciphertext);
+    size_t plaintextlen2 = 1024;
+    unsigned char *plaintext2 = malloc(sizeof(unsigned char) * plaintextlen2);
+    ret = atchops_aes_ctr_decrypt(aes_key, AES_256, (const unsigned char *) ciphertext, ciphertextlen, &olen, plaintext2, plaintextlen2);
     // printf("decrypted: ");
-    // printf("%s\n", result->res);
-    // printx((const unsigned char *)result->res, result->reslen);
-    // printf("decrypted-len: %lu\n", result->reslen);
-    retval = strcmp(plaintext, result->res);
+    // printf("%s\n", plaintext2);
+    // printx((const unsigned char *) plaintext2, olen);
+    // printf("decrypted-len: %lu\n", olen);
 
-    // AESResult *result = atchops_aes256ctr_encrypt()
+    free(ciphertext);
+    free(plaintext2);
 
-    return retval;
+    return ret;
 }

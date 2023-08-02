@@ -16,12 +16,6 @@ typedef enum {
     AES_256 = 256,
 } AESKeySize;
 
-typedef struct {
-    int status; // status code of the operation
-    size_t reslen; // length of the result written
-    unsigned char *res; // result of the encryption/decryption
-} AESResult;
-
 /**
  * @brief AES CTR encrypt plaintext
  * 
@@ -29,7 +23,7 @@ typedef struct {
  * @param plaintext the plain text to encryt, must be null terminated `\0`
  * @return AESResult* the result of the encryption
  */
-AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext);
+int atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext, const size_t plaintextlen, size_t *ciphertextolen, unsigned char *ciphertext, const size_t ciphertextlen);
 
 /**
  * @brief AES CTR decrypt cipher text
@@ -38,7 +32,7 @@ AESResult *atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_
  * @param ciphertext the base64 encoded cipher text, must be null terminated `\0`
  * @return AESResult* the result of the decrytion
  */
-AESResult *atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext);
+int atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext, const size_t ciphertextlen, size_t *plaintextolen, unsigned char *plaintext, const size_t plaintextlen);
 
 #ifdef __cplusplus
 }
