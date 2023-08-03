@@ -9,7 +9,7 @@ int main()
 
     // initialize buffer to use throughout program
 
-    size_t recvlen = 10000;
+    size_t recvlen = 32768;
     unsigned char *recv = malloc(sizeof(unsigned char) * recvlen);
     size_t *olen = malloc(sizeof(size_t));
 
@@ -136,6 +136,22 @@ int main()
     atclient_connection_send(&secondary_connection, recv, recvlen, olen, pkamcommand, strlen(pkamcommand));
 
     printf("\"%.*s\"\n", (int)*olen, recv);
+
+
+    size_t commandlen = 32768;
+    unsigned char *command = malloc(sizeof(unsigned char) * commandlen);
+    memset(command, 0, commandlen);
+    while(1)
+    {
+        fgets(command, commandlen, stdin);
+        if(strcmp(command, "exit") == 0)
+        {
+            break;
+        }
+        atclient_connection_send(&secondary_connection, recv, recvlen, olen, command, strlen(command));
+        memset(command, 0, commandlen);
+        printf("\nrecv: \"%.*s\"\n\n", recvlen, recv);
+    }
 
     goto exit;
 
