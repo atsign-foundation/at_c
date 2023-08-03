@@ -169,7 +169,21 @@ int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, 
     }
     // printf("mbedtls_ssl_write: %d\n", ret);
 
-    ret = mbedtls_ssl_read(ctx->ssl, recv, recvlen);
+    memset(recv, 0, recvlen);
+    do
+    {
+        ret = mbedtls_ssl_read(ctx->ssl, recv, recvlen);
+        if(ret < 0)
+        {
+            goto exit;
+        }
+        *olen = ret;
+        // printf("mbedtls_ssl_read: %d\n", ret);
+
+        // size_t bytesavail = mbedtls_ssl_get_bytes_avail(ctx->ssl);
+        // printf("bytes_avail: %lu\n", bytesavail);
+    } while(ret == MBEDTLS_ERR_SSL_WANT_READ);
+
     if(ret < 0)
     {
         goto exit;
@@ -193,7 +207,6 @@ int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, 
         return ret;
     }
 }
-
 
 void atclient_connection_free(atclient_connection_ctx *ctx)
 {
