@@ -11,8 +11,8 @@ int main()
     const int port = 64;
 
     atclient_connection_ctx *ctx = malloc(sizeof(atclient_connection_ctx));
-    atclient_connection_init(ctx, host, port);
-    ret = atclient_connection_connect(ctx);
+    atclient_connection_init(ctx);
+    ret = atclient_connection_connect(ctx, host, port);
     if (ret != 0)
         goto exit;
     // printf("atclient_connection_connect: %d\n", ret);

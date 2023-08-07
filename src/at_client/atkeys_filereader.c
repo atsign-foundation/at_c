@@ -1,241 +1,235 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//could us cJSON.h maybe
-#include "atkeys_filereader.h"
+#include "at_client/atkeys_filereader.h"
 
-int atclient_atkeysfile_read(const char* path, const size_t pathlen, atclient_atkeysfile* atsign){
-    /*readAtKeys creates a struct to store AtKeys, reads .atKeys file contents,
-    and saves into the struct. The function returns a pointer to the new struct.
-    */
+#define KEY_CHAR_PRIVATE_MAX_LEN 4000 // base64 encoded private key at most 4000 char len
+#define KEY_CHAR_PUBLIC_MAX_LEN 1000  // base64 encoded public key at most 1000 char len
+#define KEY_CHAR_AES256_MAX_LEN 100   // baes64 encoded aes256 key at most 100 char len
+#define KEY_CHAR_ATSIGN_MAX_LEN 100   // atsign at most 100 char len, e.g. @alice
 
-   //open file to read
-    FILE* file = fopen(path, "r");
-    if(file == NULL){
-        perror("Error opening the file to read");
-        return -1;
+void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile)
+{
+    atkeysfile->aes_encrypt_private_key = malloc(sizeof(atclient_atkeysfile_entry));
+    atkeysfile->aes_encrypt_private_key->len = KEY_CHAR_PRIVATE_MAX_LEN;
+    atkeysfile->aes_encrypt_private_key->key = malloc(sizeof(char) * atkeysfile->aes_encrypt_private_key->len);
+    memset(atkeysfile->aes_encrypt_private_key->key, 0, atkeysfile->aes_encrypt_private_key->len);
+
+    atkeysfile->aes_encrypt_public_key = malloc(sizeof(atclient_atkeysfile_entry));
+    atkeysfile->aes_encrypt_public_key->len = KEY_CHAR_PUBLIC_MAX_LEN;
+    atkeysfile->aes_encrypt_public_key->key = malloc(sizeof(char) * atkeysfile->aes_encrypt_public_key->len);
+    memset(atkeysfile->aes_encrypt_public_key->key, 0, atkeysfile->aes_encrypt_public_key->len);
+
+    atkeysfile->aes_pkam_private_key = malloc(sizeof(atclient_atkeysfile_entry));
+    atkeysfile->aes_pkam_private_key->len = KEY_CHAR_PRIVATE_MAX_LEN;
+    atkeysfile->aes_pkam_private_key->key = malloc(sizeof(char) * atkeysfile->aes_pkam_private_key->len);
+    memset(atkeysfile->aes_pkam_private_key->key, 0, atkeysfile->aes_pkam_private_key->len);
+
+    atkeysfile->aes_pkam_public_key = malloc(sizeof(atclient_atkeysfile_entry));
+    atkeysfile->aes_pkam_public_key->len = KEY_CHAR_PUBLIC_MAX_LEN;
+    atkeysfile->aes_pkam_public_key->key = malloc(sizeof(char) * atkeysfile->aes_pkam_public_key->len);
+    memset(atkeysfile->aes_pkam_public_key->key, 0, atkeysfile->aes_pkam_public_key->len);
+
+    atkeysfile->self_encryption_key = malloc(sizeof(atclient_atkeysfile_entry));
+    atkeysfile->self_encryption_key->len = KEY_CHAR_AES256_MAX_LEN;
+    atkeysfile->self_encryption_key->key = malloc(sizeof(char) * atkeysfile->self_encryption_key->len);
+    memset(atkeysfile->self_encryption_key->key, 0, atkeysfile->self_encryption_key->len);
+}
+
+enum currently_viewing
+{
+    NONE = 0,
+    AES_PKAM_PUBLIC_KEY,
+    AES_PKAM_PRIVATE_KEY,
+    AES_ENCRYPT_PUBLIC_KEY,
+    AES_ENCRYPT_PRIVATE_KEY,
+    SELF_ENCRYPTION_KEY
+};
+
+int atclient_atkeysfile_read(const char *path, atclient_atkeysfile *atkeysfile)
+{
+    int ret = 1;
+
+    FILE *file = fopen(path, "r");
+    if (file == NULL)
+    {
+        printf("Error opening file!\n");
+        ret = 1;
+        goto exit;
     }
 
-    //save contents into a string
-    char* line = NULL;
-    size_t len = 0;
-    char* token; //to parse the string with tokenization
+    char c;
+    short i = 0;
 
-    if(getline(&line, &len, file) != -1){
-        printf("Line saved\n");
+    short word_max_len = 50;
+    char *word = malloc(sizeof(char) * word_max_len);
+    memset(word, 0, word_max_len);
 
-        token = strtok(line, ","); //start tokenization
-        if(token == NULL){
-            perror("Invalid file format to create token");
-            fclose(file);
-            free(line);
-            return -1;
+    enum currently_viewing curr = NONE;
+    while ((c = fgetc(file)) != EOF)
+    {
+        if (c == '}' || c == '{' || c == ':')
+        {
+            continue;
         }
-
-        //population time: save all values in atclient_atkeys_file
-        token = save(token, atsign->aesPkamPublicKey);
-        token = save(token, atsign->aesPkamPrivateKey);
-        token = save(token, atsign->aesEncryptPublicKey);
-        token = save(token, atsign->aesEncryptPrivateKey);
-        token = save(token, atsign->selfEncryptionKey);
-        token = save(token, atsign->atSign);
-    } else{
-        perror("Line not saved\n");
-        return -1;
+        else if (c == '"')
+        {
+            memset(word, 0, word_max_len);
+            i = 0;
+            continue;
+        }
+        else if (c == ',')
+        {
+            curr = NONE;
+            continue;
+        }
+        switch (curr)
+        {
+        case NONE:
+        {
+            *(word + i++) = c;
+            if (strncmp(word, TOKEN_AES_PKAM_PUBLIC_KEY, TOKEN_AES_PKAM_PUBLIC_KEY_LEN) == 0)
+            {
+                curr = AES_PKAM_PUBLIC_KEY;
+                memset(word, 0, word_max_len);
+                i = 0;
+            }
+            else if (strncmp(word, TOKEN_AES_PKAM_PRIVATE_KEY, TOKEN_AES_PKAM_PRIVATE_KEY_LEN) == 0)
+            {
+                curr = AES_PKAM_PRIVATE_KEY;
+                memset(word, 0, word_max_len);
+                i = 0;
+            }
+            else if (strncmp(word, TOKEN_AES_ENCRYPT_PUBLIC_KEY, TOKEN_AES_ENCRYPT_PUBLIC_KEY_LEN) == 0)
+            {
+                curr = AES_ENCRYPT_PUBLIC_KEY;
+                memset(word, 0, word_max_len);
+                i = 0;
+            }
+            else if (strncmp(word, TOKEN_AES_ENCRYPT_PRIVATE_KEY, TOKEN_AES_ENCRYPT_PRIVATE_KEY_LEN) == 0)
+            {
+                curr = AES_ENCRYPT_PRIVATE_KEY;
+                memset(word, 0, word_max_len);
+                i = 0;
+            }
+            else if (strncmp(word, TOKEN_SELF_ENCRYPTION_KEY, TOKEN_SELF_ENCRYPTION_KEY_LEN) == 0)
+            {
+                curr = SELF_ENCRYPTION_KEY;
+                memset(word, 0, word_max_len);
+                i = 0;
+            }
+            break;
+        }
+        case AES_PKAM_PUBLIC_KEY:
+        {
+            *(atkeysfile->aes_pkam_public_key->key + i++) = c;
+            break;
+        }
+        case AES_PKAM_PRIVATE_KEY:
+        {
+            *(atkeysfile->aes_pkam_private_key->key + i++) = c;
+            break;
+        }
+        case AES_ENCRYPT_PUBLIC_KEY:
+        {
+            *(atkeysfile->aes_encrypt_public_key->key + i++) = c;
+            break;
+        }
+        case AES_ENCRYPT_PRIVATE_KEY:
+        {
+            *(atkeysfile->aes_encrypt_private_key->key + i++) = c;
+            break;
+        }
+        case SELF_ENCRYPTION_KEY:
+        {
+            *(atkeysfile->self_encryption_key->key + i++) = c;
+            break;
+        }
+        }
+        // printf("curr: %d | c: %c | i: %lu | word: %.*s\n", curr, c, i, 50, word);
     }
 
     fclose(file);
-    free(line);
+    free(word);
 
-    return 0;
-}
+    ret = 0;
 
-void atclient_atkeysfile_init(atclient_atkeysfile** atkeysfile){
-    *atkeysfile = malloc(sizeof(atclient_atkeysfile));
-    if (*atkeysfile == NULL) {
-        perror("Error allocating memory for atclient_atkeysfile_init");
-        return;
-    }
+    goto exit;
 
-    (*atkeysfile)->aesPkamPublicKey = malloc(sizeof(atclient_atkeysfile_entry));
-    (*atkeysfile)->aesPkamPrivateKey = malloc(sizeof(atclient_atkeysfile_entry));
-    (*atkeysfile)->aesEncryptPublicKey = malloc(sizeof(atclient_atkeysfile_entry));
-    (*atkeysfile)->aesEncryptPrivateKey = malloc(sizeof(atclient_atkeysfile_entry));
-    (*atkeysfile)->selfEncryptionKey = malloc(sizeof(atclient_atkeysfile_entry));
-    (*atkeysfile)->atSign = malloc(sizeof(atclient_atkeysfile_entry));
-}
-
-char* save(char* token, atclient_atkeysfile_entry* attribute){
-    /*save assumes tokenization has begun. The function will save to a specified 
-    struct attribute and returns a new token which contains the substring*/
-
-    if (token != NULL) {
-        char* temp = strdup(token); //saves temporary substring
-        if(temp == NULL){
-            perror("Error allocating memory for temp");
-            return NULL;
-        }
-
-        //find starting index
-        char* splitter = strchr(temp, ':'); //find first occurrence of ':'
-        if(splitter == NULL){
-            perror("Invalid token format");
-            free(temp);
-            return NULL;
-        }
-
-        int start = splitter - temp + 2; //change index to the key
-        int length = strlen(temp) - start; //length of actual key
-        char* subKey = (char*)malloc((length + 1)*sizeof(char)); //alloc string for actual key
-        if(subKey == NULL){
-            perror("subKey alloc failed in save\n");
-            free(temp);
-            return NULL;
-        }
-
-        //save the actual key
-        if(strchr(temp, '}') == NULL){
-            strncpy(subKey, temp+start, length - 1); //strncpy(dest, source at new start position, correct size excluding last")
-        }else{
-            strncpy(subKey, temp+start, length - 2); //strncpy(dest, source at new start position, correct size excluding last")
-        }
-        
-        subKey[length] = '\0';    
-        
-        //save to struct
-        attribute->key = subKey; 
-        attribute->len = strlen(subKey);
-        //printf("Saved key OFFICIAL is %s\n", attribute->key);
-
-        free(temp);
-    }else{
-        perror("save function did not run");
-        return NULL;
-    }
-
-    return token = strtok(NULL, ",");
-}
-
-int atclient_atkeysfile_write(const char *path, const size_t len, atclient_atkeysfile *atsign)
+exit:
 {
-    //writeAtKeys writes a string from a fully populated struct at the given path
+    return ret;
+}
+}
 
-    //open file for writing
-    FILE* file = fopen(path, "w");
-    if(file == NULL){
-        perror("Couldn't open file for writing\n");
-        return -1;
+int atclient_atkeysfile_write(const char *path, const char *atsign, atclient_atkeysfile *atkeysfile)
+{
+    int ret = 1;
+
+    printf("writing to path: %s\n", path);
+
+    FILE *file = fopen(path, "w+");
+
+    if (file == NULL)
+    {
+        printf("Error opening file!\n");
+        ret = 1;
+        goto exit;
     }
 
-    //char* line = malloc(sizeof(char)); //for {}
-    char* line = malloc(sizeof(char)*3); //for {}
-    if(line == NULL){
-        perror("Error allocating memory for line");
-        fclose(file);
-        return -1;
-    }
 
-    strcpy(line, "{");
+    fputs("{\"", file);                                    // {"
+    fputs(TOKEN_AES_PKAM_PUBLIC_KEY, file);                // aesPkamPublicKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_pkam_public_key->key, file);     // <aesPkamPublicKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_AES_PKAM_PRIVATE_KEY, file);               // aesPkamPrivateKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_pkam_private_key->key, file);    // <aesPkamPrivateKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_AES_ENCRYPT_PUBLIC_KEY, file);             // aesEncryptPublicKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_encrypt_public_key->key, file);  // <aesEncryptPublicKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_AES_ENCRYPT_PRIVATE_KEY, file);            // aesEncryptPrivateKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->aes_encrypt_private_key->key, file); // <aesEncryptPrivateKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(TOKEN_SELF_ENCRYPTION_KEY, file);                // selfEncryptionKey
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->self_encryption_key->key, file);     // <selfEncryptionKey>
+    fputs("\",\"", file);                                  // ","
+    fputs(atsign, file);                                   // @alice
+    fputs("\":\"", file);                                  // ":"
+    fputs(atkeysfile->self_encryption_key->key, file);     // <selfEncryptionKey>
+    fputs("\"}", file);                                    // "}
 
-    //get Atsign string
-    char* pathCpy = (char*)malloc((strlen(path) + 1) * sizeof(char));
-    if(pathCpy == NULL){
-        perror("Error allocating memory for pathCpy");
-        fclose(file);
-        return -1;
-    }
 
-    strcpy(pathCpy, path);
-    char* sign = strtok(pathCpy, "_"); 
-    printf("The atsign is %s\n", sign);
-
-    updateFileLine(&line, "aesPkamPublicKey", atsign->aesPkamPublicKey, 0);
-    updateFileLine(&line, "aesPkamPrivateKey", atsign->aesPkamPrivateKey, 0);
-    updateFileLine(&line, "aesEncryptPublicKey", atsign->aesEncryptPublicKey, 0);
-    updateFileLine(&line, "aesEncryptPrivateKey", atsign->aesEncryptPrivateKey, 0);
-    updateFileLine(&line, "selfEncryptionKey", atsign->selfEncryptionKey, 0);
-    updateFileLine(&line, sign, atsign->atSign, -1);
-    //line = realloc(line, (strlen(line) + 2)*sizeof(char));
-    //strcat(line, newType);
-    strcat(line, "}");
-
-    //printf("FINAL LINE IS %s\n", line);
-
-    fprintf(file, "%s", line); //write line to file
-    printf("Data written to file\n");
-
-    free(line);
-    free(pathCpy);
     fclose(file);
 
-    return 0;
-}
+    ret = 0;
+    goto exit;
 
-void updateFileLine(char** line, char* type, atclient_atkeysfile_entry* attribute, int comma){
-    
-    //save type in format: "type":
-    char* newType = (char*)malloc((strlen(type) + 3) * sizeof(char));
-    if(newType == NULL){
-        perror("Error allocating memory for newType");
-        return;
-    }
-    strcpy(newType, "\"");
-    strcat(newType, type);
-    strcat(newType, "\":");
-    //printf("The newType is %s\n", newType);
-
-    //update line with type
-    *line = realloc(*line, (strlen(*line) + strlen(newType) + 1)*sizeof(char));
-    strcat(*line, newType);
-
-    //save key in format: "key"
-    char* newKey = (char*)malloc((strlen(attribute->key) + 3) * sizeof(char));
-    if(newKey == NULL){
-        perror("Error allocating memory for newKey");
-        return;
-    }
-    strcpy(newKey, "\"");
-    strcat(newKey, attribute->key);
-    strcat(newKey, "\"");
-    if(comma == 0){
-        strcat(newKey, ",");
-    }
-
-    //printf("The newType is %s\n", newKey);
-
-    //update line with key
-    *line = realloc(*line, (strlen(*line) + attribute->len + 1)*sizeof(char));
-    strcat(*line, newKey);
-
-    //printf("Updated Line to %s\n", *line);
-}
-
-/* Main function to demonstrate
-int main()
+exit:
 {
-    char* filepath = "@17shiny_key.atKeys";
+    return ret;
+}
+}
 
-    //create struct & allocate
-    atclient_atkeysfile* atsign = malloc(sizeof(atclient_atkeysfile));
-    atclient_atkeysfile_init(&atsign);
+void atclient_atkeysfile_free(atclient_atkeysfile *atkeysfile)
+{
+    free(atkeysfile->aes_encrypt_private_key->key);
+    free(atkeysfile->aes_encrypt_private_key);
 
-    //read to populate struct
-    if(atclient_atkeysfile_read(filepath, strlen(filepath), atsign) != 0){
-        perror("Error reading into a struct");
-        return -1;
-    } else{
-        printf("Struct is fully populated\n");
-    }
+    free(atkeysfile->aes_encrypt_public_key->key);
+    free(atkeysfile->aes_encrypt_public_key);
 
-    printf("STRUCT SAVED %s for the AtSign\n", atsign->atSign->key);
+    free(atkeysfile->aes_pkam_private_key->key);
+    free(atkeysfile->aes_pkam_private_key);
 
-    //write populated struct into a txt file
-    if(atclient_atkeysfile_write("@17shinyCopy_key.atKeys", strlen("@17shinyCopy_key.atKeys"), atsign) != 0){
-        perror("Error writing into a struct");
-        return -1;
-    } else{
-        printf("Written to file\n");
-    }
+    free(atkeysfile->aes_pkam_public_key->key);
+    free(atkeysfile->aes_pkam_public_key);
 
-    return 0;
-}*/
+    free(atkeysfile->self_encryption_key->key);
+    free(atkeysfile->self_encryption_key);
+}
