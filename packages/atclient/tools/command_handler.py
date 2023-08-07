@@ -3,7 +3,8 @@ class CommandHandler(object):
     self.platform = platform
     self.framework = framework
     self.dir_name = platform + '_' + framework
-    self.root_dir = root_dir
+    self.root_dir = root_dir+'/..'
+    self.build_dir=self.root_dir+'/build/'+self.dir_name
     pass
   def handle(self, command, args):
     if command == 'init': self.init(args)

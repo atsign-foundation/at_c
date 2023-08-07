@@ -20,7 +20,7 @@ project(
   LANGUAGES C
 )
 
-if(NOT BUILD_ESP_IDF) # build for other platforms
+if(NOT BUILD_ESP_IDF) # build for other platforms (Arduino or MbedTLS)
 
   # build libraries
 
@@ -129,7 +129,6 @@ if(NOT BUILD_ESP_IDF) # build for other platforms
     PRIVATE -Wwrite-strings -Wstack-protector -fstack-protector -Wpadded -Winline -Wdisabled-optimization # Security
     PRIVATE -Waggregate-return -Wbad-function-cast -Wc++-compat # C specific
   )
-
 endif()
 
 

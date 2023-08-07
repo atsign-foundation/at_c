@@ -4,7 +4,6 @@
 
 int main()
 {
-
     int ret = 1;
 
     // initialize buffer to use throughout program
@@ -150,7 +149,7 @@ int main()
         }
         atclient_connection_send(&secondary_connection, recv, recvlen, olen, command, strlen(command));
         memset(command, 0, commandlen);
-        printf("\nrecv: \"%.*s\"\n\n", recvlen, recv);
+        printf("\nrecv: \"%.*s\"\n\n", *olen, recv);
     }
 
     goto exit;

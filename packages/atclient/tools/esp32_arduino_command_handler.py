@@ -1,4 +1,5 @@
-from tools.command_handler import CommandHandler
+from command_handler import CommandHandler
+
 class ESP32ArduinoCommandHandler(CommandHandler):
   def __init__(self, root_dir):
     super().__init__('esp32', 'arduino', root_dir)
