@@ -5,8 +5,9 @@
             "configurationProvider": "ms-vscode.cmake-tools",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/packages/at_c/include/**",
-                "${workspaceFolder}/packages/at_c/deps/mbedtls/include/**"
+                "${workspaceFolder}/packages/atclient/include/**",
+                "${workspaceFolder}/packages/atclient/deps/mbedtls/include/**",
+                "${workspaceFolder}/packages/repl/include/**"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c99",
