@@ -141,7 +141,6 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
         goto exit;
     }
 
-    
     free(readbuf);
 
     free(portstr);
@@ -169,20 +168,43 @@ int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, 
     }
     // printf("mbedtls_ssl_write: %d\n", ret);
 
+
     memset(recv, 0, recvlen);
+    int found = 0;
+    size_t l = 0;
     do
     {
-        ret = mbedtls_ssl_read(ctx->ssl, recv, recvlen);
+        ret = mbedtls_ssl_read(ctx->ssl, recv + l, recvlen - l);
         if(ret < 0)
         {
             goto exit;
         }
-        *olen = ret;
+        l = l + ret;
         // printf("mbedtls_ssl_read: %d\n", ret);
+
+        // printf("*(recv+%lu) == %.2x == %c\n", l-1, (unsigned char) *(recv + l-1), (unsigned char) *(recv + l-1));
+        // printf("*(recv+%lu) == %.2x == %c\n", l, (unsigned char) *(recv + l), (unsigned char) *(recv + l));
+
+        // printf("\\n: %.2x\n", '\n');
+
+        for(int i = l; i >= l - ret && i >= 0; i--)
+        {
+            // printf("i: %d c: %.2x\n", i, (unsigned char) *(recv + i));
+            if(*(recv + i) == '\n')
+            {
+                *olen = i;
+                found = 1;
+                break;
+            }
+        }
+        if(found == 1)
+        {
+            break;
+        }
 
         // size_t bytesavail = mbedtls_ssl_get_bytes_avail(ctx->ssl);
         // printf("bytes_avail: %lu\n", bytesavail);
-    } while(ret == MBEDTLS_ERR_SSL_WANT_READ);
+    } while(ret == MBEDTLS_ERR_SSL_WANT_READ || found == 0);
 
     if(ret < 0)
     {
