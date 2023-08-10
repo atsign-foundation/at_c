@@ -9,7 +9,7 @@ project(
 )
 
 # #########################################################
-# 0. Variables - you are free to edit anything in this step
+# 0a. Variables - you are free to edit anything in this step
 # #########################################################
 
 # apparently globs are bad practice, manually add your src files here
@@ -23,15 +23,17 @@ set(atclient_include_dir
 	${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like `#include "atclient/xyz.h"
 )
 
-
 # #########################################################
 # 0b. Build atchops locally or use already installed atchops
 # #########################################################
 
-option(BUILD_LOCAL_ATCHOPS "Build Local ATCHOPS" ON) # can use it like `cmake -S . -B build -DBUILD_LOCAL_ATCHOPS=OFF` to not rebuild atchops everytime
-set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops) # relative to CMakeLists.txt
+# can use it like `cmake -S . -B build -DBUILD_LOCAL_ATCHOPS=OFF` to not rebuild atchops everytime
+option(USE_LOCAL_ATCHOPS "Use Local ATCHOPS" ON)
 
-message(STATUS "Building Local ATCHOPS: ${BUILD_LOCAL_ATCHOPS} from DIR: ${atchops_src_dir}")
+if(USE_LOCAL_ATCHOPS)
+	set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops)
+	message(STATUS "Building Local ATCHOPS: ${USE_LOCAL_ATCHOPS} from DIR: ${atchops_src_dir}")
+endif()
 
 # #########################################################
 # 1. Include stuff
@@ -60,36 +62,18 @@ FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been popul
 message(STATUS "Successfully fetched MbedTLS v3.4.1")
 
 # #########################################################
-# 2B. Get atchops::atchops
+# 2B. Get atchops
 # #########################################################
 
-# if(BUILD_LOCAL_ATCHOPS)
-# 	execute_process(
-# 		COMMAND rm -f build/CMakeCache.txt
-# 		WORKING_DIRECTORY ${atchops_src_dir}
-# 	)
-
-# 	execute_process(
-# 		COMMAND cmake -S . -B build
-# 		WORKING_DIRECTORY ${atchops_src_dir}
-# 	)
-
-# 	execute_process(
-# 		COMMAND sudo cmake --build build --target install
-# 		WORKING_DIRECTORY ${atchops_src_dir}
-# 	)
-# endif()
-
-# find_package(atchops REQUIRED CONFIG)
-
-FetchContent_Declare(
-	atchops
-	SOURCE_DIR ${atchops_src_dir}
-)
-
-FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
-
-
+if(USE_LOCAL_ATCHOPS)
+	FetchContent_Declare(
+		atchops
+		SOURCE_DIR ${atchops_src_dir}
+	)
+	FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
+else()
+	find_package(atchops REQUIRED CONFIG)
+endif()
 
 # atchops::atchops is now available
 message(STATUS "Successfully found `atchops` package")
@@ -137,9 +121,8 @@ install(
 
 # #########################################################
 # 5. Add tests
-# This step configures running `cmake --build build --target test` (which is similar to `make test`)
+# Run the tests via cd build && make all && cd tests && ctest
 # #########################################################
-
 enable_testing()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
