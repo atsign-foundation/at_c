@@ -60,11 +60,11 @@ add_library(atchops STATIC ${atchops_srcs})
 # we put *.h inside of nested atchops/ directory so that it will be included like #include "atchops/atchops.h"
 target_include_directories(atchops PUBLIC
     $<BUILD_INTERFACE:${atchops_include_dir}> # when `cmake ..` look for headers when building in ./packages/atchops/include/atchops/*.h
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # when `make install` look inside of something like /usr/local/include/atchops/*.h
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # when `make install` look inside of something like /usr/local/include/**
 )
 
 # add MbedTLS dependencies to `atchops`
-target_link_libraries(atchops PRIVATE MbedTLS::mbedtls MbedTLS::mbedcrypto MbedTLS::mbedx509)
+target_link_libraries(atchops PRIVATE MbedTLS::mbedcrypto)
 
 # #########################################################
 # 4. Install atchops
@@ -74,17 +74,20 @@ target_link_libraries(atchops PRIVATE MbedTLS::mbedtls MbedTLS::mbedcrypto MbedT
 
 # Installs headers to /usr/local/include/atchops/*.h
 install(
-    DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/${PROJECT_NAME}
+    DIRECTORY ${atchops_include_dir}/${PROJECT_NAME}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} # install goes to: /usr/local/include/atchops/*.h
 )
 
-# Tells `atchops-config.cmake` where to find mbedtls stuff
+# Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find mbedtls stuff
 install(
-    TARGETS ${PROJECT_NAME} mbedtls mbedcrypto mbedx509
+    TARGETS ${PROJECT_NAME} mbedcrypto
     EXPORT ${PROJECT_NAME}-config
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
 )
 
 install(
-    EXPORT ${PROJECT_NAME}-config
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} # install goes to: /usr/local/lib/cmake/atchops/atchops-config.cmake
+	EXPORT ${PROJECT_NAME}-config
+	NAMESPACE ${PROJECT_NAME}::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	FILE ${PROJECT_NAME}-config.cmake
 )

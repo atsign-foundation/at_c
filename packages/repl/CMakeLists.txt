@@ -1,27 +1,24 @@
-cmake_minimum_required(VERSION 3.19.2)
+cmake_minimum_required(VERSION 3.19)
 
-project(repl)
+project(
+    repl
+    VERSION 0.0.1
+    LANGUAGES C
+    HOMEPAGE_URL https://atsign.com
+)
 
-set(CMAKE_C_STANDARD 99)
+find_package(atchops REQUIRED CONFIG) # install via tools/install-atclient.sh
+find_package(atclient REQUIRED CONFIG) # install via tools/install-atclient.sh
 
-add_executable(repl ${CMAKE_SOURCE_DIR}/src/main.c)
+message(STATUS "atclient was found")
 
-message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+add_executable(repl)
 
-find_library(AT_CLIENT_LIB libat_client.a ${CMAKE_SOURCE_DIR}/lib)
-find_library(AT_CHOPS libat_chops.a ${CMAKE_SOURCE_DIR}/lib)
+target_sources(repl PRIVATE src/main.c)
 
-target_link_libraries(repl PRIVATE ${AT_CLIENT_LIB})
-target_link_libraries(repl PRIVATE ${AT_CHOPS})
-target_include_directories(repl PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(repl PRIVATE ${CMAKE_SOURCE_DIR}/include/at_client)
-target_include_directories(repl PRIVATE ${CMAKE_SOURCE_DIR}/include/at_chops)
+target_link_libraries(repl PRIVATE atclient::atclient)
 
-# target_include_directories(repl PRIVATE ${CMAKE_SOURCE_DIR}/include)
-# target_include_directories(repl PRIVATE ${CMAKE_SOURCE_DIR}/include/at_client)
-# target_include_directories(repl PRIVATE ${CMAKE_SOURCE_DIR}/include/at_chops)
-# target_link_libraries(repl PRIVATE ${CMAKE_SOURCE_DIR}/lib/libat_client.a)
-# target_link_libraries(repl PRIVATE ${CMAKE_SOURCE_DIR}/lib/libat_chops.a)
-# target_link_libraries(repl PRIVATE ${CMAKE_SOURCE_DIR}/lib/libmbedcrypto.a)
-# target_link_libraries(repl PRIVATE ${CMAKE_SOURCE_DIR}/lib/libmbedtls.a)
-# target_link_libraries(repl PRIVATE ${CMAKE_SOURCE_DIR}/lib/libmbedx509.a)
+install(
+    TARGETS repl
+    DESTINATION ${CMAKE_CURRENT_LIST_DIR}/install
+)

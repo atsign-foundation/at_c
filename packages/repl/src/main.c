@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "at_client.h"
+#include "atclient/connection.h"
+#include "atclient/atkeys_filereader.h"
+#include "atchops/aes_ctr.h"
+#include "atchops/rsa.h"
 
 int main()
 {
+
     int ret = 1;
 
     // initialize buffer to use throughout program
@@ -39,7 +42,7 @@ int main()
     char *secondary_port = malloc(sizeof(char) * secondary_len);
 
     int i = 0, c;
-    while((c = recv[i]) != ':' && i < *olen)
+    while ((c = recv[i]) != ':' && i < *olen)
     {
         secondary_host[i] = c;
         i++;
@@ -47,7 +50,7 @@ int main()
     secondary_host[i] = '\0';
     i++;
     int j = 0;
-    while((c = recv[i]) != '\0' && i < *olen)
+    while ((c = recv[i]) != '\0' && i < *olen)
     {
         secondary_port[j] = c;
         i++;
@@ -76,14 +79,14 @@ int main()
 
     int in = 0;
     j = 0;
-    for(int i = 0; i < *olen; i++)
+    for (int i = 0; i < *olen; i++)
     {
         char c = recv[i];
-        if(in == 1)
+        if (in == 1)
         {
             from_response[j++] = c;
         }
-        if(c == ':')
+        if (c == ':')
         {
             in = 1;
         }
@@ -137,14 +140,13 @@ int main()
 
     printf("\"%.*s\"\n", (int)*olen, recv);
 
-
     size_t commandlen = 32768;
     unsigned char *command = malloc(sizeof(unsigned char) * commandlen);
     memset(command, 0, commandlen);
-    while(1)
+    while (1)
     {
         fgets(command, commandlen, stdin);
-        if(strcmp(command, "exit") == 0)
+        if (strcmp(command, "exit") == 0)
         {
             break;
         }
@@ -155,7 +157,8 @@ int main()
 
     goto exit;
 
-exit: {
+exit:
+{
     return ret;
 }
 }
