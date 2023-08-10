@@ -8,6 +8,7 @@ cmake_install.cmake
 
 build/
 install/
+bin/
 
 lib/**/lib*.a
 

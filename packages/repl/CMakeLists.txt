@@ -20,5 +20,5 @@ target_link_libraries(repl PRIVATE atclient::atclient)
 
 install(
     TARGETS repl
-    DESTINATION ${CMAKE_CURRENT_LIST_DIR}/install
+    DESTINATION ${CMAKE_CURRENT_LIST_DIR}/bin
 )
