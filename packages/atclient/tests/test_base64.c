@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "at_chops/base64.h"
+#include "atchops/base64.h"
 
 #define SRC_STRING "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="
 #define DST_BYTES_ALLOCATED 5000

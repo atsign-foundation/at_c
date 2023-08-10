@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "at_client.h"
+#include "atclient.h"
 
 #define ATSIGN "@smoothalligator"
 

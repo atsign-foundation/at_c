@@ -136,6 +136,15 @@ install(
 )
 
 # #########################################################
+# 5. Add tests
+# This step configures running `cmake --build build --target test` (which is similar to `make test`)
+# #########################################################
+
+enable_testing()
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+
+# #########################################################
 # #########################################################
 # #########################################################
 # Old CMakeLists.txt

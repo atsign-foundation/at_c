@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "at_chops/rsa.h"
-#include "at_chops/base64.h"
+#include "atchops/rsa.h"
+#include "atchops/base64.h"
 
 int main()
 {

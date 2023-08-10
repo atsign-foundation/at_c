@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "at_client/connection.h"
+#include "atclient/connection.h"
 
 int main()
 {
