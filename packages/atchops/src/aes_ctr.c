@@ -74,7 +74,7 @@ int atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, c
         byte = *(aes_encrypted + aes_encryptedlen++);
         // printf("%x\n", byte);
     } while (byte != 0);
-    --aes_encryptedlen;
+    aes_encryptedlen = aes_encryptedlen - 2;
 
     // encode the encrypted data in base64
     size_t dstlen = MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION;
