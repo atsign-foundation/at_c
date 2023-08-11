@@ -23,7 +23,7 @@ jobs:
           generator: Unix Makefiles
           run-build: true
           run-test: false
-      
+
       - name: Run CTest
         working-directory: packages/atclient/build/tests
         run: |

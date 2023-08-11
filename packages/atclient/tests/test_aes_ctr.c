@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     size_t olen = 0;
     printf("plaintext: ");
     printf("%s\n", plaintext);
-    printx((const unsigned char *)plaintext, strlen(plaintext));
+    printx((const unsigned char *)plaintext, strlen(plaintext)+16);
     printf("plaintext-len: %lu\n", strlen(plaintext));
 
     int ret = 1;
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     ret = atchops_aes_ctr_encrypt(aes_key, AES_256, (const unsigned char *) plaintext, plaintextlen, &olen, ciphertext, ciphertextlen);
     printf("encrypted: ");
     printf("%s\n", ciphertext);
-    printx((const unsigned char *)ciphertext, olen);
+    printx((const unsigned char *)ciphertext, olen+16);
     printf("encrypted-len: %lu\n", olen);
 
     size_t plaintextlen2 = 1024;
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     ret = atchops_aes_ctr_decrypt(aes_key, AES_256, (const unsigned char *) ciphertext, ciphertextlen, &olen, plaintext2, plaintextlen2);
     printf("decrypted: ");
     printf("%s\n", plaintext2);
-    printx((const unsigned char *) plaintext2, olen);
+    printx((const unsigned char *) plaintext2, olen+16);
     printf("decrypted-len: %lu\n", olen);
 
     free(ciphertext);

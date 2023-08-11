@@ -121,6 +121,12 @@ int atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, c
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
     ret = atchops_base64_decode(dst, dstlen, writtenlen, ciphertext, strlen(ciphertext));
 
+    printf("\nDecoded ciphertext: %lu\n", *writtenlen);
+    for(int i = 0; i < *writtenlen+16; i++) {
+        printf("%.2x ", *(dst + i));
+    }
+    printf("\n");
+
     // run decrypt
     size_t *iv_ctr = malloc(sizeof(unsigned int));
     unsigned char *iv = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
@@ -135,11 +141,13 @@ int atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, c
     // find how much of the decrypted data is actually used
     int aes_decryptedlen = 0;
     unsigned char byte;
+    printf("\nFinding out how much of the encrypted data is actually used: \n");
     do
     {
         byte = *(aes_decrypted + aes_decryptedlen++);
-        // printf("%x\n", byte);
+        printf("%.2x ", byte);
     } while (byte != '\0');
+    printf("\n");
 
     // remove padding
 
