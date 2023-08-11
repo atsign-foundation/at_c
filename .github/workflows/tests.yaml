@@ -1,0 +1,23 @@
+name: Tests
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
+
+      - name: Confgure with CMake
+        working-directory: packages/atclient
+        run: |
+          cmake -S . -B build
+          cmake --build build --target all
+
+      - name: Run CTest
+        working-directory: packages/atclient/build/tests
+        run: ctest --output-on-failure
+
