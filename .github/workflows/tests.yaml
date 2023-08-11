@@ -19,7 +19,7 @@ jobs:
         with:
           source-dir: packages/atclient
           build-dir: packages/atclient/build
-          generator: Makefiles
+          generator: Unix Makefiles
           run-build: true
           run-test: true
 
