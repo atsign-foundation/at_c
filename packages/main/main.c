@@ -70,12 +70,11 @@ int atchops_aes_ctr_encrypt(
     memset(plaintextpadded + plaintextlen, padding_val, num_pad_bytes_to_add);
     plaintextpadded[plaintextpaddedlen] = '\0';
 
-    // printf("Plaintext Padded: \"%s\"\n", plaintext_padded);
-    // printf("plaintext padded: %lu\n", plaintextpaddedlen);
-    // for(int i = 0; i < plaintextpaddedlen + 1; i++) {
-    //     printf("%.02x ", *(plaintextpadded + i));
-    // }
-    // printf("\n\n");
+    printf("plaintext padded: %lu\n", plaintextpaddedlen);
+    for(int i = 0; i < plaintextpaddedlen + 1; i++) {
+        printf("%.02x ", *(plaintextpadded + i));
+    }
+    printf("\n\n");
 
     // 3. AES CTR encrypt
 
@@ -139,11 +138,12 @@ int atchops_aes_ctr_decrypt(
     // 1. initialize AES key
     unsigned long keylen = keybits/8;
     unsigned char *key = malloc(sizeof(unsigned char) * keylen);
-    unsigned long keyolen;
+    memset(key, 0, keylen);
+    unsigned long keyolen = 0;
 
     ret = atchops_base64_decode(key, keylen, &keyolen, keybase64, keybase64len);
     printf("atchops_base64_decode: %d\n", ret);
-    printf("aes_key:\n");
+    printf("aes_key: %lu\n", keyolen);
     for(int i = 0; i < keyolen; i++)
     {
         printf("%02x ", *(key + i));
@@ -250,10 +250,14 @@ int main()
 
     // 2. decrypt
 
+    printf("\n========\nDecrypting\n========\n\n");
+
     const unsigned long plaintextlen2 = 5000;
     unsigned char *plaintext2 = malloc(sizeof(unsigned char) * plaintextlen2);
+    memset(plaintext2, 0, plaintextlen2);
     unsigned long plaintextolen = 0;
 
+    memset(iv, 0, ivlen);
     ret = atchops_aes_ctr_decrypt(AES_KEY, strlen(AES_KEY), 256, iv, ivlen, ciphertextbase64, ciphertextbase64olen, plaintext2, plaintextlen2, &plaintextolen);
 
 
