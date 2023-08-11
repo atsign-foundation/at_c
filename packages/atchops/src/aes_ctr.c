@@ -74,7 +74,7 @@ int atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, c
         byte = *(aes_encrypted + aes_encryptedlen++);
         // printf("%x\n", byte);
     } while (byte != 0);
-    aes_encryptedlen = aes_encryptedlen - 2;
+    aes_encryptedlen = aes_encryptedlen - 1;
 
     // encode the encrypted data in base64
     size_t dstlen = MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION;
@@ -124,8 +124,11 @@ int atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, c
     // run decrypt
     size_t *iv_ctr = malloc(sizeof(unsigned int));
     unsigned char *iv = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
+    memset(iv, 0, IV_AMOUNT_BYTES);
     unsigned char *stream_block = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
+    memset(stream_block, 0, IV_AMOUNT_BYTES);
     unsigned char *aes_decrypted = malloc(sizeof(unsigned char) * MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
+    memset(aes_decrypted, 0, MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
 
     ret = mbedtls_aes_crypt_ctr(ctx, *writtenlen, iv_ctr, iv, stream_block, dst, aes_decrypted);
 

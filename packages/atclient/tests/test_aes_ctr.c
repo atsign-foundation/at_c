@@ -15,7 +15,7 @@ void printx(const unsigned char *str, size_t len)
 int main(int argc, char **argv)
 {
     const char *aes_key = "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="; // 32 byte key == 256 bits
-    const char *plaintext = "i like to eat pizza !! ++";
+    const char *plaintext = "i like to eat pizza 123";
     const size_t plaintextlen = strlen(plaintext);
 
     size_t olen = 0;
