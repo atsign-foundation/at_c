@@ -55,8 +55,11 @@ int atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, c
 
     size_t *iv_ctr = malloc(sizeof(unsigned int));
     unsigned char *iv = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
+    memset(iv, 0, IV_AMOUNT_BYTES);
     unsigned char *stream_block = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
+    memset(stream_block, 0, IV_AMOUNT_BYTES);
     unsigned char *aes_encrypted = malloc(sizeof(unsigned char) * MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
+    memset(aes_encrypted, 0, MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
 
     // maybe base 64 encode it before feeding to cipher
 
