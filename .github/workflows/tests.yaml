@@ -14,13 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
 
-      - name: Confgure with CMake
-        working-directory: packages/atclient
-        run: |
-          cmake -S . -B build
-          cmake --build build --target all
-
-      - name: Run CTest
-        working-directory: packages/atclient/build/tests
-        run: ctest --output-on-failure
+      - name: Configure with CMake, Build with Makefiles, Run CTest
+        uses: threeal/cmake-action@v1.3.0
+        with:
+          source-dir: packages/atclient
+          build-dir: packages/atclient/build
+          generator: Makefiles
+          run-build: true
+          run-test: true
 
