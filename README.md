@@ -8,5 +8,6 @@
 
 ## Packages
 
-- `atclient` is the core dependency for anything Atsign technology related
-- `repl` is a demo application allowing you to directly interact with your atServer with a pkam authenticated session 
+- `atchops` stands for cryptographic and hashing operations catered for the atProtocol, uses [MbedTLS crypto](https://github.com/Mbed-TLS/mbedtls) as a dependency.
+- `atclient` is the core dependency for anything Atsign technology related. atclient depends on [atchops](./packages/atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls)
+- `repl` is a demo application using atclient

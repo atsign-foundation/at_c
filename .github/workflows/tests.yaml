@@ -20,10 +20,11 @@ jobs:
           source-dir: packages/${{ matrix.package }}
           generator: Unix Makefiles
           # args: -D$(echo "${{ matrix.package }}" | tr '[:lower:]' '[:upper:]')_BUILD_TESTS=ON # this doesn't work :/
-          args: -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
-          build-dir: packages/${{ matrix.package }}/build
+          args: -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=./output
+          build-dir: packages/${{ matrix.package }}/output
           run-build: true
           build-args: --target install
           run-test: true
           test-args: -V --output-on-failure
+          
 
