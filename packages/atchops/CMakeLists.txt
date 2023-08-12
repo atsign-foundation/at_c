@@ -25,40 +25,23 @@ set(atchops_include_dir
     ${CMAKE_CURRENT_LIST_DIR}/include # not `include/atchops` because we want clients to include it like #include "atchops/atchops.h"
 )
 
+option(ATCHOPS_BUILD_TESTS "Build tests" OFF)
+
 # #########################################################
 # 1. Include CMake modules
 # #########################################################
-
-# FetchContent is a CMake v3.11+ module that downloads content at configure time
-include(FetchContent)
 
 # ${CMAKE_INSTALL_*} variables are defined in GNUInstallDirs and changes according to OS. E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
 include(GNUInstallDirs)
 
 # #########################################################
-# 2. Use FetchContent to get MbedTLS namespace
-# #########################################################
+# 2. find_package MbedTLS
+# #########################################################ß
 
-# v3.4.1 Release
-FetchContent_Declare(
-    MbedTLS
-    URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
-    URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
-    OVERRIDE_FIND_PACKAGE
-)
-
-# From `development` branch
-# FetchContent_Declare(
-#     MbedTLS
-#     GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls
-#     GIT_TAG 2588f8d36d8f519c6e37b8a8f8977ba2aa9c72a4
-#     # OVERRIDE_FIND_PACKAGE
-# )
-
-# FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
+# You can install MbedTLS with `cmake -S . -B build && sudo cmake --build build --target install` on the root of MbedTLS's repo or source code release
 find_package(MbedTLS REQUIRED)
 
-# MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx50 are now available
+# MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
 message(STATUS "Successfully fetched MbedTLS")
 
 # #########################################################
@@ -89,16 +72,26 @@ install(
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} # install goes to: /usr/local/include/atchops/*.h
 )
 
-# Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find mbedtls stuff
+# Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find stuff
 install(
-    TARGETS ${PROJECT_NAME} mbedcrypto
+    TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-config
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
 )
 
+# Export atchops-config.cmake to /usr/local/lib/cmake/atchops/atchops-config.cmake
 install(
 	EXPORT ${PROJECT_NAME}-config
 	NAMESPACE ${PROJECT_NAME}::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 	FILE ${PROJECT_NAME}-config.cmake
 )
+
+# #########################################################
+# Generate tests
+# #########################################################
+
+if(ATCHOPS_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
