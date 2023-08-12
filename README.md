@@ -4,7 +4,7 @@
 
 # at_c
 
-`at_c` is the C implementation of the atProtocol
+`at_c` is the client C implementation of the atProtocol
 
 ## Packages
 
