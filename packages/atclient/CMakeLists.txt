@@ -23,6 +23,8 @@ set(atclient_include_dir
 	${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like `#include "atclient/xyz.h"
 )
 
+option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF)
+
 # #########################################################
 # 0b. Build atchops locally or use already installed atchops
 # #########################################################
@@ -50,6 +52,7 @@ include(GNUInstallDirs)
 # #########################################################
 # 2A. Get MbedTLS::mbedtls
 # #########################################################
+
 FetchContent_Declare(
 	MbedTLS
 	URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
@@ -58,8 +61,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
 
+# find_package(MbedTLS REQUIRED)
+
 # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx50 are now available via MbedTLS namespace
-message(STATUS "Successfully fetched MbedTLS v3.4.1")
+message(STATUS "Successfully fetched MbedTLS")
 
 # #########################################################
 # 2B. Get atchops
@@ -85,7 +90,7 @@ add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
 
 target_link_libraries(${PROJECT_NAME}
 	PUBLIC atchops
-	PUBLIC MbedTLS::mbedtls
+	PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -123,9 +128,11 @@ install(
 # 5. Add tests
 # Run the tests via cd build && make all && cd tests && ctest
 # #########################################################
-enable_testing()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+if(ATCLIENT_BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+endif()
 
 # #########################################################
 # #########################################################

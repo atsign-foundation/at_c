@@ -31,6 +31,8 @@ option(ATCHOPS_BUILD_TESTS "Build tests" OFF)
 # 1. Include CMake modules
 # #########################################################
 
+include(FetchContent)
+
 # ${CMAKE_INSTALL_*} variables are defined in GNUInstallDirs and changes according to OS. E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
 include(GNUInstallDirs)
 
@@ -38,8 +40,13 @@ include(GNUInstallDirs)
 # 2. find_package MbedTLS
 # #########################################################ß
 
-# You can install MbedTLS with `cmake -S . -B build && sudo cmake --build build --target install` on the root of MbedTLS's repo or source code release
-find_package(MbedTLS REQUIRED)
+FetchContent_Declare(
+	MbedTLS
+	URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
+	URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
+)
+
+FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
 
 # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
 message(STATUS "Successfully fetched MbedTLS")
@@ -58,7 +65,7 @@ target_include_directories(atchops PUBLIC
 )
 
 # add MbedTLS dependencies to `atchops`
-target_link_libraries(atchops PRIVATE MbedTLS::mbedcrypto)
+target_link_libraries(atchops PUBLIC MbedTLS::mbedcrypto)
 
 # #########################################################
 # 4. Install atchops
@@ -74,7 +81,7 @@ install(
 
 # Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find stuff
 install(
-    TARGETS ${PROJECT_NAME}
+    TARGETS ${PROJECT_NAME} mbedcrypto
     EXPORT ${PROJECT_NAME}-config
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
 )

@@ -1,4 +1,8 @@
 
+add_executable(test_aes_ctr_decrypt ${CMAKE_CURRENT_LIST_DIR}/test_aes_ctr_decrypt.c)
+target_link_libraries(test_aes_ctr_decrypt PRIVATE atchops)
+add_test(NAME AES_CTR_Decrypt COMMAND test_aes_ctr_decrypt)
+
 add_executable(test_aes_ctr ${CMAKE_CURRENT_LIST_DIR}/test_aes_ctr.c)
 target_link_libraries(test_aes_ctr PRIVATE atchops)
 add_test(NAME AES_CTR COMMAND test_aes_ctr)

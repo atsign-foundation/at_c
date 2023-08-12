@@ -7,15 +7,15 @@ project(
     HOMEPAGE_URL https://atsign.com
 )
 
-find_package(atchops REQUIRED CONFIG) # install via tools/install-atclient.sh
-find_package(atclient REQUIRED CONFIG) # install via tools/install-atclient.sh
+include(GNUInstallDirs)
+
+find_package(atclient REQUIRED CONFIG)
 
 message(STATUS "atclient was found")
 
 add_executable(repl)
 
 target_sources(repl PRIVATE src/main.c)
-
 target_link_libraries(repl PRIVATE atclient::atclient)
 
 install(

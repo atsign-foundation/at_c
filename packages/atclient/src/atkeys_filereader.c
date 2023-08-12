@@ -152,6 +152,13 @@ int atclient_atkeysfile_read(const char *path, atclient_atkeysfile *atkeysfile)
     fclose(file);
     free(word);
 
+    // for each key, edit the length up until NULL
+    atkeysfile->aes_pkam_public_key->len = strlen(atkeysfile->aes_pkam_public_key->key);
+    atkeysfile->aes_pkam_private_key->len = strlen(atkeysfile->aes_pkam_private_key->key);
+    atkeysfile->aes_encrypt_public_key->len = strlen(atkeysfile->aes_encrypt_public_key->key);
+    atkeysfile->aes_encrypt_private_key->len = strlen(atkeysfile->aes_encrypt_private_key->key);
+    atkeysfile->self_encryption_key->len = strlen(atkeysfile->self_encryption_key->key);
+
     ret = 0;
 
     goto exit;
