@@ -10,12 +10,15 @@ int main()
     const char *host = "root.atsign.org";
     const int port = 64;
 
+    printf("host: %s\n", host);
+    printf("port: %d\n", port);
+
     atclient_connection_ctx *ctx = malloc(sizeof(atclient_connection_ctx));
     atclient_connection_init(ctx);
     ret = atclient_connection_connect(ctx, host, port);
     if (ret != 0)
         goto exit;
-    // printf("atclient_connection_connect: %d\n", ret);
+    printf("atclient_connection_connect: %d\n", ret);
 
     const size_t dstlen = 1024;
     char *dst = malloc(sizeof(char) * dstlen);
@@ -23,16 +26,16 @@ int main()
     const char *cmd = "colin\r\n";
     const size_t cmdlen = strlen(cmd);
     ret = atclient_connection_send(ctx, dst, dstlen, olen, cmd, cmdlen);
+    printf("atclient_connection_send_data: %d\n", ret);
     if (ret != 0)
         goto exit;
-    // printf("atclient_connection_send_data: %d\n", ret);
 
-    // printf("\"");
-    // for(int i = 0; i < *olen; i++)
-    // {
-    //     printf("%c", dst[i]);
-    // }
-    // printf("\"\n");
+    printf("\"");
+    for(int i = 0; i < *olen; i++)
+    {
+        printf("%c", dst[i]);
+    }
+    printf("\"\n");
 
     ret = strncmp(dst, "79b6d83f-5026-5fda-8299-5a0704bd2416.canary.atsign.zone:1029", *olen);
     if(ret != 0)
