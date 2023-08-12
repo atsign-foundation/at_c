@@ -1,4 +1,4 @@
-name: Tests
+name: AtChops & AtClient Unit Tests
 on:
   push:
     branches: [trunk]
