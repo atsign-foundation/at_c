@@ -29,7 +29,12 @@ int main()
     }
     printf("\n");
 
-    ret = 1;
+    // ret = 1;
+
+    if(plaintextolen <= 0)
+    {
+        ret = 1;
+    }
 
     return ret;
 }
