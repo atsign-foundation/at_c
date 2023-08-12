@@ -1,5 +1,5 @@
 
-file(GLOB_RECURSE files ${CMAKE_CURRENT_LIST_DIR}/*.c)
+file(GLOB_RECURSE files ${CMAKE_CURRENT_LIST_DIR}/test_*.c)
 foreach(file ${files})
     # ${filename} - without `.c`
     get_filename_component(filename ${file} NAME)
