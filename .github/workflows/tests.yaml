@@ -8,7 +8,7 @@ on:
 jobs:
   unit_tests:
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
+    continue-on-error: true # if one matrix cell fails, the other ones keep going :)
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
