@@ -10,29 +10,18 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
+        package: [atchops, atclient]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
 
-      - name: AtChops
+      - name: CMake Configure, Make Install, and CTest
         uses: threeal/cmake-action@v1.3.0
         with:
-          source-dir: packages/atchops
+          source-dir: packages/${{ matrix.package }}
           generator: Unix Makefiles
-          args: -DATCHOPS_BUILD_TESTS=ON
-          build-dir: packages/atchops/build
-          run-build: true
-          build-args: --target install
-          run-test: true
-          test-args: -V --output-on-failure
-
-      - name: AtClient
-        uses: threeal/cmake-action@v1.3.0
-        with:
-          source-dir: packages/atclient
-          generator: Unix Makefiles
-          args: -DATCLIENT_BUILD_TESTS=ON
-          build-dir: packages/atclient/build
+          args: -D${{ matrix.package }}_BUILD_TESTS=ON
+          build-dir: packages/${{ matrix.package }}/build
           run-build: true
           build-args: --target install
           run-test: true
