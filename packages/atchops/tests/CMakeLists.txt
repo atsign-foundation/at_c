@@ -8,5 +8,5 @@ foreach(file ${files})
 
     add_executable(${filename} ${file})
     target_link_libraries(${filename} PRIVATE atchops)
-    add_test(NAME ${filename} COMMAND ${filename})
+    add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
 endforeach()

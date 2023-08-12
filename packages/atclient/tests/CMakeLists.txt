@@ -1,4 +1,11 @@
 
-add_executable(test_connection ${CMAKE_CURRENT_LIST_DIR}/test_connection.c)
-target_link_libraries(test_connection PRIVATE atclient)
-add_test(NAME Connection COMMAND test_connection)
+file(GLOB_RECURSE files ${CMAKE_CURRENT_LIST_DIR}/*.c)
+foreach(file ${files})
+    # ${filename} - without `.c`
+    get_filename_component(filename ${file} NAME)
+    string(REPLACE ".c" "" filename ${filename})
+
+    add_executable(${filename} ${file})
+    target_link_libraries(${filename} PRIVATE atchops)
+    add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
+endforeach()
