@@ -28,11 +28,23 @@ jobs:
       #     # run-test: true
       #     # test-args: -V --output-on-failure
 
-      - name: CMake Configure and Build
+      - name: CMake Configure
         working-directory: packages/${{matrix.package}}
         run: |
           cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
+
+      - name: Build and Install (Linux/MacOS)
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
+        working-directory: packages/${{matrix.package}}
+        run: |
           sudo cmake --build build --target install
+
+      - name: Build and Install (Linux/MacOS)
+        if: ${{ matrix.os == 'windows-latest' }}
+        working-directory: packages/${{matrix.package}}
+        run: |
+          cmake --build build --target install
+
 
       - name: CTest
         working-directory: packages/${{ matrix.package}}/build/tests
