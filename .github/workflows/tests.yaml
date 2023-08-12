@@ -44,10 +44,16 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{matrix.package}}
         run: |
-          cmake --build build --target install --config Debug
+          cmake --build build --target install
 
-
-      - name: CTest
+      - name: CTest (Linux/MacOS)
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
           ctest -V --output-on-failure
+
+      - name: CTest (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        working-directory: packages/${{ matrix.package}}/build/tests
+        run: |
+          ctest -V -C Debug 
