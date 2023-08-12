@@ -18,19 +18,23 @@ jobs:
         uses: threeal/cmake-action@v1.3.0
         with:
           source-dir: packages/atchops
-          build-dir: packages/atchops/build
           generator: Unix Makefiles
           args: -DATCHOPS_BUILD_TESTS=ON
+          build-dir: packages/atchops/build
           run-build: true
+          build-args: --target install
           run-test: true
+          test-args: -V --output-on-failure
 
       - name: AtClient
         uses: threeal/cmake-action@v1.3.0
         with:
           source-dir: packages/atclient
-          build-dir: packages/atclient/build
           generator: Unix Makefiles
           args: -DATCLIENT_BUILD_TESTS=ON
+          build-dir: packages/atclient/build
           run-build: true
+          build-args: --target install
           run-test: true
+          test-args: -V --output-on-failure
 
