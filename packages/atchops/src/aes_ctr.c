@@ -5,6 +5,8 @@
 #include "atchops/aes_ctr.h"
 #include "atchops/base64.h"
 
+#define BUFFER_SIZE 65536
+
 int atchops_aes_ctr_encrypt(
     const char *keybase64, 
     const unsigned long keybase64len,
@@ -65,7 +67,7 @@ int atchops_aes_ctr_encrypt(
     ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
     // printf("mbedtls_aes_setkey_enc: %d\n", ret);
 
-    unsigned long ciphertextlen = 5000;
+    unsigned long ciphertextlen = BUFFER_SIZE;
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     unsigned long ciphertextolen = 0;
 
@@ -131,7 +133,7 @@ int atchops_aes_ctr_decrypt(
     // printf("\n\n");
 
     // 2. decode the ciphertextbase64 into ciphertext
-    unsigned long ciphertextlen = 5000;
+    unsigned long ciphertextlen = BUFFER_SIZE;
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     memset(ciphertext, 0, ciphertextlen);
     unsigned long ciphertextolen = 0;
@@ -162,7 +164,7 @@ int atchops_aes_ctr_decrypt(
     unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
     memset(stream_block, 0, 16);
 
-    unsigned long plaintextpaddedlen = 1000;
+    unsigned long plaintextpaddedlen = plaintextlen;
     unsigned char *plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedlen);
     memset(plaintextpadded, 0, plaintextpaddedlen);
     unsigned long plaintextpaddedolen = 0;

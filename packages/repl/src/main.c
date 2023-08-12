@@ -100,6 +100,7 @@ int main()
 
     const size_t pkamprivatekeylen = 10000;
     unsigned char *pkamprivatekey = malloc(sizeof(unsigned char) * pkamprivatekeylen);
+    memset(pkamprivatekey, 0, pkamprivatekeylen);
     size_t pkamprivatekeyolen = 0;
 
     printf("self encryption key: \"%s\"\n", atkeysfile.self_encryption_key->key);
@@ -133,6 +134,7 @@ int main()
 
     size_t pkamcommandlen = 32768;
     unsigned char *pkamcommand = malloc(sizeof(unsigned char) * pkamcommandlen);
+    memset(pkamcommand, 0, pkamcommandlen);
     memset(pkamcommand, 0, pkamcommandlen);
 
     strcat(pkamcommand, "pkam:");
