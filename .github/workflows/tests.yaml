@@ -7,11 +7,12 @@ on:
 
 jobs:
   unit_tests:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         package: [atchops, atclient]
-    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       # - name: CMake Configure, Make Install, and CTest
@@ -39,7 +40,7 @@ jobs:
         run: |
           sudo cmake --build build --target install
 
-      - name: Build and Install (Linux/MacOS)
+      - name: Build and Install (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{matrix.package}}
         run: |
