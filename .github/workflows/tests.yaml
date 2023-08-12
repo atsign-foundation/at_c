@@ -20,6 +20,7 @@ jobs:
           source-dir: packages/atclient
           build-dir: packages/atclient/build
           generator: Unix Makefiles
+          args: -DATCLIENT_BUILD_TESTS=ON
           run-build: true
           run-test: false
 
