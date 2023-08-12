@@ -5,255 +5,201 @@
 #include "atchops/aes_ctr.h"
 #include "atchops/base64.h"
 
-#define AES_KEY_BITS 256
-#define AES_KEY_BYTES AES_KEY_BITS / 8
-#define IV_AMOUNT_BYTES 16
-
-#define MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION 5000
-
-int atchops_aes_ctr_encrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned long *ciphertextbase64olen, unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len)
+int atchops_aes_ctr_encrypt(
+    const char *keybase64, 
+    const unsigned long keybase64len,
+    const AESKeySize keybits, 
+    const unsigned char *iv,
+    const unsigned long ivlen,
+    const unsigned char *plaintext, // plaintext to encrypt 
+    const unsigned long plaintextlen,  
+    unsigned char *ciphertextbase64,  // buffer to populate
+    const unsigned long ciphertextbase64len, // the size of the buffer
+    unsigned long *ciphertextbase64olen // written actual length in the buffer
+    )
 {
     int ret = 1;
-    size_t plaintext_len = strlen(plaintext);
 
-    // pad the plain text to be a multiple of 16 bytes
-    // printf("Padding...\n");
-    unsigned char *plaintext_padded;
-    size_t plaintext_paddedlen;
+    // 1. initialize AES key
+    unsigned long keylen = keybits/8;
+    unsigned char *key = malloc(sizeof(unsigned char) * keylen);
+    unsigned long keyolen;
 
-    const short int mod = plaintext_len % 16;
-    const short int num_pad_bytes_to_add = 16 - mod;
-    const unsigned char padding_val = num_pad_bytes_to_add;
-
-    plaintext_paddedlen = plaintext_len + num_pad_bytes_to_add;
-    printf("plaintext_paddedlen: %lu = %d + %d\n", plaintext_paddedlen, plaintext_len, num_pad_bytes_to_add);
-    plaintext_padded = malloc(sizeof(unsigned char) * (plaintext_paddedlen + 1));
-    for (int i = 0; i < plaintext_len; i++)
-    {
-        // printf("ia: %d\n", i);
-        *(plaintext_padded + i) = *(plaintext + i);
-    }
-    for (int i = plaintext_len; i < plaintext_len + num_pad_bytes_to_add; i++)
-    {
-        *(plaintext_padded + i) = padding_val;
-        // printf("ib: %d\n", i);
-    }
-
-    // printf("Plaintext Padded: \"%s\"\n", plaintext_padded);
-    printf("plaintext padded: %lu\n", plaintext_paddedlen);
-    for(int i = 0; i < plaintextlen + plaintext_paddedlen+7; i++) {
-        printf("%.02x ", *(plaintext_padded + i));
-    }
-    printf("\n");
-
-    printf("\ninitializing aes key....\n");
-    // initialize AES key
-    unsigned char key[256/8] = {0};
-    size_t keylen = sizeof(key);
-    size_t *writtenlen = malloc(sizeof(size_t));
-
-    ret = atchops_base64_decode(key, keylen, writtenlen, key_base64, strlen(key_base64));
-    printf("atchops_base64_decode: %d\n", ret);
-
-    printf("key: %lu %lu\n", keylen, *writtenlen);
-    for(int i = 0; i < keylen+15; i++) {
-        printf("%.02x ", *(key + i));
-    }
-    printf("\n");
-
-    // key is ready
-
-    psa_status_t status;
-    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    psa_key_id_t psa_key = 0;
-    size_t output_len = 0;
-    const size_t block_size = 16;
-    uint8_t iv[block_size] = {0};
-
-    status = psa_crypto_init();
-    printf("psa_crypto_init: %d\n", status);
-
-    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_ENCRYPT);
-    psa_set_key_algorithm(&attributes, PSA_ALG_CTR);
-    psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&attributes, 256);
-
-    status = psa_import_key(&attributes, key, 32, &psa_key);
-    printf("psa_import_key: %d\n", status);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to import a key\n");
-        return status;
-    }
-
-    unsigned char *ciphertext_notencoded = malloc(sizeof(unsigned char) * 5000);
-    unsigned long *ciphertext_notencodedolen = malloc(sizeof(unsigned long));
-
-    status = psa_cipher_encrypt(psa_key, PSA_ALG_CTR, plaintext_padded, plaintext_paddedlen, ciphertext_notencoded, 5000, ciphertext_notencodedolen);
-    printf("psa_cipher_encrypt: %d\n", status);
-
-    for(int i = 0; i < *ciphertext_notencodedolen+15; i++) {
-        printf("%.02x ", *(ciphertext_notencoded + i));
-    }
-    printf("\n");
-
-    // initialize AES context
-    // mbedtls_aes_context *ctx = malloc(sizeof(mbedtls_aes_context));
-    // mbedtls_aes_init(ctx);
-    // ret = mbedtls_aes_setkey_enc(ctx, key, key_size);
-
-    // size_t *iv_ctr = malloc(sizeof(unsigned int));
-    // *iv_ctr = 0;
-    // unsigned char *iv = malloc(sizeof(unsigned char) * 16);
-    // memset(iv, 0, 16);
-    // unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
-    // memset(stream_block, 0, 16);
-    // unsigned char *aes_encrypted = malloc(sizeof(unsigned char) * 5000);
-    // memset(aes_encrypted, 0, 5000);
-
-    // // maybe base 64 encode it before feeding to cipher
-
-    // // run encrypt
-    // ret = mbedtls_aes_crypt_ctr(ctx, plaintext_paddedlen, iv_ctr, iv, stream_block, plaintext_padded, aes_encrypted);
-
-    // // find how much of the encrypted data is actually used
-    // int aes_encryptedlen = 0;
-    // unsigned char byte;
-    // do
+    ret = atchops_base64_decode(key, keylen, &keyolen, keybase64, keybase64len);
+    // printf("atchops_base64_decode: %d\n", ret);
+    // printf("aes_key:\n");
+    // for(int i = 0; i < keyolen; i++)
     // {
-    //     byte = *(aes_encrypted + aes_encryptedlen++);
-    //     // printf("%x\n", byte);
-    // } while (byte != 0);
-    // aes_encryptedlen = aes_encryptedlen - 1;
+    //     printf("%02x ", *(key + i));
+    // }
+    // printf("\n\n");
 
-    // encode the encrypted data in base64
-    size_t dstlen = MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION;
-    unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    ret = atchops_base64_encode(dst, dstlen, writtenlen, ciphertext_notencoded, *ciphertext_notencodedolen);
+    // 2. pad the plaintext
+    unsigned char *plaintextpadded; // will contain the plaintext with padded trialing bytes
+    size_t plaintextpaddedlen; // the length of the plain text + padding (no null terminator)
 
-    // printf("%s\n", dst);
+    const int num_pad_bytes_to_add = 16 - (plaintextlen % 16);
+    const unsigned char padding_val = num_pad_bytes_to_add;
+    // printf("appending %d bytes of padding: 0x%02x\n", num_pad_bytes_to_add, padding_val);
 
-    // done
-    unsigned char *p = ciphertextbase64;
-    for (int i = 0; i < *writtenlen; i++)
-    {
-        *p++ = *(dst + i);
+    plaintextpaddedlen = plaintextlen + num_pad_bytes_to_add;
+    // printf("plaintext_paddedlen: %lu = %d + %d\n", plaintextpaddedlen, plaintextlen, num_pad_bytes_to_add);
+
+    plaintextpadded = malloc(sizeof(unsigned char) * (plaintextpaddedlen + 1));
+    memcpy(plaintextpadded, plaintext, plaintextlen);
+    memset(plaintextpadded + plaintextlen, padding_val, num_pad_bytes_to_add);
+    plaintextpadded[plaintextpaddedlen] = '\0';
+
+    printf("plaintext padded: %lu\n", plaintextpaddedlen);
+    for(int i = 0; i < plaintextpaddedlen + 1; i++) {
+        printf("%.02x ", *(plaintextpadded + i));
     }
-    *ciphertextbase64olen = *writtenlen;
+    printf("\n\n");
 
-    // mbedtls_aes_free(ctx);
-    // free(iv_ctr);
-    // free(iv);
-    // free(stream_block);
-    // free(aes_encrypted);
+    // 3. AES CTR encrypt
+
+    mbedtls_aes_context aes;
+
+    mbedtls_aes_init(&aes);
+
+    ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
+    // printf("mbedtls_aes_setkey_enc: %d\n", ret);
+
+    unsigned long ciphertextlen = 5000;
+    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    unsigned long ciphertextolen = 0;
+
+    unsigned long nc_off = 0;
+    unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
+    memset(stream_block, 0, 16);
+
+    ret = mbedtls_aes_crypt_ctr(&aes, plaintextpaddedlen, &nc_off, iv, stream_block, plaintextpadded, ciphertext);
+    // printf("mbedtls_aes_crypt_ctr: %d\n", ret);
+
+    free(stream_block);
+    free(key);
+
+    while(*(ciphertext + ciphertextolen++) != '\0');
+    --ciphertextolen; // don't count the null terminator
+
+    printf("ciphertext after encryption (not base64 encoded yet): %lu\n", ciphertextolen);
+    for(int i = 0; i < ciphertextolen; i++)
+    {
+        printf("%02x ", *(ciphertext + i));
+    }
+    printf("\n\n");
+
+    // 4. base64 encode ciphertext
+
+    ret = atchops_base64_encode(ciphertextbase64, ciphertextbase64len, ciphertextbase64olen, ciphertext, ciphertextolen);
+    // printf("atchops_base64_encode: %d\n", ret);
+
+    free(ciphertext);
+    mbedtls_aes_free(&aes);
 
     return ret;
 }
 
-int atchops_aes_ctr_decrypt(const char *key_base64, const AESKeySize key_size, const unsigned char *ciphertext, const size_t ciphertextlen, size_t *plaintextolen, unsigned char *plaintext, const size_t plaintextlen)
+int atchops_aes_ctr_decrypt(
+    const char *keybase64,
+    const unsigned long keybase64len,
+    const AESKeySize keybits,
+    const unsigned char *iv,
+    const unsigned long ivlen,
+    const unsigned char *ciphertextbase64,
+    const unsigned long ciphertextbase64len,
+    unsigned char *plaintext,
+    const size_t plaintextlen,
+    unsigned long *plaintextolen
+    )
 {
     int ret = 1;
-    // initialize AES key
 
-    unsigned char key[key_size/8];
-    size_t keylen = sizeof(key);
+    // 1. initialize AES key
+    unsigned long keylen = keybits/8;
+    unsigned char *key = malloc(sizeof(unsigned char) * keylen);
+    memset(key, 0, keylen);
+    unsigned long keyolen = 0;
 
-    size_t *writtenlen = malloc(sizeof(size_t));
-    ret = atchops_base64_decode(key, keylen, writtenlen, key_base64, strlen(key_base64));
-
-    // initialize AES context
-    // mbedtls_aes_context *ctx = malloc(sizeof(mbedtls_aes_context));
-    // mbedtls_aes_init(ctx);
-    // ret = mbedtls_aes_setkey_enc(ctx, key, key_size);
-
-    // decode the base64 ciphertext
-    size_t dstlen = MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION;
-    unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    ret = atchops_base64_decode(dst, dstlen, writtenlen, ciphertext, strlen(ciphertext));
-
-    printf("\nDecoded ciphertext: %lu\n", *writtenlen);
-    for(int i = 0; i < *writtenlen+16; i++) {
-        printf("%.2x ", *(dst + i));
+    ret = atchops_base64_decode(key, keylen, &keyolen, keybase64, keybase64len);
+    printf("atchops_base64_decode: %d\n", ret);
+    printf("aes_key: %lu\n", keyolen);
+    for(int i = 0; i < keyolen; i++)
+    {
+        printf("%02x ", *(key + i));
     }
-    printf("\n");
+    printf("\n\n");
 
-    // run decrypt
+    // 2. decode the ciphertextbase64 into ciphertext
+    unsigned long ciphertextlen = 5000;
+    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    memset(ciphertext, 0, ciphertextlen);
+    unsigned long ciphertextolen = 0;
 
-    psa_crypto_init();
+    printf("ciphertextbase64: %lu | %.*s\n", ciphertextbase64len, ciphertextbase64len, ciphertextbase64);
+    for(int i = 0; i < ciphertextbase64len; i++)
+    {
+        printf("%02x ", *(ciphertextbase64 + i));
+    }
+    printf("\n\n");
+    ret = atchops_base64_decode(ciphertext, ciphertextlen, &ciphertextolen, ciphertextbase64, ciphertextbase64len);
+    printf("atchops_base64_decode: %d\n", ret);
+    printf("ciphertext decoded: %lu\n", ciphertextolen);
+    for(int i = 0; i < ciphertextolen; i++)
+    {
+        printf("%02x ", *(ciphertext + i));
+    }
+    printf("\n\n");
 
-    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    psa_key_id_t psa_key = 0;
-    size_t output_len = 0;
+    // 3. AES decrypt
+    mbedtls_aes_context aes;
+    mbedtls_aes_init(&aes);
 
-    psa_set_key_algorithm(&attributes, PSA_ALG_CTR);
-    psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&attributes, key_size);
-    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_DECRYPT);
+    ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
+    printf("mbedtls_aes_setkey_dec: %d\n", ret);
 
-    psa_status_t status = psa_import_key(&attributes, key, key_size/8, &psa_key);
-    printf("psa_import_key: %d\n", status);
+    unsigned long nc_off = 0;
+    unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
+    memset(stream_block, 0, 16);
 
-    psa_cipher_decrypt(psa_key, PSA_ALG_CTR, dst, *writtenlen, plaintext, plaintextlen, plaintextolen);
+    unsigned long plaintextpaddedlen = 1000;
+    unsigned char *plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedlen);
+    memset(plaintextpadded, 0, plaintextpaddedlen);
+    unsigned long plaintextpaddedolen = 0;
 
-    // size_t *iv_ctr = malloc(sizeof(unsigned int));
-    // *iv_ctr = 0;
-    // unsigned char *iv = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
-    // memset(iv, 0, IV_AMOUNT_BYTES);
-    // unsigned char *stream_block = malloc(sizeof(unsigned char) * IV_AMOUNT_BYTES);
-    // memset(stream_block, 0, IV_AMOUNT_BYTES);
-    // unsigned char *aes_decrypted = malloc(sizeof(unsigned char) * MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
-    // memset(aes_decrypted, 0, MAX_BYTES_ALLOCATED_FOR_ENCRYPTION_OPERATION);
+    ret = mbedtls_aes_crypt_ctr(&aes, ciphertextolen, &nc_off, iv, stream_block, ciphertext, plaintextpadded);
+    printf("mbedtls_aes_crypt_ctr: %d\n", ret);
 
-    // ret = mbedtls_aes_crypt_ctr(ctx, *writtenlen, iv_ctr, iv, stream_block, dst, aes_decrypted);
+    while(*(plaintextpadded + plaintextpaddedolen++) != '\0');
+    --plaintextpaddedolen; // don't count the null terminator
 
-    // // find how much of the decrypted data is actually used
-    // int aes_decryptedlen = 0;
-    // unsigned char byte;
-    // printf("\nFinding out how much of the encrypted data is actually used: \n");
-    // do
-    // {
-    //     byte = *(aes_decrypted + aes_decryptedlen++);
-    //     printf("%.2x ", byte);
-    // } while (byte != '\0');
-    // printf("\n");
+    printf("plaintextpadded: %lu | %.*s\n", plaintextpaddedolen, plaintextpaddedolen, plaintextpadded);
+    for(int i = 0; i < plaintextpaddedolen; i++)
+    {
+        printf("%02x ", *(plaintextpadded + i));
+    }
+    printf("\n\n");
 
-    // // remove padding
+    free(stream_block);
+    free(key);
 
-    // // find the value of the pad
-    // unsigned char pad_val = *(aes_decrypted + aes_decryptedlen - 2);
-    // // printf("pad_val: %02x\n", pad_val);
-    // if(pad_val >= 0x00 && pad_val <= 0x0F || pad_val == 0x10) // https://www.ibm.com/docs/en/zos/2.4.0?topic=rules-pkcs-padding-method
-    // {
-    //     // eliminate that amount of padding
-    //     aes_decryptedlen -= (pad_val+1);
-    //     *(aes_decrypted+aes_decryptedlen) = '\0';
-    // }
+    // 4. remove padding
 
-    // // printf("aa\n");
-    // // for(int i = 0; i < aes_decryptedlen + 10; i++)
-    // // {
-    // //     printf("%02x ", *(aes_decrypted+i));
-    // // }
-    // // printf("aa\n");
+    // IBM PKCS Padding method states that there is always at least 1 padded value: https://www.ibm.com/docs/en/zos/2.4.0?topic=rules-pkcs-padding-method
+    // the value of the padded byte is always the number of padded bytes to expect, pad_val == num_padded_bytes
+    unsigned char pad_val = *(plaintextpadded + (plaintextpaddedolen - 1));
+    printf("pad_val byte: 0x%02x\n", pad_val);
 
-    // unsigned char *aes_decrypted_unpadded = malloc(sizeof(unsigned char) * aes_decryptedlen);
-    // for (int i = 0; i < aes_decryptedlen; i++)
-    // {
-    //     *(aes_decrypted_unpadded + i) = *(aes_decrypted + i);
-    // }
+    *plaintextolen = plaintextpaddedolen - pad_val;
 
-    // // done
-    // unsigned char *p = plaintext;
-    // for (int i = 0; i < plaintextlen; i++)
-    // {
-    //     *p++ = *(aes_decrypted_unpadded + i);
-    // }
-    // *plaintextolen = aes_decryptedlen;
+    // add null terminator for good sake
+    *(plaintextpadded + *plaintextolen) = '\0';
+    memcpy(plaintext, plaintextpadded, *plaintextolen);
 
-    // mbedtls_aes_free(ctx);
-    // free(iv_ctr);
-    // free(iv);
-    // free(stream_block);
-    // free(aes_decrypted);
+    // free everything
+    free(plaintextpadded);
+    free(ciphertext);
+    mbedtls_aes_free(&aes);
 
     return ret;
 }

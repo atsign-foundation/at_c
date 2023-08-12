@@ -39,16 +39,27 @@ include(GNUInstallDirs)
 # 2. Use FetchContent to get MbedTLS namespace
 # #########################################################
 
+# v3.4.1 Release
 FetchContent_Declare(
     MbedTLS
     URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
     URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
+    OVERRIDE_FIND_PACKAGE
 )
 
-FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
+# From `development` branch
+# FetchContent_Declare(
+#     MbedTLS
+#     GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls
+#     GIT_TAG 2588f8d36d8f519c6e37b8a8f8977ba2aa9c72a4
+#     # OVERRIDE_FIND_PACKAGE
+# )
+
+# FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
+find_package(MbedTLS REQUIRED)
 
 # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx50 are now available
-message(STATUS "Successfully fetched MbedTLS v3.4.1")
+message(STATUS "Successfully fetched MbedTLS")
 
 # #########################################################
 # 3. Create atchops target

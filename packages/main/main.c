@@ -205,6 +205,22 @@ int atchops_aes_ctr_decrypt(
 
     // 4. remove padding
 
+    // IBM PKCS Padding method states that there is always at least 1 padded value: https://www.ibm.com/docs/en/zos/2.4.0?topic=rules-pkcs-padding-method
+    // the value of the padded byte is always the number of padded bytes to expect, pad_val == num_padded_bytes
+    unsigned char pad_val = *(plaintextpadded + (plaintextpaddedolen - 1));
+    printf("pad_val byte: 0x%02x\n", pad_val);
+
+    *plaintextolen = plaintextpaddedolen - pad_val;
+
+    // add null terminator for good sake
+    *(plaintextpadded + *plaintextolen) = '\0';
+    memcpy(plaintext, plaintextpadded, *plaintextolen);
+
+    // free everything
+    free(plaintextpadded);
+    free(ciphertext);
+    mbedtls_aes_free(&aes);
+
     return ret;
 }
 
@@ -223,7 +239,7 @@ int main()
     }
     printf("\n\n");
 
-    unsigned char *plaintext = "I like pizza";
+    unsigned char *plaintext = "I like pizza!";
     const unsigned long plaintextlen = strlen(plaintext);
     printf("plaintext: %lu | %s\n", plaintextlen, plaintext);
     for(int i = 0; i < plaintextlen; i++)
@@ -259,6 +275,14 @@ int main()
 
     memset(iv, 0, ivlen);
     ret = atchops_aes_ctr_decrypt(AES_KEY, strlen(AES_KEY), 256, iv, ivlen, ciphertextbase64, ciphertextbase64olen, plaintext2, plaintextlen2, &plaintextolen);
+
+    printf("atchops_aes_ctr_decrypt: %d\n", ret);
+    printf("plaintext: %lu | %.*s\n", plaintextolen, plaintextolen, plaintext2);
+    for(int i = 0; i < plaintextolen; i++)
+    {
+        printf("%02x ", *(plaintext2 + i));
+    }
+    printf("\n\n");
 
 
     return ret;
