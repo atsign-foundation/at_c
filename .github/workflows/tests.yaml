@@ -13,17 +13,12 @@ jobs:
         package: [atchops, atclient]
     runs-on: ${{ matrix.os }}
     steps:
-
-      - name: Upper
-        run: |
-          UPPER=$(echo "${{ matrix.package }}" | tr '[:lower:]' '[:upper:]')
-
       - name: CMake Configure, Make Install, and CTest
         uses: threeal/cmake-action@v1.3.0
         with:
           source-dir: packages/${{ matrix.package }}
           generator: Unix Makefiles
-          args: -D${UPPER}_BUILD_TESTS=ON
+          args: -D$(echo "${{ matrix.package }}" | tr '[:lower:]' '[:upper:]')_BUILD_TESTS=ON
           build-dir: packages/${{ matrix.package }}/build
           run-build: true
           build-args: --target install
