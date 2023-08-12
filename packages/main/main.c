@@ -175,7 +175,7 @@ int atchops_aes_ctr_decrypt(
     mbedtls_aes_context aes;
     mbedtls_aes_init(&aes);
 
-    ret = mbedtls_aes_setkey_dec(&aes, key, keybits);
+    ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
     printf("mbedtls_aes_setkey_dec: %d\n", ret);
 
     unsigned long nc_off = 0;
