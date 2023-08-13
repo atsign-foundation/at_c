@@ -52,17 +52,18 @@ jobs:
         run: |
           ctest -V --output-on-failure
 
-      - name: CTest (Windows)
-        timeout-minutes: 1
-        if: ${{ matrix.os == 'windows-latest' }}
-        working-directory: packages/${{ matrix.package}}/build/tests
-        run: |
-          ctest -V --output-on-failure -C Debug --timeout 10
-
       - name: Windows experimental
+        continue-on-error: true
         timeout-minutes: 1
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
           ./test_aes_ctr
           ./test_aes_ctr_decrypt
+
+      - name: CTest (Windows)
+        timeout-minutes: 1
+        if: ${{ matrix.os == 'windows-latest' }}
+        working-directory: packages/${{ matrix.package}}/build/tests
+        run: |
+          ctest -V --output-on-failure -C Debug --timeout 10
