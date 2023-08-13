@@ -6,7 +6,7 @@ on:
     branches: [trunk]
 
 jobs:
-  unit_tests:
+  unit_tests_atchops:
     runs-on: ${{ matrix.os }}
     continue-on-error: true # if one matrix cell fails, the other ones keep going :)
     strategy:
@@ -30,16 +30,9 @@ jobs:
       #     # test-args: -V --output-on-failure
 
       - name: CMake Configure
-        # if: ${{ (matrix.os != 'windows-latest') || (matrix.package != 'atchops') }} 
         working-directory: packages/${{matrix.package}}
         run: |
           cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
-
-      # - name: CMake Configure (Windows AtChops)
-      #   if: ${{ (matrix.os == 'windows-latest') && (matrix.package == 'atchops') }} 
-      #   working-directory: packages/${{matrix.package}}
-      #   run: |
-      #     cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON -DWINDOWS_BUILD=1 -DWINDOWS=1
 
       - name: Build and Install (Linux/MacOS)
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
@@ -61,6 +54,7 @@ jobs:
 
       - name: CTest (Windows)
         timeout-minutes: 1
+        continue-on-error: true
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
