@@ -30,9 +30,16 @@ jobs:
       #     # test-args: -V --output-on-failure
 
       - name: CMake Configure
+        if: ${{ (matrix.os != 'windows-latest') || (matrix.package != 'atchops') }} 
         working-directory: packages/${{matrix.package}}
         run: |
           cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
+
+      - name: CMake Configure (Windows AtChops)
+        if: ${{ (matrix.os == 'windows-latest') && (matrix.package == 'atchops') }} 
+        working-directory: packages/${{matrix.package}}
+        run: |
+          cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON -DWINDOWS_BUILD=1 -DWINDOWS=1
 
       - name: Build and Install (Linux/MacOS)
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
@@ -51,15 +58,6 @@ jobs:
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
           ctest -V --output-on-failure
-
-      - name: Windows experimental
-        continue-on-error: true
-        timeout-minutes: 1
-        if: ${{ matrix.os == 'windows-latest' }}
-        working-directory: packages/${{ matrix.package}}/build/tests
-        run: |
-          ./test_aes_ctr
-          ./test_aes_ctr_decrypt
 
       - name: CTest (Windows)
         timeout-minutes: 1
