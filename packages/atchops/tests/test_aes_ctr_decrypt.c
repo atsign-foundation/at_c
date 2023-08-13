@@ -13,28 +13,36 @@ int main()
     int ret = 1;
 
     unsigned long plaintextlen = 10000;
-    unsigned char *plaintext = calloc(plaintextlen, sizeof(unsigned char));
+    unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
     unsigned long plaintextolen = 0;
 
-    unsigned char *iv = calloc(16, sizeof(unsigned char));
+    unsigned char *iv = malloc(sizeof(unsigned char) * 16);
     memset(iv, 0, 16);
 
     ret = atchops_aes_ctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), 256, iv, 16, CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext, plaintextlen, &plaintextolen);
+    if(ret != 0)
+    {
+        goto exit;
+    }
 
-    printf("decrypted: ");
-    printf("%s\n", plaintext);
-    for(int i = 0; i < plaintextolen; i++)
+    if(plaintextolen <= 0)
+    {
+        ret = 1;
+        goto exit;
+    }
+
+    printf("decrypted: %s\n", plaintext);
+    for(int i = 0; i < plaintextolen && i < plaintextlen; i++)
     {
         printf("%02x ", *(plaintext + i));
     }
     printf("\n");
 
-    // ret = 1;
 
-    if(plaintextolen <= 0)
-    {
-        ret = 1;
-    }
+    free(iv);
+    free(plaintext);
 
+exit: {
     return ret;
+}
 }
