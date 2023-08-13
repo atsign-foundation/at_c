@@ -21,23 +21,25 @@ int main()
 
     atchops_rsa_publickey publickeystruct;
 
-    // printf("populating public key struct..\n");
+    printf("populating public key struct..\n");
     ret = atchops_rsa_populate_publickey(publickey, publickeylen, &publickeystruct);
+    printf("atchops_rsa_populate_publickey returned: %d\n", ret);
     if(ret != 0)
         goto ret;
 
-    const size_t ciphertextlen = 256;
+    const size_t ciphertextlen = 1024;
     char *ciphertext = malloc((sizeof(unsigned char) * ciphertextlen) + 1);
     size_t *ciphertextolen = malloc(sizeof(size_t));
     ciphertext[*ciphertextolen] = '\0'; // add null terminator, not necessary but it's okay
 
-    // printf("encrypting...\n");
+    printf("encrypting...\n");
     ret = atchops_rsa_encrypt(publickeystruct, plaintext, plaintextlen, &ciphertext, ciphertextolen);
+    printf("atchops_rsa_encrypt returned: %d\n", ret);
     if(ret != 0)
         goto ret;
 
-    // printf("ciphertext (base64 encoded): %s\n", ciphertext);
-    // printx(ciphertext, *ciphertextolen);
+    printf("ciphertext (base64 encoded): %s\n", ciphertext);
+    printx(ciphertext, *ciphertextolen);
 
     goto ret;
 

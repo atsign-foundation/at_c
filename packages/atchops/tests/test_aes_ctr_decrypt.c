@@ -42,6 +42,8 @@ int main()
     free(iv);
     free(plaintext);
 
+    goto exit;
+
 exit: {
     return ret;
 }

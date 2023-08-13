@@ -19,6 +19,7 @@ int main()
     const char *ciphertext = CIPHERTEXTBASE64;
 
     ret = atchops_rsa_populate_privatekey(privatekey, privatekeylen, &privatekeystruct);
+    printf("atchops_rsa_populate_privatekey: %d\n", ret);
     if(ret != 0)
         goto ret;
 
@@ -27,10 +28,14 @@ int main()
     plaintext[*plaintextlen] = '\0'; // add null terminator, not necessary but it's okay
 
     ret = atchops_rsa_decrypt(privatekeystruct, ciphertext, ciphertextlen, &plaintext, plaintextlen);
+    printf("atchops_rsa_decrypt: %d\n", ret);
     if(ret != 0)
         goto ret;
 
-    // printf("plaintext: %s\n", plaintext);
+    printf("plaintext: %s\n", plaintext);
+
+    free(plaintext);
+    free(plaintextlen);
 
     goto ret;
 

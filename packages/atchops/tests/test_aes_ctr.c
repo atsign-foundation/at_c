@@ -60,6 +60,8 @@ int main(int argc, char **argv)
 
     free(ciphertext);
     free(plaintext2);
+    goto ret;
+    
 ret:
 {
     return ret;
