@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <stddef.h>
 
 void printx(unsigned char *data, size_t len);

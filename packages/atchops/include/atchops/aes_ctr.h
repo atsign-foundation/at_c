@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 
 #define IV_AMOUNT_BYTES 16
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <stddef.h>
 
 #define MAX_TEXT_LENGTH_FORBASE64_ENCODING_OPERATION 10000 // the max length of base64 encoded text (should be more than enough)

@@ -3,16 +3,17 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "atchops/byteutil.h"
 #include "atchops/aes_ctr.h"
 
-void printx(const unsigned char *str, size_t len)
-{
-    for (int i = 0; i < len; i++)
-    {
-        printf("%02x ", *(str + i));
-    }
-    printf("\n");
-}
+// void printx(const unsigned char *str, size_t len)
+// {
+//     for (int i = 0; i < len; i++)
+//     {
+//         printf("%02x ", *(str + i));
+//     }
+//     printf("\n");
+// }
 
 int main(int argc, char **argv)
 {
