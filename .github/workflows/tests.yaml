@@ -51,13 +51,13 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{matrix.package}}
         run: |
-          cmake --build build -C Debug
+          cmake --build build --config Debug
 
       - name: CTest (Linux/MacOS)
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
-          ctest -V --output-on-failure
+          ctest -V --output-on-failure --timeout 2
 
       - name: CTest (Windows)
         timeout-minutes: 1
