@@ -1,7 +1,7 @@
-#include "atclient/at_logger.h"
 #include <stdio.h>
+#include "atclient/at_logger.h"
 
-void printx(const unsigned char *bytes, size_t byteslen) {
+static void printx(const unsigned char *bytes, size_t byteslen) {
     for (size_t i = 0; i < byteslen; i++) {
         printf("%02x ", bytes[i]);
     }
