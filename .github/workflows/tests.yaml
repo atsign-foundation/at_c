@@ -57,4 +57,4 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
-          ctest -V -C Release 
+          ctest -V
