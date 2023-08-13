@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdint.h>
 #include "atchops/aes_ctr.h"
 
 void printx(const unsigned char *str, size_t len)
