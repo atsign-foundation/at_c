@@ -28,7 +28,7 @@ int atchops_aes_ctr_encrypt(
     unsigned long keyolen;
 
     ret = atchops_base64_decode(key, keylen, &keyolen, keybase64, keybase64len);
-    // printf("atchops_base64_decode: %d\n", ret);
+    printf("atchops_base64_decode: %d\n", ret);
     // printf("aes_key:\n");
     // for(int i = 0; i < keyolen; i++)
     // {
@@ -65,7 +65,7 @@ int atchops_aes_ctr_encrypt(
     mbedtls_aes_init(&aes);
 
     ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
-    // printf("mbedtls_aes_setkey_enc: %d\n", ret);
+    printf("mbedtls_aes_setkey_enc: %d\n", ret);
 
     unsigned long ciphertextlen = BUFFER_SIZE;
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
@@ -76,7 +76,7 @@ int atchops_aes_ctr_encrypt(
     memset(stream_block, 0, 16);
 
     ret = mbedtls_aes_crypt_ctr(&aes, plaintextpaddedlen, &nc_off, iv, stream_block, plaintextpadded, ciphertext);
-    // printf("mbedtls_aes_crypt_ctr: %d\n", ret);
+    printf("mbedtls_aes_crypt_ctr: %d\n", ret);
 
     free(stream_block);
     free(key);
@@ -94,7 +94,7 @@ int atchops_aes_ctr_encrypt(
     // 4. base64 encode ciphertext
 
     ret = atchops_base64_encode(ciphertextbase64, ciphertextbase64len, ciphertextbase64olen, ciphertext, ciphertextolen);
-    // printf("atchops_base64_encode: %d\n", ret);
+    printf("atchops_base64_encode: %d\n", ret);
 
     free(ciphertext);
     mbedtls_aes_free(&aes);
@@ -145,7 +145,7 @@ int atchops_aes_ctr_decrypt(
     // }
     // printf("\n\n");
     ret = atchops_base64_decode(ciphertext, ciphertextlen, &ciphertextolen, ciphertextbase64, ciphertextbase64len);
-    // printf("atchops_base64_decode: %d\n", ret);
+    printf("atchops_base64_decode: %d\n", ret);
     // printf("ciphertext decoded: %lu\n", ciphertextolen);
     // for(int i = 0; i < ciphertextolen; i++)
     // {
@@ -158,7 +158,7 @@ int atchops_aes_ctr_decrypt(
     mbedtls_aes_init(&aes);
 
     ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
-    // printf("mbedtls_aes_setkey_enc: %d\n", ret);
+    printf("mbedtls_aes_setkey_enc: %d\n", ret);
 
     unsigned long nc_off = 0;
     unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
@@ -170,7 +170,7 @@ int atchops_aes_ctr_decrypt(
     unsigned long plaintextpaddedolen = 0;
 
     ret = mbedtls_aes_crypt_ctr(&aes, ciphertextolen, &nc_off, iv, stream_block, ciphertext, plaintextpadded);
-    // printf("mbedtls_aes_crypt_ctr: %d\n", ret);
+    printf("mbedtls_aes_crypt_ctr: %d\n", ret);
 
     // printf("plaintextpadded: %.*s\n", plaintextpaddedlen, plaintextpadded);
     // for(int i = 0; i < plaintextpaddedlen; i++)
@@ -206,6 +206,8 @@ int atchops_aes_ctr_decrypt(
 
     *plaintextolen = plaintextpaddedolen - pad_val;
     memcpy(plaintext, plaintextpadded, *plaintextolen);
+
+    printf("removed padding in decrypt...\n");
 
     // free everything
     free(ciphertext);
