@@ -29,10 +29,12 @@ option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF)
 # 0b. Build atchops locally or use already installed atchops
 # #########################################################
 
-# can use it like `cmake -S . -B build -DBUILD_LOCAL_ATCHOPS=OFF` to not rebuild atchops everytime
-option(USE_LOCAL_ATCHOPS "Use Local ATCHOPS" ON)
+# can use during the configuration command
+# example: `cmake -S . -B build -DFETCH_ATCHOPS=OFF` to not rebuild atchops everytime
+option(ATCLIENT_FETCH_ATCHOPS "Use Local ATCHOPS" ON)
+option(ATCLIENT_FETCH_MBEDTLS "Fetch MbedTLS via releases" ON)
 
-if(USE_LOCAL_ATCHOPS)
+if(ATCLIENT_FETCH_ATCHOPS)
 	set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops)
 	message(STATUS "Building Local ATCHOPS: ${USE_LOCAL_ATCHOPS} from DIR: ${atchops_src_dir}")
 endif()
@@ -52,36 +54,38 @@ include(GNUInstallDirs)
 # #########################################################
 # 2A. Get MbedTLS::mbedtls
 # #########################################################
+if(ATCLIENT_FETCH_MBEDTLS)
+	FetchContent_Declare(
+		MbedTLS
+		URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
+		URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
+	)
 
-FetchContent_Declare(
-	MbedTLS
-	URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
-	URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
-)
-
-FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
-
-# find_package(MbedTLS REQUIRED)
+	FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
+	message(STATUS "Successfully fetched MbedTLS")
+else()
+	find_package(MbedTLS REQUIRED CONFIG)
+	message(STATUS "Successfully found `MbedTLS` package")
+endif()
 
 # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx50 are now available via MbedTLS namespace
-message(STATUS "Successfully fetched MbedTLS")
 
 # #########################################################
 # 2B. Get atchops
 # #########################################################
-
-if(USE_LOCAL_ATCHOPS)
+if(ATCLIENT_FETCH_ATCHOPS)
 	FetchContent_Declare(
 		atchops
 		SOURCE_DIR ${atchops_src_dir}
 	)
 	FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
+	message(STATUS "Successfully fetched `atchops` package")
 else()
 	find_package(atchops REQUIRED CONFIG)
+	message(STATUS "Successfully found `atchops` package")
 endif()
 
 # atchops::atchops is now available
-message(STATUS "Successfully found `atchops` package")
 
 # #########################################################
 # 3. Create atclient library
@@ -103,11 +107,30 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # This step configures running `cmake --build build --target install` (which is the same thing as `make install`)
 # #########################################################
 
+# exports atclient-config.cmake to /usr/local/lib/cmake/atclient/atclient-config.cmake
+set(TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atclient
+
+if(ATCLIENT_FETCH_ATCHOPS) # if we are fetching atchops, it was not installed, so we do not need to export it
+	list(APPEND TARGETS_TO_INSTALL atchops) # install atchops
+endif()
+
+if(ATCLIENT_FETCH_MBEDTLS) # if we are fetching mbedtls, it was not installed, so we do not need to export it
+	list(APPEND TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto) # install mbedtls
+endif()
+
 # install atclient library to /usr/local/lib/libatclient.a
 install(
-	TARGETS ${PROJECT_NAME} atchops mbedtls mbedx509 mbedcrypto
+	TARGETS ${TARGETS_TO_INSTALL}
 	EXPORT ${PROJECT_NAME}-config
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+# export the config to /usr/local/lib/cmake/atclient/atclient-config.cmake
+install(
+	EXPORT ${PROJECT_NAME}-config
+	NAMESPACE ${PROJECT_NAME}::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	FILE ${PROJECT_NAME}-config.cmake
 )
 
 # put everything inside of include/atclient into /usr/local/include/atclient
@@ -116,19 +139,10 @@ install(
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# exports atclient-config.cmake to /usr/local/lib/cmake/atclient/atclient-config.cmake
-install(
-	EXPORT ${PROJECT_NAME}-config
-	NAMESPACE ${PROJECT_NAME}::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-	FILE ${PROJECT_NAME}-config.cmake
-)
-
 # #########################################################
 # 5. Add tests
 # Run the tests via cd build && make all && cd tests && ctest
 # #########################################################
-
 if(ATCLIENT_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)

@@ -13,6 +13,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         package: [atchops, atclient]
+        
         # exclude:
         #   - os: windows-latest # this is failing for some reason
         #     package: atchops
@@ -56,7 +57,6 @@ jobs:
           ctest -V --output-on-failure --timeout 2
 
       - name: CTest (Windows)
-        timeout-minutes: 1
         continue-on-error: true # even if this fails, the overall job should still succeed
         if: ${{ matrix.os == 'windows-latest' }}
         working-directory: packages/${{ matrix.package}}/build/tests
