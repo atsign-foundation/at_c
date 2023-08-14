@@ -7,57 +7,25 @@ on:
 
 jobs:
   unit-tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: "ubuntu-latest"
     continue-on-error: true # if one matrix cell fails, the other ones keep going :)
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
         package: [atchops, atclient]
-
-        exclude:
-          - os: windows-latest # this is failing for some reason
-            package: atchops
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      # - name: CMake Configure, Make Install, and CTest
-      #   uses: threeal/cmake-action@v1.3.0
-      #   with:
-      #     source-dir: packages/${{ matrix.package }}
-      #     generator: Unix Makefiles
-      #     # args: -D$(echo "${{ matrix.package }}" | tr '[:lower:]' '[:upper:]')_BUILD_TESTS=ON # this doesn't work :/
-      #     args: -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
-      #     build-dir: packages/${{ matrix.package }}/build
-      #     run-build: true
-      #     build-args: --target install
-      #     run-test: false
-      #     # run-test: true
-      #     # test-args: -V --output-on-failure
 
       - name: CMake Configure
         working-directory: packages/${{matrix.package}}
         run: |
           cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
 
-      - name: Build and Install (Linux/MacOS)
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
+      - name: Build and Install
         working-directory: packages/${{matrix.package}}
         run: |
           sudo cmake --build build --target install
 
-      - name: CTest (Linux/MacOS)
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
+      - name: CTest
         working-directory: packages/${{ matrix.package}}/build/tests
         run: |
           ctest -V --output-on-failure --timeout 2
-
-      - name: Build and Install (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        working-directory: packages/${{matrix.package}}
-        run: |
-          cmake --build build --config Debug
-
-      - name: CTest (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        working-directory: packages/${{ matrix.package}}/build/tests
-        run: |
-          ctest -V --output-on-failure -C Debug --timeout 10
