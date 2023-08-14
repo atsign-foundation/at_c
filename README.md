@@ -46,7 +46,7 @@ Once you have completed this step, you can branch off to any of the following:
 cmake -S . -B build
 ```
 
-If you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime:
+If you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime with `ATCLIENT_FETCH_MBEDTLS=OFF` and `ATCLIENT_FETCH_ATCHOPS=OFF` respectively:
 
 ```sh
 cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=OFF
