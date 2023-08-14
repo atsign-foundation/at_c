@@ -13,10 +13,15 @@ jobs:
         run: |
           git clone https://github.com/Mbed-TLS/mbedtls.git
 
-      - name: Install MbedTLS
+      - name: Config MbedTLS
         working-directory: mbedtls
         run: |
-          cmake --build build --target install 
+          cmake -S . -B build -DWINDOWS=1 -DWINDOWS_BUILD=1
+
+      - name: Config MbedTLS
+        working-directory: mbedtls
+        run: |
+          cmake --build build --target install
 
       - name: CMake Configure AtChops
         working-directory: packages/atchops
