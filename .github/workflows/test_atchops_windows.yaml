@@ -13,6 +13,11 @@ jobs:
         run: |
           git clone https://github.com/Mbed-TLS/mbedtls.git
 
+      - name: Run scripts\make_generated_files.bat
+        working-directory: mbedtls
+        run: |
+          scripts\make_generated_files.bat
+          
       - name: Config MbedTLS
         working-directory: mbedtls
         run: |
