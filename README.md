@@ -30,6 +30,8 @@ git clone https://github.com/atsign-foundation/at_c.git
 cd at_c/packages/atclient
 ```
 
+You could also cd into `atchops` if you want to build/test that instead.
+
 Once you have completed this step, you can branch off to any of the following:
 
 - [Installing on Linux/MacOS](#installing-on-linuxmacos)
