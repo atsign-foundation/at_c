@@ -16,19 +16,38 @@
 
 To build the source code you will need to have [CMake](https://cmake.org/) installed.
 
-### Building on Linux/MacOS
+Building the source code will allow you to use the `atclient` library in your own CMake projects:
 
-1. Clone the repository and change directory into `packages/atclient`.
+```cmake
+find_package(atclient REQUIRED CONFIG)
+target_link_libraries(myproj PRIVATE atclient::atclient)
+```
+
+The first step to achieve this is to first get ahold of the source code either via git clone or from downloading the source from our releases:
 
 ```sh
 git clone https://github.com/atsign-foundation/at_c.git
 cd at_c/packages/atclient
 ```
 
-2. CMake configure
+Once you have completed this step, you can branch off to any of the following:
+
+- [Installing on Linux/MacOS](#installing-on-linuxmacos)
+- [Running Tests on Linux/MacOS](#running-tests-on-linuxmacos)
+- [Installing on Windows](#installing-on-windows)
+
+### Installing on Linux/MacOS
+
+1. CMake configure
 
 ```sh
 cmake -S . -B build
+```
+
+If you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime:
+
+```sh
+cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=OFF
 ```
 
 3. Install
@@ -37,25 +56,32 @@ cmake -S . -B build
 cmake --build build --target install
 ```
 
-### Building on Windows
+### Running Tests on Linux/MacOS
+
+1. CMake configure with `-DATCLIENT_BUILD_TESTS=ON`
+
+```sh
+cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
+```
+
+2. Build (target is all by default)
+
+```sh
+cmake --build build
+```
+
+3. Run tests
+
+```sh
+cd build/tests && ctest -V --output-on-failure --timeout 10
+```
+
+`--timeout 10` times out tests after 10 seconds
+
+### Installing on Windows
 
 Coming Soon!
 
-## Usage
-
-To use `atclient`, you can use `find_package` in your CMakeLists.txt file.
-
-```cmake
-cmake_minimum_required(VERSION 3.10)
-
-project(myproject)
-
-find_package(atclient REQUIRED CONFIG)
-
-add_executable(myproject src/main.cpp)
-
-target_link_libraries(myproject PRIVATE atclient::atclient)
-```
 
 ## Maintainers
 
