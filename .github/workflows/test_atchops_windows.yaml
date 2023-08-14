@@ -9,12 +9,14 @@ jobs:
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
-      - name: Clone and Install MbedTLS
+      - name: Clone MbedTLS
         run: |
           git clone https://github.com/Mbed-TLS/mbedtls.git
-          cd mbedtls
-          cmake -S . -B build -DWINDOWS=1 -DWINDOWS_BUILD=1
-          cmake --build build --target install
+
+      - name: Install MbedTLS
+        working-directory: mbedtls
+        run: |
+          cmake --install build --prefix /mingw64
 
       - name: CMake Configure AtChops
         working-directory: packages/atchops
