@@ -1,4 +1,4 @@
-name: Build REPL
+name: Unit Tests (AtChops Windows)
 on:
   pull_request:
     branches: [trunk]
@@ -16,7 +16,7 @@ jobs:
       - name: Install MbedTLS
         working-directory: mbedtls
         run: |
-          cmake --install build --prefix /mingw64
+          cmake --build build --target install 
 
       - name: CMake Configure AtChops
         working-directory: packages/atchops
