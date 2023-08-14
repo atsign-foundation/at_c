@@ -8,25 +8,27 @@ on:
 jobs:
   unit-tests:
     runs-on: "ubuntu-latest"
-    continue-on-error: true # if one matrix cell fails, the other ones keep going :)
-    strategy:
-      matrix:
-        package: [atchops, atclient]
-
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
-      - name: CMake Configure
-        working-directory: packages/${{matrix.package}}
+      - name: Install AtChops
+        working-directory: packages/atchops
         run: |
-          cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
-
-      - name: Build and Install
-        working-directory: packages/${{matrix.package}}
-        run: |
+          cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON -DATCHOPS_FETCH_MBEDTLS=ON
           sudo cmake --build build --target install
 
-      - name: CTest
-        working-directory: packages/${{ matrix.package}}/build/tests
+      - name: CTest AtChops
+        working-directory: packages/atchops/build/tests
+        run: |
+          ctest -V --output-on-failure --timeout 2
+
+      - name: Install AtClient
+        working-directory: packages/atclient
+        run: |
+          cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCLIENT_FETCH_ATCHOPS=OFF -DATCLIENT_FETCH_MBEDTLS=ON
+          sudo cmake --build build --target install
+
+      - name: CTest AtClient
+        working-directory: packages/atclient/build/tests
         run: |
           ctest -V --output-on-failure --timeout 2
