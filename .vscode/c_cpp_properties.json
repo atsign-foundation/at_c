@@ -5,13 +5,17 @@
             "configurationProvider": "ms-vscode.cmake-tools",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/deps/mbedtls/include/**"
+                "${workspaceFolder}/**",
+                "/usr/local/include"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c99",
             "cppStandard": "c++17",
-            "defines": ["BUILD_MBEDTLS=1", "BUILD_ARDUINO", "BUILD_ESP_IDF"] // So that vscode marks these code blocks as reachable
+            "defines": [
+                "BUILD_MBEDTLS=1",
+                "BUILD_ARDUINO",
+                "BUILD_ESP_IDF"
+            ] // So that vscode marks these code blocks as reachable
         }
     ],
     "version": 4

@@ -4,89 +4,130 @@
 
 # at_c
 
-`at_c` is the C implementation of the atProtocol
+`at_c` is the client C implementation of the atProtocol
 
-## Project structure
+## Packages
 
-`archetypes`: contains useful templates for compiling applications for this library.  
-`build`: cmake builds to this folder.  
-`deps`: git submodules and other dependencies.
-`example`: example applications.
-`include`: declarations (header files).
-`src`: definitions (source code).  
-`lib`: staticly linked libraries.  
-`targets`: additional configuration for build targets.  
-`test`: contains the test source code files and where test binaries are moved to.
-`tools`: contains tools and scripts, some used by tool.py
+- `atchops` stands for cryptographic and hashing operations catered for the atProtocol, uses [MbedTLS crypto](https://github.com/Mbed-TLS/mbedtls) as a dependency.
+- `atclient` is the core dependency for anything Atsign technology related. atclient depends on [atchops](./packages/atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls)
+- `repl` is a demo application using atclient
 
-## Dependencies
+## Building Source
 
-- [CMake](https://cmake.org/) (3.13+)
-- [Python](https://www.python.org/) (3.6+)
-- [Git](https://git-scm.com/)
+To build the source code you will need to have [CMake](https://cmake.org/) installed.
 
-## Tools
+Most of the following steps will work with `atchops` and `atclient`:
 
-The entire build pipeline can be run via python using `./tool.py`.
+- [Installing on Linux/MacOS](#installing-on-linuxmacos)
+- [Running Tests on Linux/MacOS](#running-tests-on-linuxmacos)
+- [Installing on Windows](#installing-on-windows)
 
-You will need to first update the git submodules:
+### Installing on Linux/MacOS
+
+1. Get ahold of the source code either via git clone or from downloading the source from our releases:
 
 ```sh
-git submodule update --init --recursive
+git clone https://github.com/atsign-foundation/at_c.git
+cd at_c/packages/atclient
 ```
 
-You may also need to install the python dependencies:
+2. CMake configure
 
 ```sh
-python3 -m pip install -r requirements.txt
+cmake -S . -B build
 ```
 
-Usage:
+If you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime with `ATCLIENT_FETCH_MBEDTLS=OFF` and `ATCLIENT_FETCH_ATCHOPS=OFF` respectively:
 
 ```sh
-usage: tool.py [-h] [-p {desktop,esp32}] [-f {mbedtls}] {init,build,clean,project}
+cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=OFF
 ```
+
+3. Install
+
+```sh
+cmake --build build --target install
+```
+
+4. Building the source code will allow you to use the `atclient` library in your own CMake projects:
+
+```cmake
+find_package(atclient REQUIRED CONFIG)
+target_link_libraries(myproj PRIVATE atclient::atclient)
+```
+
+### Running Tests on Linux/MacOS
+
+1. Get ahold of the source code either via git clone or from downloading the source from our releases:
+
+```sh
+git clone https://github.com/atsign-foundation/at_c.git
+cd at_c/packages/atclient
+```
+
+2. CMake configure with `-DATCLIENT_BUILD_TESTS=ON`
+
+```sh
+cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
+```
+
+3. Build (target is all by default)
+
+```sh
+cmake --build build
+```
+
+4. Run tests
+
+```sh
+cd build/tests && ctest -V --output-on-failure --timeout 10
+```
+
+`--timeout 10` times out tests after 10 seconds
+
+### Installing on Windows
+
+Coming Soon!
+
+## Contributing
+
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) for information on how to properly fork and open a pull request.
+
+When creating 
+
+- [Creating Tests](#creating-tests)
+- [Adding New Source Files](#adding-new-source-files)
+- [Adding New Include Headers](#adding-new-include-headers
+
+### Creating Tests
+
+If you want to add a test in atclient, simply add a `test_*.c` file in the `tests` directory. CMake will automatically detect it and add it to the test suite. Ensure that the test file is named `test_*.c` or else it will not be detected.
+
+Ensure the file has a `int main(int argc, char **argv)` function and returns 0 on success and not 0 on failure.
+
+### Adding New Source Files
+
+This one is a little more tricky. Adding a new source file to the project requires a few steps:
+
+Add the source file to the `CMakeLists.txt` file in the `src` directory. This is so that CMake knows to compile the file.
 
 Example:
 
-Build for Desktop using MbedTLS:
-
-```sh
-python3 tool.py -p desktop -f mbedtls build
-```
-
-## Adding your own Test
-
-1. Create your test in `test/`. Example: `test/my_test.c`
-
-2. Write your test in main(). Example:
-
-my_test.c
-
-```c
-int main()
-{
-    if(1 == 1) {
-        return 0; // exit code 0
-    } else {
-        return 1; // exit code 1
-    }
-}
-```
-
-3. Add your test to `CMakeLists.txt`. Example:
-
 ```cmake
-add_executable(my_test test/my_test.c)
-target_link_libraries(my_test PRIVATE at_client)
-add_test(
-  NAME MY_TEST
-  COMMAND $<TARGET_FILE:my_test>)
+target_sources(atclient PRIVATE
+    ...
+    ${CMAKE_CURRENT_LIST_DIR}/src/folder/new_file.c
+    ...
+)
 ```
 
-4. Build and test
+### Adding New Include Headers
 
-```sh
-python3 tool.py -p <platform> -f <framework> build
-python3 tool.py -p <platform> -f <framework> test
-```
+Simply add the header inside of the `include/` directory. CMake will automatically detect it and add it to the include path.
+
+If it is added in a subdirectory (like `include/atclient/`), then the include path will be `atclient/` (e.g. `#include <atclient/new_header.h>`)
+
+## Maintainers
+
+- [XavierChanth](https://github.com/XavierChanth)
+- [JeremyTubongbanua](https://github.com/JeremyTubongbanua)

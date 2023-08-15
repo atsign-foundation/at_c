@@ -1,9 +1,0 @@
-[submodule "deps/mbedtls"]
-	path = deps/mbedtls
-	url = https://github.com/Mbed-TLS/mbedtls.git
-[submodule "deps/esp-idf"]
-	path = deps/esp-idf
-	url = https://github.com/espressif/esp-idf.git
-[submodule "deps/Arduino-CMake-Toolchain"]
-	path = deps/Arduino-CMake-Toolchain
-	url = https://github.com/a9183756-gh/Arduino-CMake-Toolchain.git
