@@ -78,8 +78,6 @@ if(ATCLIENT_FETCH_ATCHOPS)
 		SOURCE_DIR ${atchops_src_dir}
 	)
 	FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
-	add_library(atchops::atchops ALIAS atchops) # create alias for atchops so that we can use atchops::atchops
-	# we have to create an alias instead of namespace becuase I think FetchCOntent with SOURCE_DIR isn't actually installing it and is adding it as a subdirectory or similar. Unlike previous FetchContent, we provide a URL and I think that installs it
 	message(STATUS "Successfully fetched `atchops` package")
 else()
 	find_package(atchops REQUIRED CONFIG)
@@ -133,6 +131,12 @@ install(
 	FILE ${PROJECT_NAME}-config.cmake
 )
 
+install(
+    EXPORT ${PROJECT_NAME}-config
+    NAMESPACE ${PROJECT_NAME}::
+    FILE ${PROJECT_NAME}-targets.cmake # New: Required when writing our own <proj>-config.cmake file
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+
 # put everything inside of include/atclient into /usr/local/include/atclient
 install(
 	DIRECTORY ${atclient_include_dir}/${PROJECT_NAME}
@@ -140,8 +144,30 @@ install(
 )
 
 # #########################################################
-# 5. Add tests
+# 5. Export in case people use us in a subdirectory
+# #########################################################
+export(
+	EXPORT ${PROJECT_NAME}-config
+	NAMESPACE ${PROJECT_NAME}::
+	FILE ${PROJECT_NAME}-config.cmake
+)
+
+export(
+	EXPORT ${PROJECT_NAME}-config
+	NAMESPACE ${PROJECT_NAME}::
+	FILE ${PROJECT_NAME}-targets.cmake
+)
+
+export(
+	PACKAGE ${PROJECT_NAME}
+)
+
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+# #########################################################
+# 6. Add tests
 # Run the tests via cd build && make all && cd tests && ctest
+# configure with -DATCLIENT_BUILD_TESTS=ON
 # #########################################################
 if(ATCLIENT_BUILD_TESTS)
 	enable_testing()

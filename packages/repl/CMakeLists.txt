@@ -8,8 +8,13 @@ project(
 )
 
 include(GNUInstallDirs)
+include(FetchContent)
 
-find_package(atclient REQUIRED CONFIG)
+FetchContent_Declare(
+    atclient
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../atclient
+)
+FetchContent_MakeAvailable(atclient)
 
 message(STATUS "atclient was found")
 

@@ -102,17 +102,20 @@ install(
     FILE ${PROJECT_NAME}-config.cmake
 )
 
-# Export in case people add us via add_subdirectory
+# #########################################################
+# 5. Export in case people add us via add_subdirectory
+# #########################################################
 export(PACKAGE ${PROJECT_NAME})
 
-# Export in case people add us via add_subdirectory
 export(
     EXPORT ${PROJECT_NAME}-config
     NAMESPACE ${PROJECT_NAME}::
     FILE "cmake/${PROJECT_NAME}-config.cmake")
 
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
 # #########################################################
-# Generate tests
+# 6. Generate tests
 # #########################################################
 if(ATCHOPS_BUILD_TESTS)
     enable_testing()
