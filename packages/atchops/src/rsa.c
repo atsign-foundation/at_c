@@ -352,6 +352,7 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
     --writtenlen;
     // printf("Challenge: %s\n", dst);
 
+    memset(signature, 0, signaturelen);
     memcpy(signature, dst, writtenlen);
     *signatureolen = writtenlen;
 
