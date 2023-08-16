@@ -8,26 +8,26 @@
 #define BUFFER_SIZE 65536
 
 int atchops_aes_ctr_encrypt(
-    const char *keybase64, 
+    const char *keybase64,
     const unsigned long keybase64len,
-    const AESKeySize keybits, 
+    const AESKeySize keybits,
     const unsigned char *iv,
     const unsigned long ivlen,
-    const unsigned char *plaintext, // plaintext to encrypt 
-    const unsigned long plaintextlen,  
-    unsigned char *ciphertextbase64,  // buffer to populate
+    const unsigned char *plaintext, // plaintext to encrypt
+    const unsigned long plaintextlen,
+    unsigned char *ciphertextbase64,         // buffer to populate
     const unsigned long ciphertextbase64len, // the size of the buffer
-    unsigned long *ciphertextbase64olen // written actual length in the buffer
-    )
+    unsigned long *ciphertextbase64olen      // written actual length in the buffer
+)
 {
     int ret = 1;
 
     // 1. initialize AES key
-    unsigned long keylen = keybits/8;
+    unsigned long keylen = keybits / 8;
     unsigned char *key = malloc(sizeof(unsigned char) * keylen);
     unsigned long keyolen;
 
-    ret = atchops_base64_decode(key, keylen, &keyolen, keybase64, keybase64len);
+    ret = atchops_base64_decode(keybase64, keybase64len, key, keylen, &keyolen);
     printf("atchops_base64_decode: %d\n", ret);
     // printf("aes_key:\n");
     // for(int i = 0; i < keyolen; i++)
@@ -38,7 +38,7 @@ int atchops_aes_ctr_encrypt(
 
     // 2. pad the plaintext
     unsigned char *plaintextpadded; // will contain the plaintext with padded trialing bytes
-    size_t plaintextpaddedlen; // the length of the plain text + padding (no null terminator)
+    size_t plaintextpaddedlen;      // the length of the plain text + padding (no null terminator)
 
     const int num_pad_bytes_to_add = 16 - (plaintextlen % 16);
     const unsigned char padding_val = num_pad_bytes_to_add;
@@ -69,6 +69,7 @@ int atchops_aes_ctr_encrypt(
 
     unsigned long ciphertextlen = BUFFER_SIZE;
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    memset(ciphertext, 0, ciphertextlen);
     unsigned long ciphertextolen = 0;
 
     unsigned long nc_off = 0;
@@ -81,7 +82,8 @@ int atchops_aes_ctr_encrypt(
     free(stream_block);
     free(key);
 
-    while(*(ciphertext + ciphertextolen++) != '\0');
+    while (*(ciphertext + ciphertextolen++) != '\0')
+        ;
     --ciphertextolen; // don't count the null terminator
 
     // printf("ciphertext after encryption (not base64 encoded yet): %lu\n", ciphertextolen);
@@ -93,7 +95,7 @@ int atchops_aes_ctr_encrypt(
 
     // 4. base64 encode ciphertext
 
-    ret = atchops_base64_encode(ciphertextbase64, ciphertextbase64len, ciphertextbase64olen, ciphertext, ciphertextolen);
+    ret = atchops_base64_encode(ciphertextbase64, ciphertextbase64len, ciphertext, ciphertextlen, &ciphertextolen);
     printf("atchops_base64_encode: %d\n", ret);
 
     free(ciphertext);
@@ -112,18 +114,17 @@ int atchops_aes_ctr_decrypt(
     const unsigned long ciphertextbase64len,
     unsigned char *plaintext,
     const size_t plaintextlen,
-    unsigned long *plaintextolen
-    )
+    unsigned long *plaintextolen)
 {
     int ret = 1;
 
     // 1. initialize AES key
-    unsigned long keylen = keybits/8;
+    unsigned long keylen = keybits / 8;
     unsigned char *key = malloc(sizeof(unsigned char) * keylen);
     memset(key, 0, keylen);
     unsigned long keyolen = 0;
 
-    ret = atchops_base64_decode(key, keylen, &keyolen, keybase64, keybase64len);
+    ret = atchops_base64_decode(keybase64, keybase64len, key, keylen, &keyolen);
     // printf("atchops_base64_decode: %d\n", ret);
     // printf("aes_key: %lu\n", keyolen);
     // for(int i = 0; i < keyolen; i++)
@@ -144,7 +145,7 @@ int atchops_aes_ctr_decrypt(
     //     printf("%02x ", *(ciphertextbase64 + i));
     // }
     // printf("\n\n");
-    ret = atchops_base64_decode(ciphertext, ciphertextlen, &ciphertextolen, ciphertextbase64, ciphertextbase64len);
+    ret = atchops_base64_decode(ciphertextbase64, ciphertextbase64len, ciphertext, ciphertextlen, &ciphertextolen);
     printf("atchops_base64_decode: %d\n", ret);
     // printf("ciphertext decoded: %lu\n", ciphertextolen);
     // for(int i = 0; i < ciphertextolen; i++)
@@ -179,7 +180,8 @@ int atchops_aes_ctr_decrypt(
     // }
     // printf("\n\n");
 
-    while(*(plaintextpadded + plaintextpaddedolen++) != '\0');
+    while (*(plaintextpadded + plaintextpaddedolen++) != '\0')
+        ;
     --plaintextpaddedolen; // don't count the null terminator
 
     // printf("plaintextpadded: %lu | %.*s\n", plaintextpaddedolen, plaintextpaddedolen, plaintextpadded);
@@ -199,10 +201,8 @@ int atchops_aes_ctr_decrypt(
     unsigned char pad_val = *(plaintextpadded + (plaintextpaddedolen - 1));
     // printf("pad_val byte: 0x%02x\n", pad_val);
 
-
     // add null terminator for good sake
     *(plaintextpadded + plaintextpaddedolen - pad_val) = '\0';
-
 
     *plaintextolen = plaintextpaddedolen - pad_val;
     memcpy(plaintext, plaintextpadded, *plaintextolen);

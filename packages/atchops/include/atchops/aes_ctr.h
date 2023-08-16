@@ -1,16 +1,9 @@
 #pragma once
 
-#include <string.h>
-#include <stdint.h>
-#include <stddef.h>
-
-#define IV_AMOUNT_BYTES 16
-
-typedef enum
-{
+typedef enum AESKeySize {
     AES_128 = 128, // not tested
-    AES_192 = 192,
-    AES_256 = 256, // not tested
+    AES_192 = 192, // not tested
+    AES_256 = 256,
 } AESKeySize;
 
 int atchops_aes_ctr_encrypt(
@@ -34,5 +27,5 @@ int atchops_aes_ctr_decrypt(
     const unsigned char *ciphertextbase64,
     const unsigned long ciphertextbase64len,
     unsigned char *plaintext,
-    const size_t plaintextlen,
+    const unsigned long plaintextlen,
     unsigned long *plaintextolen);

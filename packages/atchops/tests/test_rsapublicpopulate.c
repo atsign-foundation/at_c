@@ -19,13 +19,13 @@ int main()
         goto ret;
     }
 
-    if (publickeystruct.n_param.len <= 0)
+    if (publickeystruct.n.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (publickeystruct.e_param.len <= 0)
+    if (publickeystruct.e.len <= 0)
     {
         ret = 1;
         goto ret;

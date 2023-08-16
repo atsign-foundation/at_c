@@ -1,5 +1,4 @@
 #include "atchops/rsa.h"
-#include "atchops/byteutil.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -20,31 +19,31 @@ int main()
         goto ret;
     }
 
-    if (privatekeystruct.n_param.len <= 0)
+    if (privatekeystruct.n.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.e_param.len <= 0)
+    if (privatekeystruct.e.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.d_param.len <= 0)
+    if (privatekeystruct.d.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.p_param.len <= 0)
+    if (privatekeystruct.p.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.q_param.len <= 0)
+    if (privatekeystruct.q.len <= 0)
     {
         ret = 1;
         goto ret;

@@ -1,7 +1,7 @@
-#include <stddef.h>
+
 #include <mbedtls/base64.h>
 
-int atchops_base64_encode(unsigned char *dst, size_t dstlen, size_t *writtenlen, const unsigned char *src, const size_t srclen)
+int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, unsigned char *dst, const unsigned long dstlen, unsigned long *writtenlen)
 {
     return mbedtls_base64_encode(
         dst,
@@ -11,7 +11,7 @@ int atchops_base64_encode(unsigned char *dst, size_t dstlen, size_t *writtenlen,
         srclen);
 }
 
-int atchops_base64_decode(unsigned char *dst, size_t dstlen, size_t *writtenlen, const unsigned char *src, const size_t srclen)
+int atchops_base64_decode(const unsigned char *src, const unsigned long srclen, unsigned char *dst, const unsigned long dstlen, unsigned long *writtenlen)
 {
     return mbedtls_base64_decode(
         dst,

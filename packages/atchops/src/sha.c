@@ -4,7 +4,7 @@
 #include <mbedtls/md.h>
 #include "atchops/sha.h"
 
-int atchops_sha_hash(unsigned char *output, unsigned long outputlen, unsigned long *outputolen, const unsigned char *input, const unsigned long inputlen, atchops_md_type mdtype)
+int atchops_sha_hash(atchops_md_type mdtype, const unsigned char *input, const unsigned long inputlen, unsigned char *output, unsigned long outputlen, unsigned long *outputolen)
 {
     int ret = 1;
 
@@ -32,17 +32,19 @@ int atchops_sha_hash(unsigned char *output, unsigned long outputlen, unsigned lo
         goto ret;
 
     memcpy(output, hash, outputlen);
-    
+
     int i = 0;
-    while(i < outputlen && *(hash + i++) != '\0')
+    while (i < outputlen && *(hash + i++) != '\0')
     {
         *outputolen += 1;
     }
+    --(*outputolen); // remove the '\0' at the end of the string
 
     mbedtls_md_free(&md_ctx);
 
     goto ret;
-    ret: {
-        return ret;
-    }
+ret:
+{
+    return ret;
+}
 }

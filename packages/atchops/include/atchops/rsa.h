@@ -1,25 +1,26 @@
 #pragma once
 
-#include <stddef.h>
-#include <ctype.h>
 #include "sha.h"
 
-typedef struct {
-    size_t len;
+typedef struct rsa_param
+{
+    unsigned long len;    // length of the number in bytes
     unsigned char *value; // hex byte array of the number
 } rsa_param;
 
-typedef struct {
-    rsa_param n_param; // modulus
-    rsa_param e_param; // public exponent
+typedef struct atchops_rsa_publickey
+{
+    rsa_param n; // modulus
+    rsa_param e; // public exponent
 } atchops_rsa_publickey;
 
-typedef struct {
-    rsa_param n_param; // modulus
-    rsa_param e_param; // public exponent
-    rsa_param d_param; // private exponent
-    rsa_param p_param; // prime 1
-    rsa_param q_param; // prime 2
+typedef struct atchops_rsa_privatekey
+{
+    rsa_param n; // modulus
+    rsa_param e; // public exponent
+    rsa_param d; // private exponent
+    rsa_param p; // prime 1
+    rsa_param q; // prime 2
 } atchops_rsa_privatekey;
 
 /**
@@ -30,7 +31,7 @@ typedef struct {
  * @param publickeystruct the public key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa_publickey *publickeystruct);
+int atchops_rsa_populate_publickey(const char *publickeybase64, const unsigned long publickeybase64len, atchops_rsa_publickey *publickeystruct);
 
 /**
  * @brief Populate a private key struct from a base64 string
@@ -40,41 +41,44 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t pub
  * @param privatekeystruct the private key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa_privatekey *privatekeystruct);
+int atchops_rsa_populate_privatekey(const char *privatekeybase64, const unsigned long privatekeybase64len, atchops_rsa_privatekey *privatekeystruct);
 
 /**
- * @brief Sign a message with an RSA 2048 Private Key
+ * @brief Sign a message with an RSA private key
  *
- * @param privatekeystruct the private key struct to use for signing
- * @param mdtype the message digest type to use
- * @param signature the signature to populate. Pass in a pointer to a pointer to an unsigned char array. The pointer will be reassigned to the newly allocated array.
- * @param signaturelen  the output length of the signature
+ * @param privatekeystruct the private key struct to use for signing, see atchops_rsa_populate_privatekey
+ * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
  * @param message the message to sign
- * @param messagelen the length of the message
+ * @param messagelen the length of the message, most people use strlen() to find this length
+ * @param signature the signature buffer to populate
+ * @param signaturelen the length of the signature buffer
+ * @param signatureolen the length of the signature buffer after signing
  * @return int 0 on success
  */
-int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type mdtype, unsigned char **signature, size_t *signaturelen, const unsigned char *message, const size_t messagelen);
+int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signature, const unsigned long signaturelen, unsigned long *signatureolen);
 
 /**
- * @brief Encrypt a string of text with an RSA 2048 Public Key
- * 
- * @param publickeystruct the public key struct to use for encryption, must be populated using atchops_rsa_populate_publickey
- * @param plaintext the plain text to encrypt
- * @param plaintextlen the length of the plain text
- * @param ciphertext the ciphertext to populate. Pass in a pointer to a pointer to a char array. The pointer will be reassigned to the newly allocated array. Assumption is enough space is allocated for the ciphertext.
- * @param ciphertextolen the output length of the ciphertext
+ * @brief Encrypt bytes with an RSA public key
+ *
+ * @param publickeystruct the public key struct to use for encryption, see atchops_rsa_populate_publickey
+ * @param plaintext the plaintext to encrypt
+ * @param plaintextlen the length of the plaintext, most people use strlen() to find this length
+ * @param ciphertext the ciphertext buffer to populate
+ * @param ciphertextlen the length of the ciphertext buffer
+ * @param ciphertextolen the length of the ciphertext buffer after encryption
  * @return int 0 on success
  */
-int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const char *plaintext, const size_t plaintextlen, char **ciphertext, size_t *ciphertextolen);
+int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned char *ciphertext, const unsigned long ciphertextlen, unsigned long *ciphertextolen);
 
 /**
- * @brief Decrypt a string of text with an RSA 2048 Private Key
- * 
- * @param privatekeystruct the private key struct to use for decryption, must be populated using atchops_rsa_populate_privatekey
- * @param ciphertextbase64encoded the base64 encoded string ciphertext to decrypt 
- * @param ciphertextbase64encodedlen the length of the base64 encoded string
- * @param plaintext the plaintext to populate. Pass in a pointer to a pointer to a char array. The pointer will be reassigned to the newly allocated array. Assumption is enough space is allocated for the plaintext.
- * @param plaintextolen the output length of the plaintext
+ * @brief Decrypt bytes with an RSA private key
+ *
+ * @param privatekeystruct the private key struct to use for decryption, see atchops_rsa_populate_privatekey
+ * @param ciphertextbase64 the ciphertext to decrypt, base64 encoded
+ * @param ciphertextbase64len the length of the ciphertext, most people use strlen() to find this length
+ * @param plaintext the plaintext buffer to populate
+ * @param plaintextlen the length of the plaintext buffer
+ * @param plaintextolen the length of the plaintext buffer after decryption
  * @return int 0 on success
  */
-int atchops_rsa_decrypt(atchops_rsa_privatekey privatekeystruct, const char *ciphertextbase64encoded, const size_t ciphertextbase64encodedlen, char **plaintext, size_t *plaintextolen);
+int atchops_rsa_decrypt(atchops_rsa_privatekey privatekeystruct, const unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len, unsigned char *plaintext, const unsigned long plaintextlen, unsigned long *plaintextolen);

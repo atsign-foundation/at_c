@@ -36,19 +36,19 @@ int main()
     if(ret != 0)
         goto ret;
 
-    const size_t ciphertextlen = 1024;
-    char *ciphertext = malloc((sizeof(unsigned char) * ciphertextlen) + 1);
-    size_t *ciphertextolen = malloc(sizeof(size_t));
-    ciphertext[*ciphertextolen] = '\0'; // add null terminator, not necessary but it's okay
+    const unsigned long ciphertextlen = 1024;
+    unsigned char *ciphertext = calloc(ciphertextlen, sizeof(unsigned char));
+    memset(ciphertext, 0, ciphertextlen);
+    unsigned long ciphertextolen = 0;
 
     printf("encrypting...\n");
-    ret = atchops_rsa_encrypt(publickeystruct, plaintext, plaintextlen, &ciphertext, ciphertextolen);
+    ret = atchops_rsa_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, &ciphertextolen);
     printf("atchops_rsa_encrypt returned: %d\n", ret);
     if(ret != 0)
         goto ret;
 
     printf("ciphertext (base64 encoded): %s\n", ciphertext);
-    printx(ciphertext, *ciphertextolen);
+    printx(ciphertext, ciphertextolen);
 
     goto ret;
 

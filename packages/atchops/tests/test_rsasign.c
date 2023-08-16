@@ -10,6 +10,8 @@
 
 #define MESSAGE "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182"
 
+#define EXPECTED_SIGNATURE "qaEysA8nF/aGjXiIqtHZzZbM90+fn2Ugpy5hgBf0izPoBR2orbeWVUJ1sI5fNMkMwOziRjA6j+AKcG4O/NaLYd31WOq4QzxDqRV+AY4d04mBZsa9wDd/30hSeUwCmubFNrHNSXi84HJS3D886FdByp2wRee5DIu6CalF4yCCpXO5YeTNNFvbk8Spqz3GY4cvjWhVW1ISBfQ928dWTuOkTfqiv/2cj9VAb460EoPeeWYabX1J2SBqUjRWsQsjiOiGiRYcft0DRc5TBru/oVGFrxbB+VL+HGc0Boi1T23FPoyg5FazF0yK2BBW0PWUqQ0BDny/1tZg7p8Wtv8ERHhxew="
+
 int main()
 {
 
@@ -23,18 +25,26 @@ int main()
     if (ret != 0)
         goto ret;
 
-    size_t *signaturelen = malloc(sizeof(size_t));
+    size_t signatureolen = 0;
     unsigned char *signature = malloc(sizeof(unsigned char) * SIGNATURE_BUFFER_LEN);
+    memset(signature, 0, SIGNATURE_BUFFER_LEN);
 
     const unsigned char *message = MESSAGE;
     const size_t messagelen = strlen(message);
 
-    ret = atchops_rsa_sign(privatekeystruct, ATCHOPS_MD_SHA256, &signature, signaturelen, message, messagelen);
+    ret = atchops_rsa_sign(privatekeystruct, ATCHOPS_MD_SHA256, message, messagelen, signature, SIGNATURE_BUFFER_LEN, &signatureolen);
+    printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
         goto ret;
 
-    ret = strncmp(signature, "AwsKWNqRHiCtdNJ0U5GXZ1H5obptEWVR1+A1kPhot4cdLfmulvBVXRaBIrP+jd2TSP2J/KNAgv2BDLH7DXUibdTnzJaKm/QKAjpwpuShnV6Y9KSWTnomBw9x9OWDkVrBzSo5rOFpHHOTZJhp4ygStKEzZDa108g8uP5PpkfzntO2eIVEOdMHoL9/yAkuYJcz+VmCH+1AJtCdeKfhjfmlk0bP72fwsait6pA3TW0iEll9ptZmlLjNtCTi982h1yNprh+XtrjMz7ClbJChQf3LLHiJMZ+7r4yKTrehdBVfxQoNNw9r2D7TBRaY8bXYwMombMHRuu0oVbqNU1jEs60NGQ==", *signaturelen);
-    if(ret != 0) goto ret;
+    ret = strncmp(signature, EXPECTED_SIGNATURE, signatureolen);
+    printf("strncmp: %d\n", ret);
+    if(ret != 0)
+    {
+        printf("signature len: %lu\n", signatureolen);
+        printf("signature: %s\n", signature);
+        goto ret;
+    }
 
     // printf("signature len: %lu\n", *signaturelen);
     // printf("signature: %s\n", signature);
