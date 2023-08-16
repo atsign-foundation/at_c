@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <atchops/aes_ctr.h>
 #include <atchops/rsa.h>
@@ -6,8 +7,8 @@
 #include <atclient/atkeys_filereader.h>
 
 #define ATSIGN "@jeremy_0"
-// #define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@jeremy_0_key.atKeys"
-#define ATKEYS_FILE_PATH "./@jeremy_0_key.atKeys"
+#define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@jeremy_0_key.atKeys"
+// #define ATKEYS_FILE_PATH "./@jeremy_0_key.atKeys"
 
 static void *without_at_symbol(char *atsign, char *buf)
 {
@@ -157,17 +158,18 @@ int main()
 
     ret = atchops_rsa_populate_privatekey(pkamprivatekey, pkamprivatekeyolen, &pkamprivatekeystruct);
 
-    printf("n: %lu\n", pkamprivatekeystruct.n_param.len);
-    printf("e: %lu\n", pkamprivatekeystruct.e_param.len);
+    printf("n: %lu\n", pkamprivatekeystruct.n.len);
+    printf("e: %lu\n", pkamprivatekeystruct.e.len);
 
     // sign from response
 
     const size_t signaturelen = 32768;
     unsigned char *signature = malloc(sizeof(unsigned char) * signaturelen);
+    unsigned long signatureolen = 0;
     memset(signature, 0, signaturelen);
-    atchops_rsa_sign(pkamprivatekeystruct, ATCHOPS_MD_SHA256, &signature, &signaturelen, from_response, strlen(from_response));
+    atchops_rsa_sign(pkamprivatekeystruct, ATCHOPS_MD_SHA256, from_response, strlen(from_response), signature, signaturelen, &signatureolen);
 
-    printf("signature: \"%s\"\n", signature);
+    printf("signature: \"%.*s\"\n", (int) signatureolen, signature);
 
     // send pkam command
 
@@ -176,13 +178,14 @@ int main()
     memset(pkamcommand, 0, pkamcommandlen);
 
     strcat(pkamcommand, "pkam:");
-    strncat(pkamcommand, signature, signaturelen);
+    strcat(pkamcommand, signature);
     strcat(pkamcommand, "\r\n");
 
     printf("pkam command: \"%s\"\n", pkamcommand);
 
-    atclient_connection_send(&secondary_connection, recv, recvlen, &olen, pkamcommand, strlen(pkamcommand));
+    ret = atclient_connection_send(&secondary_connection, recv, recvlen, &olen, pkamcommand, strlen(pkamcommand));
 
+    printf("signature olen: %lu\n", signatureolen);
     printf("\"%.*s\"\n", (int) olen, recv);
 
     size_t commandlen = 32768;
