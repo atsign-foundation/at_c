@@ -81,7 +81,6 @@ install(
 )
 
 # Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find stuff
-
 set(TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atchops
 
 if(ATCHOPS_FETCH_MBEDTLS)
@@ -102,6 +101,15 @@ install(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
     FILE ${PROJECT_NAME}-config.cmake
 )
+
+# Export in case people add us via add_subdirectory
+export(PACKAGE ${PROJECT_NAME})
+
+# Export in case people add us via add_subdirectory
+export(
+    EXPORT ${PROJECT_NAME}-config
+    NAMESPACE ${PROJECT_NAME}::
+    FILE "cmake/${PROJECT_NAME}-config.cmake")
 
 # #########################################################
 # Generate tests

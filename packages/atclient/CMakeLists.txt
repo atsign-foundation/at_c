@@ -60,7 +60,6 @@ if(ATCLIENT_FETCH_MBEDTLS)
 		URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
 		URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
 	)
-
 	FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
 	message(STATUS "Successfully fetched MbedTLS")
 else()
@@ -79,6 +78,8 @@ if(ATCLIENT_FETCH_ATCHOPS)
 		SOURCE_DIR ${atchops_src_dir}
 	)
 	FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
+	add_library(atchops::atchops ALIAS atchops) # create alias for atchops so that we can use atchops::atchops
+	# we have to create an alias instead of namespace becuase I think FetchCOntent with SOURCE_DIR isn't actually installing it and is adding it as a subdirectory or similar. Unlike previous FetchContent, we provide a URL and I think that installs it
 	message(STATUS "Successfully fetched `atchops` package")
 else()
 	find_package(atchops REQUIRED CONFIG)
@@ -93,8 +94,7 @@ endif()
 add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
 
 target_link_libraries(${PROJECT_NAME}
-	PUBLIC atchops
-	PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509
+	PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509 atchops::atchops
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
