@@ -97,7 +97,7 @@ When creating
 
 - [Creating Tests](#creating-tests)
 - [Adding New Source Files](#adding-new-source-files)
-- [Adding New Include Headers](#adding-new-include-headers
+- [Adding New Include Headers](#adding-new-include-headers)
 
 ### Creating Tests
 
