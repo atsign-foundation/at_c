@@ -37,7 +37,7 @@ cd at_c/packages/atclient
 cmake -S . -B build
 ```
 
-If you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime with `ATCLIENT_FETCH_MBEDTLS=OFF` and `ATCLIENT_FETCH_ATCHOPS=OFF` respectively:
+Alternatively, if you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime with `ATCLIENT_FETCH_MBEDTLS=OFF` and `ATCLIENT_FETCH_ATCHOPS=OFF` respectively. Doing this drastically reduces the time it takes to configure the project:
 
 ```sh
 cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=OFF
