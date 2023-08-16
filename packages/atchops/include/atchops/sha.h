@@ -11,5 +11,4 @@ typedef enum {
     ATCHOPS_MD_RIPEMD160,
 } atchops_md_type;
 
-int atchops_sha_hash(const char *input, size_t inputlen, unsigned char **output, atchops_md_type mdtype);
-
+int atchops_sha_hash(unsigned char *output, unsigned long outputlen, unsigned long *outputolen, const unsigned char *input, const unsigned long inputlen, atchops_md_type mdtype);
