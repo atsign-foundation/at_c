@@ -110,15 +110,3 @@ if(ATCHOPS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
-
-
-# Temp (DO NOT COMMIT)
-add_executable(main src/main.c)
-target_link_libraries(main PRIVATE atchops)
-target_link_libraries(main PRIVATE MbedTLS::mbedcrypto)
-target_include_directories(main PRIVATE ${atchops_include_dir})
-
-install(
-    TARGETS main
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
