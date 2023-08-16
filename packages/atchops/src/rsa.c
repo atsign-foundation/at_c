@@ -8,7 +8,6 @@
 #include <mbedtls/ctr_drbg.h>
 #include "atchops/rsa.h"
 #include "atchops/base64.h"
-#include "atchops/byteutil.h"
 #include "atchops/sha.h"
 
 int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa_publickey *publickeystruct)
@@ -88,12 +87,12 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t pub
     // }
     publickeystruct->n_param.len = current->buf.len;
     publickeystruct->n_param.value = malloc(sizeof(unsigned char) * publickeystruct->n_param.len);
-    copy(publickeystruct->n_param.value, current->buf.p, publickeystruct->n_param.len);
+    memcpy(publickeystruct->n_param.value, current->buf.p, publickeystruct->n_param.len);
 
     current = current->next;
     publickeystruct->e_param.len = current->buf.len;
     publickeystruct->e_param.value = malloc(sizeof(unsigned char) * publickeystruct->e_param.len);
-    copy(publickeystruct->e_param.value, current->buf.p, publickeystruct->e_param.len);
+    memcpy(publickeystruct->e_param.value, current->buf.p, publickeystruct->e_param.len);
 
     goto ret;
 
@@ -205,31 +204,31 @@ int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t p
     // printf("n\n");
     privatekeystruct->n_param.len = current->buf.len;
     privatekeystruct->n_param.value = malloc(sizeof(unsigned char) * privatekeystruct->n_param.len);
-    copy(privatekeystruct->n_param.value, current->buf.p, privatekeystruct->n_param.len);
+    memcpy(privatekeystruct->n_param.value, current->buf.p, privatekeystruct->n_param.len);
 
     // printf("e\n");
     current = current->next;
     privatekeystruct->e_param.len = current->buf.len;
     privatekeystruct->e_param.value = malloc(sizeof(unsigned char) * privatekeystruct->e_param.len);
-    copy(privatekeystruct->e_param.value, current->buf.p, privatekeystruct->e_param.len);
+    memcpy(privatekeystruct->e_param.value, current->buf.p, privatekeystruct->e_param.len);
 
     // printf("d\n");
     current = current->next;
     privatekeystruct->d_param.len = current->buf.len;
     privatekeystruct->d_param.value = malloc(sizeof(unsigned char) * privatekeystruct->d_param.len);
-    copy(privatekeystruct->d_param.value, current->buf.p, privatekeystruct->d_param.len);
+    memcpy(privatekeystruct->d_param.value, current->buf.p, privatekeystruct->d_param.len);
 
     // printf("p\n");
     current = current->next;
     privatekeystruct->p_param.len = current->buf.len;
     privatekeystruct->p_param.value = malloc(sizeof(unsigned char) * privatekeystruct->p_param.len);
-    copy(privatekeystruct->p_param.value, current->buf.p, privatekeystruct->p_param.len);
+    memcpy(privatekeystruct->p_param.value, current->buf.p, privatekeystruct->p_param.len);
 
     // printf("q\n");
     current = current->next;
     privatekeystruct->q_param.len = current->buf.len;
     privatekeystruct->q_param.value = malloc(sizeof(unsigned char) * privatekeystruct->q_param.len);
-    copy(privatekeystruct->q_param.value, current->buf.p, privatekeystruct->q_param.len);
+    memcpy(privatekeystruct->q_param.value, current->buf.p, privatekeystruct->q_param.len);
 
     goto ret;
 
@@ -245,7 +244,8 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
 
     const size_t hashlen = 32;
     unsigned char *hash = malloc(sizeof(char) * hashlen);
-    ret = atchops_sha_hash(message, messagelen, &hash, mdtype);
+    size_t hasholen = 0;
+    ret = atchops_sha_hash(hash, hashlen, &hasholen, message, messagelen, mdtype);
     if (ret != 0)
         goto ret;
 

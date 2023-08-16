@@ -16,7 +16,6 @@ project(
 set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/aes_ctr.c
     ${CMAKE_CURRENT_LIST_DIR}/src/base64.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/byteutil.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
     ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
 )
@@ -111,3 +110,15 @@ if(ATCHOPS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+
+# Temp (DO NOT COMMIT)
+add_executable(main src/main.c)
+target_link_libraries(main PRIVATE atchops)
+target_link_libraries(main PRIVATE MbedTLS::mbedcrypto)
+target_include_directories(main PRIVATE ${atchops_include_dir})
+
+install(
+    TARGETS main
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
