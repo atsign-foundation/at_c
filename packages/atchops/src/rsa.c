@@ -319,7 +319,7 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
     // printf("hashlen: %lu\n", hashlen);
     // printf("hash: ");
     // printx(hash, hashlen);
-    int buflen = 256+1; // +1 for null terminator
+    int buflen = 256; // +1 for null terminator
     unsigned char *buf = malloc(sizeof(unsigned char) * buflen);
     memset(buf, 0, buflen);
     ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, buf);
@@ -349,7 +349,6 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
     {
         *(dst + writtenlen) = '\0';
     }
-    --writtenlen;
     // printf("Challenge: %s\n", dst);
 
     memset(signature, 0, signaturelen);
