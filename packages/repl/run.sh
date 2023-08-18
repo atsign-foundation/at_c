@@ -1,11 +1,6 @@
 #!/bin/bash
 set -eu
 
-# install atclient locally
-cd ../atclient
-./install-system.sh
-cd ../repl
-
 # clean
 rm -f build/CMakeCache.txt
 sudo rm -f bin/repl

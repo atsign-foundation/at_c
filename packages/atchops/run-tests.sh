@@ -1,7 +1,9 @@
 #!/bin/bash
 set -eu
-cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON
+# sudo rm -rf build
+sudo cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON -DATCHOPS_FETCH_MBEDTLS=ON -DCMAKE_INSTALL_PREFIX=./install
+sudo rm -rf install
 sudo cmake --build build --target all
 cd build/tests
-ctest --output-on-failure
+sudo ctest --output-on-failure -V
 cd ../..

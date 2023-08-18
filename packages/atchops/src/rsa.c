@@ -10,7 +10,7 @@
 #include "atchops/base64.h"
 #include "atchops/sha.h"
 
-static void printx(const unsigned char *buf, const size_t len)
+static void printx(const unsigned char *buf, const unsigned long len)
 {
     for (int i = 0; i < len; i++)
     {
@@ -19,15 +19,15 @@ static void printx(const unsigned char *buf, const size_t len)
     printf("\n");
 }
 
-int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t publickeybase64len, atchops_rsa_publickey *publickeystruct)
+int atchops_rsa_populate_publickey(const char *publickeybase64, const unsigned long publickeybase64len, atchops_rsa_publickey *publickeystruct)
 {
     int ret = 0;
 
     // 1. base64 decode the key
-    size_t dstlen = 8192;
+    unsigned long dstlen = 8192;
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    size_t writtenlen = 0;
-    ret = atchops_base64_decode(publickeybase64, publickeybase64len, dst, dstlen, &writtenlen);
+    unsigned long writtenlen = 0;
+    ret = atchops_base64_decode((const unsigned char *) publickeybase64, publickeybase64len, dst, dstlen, &writtenlen);
     if (ret != 0)
         goto ret;
 
@@ -37,7 +37,7 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t pub
 
     const unsigned char *end = dst + (writtenlen);
 
-    size_t *lengthread = malloc(sizeof(size_t));
+    unsigned long *lengthread = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     // printf("ret: %d\n", ret);
     if (ret != 0)
@@ -47,7 +47,7 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t pub
     // printf("*(dst+1) now points to : %02x\n", *(dst+1));
     // printf("*(dst+2) now points to : %02x\n", *(dst+2));
 
-    size_t *lengthread2 = malloc(sizeof(size_t));
+    unsigned long *lengthread2 = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread2, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     // printf("ret: %d\n", ret);
     if (ret != 0)
@@ -61,7 +61,7 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const size_t pub
     // printf("*(dst+1) now points to : %02x\n", *(dst+1));
     // printf("*(dst+2) now points to : %02x\n", *(dst+2));
 
-    size_t *lengthread3 = malloc(sizeof(size_t));
+    unsigned long *lengthread3 = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread3, MBEDTLS_ASN1_BIT_STRING);
     // printf("ret: %d\n", ret);
     if (ret != 0)
@@ -111,15 +111,15 @@ ret:
 }
 }
 
-int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t privatekeybase64len, atchops_rsa_privatekey *privatekeystruct)
+int atchops_rsa_populate_privatekey(const char *privatekeybase64, const unsigned long privatekeybase64len, atchops_rsa_privatekey *privatekeystruct)
 {
     int ret = 1;
 
-    size_t dstlen = 8196;
+    unsigned long dstlen = 8196;
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
     memset(dst, 0, dstlen);
-    size_t writtenlen = 0;
-    ret = atchops_base64_decode(privatekeybase64, privatekeybase64len, dst, dstlen, &writtenlen);
+    unsigned long writtenlen = 0;
+    ret = atchops_base64_decode((const unsigned char *) privatekeybase64, privatekeybase64len, dst, dstlen, &writtenlen);
     if (ret != 0)
         goto ret;
 
@@ -128,10 +128,10 @@ int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t p
     // printf("writtenlen: %lu\n", *writtenlen);
     // printf("\n");
 
-    char *end = dst + writtenlen;
+    unsigned char *end = dst + writtenlen;
 
     // printf("1st get tag\n");
-    size_t *lengthread = malloc(sizeof(size_t));
+    unsigned long *lengthread = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     if (ret != 0)
         goto ret;
@@ -144,7 +144,7 @@ int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t p
     // printf("*(dst+4) now points to : %02x\n", *(dst+4));
 
     // printf("2nd get tag\n");
-    size_t *lengthread2 = malloc(sizeof(size_t));
+    unsigned long *lengthread2 = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread2, MBEDTLS_ASN1_INTEGER);
     if (ret != 0)
         goto ret;
@@ -158,7 +158,7 @@ int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t p
     // printf("*(dst+4) now points to : %02x\n", *(dst+4));
 
     // printf("3rd get tag\n");
-    size_t *lengthread3 = malloc(sizeof(size_t));
+    unsigned long *lengthread3 = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread3, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     if (ret != 0)
         goto ret;
@@ -172,7 +172,7 @@ int atchops_rsa_populate_privatekey(const char *privatekeybase64, const size_t p
     // printf("*(dst+4) now points to : %02x\n", *(dst+4));
 
     // printf("4th get tag\n");
-    size_t *lengthread4 = malloc(sizeof(size_t));
+    unsigned long *lengthread4 = malloc(sizeof(unsigned long));
     ret = mbedtls_asn1_get_tag(&dst, end, lengthread4, 0x04);
     if (ret != 0)
         goto ret;
@@ -252,10 +252,10 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
 {
     int ret = 1; // error, until successful.
 
-    const size_t hashlen = 32;
+    const unsigned long hashlen = 32;
     unsigned char *hash = malloc(sizeof(char) * hashlen);
     memset(hash, 0, hashlen);
-    size_t hasholen = 0;
+    unsigned long hasholen = 0;
     ret = atchops_sha_hash(mdtype, message, messagelen, hash, hashlen, &hasholen);
     if (ret != 0)
         goto ret;
@@ -338,7 +338,7 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
     unsigned long dstlen = 4096;
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
     memset(dst, 0, dstlen);
-    size_t writtenlen = 0;
+    unsigned long writtenlen = 0;
     ret = atchops_base64_encode(buf, 256, dst, dstlen, &writtenlen);
     printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
@@ -394,9 +394,9 @@ int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const unsigned ch
 
     // printf("base64 encoding...\n");
     // base64 encode the plain text
-    size_t dstlen = 2048;
+    unsigned long dstlen = 2048;
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    size_t olen = 0;
+    unsigned long olen = 0;
     ret = atchops_base64_encode(plaintext, plaintextlen,  dst, dstlen, &olen);
     // printf("atchops_base64_encode_1: %d\n", ret);
     if (ret != 0)
@@ -415,7 +415,7 @@ int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const unsigned ch
 
     // printf("encrypting...\n");
     // encrypt the base64 encoded text
-    size_t outputlen = 256; // 256 bytes is the result of an RSA
+    unsigned long outputlen = 256; // 256 bytes is the result of an RSA
     unsigned char *output = malloc(sizeof(unsigned char) * outputlen);
     memset(output, 0, outputlen);
     ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, plaintext, output);
@@ -486,10 +486,10 @@ int atchops_rsa_decrypt(atchops_rsa_privatekey privatekeystruct, const unsigned 
         goto ret;
 
     // base64 decode the ciphertext
-    const size_t dstlen = 8192;
+    const unsigned long dstlen = 8192;
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
     memset(dst, 0, dstlen);
-    size_t writtenlen = 0;
+    unsigned long writtenlen = 0;
     ret = atchops_base64_decode(ciphertextbase64, ciphertextbase64len, dst, dstlen, &writtenlen);
     // printf("atchops_base64_decode: %d\n", ret);
     if (ret != 0)
@@ -505,10 +505,10 @@ int atchops_rsa_decrypt(atchops_rsa_privatekey privatekeystruct, const unsigned 
         goto ret;
 
     // rsa decrypt dst
-    const size_t outputmaxlen = 4096;
+    const unsigned long outputmaxlen = 4096;
     unsigned char *output = malloc(sizeof(unsigned char) * outputmaxlen);
     memset(output, 0, outputmaxlen);
-    size_t writtenlen2 = 0;
+    unsigned long writtenlen2 = 0;
     ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, &writtenlen2, dst, output, outputmaxlen);
     // printf("mbedtls_rsa_pkcs1_decrypt: %d\n", ret);
     if (ret != 0)

@@ -27,7 +27,7 @@ int atchops_aes_ctr_encrypt(
     unsigned char *key = malloc(sizeof(unsigned char) * keylen);
     unsigned long keyolen;
 
-    ret = atchops_base64_decode(keybase64, keybase64len, key, keylen, &keyolen);
+    ret = atchops_base64_decode((const unsigned char *) keybase64, keybase64len, key, keylen, &keyolen);
     printf("atchops_base64_decode: %d\n", ret);
     // printf("aes_key:\n");
     // for(int i = 0; i < keyolen; i++)
@@ -113,7 +113,7 @@ int atchops_aes_ctr_decrypt(
     const unsigned char *ciphertextbase64,
     const unsigned long ciphertextbase64len,
     unsigned char *plaintext,
-    const size_t plaintextlen,
+    const unsigned long plaintextlen,
     unsigned long *plaintextolen)
 {
     int ret = 1;
@@ -124,7 +124,7 @@ int atchops_aes_ctr_decrypt(
     memset(key, 0, keylen);
     unsigned long keyolen = 0;
 
-    ret = atchops_base64_decode(keybase64, keybase64len, key, keylen, &keyolen);
+    ret = atchops_base64_decode((const unsigned char *) keybase64, keybase64len, key, keylen, &keyolen);
     // printf("atchops_base64_decode: %d\n", ret);
     // printf("aes_key: %lu\n", keyolen);
     // for(int i = 0; i < keyolen; i++)
