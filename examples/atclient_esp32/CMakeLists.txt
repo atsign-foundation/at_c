@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
 
 set(EXTRA_COMPONENT_DIRS
-    ${CMAKE_SOURCE_DIR}/../atclient
-    ${CMAKE_SOURCE_DIR}/../atchops
+    ${CMAKE_SOURCE_DIR}/../../packages/atclient
+    ${CMAKE_SOURCE_DIR}/../../packages/atchops
 )
-
-set(COMPONENTS atclient atchops main)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 

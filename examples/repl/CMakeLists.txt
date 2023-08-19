@@ -12,7 +12,7 @@ include(FetchContent)
 
 # FetchContent_Declare(
 #     atclient
-#     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../atclient
+#     SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../atclient
 # )
 # FetchContent_MakeAvailable(atclient)
 find_package(atclient REQUIRED CONFIG)
