@@ -1,3 +1,5 @@
+// This file is not captured by the tests
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
