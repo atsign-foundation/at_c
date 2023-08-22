@@ -23,7 +23,7 @@
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) for information on how to properly fork and open a pull request.
 
-When creating source files, include headers, or tests to certain packages, please follow the documentation in their according README files.
+When creating source files, include headers, or tests to certain packages, please follow the documentation in their according README files (for example [atclient Contributing](./packages/atclient/README.md)).
 
 ## Maintainers
 
