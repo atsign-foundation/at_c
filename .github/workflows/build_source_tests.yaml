@@ -12,9 +12,9 @@ jobs:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Install atclient
-        working-directory: packages/atchops
+        working-directory: packages/atclient
         run: |
-          cmake -S . -B build -DATCHOPS_FETCH_MBEDTLS=ON
+          cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=ON -DATCLIENT_FETCH_MBEDTLS=ON
           sudo cmake --build build --target install
 
       - name: Build sample_cmake_project
