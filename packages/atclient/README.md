@@ -1,85 +1,176 @@
+# atclient
 
-## Project structure
+atclient is the core dependency for anything Atsign technology related. atclient depends on [atchops](../atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls).
 
-`archetypes`: contains useful templates for compiling applications for this library.  
-`build`: cmake builds to this folder.  
-`deps`: git submodules and other dependencies.
-`example`: example applications.
-`include`: declarations (header files).
-`src`: definitions (source code).  
-`lib`: staticly linked libraries.  
-`targets`: additional configuration for build targets.  
-`test`: contains the test source code files and where test binaries are moved to.
-`tools`: contains tools and scripts, some used by tool.py
+This client SDK implements the atProtocol. It is written in C and is intended to be used in embedded systems. This package and the following documentation will assist you in building and using the C SDK for desktop. To use this SDK in something like an ESP32, checkout [atclient_espidf](../atclient_espidf/README.md).
 
-## Dependencies
+It is not mandatory to build [atchops](../atchops/README.md) or [MbedTLS](https://github.com/Mbed-TLS/mbedtls) from source to use this package. However, you have the option of doing so if you want faster building/debugging times. You can avoid fetching these packages everytime by setting the `ATCLIENT_FETCH_MBEDTLS` and `ATCLIENT_FETCH_ATCHOPS` to off during the configure step. These steps are illustrated in the [Installing on Linux/MacOS](#installing-on-linuxmacos) section.
 
-- [CMake](https://cmake.org/) (3.13+)
-- [Python](https://www.python.org/) (3.6+)
-- [Git](https://git-scm.com/)
+<!-- build table of contents with: https://derlin.github.io/bitdowntoc/ -->
 
-## Tools
+- [atclient](#atclient)
+  * [Building Source](#building-source)
+    + [Installing on Linux/MacOS](#installing-on-linuxmacos)
+    + [Installing on Windows](#installing-on-windows)
+  * [Running Tests on Linux/MacOS](#running-tests-on-linuxmacos)
+  * [Contributing](#contributing)
+    + [Creating Tests](#creating-tests)
+    + [Adding New Source Files](#adding-new-source-files)
+    + [Adding New Include Headers](#adding-new-include-headers)
 
-The entire build pipeline can be run via python using `./tool.py`.
 
-You will need to first update the git submodules:
+## Building Source
 
-```sh
-git submodule update --init --recursive
-```
+To build the source code you will need to have [CMake](https://cmake.org/) installed and a generator like [Ninja](https://ninja-build.org/) or [Unix Makefiles](https://cmake.org/cmake/help/latest/generator/Unix%20Makefiles.html) (which is installed by default on most Linux distros).
 
-You may also need to install the python dependencies:
+### Installing on Linux/MacOS
+
+1. Get ahold of the source code either via git clone or from downloading the source from our releases:
 
 ```sh
-python3 -m pip install -r requirements.txt
+git clone https://github.com/atsign-foundation/at_c.git
+cd at_c/packages/atclient
 ```
 
-Usage:
+2. CMake configure
 
 ```sh
-usage: tool.py [-h] [-p {desktop,esp32}] [-f {mbedtls}] {init,build,clean,project}
+cmake -S . -B build
 ```
+
+Alternatively, if you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime with `ATCLIENT_FETCH_MBEDTLS=OFF` and `ATCLIENT_FETCH_ATCHOPS=OFF` respectively. Doing this drastically reduces the time it takes to configure the project:
+
+```sh
+cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=OFF
+```
+
+If you would not like the static libraries and include header files to be installed on your system directly, you can specify a custom install directory with `-DCMAKE_INSTALL_PREFIX=/path/to/install`:
 
 Example:
 
-Build for Desktop using MbedTLS:
+```sh
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=./install
+```
+
+The command above will install the static libraries and include header files in the `install` directory in the root of the project. Installing without the `-DCMAKE_INSTALL_PREFIX=./install` flag in the configure step will install the static libraries, include headers, and any binaries in your system directories, such as `/usr/local/lib` and `/usr/local/include`.
+
+Example of the install directory structure:
+
+```bash
+.
+└── install/
+    ├── bin
+    ├── include/
+    │   ├── atclient/
+    │   │   └── *.h
+    │   ├── atchops/
+    │   │   └── *.h
+    │   └── mbedtls/
+    │       └── *.h
+    └── lib/
+        ├── cmake/
+        │   ├── atclient/
+        │   │   └── atclient-config.cmake
+        │   └── atchops/
+        │       └── atchops-config.cmake
+        ├── libatchops.a
+        ├── libatclient.a
+        ├── libmbedtls.a
+        ├── libmbedcrypto.a
+        └── libmbedx509.a
+```
+
+3. Install.
 
 ```sh
-python3 tool.py -p desktop -f mbedtls build
+cmake --build build --target install
 ```
 
-## Adding your own Test
+This is the same as doing `cd build && make install` if you are using something like Unix Makefiles as your generator.
 
-1. Create your test in `test/`. Example: `test/my_test.c`
+You may need to use `sudo` depending on your system.
 
-2. Write your test in main(). Example:
-
-my_test.c
-
-```c
-int main()
-{
-    if(1 == 1) {
-        return 0; // exit code 0
-    } else {
-        return 1; // exit code 1
-    }
-}
-```
-
-3. Add your test to `CMakeLists.txt`. Example:
+4. Building the source code will allow you to use the `atclient` library in your own CMake projects:
 
 ```cmake
-add_executable(my_test test/my_test.c)
-target_link_libraries(my_test PRIVATE at_client)
-add_test(
-  NAME MY_TEST
-  COMMAND $<TARGET_FILE:my_test>)
+find_package(atclient REQUIRED CONFIG)
+target_link_libraries(myproj PRIVATE atclient::atclient)
 ```
 
-4. Build and test
+### Installing on Windows
+
+Coming Soon!
+
+For now, here are some experimental commands that may work:
+
+```
+cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
+cmake --build build --config Debug
+```
+
+You may also specify a generator in the configure step with something like: `-G "MinGW Makefiles"`
+
+## Running Tests on Linux/MacOS
+
+1. Get ahold of the source code either via git clone or from downloading the source from our releases:
 
 ```sh
-python3 tool.py -p <platform> -f <framework> build
-python3 tool.py -p <platform> -f <framework> test
+git clone https://github.com/atsign-foundation/at_c.git
+cd at_c/packages/atclient
 ```
+
+2. CMake configure with `-DATCLIENT_BUILD_TESTS=ON`
+
+```sh
+cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
+```
+
+3. Build (target is all by default)
+
+```sh
+cmake --build build
+```
+
+This is the same as doing `cd build && make all`, if you are using something like Unix Makefiles as your generator.
+
+4. Run tests
+
+```sh
+cd build/tests && ctest -V --output-on-failure --timeout 10
+```
+
+`--timeout 10` times out tests after 10 seconds
+
+`-V` will output any stdout lines from the tests.
+
+## Contributing
+
+When creating source files, include headers, or tests to certain packages, please follow the documentation in their according README files.
+
+### Creating Tests
+
+If you want to add a test in atclient, simply add a `test_*.c` file in the `tests` directory. CMake will automatically detect it and add it to the test suite. Ensure that the test file is named `test_*.c` or else it will not be detected.
+
+Ensure the file has a `int main(int argc, char **argv)` function and returns 0 on success and not 0 on failure.
+
+### Adding New Source Files
+
+This one is a little more tricky. Adding a new source file to the project requires a few steps:
+
+Add the source file to the `CMakeLists.txt` file in the `src` directory. This is so that CMake knows to compile the file.
+
+Example:
+
+```cmake
+target_sources(atclient PRIVATE
+    ...
+    ${CMAKE_CURRENT_LIST_DIR}/src/folder/new_file.c
+    ...
+)
+```
+
+### Adding New Include Headers
+
+Simply add the header inside of the `include/` directory. CMake will automatically detect it and add it to the include path.
+
+If it is added in a subdirectory (like `include/atclient/`), then the include path will be `atclient/` (e.g. `#include <atclient/new_header.h>`)

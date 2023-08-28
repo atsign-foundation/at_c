@@ -52,7 +52,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
     }
     // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
 
-    ret = mbedtls_x509_crt_parse(ctx->cacert, ROOT_CERT, strlen(ROOT_CERT) + 1);
+    ret = mbedtls_x509_crt_parse(ctx->cacert, (const unsigned char *) ROOT_CERT, strlen(ROOT_CERT) + 1);
     if(ret != 0)
     {
         goto exit;
@@ -133,7 +133,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
     }
     // printf("mbedtls_ssl_read: %d\n", ret);
 
-    mbedtls_ssl_write(ctx->ssl, "\n", 1);
+    mbedtls_ssl_write(ctx->ssl, (const unsigned char *) "\n", 1);
 
     ret = mbedtls_ssl_read(ctx->ssl, readbuf, readbuflen);
     if(ret < 0)

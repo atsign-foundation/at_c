@@ -12,24 +12,24 @@ int main()
     int retval;
 
     const unsigned char *src = SRC_STRING;
-    const size_t srclen = strlen(src);
+    const unsigned long srclen = strlen(src);
 
-    size_t dstlen = DST_BYTES_ALLOCATED;
+    unsigned long dstlen = DST_BYTES_ALLOCATED;
     unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
 
-    size_t dstlen2 = DST_BYTES_ALLOCATED;
+    unsigned long dstlen2 = DST_BYTES_ALLOCATED;
     unsigned char *dst2 = malloc(sizeof(unsigned char) * dstlen);
 
-    size_t *olen = malloc(sizeof(size_t));
+    unsigned long *olen = malloc(sizeof(unsigned long));
 
-    retval = atchops_base64_decode(dst, dstlen, olen, src, srclen);
+    retval = atchops_base64_decode(src, srclen, dst, dstlen, olen);
     if(retval)
     {
         goto ret;
     }
     // printf("olen: %lu\n", *olen);
 
-    retval = atchops_base64_encode(dst2, dstlen2, olen, dst, *olen);
+    retval = atchops_base64_encode(dst, *olen, dst2, dstlen2, olen);
     if(retval)
     {
         goto ret;
