@@ -14,7 +14,7 @@ jobs:
       - name: Install atclient
         working-directory: packages/atclient
         run: |
-          cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=ON -DATCLIENT_FETCH_MBEDTLS=ON
+          cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=ON -DATCLIENT_FETCH_ATCHOPS=ON
           sudo cmake --build build --target install
 
       - name: Build sample_cmake_project
