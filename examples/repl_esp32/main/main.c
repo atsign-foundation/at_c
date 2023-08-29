@@ -1,6 +1,6 @@
 
 #define CONFIG_ESP_WIFI_SSID "Soup"
-#define CONFIG_ESP_WIFI_PASSWORD "maya12345"
+#define CONFIG_ESP_WIFI_PASSWORD "****"
 
 extern void wifi_connect(const char *ssid, const char *password);
 
