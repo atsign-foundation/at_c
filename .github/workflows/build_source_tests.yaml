@@ -1,0 +1,29 @@
+name: Build Source Tests
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+jobs:
+  atclient:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Install atclient
+        working-directory: packages/atclient
+        run: |
+          cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=ON -DATCLIENT_FETCH_MBEDTLS=ON
+          sudo cmake --build build --target install
+
+      - name: Build sample_cmake_project
+        working-directory: examples/sample_cmake_project
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      - name: Run sample_cmake_project executable
+        working-directory: examples/sample_cmake_project
+        run: |
+          ./build/exec
