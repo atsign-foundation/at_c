@@ -17,6 +17,7 @@ static void my_debug(void *ctx, int level, const char *file, int line, const cha
 
 void atclient_connection_init(atclient_connection_ctx *ctx)
 {
+    memset(ctx, 0, sizeof(atclient_connection_ctx));
     ctx->host = NULL;
     ctx->port = NULL;
     ctx->cert_pem = ROOT_CERT;
