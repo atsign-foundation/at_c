@@ -66,7 +66,7 @@ static int init_event_handlers(EventGroupHandle_t *wifi_event_group)
         wifi_event_base,     // esp_event_base_t
         any_event_id,        // int32_t
         &event_handler_wifi, // esp_event_handler_t
-        wifi_event_group,   // void * (event_handler_arg)
+        wifi_event_group,    // void * (event_handler_arg)
         NULL                 // esp_event_handler_instance_t * (instance)
     );
     ESP_ERROR_CHECK(ret);
@@ -141,7 +141,7 @@ void wifi_connect(const char *ssid, const char *password)
 
     // initialize wifi, esp_wifi.h
     ESP_LOGI(TAG, "Initializing wifi...");
-    ret = init_wifi_sta((const unsigned char *) ssid, strlen(ssid), (const unsigned char *)password, strlen(password));
+    ret = init_wifi_sta((const unsigned char *)ssid, strlen(ssid), (const unsigned char *)password, strlen(password));
     ESP_ERROR_CHECK(ret);
 
     // event handler sets bits in event group, attempt connect using esp_wifi_connect()
@@ -150,7 +150,7 @@ void wifi_connect(const char *ssid, const char *password)
     {
         ESP_LOGI(TAG, "Attempting to connect to WiFi...");
         ret = esp_wifi_connect();
-        ESP_LOGI(TAG, "esp_wifi_connect() returned %d", (int) ret);
+        ESP_LOGI(TAG, "esp_wifi_connect() returned %d", (int)ret);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
 
         bits = xEventGroupWaitBits(
