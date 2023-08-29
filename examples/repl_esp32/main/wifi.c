@@ -11,7 +11,7 @@
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
-static const char *TAG = "repl_esp32"; // for logging
+static const char *TAG = "repl_esp32 WiFi"; // for logging
 
 extern void event_handler_wifi(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 
@@ -117,7 +117,7 @@ static int init_wifi_sta(const unsigned char *wifi_ssid, const unsigned long wif
     return ret;
 }
 
-void wifi_connect(const char *ssid, const char *password)
+int wifi_connect(const char *ssid, const char *password)
 {
     int ret = 1;
 
@@ -163,10 +163,13 @@ void wifi_connect(const char *ssid, const char *password)
         if (bits & WIFI_CONNECTED_BIT)
         {
             ESP_LOGI(TAG, "Connected to WiFi !");
+            ret = 0;
         }
         else if (bits & WIFI_FAIL_BIT)
         {
             ESP_LOGI(TAG, "Failed to connect to WiFi.");
         }
-    } while (ret != ESP_OK);
+    } while (bits & WIFI_FAIL_BIT);
+
+    return ret;
 }
