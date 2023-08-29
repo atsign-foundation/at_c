@@ -25,7 +25,7 @@ void app_main(void)
     ret = atclient_connection_connect(&root_connection, "root.atsign.org", 64);
     if (ret != 0)
     {
-        ESP_LOGE(TAG, "Failed to connect to root.atsign.org. at_client_connection_connect: %d");
+        ESP_LOGE(TAG, "Failed to connect to root.atsign.org. at_client_connection_connect: %d", ret);
         goto exit;
     }
     ESP_LOGI(TAG, "Connected to root.atsign.org");
