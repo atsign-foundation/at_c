@@ -26,14 +26,14 @@ void event_handler_wifi(void *event_handler_arg, esp_event_base_t event_base, in
     if(event_id == WIFI_EVENT_STA_START)
     {
         ESP_LOGI(TAG_WIFI_EVENT_HANDLER, "Connecting to WiFi...");
-    } else if(event_id == WIFI_EVENT_STA_DISCONNECTED)
-    {
-        ESP_LOGI(TAG_WIFI_EVENT_HANDLER, "Disconnected from WiFi...");
-        xEventGroupSetBits(wifi_event_group, WIFI_FAIL_BIT); // set fail bit
     } else if(event_id == WIFI_EVENT_STA_CONNECTED)
     {
         ESP_LOGI(TAG_WIFI_EVENT_HANDLER, "Connected to WiFi ! ... SSID:%s", ((wifi_event_sta_connected_t *) event_data)->ssid);
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT); // set connected bit
+    } else if(event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
+        ESP_LOGI(TAG_WIFI_EVENT_HANDLER, "Disconnected from WiFi...");
+        xEventGroupSetBits(wifi_event_group, WIFI_FAIL_BIT); // set fail bit
     }
 }
 
