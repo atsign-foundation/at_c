@@ -18,6 +18,7 @@
 - [atclient_esp32_static_components](./examples/atclient_esp32_static_components/README.md) is an example of how to use atclient in your ESP-IDF project with static libraries in separated components built from [atclient_espidf](./packages/atclient_espidf/README.md).
 - [atclient_esp32_static_no_components](./examples/atclient_esp32_static_no_components/) is an example of how to use atclient in your ESP-IDF project with static libraries without components built from [atclient_espidf](./packages/atclient_espidf/README.md).
 - [repl](./examples/repl/README.md) is a command line interface for interacting with the atProtocol. Works on Desktop Linux/MacOS.
+- [repl](./examples/repl_esp32/README.md) is a command line interface for interacting with the atProtocol. Works on ESP32, not tested on other devices that can run the IDF.
 
 ## Contributing
 
