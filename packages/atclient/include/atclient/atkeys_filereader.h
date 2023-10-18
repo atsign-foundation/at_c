@@ -16,7 +16,7 @@
 #define TOKEN_SELF_ENCRYPTION_KEY_LEN 17
 
 typedef struct atclient_atkeysfile_entry{
-    size_t len;
+    unsigned long len;
     char *key;
 } atclient_atkeysfile_entry;
 

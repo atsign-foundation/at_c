@@ -17,6 +17,7 @@ static void my_debug(void *ctx, int level, const char *file, int line, const cha
 
 void atclient_connection_init(atclient_connection_ctx *ctx)
 {
+    memset(ctx, 0, sizeof(atclient_connection_ctx));
     ctx->host = NULL;
     ctx->port = NULL;
     ctx->cert_pem = ROOT_CERT;
@@ -133,7 +134,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
     }
     // printf("mbedtls_ssl_read: %d\n", ret);
 
-    mbedtls_ssl_write(ctx->ssl, (const unsigned char *) "\n", 1);
+    mbedtls_ssl_write(ctx->ssl, (const unsigned char *) "\r\n", 2);
 
     ret = mbedtls_ssl_read(ctx->ssl, readbuf, readbuflen);
     if(ret < 0)
