@@ -159,7 +159,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
     }
 }
 
-int atclient_connection_send(atclient_connection_ctx *ctx, unsigned char *recv, const size_t recvlen, size_t *olen, const unsigned char *src, const size_t srclen)
+int atclient_connection_send(atclient_connection_ctx *ctx, const unsigned char *src, const unsigned long srclen, unsigned char *recv, const unsigned long recvlen, unsigned long *olen)
 {
     int ret = 1;
     ret = mbedtls_ssl_write(ctx->ssl, src, srclen);

@@ -26,22 +26,22 @@ typedef struct atchops_rsa_privatekey
 /**
  * @brief Populate a public key struct from a base64 string
  *
+ * @param publickeystruct the public key struct to populate
  * @param publickeybase64 a base64 string representing an RSA 2048 Public Key
  * @param publickeybase64len the length of the base64 string
- * @param publickeystruct the public key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_publickey(const char *publickeybase64, const unsigned long publickeybase64len, atchops_rsa_publickey *publickeystruct);
+int atchops_rsa_populate_publickey(atchops_rsa_publickey *publickeystruct, const char *publickeybase64, const unsigned long publickeybase64len);
 
 /**
  * @brief Populate a private key struct from a base64 string
  *
+ * @param privatekeystruct the private key struct to populate
  * @param privatekeybase64 the base64 string representing an RSA 2048 Private Key
  * @param privatekeybase64len the length of the base64 string
- * @param privatekeystruct the private key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_privatekey(const char *privatekeybase64, const unsigned long privatekeybase64len, atchops_rsa_privatekey *privatekeystruct);
+int atchops_rsa_populate_privatekey(atchops_rsa_privatekey *privatekeystruct, const char *privatekeybase64, const unsigned long privatekeybase64len);
 
 /**
  * @brief Sign a message with an RSA private key

@@ -19,7 +19,7 @@ static void printx(const unsigned char *buf, const unsigned long len)
     printf("\n");
 }
 
-int atchops_rsa_populate_publickey(const char *publickeybase64, const unsigned long publickeybase64len, atchops_rsa_publickey *publickeystruct)
+int atchops_rsa_populate_publickey(atchops_rsa_publickey *publickeystruct, const char *publickeybase64, const unsigned long publickeybase64len)
 {
     int ret = 0;
 
@@ -111,7 +111,7 @@ ret:
 }
 }
 
-int atchops_rsa_populate_privatekey(const char *privatekeybase64, const unsigned long privatekeybase64len, atchops_rsa_privatekey *privatekeystruct)
+int atchops_rsa_populate_privatekey(atchops_rsa_privatekey *privatekeystruct, const char *privatekeybase64, const unsigned long privatekeybase64len)
 {
     int ret = 1;
 

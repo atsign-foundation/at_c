@@ -12,7 +12,6 @@ int atchops_aes_ctr_encrypt(
     const unsigned long keybase64len,
     const AESKeySize keybits,
     const unsigned char *iv,
-    const unsigned long ivlen,
     const unsigned char *plaintext, // plaintext to encrypt
     const unsigned long plaintextlen,
     unsigned char *ciphertextbase64,         // buffer to populate
@@ -109,7 +108,6 @@ int atchops_aes_ctr_decrypt(
     const unsigned long keybase64len,
     const AESKeySize keybits,
     const unsigned char *iv,
-    const unsigned long ivlen,
     const unsigned char *ciphertextbase64,
     const unsigned long ciphertextbase64len,
     unsigned char *plaintext,

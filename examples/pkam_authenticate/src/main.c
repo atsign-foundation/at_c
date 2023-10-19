@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <atclient/atclient.h>
-#include <atclient/atkeys_filereader.h>
+#include <atclient/atkeysfile.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64

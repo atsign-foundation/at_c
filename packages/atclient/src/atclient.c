@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "atclient/atclient.h"
-#include "atclient/atkeys_filereader.h"
+#include "atclient/atkeys.h"
+#include "atclient/atkeysfile.h"
 #include "atclient/connection.h"
 #include "atchops/rsa.h"
 #include "atchops/aes_ctr.h"
@@ -56,7 +57,7 @@ exit: {
 }
 }
 
-int atclient_pkam_authenticate(atclient_ctx *ctx, const char *atsign, atclient_atkeysfile *atkeysfile)
+int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const char *atsign)
 {
     int ret = 1; // error by default
 
@@ -73,7 +74,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, const char *atsign, atclient_a
     atsign--;
 
     unsigned long olen = 0;
-    ret = atclient_connection_send(&(ctx->root_connection), recv, recvlen, &olen, src, strlen(src));
+    ret = atclient_connection_send(&(ctx->root_connection), src, strlen(src), recv, recvlen, &olen);
     if(ret != 0)
     {
         goto exit;
@@ -143,34 +144,8 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, const char *atsign, atclient_a
     printf("challenge: \'%s\'\n", challenge);
 
     // sign
-    atchops_rsa_privatekey pkamprivatekeystruct;
-
-    const unsigned long pkamprivatekeylen = 4096*16;
-    unsigned char *pkamprivatekey = malloc(sizeof(unsigned char) * pkamprivatekeylen);
-    memset(pkamprivatekey, 0, pkamprivatekeylen);
-    unsigned long pkamprivatekeyolen = 0;
-
-    // printf("self encryption key: \"%s\"\n", atkeysfile->self_encryption_key->key);
-    // printf("pkam private key (encrypted): \"%s\"\n", atkeysfile->aes_pkam_private_key->key);
-    // printf("pkam private key (encrypted) len: %lu\n", atkeysfile->aes_pkam_private_key->len);
-
-    unsigned char *iv = malloc(sizeof(unsigned char) * 16);
-    memset(iv, 0, 16);
-
-    ret = atchops_aes_ctr_decrypt(atkeysfile->self_encryption_key->key, atkeysfile->self_encryption_key->len, 256, iv, 16, atkeysfile->aes_pkam_private_key->key, atkeysfile->aes_pkam_private_key->len, pkamprivatekey, pkamprivatekeylen, &pkamprivatekeyolen);
-    // printf("atchops_aes_ctr_decrypt: %d\n", ret);
-
-    // printf("pkam private key (decrypted): \"%s\"\n", pkamprivatekey);
-    // printf("pkam private key (decrypted) len: %lu\n", pkamprivatekeyolen);
-
-    ret = atchops_rsa_populate_privatekey(pkamprivatekey, pkamprivatekeyolen, &pkamprivatekeystruct);
-
-    // printf("n: %lu\n", pkamprivatekeystruct.n.len);
-    // printf("e: %lu\n", pkamprivatekeystruct.e.len);
-
-    // sign
     memset(recv, 0, recvlen);
-    ret = atchops_rsa_sign(pkamprivatekeystruct, ATCHOPS_MD_SHA256, challenge, strlen(challenge), recv, recvlen, &olen);
+    ret = atchops_rsa_sign(atkeys.pkam_private_key, ATCHOPS_MD_SHA256, challenge, strlen(challenge), recv, recvlen, &olen);
     printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
     {
