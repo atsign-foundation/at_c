@@ -21,21 +21,22 @@ int main(int argc, char **argv)
     // printf("aes_pkam_private_key: %lu | %s\n", atkeysfile.aes_pkam_private_key_olen, atkeysfile.aes_pkam_private_key);
     // printf("aes_encrypt_public_key: %lu | %s\n", atkeysfile.aes_encrypt_public_key_olen, atkeysfile.aes_encrypt_public_key);
     // printf("aes_encrypt_private_key: %lu | %s\n", atkeysfile.aes_encrypt_private_key_olen, atkeysfile.aes_encrypt_private_key);
-    // printf("self_encryption_key: %lu | %s\n", atkeysfile.self_encryption_key_olen, atkeysfile.self_encryption_key);
+    // printf("selfencryptionkeystr: %lu | %s\n", atkeysfile.self_encryption_key_olen, atkeysfile.selfencryptionkeystr);
 
     atclient_atkeys atkeys;
-    ret = atclient_atkeys_populate(&atkeys, &atkeysfile);
+    atclient_atkeys_init(&atkeys);
+    ret = atclient_atkeys_populate(&atkeys, atkeysfile);
     printf("atclient_atkeys_populate: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
-    printf("aes_pkam_private_key: %lu | %s\n", atkeys.pkam_private_key_olen, atkeys.pkam_private_key);
-    printf("aes_pkam_public_key: %lu | %s\n", atkeys.pkam_public_key_olen, atkeys.pkam_public_key);
-    printf("aes_encrypt_private_key: %lu | %s\n", atkeys.encrypt_private_key_olen, atkeys.encrypt_private_key);
-    printf("aes_encrypt_public_key: %lu | %s\n", atkeys.encrypt_public_key_olen, atkeys.encrypt_public_key);
-    printf("self_encryption_key: %lu | %s\n", atkeys.self_encryption_key_olen, atkeys.self_encryption_key);
+    printf("pkam private key (decrypted): %lu | %s\n", atkeys.pkamprivatekeyolen, atkeys.pkamprivatekeystr);
+    printf("pkam public key  (decrypted): %lu | %s\n", atkeys.pkampublickeyolen, atkeys.pkampublickeystr);
+    printf("encrypt private key (decrypted): %lu | %s\n", atkeys.encryptprivatekeyolen, atkeys.encryptprivatekeystr);
+    printf("encrypt public key (decrypted): %lu | %s\n", atkeys.encryptpublickeyolen, atkeys.encryptpublickeystr);
+    printf("self encryption key: %lu | %s\n", atkeys.selfencryptionkeyolen, atkeys.selfencryptionkeystr);
 
 exit:
 {

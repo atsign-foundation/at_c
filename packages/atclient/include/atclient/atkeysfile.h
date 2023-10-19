@@ -1,25 +1,25 @@
 #pragma once
 
 typedef struct atclient_atkeysfile {
-    unsigned long aes_pkam_public_key_len;
-    unsigned char *aes_pkam_public_key;
-    unsigned long aes_pkam_public_key_olen;
+    unsigned long aespkampublickeylen;
+    unsigned char *aespkampublickeystr;
+    unsigned long aespkampublickeyolen;
 
-    unsigned long aes_pkam_private_key_len;
-    unsigned char *aes_pkam_private_key;
-    unsigned long aes_pkam_private_key_olen;
+    unsigned long aespkamprivatekeylen;
+    unsigned char *aespkamprivatekeystr;
+    unsigned long aespkamprivatekeyolen;
 
-    unsigned long aes_encrypt_public_key_len;
-    unsigned char *aes_encrypt_public_key;
-    unsigned long aes_encrypt_public_key_olen;
+    unsigned long aesencryptpublickeylen;
+    unsigned char *aesencryptpublickeystr;
+    unsigned long aesencryptpublickeyolen;
 
-    unsigned long aes_encrypt_private_key_len;
-    unsigned char *aes_encrypt_private_key;
-    unsigned long aes_encrypt_private_key_olen;
+    unsigned long aesencryptprivatekeylen;
+    unsigned char *aesencryptprivatekeystr;
+    unsigned long aesencryptprivatekeyolen;
 
-    unsigned long self_encryption_key_len;
-    unsigned char *self_encryption_key;
-    unsigned long self_encryption_key_olen;
+    unsigned long selfencryptionkeylen;
+    unsigned char *selfencryptionkeystr;
+    unsigned long selfencryptionkeyolen;
 } atclient_atkeysfile;
 
 void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile);
