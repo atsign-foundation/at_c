@@ -53,7 +53,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
 
     // 2. pkam public key
     ret = atchops_aes_ctr_decrypt(
-        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, AES_256, iv,
+        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkampublickeystr, atkeysfile.aespkampublickeyolen,
         atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
 
@@ -66,7 +66,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
 
     // 3. pkam private key
     ret = atchops_aes_ctr_decrypt(
-        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, AES_256, iv,
+        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkamprivatekeystr, atkeysfile.aespkamprivatekeyolen,
         atkeys->pkamprivatekeystr, atkeys->pkamprivatekeylen, &(atkeys->pkamprivatekeyolen));
     if(ret != 0)
@@ -77,7 +77,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
 
     // 4. encrypt public key
     ret = atchops_aes_ctr_decrypt(
-        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, AES_256, iv,
+        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aesencryptpublickeystr, atkeysfile.aesencryptpublickeyolen,
         atkeys->encryptpublickeystr, atkeys->encryptpublickeylen, &(atkeys->encryptpublickeyolen));
 
@@ -89,7 +89,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
 
     // 5. encrypt private key
     ret = atchops_aes_ctr_decrypt(
-        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, AES_256, iv,
+        atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aesencryptprivatekeystr, atkeysfile.aesencryptprivatekeyolen,
         atkeys->encryptprivatekeystr, atkeys->encryptprivatekeylen, &(atkeys->encryptprivatekeyolen));
     if(ret != 0)

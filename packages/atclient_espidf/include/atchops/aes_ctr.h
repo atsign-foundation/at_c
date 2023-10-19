@@ -1,8 +1,8 @@
 #pragma once
 
 typedef enum AESKeySize {
-    AES_128 = 128, // not tested
-    AES_192 = 192, // not tested
+    ATCHOPS_AES_128 = 128, // not tested
+    ATCHOPS_AES_192 = 192, // not tested
     AES_256 = 256,
 } AESKeySize;
 
