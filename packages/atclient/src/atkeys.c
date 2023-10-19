@@ -56,6 +56,8 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, AES_256, iv,
         atkeysfile.aespkampublickeystr, atkeysfile.aespkampublickeyolen,
         atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
+
+    printf("pkam public key str: %s\n", atkeys->pkampublickeystr);
     if(ret != 0)
     {
         goto exit;
@@ -90,6 +92,36 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, AES_256, iv,
         atkeysfile.aesencryptprivatekeystr, atkeysfile.aesencryptprivatekeyolen,
         atkeys->encryptprivatekeystr, atkeys->encryptprivatekeylen, &(atkeys->encryptprivatekeyolen));
+    if(ret != 0)
+    {
+        goto exit;
+    }
+
+    // populate rsa structs
+    printf("PKAM PUBLIC KEY STR: %s\n", atkeys->pkampublickeystr);
+    ret = atchops_rsa_populate_publickey(&(atkeys->pkampublickey), atkeys->pkampublickeystr, atkeys->pkampublickeyolen);
+    printf("atchops_rsa_populate_privatekey: %d\n", ret);
+    if(ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = atchops_rsa_populate_privatekey(&(atkeys->pkamprivatekey), atkeys->pkamprivatekeystr, atkeys->pkamprivatekeyolen);
+    printf("atchops_rsa_populate_privatekey: %d\n", ret);
+    if(ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = atchops_rsa_populate_privatekey(&(atkeys->encryptprivatekey), atkeys->encryptprivatekeystr, atkeys->encryptprivatekeyolen);
+    printf("atchops_rsa_populate_privatekey: %d\n", ret);
+    if(ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = atchops_rsa_populate_publickey(&(atkeys->encryptpublickey), atkeys->encryptpublickeystr, atkeys->encryptpublickeyolen);
+    printf("atchops_rsa_populate_privatekey: %d\n", ret);
     if(ret != 0)
     {
         goto exit;

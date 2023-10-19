@@ -32,11 +32,11 @@ int main(int argc, char **argv)
         goto exit;
     }
 
-    printf("pkam private key (decrypted): %lu | %s\n", atkeys.pkamprivatekeyolen, atkeys.pkamprivatekeystr);
-    printf("pkam public key  (decrypted): %lu | %s\n", atkeys.pkampublickeyolen, atkeys.pkampublickeystr);
-    printf("encrypt private key (decrypted): %lu | %s\n", atkeys.encryptprivatekeyolen, atkeys.encryptprivatekeystr);
-    printf("encrypt public key (decrypted): %lu | %s\n", atkeys.encryptpublickeyolen, atkeys.encryptpublickeystr);
-    printf("self encryption key: %lu | %s\n", atkeys.selfencryptionkeyolen, atkeys.selfencryptionkeystr);
+    // printf("pkam private key (decrypted): %lu | %s\n", atkeys.pkamprivatekeyolen, atkeys.pkamprivatekeystr);
+    // printf("pkam public key  (decrypted): %lu | %s\n", atkeys.pkampublickeyolen, atkeys.pkampublickeystr);
+    // printf("encrypt private key (decrypted): %lu | %s\n", atkeys.encryptprivatekeyolen, atkeys.encryptprivatekeystr);
+    // printf("encrypt public key (decrypted): %lu | %s\n", atkeys.encryptpublickeyolen, atkeys.encryptpublickeystr);
+    // printf("self encryption key: %lu | %s\n", atkeys.selfencryptionkeyolen, atkeys.selfencryptionkeystr);
 
 exit:
 {

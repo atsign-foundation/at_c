@@ -106,15 +106,13 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     }
     port = atoi(portstr);
 
-    printf("Host: \'%s\'", host);
-    printf("PortStr: \'%s\'\n", portstr);
-
     // 2. init secondary connection
     ret = atclient_init_secondary_connection(ctx, host, port);
     if(ret != 0)
     {
         goto exit;
     }
+    printf("Established connection with secondary: %s:%d\n", host, port);
 
     // 3. send pkam auth
     memset(src, 0, sizeof(unsigned char) * srclen);
@@ -124,7 +122,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     strcat(src, atsign);
     strcat(src, "\r\n");
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), recv, recvlen, &olen, src, strlen(src));
+    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen(src), recv, recvlen, &olen);
     if(ret != 0)
     {
         goto exit;
@@ -145,7 +143,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
 
     // sign
     memset(recv, 0, recvlen);
-    ret = atchops_rsa_sign(atkeys.pkam_private_key, ATCHOPS_MD_SHA256, challenge, strlen(challenge), recv, recvlen, &olen);
+    ret = atchops_rsa_sign(atkeys.pkamprivatekey, ATCHOPS_MD_SHA256, challenge, strlen(challenge), recv, recvlen, &olen);
     printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
     {
@@ -164,20 +162,20 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
 
     memset(recv, 0, recvlen);
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), recv, recvlen, &olen, src, strlen(src));
+    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen(src), recv, recvlen, &olen);
 
     if(ret != 0)
     {
         goto exit;
     }
 
-    printf("pkam response: \"%s\"", recv);
+    printf("pkam response: \"%s\"\n", recv);
 
-    free(src);
-    free(recv);
 
     goto exit;
 exit: {
+    free(src);
+    free(recv);
     return ret;
 }
 }

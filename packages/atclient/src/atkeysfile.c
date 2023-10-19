@@ -72,11 +72,11 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    const unsigned long read_buf_len = 32768;
-    char *read_buf = (char *) malloc(sizeof(char) * read_buf_len);
-    memset(read_buf, 0, read_buf_len);
+    const unsigned long readbuflen = 32768;
+    char *readbuf = (char *) malloc(sizeof(char) * readbuflen);
+    memset(readbuf, 0, readbuflen);
 
-    unsigned long bytes_read = fread(read_buf, sizeof(char), read_buf_len, file);
+    unsigned long bytes_read = fread(readbuf, sizeof(char), readbuflen, file);
     if (bytes_read == 0)
     {
         printf("Error reading file!\n");
@@ -84,7 +84,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    ret = extract_json_string(read_buf, "aesPkamPublicKey", atkeysfile->aespkampublickeystr, atkeysfile->aespkampublickeylen);
+    ret = extract_json_string(readbuf, "aesPkamPublicKey", atkeysfile->aespkampublickeystr, atkeysfile->aespkampublickeylen);
     if (ret != 0)
     {
         printf("Error extracting aesPkamPublicKey\n");
@@ -93,7 +93,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     }
     atkeysfile->aespkampublickeyolen = strlen(atkeysfile->aespkampublickeystr);
 
-    ret = extract_json_string(read_buf, "aesPkamPrivateKey", atkeysfile->aespkamprivatekeystr, atkeysfile->aespkamprivatekeylen);
+    ret = extract_json_string(readbuf, "aesPkamPrivateKey", atkeysfile->aespkamprivatekeystr, atkeysfile->aespkamprivatekeylen);
     if (ret != 0)
     {
         printf("Error extracting aesPkamPrivateKey\n");
@@ -102,7 +102,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     }
     atkeysfile->aespkamprivatekeyolen = strlen(atkeysfile->aespkamprivatekeystr);
 
-    ret = extract_json_string(read_buf, "aesEncryptPublicKey", atkeysfile->aesencryptpublickeystr, atkeysfile->aesencryptpublickeylen);
+    ret = extract_json_string(readbuf, "aesEncryptPublicKey", atkeysfile->aesencryptpublickeystr, atkeysfile->aesencryptpublickeylen);
     if (ret != 0)
     {
         printf("Error extracting aesEncryptPublicKey\n");
@@ -111,7 +111,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     }
     atkeysfile->aesencryptpublickeyolen = strlen(atkeysfile->aesencryptpublickeystr);
 
-    ret = extract_json_string(read_buf, "aesEncryptPrivateKey", atkeysfile->aesencryptprivatekeystr, atkeysfile->aesencryptprivatekeylen);
+    ret = extract_json_string(readbuf, "aesEncryptPrivateKey", atkeysfile->aesencryptprivatekeystr, atkeysfile->aesencryptprivatekeylen);
     if (ret != 0)
     {
         printf("Error extracting aesEncryptPrivateKey\n");
@@ -120,7 +120,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     }
     atkeysfile->aesencryptprivatekeyolen = strlen(atkeysfile->aesencryptprivatekeystr);
 
-    ret = extract_json_string(read_buf, "selfEncryptionKey", atkeysfile->selfencryptionkeystr, atkeysfile->selfencryptionkeylen);
+    ret = extract_json_string(readbuf, "selfEncryptionKey", atkeysfile->selfencryptionkeystr, atkeysfile->selfencryptionkeylen);
     if (ret != 0)
     {
         printf("Error extracting selfEncryptionKey\n");
@@ -135,7 +135,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
 exit:
 {
     fclose(file);
-    free(read_buf);
+    free(readbuf);
     return ret;
 }
 }

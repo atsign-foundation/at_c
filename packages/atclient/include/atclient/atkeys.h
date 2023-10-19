@@ -14,7 +14,7 @@ typedef struct atclient_atkeys
     unsigned long pkamprivatekeylen;
     unsigned char *pkamprivatekeystr; // base64 encoded, decrypted
     unsigned long pkamprivatekeyolen;
-    atchops_rsa_privatekey pkam_private_key; // conatins n, e, d, p, q
+    atchops_rsa_privatekey pkamprivatekey; // conatins n, e, d, p, q
 
     unsigned long encryptpublickeylen;
     unsigned char *encryptpublickeystr; // base64 encoded, decrypted
