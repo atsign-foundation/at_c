@@ -40,11 +40,11 @@ int atchops_sha_hash(atchops_md_type mdtype, const unsigned char *input, const u
     }
     --(*outputolen); // remove the '\0' at the end of the string
 
-    mbedtls_md_free(&md_ctx);
 
     goto ret;
 ret:
 {
+    mbedtls_md_free(&md_ctx);
     return ret;
 }
 }
