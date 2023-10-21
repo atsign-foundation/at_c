@@ -156,7 +156,7 @@ int main()
     printf("pkam private key (decrypted): \"%s\"\n", pkamprivatekey);
     printf("pkam private key (decrypted) len: %lu\n", pkamprivatekeyolen);
 
-    ret = atchops_rsa_populate_privatekey(pkamprivatekey, pkamprivatekeyolen, &pkamprivatekeystruct);
+    ret = atchops_rsakey_populate_privatekey(pkamprivatekey, pkamprivatekeyolen, &pkamprivatekeystruct);
 
     printf("n: %lu\n", pkamprivatekeystruct.n.len);
     printf("e: %lu\n", pkamprivatekeystruct.e.len);

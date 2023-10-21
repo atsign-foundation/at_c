@@ -31,7 +31,7 @@ int main()
     atchops_rsa_publickey publickeystruct;
 
     printf("populating public key struct..\n");
-    ret = atchops_rsa_populate_publickey(publickey, publickeylen, &publickeystruct);
+    ret = atchops_rsakey_populate_publickey(publickey, publickeylen, &publickeystruct);
     printf("atchops_rsa_populate_publickey returned: %d\n", ret);
     if(ret != 0)
         goto ret;

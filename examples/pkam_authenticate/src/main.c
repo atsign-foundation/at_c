@@ -10,35 +10,51 @@
 
 int main(int argc, char **argv)
 {
+    int ret = 1;
     // 1. init atkeys
 
     // 1a. read `atkeysfile` struct
     atclient_atkeysfile atkeysfile;
     atclient_atkeysfile_init(&atkeysfile);
-    int atkeys_read_code = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
-    printf("atkeysfile_read_success: %d\n", atkeys_read_code);
+    ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
+    printf("atkeysfile_read_code: %d\n", ret);
+    if (ret != 0)
+    {
+        goto exit;
+    }
 
     // 1b. populate `atkeys` struct
     atclient_atkeys atkeys;
     atclient_atkeys_init(&atkeys);
-    int atkeys_populate_code = atclient_atkeys_populate(&atkeys, atkeysfile);
-    printf("atkeys_populate_code: %d\n", atkeys_populate_code);
+    ret = atclient_atkeys_populate(&atkeys, atkeysfile);
+    printf("atkeys_populate_code: %d\n", ret);
+    if (ret != 0)
+    {
+        goto exit;
+    }
 
     // 2. pkam auth
     atclient_ctx atclient;
     atclient_init(&atclient);
-    int root_connection_code = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
-    printf("root_connection_code: %d\n", root_connection_code);
-    int pkam_authentication_code = atclient_pkam_authenticate(&atclient, atkeys, ATSIGN);
-    printf("pkam_authentication_code: %d\n", pkam_authentication_code);
+    ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = atclient_pkam_authenticate(&atclient, atkeys, ATSIGN);
+    if (ret != 0)
+    {
+        goto exit;
+    }
 
     goto exit;
 
 exit:
 {
-    atclient_atkeysfile_free(&atkeysfile);
-    atclient_atkeys_free(&atkeys);
-    atclient_free(&atclient);
+    // atclient_atkeysfile_free(&atkeysfile);
+    // atclient_atkeys_free(&atkeys);
+    // atclient_free(&atclient);
     return 0;
 }
 }

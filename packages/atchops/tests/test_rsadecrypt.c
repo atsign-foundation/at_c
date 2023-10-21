@@ -20,8 +20,8 @@ int main()
     atchops_rsa_privatekey privatekeystruct;
 
     printf("1\n");
-    ret = atchops_rsa_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
-    printf("atchops_rsa_populate_privatekey: %d\n", ret);
+    ret = atchops_rsakey_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
+    printf("atchops_rsakey_populate_privatekey: %d\n", ret);
     if (ret != 0)
         goto ret;
 

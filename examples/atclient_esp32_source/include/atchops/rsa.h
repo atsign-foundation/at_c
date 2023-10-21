@@ -2,25 +2,25 @@
 
 #include "sha.h"
 
-typedef struct rsa_param
+typedef struct rsakey_param
 {
     unsigned long len;    // length of the number in bytes
     unsigned char *value; // hex byte array of the number
-} rsa_param;
+} rsakey_param;
 
 typedef struct atchops_rsa_publickey
 {
-    rsa_param n; // modulus
-    rsa_param e; // public exponent
+    rsakey_param n; // modulus
+    rsakey_param e; // public exponent
 } atchops_rsa_publickey;
 
 typedef struct atchops_rsa_privatekey
 {
-    rsa_param n; // modulus
-    rsa_param e; // public exponent
-    rsa_param d; // private exponent
-    rsa_param p; // prime 1
-    rsa_param q; // prime 2
+    rsakey_param n; // modulus
+    rsakey_param e; // public exponent
+    rsakey_param d; // private exponent
+    rsakey_param p; // prime 1
+    rsakey_param q; // prime 2
 } atchops_rsa_privatekey;
 
 /**
@@ -31,7 +31,7 @@ typedef struct atchops_rsa_privatekey
  * @param publickeystruct the public key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_publickey(const char *publickeybase64, const unsigned long publickeybase64len, atchops_rsa_publickey *publickeystruct);
+int atchops_rsakey_populate_publickey(const char *publickeybase64, const unsigned long publickeybase64len, atchops_rsa_publickey *publickeystruct);
 
 /**
  * @brief Populate a private key struct from a base64 string
@@ -41,12 +41,12 @@ int atchops_rsa_populate_publickey(const char *publickeybase64, const unsigned l
  * @param privatekeystruct the private key struct to populate
  * @return int 0 on success
  */
-int atchops_rsa_populate_privatekey(const char *privatekeybase64, const unsigned long privatekeybase64len, atchops_rsa_privatekey *privatekeystruct);
+int atchops_rsakey_populate_privatekey(const char *privatekeybase64, const unsigned long privatekeybase64len, atchops_rsa_privatekey *privatekeystruct);
 
 /**
  * @brief Sign a message with an RSA private key
  *
- * @param privatekeystruct the private key struct to use for signing, see atchops_rsa_populate_privatekey
+ * @param privatekeystruct the private key struct to use for signing, see atchops_rsakey_populate_privatekey
  * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
  * @param message the message to sign
  * @param messagelen the length of the message, most people use strlen() to find this length
@@ -60,7 +60,7 @@ int atchops_rsa_sign(atchops_rsa_privatekey privatekeystruct, atchops_md_type md
 /**
  * @brief Encrypt bytes with an RSA public key
  *
- * @param publickeystruct the public key struct to use for encryption, see atchops_rsa_populate_publickey
+ * @param publickeystruct the public key struct to use for encryption, see atchops_rsakey_populate_publickey
  * @param plaintext the plaintext to encrypt
  * @param plaintextlen the length of the plaintext, most people use strlen() to find this length
  * @param ciphertext the ciphertext buffer to populate
@@ -73,7 +73,7 @@ int atchops_rsa_encrypt(atchops_rsa_publickey publickeystruct, const unsigned ch
 /**
  * @brief Decrypt bytes with an RSA private key
  *
- * @param privatekeystruct the private key struct to use for decryption, see atchops_rsa_populate_privatekey
+ * @param privatekeystruct the private key struct to use for decryption, see atchops_rsakey_populate_privatekey
  * @param ciphertextbase64 the ciphertext to decrypt, base64 encoded
  * @param ciphertextbase64len the length of the ciphertext, most people use strlen() to find this length
  * @param plaintext the plaintext buffer to populate

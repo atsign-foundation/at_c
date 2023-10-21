@@ -13,7 +13,7 @@ int main()
     const unsigned char *privatekeybase64 = PRIVATE_KEY_BASE64;
 
     atchops_rsa_privatekey privatekeystruct;
-    ret = atchops_rsa_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
+    ret = atchops_rsakey_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
     if (ret != 0)
     {
         goto ret;
