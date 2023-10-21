@@ -59,7 +59,7 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
 
     // 1. base64 decode the key
     unsigned long dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
-    unsigned char *dst = (unsigned char *) malloc(sizeof(unsigned char) * dstlen);
+    unsigned char *dst = (unsigned char *)malloc(sizeof(unsigned char) * dstlen);
     memset(dst, 0, dstlen);
     unsigned long writtenlen = 0;
     ret = atchops_base64_decode((const unsigned char *)publickeybase64, publickeybase64len, dst, dstlen, &writtenlen);
@@ -119,7 +119,9 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
 
 exit:
 {
+    // following frees cause "pointer being freed was not allocated" error:
     // free(dst); // is already freed on its own somehow
+    // mbedtls_asn1_sequence_free(&seq); // for some reason this is not needed
     return ret;
 }
 }
@@ -212,7 +214,9 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
 
 exit:
 {
+    // following frees cause "pointer being freed was not allocated" error:
     // free(dst); // is already freed on its own somehow
+    // mbedtls_asn1_sequence_free(&seq); // for some reason this is not needed
     return ret;
 }
 }
