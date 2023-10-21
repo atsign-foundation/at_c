@@ -1,5 +1,10 @@
 #pragma once
 
+#include <mbedtls/ssl.h>
+#include <mbedtls/net_sockets.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+
 #define ROOT_CERT                                                        \
     "-----BEGIN CERTIFICATE-----\n"                                      \
     "MIIFFjCCAv6gAwIBAgIRAJErCErPDBinU/bWLiWnX1owDQYJKoZIhvcNAQELBQAw\n" \
@@ -36,13 +41,12 @@ typedef struct atclient_connection_ctx {
     char *host; // assume null terminated, example: "root.atsign.org"
     int port; // example: 64
     char *cert_pem; // assume null terminated, example: "-----BEGIN CERTIFICATE-----\nMIIF..."
-    void *server_fd;
-    void *ssl;
-    void *conf;
-    void *cacert;
-    void *entropy;
-    void *ctr_drbg;
-    void *saved_session;
+    mbedtls_net_context net;
+    mbedtls_ssl_context ssl;
+    mbedtls_ssl_config ssl_config;
+    mbedtls_x509_crt cacert;
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
 } atclient_connection_ctx;
 
 void atclient_connection_init(atclient_connection_ctx *ctx);

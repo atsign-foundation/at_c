@@ -36,9 +36,9 @@ int main(int argc, char **argv)
 
 exit:
 {
-    atclient_free(&atclient);
     atclient_atkeysfile_free(&atkeysfile);
     atclient_atkeys_free(&atkeys);
+    atclient_free(&atclient);
     return 0;
 }
 }

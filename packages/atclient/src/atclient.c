@@ -14,8 +14,6 @@
 void atclient_init(atclient_ctx *ctx)
 {
     memset(ctx, 0, sizeof(atclient_ctx));
-    ctx->roothost = (char *) malloc(sizeof(char) * HOST_BUFFER_SIZE);
-    ctx->secondaryhost = (char *) malloc(sizeof(char) * HOST_BUFFER_SIZE);
 }
 
 int atclient_init_root_connection(atclient_ctx *ctx, const char *roothost, const int rootport)
@@ -29,9 +27,6 @@ int atclient_init_root_connection(atclient_ctx *ctx, const char *roothost, const
     {
         goto exit;
     }
-
-    strcpy(ctx->roothost, roothost);
-    ctx->rootport = rootport;
 
     goto exit;
 
@@ -51,9 +46,6 @@ int atclient_init_secondary_connection(atclient_ctx *ctx, const char *secondaryh
     {
         goto exit;
     }
-
-    strcpy(ctx->secondaryhost, secondaryhost);
-    ctx->secondaryport = secondaryport;
 
     goto exit;
 
@@ -202,5 +194,6 @@ int atclient_delete(atclient_ctx *ctx, const char *key)
 
 void atclient_free(atclient_ctx *ctx)
 {
-    return; // not implemented
+    atclient_connection_free(&(ctx->root_connection));
+    atclient_connection_free(&(ctx->secondary_connection));
 }

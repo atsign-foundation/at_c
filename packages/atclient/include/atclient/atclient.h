@@ -3,11 +3,6 @@
 
 typedef struct atclient_ctx
 {
-
-    char *roothost;
-    int rootport;
-    char *secondaryhost;
-    int secondaryport;
     atclient_connection_ctx root_connection;
     atclient_connection_ctx secondary_connection;
 } atclient_ctx;
