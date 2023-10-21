@@ -15,7 +15,7 @@
  * @param signatureolen the length of the signature buffer after signing
  * @return int 0 on success
  */
-int atchops_rsa_sign(atchops_rsakey_privatekey privatekeystruct, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signature, const unsigned long signaturelen, unsigned long *signatureolen);
+int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen);
 
 /**
  * @brief Encrypt bytes with an RSA public key
@@ -28,7 +28,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekeystruct, atchops_md_type
  * @param ciphertextolen the length of the ciphertext buffer after encryption
  * @return int 0 on success
  */
-int atchops_rsa_encrypt(atchops_rsakey_publickey publickeystruct, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned char *ciphertext, const unsigned long ciphertextlen, unsigned long *ciphertextolen);
+int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len, unsigned long *ciphertextbase64olen);
 
 /**
  * @brief Decrypt bytes with an RSA private key

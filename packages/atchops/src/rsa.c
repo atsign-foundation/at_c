@@ -11,49 +11,28 @@
 #include "atchops/base64.h"
 #include "atchops/sha.h"
 
-static void printx(const unsigned char *buf, const unsigned long len)
-{
-    for (int i = 0; i < len; i++)
-    {
-        printf("%02x ", *(buf + i));
-    }
-    printf("\n");
-}
-
-int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signature, const unsigned long signaturelen, unsigned long *signatureolen)
+int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen)
 {
     int ret = 1; // error, until successful.
 
+    // 1. hash the message
+
     const unsigned long hashlen = 32;
-    unsigned char *hash = malloc(sizeof(char) * hashlen);
+    unsigned char *hash = malloc(sizeof(unsigned char) * hashlen);
     memset(hash, 0, hashlen);
     unsigned long hasholen = 0;
+
     ret = atchops_sha_hash(mdtype, message, messagelen, hash, hashlen, &hasholen);
+    // printf("atchops_sha_hash: %d\n", ret);
     if (ret != 0)
+    {
         goto ret;
+    }
 
-    // printf("signaturelen: %lu\n", *signaturelen);
-    // for(int i = 0; i < *signaturelen; i++)
-    // {
-    //     printf("%02x ", *(*signature + i));
-    // }
-    // printf("\n");
-
-    // *signature = malloc(sizeof(unsigned char) * (*signaturelen));
+    // 2. sign the hash with rsa private key
 
     mbedtls_rsa_context rsa;
     mbedtls_rsa_init(&rsa);
-
-    // printf("\nn: %lu\n", privatekey.n.len);
-    // printx(privatekey.n.value, privatekey.n.len);
-    // printf("\ne: %lu\n", privatekey.e.len);
-    // printx(privatekey.e.value, privatekey.e.len);
-    // printf("\nd: %lu\n", privatekey.d.len);
-    // printx(privatekey.d.value, privatekey.d.len);
-    // printf("\np: %lu\n", privatekey.p.len);
-    // printx(privatekey.p.value, privatekey.p.len);
-    // printf("\nq: %lu\n", privatekey.q.len);
-    // printx(privatekey.q.value, privatekey.q.len);
 
     ret = mbedtls_rsa_import_raw(&rsa,
                                  privatekey.n.value, privatekey.n.len,
@@ -61,20 +40,25 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtyp
                                  privatekey.q.value, privatekey.q.len,
                                  privatekey.d.value, privatekey.d.len,
                                  privatekey.e.value, privatekey.e.len);
-
     // printf("rsa import: %d\n", ret);
     if (ret != 0)
+    {
         goto ret;
+    }
 
     ret = mbedtls_rsa_complete(&rsa);
     // printf("rsa complete: %d\n", ret);
     if (ret != 0)
+    {
         goto ret;
+    }
 
     ret = mbedtls_rsa_check_privkey(&rsa);
     // printf("rsa check privkey: %d\n", ret);
     if (ret != 0)
+    {
         goto ret;
+    }
 
     mbedtls_entropy_context entropy_ctx;
     mbedtls_entropy_init(&entropy_ctx);
@@ -84,135 +68,103 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtyp
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
     // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
     if (ret != 0)
+    {
         goto ret;
+    }
 
-    // printf("mbedtls_rsa_self_test: %d\n", mbedtls_rsa_self_test(0));
+    const unsigned long signaturelen = 256; // result of signature always 256 bytes
+    unsigned char *signature = malloc(sizeof(unsigned char) * signaturelen);
+    memset(signature, 0, signaturelen);
 
-    // printf("hashlen: %lu\n", hashlen);
-    // printf("hash: ");
-    // printx(hash, hashlen);
-    int buflen = 256; // +1 for null terminator
-    unsigned char *buf = malloc(sizeof(unsigned char) * buflen);
-    memset(buf, 0, buflen);
-    ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, buf);
+    ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, signature);
     // printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
     if (ret != 0)
+    {
         goto ret;
+    }
 
-    // printf("buflen: %lu\n", buflen);
-    // for (int i = 0; i < buflen; i++)
-    // {
-    //     printf("%02x ", *(buf + i));
-    // }
-    // printf("\n");
-
-    // base64 encode
-    unsigned long dstlen = 4096;
-    unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    memset(dst, 0, dstlen);
-    unsigned long writtenlen = 0;
-    ret = atchops_base64_encode(buf, 256, dst, dstlen, &writtenlen);
+    // 3. base64 encode the signature
+    ret = atchops_base64_encode(signature, signaturelen, signaturebase64, signaturebase64len, &signaturebase64olen);
     // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
-        goto ret;
-
-    // append null terminator
-    if (writtenlen < dstlen)
     {
-        *(dst + writtenlen) = '\0';
+        goto ret;
     }
-    // printf("Challenge: %s\n", dst);
-
-    memset(signature, 0, signaturelen);
-    memcpy(signature, dst, writtenlen);
-    *signatureolen = writtenlen;
 
     goto ret;
 
 ret:
 {
-    free(buf);
+    free(hash);
+    free(signature);
     return ret;
 }
 }
 
-int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned char *ciphertext, const unsigned long ciphertextlen, unsigned long *ciphertextolen)
+int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len, unsigned long *ciphertextbase64olen)
 {
     int ret = 1;
 
+    // 1. rsa encrypt the plain text
     mbedtls_rsa_context rsa;
     mbedtls_rsa_init(&rsa);
 
-    // printf("importing raw...\n");
     ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, NULL, NULL, NULL, NULL, NULL, publickey.e.value, publickey.e.len);
+    // printf("importing rsa: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    // printf("n: %d\n", publickey.n_param.len);
-    // printx(publickey.n_param.value, publickey.n_param.len);
-
-    // printf("e: %d\n", publickey.e_param.len);
-    // printx(publickey.e_param.value, publickey.e_param.len);
-
-    // printf("checking public key...\n");
     ret = mbedtls_rsa_check_pubkey(&rsa);
     // printf("public key check: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    // printf("completing rsa...\n");
     ret = mbedtls_rsa_complete(&rsa);
+    // printf("mbedtls_rsa_complete: %d\n", ret);
     if (ret != 0)
-        goto ret;
-
-    // printf("base64 encoding...\n");
-    // base64 encode the plain text
-    unsigned long dstlen = 2048;
-    unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    unsigned long olen = 0;
-    ret = atchops_base64_encode(plaintext, plaintextlen,  dst, dstlen, &olen);
-    // printf("atchops_base64_encode_1: %d\n", ret);
-    if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
     mbedtls_entropy_context entropy_ctx;
     mbedtls_entropy_init(&entropy_ctx);
 
-    // printf("seeding...\n");
     mbedtls_ctr_drbg_context ctr_drbg_ctx;
     mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
     // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    // printf("encrypting...\n");
-    // encrypt the base64 encoded text
-    unsigned long outputlen = 256; // 256 bytes is the result of an RSA
+    const unsigned long outputlen = 256; // 256 bytes is the result of an RSA
     unsigned char *output = malloc(sizeof(unsigned char) * outputlen);
     memset(output, 0, outputlen);
+
     ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, plaintext, output);
+    // printf("mbedtls_rsa_pkcs1_encrypt: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    dstlen = 4096;
-    unsigned char *dst2 = malloc(sizeof(unsigned char) * dstlen);
-    olen = 0;
-
-    ret = atchops_base64_encode(output, outputlen, dst2, dstlen, &olen);
+    ret = atchops_base64_encode(output, outputlen, ciphertextbase64, ciphertextbase64len, ciphertextbase64olen);
+    // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    // printx(dst2, *olen);
-    // printf("%s\n", dst2);
+    goto exit;
 
-    memcpy(ciphertext, dst2, olen);
-    *ciphertextolen = olen;
-
-    goto ret;
-
-ret:
+exit:
 {
+    free(output);
     return ret;
 }
 }
