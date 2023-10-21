@@ -62,9 +62,11 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     const unsigned long recvlen = 1024;
     unsigned char *recv = (unsigned char *) malloc(sizeof(unsigned char) * recvlen);
     memset(recv, 0, sizeof(unsigned char) * recvlen);
+
     unsigned long srclen = 1024;
     unsigned char *src = (unsigned char *) malloc(sizeof(unsigned char) * srclen);
     memset(src, 0, sizeof(unsigned char) * srclen);
+
     atsign++; // remove @
     strcat(src, atsign);
     strcat(src, "\r\n");
@@ -76,7 +78,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     {
         goto exit;
     }
-    printf("recv: \'%s\'\n", recv);
+    // printf("recv: \'%s\'\n", recv);
 
     // recv is something like 3b419d7a-2fee-5080-9289-f0e1853abb47.swarm0002.atsign.zone:5770
     // store host and port in separate vars
@@ -124,7 +126,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     {
         goto exit;
     }
-    printf("challenge: \'%s\'\n", recv);
+    // printf("challenge: \'%s\'\n", recv);
 
     const unsigned long challengelen = 1024;
     unsigned char *challenge = (unsigned char *) malloc(sizeof(unsigned char) * challengelen);
@@ -136,18 +138,18 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     // remove \r\n@ at the end
     challenge[olen - 5] = '\0';
 
-    printf("challenge: \'%s\'\n", challenge);
+    // printf("challenge: \'%s\'\n", challenge);
 
     // sign
     memset(recv, 0, recvlen);
     ret = atchops_rsa_sign(atkeys.pkamprivatekey, ATCHOPS_MD_SHA256, challenge, strlen(challenge), recv, recvlen, &olen);
-    printf("atchops_rsa_sign: %d\n", ret);
+    // printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
     {
         goto exit;
     }
 
-    printf("signature: \"%.*s\"\n", (int) olen, recv);
+    // printf("signature: \"%.*s\"\n", (int) olen, recv);
 
     memset(src, 0, srclen);
 
@@ -155,7 +157,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     strcat(src, recv);
     strcat(src, "\r\n");
 
-    printf("pkam command: %d | \"%s\"\n", strlen(src), src);
+    // printf("pkam command: %d | \"%s\"\n", strlen(src), src);
 
     memset(recv, 0, recvlen);
 
@@ -166,7 +168,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
         goto exit;
     }
 
-    printf("pkam response: \"%s\"\n", recv);
+    // printf("pkam response: \"%s\"\n", recv);
 
 
     goto exit;

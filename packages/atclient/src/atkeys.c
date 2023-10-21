@@ -106,28 +106,28 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
 
     // 2a. pkam public key
     ret = atchops_rsakey_populate_publickey(&(atkeys->pkampublickey), atkeys->pkampublickeystr, atkeys->pkampublickeyolen);
-    printf("pkam public key population: %d\n", ret);
+    // printf("pkam public key population: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = atchops_rsakey_populate_privatekey(&(atkeys->pkamprivatekey), atkeys->pkamprivatekeystr, atkeys->pkamprivatekeyolen);
-    printf("pkam private key population: %d\n", ret);
+    // printf("pkam private key population: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = atchops_rsakey_populate_privatekey(&(atkeys->encryptprivatekey), atkeys->encryptprivatekeystr, atkeys->encryptprivatekeyolen);
-    printf("atchops_rsa_populate_privatekey: %d\n", ret);
+    // printf("atchops_rsa_populate_privatekey: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = atchops_rsakey_populate_publickey(&(atkeys->encryptpublickey), atkeys->encryptpublickeystr, atkeys->encryptpublickeyolen);
-    printf("atchops_rsa_populate_privatekey: %d\n", ret);
+    // printf("atchops_rsa_populate_privatekey: %d\n", ret);
     if (ret != 0)
     {
         goto exit;

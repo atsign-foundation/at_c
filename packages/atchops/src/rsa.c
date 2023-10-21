@@ -112,7 +112,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtyp
     memset(dst, 0, dstlen);
     unsigned long writtenlen = 0;
     ret = atchops_base64_encode(buf, 256, dst, dstlen, &writtenlen);
-    printf("atchops_base64_encode: %d\n", ret);
+    // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
         goto ret;
 
