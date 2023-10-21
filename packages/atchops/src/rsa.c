@@ -173,6 +173,19 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
 {
     int ret = 1;
 
+    // 1. base64 decode the ciphertextbase64
+    const unsigned long ciphertextlen = plaintextlen; // the result of the base64 decode of the cipher text should be of sufficient length for the plaintext length they are expecting
+    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    memset(ciphertext, 0, ciphertextlen);
+    unsigned long ciphertextolen = 0;
+    ret = atchops_base64_decode(ciphertextbase64, ciphertextbase64len, ciphertext, ciphertextlen, &ciphertextolen);
+    // printf("atchops_base64_decode: %d\n", ret);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    // 2. rsa decrypt the base64 decoded ciphertext
     mbedtls_rsa_context rsa;
     mbedtls_rsa_init(&rsa);
 
@@ -188,37 +201,25 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
         privatekey.d.len,
         privatekey.e.value,
         privatekey.e.len);
+    // printf("mbedtls_rsa_import_raw: %d\n", ret);
     if (ret != 0)
-        goto ret;
-
-    // printf("n: %lu\n", privatekey.n_param.len);
-    // printx(privatekey.n_param.value, privatekey.n_param.len);
-    // printf("e: %lu\n", privatekey.e_param.len);
-    // printx(privatekey.e_param.value, privatekey.e_param.len);
-    // printf("d: %lu\n", privatekey.d_param.len);
-    // printx(privatekey.d_param.value, privatekey.d_param.len);
-    // printf("p: %lu\n", privatekey.p_param.len);
-    // printx(privatekey.p_param.value, privatekey.p_param.len);
-    // printf("q: %lu\n", privatekey.q_param.len);
-    // printx(privatekey.q_param.value, privatekey.q_param.len);
+    {
+        goto exit;
+    }
 
     ret = mbedtls_rsa_complete(&rsa);
+    // printf("mbedtls_rsa_complete: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
     ret = mbedtls_rsa_check_privkey(&rsa);
+    // printf("mbedtls_rsa_check_privkey: %d\n", ret);
     if (ret != 0)
-        goto ret;
-
-    // base64 decode the ciphertext
-    const unsigned long dstlen = 8192;
-    unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-    memset(dst, 0, dstlen);
-    unsigned long writtenlen = 0;
-    ret = atchops_base64_decode(ciphertextbase64, ciphertextbase64len, dst, dstlen, &writtenlen);
-    // printf("atchops_base64_decode: %d\n", ret);
-    if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
     mbedtls_entropy_context entropy_ctx;
     mbedtls_entropy_init(&entropy_ctx);
@@ -226,27 +227,24 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
     mbedtls_ctr_drbg_context ctr_drbg_ctx;
     mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
+    // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    // rsa decrypt dst
-    const unsigned long outputmaxlen = 4096;
-    unsigned char *output = malloc(sizeof(unsigned char) * outputmaxlen);
-    memset(output, 0, outputmaxlen);
-    unsigned long writtenlen2 = 0;
-    ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, &writtenlen2, dst, output, outputmaxlen);
+    ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextolen, ciphertext, plaintext, plaintextlen);
     // printf("mbedtls_rsa_pkcs1_decrypt: %d\n", ret);
     if (ret != 0)
-        goto ret;
+    {
+        goto exit;
+    }
 
-    memset(plaintext, 0, plaintextlen);
-    memcpy(plaintext, output, writtenlen2);
-    *plaintextolen = writtenlen2;
+    goto exit;
 
-    goto ret;
-
-ret:
+exit:
 {
+    free(ciphertext);
     return ret;
 }
 }
