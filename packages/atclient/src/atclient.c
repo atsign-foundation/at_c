@@ -9,24 +9,29 @@
 #include "atchops/rsa.h"
 #include "atchops/aes_ctr.h"
 
+#define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
+
 void atclient_init(atclient_ctx *ctx)
 {
     memset(ctx, 0, sizeof(atclient_ctx));
+    ctx->roothost = (char *) malloc(sizeof(char) * HOST_BUFFER_SIZE);
+    ctx->secondaryhost = (char *) malloc(sizeof(char) * HOST_BUFFER_SIZE);
 }
 
-int atclient_init_root_connection(atclient_ctx *ctx, const char *root_server, const int root_port)
+int atclient_init_root_connection(atclient_ctx *ctx, const char *roothost, const int rootport)
 {
     int ret = 1; // error by default
 
-    atclient_connection_ctx root_connection;
-    atclient_connection_init(&root_connection);
-    ctx->root_connection = root_connection;
+    atclient_connection_init(&(ctx->root_connection));
 
-    ret = atclient_connection_connect(&(ctx->root_connection), root_server, root_port);
+    ret = atclient_connection_connect(&(ctx->root_connection), roothost, rootport);
     if(ret != 0)
     {
         goto exit;
     }
+
+    strcpy(ctx->roothost, roothost);
+    ctx->rootport = rootport;
 
     goto exit;
 
@@ -36,19 +41,19 @@ exit:
 }
 }
 
-int atclient_init_secondary_connection(atclient_ctx *ctx, const char *secondary_server, const int secondary_port)
+int atclient_init_secondary_connection(atclient_ctx *ctx, const char *secondaryhost, const int secondaryport)
 {
     int ret = 1; // error by default
 
-    atclient_connection_ctx secondary_connection;
-    atclient_connection_init(&secondary_connection);
-    ctx->secondary_connection = secondary_connection;
-
-    ret = atclient_connection_connect(&(ctx->secondary_connection), secondary_server, secondary_port);
+    atclient_connection_init(&(ctx->secondary_connection));
+    ret = atclient_connection_connect(&(ctx->secondary_connection), secondaryhost, secondaryport);
     if(ret != 0)
     {
         goto exit;
     }
+
+    strcpy(ctx->secondaryhost, secondaryhost);
+    ctx->secondaryport = secondaryport;
 
     goto exit;
 
@@ -84,10 +89,10 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     // recv is something like 3b419d7a-2fee-5080-9289-f0e1853abb47.swarm0002.atsign.zone:5770
     // store host and port in separate vars
     char *host = (unsigned char *) malloc(sizeof(unsigned char) * 1024);
-    char *portstr = (unsigned char *) malloc(sizeof(unsigned char) * 128);
+    char *portstr = (unsigned char *) malloc(sizeof(unsigned char) * 16);
     int port;
     memset(host, 0, sizeof(unsigned char) * 1024);
-    memset(portstr, 0, sizeof(unsigned char) * 128);
+    memset(portstr, 0, sizeof(unsigned char) * 16);
 
     int i = 0;
     for(; i < olen; i++)
@@ -112,7 +117,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     {
         goto exit;
     }
-    printf("Established connection with secondary: %s:%d\n", host, port);
+    // printf("Established connection with secondary: %s:%d\n", host, port);
 
     // 3. send pkam auth
     memset(src, 0, sizeof(unsigned char) * srclen);
