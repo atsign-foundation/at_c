@@ -9,6 +9,7 @@ set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
+	${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c
 	${CMAKE_CURRENT_LIST_DIR}/src/connection.c
 )
 

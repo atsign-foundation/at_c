@@ -13,31 +13,31 @@ void atclient_atkeys_init(atclient_atkeys *atkeys)
     memset(atkeys, 0, sizeof(atclient_atkeys));
 
     atkeys->pkampublickeylen = BUFFER_SIZE;
-    atkeys->pkampublickeystr = (unsigned char *)malloc(sizeof(unsigned char) * atkeys->pkampublickeylen);
+    atkeys->pkampublickeystr = (char *)malloc(sizeof(char) * atkeys->pkampublickeylen);
     memset(atkeys->pkampublickeystr, 0, atkeys->pkampublickeylen);
     atkeys->pkampublickeyolen = 0;
     atchops_rsakey_init_publickey(&(atkeys->pkampublickey));
 
     atkeys->pkamprivatekeylen = BUFFER_SIZE;
-    atkeys->pkamprivatekeystr = (unsigned char *)malloc(sizeof(unsigned char) * atkeys->pkamprivatekeylen);
+    atkeys->pkamprivatekeystr = (char *)malloc(sizeof(char) * atkeys->pkamprivatekeylen);
     memset(atkeys->pkamprivatekeystr, 0, atkeys->pkamprivatekeylen);
     atkeys->pkamprivatekeyolen = 0;
     atchops_rsakey_init_privatekey(&(atkeys->pkamprivatekey));
 
     atkeys->encryptpublickeylen = BUFFER_SIZE;
-    atkeys->encryptpublickeystr = (unsigned char *)malloc(sizeof(unsigned char) * atkeys->encryptpublickeylen);
+    atkeys->encryptpublickeystr = (char *)malloc(sizeof(char) * atkeys->encryptpublickeylen);
     memset(atkeys->encryptpublickeystr, 0, atkeys->encryptpublickeylen);
     atkeys->encryptpublickeyolen = 0;
     atchops_rsakey_init_publickey(&(atkeys->encryptpublickey));
 
     atkeys->encryptprivatekeylen = BUFFER_SIZE;
-    atkeys->encryptprivatekeystr = (unsigned char *)malloc(sizeof(unsigned char) * atkeys->encryptprivatekeylen);
+    atkeys->encryptprivatekeystr = (char *)malloc(sizeof(char) * atkeys->encryptprivatekeylen);
     memset(atkeys->encryptprivatekeystr, 0, atkeys->encryptprivatekeylen);
     atkeys->encryptprivatekeyolen = 0;
     atchops_rsakey_init_privatekey(&(atkeys->encryptprivatekey));
 
     atkeys->selfencryptionkeylen = BUFFER_SIZE;
-    atkeys->selfencryptionkeystr = (unsigned char *)malloc(sizeof(unsigned char) * atkeys->selfencryptionkeylen);
+    atkeys->selfencryptionkeystr = (char *)malloc(sizeof(char) * atkeys->selfencryptionkeylen);
     memset(atkeys->selfencryptionkeystr, 0, atkeys->selfencryptionkeylen);
     atkeys->selfencryptionkeyolen = 0;
 }
@@ -56,7 +56,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     // 1. decrypt *.atKeys and populate atkeys struct
 
     // 1a. self encryption key
-    strncpy(atkeys->selfencryptionkeystr, atkeysfile.selfencryptionkeystr, atkeysfile.selfencryptionkeyolen);
+    memcpy(atkeys->selfencryptionkeystr, atkeysfile.selfencryptionkeystr, atkeysfile.selfencryptionkeyolen);
     atkeys->selfencryptionkeyolen = atkeysfile.selfencryptionkeyolen;
 
     // 1b. pkam public key

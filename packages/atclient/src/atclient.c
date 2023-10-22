@@ -68,12 +68,12 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     memset(src, 0, sizeof(unsigned char) * srclen);
 
     atsign++; // remove @
-    strcat(src, atsign);
-    strcat(src, "\r\n");
+    memcpy(src, atsign, strlen(atsign));
+    memcpy(src + strlen(atsign), "\r\n", 2);
     atsign--;
 
     unsigned long olen = 0;
-    ret = atclient_connection_send(&(ctx->root_connection), src, strlen(src), recv, recvlen, &olen);
+    ret = atclient_connection_send(&(ctx->root_connection), src, strlen((char *) src), recv, recvlen, &olen);
     if(ret != 0)
     {
         goto exit;
@@ -82,8 +82,8 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
 
     // recv is something like 3b419d7a-2fee-5080-9289-f0e1853abb47.swarm0002.atsign.zone:5770
     // store host and port in separate vars
-    char *host = (unsigned char *) malloc(sizeof(unsigned char) * 1024);
-    char *portstr = (unsigned char *) malloc(sizeof(unsigned char) * 16);
+    char *host = (char *) malloc(sizeof(char) * 1024);
+    char *portstr = (char *) malloc(sizeof(char) * 16);
     int port;
     memset(host, 0, sizeof(unsigned char) * 1024);
     memset(portstr, 0, sizeof(unsigned char) * 16);
@@ -107,68 +107,63 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
 
     // 2. init secondary connection
     ret = atclient_init_secondary_connection(ctx, host, port);
+    // printf("atclient_init_secondary_connection: %d\n", ret);
     if(ret != 0)
     {
         goto exit;
     }
-    // printf("Established connection with secondary: %s:%d\n", host, port);
 
     // 3. send pkam auth
     memset(src, 0, sizeof(unsigned char) * srclen);
     memset(recv, 0, sizeof(unsigned char) * recvlen);
 
-    strcat(src, "from:");
-    strcat(src, atsign);
-    strcat(src, "\r\n");
+    memcpy(src, "from:", 5);
+    memcpy(src + 5, atsign, strlen(atsign));
+    memcpy(src + 5 + strlen(atsign), "\r\n", 2);
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen(src), recv, recvlen, &olen);
+    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen((char *) src), recv, recvlen, &olen);
     if(ret != 0)
     {
         goto exit;
     }
-    // printf("challenge: \'%s\'\n", recv);
 
     const unsigned long challengelen = 1024;
     unsigned char *challenge = (unsigned char *) malloc(sizeof(unsigned char) * challengelen);
     memset(challenge, 0, challengelen);
-    strcpy(challenge, recv);
+    memcpy(challenge, recv, olen);
 
     // remove data:
     challenge = challenge + 5;
     // remove \r\n@ at the end
     challenge[olen - 5] = '\0';
 
-    // printf("challenge: \'%s\'\n", challenge);
 
     // sign
     memset(recv, 0, recvlen);
-    ret = atchops_rsa_sign(atkeys.pkamprivatekey, ATCHOPS_MD_SHA256, challenge, strlen(challenge), recv, recvlen, &olen);
+    ret = atchops_rsa_sign(atkeys.pkamprivatekey, ATCHOPS_MD_SHA256, challenge, strlen((char *) challenge), recv, recvlen, &olen);
     // printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
     {
         goto exit;
     }
 
-    // printf("signature: \"%.*s\"\n", (int) olen, recv);
 
     memset(src, 0, srclen);
 
-    strcat(src, "pkam:");
-    strcat(src, recv);
-    strcat(src, "\r\n");
+    memcpy(src, "pkam:", 5);
+    memcpy(src + 5, recv, olen);
+    memcpy(src + 5 + olen, "\r\n", 2);
 
-    // printf("pkam command: %d | \"%s\"\n", strlen(src), src);
 
     memset(recv, 0, recvlen);
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen(src), recv, recvlen, &olen);
+    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen((char *) src), recv, recvlen, &olen);
 
     if(ret != 0)
     {
         goto exit;
     }
 
-    // printf("pkam response: \"%s\"\n", recv);
 
 
     goto exit;

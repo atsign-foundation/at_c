@@ -39,7 +39,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
     strcpy(ctx->host, host); // assume null terminated, example: "root.atsign.org"
     ctx->port = port;        // example: 64
 
-    char *portstr = malloc(sizeof(char) * 6);
+    char *portstr = (char *) malloc(sizeof(char) * 6);
     sprintf(portstr, "%d", ctx->port);
 
     ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy), NULL, NULL);
@@ -99,6 +99,7 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
     }
 
     ret = mbedtls_ssl_get_verify_result(&(ctx->ssl));
+    // printf("mbedtls_ssl_get_verify_result: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
@@ -110,24 +111,31 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
 
     const unsigned long readbuflen = 128;
     unsigned char *readbuf = malloc(sizeof(unsigned char) * readbuflen);
+    memset(readbuf, 0, readbuflen);
+
+    // read anything that was already sent
     ret = mbedtls_ssl_read(&(ctx->ssl), readbuf, readbuflen);
     if (ret < 0)
     {
         goto exit;
     }
 
+    // press enter
     ret = mbedtls_ssl_write(&(ctx->ssl), (const unsigned char *)"\r\n", 2);
     if (ret < 0)
     {
         goto exit;
     }
 
+    // read anything that was sent
     ret = mbedtls_ssl_read(&(ctx->ssl), readbuf, readbuflen);
     if (ret < 0)
     {
         goto exit;
     }
 
+    // now we are guaranteed a blank canvas
+    
     if (ret > 0)
     {
         ret = 0; // a positive exit code is not an error

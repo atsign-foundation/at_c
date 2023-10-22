@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <atclient/atclient.h>
 #include <atclient/atkeysfile.h>
+#include <atclient/atlogger.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
@@ -49,6 +50,12 @@ int main(int argc, char **argv)
     {
         goto exit;
     }
+
+    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_DEBUG, "poop %d\n", 3); // will not show
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_INFO, "poop %d\n", 3);
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_WARNING, "poop %d\n", 3);
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_ERROR, "poop %d\n", 3);
 
     goto exit;
 
