@@ -4,6 +4,17 @@
 #include "atclient/atkeysfile.h"
 #include <atchops/rsa.h>
 
+/**
+ * @brief represents the atkeys file
+ * 
+ * contains 5 keys: pkam public/private keypair, encrypt public/private keypair, and the aes-256 self encryption key.
+ * each key contains 
+ * 1. the length of the buffer, 
+ * 2. the string that holds the decrypted base64 representation of the key with buffer length specified previously in (1.)
+ * 3. the evaluated length of the key (after population), you can imagine this as the *true* length of the key as opposed to the buffer size used during memory allocation,
+ * 4. (for rsakeys), the rsakey struct used in rsa operations.
+ * 
+ */
 typedef struct atclient_atkeys
 {
     unsigned long pkampublickeylen;
@@ -31,6 +42,11 @@ typedef struct atclient_atkeys
     unsigned long selfencryptionkeyolen;
 } atclient_atkeys;
 
+/**
+ * @brief initialize an atkeys struct
+ * 
+ * @param atkeys a pointer to the struct to initialize
+ */
 void atclient_atkeys_init(atclient_atkeys *atkeys);
 
 /**
@@ -41,4 +57,10 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
  * @return int
  */
 int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeysfile);
+
+/**
+ * @brief free memory allocated by the init function
+ * 
+ * @param atkeys the atkeys struct to free
+ */
 void atclient_atkeys_free(atclient_atkeys *atkeys);
