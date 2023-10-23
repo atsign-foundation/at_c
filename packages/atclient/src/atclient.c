@@ -6,10 +6,13 @@
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
 #include "atclient/connection.h"
+#include "atclient/atlogger.h"
 #include "atchops/rsa.h"
 #include "atchops/aes_ctr.h"
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
+
+#define TAG "atclient"
 
 void atclient_init(atclient_ctx *ctx)
 {
@@ -25,8 +28,10 @@ int atclient_init_root_connection(atclient_ctx *ctx, const char *roothost, const
     ret = atclient_connection_connect(&(ctx->root_connection), roothost, rootport);
     if(ret != 0)
     {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_connection_connect: %d. Successfully connected to root\n", ret);
 
     goto exit;
 
@@ -44,8 +49,10 @@ int atclient_init_secondary_connection(atclient_ctx *ctx, const char *secondaryh
     ret = atclient_connection_connect(&(ctx->secondary_connection), secondaryhost, secondaryport);
     if(ret != 0)
     {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_connection_connect: %d. Successfully connected to secondary\n", ret);
 
     goto exit;
 
@@ -172,21 +179,6 @@ exit: {
     free(recv);
     return ret;
 }
-}
-
-int atclient_put(atclient_ctx *ctx, const char *key, const char *value)
-{
-    return 1; // not implemented
-}
-
-int atclient_get(atclient_ctx *ctx, const char *key, char *value, const unsigned long valuelen)
-{
-    return 1; // not implemented
-}
-
-int atclient_delete(atclient_ctx *ctx, const char *key)
-{
-    return 1; // not implemented
 }
 
 void atclient_free(atclient_ctx *ctx)
