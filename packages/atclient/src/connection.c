@@ -223,6 +223,43 @@ exit:
 }
 }
 
+int atclient_connection_disconnect(atclient_connection_ctx *ctx)
+{
+    return 1; // not implemented
+}
+
+int atclient_connection_is_connected(atclient_connection_ctx *ctx)
+{
+    int ret = 0; // false by default
+    const char *cmd = "\r\n";
+    const unsigned long cmdlen = strlen(cmd);
+    const unsigned long recvlen = 128;
+    unsigned char *recv = malloc(sizeof(unsigned char) * recvlen);
+    memset(recv, 0, recvlen);
+    unsigned long olen = 0;
+
+    int ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvlen, &olen);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    if (olen > 0)
+    {
+        ret = 1; // true
+    }
+    else
+    {
+        ret = 0; // false
+    }
+
+    goto exit;
+
+exit: {
+    return ret;
+}
+}
+
 void atclient_connection_free(atclient_connection_ctx *ctx)
 {
     mbedtls_net_free(&(ctx->net));
