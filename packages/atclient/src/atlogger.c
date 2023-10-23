@@ -7,11 +7,11 @@
 
 
 
-#define PREFIX_BUFFER_LEN 16
+#define PREFIX_BUFFER_LEN 64
 #define INFO_PREFIX "\e[0;32m[INFO]\e[0m"
-#define WARNING_PREFIX "\e[0;31m[WARNING]\e[0m"
-#define ERROR_PREFIX "\e[1;31m[ERROR]\e[0m"
-#define DEBUG_PREFIX "\e[0;34m[DEBUG]\e[0m"
+#define WARN_PREFIX "\e[0;31m[WARN]\e[0m"
+#define ERROR_PREFIX "\e[1;31m[ERRO]\e[0m"
+#define DEBUG_PREFIX "\e[0;34m[DEBG]\e[0m"
 
 static char *prefix;
 
@@ -22,6 +22,7 @@ typedef struct atlogger_ctx
 
 static void atlogger_get_prefix(atlogger_logging_level logging_level, char *prefix, unsigned long prefixlen)
 {
+    memset(prefix, 0, prefixlen);
     switch(logging_level)
     {
         case ATLOGGER_LOGGING_LEVEL_INFO:
@@ -31,7 +32,7 @@ static void atlogger_get_prefix(atlogger_logging_level logging_level, char *pref
         }
         case ATLOGGER_LOGGING_LEVEL_WARNING:
         {
-            memcpy(prefix, WARNING_PREFIX, strlen(WARNING_PREFIX));
+            memcpy(prefix, WARN_PREFIX, strlen(WARN_PREFIX));
             break;
         }
         case ATLOGGER_LOGGING_LEVEL_ERROR:
@@ -77,7 +78,7 @@ void atlogger_set_logging_level(atlogger_logging_level level)
     ctx->level = level;
 }
 
-void atlogger_log(atlogger_logging_level level, const char *format, ...)
+void atlogger_log(const char *tag, atlogger_logging_level level, const char *format, ...)
 {
     atlogger_ctx *ctx = atlogger_get_instance();
 
@@ -90,7 +91,12 @@ void atlogger_log(atlogger_logging_level level, const char *format, ...)
 
     va_list args;
     va_start(args, format);
-    printf("%*s \t", PREFIX_BUFFER_LEN, prefix);
+    printf("  %.*s ", strlen(prefix), prefix);
+    if(tag != NULL)
+    {
+        printf("%s ", tag);
+    }
+    printf("|\t");
     vprintf(format, args);
     va_end(args);
 }

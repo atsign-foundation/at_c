@@ -13,6 +13,6 @@ typedef enum atlogger_logging_level
 
 atlogger_logging_level atlogger_get_logging_level();
 void atlogger_set_logging_level(atlogger_logging_level level);
-void atlogger_log(atlogger_logging_level level, const char *format, ...);
+void atlogger_log(const char *tag, atlogger_logging_level level, const char *format, ...);
 
 #endif
