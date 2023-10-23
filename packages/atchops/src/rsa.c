@@ -253,3 +253,8 @@ exit:
     return ret;
 }
 }
+
+int atchops_rsa_generate(atchops_rsakey_publickey *publickey, atchops_rsakey_privatekey *privatekey, const unsigned int keysize)
+{
+    return 1; // TODO: implement
+}
