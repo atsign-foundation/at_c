@@ -12,14 +12,14 @@ int main()
 
     int ret = 1;
 
-    unsigned long plaintextlen = 10000;
+    const unsigned long plaintextlen = 10000;
     unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
     unsigned long plaintextolen = 0;
 
     unsigned char *iv = malloc(sizeof(unsigned char) * 16);
     memset(iv, 0, 16);
 
-    ret = atchops_aes_ctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), 256, iv, 16, CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext, plaintextlen, &plaintextolen);
+    ret = atchops_aes_ctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), 256, iv, (const unsigned char *) CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext, plaintextlen, &plaintextolen);
     if(ret != 0)
     {
         goto exit;

@@ -9,23 +9,25 @@ int main()
 {
     int ret = 1;
 
-    size_t publickeybase64len = strlen(PUBLIC_KEY_BASE64);
-    const unsigned char *publickeybase64 = PUBLIC_KEY_BASE64;
+    const char *publickeybase64 = PUBLIC_KEY_BASE64;
+    const unsigned long publickeybase64len = strlen(publickeybase64);
 
-    atchops_rsa_publickey publickeystruct;
-    ret = atchops_rsakey_populate_publickey(publickeybase64, publickeybase64len, &publickeystruct);
+    atchops_rsakey_publickey publickey;
+    atchops_rsakey_init_publickey(&publickey);
+
+    ret = atchops_rsakey_populate_publickey(&publickey, publickeybase64, publickeybase64len);
     if (ret != 0)
     {
         goto ret;
     }
 
-    if (publickeystruct.n.len <= 0)
+    if (publickey.n.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (publickeystruct.e.len <= 0)
+    if (publickey.e.len <= 0)
     {
         ret = 1;
         goto ret;

@@ -7,13 +7,13 @@ int main()
 {
     int ret = 1;
 
-    const unsigned char *src = "Hello!";
+    const char *src = "Hello!";
 
-    unsigned long dstlen = 32;
+    const unsigned long dstlen = 32;
     unsigned char *dst = calloc(dstlen, sizeof(unsigned char));
     unsigned long dstolen;
 
-    ret = atchops_sha_hash(ATCHOPS_MD_SHA256, src, strlen(src), dst, dstlen, &dstolen);
+    ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *) src, strlen(src), dst, dstlen, &dstolen);
     if(ret != 0)
     {
         printf("failed | atchops_sha_hash: %d\n", ret);

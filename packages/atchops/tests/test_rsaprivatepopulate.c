@@ -9,41 +9,43 @@ int main()
 {
     int ret = 1;
 
-    const size_t privatekeybase64len = strlen(PRIVATE_KEY_BASE64);
-    const unsigned char *privatekeybase64 = PRIVATE_KEY_BASE64;
+    const char *privatekeybase64 = PRIVATE_KEY_BASE64;
+    const unsigned long privatekeybase64len = strlen(PRIVATE_KEY_BASE64);
 
-    atchops_rsa_privatekey privatekeystruct;
-    ret = atchops_rsakey_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
+    atchops_rsakey_privatekey privatekey;
+    atchops_rsakey_init_privatekey(&privatekey);
+
+    ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
     if (ret != 0)
     {
         goto ret;
     }
 
-    if (privatekeystruct.n.len <= 0)
+    if (privatekey.n.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.e.len <= 0)
+    if (privatekey.e.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.d.len <= 0)
+    if (privatekey.d.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.p.len <= 0)
+    if (privatekey.p.len <= 0)
     {
         ret = 1;
         goto ret;
     }
 
-    if (privatekeystruct.q.len <= 0)
+    if (privatekey.q.len <= 0)
     {
         ret = 1;
         goto ret;

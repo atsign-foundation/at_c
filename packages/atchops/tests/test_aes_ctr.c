@@ -8,8 +8,8 @@
 
 int main(int argc, char **argv)
 {
-    const unsigned char *aes_key = AES_KEY; // 32 byte key == 256 bits
-    const unsigned char *plaintext = PLAINTEXT;
+    const char *aeskeybase64 = AES_KEY; // 32 byte key == 256 bits
+    const char *plaintext = PLAINTEXT;
     const unsigned long plaintextlen = strlen(plaintext);
     unsigned long olen = 0;
 
@@ -20,14 +20,14 @@ int main(int argc, char **argv)
 
     int ret = 1;
 
-    unsigned long ivlen = 16;
-    const unsigned char *iv = malloc(sizeof(unsigned char) * ivlen);
+    const unsigned long ivlen = 16; // iv is always 16 bytes
+    unsigned char *iv = malloc(sizeof(unsigned char) * ivlen);
     memset(iv, 0, ivlen);
 
     unsigned long ciphertextlen = 4096;
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
 
-    ret = atchops_aes_ctr_encrypt(aes_key, strlen(aes_key), ATCHOPS_AES_256, iv, ivlen, plaintext, plaintextlen, ciphertext, ciphertextlen, &olen);
+    ret = atchops_aes_ctr_encrypt(aeskeybase64, strlen(aeskeybase64), ATCHOPS_AES_256, iv, plaintext, plaintextlen, ciphertext, ciphertextlen, &olen);
     // printf("encrypted: ");
     // printf("%s\n", ciphertext);
     // printx((const unsigned char *)ciphertext, olen);
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     size_t plaintextlen2 = 4096;
     unsigned char *plaintext2 = malloc(sizeof(unsigned char) * plaintextlen2);
     memset(iv, 0, 16);
-    ret = atchops_aes_ctr_decrypt(aes_key, strlen(aes_key), ATCHOPS_AES_256, iv, ivlen, ciphertext, ciphertextlen, plaintext2, plaintextlen2, &olen);
+    ret = atchops_aes_ctr_decrypt(aeskeybase64, strlen(aeskeybase64), ATCHOPS_AES_256, iv , ciphertext, ciphertextlen, plaintext2, plaintextlen2, &olen);
     // printf("decrypted: ");
     // printf("%s\n", plaintext2);
     // printx((const unsigned char *) plaintext2, olen);

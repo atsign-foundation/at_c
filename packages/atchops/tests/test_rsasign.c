@@ -17,11 +17,12 @@ int main()
 {
     int ret = 1;
 
-    const unsigned char *privatekeybase64 = PRIVATE_KEY_BASE64;
-    unsigned long privatekeybase64len = strlen(privatekeybase64);
+    const char *privatekeybase64 = PRIVATE_KEY_BASE64;
+    const unsigned long privatekeybase64len = strlen(privatekeybase64);
 
-    atchops_rsa_privatekey privatekeystruct;
-    ret = atchops_rsakey_populate_privatekey(privatekeybase64, privatekeybase64len, &privatekeystruct);
+    atchops_rsakey_privatekey privatekey;
+    atchops_rsakey_init_privatekey(&privatekey);
+    ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
     if (ret != 0)
         goto ret;
 
@@ -29,15 +30,15 @@ int main()
     memset(signature, 0, SIGNATURE_BUFFER_LEN);
     unsigned long signatureolen = 0;
 
-    const unsigned char *message = MESSAGE;
+    const char *message = MESSAGE;
     const unsigned long messagelen = strlen(message);
 
-    ret = atchops_rsa_sign(privatekeystruct, ATCHOPS_MD_SHA256, message, messagelen, signature, SIGNATURE_BUFFER_LEN, &signatureolen);
+    ret = atchops_rsa_sign(privatekey, ATCHOPS_MD_SHA256, (const unsigned char *) message, messagelen, signature, SIGNATURE_BUFFER_LEN, &signatureolen);
     printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
         goto ret;
 
-    ret = strncmp(signature, EXPECTED_SIGNATURE, signatureolen);
+    ret = memcmp(signature, (const unsigned char *) EXPECTED_SIGNATURE, signatureolen);
     printf("strncmp: %d\n", ret);
     if(ret != 0)
     {

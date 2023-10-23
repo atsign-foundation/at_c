@@ -8,7 +8,7 @@
 
 #define PLAINTEXT "banana"
 
-static void printx(const char *str, size_t len)
+static void printx(const unsigned char *str, size_t len)
 {
     printf("hex: ");
     for(size_t i = 0; i < len; i++)
@@ -22,16 +22,17 @@ int main()
 {
     int ret = 1;
 
-    size_t publickeylen = strlen(PUBLICKEYBASE64);
-    const char *publickey = PUBLICKEYBASE64;
+    const unsigned long publickeybase64len = strlen(PUBLICKEYBASE64);
+    const char *publickeybase64 = PUBLICKEYBASE64;
 
     const char *plaintext = PLAINTEXT;
-    const size_t plaintextlen = strlen(plaintext);
+    const unsigned long plaintextlen = strlen(plaintext);
 
-    atchops_rsa_publickey publickeystruct;
+    atchops_rsakey_publickey publickey;
+    atchops_rsakey_init_publickey(&publickey);
 
     printf("populating public key struct..\n");
-    ret = atchops_rsakey_populate_publickey(publickey, publickeylen, &publickeystruct);
+    ret = atchops_rsakey_populate_publickey(&publickey, publickeybase64, publickeybase64len);
     printf("atchops_rsa_populate_publickey returned: %d\n", ret);
     if(ret != 0)
         goto ret;
@@ -42,7 +43,7 @@ int main()
     unsigned long ciphertextolen = 0;
 
     printf("encrypting...\n");
-    ret = atchops_rsa_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, &ciphertextolen);
+    ret = atchops_rsa_encrypt(publickey, (const unsigned char *) plaintext, plaintextlen, ciphertext, ciphertextlen, &ciphertextolen);
     printf("atchops_rsa_encrypt returned: %d\n", ret);
     if(ret != 0)
         goto ret;
