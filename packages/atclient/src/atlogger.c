@@ -30,7 +30,7 @@ static void atlogger_get_prefix(atlogger_logging_level logging_level, char *pref
             memcpy(prefix, INFO_PREFIX, strlen(INFO_PREFIX));
             break;
         }
-        case ATLOGGER_LOGGING_LEVEL_WARNING:
+        case ATLOGGER_LOGGING_LEVEL_WARN:
         {
             memcpy(prefix, WARN_PREFIX, strlen(WARN_PREFIX));
             break;
@@ -91,12 +91,12 @@ void atlogger_log(const char *tag, atlogger_logging_level level, const char *for
 
     va_list args;
     va_start(args, format);
-    printf("  %.*s ", strlen(prefix), prefix);
+    printf(" %.*s", strlen(prefix), prefix);
     if(tag != NULL)
     {
-        printf("%s ", tag);
+        printf("\t%s", tag);
     }
-    printf("|\t");
+    printf(" | ");
     vprintf(format, args);
     va_end(args);
 }

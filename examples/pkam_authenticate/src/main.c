@@ -9,16 +9,21 @@
 #define ATKEYSFILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@smoothalligator_key.atKeys"
 #define ATSIGN "@smoothalligator"
 
+#define TAG "pkam_authenticate"
+
 int main(int argc, char **argv)
 {
     int ret = 1;
+
+    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+
     // 1. init atkeys
 
     // 1a. read `atkeysfile` struct
     atclient_atkeysfile atkeysfile;
     atclient_atkeysfile_init(&atkeysfile);
     ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
-    printf("atkeysfile_read_code: %d\n", ret);
+    // printf("atkeysfile_read_code: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
@@ -28,7 +33,7 @@ int main(int argc, char **argv)
     atclient_atkeys atkeys;
     atclient_atkeys_init(&atkeys);
     ret = atclient_atkeys_populate(&atkeys, atkeysfile);
-    printf("atkeys_populate_code: %d\n", ret);
+    // printf("atkeys_populate_code: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
@@ -38,25 +43,18 @@ int main(int argc, char **argv)
     atclient_ctx atclient;
     atclient_init(&atclient);
     ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
-    printf("atclient_init_root_connection_code: %d\n", ret);
+    // printf("atclient_init_root_connection_code: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = atclient_pkam_authenticate(&atclient, atkeys, ATSIGN);
-    printf("atclient_pkam_authenticate_code: %d\n", ret);
+    // printf("atclient_pkam_authenticate_code: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
-
-    // logging example
-    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_DEBUG, "hi %d\n", 3); // will not show
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_INFO, "hi %d\n", 4);
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_WARNING, "hi %d\n", 11);
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_ERROR, "hi %d\n", 22);
 
     goto exit;
 
