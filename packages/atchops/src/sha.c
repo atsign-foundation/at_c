@@ -10,7 +10,7 @@ int atchops_sha_hash(atchops_md_type mdtype, const unsigned char *input, const u
 
     mbedtls_md_context_t md_ctx;
     mbedtls_md_init(&md_ctx);
-    mbedtls_md_type_t md_type = mdtype;
+    mbedtls_md_type_t md_type = (mbedtls_md_type_t) mdtype;
 
     ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(md_type), 0);
     if (ret != 0)

@@ -51,11 +51,12 @@ int main(int argc, char **argv)
         goto exit;
     }
 
+    // logging example
     atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_DEBUG, "poop %d\n", 3); // will not show
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_INFO, "poop %d\n", 3);
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_WARNING, "poop %d\n", 3);
-    atlogger_log(ATLOGGER_LOGGING_LEVEL_ERROR, "poop %d\n", 3);
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_DEBUG, "hi %d\n", 3); // will not show
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_INFO, "hi %d\n", 4);
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_WARNING, "hi %d\n", 11);
+    atlogger_log(ATLOGGER_LOGGING_LEVEL_ERROR, "hi %d\n", 22);
 
     goto exit;
 

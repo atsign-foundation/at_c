@@ -84,7 +84,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtyp
     }
 
     // 3. base64 encode the signature
-    ret = atchops_base64_encode(signature, signaturelen, signaturebase64, signaturebase64len, &signaturebase64olen);
+    ret = atchops_base64_encode(signature, signaturelen, signaturebase64, signaturebase64len, signaturebase64olen);
     // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
     {
@@ -109,7 +109,7 @@ int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char 
     mbedtls_rsa_context rsa;
     mbedtls_rsa_init(&rsa);
 
-    ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, NULL, NULL, NULL, NULL, NULL, publickey.e.value, publickey.e.len);
+    ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1, publickey.e.value, publickey.e.len);
     // printf("importing rsa: %d\n", ret);
     if (ret != 0)
     {

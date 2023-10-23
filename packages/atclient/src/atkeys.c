@@ -63,7 +63,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     ret = atchops_aes_ctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkampublickeystr, atkeysfile.aespkampublickeyolen,
-        atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
+        (unsigned char *) atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
     if (ret != 0)
     {
         goto exit;
@@ -74,7 +74,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     ret = atchops_aes_ctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkamprivatekeystr, atkeysfile.aespkamprivatekeyolen,
-        atkeys->pkamprivatekeystr, atkeys->pkamprivatekeylen, &(atkeys->pkamprivatekeyolen));
+        (unsigned char *) atkeys->pkamprivatekeystr, atkeys->pkamprivatekeylen, &(atkeys->pkamprivatekeyolen));
     if (ret != 0)
     {
         goto exit;
@@ -85,7 +85,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     ret = atchops_aes_ctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aesencryptpublickeystr, atkeysfile.aesencryptpublickeyolen,
-        atkeys->encryptpublickeystr, atkeys->encryptpublickeylen, &(atkeys->encryptpublickeyolen));
+        (unsigned char *) atkeys->encryptpublickeystr, atkeys->encryptpublickeylen, &(atkeys->encryptpublickeyolen));
     if (ret != 0)
     {
         goto exit;
