@@ -6,7 +6,7 @@
 /**
  * @brief Sign a message with an RSA private key
  *
- * @param privatekeystruct the private key struct to use for signing, see atchops_rsakey_populate_privatekey
+ * @param privatekey the private key struct to use for signing, see atchops_rsakey_populate_privatekey
  * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
  * @param message the message to sign
  * @param messagelen the length of the message, most people use strlen() to find this length
@@ -16,6 +16,18 @@
  * @return int 0 on success
  */
 int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen);
+
+/**
+ * @brief Verify a signature with an RSA public key
+ *
+ * @param publickey the public key to use for verification, see atchops_rsakey_populate_publickey
+ * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
+ * @param signature the signature to verify
+ * @param signaturelen the length of the signature, most people use strlen() to find this length
+ * @param result 1 if the signature is valid, 0 if the signature is invalid
+ * @return int 0 on success
+ */
+int atchops_rsa_verify(atchops_rsakey_publickey publickey, atchops_md_type mdtype, const unsigned char *signature, const unsigned long signaturelen, int *result);
 
 /**
  * @brief Encrypt bytes with an RSA public key

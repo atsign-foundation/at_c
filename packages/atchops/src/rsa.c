@@ -101,6 +101,11 @@ ret:
 }
 }
 
+int atchops_rsa_verify(atchops_rsakey_publickey publickey, atchops_md_type mdtype, const unsigned char *signature, const unsigned long signaturelen, int *result)
+{
+    return 1; // TODO: implement
+}
+
 int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext, const unsigned long plaintextlen, unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len, unsigned long *ciphertextbase64olen)
 {
     int ret = 1;
