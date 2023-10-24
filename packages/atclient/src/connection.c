@@ -7,6 +7,9 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include "atclient/connection.h"
+#include "atclient/atlogger.h"
+
+#define TAG "connection"
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name
 
@@ -155,11 +158,11 @@ int atclient_connection_send(atclient_connection_ctx *ctx, const unsigned char *
 {
     int ret = 1;
     ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen);
-    // printf("mbedtls_ssl_write: %d\n", ret);
     if (ret < 0)
     {
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tSENT: \"%.*s\"\n", (int) srclen, src);
 
     memset(recv, 0, recvlen);
     int found = 0;
@@ -167,7 +170,6 @@ int atclient_connection_send(atclient_connection_ctx *ctx, const unsigned char *
     do
     {
         ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvlen - l);
-        // printf("mbedtls_ssl_read: %d\n", ret);
         if (ret < 0)
         {
             goto exit;
@@ -214,6 +216,7 @@ int atclient_connection_send(atclient_connection_ctx *ctx, const unsigned char *
     {
         ret = 0;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tRECV: \"%.*s\"\n", (int) *olen, recv);
 
     goto exit;
 
@@ -238,7 +241,7 @@ int atclient_connection_is_connected(atclient_connection_ctx *ctx)
     memset(recv, 0, recvlen);
     unsigned long olen = 0;
 
-    int ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvlen, &olen);
+    ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvlen, &olen);
     if (ret != 0)
     {
         goto exit;
