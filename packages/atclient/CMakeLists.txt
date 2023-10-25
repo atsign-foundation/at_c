@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.19)
 # apparently globs are bad practice, manually add your src files here
 set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
+	${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c
