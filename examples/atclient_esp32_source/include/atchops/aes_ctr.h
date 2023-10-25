@@ -1,15 +1,15 @@
 #pragma once
 
-typedef enum AESKeySize {
+typedef enum atchops_aes_keysize {
     ATCHOPS_AES_128 = 128, // not tested
     ATCHOPS_AES_192 = 192, // not tested
     ATCHOPS_AES_256 = 256,
-} AESKeySize;
+} atchops_aes_keysize;
 
 int atchops_aes_ctr_encrypt(
     const char *keybase64,
     const unsigned long keybase64len,
-    const AESKeySize keybits,
+    const atchops_aes_keysize keybits,
     const unsigned char *iv,
     const unsigned long ivlen,
     const unsigned char *plaintext,
@@ -21,7 +21,7 @@ int atchops_aes_ctr_encrypt(
 int atchops_aes_ctr_decrypt(
     const char *keybase64,
     const unsigned long keybase64len,
-    const AESKeySize keybits,
+    const atchops_aes_keysize keybits,
     const unsigned char *iv,
     const unsigned long ivlen,
     const unsigned char *ciphertextbase64,

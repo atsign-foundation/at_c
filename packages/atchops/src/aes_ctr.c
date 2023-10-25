@@ -8,7 +8,7 @@
 int atchops_aes_ctr_encrypt(
     const char *keybase64,
     const unsigned long keybase64len,
-    const AESKeySize keybits,
+    const atchops_aes_keysize keybits,
     unsigned char *iv,
     const unsigned char *plaintext, // plaintext to encrypt
     const unsigned long plaintextlen,
@@ -101,7 +101,7 @@ exit:
 int atchops_aes_ctr_decrypt(
     const char *keybase64,
     const unsigned long keybase64len,
-    const AESKeySize keybits,
+    const atchops_aes_keysize keybits,
     unsigned char *iv,
     const unsigned char *ciphertextbase64,
     const unsigned long ciphertextbase64len,
