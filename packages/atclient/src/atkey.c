@@ -8,34 +8,34 @@
 void atclient_atkey_init(atclient_atkey *atkey)
 {
     memset(atkey, 0, sizeof(atclient_atkey));
-    atkey->namelen = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->namestr = (char *)malloc(sizeof(char) * atkey->namelen);
-    atkey->nameolen = 0;
+    atkey->name.len = ATKEY_GENERAL_BUFFER_SIZE;
+    atkey->name.str = (char *)malloc(sizeof(char) * atkey->name.len);
+    atkey->name.olen = 0;
 
-    atkey->namespacelen = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->namespacestr = (char *)malloc(sizeof(char) * atkey->namespacelen);
-    atkey->namespaceolen = 0;
+    atkey->namespacestr.len = ATKEY_GENERAL_BUFFER_SIZE;
+    atkey->namespacestr.str = (char *)malloc(sizeof(char) * atkey->namespacestr.len);
+    atkey->namespacestr.olen = 0;
 
-    atkey->sharedwithlen = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->sharedwithstr = (char *)malloc(sizeof(char) * atkey->sharedwithlen);
-    atkey->sharedwitholen = 0;
+    atkey->sharedwith.len = ATKEY_GENERAL_BUFFER_SIZE;
+    atkey->sharedwith.str = (char *)malloc(sizeof(char) * atkey->sharedwith.len);
+    atkey->sharedwith.olen = 0;
 
-    atkey->sharedbylen = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->sharedbystr = (char *)malloc(sizeof(char) * atkey->sharedbylen);
-    atkey->sharedbyolen = 0;
+    atkey->sharedby.len = ATKEY_GENERAL_BUFFER_SIZE;
+    atkey->sharedby.str = (char *)malloc(sizeof(char) * atkey->sharedby.len);
+    atkey->sharedby.olen = 0;
 
     atclient_atkey_metadata_init(&(atkey->metadata));
 }
 
 void atclient_atkey_free(atclient_atkey *atkey)
 {
-    free(atkey->namestr);
-    free(atkey->namespacestr);
-    free(atkey->sharedwithstr);
-    free(atkey->sharedbystr);
+    free(atkey->name.str);
+    free(atkey->namespacestr.str);
+    free(atkey->sharedwith.str);
+    free(atkey->sharedby.str);
 }
 
-int atclient_atkey_create_from_string(atclient_atkey *atkey, const char *atkeystr)
+int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen)
 {
     // 6 scenarios:
     // 1. PublicKey:            "public:name.wavi@smoothalligator"
@@ -84,5 +84,25 @@ int atclient_atkey_create_from_string(atclient_atkey *atkey, const char *atkeyst
     //      namespace = NULL
     //      cached = false
 
+    return 1; // TODO: implement
+}
+
+int atclient_atkey_to_string(atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen, unsigned long atkeystrolen)
+{
+    return 1; // TODO: implement
+}
+
+int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr)
+{
+    return 1; // TODO: implement
+}
+
+int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr)
+{
+    return 1; // TODO: implement
+}
+
+int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *sharedwith, char *namespacestr)
+{
     return 1; // TODO: implement
 }
