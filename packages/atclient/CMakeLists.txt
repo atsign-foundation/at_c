@@ -11,7 +11,7 @@ set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c
-	${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
+	${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
 	${CMAKE_CURRENT_LIST_DIR}/src/connection.c
 	${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
 )
