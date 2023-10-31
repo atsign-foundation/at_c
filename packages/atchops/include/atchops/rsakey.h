@@ -1,5 +1,5 @@
-#ifndef RSAKEY_H
-#define RSAKEY_H
+#ifndef ATCHOPS_RSAKEY_H
+#define ATCHOPS_RSAKEY_H
 
 typedef struct rsakey_param
 {

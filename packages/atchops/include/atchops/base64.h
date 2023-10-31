@@ -1,5 +1,5 @@
-#ifndef BASE64_H
-#define BASE64_H
+#ifndef ATCHOPS_BASE64_H
+#define ATCHOPS_BASE64_H
 
 /**
  * @brief Base64 encode some bytes

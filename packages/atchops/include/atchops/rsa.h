@@ -1,5 +1,5 @@
-#ifndef RSA_H
-#define RSA_H
+#ifndef ATCHOPS_RSA_H
+#define ATCHOPS_RSA_H
 
 #include "atchops/rsakey.h"
 #include "atchops/sha.h"

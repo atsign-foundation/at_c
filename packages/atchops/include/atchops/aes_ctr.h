@@ -1,9 +1,8 @@
-#ifndef AES_CTR_H
-#define AES_CTR_H
+#ifndef ATCHOPS_AES_CTR_H
+#define ATCHOPS_AES_CTR_H
 
 typedef enum atchops_aes_keysize {
     ATCHOPS_AES_128 = 128, // not tested
-    ATCHOPS_AES_192 = 192, // not tested
     ATCHOPS_AES_256 = 256,
 } atchops_aes_keysize;
 
@@ -28,5 +27,7 @@ int atchops_aes_ctr_decrypt(
     unsigned char *plaintext,
     const unsigned long plaintextlen,
     unsigned long *plaintextolen);
+
+int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keylen);
 
 #endif

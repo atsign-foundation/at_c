@@ -1,5 +1,5 @@
-#ifndef SHA_H
-#define SHA_H
+#ifndef ATCHOPS_SHA_H
+#define ATCHOPS_SHA_H
 
 typedef enum {
     ATCHOPS_MD_NONE=0,    /**< None. */
