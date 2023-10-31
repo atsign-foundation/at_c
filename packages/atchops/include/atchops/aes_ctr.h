@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AES_CTR_H
+#define AES_CTR_H
 
 typedef enum atchops_aes_keysize {
     ATCHOPS_AES_128 = 128, // not tested
@@ -27,3 +28,5 @@ int atchops_aes_ctr_decrypt(
     unsigned char *plaintext,
     const unsigned long plaintextlen,
     unsigned long *plaintextolen);
+
+#endif

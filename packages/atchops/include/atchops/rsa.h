@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RSA_H
+#define RSA_H
 
 #include "atchops/rsakey.h"
 #include "atchops/sha.h"
@@ -63,3 +64,5 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekeystruct, const unsign
  * @param keysize the size of the key to generate, e.g. 2048
  */
 int atchops_rsa_generate(atchops_rsakey_publickey *publickey, atchops_rsakey_privatekey *privatekey, const unsigned int keysize);
+
+#endif

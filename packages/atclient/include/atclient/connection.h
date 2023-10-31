@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONNECTION_H
+#define CONNECTION_H
 
 #include <mbedtls/ssl.h>
 #include <mbedtls/net_sockets.h>
@@ -101,3 +102,5 @@ int atclient_connection_is_connected(atclient_connection_ctx *ctx);
  * @param ctx the struct which was previously initialized
  */
 void atclient_connection_free(atclient_connection_ctx *ctx);
+
+#endif

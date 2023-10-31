@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BASE64_H
+#define BASE64_H
 
 /**
  * @brief Base64 encode some bytes
@@ -23,3 +24,5 @@ int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, 
  * @return int 0 on success
  */
 int atchops_base64_decode(const unsigned char *src, const unsigned long srclen, unsigned char *dst, unsigned long dstlen, unsigned long *writtenlen);
+
+#endif

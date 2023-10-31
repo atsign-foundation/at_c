@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RSAKEY_H
+#define RSAKEY_H
 
 typedef struct rsakey_param
 {
@@ -46,3 +47,5 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickeystruct,
  * @return int 0 on success
  */
 int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekeystruct, const char *privatekeybase64, const unsigned long privatekeybase64len);
+
+#endif

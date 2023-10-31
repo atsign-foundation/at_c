@@ -1,3 +1,6 @@
+#ifndef ATCLIENT_H
+#define ATCLIENT_H
+
 #include "atclient/connection.h"
 #include "atclient/atkeys.h"
 
@@ -51,3 +54,5 @@ int atclient_put(atclient_ctx *ctx, const char *key, const char *value);
 int atclient_get(atclient_ctx *ctx, const char *key, char *value, const unsigned long valuelen);
 int atclient_delete(atclient_ctx *ctx, const char *key);
 void atclient_free(atclient_ctx *ctx);
+
+#endif

@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef ATKEYS_H
+#define ATKEYS_H
 
 #include "atclient/atkeysfile.h"
 #include <atchops/rsa.h>
@@ -64,3 +64,5 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
  * @param atkeys the atkeys struct to free
  */
 void atclient_atkeys_free(atclient_atkeys *atkeys);
+
+#endif

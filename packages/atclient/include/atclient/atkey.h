@@ -1,7 +1,7 @@
 #ifndef ATKEY_H
 #define ATKEY_H
 
-#include "atclient/atsign.h"
+#include "atclient/atstr.h"
 #include "atclient/metadata.h"
 
 typedef enum atclient_atkey_type
@@ -14,21 +14,10 @@ typedef enum atclient_atkey_type
 
 typedef struct atclient_atkey
 {
-	unsigned long namelen;
-	char *namestr;
-	unsigned long nameolen;
-
-	unsigned long namespacelen;
-	char *namespacestr;
-	unsigned long namespaceolen;
-
-	unsigned long sharedwithlen;
-	char *sharedwithstr;
-	unsigned long sharedwitholen;
-
-	unsigned long sharedbylen;
-	char *sharedbystr;
-	unsigned long sharedbyolen;
+	atclient_atstr name;
+	atclient_atstr namespacestr;
+	atclient_atstr sharedby;
+	atclient_atstr sharedwith;
 
 	atclient_atkey_type atkeytype;
 
@@ -55,9 +44,10 @@ void atclient_atkey_free(atclient_atkey *atkey);
  *
  * @param atkey the atkey struct to populate
  * @param atkeystr the atkeystr to derive from (e.g. 'public:name.wavi@alice')
+ * @param atkeylen the length of the atkeystr
  * @return int 0 on success, that a struct was able to be created from the string. (the string followed proper key nomenclature)
  */
-int atclient_atkey_create_from_string(atclient_atkey *atkey, const char *atkeystr);
+int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen);
 
 /**
  * @brief convert an atkey struct to its string format
@@ -79,7 +69,7 @@ int atclient_atkey_to_string(atclient_atkey atkey, char *atkeystr, unsigned long
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const atclient_atsign sharedby, const char *namespacestr);
+int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr);
 
 /**
  * @brief Populate an atkey struct representing a SelfKey AtKey with null terminated strings. An example of a SelfKey AtKey would be 'name.namespace@alice'. SelfKeys can only be accessible by the sharedby (creator) atsign. Be sure to call the atclient_atkey_init function before calling this function.
@@ -90,7 +80,7 @@ int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, con
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_selfkey(atclient_atkey *atkey, char *name, const atclient_atsign sharedby, char *namespacestr);
+int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr);
 
 /**
  * @brief Populate an atkey struct representing a SharedKey AtKey given null terminated strings. An example of a SharedKey AtKey would be '@sharedwith:name.namesapce@sharedby'. SharedKeys can only be accessible by the sharedwith and sharedby atsigns, as they are encrypted with a shared AES key which is encrypted with the each of their RSA keys. Be sure to call the atclient_atkey_init function before calling this function.
@@ -102,6 +92,6 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, char *name, const atcli
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_sharedkey(atclient_atkey *atkey, char *name, const atclient_atsign sharedby, const atclient_atsign sharedwith, char *namespacestr);
+int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *sharedwith, char *namespacestr);
 
 #endif
