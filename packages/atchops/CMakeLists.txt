@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.19)
 set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/aes_ctr.c
     ${CMAKE_CURRENT_LIST_DIR}/src/base64.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iv.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
     ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
