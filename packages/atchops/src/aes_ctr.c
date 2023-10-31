@@ -2,8 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mbedtls/aes.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
 #include "atchops/aes_ctr.h"
 #include "atchops/base64.h"
+
+// extremely unique string for our application for aes key generation
+#define AES_CTR_PERSONALIZATION_RNG "5AtClient!#^@Personalization!#^@String!#^@for AES!#^@CTR!#^@RNG!#^@"
 
 int atchops_aes_ctr_encrypt(
     const char *keybase64,
@@ -79,7 +84,7 @@ int atchops_aes_ctr_encrypt(
     --ciphertextolen; // don't count the null terminator
 
     // 4. base64 encode ciphertext
-    ret = atchops_base64_encode(ciphertext, ciphertextolen, ciphertextbase64, ciphertextbase64len, &ciphertextbase64olen);
+    ret = atchops_base64_encode(ciphertext, ciphertextolen, ciphertextbase64, ciphertextbase64len, ciphertextbase64olen);
     // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
     {
@@ -194,6 +199,52 @@ exit:
     free(plaintextpadded);
     mbedtls_aes_free(&aes);
 
+    return ret;
+}
+}
+
+int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keylen)
+{
+    // note: To use the AES generator, you need to have the modules enabled in the mbedtls/config.h files (MBEDTLS_CTR_DRBG_C and MBEDTLS_ENTROPY_C), see How do I configure Mbed TLS. https://mbed-tls.readthedocs.io/en/latest/kb/how-to/generate-an-aes-key/
+
+    int ret = 1;
+
+    char *pers = AES_CTR_PERSONALIZATION_RNG;
+
+    unsigned long keybytes = keylen / 8;
+    unsigned char key[keybytes];
+    memset(key, 0, keybytes);
+
+    mbedtls_ctr_drbg_context ctr_drbg;
+    mbedtls_entropy_context entropy;
+    mbedtls_entropy_init( &entropy );
+    mbedtls_ctr_drbg_init( &ctr_drbg );
+
+    if( ( ret = mbedtls_ctr_drbg_seed( &ctr_drbg, mbedtls_entropy_func, &entropy,
+        (unsigned char *) pers, strlen( pers ) ) ) != 0 )
+    {
+        // printf( " failed\n ! mbedtls_ctr_drbg_init returned -0x%04x\n", -ret );
+        goto exit;
+    }
+
+    if( ( ret = mbedtls_ctr_drbg_random( &ctr_drbg, key, keybytes ) ) != 0 )
+    {
+        // printf( " failed\n ! mbedtls_ctr_drbg_random returned -0x%04x\n", -ret );
+        goto exit;
+    }
+
+    ret = atchops_base64_encode(key, keybytes, keybase64, keybase64len, keybase64olen);
+    if(ret != 0)
+    {
+        goto exit;
+    }
+
+    goto exit;
+
+exit:
+{
+    mbedtls_ctr_drbg_free( &ctr_drbg );
+    mbedtls_entropy_free( &entropy );
     return ret;
 }
 }

@@ -25,10 +25,11 @@ int main(int argc, char **argv)
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     memset(ciphertext, 0, ciphertextlen);
 
-    ret = atchops_aes_ctr_encrypt(aeskeybase64, strlen(aeskeybase64), ATCHOPS_AES_256, iv, plaintext, plaintextlen, ciphertext, ciphertextlen, &olen);
-    printf("encrypted (%lu): \"%.*s\"\n", olen, (int) olen, ciphertext);
+    ret = atchops_aes_ctr_encrypt(aeskeybase64, strlen(aeskeybase64), ATCHOPS_AES_256, iv, (unsigned char *) plaintext, plaintextlen, ciphertext, ciphertextlen, &olen);
+    // printf("encrypted (%lu): \"%.*s\"\n", olen, (int) olen, ciphertext);
     if (ret != 0)
     {
+        printf("atchops_aes_ctr_encrypt (failed): %d\n", ret);
         goto exit;
     }
 
@@ -37,9 +38,10 @@ int main(int argc, char **argv)
     memset(plaintext2, 0, plaintextlen2);
     memset(iv, 0, 16);
     ret = atchops_aes_ctr_decrypt(aeskeybase64, strlen(aeskeybase64), ATCHOPS_AES_256, iv , ciphertext, olen, plaintext2, plaintextlen2, &olen);
-    printf("decrypted (%lu) %.*s\n", olen, (int) olen, plaintext2);
+    // printf("decrypted (%lu) %.*s\n", olen, (int) olen, plaintext2);
     if (ret != 0)
     {
+        printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
         goto exit;
     }
 

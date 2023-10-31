@@ -18,56 +18,72 @@ int main()
     ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
     if (ret != 0)
     {
-        goto ret;
+        printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
+        goto exit;
     }
 
     if (privatekey.n.len <= 0)
     {
         ret = 1;
-        goto ret;
+        goto exit;
     }
+    printf("n:\t");
+    for (int i = 0; i < privatekey.n.len; i++)
+    {
+        printf("%02x ", privatekey.n.value[i]);
+    }
+    printf("\n");
 
     if (privatekey.e.len <= 0)
     {
         ret = 1;
-        goto ret;
+        goto exit;
     }
+    printf("e:\t");
+    for (int i = 0; i < privatekey.e.len; i++)
+    {
+        printf("%02x ", privatekey.e.value[i]);
+    }
+    printf("\n");
 
     if (privatekey.d.len <= 0)
     {
         ret = 1;
-        goto ret;
+        goto exit;
     }
+    printf("d:\t");
+    for (int i = 0; i < privatekey.d.len; i++)
+    {
+        printf("%02x ", privatekey.d.value[i]);
+    }
+    printf("\n");
 
     if (privatekey.p.len <= 0)
     {
         ret = 1;
-        goto ret;
+        goto exit;
     }
+    printf("p:\t");
+    for (int i = 0; i < privatekey.p.len; i++)
+    {
+        printf("%02x ", privatekey.p.value[i]);
+    }
+    printf("\n");
 
     if (privatekey.q.len <= 0)
     {
         ret = 1;
-        goto ret;
+        goto exit;
     }
+    printf("q:\t");
+    for (int i = 0; i < privatekey.q.len; i++)
+    {
+        printf("%02x ", privatekey.q.value[i]);
+    }
+    printf("\n");
 
-    // printf("n: %lu\n", privatekeystruct.n_param.len);
-    // printx(privatekeystruct.n_param.n, privatekeystruct.n_param.len);
-
-    // printf("e: %lu\n", privatekeystruct.e_param.len);
-    // printx(privatekeystruct.e_param.e, privatekeystruct.e_param.len);
-
-    // printf("d: %lu\n", privatekeystruct.d_param.len);
-    // printx(privatekeystruct.d_param.d, privatekeystruct.d_param.len);
-
-    // printf("p: %lu\n", privatekeystruct.p_param.len);
-    // printx(privatekeystruct.p_param.p, privatekeystruct.p_param.len);
-
-    // printf("q: %lu\n", privatekeystruct.q_param.len);
-    // printx(privatekeystruct.q_param.q, privatekeystruct.q_param.len);
-
-    goto ret;
-ret:
+    goto exit;
+exit:
 {
     return ret;
 }

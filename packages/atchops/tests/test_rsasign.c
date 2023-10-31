@@ -24,7 +24,11 @@ int main()
     atchops_rsakey_init_privatekey(&privatekey);
     ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
     if (ret != 0)
-        goto ret;
+    {
+        printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
+        goto exit;
+    }
+    printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
 
     unsigned char *signature = malloc(sizeof(unsigned char) * SIGNATURE_BUFFER_LEN);
     memset(signature, 0, SIGNATURE_BUFFER_LEN);
@@ -34,36 +38,30 @@ int main()
     const unsigned long messagelen = strlen(message);
 
     ret = atchops_rsa_sign(privatekey, ATCHOPS_MD_SHA256, (const unsigned char *) message, messagelen, signature, SIGNATURE_BUFFER_LEN, &signatureolen);
-    printf("atchops_rsa_sign: %d\n", ret);
-    if(ret != 0)
-        goto ret;
-
-    ret = memcmp(signature, (const unsigned char *) EXPECTED_SIGNATURE, signatureolen);
-    printf("strncmp: %d\n", ret);
     if(ret != 0)
     {
-        printf("signature len: %lu\n", signatureolen);
-        printf("signature: %s\n", signature);
-        printf("\n\n");
-        for(int i = 0; i < signatureolen; i++)
-            printf("%02x ", signature[i]);
-        printf("\n");
-        printf("\n\n");
+        printf("atchops_rsa_sign (failed): %d\n", ret);
+        goto exit;
+    }
+    printf("atchops_rsa_sign (success): %d\n", ret);
+    printf("signature: \"%s\"\n", signature);
 
-        printf("expected signature: %s\n", EXPECTED_SIGNATURE);
-        printf("\n\n");
-        for(int i = 0; i < signatureolen; i++)
-            printf("%02x ", EXPECTED_SIGNATURE[i]);
-        printf("\n");
-        printf("\n\n");
-        goto ret;
+    ret = memcmp(signature, (const unsigned char *) EXPECTED_SIGNATURE, signatureolen);
+    if(ret != 0)
+    {
+        printf("memcmp (failed): %d\n", ret);
+        printf("got: \"%s\" | expected: \"%s\"\n", signature, EXPECTED_SIGNATURE);
+        goto exit;
     }
 
-    // printf("signature len: %lu\n", *signaturelen);
-    // printf("signature: %s\n", signature);
+    printf("memcmp (success): %d\n", ret);
 
-ret:
+    goto exit;
+
+
+exit:
 {
+    free(signature);
     return ret;
 }
 }

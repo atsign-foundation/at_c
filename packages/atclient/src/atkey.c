@@ -8,21 +8,10 @@
 void atclient_atkey_init(atclient_atkey *atkey)
 {
     memset(atkey, 0, sizeof(atclient_atkey));
-    atkey->name.len = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->name.str = (char *)malloc(sizeof(char) * atkey->name.len);
-    atkey->name.olen = 0;
-
-    atkey->namespacestr.len = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->namespacestr.str = (char *)malloc(sizeof(char) * atkey->namespacestr.len);
-    atkey->namespacestr.olen = 0;
-
-    atkey->sharedwith.len = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->sharedwith.str = (char *)malloc(sizeof(char) * atkey->sharedwith.len);
-    atkey->sharedwith.olen = 0;
-
-    atkey->sharedby.len = ATKEY_GENERAL_BUFFER_SIZE;
-    atkey->sharedby.str = (char *)malloc(sizeof(char) * atkey->sharedby.len);
-    atkey->sharedby.olen = 0;
+    atclient_atstr_init(&(atkey->name), ATKEY_GENERAL_BUFFER_SIZE);
+    atclient_atstr_init(&(atkey->namespacestr), ATKEY_GENERAL_BUFFER_SIZE);
+    atclient_atstr_init(&(atkey->sharedby), ATKEY_GENERAL_BUFFER_SIZE);
+    atclient_atstr_init(&(atkey->sharedwith), ATKEY_GENERAL_BUFFER_SIZE);
 
     atclient_atkey_metadata_init(&(atkey->metadata));
 }

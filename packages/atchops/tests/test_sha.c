@@ -11,18 +11,38 @@ int main()
 
     const unsigned long dstlen = 32;
     unsigned char *dst = calloc(dstlen, sizeof(unsigned char));
-    unsigned long dstolen;
+    memset(dst, 0, dstlen);
+    unsigned long dstolen = 0;
 
-    ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *) src, strlen(src), dst, dstlen, &dstolen);
-    if(ret != 0)
+    ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *)src, strlen(src), dst, dstlen, &dstolen);
+    if (ret != 0)
     {
-        printf("failed | atchops_sha_hash: %d\n", ret);
+        printf("atchops_sha_hash (failed): %d\n", ret);
+        goto exit;
+    }
+    printf("atchops_sha_hash (success): %d\n", ret);
+
+    if (dstolen <= 0)
+    {
+        ret = 1;
+        printf("dstolen (failed): %d\n", ret);
         goto exit;
     }
 
+    printf("dst: ");
+    for (int i = 0; i < dstolen; i++)
+    {
+        printf("%02x ", dst[i]);
+    }
+    printf("\n");
+
+    ret = 0;
+
     goto exit;
 
-exit: {
+exit:
+{
+    free(dst);
     return ret;
 }
 }
