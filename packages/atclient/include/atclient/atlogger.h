@@ -1,6 +1,6 @@
 
-#ifndef ATLOGGER_H
-#define ATLOGGER_H
+#ifndef ATCLIENT_ATLOGGER_H
+#define ATCLIENT_ATLOGGER_H
 
 typedef enum atlogger_logging_level
 {

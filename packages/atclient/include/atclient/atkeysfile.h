@@ -1,5 +1,5 @@
-#ifndef ATKEYSFILE_H
-#define ATKEYSFILE_H
+#ifndef ATCLIENT_ATKEYSFILE_H
+#define ATCLIENT_ATKEYSFILE_H
 
 typedef struct atclient_atkeysfile {
     unsigned long aespkampublickeylen;

@@ -1,6 +1,6 @@
 
-#ifndef METADATA_H
-#define METADATA_H
+#ifndef ATCLIENT_METADATA_H
+#define ATCLIENT_METADATA_H
 
 #include "atclient/atstr.h"
 

@@ -1,5 +1,5 @@
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#ifndef ATCLIENT_CONNECTION_H
+#define ATCLIENT_CONNECTION_H
 
 #include <mbedtls/ssl.h>
 #include <mbedtls/net_sockets.h>

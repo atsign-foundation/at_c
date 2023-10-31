@@ -1,5 +1,5 @@
-#ifndef ATKEYS_H
-#define ATKEYS_H
+#ifndef ATCLIENT_ATKEYS_H
+#define ATCLIENT_ATKEYS_H
 
 #include "atclient/atkeysfile.h"
 #include <atchops/rsa.h>

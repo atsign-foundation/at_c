@@ -1,5 +1,5 @@
-#ifndef ATSTR_H
-#define ATSTR_H
+#ifndef ATCLIENT_ATSTR_H
+#define ATCLIENT_ATSTR_H
 
 /**
  * @brief Represents a string that is allocated on the heap

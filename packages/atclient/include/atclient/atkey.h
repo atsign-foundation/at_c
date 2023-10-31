@@ -1,5 +1,5 @@
-#ifndef ATKEY_H
-#define ATKEY_H
+#ifndef ATCLIENT_ATKEY_H
+#define ATCLIENT_ATKEY_H
 
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
