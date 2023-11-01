@@ -1,9 +1,11 @@
+#include <string.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include "atchops/aesctr.h"
+#include "atchops/base64.h"
 #include "atchops/constants.h"
 
-int atchops_aes_ctr_generate_key(unsigned char *key, const atchops_aes_keysize keysize)
+int atchops_aes_generate_key(unsigned char *key, const atchops_aes_keysize keysize)
 {
     int ret = 1;
 
@@ -38,7 +40,7 @@ exit:
 }
 }
 
-int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keysize)
+int atchops_aes_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keysize)
 {
     int ret = 1;
 
@@ -46,7 +48,7 @@ int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned 
     unsigned char key[keybytes];
     memset(key, 0, keybytes);
 
-    ret = atchops_aes_ctr_generate_key(key, keysize);
+    ret = atchops_aes_generate_key(key, keysize);
     if (ret != 0)
     {
         goto exit;

@@ -8,7 +8,7 @@
 #include "atchops/base64.h"
 #include "atchops/constants.h"
 
-int atchops_aes_ctr_encrypt(
+int atchops_aesctr_encrypt(
     const char *keybase64,
     const unsigned long keybase64len,
     const atchops_aes_keysize keybits,
@@ -101,7 +101,7 @@ exit:
 }
 }
 
-int atchops_aes_ctr_decrypt(
+int atchops_aesctr_decrypt(
     const char *keybase64,
     const unsigned long keybase64len,
     const atchops_aes_keysize keybits,

@@ -6,7 +6,7 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/**",
-                "/usr/local/include",
+                // "/usr/local/include",
                 "~/esp/esp-idf/components/**"
             ],
             "compilerPath": "/usr/bin/gcc",

@@ -1,5 +1,5 @@
-#ifndef ATCHOPS_AES_CTR_H
-#define ATCHOPS_AES_CTR_H
+#ifndef ATCHOPS_AESCTR_H
+#define ATCHOPS_AESCTR_H
 
 #include "atchops/aes.h"
 
@@ -12,7 +12,7 @@
  * @param iv the initialization vector (always 16 bytes long)
  * @param plaintext the plaintext to encrypt
  * @param plaintextlen the length of the plaintext string
- * @param ciphertextbase64 the ciphertext buffer to write to
+ * @param ciphertextbase64 the ciphertext buffer to write to    
  * @param ciphertextbase64len the memory allocated length of the ciphertext buffer
  * @param ciphertextbase64olen the written length of the ciphertext buffer
  * @return int 0 on success

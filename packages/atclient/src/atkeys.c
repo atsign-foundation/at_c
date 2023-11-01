@@ -60,7 +60,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     atkeys->selfencryptionkeyolen = atkeysfile.selfencryptionkeyolen;
 
     // 1b. pkam public key
-    ret = atchops_aes_ctr_decrypt(
+    ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkampublickeystr, atkeysfile.aespkampublickeyolen,
         (unsigned char *) atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
@@ -71,7 +71,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     memset(iv, 0, sizeof(unsigned char) * IV_SIZE);
 
     // 1c. pkam private key
-    ret = atchops_aes_ctr_decrypt(
+    ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkamprivatekeystr, atkeysfile.aespkamprivatekeyolen,
         (unsigned char *) atkeys->pkamprivatekeystr, atkeys->pkamprivatekeylen, &(atkeys->pkamprivatekeyolen));
@@ -82,7 +82,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     memset(iv, 0, sizeof(unsigned char) * IV_SIZE);
 
     // 1d. encrypt public key
-    ret = atchops_aes_ctr_decrypt(
+    ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aesencryptpublickeystr, atkeysfile.aesencryptpublickeyolen,
         (unsigned char *) atkeys->encryptpublickeystr, atkeys->encryptpublickeylen, &(atkeys->encryptpublickeyolen));
@@ -93,7 +93,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     memset(iv, 0, sizeof(unsigned char) * IV_SIZE);
 
     // 1e. encrypt private key
-    ret = atchops_aes_ctr_decrypt(
+    ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aesencryptprivatekeystr, atkeysfile.aesencryptprivatekeyolen,
         atkeys->encryptprivatekeystr, atkeys->encryptprivatekeylen, &(atkeys->encryptprivatekeyolen));

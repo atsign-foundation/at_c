@@ -21,17 +21,17 @@ int main()
     unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_SIZE);
     memset(iv, 0, ATCHOPS_IV_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
-    ret = atchops_aes_ctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), ATCHOPS_AES_256, iv, (const unsigned char *) CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext, plaintextlen, &plaintextolen);
+    ret = atchops_aesctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), ATCHOPS_AES_256, iv, (const unsigned char *) CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext, plaintextlen, &plaintextolen);
     if(ret != 0)
     {
-        printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
+        printf("atchops_aesctr_decrypt (failed): %d\n", ret);
         goto exit;
     }
-    printf("atchops_aes_ctr_decrypt (success): %d\n", ret);
+    printf("atchops_aesctr_decrypt (success): %d\n", ret);
 
     if(plaintextolen <= 0)
     {
-        printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
+        printf("atchops_aesctr_decrypt (failed): %d\n", ret);
         goto exit;
     }
     printf("decrypted text: %.*s\n", (int) plaintextolen, plaintext);
