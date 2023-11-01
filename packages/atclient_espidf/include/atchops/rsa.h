@@ -2,25 +2,25 @@
 
 #include "sha.h"
 
-typedef struct rsakey_param
+typedef struct atchops_rsakey_param
 {
     unsigned long len;    // length of the number in bytes
     unsigned char *value; // hex byte array of the number
-} rsakey_param;
+} atchops_rsakey_param;
 
 typedef struct atchops_rsa_publickey
 {
-    rsakey_param n; // modulus
-    rsakey_param e; // public exponent
+    atchops_rsakey_param n; // modulus
+    atchops_rsakey_param e; // public exponent
 } atchops_rsa_publickey;
 
 typedef struct atchops_rsa_privatekey
 {
-    rsakey_param n; // modulus
-    rsakey_param e; // public exponent
-    rsakey_param d; // private exponent
-    rsakey_param p; // prime 1
-    rsakey_param q; // prime 2
+    atchops_rsakey_param n; // modulus
+    atchops_rsakey_param e; // public exponent
+    atchops_rsakey_param d; // private exponent
+    atchops_rsakey_param p; // prime 1
+    atchops_rsakey_param q; // prime 2
 } atchops_rsa_privatekey;
 
 /**

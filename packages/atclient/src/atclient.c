@@ -8,7 +8,7 @@
 #include "atclient/connection.h"
 #include "atclient/atlogger.h"
 #include "atchops/rsa.h"
-#include "atchops/aes_ctr.h"
+#include "atchops/aesctr.h"
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
 

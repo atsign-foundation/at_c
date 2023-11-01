@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "atchops/aes_ctr.h"
+#include "atchops/aesctr.h"
 
 #define PLAINTEXT "I like to eat pizza 123"
 #define AES_KEY "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="

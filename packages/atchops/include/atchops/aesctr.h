@@ -1,11 +1,7 @@
 #ifndef ATCHOPS_AES_CTR_H
 #define ATCHOPS_AES_CTR_H
 
-typedef enum atchops_aes_keysize
-{
-    ATCHOPS_AES_128 = 128, // not tested
-    ATCHOPS_AES_256 = 256,
-} atchops_aes_keysize;
+#include "atchops/aes.h"
 
 /**
  * @brief AES CTR encrypt plaintext to ciphertextbase64 (base64 encoded string)
@@ -21,7 +17,7 @@ typedef enum atchops_aes_keysize
  * @param ciphertextbase64olen the written length of the ciphertext buffer
  * @return int 0 on success
  */
-int atchops_aes_ctr_encrypt(
+int atchops_aesctr_encrypt(
     const char *keybase64,
     const unsigned long keybase64len,
     const atchops_aes_keysize keybits,
@@ -46,7 +42,7 @@ int atchops_aes_ctr_encrypt(
  * @param plaintextolen the written length of the plaintext buffer
  * @return int 0 on success
  */
-int atchops_aes_ctr_decrypt(
+int atchops_aesctr_decrypt(
     const char *keybase64,
     const unsigned long keybase64len,
     const atchops_aes_keysize keybits,
@@ -56,25 +52,5 @@ int atchops_aes_ctr_decrypt(
     unsigned char *plaintext,
     const unsigned long plaintextlen,
     unsigned long *plaintextolen);
-
-/**
- * @brief Generate an AES key of size keylen bits
- *
- * @param key key buffer of size (keylen/8) bytes
- * @param keysize key length in bits (e.g. AES-256 = 256 => ATCHOPS_AES_256)
- * @return int 0 on success
- */
-int atchops_aes_ctr_generate_key(unsigned char *key, const atchops_aes_keysize keysize);
-
-/**
- * @brief Generate an AES key of size keylen bits encoded in base 64
- *
- * @param keybase64 key buffer to hold base64 string
- * @param keybase64len the allocated length of the key buffer
- * @param keybase64olen the written length of the key buffer
- * @param keysize the AES key length in bits (e.g. AES-256 = 256 => ATCHOPS_AES_256)
- * @return int 0 on success
- */
-int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keysize);
 
 #endif

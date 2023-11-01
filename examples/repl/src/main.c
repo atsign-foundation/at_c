@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <atchops/aes_ctr.h>
+#include <atchops/aesctr.h>
 #include <atchops/rsa.h>
 #include <atclient/connection.h>
 #include <atclient/atkeys_filereader.h>
