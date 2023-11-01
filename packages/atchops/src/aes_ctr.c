@@ -63,7 +63,7 @@ int atchops_aes_ctr_encrypt(
         goto exit;
     }
 
-    const unsigned long ciphertextlen = plaintextlen*8; // 8 times the plaintext length should be sufficient space for the ciphertext
+    const unsigned long ciphertextlen = plaintextlen * 8; // 8 times the plaintext length should be sufficient space for the ciphertext
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     memset(ciphertext, 0, ciphertextlen);
     unsigned long ciphertextolen = 0;
@@ -186,7 +186,6 @@ int atchops_aes_ctr_decrypt(
     *plaintextolen = plaintextpaddedolen - padval;
     memcpy(plaintext, plaintextpadded, *plaintextolen);
 
-
     goto exit;
 
 exit:
@@ -203,38 +202,27 @@ exit:
 }
 }
 
-int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keylen)
+int atchops_aes_ctr_generate_key(unsigned char *key, const atchops_aes_keysize keysize)
 {
-    // note: To use the AES generator, you need to have the modules enabled in the mbedtls/config.h files (MBEDTLS_CTR_DRBG_C and MBEDTLS_ENTROPY_C), see How do I configure Mbed TLS. https://mbed-tls.readthedocs.io/en/latest/kb/how-to/generate-an-aes-key/
-
     int ret = 1;
 
-    char *pers = AES_CTR_PERSONALIZATION_RNG;
+    const char *pers = AES_CTR_PERSONALIZATION_RNG;
+    const unsigned long keybytes = keysize / 8;
 
-    unsigned long keybytes = keylen / 8;
-    unsigned char key[keybytes];
-    memset(key, 0, keybytes);
+    // note: To use the AES generator, you need to have the modules enabled in the mbedtls/config.h files (MBEDTLS_CTR_DRBG_C and MBEDTLS_ENTROPY_C), see How do I configure Mbed TLS. https://mbed-tls.readthedocs.io/en/latest/kb/how-to/generate-an-aes-key/
 
     mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_entropy_context entropy;
-    mbedtls_entropy_init( &entropy );
-    mbedtls_ctr_drbg_init( &ctr_drbg );
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
 
-    if( ( ret = mbedtls_ctr_drbg_seed( &ctr_drbg, mbedtls_entropy_func, &entropy,
-        (unsigned char *) pers, strlen( pers ) ) ) != 0 )
+    if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
+                                     (unsigned char *)pers, strlen(pers))) != 0)
     {
-        // printf( " failed\n ! mbedtls_ctr_drbg_init returned -0x%04x\n", -ret );
         goto exit;
     }
 
-    if( ( ret = mbedtls_ctr_drbg_random( &ctr_drbg, key, keybytes ) ) != 0 )
-    {
-        // printf( " failed\n ! mbedtls_ctr_drbg_random returned -0x%04x\n", -ret );
-        goto exit;
-    }
-
-    ret = atchops_base64_encode(key, keybytes, keybase64, keybase64len, keybase64olen);
-    if(ret != 0)
+    if ((ret = mbedtls_ctr_drbg_random(&ctr_drbg, key, keybytes)) != 0)
     {
         goto exit;
     }
@@ -243,8 +231,36 @@ int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned 
 
 exit:
 {
-    mbedtls_ctr_drbg_free( &ctr_drbg );
-    mbedtls_entropy_free( &entropy );
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    mbedtls_entropy_free(&entropy);
+    return ret;
+}
+}
+
+int atchops_aes_ctr_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len, unsigned long *keybase64olen, atchops_aes_keysize keysize)
+{
+    int ret = 1;
+
+    const unsigned long keybytes = keysize / 8;
+    unsigned char key[keybytes];
+    memset(key, 0, keybytes);
+
+    ret = atchops_aes_ctr_generate_key(key, keysize);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = atchops_base64_encode(key, keybytes, keybase64, keybase64len, keybase64olen);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    goto exit;
+
+exit:
+{
     return ret;
 }
 }
