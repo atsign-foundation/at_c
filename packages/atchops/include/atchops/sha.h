@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ATCHOPS_SHA_H
+#define ATCHOPS_SHA_H
 
 typedef enum {
     ATCHOPS_MD_NONE=0,    /**< None. */
@@ -12,3 +13,5 @@ typedef enum {
 } atchops_md_type;
 
 int atchops_sha_hash(atchops_md_type mdtype, const unsigned char *input, const unsigned long inputlen, unsigned char *output, unsigned long outputlen, unsigned long *outputolen);
+
+#endif

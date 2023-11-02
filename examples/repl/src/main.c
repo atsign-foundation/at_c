@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <atchops/aes_ctr.h>
+#include <atchops/aesctr.h>
 #include <atchops/rsa.h>
 #include <atclient/connection.h>
 #include <atclient/atkeys_filereader.h>
@@ -150,13 +150,13 @@ int main()
     unsigned char *iv = malloc(sizeof(unsigned char) * 16);
     memset(iv, 0, 16);
 
-    ret = atchops_aes_ctr_decrypt(atkeysfile.self_encryption_key->key, atkeysfile.self_encryption_key->len, 256, iv, 16, atkeysfile.aes_pkam_private_key->key, atkeysfile.aes_pkam_private_key->len, pkamprivatekey, pkamprivatekeylen, &pkamprivatekeyolen);
-    printf("atchops_aes_ctr_decrypt: %d\n", ret);
+    ret = atchops_aesctr_decrypt(atkeysfile.self_encryption_key->key, atkeysfile.self_encryption_key->len, 256, iv, 16, atkeysfile.aes_pkam_private_key->key, atkeysfile.aes_pkam_private_key->len, pkamprivatekey, pkamprivatekeylen, &pkamprivatekeyolen);
+    printf("atchops_aesctr_decrypt: %d\n", ret);
 
     printf("pkam private key (decrypted): \"%s\"\n", pkamprivatekey);
     printf("pkam private key (decrypted) len: %lu\n", pkamprivatekeyolen);
 
-    ret = atchops_rsa_populate_privatekey(pkamprivatekey, pkamprivatekeyolen, &pkamprivatekeystruct);
+    ret = atchops_rsakey_populate_privatekey(pkamprivatekey, pkamprivatekeyolen, &pkamprivatekeystruct);
 
     printf("n: %lu\n", pkamprivatekeystruct.n.len);
     printf("e: %lu\n", pkamprivatekeystruct.e.len);

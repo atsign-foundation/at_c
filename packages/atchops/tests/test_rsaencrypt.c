@@ -8,52 +8,47 @@
 
 #define PLAINTEXT "banana"
 
-static void printx(const char *str, size_t len)
-{
-    printf("hex: ");
-    for(size_t i = 0; i < len; i++)
-    {
-        printf("%02x", str[i]);
-    }
-    printf("\n");
-}
-
 int main()
 {
     int ret = 1;
 
-    size_t publickeylen = strlen(PUBLICKEYBASE64);
-    const char *publickey = PUBLICKEYBASE64;
+    const unsigned long publickeybase64len = strlen(PUBLICKEYBASE64);
+    const char *publickeybase64 = PUBLICKEYBASE64;
 
     const char *plaintext = PLAINTEXT;
-    const size_t plaintextlen = strlen(plaintext);
+    const unsigned long plaintextlen = strlen(plaintext);
 
-    atchops_rsa_publickey publickeystruct;
+    atchops_rsakey_publickey publickey;
+    atchops_rsakey_init_publickey(&publickey);
 
-    printf("populating public key struct..\n");
-    ret = atchops_rsa_populate_publickey(publickey, publickeylen, &publickeystruct);
-    printf("atchops_rsa_populate_publickey returned: %d\n", ret);
-    if(ret != 0)
+    ret = atchops_rsakey_populate_publickey(&publickey, publickeybase64, publickeybase64len);
+    if (ret != 0)
+    {
+        printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
         goto ret;
+    }
+    printf("atchops_rsakey_populate_publickey (success): %d\n", ret);
 
     const unsigned long ciphertextlen = 1024;
     unsigned char *ciphertext = calloc(ciphertextlen, sizeof(unsigned char));
     memset(ciphertext, 0, ciphertextlen);
     unsigned long ciphertextolen = 0;
 
-    printf("encrypting...\n");
-    ret = atchops_rsa_encrypt(publickeystruct, plaintext, plaintextlen, ciphertext, ciphertextlen, &ciphertextolen);
-    printf("atchops_rsa_encrypt returned: %d\n", ret);
-    if(ret != 0)
+    // printf("encrypting...\n");
+    ret = atchops_rsa_encrypt(publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext, ciphertextlen, &ciphertextolen);
+    if (ret != 0)
+    {
+        printf("atchops_rsa_encrypt (failed): %d\n", ret);
         goto ret;
-
-    printf("ciphertext (base64 encoded): %s\n", ciphertext);
-    printx(ciphertext, ciphertextolen);
-
+    }
+    printf("atchops_rsa_encrypt (success): %d\n", ret);
+    printf("ciphertext (base64 encoded): \"%s\"\n", ciphertext);
+    
     goto ret;
 
-    ret:
-    {
-        return ret;
-    }
+ret:
+{
+    free(ciphertext);
+    return ret;
+}
 }

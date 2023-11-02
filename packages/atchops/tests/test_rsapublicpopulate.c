@@ -9,36 +9,48 @@ int main()
 {
     int ret = 1;
 
-    size_t publickeybase64len = strlen(PUBLIC_KEY_BASE64);
-    const unsigned char *publickeybase64 = PUBLIC_KEY_BASE64;
+    const char *publickeybase64 = PUBLIC_KEY_BASE64;
+    const unsigned long publickeybase64len = strlen(publickeybase64);
 
-    atchops_rsa_publickey publickeystruct;
-    ret = atchops_rsa_populate_publickey(publickeybase64, publickeybase64len, &publickeystruct);
+    atchops_rsakey_publickey publickey;
+    atchops_rsakey_init_publickey(&publickey);
+
+    ret = atchops_rsakey_populate_publickey(&publickey, publickeybase64, publickeybase64len);
     if (ret != 0)
     {
-        goto ret;
+        printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
+        goto exit;
     }
 
-    if (publickeystruct.n.len <= 0)
+    if (publickey.n.len <= 0)
     {
         ret = 1;
-        goto ret;
+        printf("publickey.n.len (failed): %d\n", ret);
+        goto exit;
     }
+    printf("n:\t");
+    for(int i = 0; i < publickey.n.len; i++)
+    {
+        printf("%02x ", publickey.n.value[i]);
+    }
+    printf("\n");
 
-    if (publickeystruct.e.len <= 0)
+    if (publickey.e.len <= 0)
     {
         ret = 1;
-        goto ret;
+        printf("publickey.e.len (failed): %d\n", ret);
+        goto exit;
     }
-
-    // printf("n: ");
-    // printx(publickeystruct.n_param.n, publickeystruct.n_param.len);
-    // printf("e: ");
-    // printx(publickeystruct.e_param.e, publickeystruct.e_param.len);
-
-    goto ret;
-    ret:
+    printf("e:\t");
+    for(int i = 0; i < publickey.e.len; i++)
     {
-        return ret;
+        printf("%02x ", publickey.e.value[i]);
     }
+    printf("\n");
+
+    goto exit;
+exit:
+{
+    return ret;
+}
 }
