@@ -1,6 +1,7 @@
 <img width=250px src="https://atsign.dev/assets/img/atPlatform_logo_gray.svg?sanitize=true">
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_c/badge)](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_c)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8138/badge)](https://www.bestpractices.dev/projects/8138)
 
 # at_c
 
@@ -29,3 +30,4 @@ When creating source files, include headers, or tests to certain packages, pleas
 
 - [XavierChanth](https://github.com/XavierChanth)
 - [JeremyTubongbanua](https://github.com/JeremyTubongbanua)
+
