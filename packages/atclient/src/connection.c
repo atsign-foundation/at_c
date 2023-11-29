@@ -6,12 +6,26 @@
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
-#include "atclient/connection.h"
 #include "atclient/atlogger.h"
+#include "atclient/cacerts.h"
+#include "atclient/connection.h"
+#include "atclient/constants.h"
 
 #define TAG "connection"
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name
+
+/* Concatenation of all available CA certificates in PEM format */
+const char cas_pem[] =
+    LETS_ENCRYPT_ROOT
+    GOOGLE_GLOBAL_SIGN
+    GOOGLE_GTS_ROOT_R1
+    GOOGLE_GTS_ROOT_R2
+    GOOGLE_GTS_ROOT_R3
+    GOOGLE_GTS_ROOT_R4
+    ZEROSSL_INTERMEDIATE
+    "";
+const size_t cas_pem_len = sizeof(cas_pem);
 
 static void my_debug(void *ctx, int level, const char *file, int line, const char *str)
 {
@@ -25,7 +39,6 @@ void atclient_connection_init(atclient_connection_ctx *ctx)
     memset(ctx, 0, sizeof(atclient_connection_ctx));
     ctx->host = (char *)malloc(sizeof(char) * HOST_BUFFER_SIZE);
     ctx->port = -1;
-    ctx->cert_pem = ROOT_CERT;
 
     mbedtls_net_init(&(ctx->net));
     mbedtls_ssl_init(&(ctx->ssl));
@@ -52,9 +65,8 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
         goto exit;
     }
 
-    ret = mbedtls_x509_crt_parse(&(ctx->cacert), (const unsigned char *)ROOT_CERT, strlen(ROOT_CERT) + 1);
-    // printf("mbedtls_x509_crt_parse: %d\n", ret);
-    if (ret != 0)
+    ret = mbedtls_x509_crt_parse(&(ctx->cacert), cas_pem, cas_pem_len);
+    if (ret != 0) 
     {
         goto exit;
     }
