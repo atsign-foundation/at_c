@@ -12,6 +12,12 @@ typedef enum atclient_atkey_type
 	SHAREDKEY,
 } atclient_atkey_type;
 
+typedef enum OperationEnum {
+    UPDATE,
+    DELETE,
+    REMOVE
+} OperationEnum;
+
 typedef struct atclient_atkey
 {
 	atclient_atstr name;

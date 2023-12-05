@@ -11,13 +11,23 @@ set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c
+	${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
+	${CMAKE_CURRENT_LIST_DIR}/src/atutils.c
 	${CMAKE_CURRENT_LIST_DIR}/src/connection.c
 	${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
 )
 
 set(atclient_include_dir
 	${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like `#include "atclient/xyz.h"
+)
+
+set(uuid4_include_dir
+	${CMAKE_CURRENT_LIST_DIR}/build/_deps/uuid4-src/src
+)
+
+set(cjson_include_dir
+	${CMAKE_CURRENT_LIST_DIR}/build/_deps/cjson-src
 )
 
 if(ESP_PLATFORM)
@@ -48,7 +58,7 @@ if(NOT ESP_PLATFORM) # build for Desktop
 
 	option(ATCLIENT_FETCH_ATCHOPS "Use Local ATCHOPS" ON)
 	option(ATCLIENT_FETCH_MBEDTLS "Fetch MbedTLS via releases" ON)
-
+	
 	# #########################################################
 	# 0b. Build atchops locally or use already installed atchops
 	# #########################################################
@@ -106,6 +116,52 @@ if(NOT ESP_PLATFORM) # build for Desktop
 	endif()
 
 	# atchops::atchops is now available
+	
+	# #########################################################
+	# 2C. Get cJSON
+	# #########################################################
+	FetchContent_Declare(
+		cjson
+		GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
+		GIT_TAG cb8693b058ba302f4829ec6d03f609ac6f848546	# v1.7.16
+	)
+	
+	FetchContent_GetProperties(cjson)
+	if(NOT cjson_POPULATED)
+		FetchContent_Populate(cjson)
+		add_library(cjson 
+			${cjson_SOURCE_DIR}/cJSON.c
+			${cjson_SOURCE_DIR}/cJSON_Utils.c
+		)
+		target_include_directories(cjson INTERFACE
+       		$<BUILD_INTERFACE:${cjson_BINARY_DIR}>
+        	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    	)
+	endif()
+	
+	message(STATUS "Successfully fetched cjson")
+
+	# #########################################################
+	# 2D. Get uuid4
+	# #########################################################
+	FetchContent_Declare(
+		uuid4
+		GIT_REPOSITORY https://github.com/rxi/uuid4.git
+		GIT_TAG master
+	)
+	
+	FetchContent_GetProperties(uuid4)
+	if(NOT uuid4_POPULATED)
+		FetchContent_Populate(uuid4)
+		add_library(uuid4 ${uuid4_SOURCE_DIR}/src/uuid4.c)
+		# target_include_directories(uuid4 PUBLIC ${uuid4_SOURCE_DIR})
+		target_include_directories(uuid4 INTERFACE
+       		$<BUILD_INTERFACE:${uuid4_BINARY_DIR}/src>
+        	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    	)
+	endif()
+	
+	message(STATUS "Successfully fetched uuid4")	
 
 	# #########################################################
 	# 3. Create atclient library
@@ -113,11 +169,13 @@ if(NOT ESP_PLATFORM) # build for Desktop
 	add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
 
 	target_link_libraries(${PROJECT_NAME}
-		PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509 atchops::atchops
+		PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509 atchops::atchops cjson uuid4
 	)
 
 	target_include_directories(${PROJECT_NAME} PUBLIC
 		$<BUILD_INTERFACE:${atclient_include_dir}>
+		$<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
+		$<BUILD_INTERFACE:${uuid4_SOURCE_DIR}/src>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
 
@@ -137,6 +195,9 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		list(APPEND TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto) # install mbedtls
 	endif()
 
+	list(APPEND TARGETS_TO_INSTALL cjson)
+	list(APPEND TARGETS_TO_INSTALL uuid4)
+	
 	# install atclient library to /usr/local/lib/libatclient.a
 	install(
 		TARGETS ${TARGETS_TO_INSTALL}

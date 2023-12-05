@@ -16,9 +16,9 @@ typedef struct atclient_atkey_metadata
     atclient_atstr status;
     atclient_atstr datasignature; // public data is signed using the key owner's encryptPrivateKey and result is stored here
     int version;                   // read and set by the protocol
-    unsigned long ttl;             // time to live in milliseconds
-    unsigned long ttb;             // time to birth in milliseconds
-    unsigned long ttr;             // time to refresh. -1 means corresponding cached keys will not be refreshed and can be cached forever, 0 means do not refresh, ttr > 0 means refresh the key every ttr milliseconds, ttr null means it is non-applicable (aka this key cannot be cached) which has the same effect as 0
+    long ttl;             // time to live in milliseconds
+    long ttb;             // time to birth in milliseconds
+    long ttr;             // time to refresh. -1 means corresponding cached keys will not be refreshed and can be cached forever, 0 means do not refresh, ttr > 0 means refresh the key every ttr milliseconds, ttr null means it is non-applicable (aka this key cannot be cached) which has the same effect as 0
     int ccd;                       // cascade delete; (1) => cached key will be deleted upon the deletion of this key, (0) => no cascade delete
     int isbinary;                  // (1) => key points to binary data, (0) => otherwise
     int isencrypted;               // (1) => key points to value is encrypted
@@ -40,8 +40,12 @@ typedef struct atclient_atkey_metadata
 } atclient_atkey_metadata;
 
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
-int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr, const unsigned long metadatastrlen);
-int atclient_atkey_metadata_to_string(atclient_atkey_metadata *metadata, char *metadatastr, const unsigned long metadatastrlen, unsigned long *metadatastrolen);
+int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr);
+int atclient_atkey_metadata_from_json(const char* json_str, atclient_atkey_metadata* metadata);
+int atclient_atkey_metadata_to_string(atclient_atkey_metadata *metadata, char** result_ptr);
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata);
+
+int tv_from_str(char *timestamp_str, struct timeval *tv);
+int tv_to_str(struct timeval *tv, char *timestamp_str);
 
 #endif

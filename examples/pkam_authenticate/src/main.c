@@ -41,8 +41,8 @@ int main(int argc, char **argv)
 
     // 2. pkam auth
     atclient_ctx atclient;
-    atclient_init(&atclient);
-    ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
+    atclient_init(&atclient, ATSIGN);
+        ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
     // printf("atclient_init_root_connection_code: %d\n", ret);
     if (ret != 0)
     {
