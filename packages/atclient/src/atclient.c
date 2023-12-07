@@ -355,10 +355,10 @@ int attalk_send(atclient_ctx *ctx, atclient_atkeys atkeys, const char *myatsign,
     int ret = 1;
     unsigned char iv[ATCHOPS_IV_SIZE];
 
-    const unsigned long ivbase64len = 24;
+    const unsigned long ivbase64len = 26;
     unsigned char *ivbase64 = malloc((sizeof(char) * ivbase64len) + 1);
-    memset(ivbase64, 0, ivbase64len);
-    ret = atchops_iv_generate_b64(iv, ivbase64);
+    memset(ivbase64, 0, ivbase64len + 1);
+    ret = atchops_iv_generate_base64(ivbase64, ivbase64len, &olen);
     if (ret != 0)
     {
         printf("atchops_iv_generate (failed): %d\n", ret);
@@ -392,11 +392,20 @@ int attalk_send(atclient_ctx *ctx, atclient_atkeys atkeys, const char *myatsign,
 int notify(atclient_ctx *ctx, atclient_atkey *at_key, char *value, char *recv, const unsigned long recvlen, char *operation, char *session_uuid)
 {
     int ret = 1;
+    unsigned long olen = 0;
 
-    char *iv = at_key->metadata.ivnonce.str;
+    // Decode iv
+    char *ivbase64 = at_key->metadata.ivnonce.str;
+    const unsigned long ivbyteslen = 17;
+    char *iv = malloc(ivbyteslen);
+    ret = atchops_base64_decode(ivbase64, strlen(ivbase64), iv, ivbyteslen, &olen);
+    if (ret != 0)
+    {
+        // goto exit;
+    }
+
     char *enc_key_shared_by_me = malloc(45);
     get_encryption_key_shared_by_me(ctx, at_key->sharedwith.str, enc_key_shared_by_me);
-    unsigned long olen = 0;
 
     // Encrypt message
     unsigned long ciphertextlen = ATSIGN_BUFFER_LENGTH; // sufficient allocation
@@ -451,7 +460,8 @@ int notify(atclient_ctx *ctx, atclient_atkey *at_key, char *value, char *recv, c
         metadata_str,
         ":",
         at_key->sharedwith.str,
-        ":attalk.ai6bh",
+        ":",
+        at_key->namespacestr.str,
         ctx->atsign.atsign,
         ":",
         ciphertext,
@@ -461,8 +471,7 @@ int notify(atclient_ctx *ctx, atclient_atkey *at_key, char *value, char *recv, c
     char *command = concatenate_with_prefix(initial_prefix, strings, num_strings);
 
     // Send notification
-    unsigned long olen_recv = 0;
-    ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen_recv);
+    ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
     if (ret != 0)
     {
         return ret;
