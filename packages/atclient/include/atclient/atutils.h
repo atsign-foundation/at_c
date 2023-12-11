@@ -14,4 +14,6 @@ char* concatenate_with_prefix(const char* initial_prefix, const char* strings[],
 
 atclient_atkeys load_keys(atsign *atsign);
 
+long long current_time_millis();
+
 #endif
