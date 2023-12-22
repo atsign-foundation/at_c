@@ -1,9 +1,9 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "atclient/atlogger.h"
-#include "monitorconnection.h"
-#include "atutils.h"
-#include "atevent.h"
+#include "atclient/monitorconnection.h"
+#include "atclient/atutils.h"
+#include "atclient/atevent.h"
 
 pthread_mutex_t should_be_running_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t running_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -20,7 +20,7 @@ void atclient_monitor_connection_init(atclient_monitor_connection_ctx *ctx, char
 
     atclient_connection_ctx c_ctx;
     atclient_connection_init(&c_ctx);
-    ctx->secondary_connection = c_ctx;
+    ctx->monitor_connection = c_ctx;
 
     atsign atsign;
     atsign_init(&atsign, atsign_str);
@@ -83,7 +83,7 @@ int start_heartbeat_impl(atclient_monitor_connection_ctx *ctx)
                     unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
                     memset(recv, 0, sizeof(unsigned char) * recvlen);
 
-                    atclient_connection_send(&(ctx->secondary_connection), "noop:0", strlen("noop:0"), recv, recvlen, &olen);
+                    atclient_connection_send(&(ctx->monitor_connection), "noop:0", strlen("noop:0"), recv, recvlen, &olen);
                     free(recv);
 
                     ctx->last_heartbeat_sent_time = current_time_millis();
@@ -113,12 +113,12 @@ int start_monitor(atclient_monitor_connection_ctx *ctx, char *regex)
     {
         ctx->running = 1;
         pthread_mutex_unlock(&running_lock);
-        if (!atclient_connection_is_connected(&(ctx->secondary_connection)))
+        if (!atclient_connection_is_connected(&(ctx->monitor_connection)))
         {
             ret = atclient_connection_connect(
-                &(ctx->secondary_connection),
-                ctx->secondary_connection.host,
-                ctx->secondary_connection.port);
+                &(ctx->monitor_connection),
+                ctx->monitor_connection.host,
+                ctx->monitor_connection.port);
             if (ret != 0)
             {
                 printf("start_monitor failed to connect to secondary");
@@ -148,7 +148,7 @@ int stop_monitor(atclient_monitor_connection_ctx *ctx)
 
     ctx->last_heartbeat_sent_time = current_time_millis();
     ctx->last_heartbeat_ack_time = current_time_millis();
-    atclient_connection_disconnect(&(ctx->secondary_connection));
+    atclient_connection_disconnect(&(ctx->monitor_connection));
 }
 
 int run(atclient_monitor_connection_ctx *ctx, char *regex)
@@ -170,7 +170,7 @@ int run(atclient_monitor_connection_ctx *ctx, char *regex)
     memset(recv, 0, sizeof(unsigned char) * recvlen);
 
     // Send monitor command; we don't want to recv any answer now, we will be reading from the buffer later
-    ret = mbedtls_ssl_write(&(ctx->secondary_connection.ssl), monitor_command, strlen((char *)monitor_command));
+    ret = mbedtls_ssl_write(&(ctx->monitor_connection.ssl), monitor_command, strlen((char *)monitor_command));
     if (ret < 0)
     {
         return ret;
@@ -185,7 +185,7 @@ int run(atclient_monitor_connection_ctx *ctx, char *regex)
         pthread_mutex_unlock(&should_be_running_lock);
         entered = 1;
         first = 0;
-        ret = atclient_connection_readline(&(ctx->secondary_connection), recv, recvlen);
+        ret = atclient_connection_readline(&(ctx->monitor_connection), recv, recvlen);
         if (ret < 0)
         {
             return ret;
@@ -286,7 +286,7 @@ int run(atclient_monitor_connection_ctx *ctx, char *regex)
     ctx->running = 0;
     pthread_mutex_unlock(&running_lock);
 
-    ret = atclient_connection_disconnect(&(ctx->secondary_connection));
+    ret = atclient_connection_disconnect(&(ctx->monitor_connection));
     if (ret != 0)
     {
         return ret;

@@ -55,12 +55,12 @@ exit:
 }
 }
 
-int atclient_init_secondary_connection(atclient_ctx *ctx, const char *secondaryhost, const int secondaryport)
+int atclient_init_secondary_connection(atclient_connection_ctx *connection, const char *secondaryhost, const int secondaryport)
 {
     int ret = 1; // error by default
 
-    atclient_connection_init(&(ctx->secondary_connection));
-    ret = atclient_connection_connect(&(ctx->secondary_connection), secondaryhost, secondaryport);
+    atclient_connection_init(connection);
+    ret = atclient_connection_connect(connection, secondaryhost, secondaryport);
     if (ret != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
@@ -76,9 +76,21 @@ exit:
 }
 }
 
-int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const char *atsign)
+int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_connection_type type, atclient_atkeys atkeys, const char *atsign)
 {
     int ret = 1; // error by default
+    atclient_connection_ctx connection;
+    switch(type) {
+        case ATCLIENT_CONNECTION_TYPE_ROOT:
+            printf("Error: root connection can't be used for pkam authentication");
+            goto exit;
+        case ATCLIENT_CONNECTION_TYPE_SECONDARY:
+            connection = ctx->secondary_connection;
+        case ATCLIENT_CONNECTION_TYPE_MONITOR:
+            connection = ctx->monitor.monitor_connection;
+        default:
+            connection = ctx->secondary_connection;
+    }
 
     // 1. init root connection
     const unsigned long recvlen = 1024;
@@ -128,7 +140,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     port = atoi(portstr);
 
     // 2. init secondary connection
-    ret = atclient_init_secondary_connection(ctx, host, port);
+    ret = atclient_init_secondary_connection(&connection, host, port);
     // printf("atclient_init_secondary_connection: %d\n", ret);
     if (ret != 0)
     {
@@ -143,7 +155,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
     memcpy(src + 5, atsign, strlen(atsign));
     memcpy(src + 5 + strlen(atsign), "\r\n", 2);
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen((char *)src), recv, recvlen, &olen);
+    ret = atclient_connection_send(&connection, src, strlen((char *)src), recv, recvlen, &olen);
     if (ret != 0)
     {
         goto exit;
@@ -176,7 +188,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
 
     memset(recv, 0, recvlen);
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen((char *)src), recv, recvlen, &olen);
+    ret = atclient_connection_send(&connection, src, strlen((char *)src), recv, recvlen, &olen);
 
     if (ret != 0)
     {
@@ -478,6 +490,18 @@ int notify(atclient_ctx *ctx, atclient_atkey *at_key, char *value, char *recv, c
     }
 
     return 0;
+}
+
+void atclient_start_monitor(atclient_ctx *ctx, atclient_monitor_connection_ctx *monitor)
+{
+    if(&(ctx->queue) != NULL)
+    {
+        if (&(ctx->monitor.monitor_connection) == NULL)
+        {
+            atclient_monitor_connection_init(&(ctx->monitor), ctx->atsign.atsign);
+
+        }
+    }
 }
 
 void atclient_free(atclient_ctx *ctx)

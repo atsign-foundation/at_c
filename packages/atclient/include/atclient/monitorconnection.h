@@ -8,7 +8,7 @@
 #define HEARTBEAT_INVERVAL_MILLIS 30000
 
 typedef struct atclient_monitor_connection_ctx {
-    atclient_connection_ctx secondary_connection;
+    atclient_connection_ctx monitor_connection;
     atsign atsign;
     AtEventQueue queue;
     long long last_heartbeat_sent_time;

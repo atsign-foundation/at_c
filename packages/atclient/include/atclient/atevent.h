@@ -1,8 +1,8 @@
 #ifndef ATEVENT_H
 #define ATEVENT_H
 
-#include "cJSON.h"
 #include <pthread.h>
+#include "cJSON.h"
 
 #define MAX_QUEUE_SIZE 30
 

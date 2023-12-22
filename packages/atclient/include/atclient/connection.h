@@ -17,6 +17,13 @@ typedef struct atclient_connection_ctx {
     mbedtls_ctr_drbg_context ctr_drbg;
 } atclient_connection_ctx;
 
+typedef enum {
+    ATCLIENT_CONNECTION_TYPE_NONE = 0,
+    ATCLIENT_CONNECTION_TYPE_ROOT = 1,
+    ATCLIENT_CONNECTION_TYPE_SECONDARY = 2,
+    ATCLIENT_CONNECTION_TYPE_MONITOR = 3,
+} atclient_connection_type;
+
 /**
  * @brief initialize the context for a connection. this function should be called before use of any other function
  * 

@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.19)
 # apparently globs are bad practice, manually add your src files here
 set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
+	${CMAKE_CURRENT_LIST_DIR}/src/atevent.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
@@ -16,6 +17,7 @@ set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atutils.c
 	${CMAKE_CURRENT_LIST_DIR}/src/connection.c
 	${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
+	${CMAKE_CURRENT_LIST_DIR}/src/monitorconnection.c
 )
 
 set(atclient_include_dir
@@ -132,7 +134,7 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		add_library(cjson 
 			${cjson_SOURCE_DIR}/cJSON.c
 			${cjson_SOURCE_DIR}/cJSON_Utils.c
-		)
+					)
 		target_include_directories(cjson INTERFACE
        		$<BUILD_INTERFACE:${cjson_BINARY_DIR}>
         	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -174,7 +176,7 @@ if(NOT ESP_PLATFORM) # build for Desktop
 
 	target_include_directories(${PROJECT_NAME} PUBLIC
 		$<BUILD_INTERFACE:${atclient_include_dir}>
-		$<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
+		$<BUILD_INTERFACE:${cjson_SOURCE_DIR}/>
 		$<BUILD_INTERFACE:${uuid4_SOURCE_DIR}/src>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
