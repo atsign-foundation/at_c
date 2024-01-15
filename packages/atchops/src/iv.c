@@ -43,6 +43,50 @@ exit:
 }
 }
 
+int atchops_iv_generate_b64(unsigned char *iv, unsigned char *ivbase64)
+{
+    int ret = 1;
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
+    if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *)ATCHOPS_RNG_PERSONALIZATION, strlen(ATCHOPS_RNG_PERSONALIZATION))) != 0)
+    {
+        // printf("Error initializing CTR_DRBG\n");
+        goto exit;
+    }
+
+    if ((ret = mbedtls_ctr_drbg_random(&ctr_drbg, iv, ATCHOPS_IV_SIZE)) != 0)
+    {
+        // printf("Error generating random IV\n");
+        goto exit;
+    }
+
+    int generated_iv_b64_len = 24;
+    char *generated_iv_b64 = malloc(generated_iv_b64_len + 1);
+    unsigned long olen = 0;
+    ret = atchops_base64_encode(iv, ATCHOPS_IV_SIZE, generated_iv_b64, generated_iv_b64_len + 1, &olen);
+    if (ret != 0)
+    {
+        puts("Error en encode");
+        goto exit;
+    }
+
+    memcpy(ivbase64, generated_iv_b64, generated_iv_b64_len + 1);
+    free(generated_iv_b64);
+    
+    goto exit;
+
+exit:
+{
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    mbedtls_entropy_free(&entropy);
+    return ret;
+}
+}
+
 int atchops_iv_generate_base64(unsigned char *ivbase64, const unsigned long ivbase64len, unsigned long *ivbase64olen)
 {
     int ret = 1;

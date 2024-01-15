@@ -17,6 +17,13 @@ typedef struct atclient_connection_ctx {
     mbedtls_ctr_drbg_context ctr_drbg;
 } atclient_connection_ctx;
 
+typedef enum {
+    ATCLIENT_CONNECTION_TYPE_NONE = 0,
+    ATCLIENT_CONNECTION_TYPE_ROOT = 1,
+    ATCLIENT_CONNECTION_TYPE_SECONDARY = 2,
+    ATCLIENT_CONNECTION_TYPE_MONITOR = 3,
+} atclient_connection_type;
+
 /**
  * @brief initialize the context for a connection. this function should be called before use of any other function
  * 
@@ -46,6 +53,13 @@ int atclient_connection_connect(atclient_connection_ctx *ctx, const char *host, 
  * @return int 0 on success, otherwise error
  */
 int atclient_connection_send(atclient_connection_ctx *ctx, const unsigned char *src, const unsigned long srclen, unsigned char *recv, const unsigned long recvlen, unsigned long *olen);
+
+/// @brief 
+/// @param ctx the connection which was initialized (via the init function) and connected (via the connect function)
+/// @param recv the buffer to receive data
+/// @param recvlen the length of the buffer to receive data
+/// @return int 0 on success, otherwise error
+int atclient_connection_readline(atclient_connection_ctx *ctx, char *recv, size_t recvlen);
 
 /**
  * @brief disconnect a connection

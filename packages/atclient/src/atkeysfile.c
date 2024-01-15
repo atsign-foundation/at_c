@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "atclient/atkeysfile.h"
 
+#include "cJSON.h"
+
 #define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
 
 void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile)
@@ -61,7 +63,8 @@ static int extract_json_string(const char *json, const char *key, char *buffer, 
 
 int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
 {
-    int ret = 1;
+    int ret = 0;
+    char *what = "";
 
     FILE *file = fopen(path, "r");
 
@@ -69,7 +72,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     {
         printf("Error opening file!\n");
         ret = 1;
-        goto exit;
+        goto exit1;
     }
 
     const unsigned long readbuflen = 32768;
@@ -81,58 +84,82 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     {
         printf("Error reading file!\n");
         ret = 1;
-        goto exit;
+        goto exit2;
+    }
+    cJSON *root = cJSON_Parse(readbuf);
+
+    if (root == NULL) 
+    {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) 
+        {
+            what = "it wasn't possible to parse the atKeys file content";
+            fprintf(stderr, "Error while parsing atKeys: %s, %s\n", what, error_ptr);
+        }
+        ret = 1;
+        goto exit2;
     }
 
-    ret = extract_json_string(readbuf, "aesPkamPublicKey", atkeysfile->aespkampublickeystr, atkeysfile->aespkampublickeylen);
-    if (ret != 0)
+    atkeysfile->aespkampublickeystr = cJSON_GetObjectItemCaseSensitive(root, "aesPkamPublicKey")->valuestring;
+    if (!atkeysfile->aespkampublickeystr) 
     {
-        printf("Error extracting aesPkamPublicKey\n");
+        what = "\"aesPkamPublicKey\" wasn't found";
+        fprintf(stderr, "Error while parsing atKeys: %s\n", what);
         ret = 1;
-        goto exit;
+        goto exit2;
     }
     atkeysfile->aespkampublickeyolen = strlen(atkeysfile->aespkampublickeystr);
 
-    ret = extract_json_string(readbuf, "aesPkamPrivateKey", atkeysfile->aespkamprivatekeystr, atkeysfile->aespkamprivatekeylen);
-    if (ret != 0)
+    atkeysfile->aespkamprivatekeystr = cJSON_GetObjectItemCaseSensitive(root, "aesPkamPrivateKey")->valuestring;
+    if (!atkeysfile->aespkamprivatekeystr) 
     {
-        printf("Error extracting aesPkamPrivateKey\n");
+        what = "\"aesPkamPrivateKey\" wasn't found";
+        fprintf(stderr, "Error while parsing atKeys: %s\n", what);
         ret = 1;
-        goto exit;
+        goto exit2;
     }
     atkeysfile->aespkamprivatekeyolen = strlen(atkeysfile->aespkamprivatekeystr);
 
-    ret = extract_json_string(readbuf, "aesEncryptPublicKey", atkeysfile->aesencryptpublickeystr, atkeysfile->aesencryptpublickeylen);
-    if (ret != 0)
+    atkeysfile->aesencryptpublickeystr = cJSON_GetObjectItemCaseSensitive(root, "aesEncryptPublicKey")->valuestring;
+    if (!atkeysfile->aesencryptpublickeystr) 
     {
-        printf("Error extracting aesEncryptPublicKey\n");
+        what = "\"aesEncryptPublicKey\" wasn't found";
+        fprintf(stderr, "Error while parsing atKeys: %s\n", what);
         ret = 1;
-        goto exit;
+        goto exit2;
     }
     atkeysfile->aesencryptpublickeyolen = strlen(atkeysfile->aesencryptpublickeystr);
 
-    ret = extract_json_string(readbuf, "aesEncryptPrivateKey", atkeysfile->aesencryptprivatekeystr, atkeysfile->aesencryptprivatekeylen);
-    if (ret != 0)
+    atkeysfile->aesencryptprivatekeystr = cJSON_GetObjectItemCaseSensitive(root, "aesEncryptPrivateKey")->valuestring;
+    if (!atkeysfile->aesencryptprivatekeystr) 
     {
-        printf("Error extracting aesEncryptPrivateKey\n");
+        what = "\"aesEncryptPrivateKey\" wasn't found";
+        fprintf(stderr, "Error while parsing atKeys: %s\n", what);
         ret = 1;
-        goto exit;
+        goto exit2;
     }
     atkeysfile->aesencryptprivatekeyolen = strlen(atkeysfile->aesencryptprivatekeystr);
 
-    ret = extract_json_string(readbuf, "selfEncryptionKey", atkeysfile->selfencryptionkeystr, atkeysfile->selfencryptionkeylen);
-    if (ret != 0)
+    atkeysfile->selfencryptionkeystr = cJSON_GetObjectItemCaseSensitive(root, "selfEncryptionKey")->valuestring;
+    if (!atkeysfile->selfencryptionkeystr) 
     {
-        printf("Error extracting selfEncryptionKey\n");
+        what = "\"selfEncryptionKey\" wasn't found";
+        fprintf(stderr, "Error while parsing atKeys: %s\n", what);
         ret = 1;
-        goto exit;
+        goto exit2;
     }
     atkeysfile->selfencryptionkeyolen = strlen(atkeysfile->selfencryptionkeystr);
 
 
-    goto exit;
+    goto exit2;
 
-exit:
+exit1:
+{
+    fclose(file);
+    return ret;
+}
+
+exit2:
 {
     fclose(file);
     free(readbuf);
@@ -140,16 +167,44 @@ exit:
 }
 }
 
-int atclient_atkeysfile_write(atclient_atkeysfile *atkeysfile, const char *path, const char *atsign)
+int atclient_atkeysfile_write(atclient_atkeysfile *keys, const char *directory, const char *atsign)
 {
-    int ret = 1;
+    int ret = 0;
+    char file_path[256];
+    snprintf(file_path, sizeof(file_path), "%s/%s_key.atKeys", directory, atsign);
 
-    // TODO: implement
+    cJSON *root = cJSON_CreateObject();
 
-    goto exit;
+    cJSON_AddStringToObject(root, "aesPkamPublicKey", keys->aespkampublickeystr);
+    cJSON_AddStringToObject(root, "aesPkamPrivateKey", keys->aespkamprivatekeystr);
+    cJSON_AddStringToObject(root, "aesEncryptPublicKey", keys->aesencryptpublickeystr);
+    cJSON_AddStringToObject(root, "aesEncryptPrivateKey", keys->aesencryptprivatekeystr);
+    cJSON_AddStringToObject(root, "selfEncryptionKey", keys->selfencryptionkeystr);
+    cJSON_AddStringToObject(root, atsign, keys->selfencryptionkeystr);
 
-exit:
-{
+    char *json_string = cJSON_Print(root);
+
+    FILE *file = fopen(file_path, "w");
+    if (file == NULL) 
+    {
+        fprintf(stderr, "Error opening file!\n");
+        ret = 1;
+        goto exit2;    
+    }
+
+    goto exit1;
+
+exit1:
+{       
+    fclose(file);
+    cJSON_Delete(root);
+    free(json_string);
+    return ret;
+}
+exit2:
+{       
+    cJSON_Delete(root);
+    free(json_string);
     return ret;
 }
 }

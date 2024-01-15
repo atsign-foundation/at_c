@@ -238,9 +238,40 @@ exit:
 }
 }
 
+int atclient_connection_readline(atclient_connection_ctx *ctx, char *recv, size_t recvlen) {
+    char c;
+    int ret;
+    size_t index = 0;
+
+    do {
+        if(index >= recvlen - 1) {
+            break;
+        }
+
+        ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)&c, 1);
+        if(ret == 1) {
+            recv[index++] = c;
+        } else {
+            printf("readline error: %d\n", ret);
+            return ret;
+        }
+    } while(c != '\n');
+
+    recv[index] = '\0';
+
+    return 0;
+}
+
 int atclient_connection_disconnect(atclient_connection_ctx *ctx)
 {
-    return 1; // not implemented
+    int ret = 0;
+    do {
+        ret = mbedtls_ssl_close_notify(&(ctx->ssl));
+    } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+    ret = 0;
+
+    atclient_connection_free(ctx);
+    return ret;
 }
 
 int atclient_connection_is_connected(atclient_connection_ctx *ctx)
@@ -281,7 +312,7 @@ void atclient_connection_free(atclient_connection_ctx *ctx)
     mbedtls_ssl_free(&(ctx->ssl));
     mbedtls_ssl_config_free(&(ctx->ssl_config));
     mbedtls_x509_crt_free(&(ctx->cacert));
-    mbedtls_entropy_free(&(ctx->entropy));
     mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
+    mbedtls_entropy_free(&(ctx->entropy));
     free(ctx->host);
 }

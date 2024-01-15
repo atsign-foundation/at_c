@@ -63,7 +63,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkampublickeystr, atkeysfile.aespkampublickeyolen,
-        (unsigned char *) atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
+        (unsigned char *)atkeys->pkampublickeystr, atkeys->pkampublickeylen, &(atkeys->pkampublickeyolen));
     if (ret != 0)
     {
         goto exit;
@@ -74,7 +74,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aespkamprivatekeystr, atkeysfile.aespkamprivatekeyolen,
-        (unsigned char *) atkeys->pkamprivatekeystr, atkeys->pkamprivatekeylen, &(atkeys->pkamprivatekeyolen));
+        (unsigned char *)atkeys->pkamprivatekeystr, atkeys->pkamprivatekeylen, &(atkeys->pkamprivatekeyolen));
     if (ret != 0)
     {
         goto exit;
@@ -85,7 +85,7 @@ int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeys
     ret = atchops_aesctr_decrypt(
         atkeys->selfencryptionkeystr, atkeys->selfencryptionkeyolen, ATCHOPS_AES_256, iv,
         atkeysfile.aesencryptpublickeystr, atkeysfile.aesencryptpublickeyolen,
-        (unsigned char *) atkeys->encryptpublickeystr, atkeys->encryptpublickeylen, &(atkeys->encryptpublickeyolen));
+        (unsigned char *)atkeys->encryptpublickeystr, atkeys->encryptpublickeylen, &(atkeys->encryptpublickeyolen));
     if (ret != 0)
     {
         goto exit;
@@ -141,6 +141,109 @@ exit:
     free(recv);
     return ret;
 }
+}
+
+// Function to copy atclient_atkeys
+void copy_atkeys(atclient_atkeys *dest, const atclient_atkeys *src)
+{
+    // Copy each member of the struct
+    dest->pkampublickeylen = src->pkampublickeylen;
+    dest->pkamprivatekeylen = src->pkamprivatekeylen;
+    dest->encryptpublickeylen = src->encryptpublickeylen;
+    dest->encryptprivatekeylen = src->encryptprivatekeylen;
+    dest->selfencryptionkeylen = src->selfencryptionkeylen;
+
+    // Copy pkam public key
+    if (dest->pkampublickeylen > 0)
+    {
+        free(dest->pkampublickeystr);
+        dest->pkampublickeystr = (char *)malloc(sizeof(char) * dest->pkampublickeylen);
+        strncpy(dest->pkampublickeystr, src->pkampublickeystr, dest->pkampublickeylen);
+    }
+
+    // Copy pkam private key
+    if (dest->pkamprivatekeylen > 0)
+    {
+        free(dest->pkamprivatekeystr);
+        dest->pkamprivatekeystr = (char *)malloc(sizeof(char) * dest->pkamprivatekeylen);
+        strncpy(dest->pkamprivatekeystr, src->pkamprivatekeystr, dest->pkamprivatekeylen);
+    }
+
+    // Copy encrypt public key
+    if (dest->encryptpublickeylen > 0)
+    {
+        free(dest->encryptpublickeystr);
+        dest->encryptpublickeystr = (char *)malloc(sizeof(char) * dest->encryptpublickeylen);
+        strncpy(dest->encryptpublickeystr, src->encryptpublickeystr, dest->encryptpublickeylen);
+    }
+
+    // Copy encrypt private key
+    if (dest->encryptprivatekeylen > 0)
+    {
+        free(dest->encryptprivatekeystr);
+        dest->encryptprivatekeystr = (char *)malloc(sizeof(char) * dest->encryptprivatekeylen);
+        strncpy(dest->encryptprivatekeystr, src->encryptprivatekeystr, dest->encryptprivatekeylen);
+    }
+
+    // Copy self encryption key
+    if (dest->selfencryptionkeylen > 0)
+    {
+        free(dest->selfencryptionkeystr);
+        dest->selfencryptionkeystr = (char *)malloc(sizeof(char) * dest->selfencryptionkeylen);
+        strncpy(dest->selfencryptionkeystr, src->selfencryptionkeystr, dest->selfencryptionkeylen);
+    }
+
+    // Copy RSA key parameters
+    memcpy(&(dest->pkampublickey), &(src->pkampublickey), sizeof(atchops_rsakey_publickey));
+    memcpy(&(dest->pkamprivatekey), &(src->pkamprivatekey), sizeof(atchops_rsakey_privatekey));
+    memcpy(&(dest->encryptpublickey), &(src->encryptpublickey), sizeof(atchops_rsakey_publickey));
+    memcpy(&(dest->encryptprivatekey), &(src->encryptprivatekey), sizeof(atchops_rsakey_privatekey));
+
+    // pkam public key
+    dest->pkampublickey.n.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkampublickey.n.len);
+    memcpy(dest->pkampublickey.n.value, src->pkampublickey.n.value, dest->pkampublickey.n.len);
+
+    dest->pkampublickey.e.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkampublickey.e.len);
+    memcpy(dest->pkampublickey.e.value, src->pkampublickey.e.value, dest->pkampublickey.e.len);
+
+    // pkam private key
+    dest->pkamprivatekey.n.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkamprivatekey.n.len);
+    memcpy(dest->pkamprivatekey.n.value, src->pkamprivatekey.n.value, dest->pkamprivatekey.n.len);
+
+    dest->pkamprivatekey.e.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkamprivatekey.e.len);
+    memcpy(dest->pkamprivatekey.e.value, src->pkamprivatekey.e.value, dest->pkamprivatekey.e.len);
+
+    dest->pkamprivatekey.d.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkamprivatekey.d.len);
+    memcpy(dest->pkamprivatekey.d.value, src->pkamprivatekey.d.value, dest->pkamprivatekey.d.len);
+
+    dest->pkamprivatekey.p.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkamprivatekey.p.len);
+    memcpy(dest->pkamprivatekey.p.value, src->pkamprivatekey.p.value, dest->pkamprivatekey.p.len);
+
+    dest->pkamprivatekey.q.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->pkamprivatekey.q.len);
+    memcpy(dest->pkamprivatekey.q.value, src->pkamprivatekey.q.value, dest->pkamprivatekey.q.len);
+
+    // encrypt public key
+    dest->encryptpublickey.n.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptpublickey.n.len);
+    memcpy(dest->encryptpublickey.n.value, src->encryptpublickey.n.value, dest->encryptpublickey.n.len);
+
+    dest->encryptpublickey.e.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptpublickey.e.len);
+    memcpy(dest->encryptpublickey.e.value, src->encryptpublickey.e.value, dest->encryptpublickey.e.len);
+
+    // encrypt private key
+    dest->encryptprivatekey.n.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptprivatekey.n.len);
+    memcpy(dest->encryptprivatekey.n.value, src->encryptprivatekey.n.value, dest->encryptprivatekey.n.len);
+
+    dest->encryptprivatekey.e.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptprivatekey.e.len);
+    memcpy(dest->encryptprivatekey.e.value, src->encryptprivatekey.e.value, dest->encryptprivatekey.e.len);
+
+    dest->encryptprivatekey.d.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptprivatekey.d.len);
+    memcpy(dest->encryptprivatekey.d.value, src->encryptprivatekey.d.value, dest->encryptprivatekey.d.len);
+
+    dest->encryptprivatekey.p.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptprivatekey.p.len);
+    memcpy(dest->encryptprivatekey.p.value, src->encryptprivatekey.p.value, dest->encryptprivatekey.p.len);
+
+    dest->encryptprivatekey.q.value = (unsigned char *)malloc(sizeof(unsigned char) * dest->encryptprivatekey.q.len);
+    memcpy(dest->encryptprivatekey.q.value, src->encryptprivatekey.q.value, dest->encryptprivatekey.q.len);
 }
 
 void atclient_atkeys_free(atclient_atkeys *atkeys)

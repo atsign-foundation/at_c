@@ -58,6 +58,8 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
  */
 int atclient_atkeys_populate(atclient_atkeys *atkeys, atclient_atkeysfile atkeysfile);
 
+void copy_atkeys(atclient_atkeys *dest, const atclient_atkeys *src);
+
 /**
  * @brief free memory allocated by the init function
  * 
