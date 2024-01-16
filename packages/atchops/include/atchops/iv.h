@@ -11,7 +11,7 @@
 int atchops_iv_generate(unsigned char *iv);
 
 /**
- * @brief GEnerates a random initialization vector and encodes it in base64
+ * @brief Generates a random initialization vector and encodes it in base64
  * 
  * @param ivbase64 the buffer to store the generated IV
  * @param ivbase64len the length of the buffer
