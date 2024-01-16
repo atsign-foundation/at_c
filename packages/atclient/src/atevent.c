@@ -38,7 +38,7 @@ void atevent_enqueue(AtEventQueue* queue, AtEvent* event) {
         pthread_cond_wait(&queue->not_full, &queue->mutex);
     }
 
-    AtEvent* event_copy = atevent_new_event(event->event_type);
+    AtEvent* event_copy = atevent_init(event->event_type);
     event_copy->event_data = cJSON_Duplicate(event->event_data, 1);
 
     queue->events[queue->rear] = event_copy;

@@ -18,7 +18,7 @@ typedef struct atclient_ctx
     atclient_connection_ctx root_connection;
     atclient_connection_ctx secondary_connection;
     atclient_monitor_connection_ctx monitor;
-    atsign atsign;
+    atclient_atsign atsign;
     atclient_atkeys atkeys;
     AtEventQueue queue;
 } atclient_ctx;

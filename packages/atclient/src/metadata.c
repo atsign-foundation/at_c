@@ -7,6 +7,31 @@
 #include <sys/time.h>
 #include "cJSON.h"
 
+static void add_field(char **result_ptr, size_t *size_ptr, const char *name, const char *value)
+{
+    char *result = *result_ptr;
+    size_t size = *size_ptr;
+
+    int needed = snprintf(NULL, 0, "%s%s", name, value) + 1;
+
+    size_t new_size = strlen(result) + needed;
+    char *new_result = realloc(result, new_size);
+    if (new_result == NULL)
+    {
+        free(result);
+        *result_ptr = NULL;
+        return;
+    }
+    result = new_result;
+    size = new_size;
+
+    strcat(result, name);
+    strcat(result, value);
+
+    *result_ptr = result;
+    *size_ptr = size;
+}
+
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata)
 {
     memset(metadata, 0, sizeof(atclient_atkey_metadata));
@@ -108,31 +133,6 @@ int atclient_atkey_metadata_to_string(atclient_atkey_metadata *metadata, char **
 
     *result_ptr = result;
     return 0;
-}
-
-void add_field(char **result_ptr, size_t *size_ptr, const char *name, const char *value)
-{
-    char *result = *result_ptr;
-    size_t size = *size_ptr;
-
-    int needed = snprintf(NULL, 0, "%s%s", name, value) + 1;
-
-    size_t new_size = strlen(result) + needed;
-    char *new_result = realloc(result, new_size);
-    if (new_result == NULL)
-    {
-        free(result);
-        *result_ptr = NULL;
-        return;
-    }
-    result = new_result;
-    size = new_size;
-
-    strcat(result, name);
-    strcat(result, value);
-
-    *result_ptr = result;
-    *size_ptr = size;
 }
 
 void fill_atstr_from_json(cJSON *json, atclient_atstr *atstr)

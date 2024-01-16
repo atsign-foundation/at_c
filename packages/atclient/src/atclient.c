@@ -12,6 +12,7 @@
 #include "atchops/rsa.h"
 #include "atchops/aesctr.h"
 #include "atchops/iv.h"
+#include "atchops/base64.h"
 #include "uuid4.h"
 #include <atchops/constants.h>
 #include <atclient/constants.h>
@@ -25,7 +26,7 @@ void atclient_init(atclient_ctx *ctx, char *atsign_str)
     int ret = 1;
     memset(ctx, 0, sizeof(atclient_ctx));
 
-    atsign atsign;
+    atclient_atsign atsign;
     atsign_init(&atsign, atsign_str);
     ctx->atsign = atsign;
 

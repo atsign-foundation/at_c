@@ -12,7 +12,7 @@ char* without_prefix(char* atsign);
 char* with_prefix(char* atsign);
 char* concatenate_with_prefix(const char* initial_prefix, const char* strings[], int num_strings);
 
-atclient_atkeys load_keys(atsign *atsign);
+atclient_atkeys load_keys(atclient_atsign *atsign);
 
 long long current_time_millis();
 

@@ -9,7 +9,7 @@
 
 typedef struct atclient_monitor_connection_ctx {
     atclient_connection_ctx monitor_connection;
-    atsign atsign;
+    atclient_atsign atsign;
     AtEventQueue queue;
     long long last_heartbeat_sent_time;
     long long last_heartbeat_ack_time;

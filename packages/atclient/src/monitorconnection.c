@@ -8,150 +8,7 @@
 pthread_mutex_t should_be_running_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t running_lock = PTHREAD_MUTEX_INITIALIZER;
 
-void atclient_monitor_connection_init(atclient_monitor_connection_ctx *ctx, char *atsign_str)
-{
-    memset(ctx, 0, sizeof(atclient_monitor_connection_ctx));
-    ctx->last_received_time = 0;
-    ctx->running = 0;
-    ctx->should_be_running = 0;
-
-    ctx->last_heartbeat_sent_time = current_time_millis();
-    ctx->last_heartbeat_ack_time = current_time_millis();
-
-    atclient_connection_ctx c_ctx;
-    atclient_connection_init(&c_ctx);
-    ctx->monitor_connection = c_ctx;
-
-    atsign atsign;
-    atsign_init(&atsign, atsign_str);
-    ctx->atsign = atsign;
-
-    AtEventQueue queue;
-    atevent_queue_init(&queue);
-    ctx->queue = queue;
-}
-
-int start_heartbeat(atclient_monitor_connection_ctx *ctx)
-{
-    pthread_t thread_id;
-    pthread_create(&thread_id, NULL, start_heartbeat_impl, ctx);
-    pthread_detach(thread_id);
-}
-
-int start_heartbeat_impl(atclient_monitor_connection_ctx *ctx)
-{
-    while (1)
-    {
-        pthread_mutex_lock(&should_be_running_lock);
-        if (ctx->should_be_running)
-        {
-            pthread_mutex_unlock(&should_be_running_lock);
-            if ((!ctx->running) || ((ctx->last_heartbeat_sent_time - ctx->last_heartbeat_ack_time) >= HEARTBEAT_INVERVAL_MILLIS))
-            {
-                printf("Monitor heartbeats not being received");
-                stop_monitor(ctx);
-                long long wait_start_time = current_time_millis();
-                pthread_mutex_lock(&running_lock);
-                int entered = 0;
-                printf("%d\n", (current_time_millis() - wait_start_time) < 5000);
-                while ((ctx->running) && ((current_time_millis - wait_start_time) < 5000))
-                {
-                    entered = 1;
-                    pthread_mutex_unlock(&running_lock);
-                    printf("Wait 5 seconds for monitor to stop");
-                    sleep(1);
-                }
-                if (!entered)
-                {
-                    pthread_mutex_unlock(&running_lock);
-                    entered = 0;
-                }
-                pthread_mutex_lock(&running_lock);
-                if (ctx->running)
-                {
-                    printf("Monitor thread has not stopped, but going to start another one anyway");
-                }
-                pthread_mutex_unlock(&running_lock);
-                start_monitor(ctx, "");
-            }
-            else
-            {
-                if (current_time_millis() - ctx->last_heartbeat_sent_time > HEARTBEAT_INVERVAL_MILLIS)
-                {
-                    unsigned long olen = 0;
-                    const unsigned long recvlen = 1024;
-                    unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
-                    memset(recv, 0, sizeof(unsigned char) * recvlen);
-
-                    atclient_connection_send(&(ctx->monitor_connection), "noop:0", strlen("noop:0"), recv, recvlen, &olen);
-                    free(recv);
-
-                    ctx->last_heartbeat_sent_time = current_time_millis();
-                }
-            }
-        }
-        else
-        {
-            pthread_mutex_unlock(&should_be_running_lock);
-        }
-        sleep(5);
-    }
-}
-
-int start_monitor(atclient_monitor_connection_ctx *ctx, char *regex)
-{
-    int ret = 0;
-    ctx->last_heartbeat_sent_time = current_time_millis();
-    ctx->last_heartbeat_ack_time = current_time_millis();
-
-    pthread_mutex_lock(&should_be_running_lock);
-    ctx->should_be_running = 1;
-    pthread_mutex_unlock(&should_be_running_lock);
-
-    pthread_mutex_lock(&running_lock);
-    if (!ctx->running)
-    {
-        ctx->running = 1;
-        pthread_mutex_unlock(&running_lock);
-        if (!atclient_connection_is_connected(&(ctx->monitor_connection)))
-        {
-            ret = atclient_connection_connect(
-                &(ctx->monitor_connection),
-                ctx->monitor_connection.host,
-                ctx->monitor_connection.port);
-            if (ret != 0)
-            {
-                printf("start_monitor failed to connect to secondary");
-                pthread_mutex_lock(&running_lock);
-                ctx->running = 0;
-                pthread_mutex_unlock(&running_lock);
-                goto exit;
-            }
-        }
-        run(ctx, regex);
-    }
-    else
-    {
-        pthread_mutex_unlock(&running_lock);
-    }
-exit:
-{
-    return ret;
-}
-}
-
-int stop_monitor(atclient_monitor_connection_ctx *ctx)
-{
-    pthread_mutex_lock(&should_be_running_lock);
-    ctx->should_be_running = 0;
-    pthread_mutex_unlock(&should_be_running_lock);
-
-    ctx->last_heartbeat_sent_time = current_time_millis();
-    ctx->last_heartbeat_ack_time = current_time_millis();
-    atclient_connection_disconnect(&(ctx->monitor_connection));
-}
-
-int run(atclient_monitor_connection_ctx *ctx, char *regex)
+static int run(atclient_monitor_connection_ctx *ctx, char *regex)
 {
     int ret = 1;
     int first = 1;
@@ -192,7 +49,7 @@ int run(atclient_monitor_connection_ctx *ctx, char *regex)
         }
         printf("\tRCVD (MONITOR): %s\n", recv);
 
-        AtEvent *event = new_event(AT_EVENT_TYPE_NONE);
+        AtEvent *event = atevent_init(AT_EVENT_TYPE_NONE);
 
         if (starts_with("data:ok", recv))
         {
@@ -292,4 +149,147 @@ int run(atclient_monitor_connection_ctx *ctx, char *regex)
         return ret;
     }
     return 0;
+}
+
+static int start_monitor(atclient_monitor_connection_ctx *ctx, char *regex)
+{
+    int ret = 0;
+    ctx->last_heartbeat_sent_time = current_time_millis();
+    ctx->last_heartbeat_ack_time = current_time_millis();
+
+    pthread_mutex_lock(&should_be_running_lock);
+    ctx->should_be_running = 1;
+    pthread_mutex_unlock(&should_be_running_lock);
+
+    pthread_mutex_lock(&running_lock);
+    if (!ctx->running)
+    {
+        ctx->running = 1;
+        pthread_mutex_unlock(&running_lock);
+        if (!atclient_connection_is_connected(&(ctx->monitor_connection)))
+        {
+            ret = atclient_connection_connect(
+                &(ctx->monitor_connection),
+                ctx->monitor_connection.host,
+                ctx->monitor_connection.port);
+            if (ret != 0)
+            {
+                printf("start_monitor failed to connect to secondary");
+                pthread_mutex_lock(&running_lock);
+                ctx->running = 0;
+                pthread_mutex_unlock(&running_lock);
+                goto exit;
+            }
+        }
+        run(ctx, regex);
+    }
+    else
+    {
+        pthread_mutex_unlock(&running_lock);
+    }
+exit:
+{
+    return ret;
+}
+}
+
+static int stop_monitor(atclient_monitor_connection_ctx *ctx)
+{
+    pthread_mutex_lock(&should_be_running_lock);
+    ctx->should_be_running = 0;
+    pthread_mutex_unlock(&should_be_running_lock);
+
+    ctx->last_heartbeat_sent_time = current_time_millis();
+    ctx->last_heartbeat_ack_time = current_time_millis();
+    atclient_connection_disconnect(&(ctx->monitor_connection));
+}
+
+void atclient_monitor_connection_init(atclient_monitor_connection_ctx *ctx, char *atsign_str)
+{
+    memset(ctx, 0, sizeof(atclient_monitor_connection_ctx));
+    ctx->last_received_time = 0;
+    ctx->running = 0;
+    ctx->should_be_running = 0;
+
+    ctx->last_heartbeat_sent_time = current_time_millis();
+    ctx->last_heartbeat_ack_time = current_time_millis();
+
+    atclient_connection_ctx c_ctx;
+    atclient_connection_init(&c_ctx);
+    ctx->monitor_connection = c_ctx;
+
+    atclient_atsign atsign;
+    atsign_init(&atsign, atsign_str);
+    ctx->atsign = atsign;
+
+    AtEventQueue queue;
+    atevent_queue_init(&queue);
+    ctx->queue = queue;
+}
+
+int start_heartbeat(atclient_monitor_connection_ctx *ctx)
+{
+    pthread_t thread_id;
+    pthread_create(&thread_id, NULL, start_heartbeat_impl, ctx);
+    pthread_detach(thread_id);
+}
+
+int start_heartbeat_impl(atclient_monitor_connection_ctx *ctx)
+{
+    while (1)
+    {
+        pthread_mutex_lock(&should_be_running_lock);
+        if (ctx->should_be_running)
+        {
+            pthread_mutex_unlock(&should_be_running_lock);
+            if ((!ctx->running) || ((ctx->last_heartbeat_sent_time - ctx->last_heartbeat_ack_time) >= HEARTBEAT_INVERVAL_MILLIS))
+            {
+                printf("Monitor heartbeats not being received");
+                stop_monitor(ctx);
+                long long wait_start_time = current_time_millis();
+                pthread_mutex_lock(&running_lock);
+                int entered = 0;
+                printf("%d\n", (current_time_millis() - wait_start_time) < 5000);
+                while ((ctx->running) && ((current_time_millis - wait_start_time) < 5000))
+                {
+                    entered = 1;
+                    pthread_mutex_unlock(&running_lock);
+                    printf("Wait 5 seconds for monitor to stop");
+                    sleep(1);
+                }
+                if (!entered)
+                {
+                    pthread_mutex_unlock(&running_lock);
+                    entered = 0;
+                }
+                pthread_mutex_lock(&running_lock);
+                if (ctx->running)
+                {
+                    printf("Monitor thread has not stopped, but going to start another one anyway");
+                }
+                pthread_mutex_unlock(&running_lock);
+                start_monitor(ctx, "");
+            }
+            else
+            {
+                if (current_time_millis() - ctx->last_heartbeat_sent_time > HEARTBEAT_INVERVAL_MILLIS)
+                {
+                    unsigned long olen = 0;
+                    const unsigned long recvlen = 1024;
+                    unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
+                    memset(recv, 0, sizeof(unsigned char) * recvlen);
+
+                    atclient_connection_send(&(ctx->monitor_connection), "noop:0", strlen("noop:0"), recv, recvlen, &olen);
+                    free(recv);
+
+                    ctx->last_heartbeat_sent_time = current_time_millis();
+                }
+            }
+        }
+        else
+        {
+            pthread_mutex_unlock(&should_be_running_lock);
+        }
+        sleep(5);
+    }
 }

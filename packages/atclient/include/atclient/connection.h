@@ -7,7 +7,7 @@
 #include <mbedtls/ctr_drbg.h>
 
 typedef struct atclient_connection_ctx {
-    char *host; // assume null terminated, example: "root.atsign.org"
+    char *host; // assume null terminated, example: "root.atclient_atsign.org"
     int port; // example: 64
     mbedtls_net_context net;
     mbedtls_ssl_context ssl;

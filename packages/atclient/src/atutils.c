@@ -81,7 +81,7 @@ char* with_prefix(char* atsign) {
     }
 }
 
-atclient_atkeys load_keys(atsign *atsign) {
+atclient_atkeys load_keys(atclient_atsign *atsign) {
     int ret = 1;
 
     // Get the home directory path
