@@ -19,6 +19,8 @@ set(atchops_include_dir
     ${CMAKE_CURRENT_LIST_DIR}/include # not `include/atchops` because we want clients to include it like #include "atchops/atchops.h"
 )
 
+cmake_policy(SET CMP0135 NEW)
+
 option(ATCHOPS_FETCH_MBEDTLS "Fetch MbedTLS from GitHub" ON) # If OFF, we assume MbedTLS is installed on the system and was already built from source
 option(ATCHOPS_BUILD_TESTS "Build tests" OFF)
 
