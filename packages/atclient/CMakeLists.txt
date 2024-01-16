@@ -72,6 +72,9 @@ if(NOT ESP_PLATFORM) # build for Desktop
 	# ${CMAKE_INSTALL_*} variables are defined in GNUInstallDirs and changes according to OS. E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
 	include(GNUInstallDirs)
 
+	# https://cmake.org/cmake/help/latest/policy/CMP0135.html
+	cmake_policy(SET CMP0135 NEW)
+
 	# #########################################################
 	# 2A. Get MbedTLS::mbedtls
 	# #########################################################
@@ -97,6 +100,7 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		FetchContent_Declare(
 			atchops
 			SOURCE_DIR ${atchops_src_dir}
+			
 		)
 		FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
 		message(STATUS "Successfully fetched `atchops` package")
@@ -204,4 +208,6 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 		add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
 	endif()
+
+
 endif()
