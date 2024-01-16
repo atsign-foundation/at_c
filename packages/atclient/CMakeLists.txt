@@ -57,7 +57,6 @@ project(
 
 if(NOT ESP_PLATFORM) # build for Desktop
 	option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF)
-
 	option(ATCLIENT_FETCH_ATCHOPS "Use Local ATCHOPS" ON)
 	option(ATCLIENT_FETCH_MBEDTLS "Fetch MbedTLS via releases" ON)
 	
@@ -140,7 +139,7 @@ if(NOT ESP_PLATFORM) # build for Desktop
         	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     	)
 	endif()
-	
+
 	message(STATUS "Successfully fetched cjson")
 
 	# #########################################################
