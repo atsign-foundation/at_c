@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.19)
 
 # #########################################################
-# 0. Variables - you are free to edit anything in this step
+# 1. Variables - you are free to edit anything in this step
 # #########################################################
 
-# apparently globs are bad practice, manually add your src files here
+# 1a. Manually add your src files here
+# globs are known as bad practice, so we do not use them here
 set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
 	${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
@@ -16,16 +17,37 @@ set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
 )
 
+# 1b. Manually add your include directories here
 set(atclient_include_dir
 	${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like `#include "atclient/xyz.h"
 )
 
+# 1c. atchops source directory. Only used when ATCLIENT_FETCH_ATCHOPS is set to ON
+set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops)
+# 1c. MbedTLS release url to download from. Only used when ATCLIENT_FETCH_MBEDTLS is set to ON
+set(mbedtls_url https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz) # URL for v3.4.1 .tar.gz release source code
+set(mbedtls_hash a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5)  # hash for v3.4.1 .tar.gz release source code
+
+# 1d. Set compile definitions
+# you may set any of these flags in the CMake configuration step via: `-DATCLIENT_BUILD_TESTS=ON` (example: `cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF)
+# or you may edit the defaults here
+option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
+option(ATCLIENT_FETCH_ATCHOPS "Use Local ATCHOPS" ON) # ON=> fetches atchops from local repository, OFF=>uses already installed atchops. ON is a simple quick way to get started, but for quicker build times, installing atchops yourself is recommended in which OFF can be used once installed.
+option(ATCLIENT_FETCH_MBEDTLS "Fetch MbedTLS via releases" ON) # ON=> fetches MbedTLS from github releases, OFF=> uses already installed MbedTLS. ON is a simple quick way to get started, but for quicker build times, installing MbedTLS yourself is recommended in which OFF can be used once installed.
+
+# #########################################################
+# 2. Build for ESP32 or Desktop?
+# #########################################################
+
+# 2a. Build for ESP32
 if(ESP_PLATFORM)
+	# Run special CMake commands for ESP32
 	idf_component_register(
 		SRCS ${atclient_srcs}
 		INCLUDE_DIRS ${atclient_include_dir}
 		REQUIRES mbedtls atchops
 	)
+	# Copy header files to include directory and libraries to lib directory
 	add_custom_command(
 		TARGET ${COMPONENT_LIB}
 		POST_BUILD
@@ -38,69 +60,63 @@ endif()
 project(
 	atclient
 	VERSION 0.0.1
-	DESCRIPTION "Atsign technolgoy client library"
+	DESCRIPTION "Atsign technology client library"
 	HOMEPAGE_URL https://atsign.com
 	LANGUAGES C
 )
 
-if(NOT ESP_PLATFORM) # build for Desktop
-	option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF)
-
-	option(ATCLIENT_FETCH_ATCHOPS "Use Local ATCHOPS" ON)
-	option(ATCLIENT_FETCH_MBEDTLS "Fetch MbedTLS via releases" ON)
+# 2b. Build for Desktop
+if(NOT ESP_PLATFORM)
 
 	# #########################################################
-	# 0b. Build atchops locally or use already installed atchops
-	# #########################################################
-
-	# can use during the configuration command
-	# example: `cmake -S . -B build -DFETCH_ATCHOPS=OFF` to not rebuild atchops everytime
-	if(ATCLIENT_FETCH_ATCHOPS)
-		set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops)
-		message(STATUS "Building Local ATCHOPS: ${USE_LOCAL_ATCHOPS} from DIR: ${atchops_src_dir}")
-	endif()
-
-	# #########################################################
-	# 1. Include stuff
+	# 3. Include CMake modules
 	# #########################################################
 
 	# FetchContent is a CMake v3.11+ module that downloads content at configure time
+	# Difference between FetchContent and ExternalProject: https://cmake.org/cmake/help/latest/module/FetchContent.html#id6
 	include(FetchContent)
 
-	# Difference between FetchContent and ExternalProject: https://cmake.org/cmake/help/latest/module/FetchContent.html#id6
-
-	# ${CMAKE_INSTALL_*} variables are defined in GNUInstallDirs and changes according to OS. E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
+	# Contains ${CMAKE_INSTALL_*} variables are defined in GNUInstallDirs and changes according to OS.
+	# E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
 	include(GNUInstallDirs)
 
+	# #########################################################
+	# 4. Set CMake policies
+	# #########################################################
+
+	# Ensures that non-deprecated behaviour is used in ExternalProject_Add and FetchContent modules
 	# https://cmake.org/cmake/help/latest/policy/CMP0135.html
 	cmake_policy(SET CMP0135 NEW)
 
 	# #########################################################
-	# 2A. Get MbedTLS::mbedtls
+	# 5. Dependencies
 	# #########################################################
-	if(ATCLIENT_FETCH_MBEDTLS)
+
+	# #########################################################
+	# 5A. MbedTLS
+	# #########################################################
+	if(ATCLIENT_FETCH_MBEDTLS) # download from GitHub
 		FetchContent_Declare(
 			MbedTLS
-			URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
-			URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
+			URL ${mbedtls_url}
+			URL_HASH SHA256=${mbedtls_hash}
 		)
 		FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
 		message(STATUS "Successfully fetched MbedTLS")
-	else()
+	else() # assume it is already installed
 		find_package(MbedTLS REQUIRED CONFIG)
 		message(STATUS "Successfully found `MbedTLS` package")
 	endif()
-
-	# MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx50 are now available via MbedTLS namespace
+	# at this point, MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx50 are now available via 'MbedTLS' namespace
 
 	# #########################################################
-	# 2B. Get atchops
+	# 5B. atchops
 	# #########################################################
 	if(ATCLIENT_FETCH_ATCHOPS)
+		message(STATUS "Building Local ATCHOPS from DIR: ${atchops_src_dir}")
 		FetchContent_Declare(
 			atchops
 			SOURCE_DIR ${atchops_src_dir}
-			
 		)
 		FetchContent_MakeAvailable(atchops) # ensures named dependencies have been populated
 		message(STATUS "Successfully fetched `atchops` package")
@@ -108,36 +124,40 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		find_package(atchops REQUIRED CONFIG)
 		message(STATUS "Successfully found `atchops` package")
 	endif()
-
-	# atchops::atchops is now available
+	# at this point, atchops::atchops is now available as an imported target
 
 	# #########################################################
-	# 3. Create atclient library
+	# 6. Create atclient library
 	# #########################################################
+
+	# Create `atclient` target
 	add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
 
+	# Link libraries to atclient target
 	target_link_libraries(${PROJECT_NAME}
 		PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509 atchops::atchops
 	)
 
+	# Set include directories for atclient target
 	target_include_directories(${PROJECT_NAME} PUBLIC
 		$<BUILD_INTERFACE:${atclient_include_dir}>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
 
 	# #########################################################
-	# 4. Install atclient library
+	# 7. Install atclient library
 	# This step configures running `cmake --build build --target install` (which is the same thing as `make install`)
+	# This work also helps other CMake projects use `find_package(atclient)` to find our library, once installed.
 	# #########################################################
 
 	# exports atclient-config.cmake to /usr/local/lib/cmake/atclient/atclient-config.cmake
 	set(TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atclient
 
-	if(ATCLIENT_FETCH_ATCHOPS) # if we are fetching atchops, it was not installed, so we do not need to export it
+	if(ATCLIENT_FETCH_ATCHOPS) # if we are fetching atchops, it was not installed, so we  need to install it
 		list(APPEND TARGETS_TO_INSTALL atchops) # install atchops
 	endif()
 
-	if(ATCLIENT_FETCH_MBEDTLS) # if we are fetching mbedtls, it was not installed, so we do not need to export it
+	if(ATCLIENT_FETCH_MBEDTLS) # if we are fetching mbedtls, it was not installed, so we need to install it
 		list(APPEND TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto) # install mbedtls
 	endif()
 
@@ -148,7 +168,7 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	)
 
-	# export the config to /usr/local/lib/cmake/atclient/atclient-config.cmake
+	# install the config to /usr/local/lib/cmake/atclient/atclient-config.cmake
 	install(
 		EXPORT ${PROJECT_NAME}-config
 		NAMESPACE ${PROJECT_NAME}::
@@ -156,20 +176,22 @@ if(NOT ESP_PLATFORM) # build for Desktop
 		FILE ${PROJECT_NAME}-config.cmake
 	)
 
+	# same thing as above but with a different file name for better compatability
 	install(
 		EXPORT ${PROJECT_NAME}-config
 		NAMESPACE ${PROJECT_NAME}::
 		FILE ${PROJECT_NAME}-targets.cmake # New: Required when writing our own <proj>-config.cmake file
 		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
-	# put everything inside of include/atclient into /usr/local/include/atclient
+	# Copy all headerfiles from `include/atclient` into `/usr/local/include/atclient`
 	install(
 		DIRECTORY ${atclient_include_dir}/${PROJECT_NAME}
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	)
 
 	# #########################################################
-	# 5. Export in case people use us in a subdirectory
+	# 8. Export in case people use us in a subdirectory
+	# Allows other Cmake projects to do `add_subdirectory(/path/to/atclient)` and then `target_link_libraries(their_target atclient::atclient)`
 	# #########################################################
 	export(
 		EXPORT ${PROJECT_NAME}-config
@@ -190,23 +212,13 @@ if(NOT ESP_PLATFORM) # build for Desktop
 	add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 	# #########################################################
-	# 6. Add tests
+	# 9. Add tests
 	# Run the tests via cd build && make all && cd tests && ctest
 	# configure with -DATCLIENT_BUILD_TESTS=ON
 	# #########################################################
 	if(ATCLIENT_BUILD_TESTS)
 		enable_testing()
 		add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
-	endif()
-
-	# #########################################################
-	# 7. Build for ESP32
-	# #########################################################
-	if(ATCLIENT_BUILD_ESPIDF)
-		message(STATUS "Building for ESP32")
-		set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src)
-		include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-		add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
 	endif()
 
 
