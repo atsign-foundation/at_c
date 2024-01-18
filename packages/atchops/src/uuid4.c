@@ -13,7 +13,7 @@
 #include <wincrypt.h>
 #endif
 
-#include "atchops/uuid4.h"
+#include "atchops/3rdparty/uuid4.h"
 
 
 static uint64_t seed[2];

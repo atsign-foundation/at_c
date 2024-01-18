@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "atchops/uuid4.h"
+#include "atchops/3rdparty/uuid4.h"
 
 int main()
 {
