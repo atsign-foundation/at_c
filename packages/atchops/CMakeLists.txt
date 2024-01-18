@@ -13,6 +13,7 @@ set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
     ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/uuid4.c
 )
 
 set(atchops_include_dir
@@ -71,15 +72,14 @@ if(NOT ESP_PLATFORM)
             URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
         )
         list(APPEND ATCHOPS_TARGETS_TO_INSTALL mbedcrypto) # since FetchContent imports the third-party library as if we wrote it ourselves, we also need to export it https://stackoverflow.com/questions/71541589/how-to-exporting-targets-fetched-with-fetchcontent
-        list(APPEND ATCHOPS_MAKE_AVAILABLE MbedTLS)
+        list(APPEND ATCHOPS_MAKE_AVAILABLE MbedTLS) # make this available later on, when we make all modules available all at once
     endif()
-
+    
+    # 2z. Fetch dependencies
+    # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
     if(ATCHOPS_MAKE_AVAILABLE)
         FetchContent_MakeAvailable(${ATCHOPS_MAKE_AVAILABLE}) # ensures named dependencies have been populated
     endif()
-
-    # 2z. Fetch dependencies
-    # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
 
     # #########################################################
     # 3. Create atchops target
