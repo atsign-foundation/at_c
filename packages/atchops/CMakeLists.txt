@@ -13,7 +13,6 @@ set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
     ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/uuid4.c
 )
 
 set(atchops_include_dir
