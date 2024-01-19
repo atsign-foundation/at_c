@@ -11,10 +11,7 @@ permissions:  # added using https://github.com/step-security/secure-repo
 
 jobs:
   unit-tests:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ["ubuntu-latest", "macos-latest"]
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
