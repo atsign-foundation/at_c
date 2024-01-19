@@ -116,7 +116,7 @@ if(NOT ESP_PLATFORM)
 			URL ${mbedtls_url}
 			URL_HASH SHA256=${mbedtls_hash}
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509)
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto)
 		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS)
 	endif()
 
