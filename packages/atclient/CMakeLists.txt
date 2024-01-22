@@ -138,9 +138,9 @@ if(NOT ESP_PLATFORM)
 
 	# Link libraries to atclient target
 	target_link_libraries(${PROJECT_NAME} PUBLIC
-		atchops
-		mbedtls
-		mbedx509
+		atchops::atchops
+		MbedTLS::mbedtls
+		MbedTLS::mbedx509
 	)
 
 	# Set include directories for atclient target
