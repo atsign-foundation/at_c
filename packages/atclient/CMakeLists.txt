@@ -103,6 +103,8 @@ if(NOT ESP_PLATFORM)
 		)
 		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops)
 		list(APPEND ATCLIENT_MAKE_AVAILABLE atchops)
+	else()
+		message(STATUS "[ATCLIENT] atchops found package..")
 	endif()
 
 	# #########################################################
@@ -118,6 +120,8 @@ if(NOT ESP_PLATFORM)
 		)
 		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto)
 		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS)
+	else()
+		message(STATUS "[ATCLIENT] MbedTLS found package..")
 	endif()
 
 	if(ATCLIENT_MAKE_AVAILABLE)
