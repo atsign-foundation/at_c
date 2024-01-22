@@ -4,5 +4,5 @@ FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 cd "$SCRIPT_DIRECTORY"
 cd ..
-sudo cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF
+cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF
 sudo cmake --build build --target install
