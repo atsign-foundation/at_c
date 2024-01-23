@@ -14,7 +14,7 @@ int main()
     memset(dst, 0, dstlen);
     unsigned long dstolen = 0;
 
-    ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *)src, strlen(src), dst, dstlen, &dstolen);
+    ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)src, strlen(src), dst, dstlen, &dstolen);
     if (ret != 0)
     {
         printf("atchops_sha_hash (failed): %d\n", ret);
