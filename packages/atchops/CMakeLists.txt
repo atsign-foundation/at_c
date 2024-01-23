@@ -13,6 +13,7 @@ set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
     ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/uuid.c
 )
 
 set(atchops_include_dir
@@ -61,7 +62,9 @@ if(NOT ESP_PLATFORM)
     # 2. Dependencies
     # #########################################################
 
-    # 2a. MbedTLS
+    # #########################################################
+	# 2A. MbedTLS
+	# #########################################################
     find_package(MbedTLS QUIET)
     if(NOT MbedTLS_FOUND)
         message(STATUS "[ATCHOPS] MbedTLS not found, fetching from GitHub...")
@@ -73,6 +76,24 @@ if(NOT ESP_PLATFORM)
         list(APPEND ATCHOPS_TARGETS_TO_INSTALL mbedcrypto p256m everest) # since FetchContent imports the third-party library as if we wrote it ourselves, we also need to export it https://stackoverflow.com/questions/71541589/how-to-exporting-targets-fetched-with-fetchcontent
         list(APPEND ATCHOPS_MAKE_AVAILABLE MbedTLS) # make this available later on, when we make all modules available all at once
     endif()
+
+    # #########################################################
+	# 2B. uuid4
+	# #########################################################
+	find_package(uuid4 QUIET)
+	if(NOT uuid4_FOUND)
+		message(STATUS "[ATCHOPS] uuid4 not found, fetching from GitHub..")
+		FetchContent_Declare(
+			uuid4
+			URL https://github.com/atsign-foundation/uuid4/releases/download/v1.0.1/uuid4-v1.0.1.zip
+            URL_HASH SHA256=6782f4bf194e108c0c76aa6ecd117048f3751f11e405a93fcb307cdcb39b34e2
+            # URL_HASH MD5=6dd2aae881ecd3f40e9c4f12f037142a
+		)
+		list(APPEND ATCHOPS_TARGETS_TO_INSTALL uuid4-static) # since we've fetched it, we have to install it
+		list(APPEND ATCHOPS_MAKE_AVAILABLE uuid4) # we have to make it available later on with FetchContent_MakeAvailable
+	else()
+		message(STATUS "[ATCHOPS] uuid4 found package..")
+	endif()
     
     # 2z. Fetch dependencies
     # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
@@ -95,6 +116,7 @@ if(NOT ESP_PLATFORM)
     # add MbedTLS dependencies to `atchops`
     target_link_libraries(${PROJECT_NAME} PUBLIC 
         MbedTLS::mbedcrypto
+        uuid4::uuid4-static
     )
 
     # #########################################################
@@ -112,11 +134,14 @@ if(NOT ESP_PLATFORM)
     # Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find stuff
     list(APPEND ATCHOPS_TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atchops
 
-    install(
-        TARGETS ${ATCHOPS_TARGETS_TO_INSTALL}
-        EXPORT ${PROJECT_NAME}-config
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
-    )
+    foreach(target ${ATCHOPS_TARGETS_TO_INSTALL})
+        message(STATUS "[ATCHOPS] Installing ${target}...")
+        install(
+            TARGETS ${target}
+            EXPORT ${PROJECT_NAME}-config
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
+        )
+    endforeach()
 
     # Export atchops-config.cmake to /usr/local/lib/cmake/atchops/atchops-config.cmake
     install(
