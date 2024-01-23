@@ -101,7 +101,7 @@ if(NOT ESP_PLATFORM)
 			atchops
 			SOURCE_DIR ${atchops_src_dir}
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops) # since we've fetched it, we have to install it
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops uuid4-static) # since we've fetched it, we have to install it
 		list(APPEND ATCLIENT_MAKE_AVAILABLE atchops) # we have to make it available later on with FetchContent_MakeAvailable
 	else()
 		message(STATUS "[ATCLIENT] atchops found package..")
