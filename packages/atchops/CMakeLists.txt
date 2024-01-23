@@ -13,6 +13,7 @@ set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
     ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/uuid.c
 )
 
 set(atchops_include_dir
@@ -61,7 +62,9 @@ if(NOT ESP_PLATFORM)
     # 2. Dependencies
     # #########################################################
 
-    # 2a. MbedTLS
+    # #########################################################
+	# 2A. MbedTLS
+	# #########################################################
     find_package(MbedTLS QUIET)
     if(NOT MbedTLS_FOUND)
         message(STATUS "[ATCHOPS] MbedTLS not found, fetching from GitHub...")
@@ -73,6 +76,23 @@ if(NOT ESP_PLATFORM)
         list(APPEND ATCHOPS_TARGETS_TO_INSTALL mbedcrypto) # since FetchContent imports the third-party library as if we wrote it ourselves, we also need to export it https://stackoverflow.com/questions/71541589/how-to-exporting-targets-fetched-with-fetchcontent
         list(APPEND ATCHOPS_MAKE_AVAILABLE MbedTLS) # make this available later on, when we make all modules available all at once
     endif()
+
+    # #########################################################
+	# 2B. uuid4
+	# #########################################################
+	find_package(uuid4 QUIET)
+	if(NOT uuid4_FOUND)
+		message(STATUS "[ATCHOPS] uuid4 not found, fetching from GitHub..")
+		FetchContent_Declare(
+			uuid4
+			GIT_REPOSITORY https://github.com/atsign-foundation/uuid4.git
+			GIT_TAG trunk # commit hash
+		)
+		list(APPEND ATCHOPS_TARGETS_TO_INSTALL uuid4-static) # since we've fetched it, we have to install it
+		list(APPEND ATCHOPS_MAKE_AVAILABLE uuid4) # we have to make it available later on with FetchContent_MakeAvailable
+	else()
+		message(STATUS "[ATCHOPS] uuid4 found package..")
+	endif()
     
     # 2z. Fetch dependencies
     # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
@@ -95,6 +115,7 @@ if(NOT ESP_PLATFORM)
     # add MbedTLS dependencies to `atchops`
     target_link_libraries(${PROJECT_NAME} PUBLIC 
         MbedTLS::mbedcrypto
+        uuid4::uuid4-static
     )
 
     # #########################################################
