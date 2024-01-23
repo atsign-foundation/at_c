@@ -101,8 +101,8 @@ if(NOT ESP_PLATFORM)
 			atchops
 			SOURCE_DIR ${atchops_src_dir}
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops)
-		list(APPEND ATCLIENT_MAKE_AVAILABLE atchops)
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops) # since we've fetched it, we have to install it
+		list(APPEND ATCLIENT_MAKE_AVAILABLE atchops) # we have to make it available later on with FetchContent_MakeAvailable
 	else()
 		message(STATUS "[ATCLIENT] atchops found package..")
 	endif()
@@ -118,8 +118,8 @@ if(NOT ESP_PLATFORM)
 			URL ${mbedtls_url}
 			URL_HASH SHA256=${mbedtls_hash}
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto)
-		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS)
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto) # since we've fetched it, we have to install it
+		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS) # we have to make it available later on with FetchContent_MakeAvailable
 	else()
 		message(STATUS "[ATCLIENT] MbedTLS found package..")
 	endif()
