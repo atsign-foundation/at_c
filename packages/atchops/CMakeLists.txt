@@ -85,8 +85,9 @@ if(NOT ESP_PLATFORM)
 		message(STATUS "[ATCHOPS] uuid4 not found, fetching from GitHub..")
 		FetchContent_Declare(
 			uuid4
-			GIT_REPOSITORY https://github.com/atsign-foundation/uuid4.git
-			GIT_TAG trunk # commit hash
+			URL https://github.com/atsign-foundation/uuid4/releases/download/v1.0.1/uuid4-v1.0.1.zip
+            URL_HASH SHA256=6782f4bf194e108c0c76aa6ecd117048f3751f11e405a93fcb307cdcb39b34e2
+            # URL_HASH MD5=6dd2aae881ecd3f40e9c4f12f037142a
 		)
 		list(APPEND ATCHOPS_TARGETS_TO_INSTALL uuid4-static) # since we've fetched it, we have to install it
 		list(APPEND ATCHOPS_MAKE_AVAILABLE uuid4) # we have to make it available later on with FetchContent_MakeAvailable
