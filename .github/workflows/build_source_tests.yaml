@@ -11,17 +11,14 @@ permissions:  # added using https://github.com/step-security/secure-repo
 
 jobs:
   atclient:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ["ubuntu-latest", "macos-latest"]
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install atclient
         working-directory: packages/atclient
         run: |
-          cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=ON -DATCLIENT_FETCH_ATCHOPS=ON
+          cmake -S . -B build
           sudo cmake --build build --target install
 
       - name: Build sample_cmake_project

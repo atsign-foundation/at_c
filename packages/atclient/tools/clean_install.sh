@@ -5,7 +5,5 @@ SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 cd "$SCRIPT_DIRECTORY"
 cd ..
 rm -rf build
-cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
-cmake --build build --target all
-cd build/tests
-ctest -V
+cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF
+sudo cmake --build build --target install

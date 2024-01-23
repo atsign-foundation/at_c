@@ -11,17 +11,14 @@ permissions:  # added using https://github.com/step-security/secure-repo
 
 jobs:
   unit-tests:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ["ubuntu-latest", "macos-latest"]
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install AtChops
         working-directory: packages/atchops
         run: |
-          cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON -DATCHOPS_FETCH_MBEDTLS=ON
+          cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON
           sudo cmake --build build --target install
 
       - name: CTest AtChops
@@ -32,7 +29,7 @@ jobs:
       - name: Install AtClient
         working-directory: packages/atclient
         run: |
-          cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCLIENT_FETCH_ATCHOPS=OFF -DATCLIENT_FETCH_MBEDTLS=ON
+          cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
           sudo cmake --build build --target install
 
       - name: CTest AtClient

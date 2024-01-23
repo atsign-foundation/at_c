@@ -21,7 +21,6 @@ set(atchops_include_dir
 
 cmake_policy(SET CMP0135 NEW)
 
-option(ATCHOPS_FETCH_MBEDTLS "Fetch MbedTLS from GitHub" ON) # If OFF, we assume MbedTLS is installed on the system and was already built from source
 option(ATCHOPS_BUILD_TESTS "Build tests" OFF)
 
 if(ESP_PLATFORM)
@@ -41,8 +40,8 @@ endif()
 
 project(
     atchops
-    VERSION 1.0.0
-    DESCRIPTION "The at_client implemented in C"
+    VERSION 0.0.1
+    DESCRIPTION "atchops - cryptographic hash operations"
     HOMEPAGE_URL https://atsign.com
     LANGUAGES C
 )
@@ -59,37 +58,44 @@ if(NOT ESP_PLATFORM)
     include(GNUInstallDirs)
 
     # #########################################################
-    # 2. find_package MbedTLS
-    # #########################################################ß
-    if(ATCHOPS_FETCH_MBEDTLS)
+    # 2. Dependencies
+    # #########################################################
+
+    # 2a. MbedTLS
+    find_package(MbedTLS QUIET)
+    if(NOT MbedTLS_FOUND)
+        message(STATUS "[ATCHOPS] MbedTLS not found, fetching from GitHub...")
         FetchContent_Declare(
             MbedTLS
             URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz
             URL_HASH SHA256=a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5 # hash for v3.4.1 .tar.gz release source code
         )
-        FetchContent_MakeAvailable(MbedTLS) # ensures named dependencies have been populated
-        message(STATUS "Successfully fetched MbedTLS")
-    else()
-        find_package(MbedTLS REQUIRED CONFIG) # this will look for MbedTLSConfig.cmake in /usr/local/lib/cmake/MbedTLS/MbedTLSConfig.cmake
-        message(STATUS "Successfully found package MbedTLS")
+        list(APPEND ATCHOPS_TARGETS_TO_INSTALL mbedcrypto) # since FetchContent imports the third-party library as if we wrote it ourselves, we also need to export it https://stackoverflow.com/questions/71541589/how-to-exporting-targets-fetched-with-fetchcontent
+        list(APPEND ATCHOPS_MAKE_AVAILABLE MbedTLS) # make this available later on, when we make all modules available all at once
     endif()
-
+    
+    # 2z. Fetch dependencies
     # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
+    if(ATCHOPS_MAKE_AVAILABLE)
+        FetchContent_MakeAvailable(${ATCHOPS_MAKE_AVAILABLE}) # ensures named dependencies have been populated
+    endif()
 
     # #########################################################
     # 3. Create atchops target
     # #########################################################
-    add_library(atchops STATIC ${atchops_srcs})
+    add_library(${PROJECT_NAME} STATIC ${atchops_srcs})
 
     # add include/atchops/*.h to `atchops`
     # we put *.h inside of nested atchops/ directory so that it will be included like #include "atchops/atchops.h"
-    target_include_directories(atchops PUBLIC
+    target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${atchops_include_dir}> # when `cmake ..` look for headers when building in ./packages/atchops/include/atchops/*.h
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # when `make install` look inside of something like /usr/local/include/**
     )
 
     # add MbedTLS dependencies to `atchops`
-    target_link_libraries(atchops PUBLIC MbedTLS::mbedcrypto)
+    target_link_libraries(${PROJECT_NAME} PUBLIC 
+        MbedTLS::mbedcrypto
+    )
 
     # #########################################################
     # 4. Install atchops
@@ -104,15 +110,10 @@ if(NOT ESP_PLATFORM)
     )
 
     # Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find stuff
-    set(TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atchops
-
-    if(ATCHOPS_FETCH_MBEDTLS)
-        # if we fetched MbedTLS, it is not installed, so we need to install it
-        list(APPEND TARGETS_TO_INSTALL mbedcrypto)
-    endif()
+    list(APPEND ATCHOPS_TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atchops
 
     install(
-        TARGETS ${TARGETS_TO_INSTALL}
+        TARGETS ${ATCHOPS_TARGETS_TO_INSTALL}
         EXPORT ${PROJECT_NAME}-config
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
     )
