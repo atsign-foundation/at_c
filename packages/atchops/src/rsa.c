@@ -30,15 +30,6 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
         goto ret;
     }
 
-    // delete later
-    printf("hash: ");
-    for (int i = 0; i < hasholen; i++)
-    {
-        printf("%02x ", hash[i]);
-    }
-    printf("\n");
-
-
     // 2. sign the hash with rsa private key
 
     mbedtls_rsa_context rsa;
@@ -64,7 +55,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
     }
 
     ret = mbedtls_rsa_check_privkey(&rsa);
-    printf("rsa check privkey: %d\n", ret);
+    // printf("rsa check privkey: %d\n", ret);
     if (ret != 0)
     {
         goto ret;
@@ -76,7 +67,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
     mbedtls_ctr_drbg_context ctr_drbg_ctx;
     mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
-    printf("mbedtls_ctr_drbg_seed: %d\n", ret);
+    // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
     if (ret != 0)
     {
         goto ret;
@@ -86,23 +77,15 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
     unsigned char *signature = malloc(sizeof(unsigned char) * signaturelen);
     memset(signature, 0, signaturelen);
     ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, signature);
-    printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
+    // printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
     if (ret != 0)
     {
         goto ret;
     }
     
-    // delete later
-    for(int i = 0; i < signaturelen; i++)
-    {
-        printf("%02x ", signature[i]);
-    }
-    printf("\n");
-    // ===
-
     // 3. base64 encode the signature
     ret = atchops_base64_encode(signature, signaturelen, signaturebase64, signaturebase64len, signaturebase64olen);
-    printf("atchops_base64_encode: %d\n", ret);
+    // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
     {
         goto ret;
