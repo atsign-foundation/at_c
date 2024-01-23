@@ -58,14 +58,25 @@ if(NOT ESP_PLATFORM)
     # ${CMAKE_INSTALL_*} variables are defined in GNUInstallDirs and changes according to OS. E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
     include(GNUInstallDirs)
 
+    # Determine if atchops is being built as a subproject using add_subdirectory()
+    if(NOT DEFINED ATCHOPS_AS_SUBPROJECT)
+        set(ATCHOPS_AS_SUBPROJECT ON)
+
+        if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+            set(ATCHOPS_AS_SUBPROJECT OFF)
+        endif()
+    endif()
+    # message(STATUS "[ATCHOPS] ATCHOPS_AS_SUBPROJECT: ${ATCHOPS_AS_SUBPROJECT}")
+
     # #########################################################
     # 2. Dependencies
     # #########################################################
 
     # #########################################################
-	# 2A. MbedTLS
-	# #########################################################
+    # 2A. MbedTLS
+    # #########################################################
     find_package(MbedTLS QUIET)
+
     if(NOT MbedTLS_FOUND)
         message(STATUS "[ATCHOPS] MbedTLS not found, fetching from GitHub...")
         FetchContent_Declare(
@@ -78,23 +89,23 @@ if(NOT ESP_PLATFORM)
     endif()
 
     # #########################################################
-	# 2B. uuid4
-	# #########################################################
-	find_package(uuid4 QUIET)
-	if(NOT uuid4_FOUND)
-		message(STATUS "[ATCHOPS] uuid4 not found, fetching from GitHub..")
-		FetchContent_Declare(
-			uuid4
-			URL https://github.com/atsign-foundation/uuid4/releases/download/v1.0.1/uuid4-v1.0.1.zip
-            URL_HASH SHA256=6782f4bf194e108c0c76aa6ecd117048f3751f11e405a93fcb307cdcb39b34e2
-            # URL_HASH MD5=6dd2aae881ecd3f40e9c4f12f037142a
-		)
-		list(APPEND ATCHOPS_TARGETS_TO_INSTALL uuid4-static) # since we've fetched it, we have to install it
-		list(APPEND ATCHOPS_MAKE_AVAILABLE uuid4) # we have to make it available later on with FetchContent_MakeAvailable
-	else()
-		message(STATUS "[ATCHOPS] uuid4 found package..")
-	endif()
-    
+    # 2B. uuid4
+    # #########################################################
+    find_package(uuid4 QUIET)
+
+    if(NOT uuid4_FOUND)
+        message(STATUS "[ATCHOPS] uuid4 not found, fetching from GitHub..")
+        FetchContent_Declare(
+            uuid4
+            URL https://github.com/atsign-foundation/uuid4/releases/download/v1.0.2/uuid4-v1.0.2.zip
+            URL_HASH MD5=797b23ad01c967517da2c9594dccecd1
+        )
+        list(APPEND ATCHOPS_TARGETS_TO_INSTALL uuid4-static) # since we've fetched it, we have to install it
+        list(APPEND ATCHOPS_MAKE_AVAILABLE uuid4) # we have to make it available later on with FetchContent_MakeAvailable
+    else()
+        message(STATUS "[ATCHOPS] uuid4 found package..")
+    endif()
+
     # 2z. Fetch dependencies
     # MbedTLS::mbedtls, MbedTLS::mbedcrypto, and MbedTLS::mbedx509 are now available
     if(ATCHOPS_MAKE_AVAILABLE)
@@ -105,6 +116,7 @@ if(NOT ESP_PLATFORM)
     # 3. Create atchops target
     # #########################################################
     add_library(${PROJECT_NAME} STATIC ${atchops_srcs})
+    add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
     # add include/atchops/*.h to `atchops`
     # we put *.h inside of nested atchops/ directory so that it will be included like #include "atchops/atchops.h"
@@ -114,7 +126,7 @@ if(NOT ESP_PLATFORM)
     )
 
     # add MbedTLS dependencies to `atchops`
-    target_link_libraries(${PROJECT_NAME} PUBLIC 
+    target_link_libraries(${PROJECT_NAME} PUBLIC
         MbedTLS::mbedcrypto
         uuid4::uuid4-static
     )
@@ -143,25 +155,26 @@ if(NOT ESP_PLATFORM)
         )
     endforeach()
 
-    # Export atchops-config.cmake to /usr/local/lib/cmake/atchops/atchops-config.cmake
-    install(
-        EXPORT ${PROJECT_NAME}-config
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-        FILE ${PROJECT_NAME}-config.cmake
-    )
-
     # #########################################################
-    # 5. Export in case people add us via add_subdirectory
+    # 5. atchops-config.cmake
     # #########################################################
-    export(PACKAGE ${PROJECT_NAME})
+    if(NOT ATCHOPS_AS_SUBPROJECT)
+        export(PACKAGE ${PROJECT_NAME})
 
-    export(
-        EXPORT ${PROJECT_NAME}-config
-        NAMESPACE ${PROJECT_NAME}::
-        FILE "cmake/${PROJECT_NAME}-config.cmake")
+        # Export atchops-config.cmake to /usr/local/lib/cmake/atchops/atchops-config.cmake
+        install(
+            EXPORT ${PROJECT_NAME}-config
+            NAMESPACE ${PROJECT_NAME}::
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+            FILE ${PROJECT_NAME}-config.cmake
+        )
 
-    add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+        export(
+            EXPORT ${PROJECT_NAME}-config
+            NAMESPACE ${PROJECT_NAME}::
+            FILE "cmake/${PROJECT_NAME}-config.cmake"
+        )
+    endif()
 
     # #########################################################
     # 6. Generate tests
