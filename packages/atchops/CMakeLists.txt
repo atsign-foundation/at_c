@@ -134,11 +134,14 @@ if(NOT ESP_PLATFORM)
     # Installs atchops and mbedcrypto and tells `atchops-config.cmake` where to find stuff
     list(APPEND ATCHOPS_TARGETS_TO_INSTALL ${PROJECT_NAME}) # install atchops
 
-    install(
-        TARGETS ${ATCHOPS_TARGETS_TO_INSTALL}
-        EXPORT ${PROJECT_NAME}-config
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
-    )
+    foreach(target ${ATCHOPS_TARGETS_TO_INSTALL})
+        message(STATUS "[ATCHOPS] Installing ${target}...")
+        install(
+            TARGETS ${target}
+            EXPORT ${PROJECT_NAME}-config
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # install goes to: /usr/local/lib/atchops/libatchops.a
+        )
+    endforeach()
 
     # Export atchops-config.cmake to /usr/local/lib/cmake/atchops/atchops-config.cmake
     install(

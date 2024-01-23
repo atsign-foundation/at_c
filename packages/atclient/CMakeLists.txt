@@ -160,6 +160,7 @@ if(NOT ESP_PLATFORM)
 
 	# install atclient library to /usr/local/lib/libatclient.a
 	foreach(target ${ATCLIENT_TARGETS_TO_INSTALL})
+		message(STATUS "[ATCLIENT] Installing ${target}..")
 		install(
 			TARGETS ${target}
 			EXPORT ${PROJECT_NAME}-config
