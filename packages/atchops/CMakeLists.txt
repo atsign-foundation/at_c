@@ -70,7 +70,7 @@ if(NOT ESP_PLATFORM)
             URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
             URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
         )
-        list(APPEND ATCHOPS_TARGETS_TO_INSTALL mbedcrypto) # since FetchContent imports the third-party library as if we wrote it ourselves, we also need to export it https://stackoverflow.com/questions/71541589/how-to-exporting-targets-fetched-with-fetchcontent
+        list(APPEND ATCHOPS_TARGETS_TO_INSTALL mbedcrypto p256m everest) # since FetchContent imports the third-party library as if we wrote it ourselves, we also need to export it https://stackoverflow.com/questions/71541589/how-to-exporting-targets-fetched-with-fetchcontent
         list(APPEND ATCHOPS_MAKE_AVAILABLE MbedTLS) # make this available later on, when we make all modules available all at once
     endif()
     

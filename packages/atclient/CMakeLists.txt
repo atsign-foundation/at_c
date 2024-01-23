@@ -114,8 +114,8 @@ if(NOT ESP_PLATFORM)
 			URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
             URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto)
-		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS)
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto p256m everest) # since we've fetched it, we have to install it
+		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS) # we have to make it available later on with FetchContent_MakeAvailable
 	else()
 		message(STATUS "[ATCLIENT] MbedTLS found package..")
 	endif()
