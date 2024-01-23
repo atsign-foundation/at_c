@@ -25,11 +25,7 @@ set(atclient_include_dir
 # 1c. atchops source directory. Only used when ATCLIENT_FETCH_ATCHOPS is set to ON
 set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops)
 
-# 1d. MbedTLS release url to download from. Only used when ATCLIENT_FETCH_MBEDTLS is set to ON
-set(mbedtls_url https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz) # URL for v3.4.1 .tar.gz release source code
-set(mbedtls_hash a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5) # hash for v3.4.1 .tar.gz release source code
-
-# 1e. Set compile definitions
+# 1d. Set compile definitions
 # you may set any of these flags in the CMake configuration step via: `-DATCLIENT_BUILD_TESTS=ON` (example: `cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF)
 # or you may edit the defaults here
 option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
@@ -115,8 +111,8 @@ if(NOT ESP_PLATFORM)
 		message(STATUS "[ATCLIENT] MbedTLS not found, fetching from GitHub..")
 		FetchContent_Declare(
 			MbedTLS
-			URL ${mbedtls_url}
-			URL_HASH SHA256=${mbedtls_hash}
+			URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
+            URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
 		)
 		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto)
 		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS)
