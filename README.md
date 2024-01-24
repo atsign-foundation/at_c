@@ -28,6 +28,10 @@ When creating source files, include headers, or tests to certain packages, pleas
 
 ## Maintainers
 
+[Atsign](https://atsign.com/) maintains this repository. Feel free to contact us about anything at [info@atsign.com](mailto:info@atsign.com)
+
 - [XavierChanth](https://github.com/XavierChanth)
 - [JeremyTubongbanua](https://github.com/JeremyTubongbanua)
+- [realvarx](https://github.com/realvarx)
+- [cpswan](https://github.com/cpswan)
 
