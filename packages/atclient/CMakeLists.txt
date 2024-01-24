@@ -75,6 +75,15 @@ if(NOT ESP_PLATFORM)
 	# E.g. on Linux & MacOS, ${CMAKE_INSTALL_LIBDIR} is /usr/local/lib, but on Windows it may be C:\Program Files\atchops\lib
 	include(GNUInstallDirs)
 
+	# Determine if atclient is being built as a subproject
+    if(NOT DEFINED ATCLIENT_AS_SUBPROJECT)
+        set(ATCLIENT_AS_SUBPROJECT ON)
+
+        if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+            set(ATCLIENT_AS_SUBPROJECT OFF)
+        endif()
+    endif()
+
 	# #########################################################
 	# 4. Set CMake policies
 	# #########################################################
@@ -131,6 +140,7 @@ if(NOT ESP_PLATFORM)
 
 	# Create `atclient` target
 	add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
+	add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 	# Link libraries to atclient target
 	target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -164,22 +174,6 @@ if(NOT ESP_PLATFORM)
 		)
 	endforeach()
 
-	# install the config to /usr/local/lib/cmake/atclient/atclient-config.cmake
-	install(
-		EXPORT ${PROJECT_NAME}-config
-		NAMESPACE ${PROJECT_NAME}::
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-		FILE ${PROJECT_NAME}-config.cmake
-	)
-
-	# same thing as above but with a different file name for better compatability
-	install(
-		EXPORT ${PROJECT_NAME}-config
-		NAMESPACE ${PROJECT_NAME}::
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-		FILE ${PROJECT_NAME}-targets.cmake # New: Required when writing our own <proj>-config.cmake file
-	)
-
 	# Copy all headerfiles from `include/atclient` into `/usr/local/include/atclient`
 	install(
 		DIRECTORY ${atclient_include_dir}/${PROJECT_NAME}
@@ -190,23 +184,27 @@ if(NOT ESP_PLATFORM)
 	# 8. Export in case people use us in a subdirectory
 	# Allows other Cmake projects to do `add_subdirectory(/path/to/atclient)` and then `target_link_libraries(their_target atclient::atclient)`
 	# #########################################################
-	export(
-		EXPORT ${PROJECT_NAME}-config
-		NAMESPACE ${PROJECT_NAME}::
-		FILE ${PROJECT_NAME}-config.cmake
-	)
 
-	export(
-		EXPORT ${PROJECT_NAME}-config
-		NAMESPACE ${PROJECT_NAME}::
-		FILE ${PROJECT_NAME}-targets.cmake
-	)
+	if(NOT ATCLIENT_AS_SUBPROJECT) # if it is not a sub project, we should install the -config.cmake
+		export(
+			EXPORT ${PROJECT_NAME}-config
+			NAMESPACE ${PROJECT_NAME}::
+			FILE ${PROJECT_NAME}-config.cmake
+		)
 
-	export(
-		PACKAGE ${PROJECT_NAME}
-	)
+		# install the config to /usr/local/lib/cmake/atclient/atclient-config.cmake
+		install(
+			EXPORT ${PROJECT_NAME}-config
+			NAMESPACE ${PROJECT_NAME}::
+			DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+			FILE ${PROJECT_NAME}-config.cmake
+		)
 
-	add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+		export(
+			PACKAGE ${PROJECT_NAME}
+		)
+	endif()
+
 
 	# #########################################################
 	# 9. Add tests
