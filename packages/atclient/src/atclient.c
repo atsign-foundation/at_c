@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mbedtls/md.h>
 #include "atclient/atclient.h"
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
@@ -147,7 +148,7 @@ int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const 
 
     // sign
     memset(recv, 0, recvlen);
-    ret = atchops_rsa_sign(atkeys.pkamprivatekey, ATCHOPS_MD_SHA256, challenge, strlen((char *) challenge), recv, recvlen, &olen);
+    ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challenge, strlen((char *) challenge), recv, recvlen, &olen);
     // printf("atchops_rsa_sign: %d\n", ret);
     if(ret != 0)
     {

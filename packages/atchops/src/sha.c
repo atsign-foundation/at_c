@@ -4,13 +4,12 @@
 #include <mbedtls/md.h>
 #include "atchops/sha.h"
 
-int atchops_sha_hash(atchops_md_type mdtype, const unsigned char *input, const unsigned long inputlen, unsigned char *output, unsigned long outputlen, unsigned long *outputolen)
+int atchops_sha_hash(mbedtls_md_type_t md_type, const unsigned char *input, const unsigned long inputlen, unsigned char *output, unsigned long outputlen, unsigned long *outputolen)
 {
     int ret = 1;
 
     mbedtls_md_context_t md_ctx;
     mbedtls_md_init(&md_ctx);
-    mbedtls_md_type_t md_type = (mbedtls_md_type_t) mdtype;
 
     ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(md_type), 0);
     if (ret != 0)
@@ -39,7 +38,6 @@ int atchops_sha_hash(atchops_md_type mdtype, const unsigned char *input, const u
         *outputolen += 1;
     }
     --(*outputolen); // remove the '\0' at the end of the string
-
 
     goto ret;
 ret:

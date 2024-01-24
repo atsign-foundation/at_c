@@ -6,12 +6,13 @@
 #include <mbedtls/md5.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
+#include <mbedtls/md.h>
 #include "atchops/rsa.h"
 #include "atchops/rsakey.h"
 #include "atchops/base64.h"
 #include "atchops/sha.h"
 
-int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen)
+int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen)
 {
     int ret = 1; // error, until successful.
 
@@ -75,14 +76,13 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtyp
     const unsigned long signaturelen = 256; // result of signature always 256 bytes
     unsigned char *signature = malloc(sizeof(unsigned char) * signaturelen);
     memset(signature, 0, signaturelen);
-
     ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, MBEDTLS_MD_SHA256, hashlen, hash, signature);
     // printf("mbedtls_rsa_pkcs1_sign: %d\n", ret);
     if (ret != 0)
     {
         goto ret;
     }
-
+    
     // 3. base64 encode the signature
     ret = atchops_base64_encode(signature, signaturelen, signaturebase64, signaturebase64len, signaturebase64olen);
     // printf("atchops_base64_encode: %d\n", ret);
@@ -101,7 +101,7 @@ ret:
 }
 }
 
-int atchops_rsa_verify(atchops_rsakey_publickey publickey, atchops_md_type mdtype, const unsigned char *signature, const unsigned long signaturelen, int *result)
+int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const unsigned char *signature, const unsigned long signaturelen, int *result)
 {
     return 1; // TODO: implement
 }

@@ -3,6 +3,7 @@
 
 #include "atchops/rsakey.h"
 #include "atchops/sha.h"
+#include <mbedtls/md.h>
 
 /**
  * @brief Sign a message with an RSA private key
@@ -16,7 +17,7 @@
  * @param signatureolen the length of the signature buffer after signing
  * @return int 0 on success
  */
-int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen);
+int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdtype, const unsigned char *message, const unsigned long messagelen, unsigned char *signaturebase64, const unsigned long signaturebase64len, unsigned long *signaturebase64olen);
 
 /**
  * @brief Verify a signature with an RSA public key
@@ -28,7 +29,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, atchops_md_type mdtyp
  * @param result 1 if the signature is valid, 0 if the signature is invalid
  * @return int 0 on success
  */
-int atchops_rsa_verify(atchops_rsakey_publickey publickey, atchops_md_type mdtype, const unsigned char *signature, const unsigned long signaturelen, int *result);
+int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const unsigned char *signature, const unsigned long signaturelen, int *result);
 
 /**
  * @brief Encrypt bytes with an RSA public key
