@@ -138,6 +138,11 @@ if(NOT ESP_PLATFORM)
 		FetchContent_MakeAvailable(${ATCLIENT_MAKE_AVAILABLE})
 	endif()
 
+	# #########################################################
+	# 5C. cJSON
+	# #########################################################
+	add_subdirectory(${CJSON_DIR})
+	list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson-static)
 
 	# #########################################################
 	# 6. Create atclient library
@@ -152,6 +157,7 @@ if(NOT ESP_PLATFORM)
 		atchops::atchops
 		MbedTLS::mbedtls
 		MbedTLS::mbedx509
+		cJSON::cjson-static
 	)
 
 	# Set include directories for atclient target
