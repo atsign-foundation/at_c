@@ -18,16 +18,21 @@ set(atclient_srcs
 )
 
 # 1b. Manually add your include directories here
-set(atclient_include_dir
+set(ATCLIENT_INCLUDE_DIR
 	${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like `#include "atclient/xyz.h"
 )
 
-# 1c. atchops source directory. Only used when ATCLIENT_FETCH_ATCHOPS is set to ON
-set(atchops_src_dir ${CMAKE_CURRENT_LIST_DIR}/../atchops)
+# 1c. atchops package directory
+set(ATCHOPS_DIR ${CMAKE_CURRENT_LIST_DIR}/../atchops)
+
+# 1d. cJSON package directory
+set(CJSON_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cJSON)
+
 
 # 1d. Set compile definitions
 # you may set any of these flags in the CMake configuration step via: `-DATCLIENT_BUILD_TESTS=ON` (example: `cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF)
 # or you may edit the defaults here
+
 option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
 
 # #########################################################
@@ -39,7 +44,7 @@ if(ESP_PLATFORM)
 	# Run special CMake commands for ESP32
 	idf_component_register(
 		SRCS ${atclient_srcs}
-		INCLUDE_DIRS ${atclient_include_dir}
+		INCLUDE_DIRS ${ATCLIENT_INCLUDE_DIR}
 		REQUIRES mbedtls atchops
 	)
 
@@ -47,7 +52,7 @@ if(ESP_PLATFORM)
 	add_custom_command(
 		TARGET ${COMPONENT_LIB}
 		POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${atclient_include_dir} ${CMAKE_SOURCE_DIR}/include
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/include
 		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}> ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
 		COMMENT "Copying built archive file and header to lib directory..."
 	)
@@ -104,9 +109,9 @@ if(NOT ESP_PLATFORM)
 		message(STATUS "[ATCLIENT] atchops not found, fetching from local repository..")
 		FetchContent_Declare(
 			atchops
-			SOURCE_DIR ${atchops_src_dir}
+			SOURCE_DIR ${ATCHOPS_DIR}
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops uuid4-static) # since we've fetched it, we have to install it
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops uuid4-static) # since we've fetched it, we have to install the targets
 		list(APPEND ATCLIENT_MAKE_AVAILABLE atchops) # we have to make it available later on with FetchContent_MakeAvailable
 	else()
 		message(STATUS "[ATCLIENT] atchops found package..")
@@ -123,7 +128,7 @@ if(NOT ESP_PLATFORM)
 			URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
             URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
 		)
-		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto p256m everest) # since we've fetched it, we have to install it
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto p256m everest) # since we've fetched it, we have to install the targets
 		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS) # we have to make it available later on with FetchContent_MakeAvailable
 	else()
 		message(STATUS "[ATCLIENT] MbedTLS found package..")
@@ -151,7 +156,7 @@ if(NOT ESP_PLATFORM)
 
 	# Set include directories for atclient target
 	target_include_directories(${PROJECT_NAME} PUBLIC
-		$<BUILD_INTERFACE:${atclient_include_dir}>
+		$<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
 
@@ -176,7 +181,7 @@ if(NOT ESP_PLATFORM)
 
 	# Copy all headerfiles from `include/atclient` into `/usr/local/include/atclient`
 	install(
-		DIRECTORY ${atclient_include_dir}/${PROJECT_NAME}
+		DIRECTORY ${ATCLIENT_INCLUDE_DIR}/${PROJECT_NAME}
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	)
 

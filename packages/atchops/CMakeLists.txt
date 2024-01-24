@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.19)
 # 0. Variables - you are free to edit anything in this step
 # #########################################################
 
-# add source files manually here, globs are apparently bad practice
-set(atchops_srcs
+# 0a. add source files manually here, globs are apparently bad practice
+set(ATCHOPS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/aes.c
     ${CMAKE_CURRENT_LIST_DIR}/src/aesctr.c
     ${CMAKE_CURRENT_LIST_DIR}/src/base64.c
@@ -16,24 +16,27 @@ set(atchops_srcs
     ${CMAKE_CURRENT_LIST_DIR}/src/uuid.c
 )
 
-set(atchops_include_dir
+# 0b. add include directories manually here
+set(ATCHOPS_INCLUDE_DIR
     ${CMAKE_CURRENT_LIST_DIR}/include # not `include/atchops` because we want clients to include it like #include "atchops/atchops.h"
 )
 
+# 0c. Set CMake policies
 cmake_policy(SET CMP0135 NEW)
 
-option(ATCHOPS_BUILD_TESTS "Build tests" OFF)
+# 0d. Set CMake options
+option(ATCHOPS_BUILD_TESTS "Build tests" OFF) # ON=>build tests, OFF=>don't build tests
 
 if(ESP_PLATFORM)
     idf_component_register(
-        SRCS ${atchops_srcs}
-        INCLUDE_DIRS ${atchops_include_dir}
+        SRCS ${ATCHOPS_SOURCES}
+        INCLUDE_DIRS ${ATCHOPS_INCLUDE_DIR}
         REQUIRES mbedtls
     )
     add_custom_command(
         TARGET ${COMPONENT_LIB}
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${atchops_include_dir} ${CMAKE_SOURCE_DIR}/include
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${ATCHOPS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/include
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}> ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
         COMMENT "Copying built archive file and header to lib directory..."
     )
@@ -115,13 +118,13 @@ if(NOT ESP_PLATFORM)
     # #########################################################
     # 3. Create atchops target
     # #########################################################
-    add_library(${PROJECT_NAME} STATIC ${atchops_srcs})
+    add_library(${PROJECT_NAME} STATIC ${ATCHOPS_SOURCES})
     add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
     # add include/atchops/*.h to `atchops`
     # we put *.h inside of nested atchops/ directory so that it will be included like #include "atchops/atchops.h"
     target_include_directories(${PROJECT_NAME} PUBLIC
-        $<BUILD_INTERFACE:${atchops_include_dir}> # when `cmake ..` look for headers when building in ./packages/atchops/include/atchops/*.h
+        $<BUILD_INTERFACE:${ATCHOPS_INCLUDE_DIR}> # when `cmake ..` look for headers when building in ./packages/atchops/include/atchops/*.h
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # when `make install` look inside of something like /usr/local/include/**
     )
 
@@ -139,7 +142,7 @@ if(NOT ESP_PLATFORM)
 
     # Installs headers to /usr/local/include/atchops/*.h
     install(
-        DIRECTORY ${atchops_include_dir}/${PROJECT_NAME}
+        DIRECTORY ${ATCHOPS_INCLUDE_DIR}/${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} # install goes to: /usr/local/include/atchops/*.h
     )
 
