@@ -1,7 +1,5 @@
-
-
-#include <cJSON/cJSON.h>
 #include <stdio.h>
+#include <cJSON/cJSON.h>
 
 int main()
 {
