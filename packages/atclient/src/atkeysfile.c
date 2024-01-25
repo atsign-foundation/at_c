@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <cJSON/cJSON.h>
 #include "atclient/atkeysfile.h"
 
 #define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
@@ -35,35 +36,16 @@ void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile)
     atkeysfile->selfencryptionkeyolen = 0;
 }
 
-static int extract_json_string(const char *json, const char *key, char *buffer, unsigned long bufferlen)
-{
-    // todo: error handling
-    const char *keyStart = strstr(json, key);
-    if (keyStart == NULL)
-    {
-        return 1; // Key not found
-    }
-
-    // move ptr to start of value
-    keyStart += strlen(key) + 3; // +1 for the colon
-
-    char c;
-    int j = 0;
-    while ((c = *keyStart) != '\0' && c != '\"' && c != '\n' && j < bufferlen)
-    {
-        *(buffer + j) = c;
-        j++;
-        keyStart++;
-    }
-
-    return 0;
-}
-
 int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
 {
     int ret = 1;
 
     FILE *file = fopen(path, "r");
+
+
+    const unsigned long readbuflen = 32768;
+    char *readbuf = (char *) malloc(sizeof(char) * readbuflen);
+    memset(readbuf, 0, readbuflen);
 
     if (file == NULL)
     {
@@ -71,10 +53,6 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         ret = 1;
         goto exit;
     }
-
-    const unsigned long readbuflen = 32768;
-    char *readbuf = (char *) malloc(sizeof(char) * readbuflen);
-    memset(readbuf, 0, readbuflen);
 
     unsigned long bytes_read = fread(readbuf, sizeof(char), readbuflen, file);
     if (bytes_read == 0)
@@ -84,51 +62,64 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    ret = extract_json_string(readbuf, "aesPkamPublicKey", atkeysfile->aespkampublickeystr, atkeysfile->aespkampublickeylen);
-    if (ret != 0)
+    cJSON *root = cJSON_Parse(readbuf);
+
+    cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
+    if (aespkamprivatekey == NULL)
     {
-        printf("Error extracting aesPkamPublicKey\n");
+        printf("Error reading aesPkamPrivateKey!\n");
         ret = 1;
         goto exit;
     }
-    atkeysfile->aespkampublickeyolen = strlen(atkeysfile->aespkampublickeystr);
 
-    ret = extract_json_string(readbuf, "aesPkamPrivateKey", atkeysfile->aespkamprivatekeystr, atkeysfile->aespkamprivatekeylen);
-    if (ret != 0)
+    cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
+    if (aespkampublickey == NULL)
     {
-        printf("Error extracting aesPkamPrivateKey\n");
+        printf("Error reading aesPkamPublicKey!\n");
         ret = 1;
         goto exit;
     }
-    atkeysfile->aespkamprivatekeyolen = strlen(atkeysfile->aespkamprivatekeystr);
 
-    ret = extract_json_string(readbuf, "aesEncryptPublicKey", atkeysfile->aesencryptpublickeystr, atkeysfile->aesencryptpublickeylen);
-    if (ret != 0)
+    cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
+    if (aesencryptprivatekey == NULL)
     {
-        printf("Error extracting aesEncryptPublicKey\n");
+        printf("Error reading aesEncryptPrivateKey!\n");
         ret = 1;
         goto exit;
     }
-    atkeysfile->aesencryptpublickeyolen = strlen(atkeysfile->aesencryptpublickeystr);
 
-    ret = extract_json_string(readbuf, "aesEncryptPrivateKey", atkeysfile->aesencryptprivatekeystr, atkeysfile->aesencryptprivatekeylen);
-    if (ret != 0)
+    cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
+    if (aesencryptpublickey == NULL)
     {
-        printf("Error extracting aesEncryptPrivateKey\n");
+        printf("Error reading aesEncryptPublicKey!\n");
         ret = 1;
         goto exit;
     }
-    atkeysfile->aesencryptprivatekeyolen = strlen(atkeysfile->aesencryptprivatekeystr);
 
-    ret = extract_json_string(readbuf, "selfEncryptionKey", atkeysfile->selfencryptionkeystr, atkeysfile->selfencryptionkeylen);
-    if (ret != 0)
+    cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
+    if (selfencryptionkey == NULL)
     {
-        printf("Error extracting selfEncryptionKey\n");
+        printf("Error reading selfEncryptionKey!\n");
         ret = 1;
         goto exit;
     }
-    atkeysfile->selfencryptionkeyolen = strlen(atkeysfile->selfencryptionkeystr);
 
+    atkeysfile->aespkamprivatekeyolen = strlen(aespkamprivatekey->valuestring);
+    memcpy(atkeysfile->aespkamprivatekeystr, aespkamprivatekey->valuestring, atkeysfile->aespkamprivatekeyolen);
+
+    atkeysfile->aespkampublickeyolen = strlen(aespkampublickey->valuestring);
+    memcpy(atkeysfile->aespkampublickeystr, aespkampublickey->valuestring, atkeysfile->aespkampublickeyolen);
+
+    atkeysfile->aesencryptprivatekeyolen = strlen(aesencryptprivatekey->valuestring);
+    memcpy(atkeysfile->aesencryptprivatekeystr, aesencryptprivatekey->valuestring, atkeysfile->aesencryptprivatekeyolen);
+
+    atkeysfile->aesencryptpublickeyolen = strlen(aesencryptpublickey->valuestring);
+    memcpy(atkeysfile->aesencryptpublickeystr, aesencryptpublickey->valuestring, atkeysfile->aesencryptpublickeyolen);
+
+    atkeysfile->selfencryptionkeyolen = strlen(selfencryptionkey->valuestring);
+    memcpy(atkeysfile->selfencryptionkeystr, selfencryptionkey->valuestring, atkeysfile->selfencryptionkeyolen);
+
+    ret = 0; // success
 
     goto exit;
 
