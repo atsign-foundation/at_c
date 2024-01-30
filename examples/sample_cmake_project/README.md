@@ -2,7 +2,7 @@
 
 This is an example desktop CMake project consuming the atclient library.
 
-First step is to build the static libraries and headers. See [atclient](../packages/atclient/README.md) for instructions on building the source.
+First step is to build the static libraries and headers. See [atclient](../../packages/atclient/README.md) for instructions on building the source.
 
 Next, add the following to your CMakeLists.txt:
 
