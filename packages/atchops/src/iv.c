@@ -5,7 +5,6 @@
 #include "atchops/base64.h"
 #include "atchops/constants.h"
 
-
 int atchops_iv_generate(unsigned char *iv)
 {
     int ret = 1;

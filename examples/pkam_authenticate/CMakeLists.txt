@@ -9,12 +9,10 @@ add_executable(main
     ${CMAKE_CURRENT_LIST_DIR}/src/main.c
 )
 
-find_package(MbedTLS CONFIG REQUIRED)
-find_package(atchops CONFIG REQUIRED)
 find_package(atclient CONFIG REQUIRED)
+find_package(atchops CONFIG)
+find_package(MbedTLS CONFIG)
 
 target_link_libraries(
-    main
-    PRIVATE atclient::atclient
-    MbedTLS::mbedtls atchops::atchops
+    main PRIVATE atclient::atclient
 )

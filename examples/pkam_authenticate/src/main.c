@@ -28,16 +28,18 @@ int main(int argc, char **argv)
     {
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
 
     // 1b. populate `atkeys` struct
     atclient_atkeys atkeys;
     atclient_atkeys_init(&atkeys);
-    ret = atclient_atkeys_populate(&atkeys, atkeysfile);
+    ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
     // printf("atkeys_populate_code: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
 
     // 2. pkam auth
     atclient_ctx atclient;

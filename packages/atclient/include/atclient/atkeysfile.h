@@ -1,26 +1,14 @@
 #ifndef ATCLIENT_ATKEYSFILE_H
 #define ATCLIENT_ATKEYSFILE_H
 
+#include "atclient/atstr.h"
+
 typedef struct atclient_atkeysfile {
-    unsigned long aespkampublickeylen;
-    unsigned char *aespkampublickeystr;
-    unsigned long aespkampublickeyolen;
-
-    unsigned long aespkamprivatekeylen;
-    unsigned char *aespkamprivatekeystr;
-    unsigned long aespkamprivatekeyolen;
-
-    unsigned long aesencryptpublickeylen;
-    unsigned char *aesencryptpublickeystr;
-    unsigned long aesencryptpublickeyolen;
-
-    unsigned long aesencryptprivatekeylen;
-    unsigned char *aesencryptprivatekeystr;
-    unsigned long aesencryptprivatekeyolen;
-
-    unsigned long selfencryptionkeylen;
-    unsigned char *selfencryptionkeystr;
-    unsigned long selfencryptionkeyolen;
+    atclient_atstr aespkamprivatekeystr;
+    atclient_atstr aespkampublickeystr;
+    atclient_atstr aesencryptprivatekeystr;
+    atclient_atstr aesencryptpublickeystr;
+    atclient_atstr selfencryptionkeystr;
 } atclient_atkeysfile;
 
 void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile);
