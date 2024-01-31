@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "atchops/aesctr.h"
+#include "atchops/iv.h"
 
 #define PLAINTEXT "I like to eat pizza 123"
 #define AES_KEY "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="
@@ -17,9 +18,8 @@ int main(int argc, char **argv)
     const unsigned long plaintextlen = strlen(plaintext);
     unsigned long olen = 0;
 
-    const unsigned long ivlen = 16; // iv is always 16 bytes
-    unsigned char *iv = malloc(sizeof(unsigned char) * ivlen);
-    memset(iv, 0, ivlen);
+    unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, ATCHOPS_IV_SIZE);
 
     unsigned long ciphertextlen = BUFFER_SIZE; // sufficient allocation
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
