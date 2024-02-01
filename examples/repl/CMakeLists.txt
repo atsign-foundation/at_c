@@ -10,12 +10,9 @@ project(
 include(GNUInstallDirs)
 include(FetchContent)
 
-# FetchContent_Declare(
-#     atclient
-#     SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../atclient
-# )
-# FetchContent_MakeAvailable(atclient)
 find_package(atclient REQUIRED CONFIG)
+find_package (atchops CONFIG QUIET)
+find_package (MbedTLS CONFIG QUIET)
 
 message(STATUS "atclient was found")
 
