@@ -275,7 +275,6 @@ void atclient_connection_free(atclient_connection *ctx)
     mbedtls_x509_crt_free(&(ctx->cacert));
     mbedtls_entropy_free(&(ctx->entropy));
     mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
-    free(ctx->host);
 }
 
 int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url)
