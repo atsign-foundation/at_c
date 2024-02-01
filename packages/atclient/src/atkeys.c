@@ -7,28 +7,28 @@
 #include "atclient/atlogger.h"
 #include "atclient/atkeys.h"
 #include "atclient/atstr.h"
+#include "atclient/constants.h"
 
 #define TAG "atkeys"
 
-#define BUFFER_SIZE 4096 // the max size of an RSA key base 64 encoded (unencrypted)
 
 void atclient_atkeys_init(atclient_atkeys *atkeys)
 {
     memset(atkeys, 0, sizeof(atclient_atkeys));
 
-    atclient_atstr_init(&(atkeys->pkampublickeystr), BUFFER_SIZE);
+    atclient_atstr_init(&(atkeys->pkampublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
     atchops_rsakey_init_publickey(&(atkeys->pkampublickey));
 
-    atclient_atstr_init(&(atkeys->pkamprivatekeystr), BUFFER_SIZE);
+    atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
     atchops_rsakey_init_privatekey(&(atkeys->pkamprivatekey));
 
-    atclient_atstr_init(&(atkeys->encryptpublickeystr), BUFFER_SIZE);
+    atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
     atchops_rsakey_init_publickey(&(atkeys->encryptpublickey));
 
-    atclient_atstr_init(&(atkeys->encryptprivatekeystr), BUFFER_SIZE);
+    atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
     atchops_rsakey_init_privatekey(&(atkeys->encryptprivatekey));
 
-    atclient_atstr_init(&(atkeys->selfencryptionkeystr), BUFFER_SIZE);
+    atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
 }
 
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
