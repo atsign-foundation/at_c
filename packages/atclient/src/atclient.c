@@ -115,28 +115,28 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     ret = atclient_atsign_without_at_symbol(withoutat.str, withoutat.len, &(withoutat.olen), atsign, atsignlen);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atsign_without_at_symbol: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_without_at_symbol: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_atstr_set_literal(&atsigncmd, "%.*s\r\n", (int) withoutat.olen, withoutat.str);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_atbytes_convert_atstr(&src, atsigncmd);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atbytes_convert_atstr: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_connection_send(&(ctx->root_connection), src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_connection_send: %d\n | failed to send: %.*s\n", ret, withoutat.olen, withoutat);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n", ret, withoutat.olen, withoutat);
         goto exit;
     }
 
@@ -146,21 +146,21 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     ret = atclient_atstr_set_literal(&url, "%.*s", (int) recv.olen, recv.bytes);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_connection_get_host_and_port(&host, &port, url);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.olen, recv.bytes);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.olen, recv.bytes);
         goto exit;
     }
 
     ret = atclient_start_secondary_connection(ctx, host.str, port);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_start_secondary_connection: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_secondary_connection: %d\n", ret);
         goto exit;
     }
 
@@ -168,28 +168,28 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     ret = atclient_atstr_set_literal(&fromcmd, "from:%.*s\r\n", (int) withoutat.olen, withoutat.str);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_atbytes_convert(&src, fromcmd.str, fromcmd.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atbytes_convert: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_connection_send: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_atstr_set_literal(&challenge, "%.*s", (int) recv.olen, recv.bytes);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
         goto exit;
     }
 
@@ -197,7 +197,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     ret = atclient_atstr_substring(&challengewithoutdata, challenge, 5, challenge.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atstr_substring: %d\n | failed to remove \'data:\' prefix", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_substring: %d\n | failed to remove \'data:\' prefix", ret);
         goto exit;
     }
 
@@ -206,20 +206,20 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     ret = atclient_atbytes_convert_atstr(&challengebytes, challengewithoutdata);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atbytes_convert_atstr: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
         goto exit;
     }
     ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen, recv.bytes, recv.len, &recv.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atchops_rsa_sign: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_atstr_set_literal(&pkamcmd, "pkam:%.*s\r\n", (int) recv.olen, recv.bytes);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
         goto exit;
     }
     
@@ -227,14 +227,14 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     ret = atclient_atbytes_convert_atstr(&src, pkamcmd);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_atbytes_convert_atstr: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
         goto exit;
     }
 
     ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &recv.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, "atclient_connection_send: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
         goto exit;
     }
 
