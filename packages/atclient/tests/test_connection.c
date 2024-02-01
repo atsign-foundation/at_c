@@ -16,6 +16,11 @@ int main()
     atclient_connection connection;
     atclient_connection_init(&connection);
 
+    const unsigned long dstlen = 1024;
+    unsigned char dst[dstlen];
+    memset(dst, 0, sizeof(unsigned char) * dstlen);
+    unsigned long olen = 0;
+    
     ret = atclient_connection_connect(&connection, host, port);
     printf("atclient_connection_connect: %d\n", ret);
     if (ret != 0)
@@ -23,10 +28,6 @@ int main()
         goto exit;
     }
 
-    const unsigned long dstlen = 1024;
-    unsigned char dst[dstlen];
-    memset(dst, 0, sizeof(unsigned char) * dstlen);
-    unsigned long olen = 0;
 
     const unsigned char *cmd = "colin\r\n";
     const unsigned long cmdlen = strlen(cmd);
