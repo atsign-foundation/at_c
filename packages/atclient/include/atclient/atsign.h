@@ -11,6 +11,6 @@
  * @param originalatsignlen the string length of the atsign being read
  * @return int 0 on success, 1 on if atsignlen is not large enough, 2 on if the originalatsignlen length passed is <= 0.
  */
-int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen, const char *originalatsign, const unsigned long *originalatsignlen);
+int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen, const char *originalatsign, const unsigned long originalatsignlen);
 
 #endif
