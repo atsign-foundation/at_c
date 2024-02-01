@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.19)
 project(sample_cmake_project)
 
 find_package(atclient REQUIRED CONFIG)
+find_package(atchops)
+find_package(MbedTLS)
 
 message(STATUS "Found atclient!")
 
