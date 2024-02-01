@@ -13,7 +13,7 @@ int main()
     printf("host: %s\n", host);
     printf("port: %d\n", port);
 
-    atclient_connection_ctx ctx;
+    atclient_connection ctx;
     atclient_connection_init(&ctx);
 
     ret = atclient_connection_connect(&ctx, host, port);

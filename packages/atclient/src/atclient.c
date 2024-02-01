@@ -1,26 +1,27 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <mbedtls/md.h>
+#include <atchops/rsa.h>
+#include <atchops/aesctr.h>
 #include "atclient/atclient.h"
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
 #include "atclient/connection.h"
 #include "atclient/atlogger.h"
-#include "atchops/rsa.h"
-#include "atchops/aesctr.h"
-
-#define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
+#include "atclient/atstr.h"
+#include "atclient/atbytes.h"
+#include "atclient/atsign.h"
+#include "atclient/constants.h"
 
 #define TAG "atclient"
 
-void atclient_init(atclient_ctx *ctx)
+void atclient_init(atclient *ctx)
 {
-    memset(ctx, 0, sizeof(atclient_ctx));
+    memset(ctx, 0, sizeof(atclient));
 }
 
-int atclient_init_root_connection(atclient_ctx *ctx, const char *roothost, const int rootport)
+int atclient_start_root_connection(atclient *ctx, const char *roothost, const int rootport)
 {
     int ret = 1; // error by default
 
@@ -42,7 +43,7 @@ exit:
 }
 }
 
-int atclient_init_secondary_connection(atclient_ctx *ctx, const char *secondaryhost, const int secondaryport)
+int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport)
 {
     int ret = 1; // error by default
 
@@ -62,127 +63,201 @@ exit: {
 }
 }
 
-int atclient_pkam_authenticate(atclient_ctx *ctx, atclient_atkeys atkeys, const char *atsign)
+int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign, const unsigned long atsignlen)
 {
     int ret = 1; // error by default
 
     // 1. init root connection
+    const unsigned long srclen = 1024;
+    atclient_atbytes src;
+    atclient_atbytes_init(&src, srclen);
+
     const unsigned long recvlen = 1024;
-    unsigned char *recv = (unsigned char *) malloc(sizeof(unsigned char) * recvlen);
-    memset(recv, 0, sizeof(unsigned char) * recvlen);
+    atclient_atbytes recv;
+    atclient_atbytes_init(&recv, recvlen);
 
-    unsigned long srclen = 1024;
-    unsigned char *src = (unsigned char *) malloc(sizeof(unsigned char) * srclen);
-    memset(src, 0, sizeof(unsigned char) * srclen);
+    const unsigned long withoutatlen = 1024;
+    atclient_atstr withoutat;
+    atclient_atstr_init(&withoutat, withoutatlen);
 
-    atsign++; // remove @
-    memcpy(src, atsign, strlen(atsign));
-    memcpy(src + strlen(atsign), "\r\n", 2);
-    atsign--;
+    const unsigned long urllen = 256;
+    atclient_atstr url;
+    atclient_atstr_init(&url, 256);
 
-    unsigned long olen = 0;
-    ret = atclient_connection_send(&(ctx->root_connection), src, strlen((char *) src), recv, recvlen, &olen);
+    atclient_atstr host;
+    atclient_atstr_init(&host, 256);
+    int port = 0;
+
+    const unsigned long atsigncmdlen = 1024;
+    atclient_atstr atsigncmd;
+    atclient_atstr_init(&atsigncmd, atsigncmdlen);
+
+    const unsigned long fromcmdlen = 1024;
+    atclient_atstr fromcmd;
+    atclient_atstr_init(&fromcmd, fromcmdlen);
+
+    const unsigned long challengelen = 1024;
+    atclient_atstr challenge;
+    atclient_atstr_init(&challenge, challengelen);
+
+    const unsigned long challengewithoutdatalen = 1024;
+    atclient_atstr challengewithoutdata;
+    atclient_atstr_init(&challengewithoutdata, challengewithoutdatalen);
+
+    const unsigned long challengebyteslen = 1024;
+    atclient_atbytes challengebytes;
+    atclient_atbytes_init(&challengebytes, challengebyteslen);
+
+    const unsigned long pkamcmdlen = 1024;
+    atclient_atstr pkamcmd;
+    atclient_atstr_init(&pkamcmd, pkamcmdlen);
+
+    ret = atclient_atsign_without_at_symbol(withoutat.str, withoutat.len, &(withoutat.olen), atsign, atsignlen);
     if(ret != 0)
     {
+        atlogger_log(TAG, "atclient_atsign_without_at_symbol: %d\n", ret);
         goto exit;
     }
-    // printf("recv: \'%s\'\n", recv);
 
-    // recv is something like 3b419d7a-2fee-5080-9289-f0e1853abb47.swarm0002.atsign.zone:5770
-    // store host and port in separate vars
-    char *host = (char *) malloc(sizeof(char) * 1024);
-    char *portstr = (char *) malloc(sizeof(char) * 16);
-    int port;
-    memset(host, 0, sizeof(unsigned char) * 1024);
-    memset(portstr, 0, sizeof(unsigned char) * 16);
-
-    int i = 0;
-    for(; i < olen; i++)
-    {
-        if(recv[i] == ':')
-        {
-            break;
-        }
-        host[i] = recv[i];
-    }
-    i++;
-    for(int j = 0; i < olen; i++)
-    {
-        portstr[j] = recv[i];
-        j++;
-    }
-    port = atoi(portstr);
-
-    // 2. init secondary connection
-    ret = atclient_init_secondary_connection(ctx, host, port);
-    // printf("atclient_init_secondary_connection: %d\n", ret);
+    ret = atclient_atstr_set_literal(&atsigncmd, "%.*s\r\n", (int) withoutat.olen, withoutat.str);
     if(ret != 0)
     {
+        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        goto exit;
+    }
+
+    ret = atclient_atbytes_convert_atstr(&src, atsigncmd);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_atbytes_convert_atstr: %d\n", ret);
+        goto exit;
+    }
+
+    ret = atclient_connection_send(&(ctx->root_connection), src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_connection_send: %d\n | failed to send: %.*s\n", ret, withoutat.olen, withoutat);
+        goto exit;
+    }
+
+    // 2. init secondary connection
+    // recv is something like 3b419d7a-2fee-5080-9289-f0e1853abb47.swarm0002.atsign.zone:5770
+    // store host and port in separate vars
+    ret = atclient_atstr_set_literal(&url, "%.*s", (int) recv.olen, recv.bytes);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        goto exit;
+    }
+
+    ret = atclient_connection_get_host_and_port(&host, &port, url);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.olen, recv.bytes);
+        goto exit;
+    }
+
+    ret = atclient_start_secondary_connection(ctx, host.str, port);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_start_secondary_connection: %d\n", ret);
         goto exit;
     }
 
     // 3. send pkam auth
-    memset(src, 0, sizeof(unsigned char) * srclen);
-    memset(recv, 0, sizeof(unsigned char) * recvlen);
-
-    memcpy(src, "from:", 5);
-    memcpy(src + 5, atsign, strlen(atsign));
-    memcpy(src + 5 + strlen(atsign), "\r\n", 2);
-
-    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen((char *) src), recv, recvlen, &olen);
+    ret = atclient_atstr_set_literal(&fromcmd, "from:%.*s\r\n", (int) withoutat.olen, withoutat.str);
     if(ret != 0)
     {
+        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
         goto exit;
     }
 
-    const unsigned long challengelen = 1024;
-    unsigned char *challenge = (unsigned char *) malloc(sizeof(unsigned char) * challengelen);
-    memset(challenge, 0, challengelen);
-    memcpy(challenge, recv, olen);
+    ret = atclient_atbytes_convert(&src, fromcmd.str, fromcmd.olen);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_atbytes_convert: %d\n", ret);
+        goto exit;
+    }
 
-    // remove data:
-    challenge = challenge + 5;
-    // remove \r\n@ at the end
-    challenge[olen - 5] = '\0';
+    ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_connection_send: %d\n", ret);
+        goto exit;
+    }
 
+    ret = atclient_atstr_set_literal(&challenge, "%.*s", (int) recv.olen, recv.bytes);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        goto exit;
+    }
+
+    // remove "data:" prefix
+    ret = atclient_atstr_substring(&challengewithoutdata, challenge, 5, challenge.olen);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_atstr_substring: %d\n | failed to remove \'data:\' prefix", ret);
+        goto exit;
+    }
 
     // sign
-    memset(recv, 0, recvlen);
-    ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challenge, strlen((char *) challenge), recv, recvlen, &olen);
-    // printf("atchops_rsa_sign: %d\n", ret);
+    atclient_atstr_reset(&recv);
+    ret = atclient_atbytes_convert_atstr(&challengebytes, challengewithoutdata);
     if(ret != 0)
     {
+        atlogger_log(TAG, "atclient_atbytes_convert_atstr: %d\n", ret);
+        goto exit;
+    }
+    ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen, recv.bytes, recv.len, &recv.olen);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atchops_rsa_sign: %d\n", ret);
         goto exit;
     }
 
-
-    memset(src, 0, srclen);
-
-    memcpy(src, "pkam:", 5);
-    memcpy(src + 5, recv, olen);
-    memcpy(src + 5 + olen, "\r\n", 2);
-
-
-    memset(recv, 0, recvlen);
-
-    ret = atclient_connection_send(&(ctx->secondary_connection), src, strlen((char *) src), recv, recvlen, &olen);
-
+    ret = atclient_atstr_set_literal(&pkamcmd, "pkam:%.*s\r\n", (int) recv.olen, recv.bytes);
     if(ret != 0)
     {
+        atlogger_log(TAG, "atclient_atstr_set_literal: %d\n", ret);
+        goto exit;
+    }
+    
+    atclient_atstr_reset(&recv);
+    ret = atclient_atbytes_convert_atstr(&src, pkamcmd);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_atbytes_convert_atstr: %d\n", ret);
         goto exit;
     }
 
+    ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &recv.olen);
+    if(ret != 0)
+    {
+        atlogger_log(TAG, "atclient_connection_send: %d\n", ret);
+        goto exit;
+    }
 
+    ret = 0;
 
     goto exit;
 exit: {
-    free(src);
-    free(recv);
+    atclient_atbytes_free(&src);
+    atclient_atbytes_free(&recv);
+    atclient_atstr_free(&withoutat);
+    atclient_atstr_free(&url);
+    atclient_atstr_free(&host);
+    atclient_atstr_free(&atsigncmd);
+    atclient_atstr_free(&fromcmd);
+    atclient_atstr_free(&challenge);
+    atclient_atstr_free(&challengewithoutdata);
+    atclient_atbytes_free(&challengebytes);
+    atclient_atstr_free(&pkamcmd);
     return ret;
 }
 }
 
-void atclient_free(atclient_ctx *ctx)
+void atclient_free(atclient *ctx)
 {
     atclient_connection_free(&(ctx->root_connection));
     atclient_connection_free(&(ctx->secondary_connection));
