@@ -202,7 +202,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     }
 
     // sign
-    atclient_atstr_reset(&recv);
+    atclient_atbytes_reset(&recv);
     ret = atclient_atbytes_convert_atstr(&challengebytes, challengewithoutdata);
     if(ret != 0)
     {
@@ -223,7 +223,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
         goto exit;
     }
     
-    atclient_atstr_reset(&recv);
+    atclient_atbytes_reset(&recv);
     ret = atclient_atbytes_convert_atstr(&src, pkamcmd);
     if(ret != 0)
     {
