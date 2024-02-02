@@ -109,56 +109,51 @@ int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char 
 {
     int ret = 1;
 
-    // 1. rsa encrypt the plain text
     mbedtls_rsa_context rsa;
     mbedtls_rsa_init(&rsa);
-
-    ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1, publickey.e.value, publickey.e.len);
-    // printf("importing rsa: %d\n", ret);
-    if (ret != 0)
-    {
-        goto exit;
-    }
-
-    ret = mbedtls_rsa_check_pubkey(&rsa);
-    // printf("public key check: %d\n", ret);
-    if (ret != 0)
-    {
-        goto exit;
-    }
-
-    ret = mbedtls_rsa_complete(&rsa);
-    // printf("mbedtls_rsa_complete: %d\n", ret);
-    if (ret != 0)
-    {
-        goto exit;
-    }
 
     mbedtls_entropy_context entropy_ctx;
     mbedtls_entropy_init(&entropy_ctx);
 
     mbedtls_ctr_drbg_context ctr_drbg_ctx;
     mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
-    ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
-    // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
-    if (ret != 0)
-    {
-        goto exit;
-    }
 
     const unsigned long outputlen = 256; // 256 bytes is the result of an RSA
     unsigned char *output = malloc(sizeof(unsigned char) * outputlen);
     memset(output, 0, outputlen);
 
+    // 1. rsa encrypt the plain text
+    ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1, publickey.e.value, publickey.e.len);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = mbedtls_rsa_check_pubkey(&rsa);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = mbedtls_rsa_complete(&rsa);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
     ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, plaintext, output);
-    // printf("mbedtls_rsa_pkcs1_encrypt: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = atchops_base64_encode(output, outputlen, ciphertextbase64, ciphertextbase64len, ciphertextbase64olen);
-    // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
@@ -168,6 +163,9 @@ int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char 
 
 exit:
 {
+    mbedtls_rsa_free(&rsa);
+    mbedtls_ctr_drbg_free(&ctr_drbg_ctx);
+    mbedtls_entropy_free(&entropy_ctx);
     free(output);
     return ret;
 }
