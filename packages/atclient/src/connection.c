@@ -172,7 +172,6 @@ static void fix_stdout_buffer(char *str, const unsigned long strlen)
     // if str == 'Jeremy\n', i want it to be 'Jeremy'
     // if str == 'Jeremy\r', i want it to be 'Jeremy'
 
-
     if (strlen == 0)
     {
         goto exit;
@@ -305,6 +304,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
 exit:
 {
+    atclient_atstr_free(&stdoutbuffer);
     return ret;
 }
 }
@@ -343,6 +343,7 @@ int atclient_connection_is_connected(atclient_connection *ctx)
 
 exit:
 {
+    free(recv);
     return ret;
 }
 }
