@@ -28,18 +28,12 @@ void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile)
 int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
 {
     int ret = 1;
+    cJSON *root = NULL;
 
     FILE *file = fopen(path, "r");
 
     atclient_atstr readbuf;
     atclient_atstr_init(&readbuf, FILE_READ_BUFFER_SIZE);
-
-    cJSON *root = cJSON_Parse(readbuf.str);
-    cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
-    cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
-    cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
-    cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
-    cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
 
     if (file == NULL)
     {
@@ -55,6 +49,13 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         ret = 1;
         goto exit;
     }
+
+    root = cJSON_Parse(readbuf.str);
+    cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
+    cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
+    cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
+    cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
+    cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
 
     if (aespkamprivatekey == NULL)
     {
@@ -127,11 +128,15 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     }
     goto exit;
 
+
 exit:
 {
+    if(root != NULL)
+    {
+        cJSON_Delete(root);
+    }
     fclose(file);
     atclient_atstr_free(&readbuf);
-    cJSON_Delete(root);
     return ret;
 }
 }
