@@ -45,8 +45,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
 {
     int ret = 1;
 
-    unsigned char *iv = (unsigned char *) malloc(sizeof(unsigned char) * ATCHOPS_IV_SIZE);
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    unsigned char *iv = (unsigned char *) malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     const unsigned long recvlen = 32768;
     unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
@@ -72,7 +72,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
         goto exit;
     }
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     // 1c. pkam private key
     ret = atchops_aesctr_decrypt(
@@ -84,7 +84,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
         goto exit;
     }
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     // 1d. encrypt public key
     ret = atchops_aesctr_decrypt(
@@ -96,7 +96,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
         goto exit;
     }
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     // 1e. encrypt private key
     ret = atchops_aesctr_decrypt(

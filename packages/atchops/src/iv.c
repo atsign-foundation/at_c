@@ -20,7 +20,7 @@ int atchops_iv_generate(unsigned char *iv)
         goto exit;
     }
 
-    if ((ret = mbedtls_ctr_drbg_random(&ctr_drbg, iv, ATCHOPS_IV_SIZE)) != 0)
+    if ((ret = mbedtls_ctr_drbg_random(&ctr_drbg, iv, ATCHOPS_IV_BUFFER_SIZE)) != 0)
     {
         // printf("Error generating random IV\n");
         goto exit;
@@ -46,7 +46,7 @@ int atchops_iv_generate_base64(unsigned char *ivbase64, const unsigned long ivba
 {
     int ret = 1;
 
-    unsigned char iv[ATCHOPS_IV_SIZE];
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
     ret = atchops_iv_generate(iv);
     if (ret != 0)
@@ -54,7 +54,7 @@ int atchops_iv_generate_base64(unsigned char *ivbase64, const unsigned long ivba
         goto exit;
     }
 
-    ret = atchops_base64_encode(iv, ATCHOPS_IV_SIZE, ivbase64, ivbase64len, ivbase64olen);
+    ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64len, ivbase64olen);
     if (ret != 0)
     {
         goto exit;
