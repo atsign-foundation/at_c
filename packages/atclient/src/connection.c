@@ -253,7 +253,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
     fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tSENT: \"%s%.*s%s\"\n", "\033[0;33m", (int)stdoutbuffer.olen, stdoutbuffer.str, "\033[0m");
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m", (int)stdoutbuffer.olen, stdoutbuffer.str);
 
     memset(recv, 0, recvlen);
     int found = 0;
@@ -298,8 +298,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     }
     fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
 
-
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tRECV: \"%s%.*s%s\"\n", "\033[31m", (int)stdoutbuffer.olen, stdoutbuffer.str, "\033[0m");
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\e[0m\"\n", "\e[1;35m", "\e[0;95m", (int)stdoutbuffer.olen, stdoutbuffer.str);
 
     goto exit;
 
