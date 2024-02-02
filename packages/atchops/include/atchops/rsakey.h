@@ -22,11 +22,11 @@ typedef struct atchops_rsakey_privatekey
     atchops_rsakey_param q; // prime 2
 } atchops_rsakey_privatekey;
 
-void atchops_rsakey_init_publickey(atchops_rsakey_publickey *publickey);
-void atchops_rsakey_free_publickey(atchops_rsakey_publickey *publickey);
+void atchops_rsakey_publickey_init(atchops_rsakey_publickey *publickey);
+void atchops_rsakey_publickey_free(atchops_rsakey_publickey *publickey);
 
-void atchops_rsakey_init_privatekey(atchops_rsakey_privatekey *privatekey);
-void atchops_rsakey_free_privatekey(atchops_rsakey_privatekey *privatekey);
+void atchops_rsakey_privatekey_init(atchops_rsakey_privatekey *privatekey);
+void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey);
 
 /**
  * @brief Populate a public key struct from a base64 string
