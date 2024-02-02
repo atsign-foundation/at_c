@@ -298,7 +298,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     }
     fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\e[0m\"\n", "\e[1;35m", "\e[0;95m", (int)stdoutbuffer.olen, stdoutbuffer.str);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m", (int)stdoutbuffer.olen, stdoutbuffer.str);
     memset(recv, 0, sizeof(unsigned char) * recvlen); // clear the buffer
     memcpy(recv, stdoutbuffer.str, stdoutbuffer.olen);
     goto exit;
