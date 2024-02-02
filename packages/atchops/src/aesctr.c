@@ -22,19 +22,10 @@ int atchops_aesctr_encrypt(
 {
     int ret = 1;
 
-    // 1. initialize AES key
-    const unsigned long keylen = keybits / 8; // 256/8 = 32 bytes long
-    unsigned char *key = malloc(sizeof(unsigned char) * keylen);
-    unsigned long keyolen = 0;
+    mbedtls_aes_context aes;
+    mbedtls_aes_init(&aes);
 
-    ret = atchops_base64_decode((const unsigned char *)keybase64, keybase64len, key, keylen, &keyolen);
-    // printf("atchops_base64_decode: %d\n", ret);
-    if (ret != 0)
-    {
-        goto exit;
-    }
-
-    // 2. pad the plaintext
+    // 1. pad the plaintext
     unsigned char *plaintextpadded;   // will contain the plaintext with padded trialing bytes
     unsigned long plaintextpaddedlen; // the length of the plain text + padding (no null terminator)
 
@@ -50,17 +41,6 @@ int atchops_aesctr_encrypt(
     memset(plaintextpadded + plaintextlen, padval, numpadbytestoadd);
     plaintextpadded[plaintextpaddedlen] = '\0';
 
-    // 3. AES CTR encrypt
-    mbedtls_aes_context aes;
-    mbedtls_aes_init(&aes);
-
-    ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
-    // printf("mbedtls_aes_setkey_enc: %d\n", ret);
-    if (ret != 0)
-    {
-        goto exit;
-    }
-
     const unsigned long ciphertextlen = plaintextlen * 8; // 8 times the plaintext length should be sufficient space for the ciphertext
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     memset(ciphertext, 0, ciphertextlen);
@@ -70,8 +50,25 @@ int atchops_aesctr_encrypt(
     unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
     memset(stream_block, 0, 16);
 
+    // 2. initialize AES key
+    const unsigned long keylen = keybits / 8; // 256/8 = 32 bytes long
+    unsigned char *key = malloc(sizeof(unsigned char) * keylen);
+    unsigned long keyolen = 0;
+
+    ret = atchops_base64_decode((const unsigned char *)keybase64, keybase64len, key, keylen, &keyolen);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
+    // 3. AES CTR encrypt
+    ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
+    if (ret != 0)
+    {
+        goto exit;
+    }
+
     ret = mbedtls_aes_crypt_ctr(&aes, plaintextpaddedlen, &nc_off, iv, stream_block, plaintextpadded, ciphertext);
-    // printf("mbedtls_aes_crypt_ctr: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
@@ -83,7 +80,6 @@ int atchops_aesctr_encrypt(
 
     // 4. base64 encode ciphertext
     ret = atchops_base64_encode(ciphertext, ciphertextolen, ciphertextbase64, ciphertextbase64len, ciphertextbase64olen);
-    // printf("atchops_base64_encode: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
@@ -93,9 +89,10 @@ int atchops_aesctr_encrypt(
 
 exit:
 {
-    free(stream_block);
     free(key);
+    free(stream_block);
     free(ciphertext);
+    free(plaintextpadded);
     mbedtls_aes_free(&aes);
     return ret;
 }
