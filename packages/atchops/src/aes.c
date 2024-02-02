@@ -15,9 +15,10 @@ int atchops_aes_generate_key(unsigned char *key, const atchops_aes_keysize keysi
     // note: To use the AES generator, you need to have the modules enabled in the mbedtls/config.h files (MBEDTLS_CTR_DRBG_C and MBEDTLS_ENTROPY_C), see How do I configure Mbed TLS. https://mbed-tls.readthedocs.io/en/latest/kb/how-to/generate-an-aes-key/
 
     mbedtls_ctr_drbg_context ctr_drbg;
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
     mbedtls_entropy_context entropy;
     mbedtls_entropy_init(&entropy);
-    mbedtls_ctr_drbg_init(&ctr_drbg);
 
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                      (unsigned char *)pers, strlen(pers))) != 0)
@@ -44,9 +45,9 @@ int atchops_aes_generate_keybase64(unsigned char *keybase64, const unsigned long
 {
     int ret = 1;
 
-    const unsigned long keybytes = keysize / 8;
-    unsigned char key[keybytes];
-    memset(key, 0, keybytes);
+    const unsigned long keylen = keysize / 8;
+    unsigned char key[keylen];
+    memset(key, 0, keylen);
 
     ret = atchops_aes_generate_key(key, keysize);
     if (ret != 0)
@@ -54,7 +55,7 @@ int atchops_aes_generate_keybase64(unsigned char *keybase64, const unsigned long
         goto exit;
     }
 
-    ret = atchops_base64_encode(key, keybytes, keybase64, keybase64len, keybase64olen);
+    ret = atchops_base64_encode(key, keylen, keybase64, keybase64len, keybase64olen);
     if (ret != 0)
     {
         goto exit;
