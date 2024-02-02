@@ -25,7 +25,7 @@ int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, 
     int ret = 1;
     if(byteslen > atbytes->len)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "byteslen is greater than atbyteslen. byteslen: %lu, atbyteslen: %lu\n", byteslen, atbytes->len);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "byteslen is greater than atbyteslen. byteslen: %lu, atbyteslen: %lu\n", byteslen, atbytes->len);
         ret = 1;
         goto exit;
     }
@@ -44,7 +44,7 @@ int atclient_atbytes_convert(atclient_atbytes *atbytes, const char *str, const u
     int ret = 1;
     if(strlen > atbytes->len)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen is greater than atbyteslen. strlen: %lu, atbyteslen: %lu\n", strlen, atbytes->len);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen is greater than atbyteslen. strlen: %lu, atbyteslen: %lu\n", strlen, atbytes->len);
         ret = 1;
         goto exit;
     }
@@ -63,7 +63,7 @@ int atclient_atbytes_convert_atstr(atclient_atbytes *atbytes, const atclient_ats
     int ret = atclient_atbytes_convert(atbytes, atstr.str, atstr.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert failed");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert failed");
         goto exit;
     }
 exit:

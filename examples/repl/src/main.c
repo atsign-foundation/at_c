@@ -8,6 +8,7 @@
 #include <atclient/atlogger.h>
 #include <atclient/atclient.h>
 #include <atclient/atkeys.h>
+#include <atclient/atbytes.h>
 
 #define TAG "REPL"
 
@@ -21,6 +22,14 @@ int main(int argc, char *argv[])
 {
     int ret = 1;
     atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+
+    const unsigned long cmdlen = 32768;
+    atclient_atbytes cmd;
+    atclient_atbytes_init(&cmd, cmdlen);
+
+    const unsigned long recvlen = 32768;
+    atclient_atbytes recv;
+    atclient_atbytes_init(&recv, recvlen);
 
     if(argc < 2 || argc > 3)
     {
@@ -83,10 +92,47 @@ int main(int argc, char *argv[])
     }
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n", atsign);
 
+    const unsigned long bufferlen = 1024;
+    char buffer[bufferlen];
+
+    int loop = 1;
+    do
+    {
+        memset(buffer, 0, sizeof(char) * bufferlen);
+        printf("Enter command: \n");
+        fgets(buffer, bufferlen, stdin);
+        ret = atclient_atbytes_convert(&cmd, buffer, strlen(buffer));
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert: %d | failed to convert command\n", ret);
+            goto exit;
+        }
+        if(strncmp(cmd.bytes, "/exit", strlen("/exit")) == 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Exiting REPL...\n");
+            loop = 0;
+            continue;
+        }
+        ret = atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.olen, recv.bytes, recv.len, &recv.olen);
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d | failed to send command\n", ret);
+            goto exit;
+        }
+        atclient_atbytes_reset(&cmd);
+        atclient_atbytes_reset(&recv);
+
+    } while(loop == 1);
+
+    ret = 0;
+    goto exit;
+
 
 
 exit:
 {
+    atclient_atstr_free(&cmd);
+    atclient_atstr_free(&recv);
     return ret;
 }
 }

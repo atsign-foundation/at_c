@@ -136,7 +136,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     }
 
     // press enter
-    ret = mbedtls_ssl_write(&(ctx->ssl), (const unsigned char *) "\r\n", 2);
+    ret = mbedtls_ssl_write(&(ctx->ssl), (const unsigned char *)"\r\n", 2);
     if (ret < 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
@@ -166,15 +166,94 @@ exit:
 }
 }
 
+static void fix_stdout_buffer(char *str, const unsigned long strlen)
+{
+    // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
+    // if str == 'Jeremy\n', i want it to be 'Jeremy'
+    // if str == 'Jeremy\r', i want it to be 'Jeremy'
+
+
+    if (strlen == 0)
+    {
+        goto exit;
+    }
+
+    int carriagereturnindex = -1;
+    int newlineindex = -1;
+
+    for (int i = strlen; i >= 0; i--)
+    {
+        if (str[i] == '\r' && carriagereturnindex == -1)
+        {
+            carriagereturnindex = i;
+        }
+        if (carriagereturnindex != -1 && newlineindex != -1)
+        {
+            break;
+        }
+    }
+
+    if (carriagereturnindex != -1)
+    {
+        for (int i = carriagereturnindex; i < strlen - 1; i++)
+        {
+            str[i] = str[i + 1];
+        }
+        str[strlen - 1] = '\0';
+    }
+
+    for (int i = strlen; i >= 0; i--)
+    {
+        if (str[i] == '\n' && newlineindex == -1)
+        {
+            newlineindex = i;
+        }
+        if (carriagereturnindex != -1 && newlineindex != -1)
+        {
+            break;
+        }
+    }
+
+    if (newlineindex != -1)
+    {
+        for (int i = newlineindex; i < strlen - 1; i++)
+        {
+            str[i] = str[i + 1];
+        }
+        str[strlen - 1] = '\0';
+    }
+
+    goto exit;
+
+exit:
+{
+    return;
+}
+}
+
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const unsigned long srclen, unsigned char *recv, const unsigned long recvlen, unsigned long *olen)
 {
     int ret = 1;
+
+    atclient_atstr stdoutbuffer;
+    atclient_atstr_init(&stdoutbuffer, 32768);
+
     ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen);
     if (ret < 0)
     {
         goto exit;
     }
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tSENT: \"%.*s\"\n", (int) srclen, src);
+
+    ret = atclient_atstr_set_literal(&stdoutbuffer, "%.*s", (int)srclen, src);
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
+
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tSENT: \"%s%.*s%s\"\n", "\033[0;33m", (int)stdoutbuffer.olen, stdoutbuffer.str, "\033[0m");
 
     memset(recv, 0, recvlen);
     int found = 0;
@@ -210,17 +289,17 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
         goto exit;
     }
 
-    *olen = 0;
-    while (recv[(*olen)] != '\r' && recv[(*olen)] != '\n')
+    atclient_atstr_reset(&stdoutbuffer);
+    ret = atclient_atstr_set_literal(&stdoutbuffer, "%.*s", (int)*olen, recv);
+    if (ret != 0)
     {
-        *olen = *olen + 1;
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
     }
+    fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
 
-    if (ret > 0)
-    {
-        ret = 0;
-    }
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tRECV: \"%.*s\"\n", (int) *olen, recv);
+
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tRECV: \"%s%.*s%s\"\n", "\033[31m", (int)stdoutbuffer.olen, stdoutbuffer.str, "\033[0m");
 
     goto exit;
 
@@ -262,7 +341,8 @@ int atclient_connection_is_connected(atclient_connection *ctx)
 
     goto exit;
 
-exit: {
+exit:
+{
     return ret;
 }
 }
@@ -301,7 +381,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
     host->len = hostlen;
     host->str[hostlen] = '\0';
     *port = atoi(colon + 1);
-    if(*port == 0)
+    if (*port == 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "port is 0\n");
         ret = 1;
