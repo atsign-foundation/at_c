@@ -16,8 +16,6 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
 {
     int ret = 1; // error, until successful.
 
-    // 1. hash the message
-
     const unsigned long hashlen = 32;
     unsigned char *hash = malloc(sizeof(unsigned char) * hashlen);
     memset(hash, 0, hashlen);
@@ -175,22 +173,28 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
 {
     int ret = 1;
 
-    // 1. base64 decode the ciphertextbase64
     const unsigned long ciphertextlen = plaintextlen; // the result of the base64 decode of the cipher text should be of sufficient length for the plaintext length they are expecting
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     memset(ciphertext, 0, ciphertextlen);
     unsigned long ciphertextolen = 0;
+
+    mbedtls_entropy_context entropy_ctx;
+    mbedtls_entropy_init(&entropy_ctx);
+
+    mbedtls_ctr_drbg_context ctr_drbg_ctx;
+    mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
+
+    mbedtls_rsa_context rsa;
+    mbedtls_rsa_init(&rsa);
+
+    // 1. base64 decode the ciphertextbase64
     ret = atchops_base64_decode(ciphertextbase64, ciphertextbase64len, ciphertext, ciphertextlen, &ciphertextolen);
-    // printf("atchops_base64_decode: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     // 2. rsa decrypt the base64 decoded ciphertext
-    mbedtls_rsa_context rsa;
-    mbedtls_rsa_init(&rsa);
-
     ret = mbedtls_rsa_import_raw(
         &rsa,
         privatekey.n.value,
@@ -203,40 +207,30 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
         privatekey.d.len,
         privatekey.e.value,
         privatekey.e.len);
-    // printf("mbedtls_rsa_import_raw: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = mbedtls_rsa_complete(&rsa);
-    // printf("mbedtls_rsa_complete: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = mbedtls_rsa_check_privkey(&rsa);
-    // printf("mbedtls_rsa_check_privkey: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
-    mbedtls_entropy_context entropy_ctx;
-    mbedtls_entropy_init(&entropy_ctx);
-
-    mbedtls_ctr_drbg_context ctr_drbg_ctx;
-    mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
-    // printf("mbedtls_ctr_drbg_seed: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
     }
 
     ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextolen, ciphertext, plaintext, plaintextlen);
-    // printf("mbedtls_rsa_pkcs1_decrypt: %d\n", ret);
     if (ret != 0)
     {
         goto exit;
