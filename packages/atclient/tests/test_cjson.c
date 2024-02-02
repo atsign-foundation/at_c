@@ -34,7 +34,6 @@ int main()
 exit:
 {
     cJSON_Delete(root);
-    cJSON_Delete(stats);
     return ret;
 }
 }
