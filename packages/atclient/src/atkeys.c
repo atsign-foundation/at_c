@@ -11,7 +11,6 @@
 
 #define TAG "atkeys"
 
-
 void atclient_atkeys_init(atclient_atkeys *atkeys)
 {
     memset(atkeys, 0, sizeof(atclient_atkeys));
@@ -45,7 +44,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
 {
     int ret = 1;
 
-    unsigned char *iv = (unsigned char *) malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     const unsigned long recvlen = 32768;
@@ -144,7 +143,6 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
 
 exit:
 {
-    free(iv);
     free(recv);
     return ret;
 }
