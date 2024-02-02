@@ -7,7 +7,7 @@
 int main()
 {
     int ret = 1;
-    unsigned char iv[ATCHOPS_IV_SIZE];
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     ret = atchops_iv_generate(iv);
     if(ret != 0)
     {
@@ -15,7 +15,7 @@ int main()
         goto exit;
     }
     printf("iv: ");
-    for(int i = 0; i < ATCHOPS_IV_SIZE; i++)
+    for(int i = 0; i < ATCHOPS_IV_BUFFER_SIZE; i++)
     {
         printf("%02x ", iv[i]);
     }

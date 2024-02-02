@@ -8,7 +8,7 @@
 
 #define BASE64_DECODED_KEY_BUFFER_SIZE 8192 // the max buffer size of a decoded RSA key
 
-void atchops_rsakey_init_publickey(atchops_rsakey_publickey *publickey)
+void atchops_rsakey_publickey_init(atchops_rsakey_publickey *publickey)
 {
     memset(publickey, 0, sizeof(atchops_rsakey_publickey));
 
@@ -18,13 +18,13 @@ void atchops_rsakey_init_publickey(atchops_rsakey_publickey *publickey)
     publickey->e.len = BASE64_DECODED_KEY_BUFFER_SIZE;
     publickey->e.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->e.len);
 }
-void atchops_rsakey_free_publickey(atchops_rsakey_publickey *publickey)
+void atchops_rsakey_publickey_free(atchops_rsakey_publickey *publickey)
 {
     free(publickey->n.value);
     free(publickey->e.value);
 }
 
-void atchops_rsakey_init_privatekey(atchops_rsakey_privatekey *privatekey)
+void atchops_rsakey_privatekey_init(atchops_rsakey_privatekey *privatekey)
 {
     memset(privatekey, 0, sizeof(atchops_rsakey_privatekey));
 
@@ -44,7 +44,7 @@ void atchops_rsakey_init_privatekey(atchops_rsakey_privatekey *privatekey)
     privatekey->q.value = malloc(sizeof(unsigned char) * privatekey->q.len);
 }
 
-void atchops_rsakey_free_privatekey(atchops_rsakey_privatekey *privatekey)
+void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey)
 {
     free(privatekey->n.value);
     free(privatekey->e.value);
@@ -119,9 +119,8 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
 
 exit:
 {
-    // following frees cause "pointer being freed was not allocated" error:
-    // free(dst); // is already freed on its own somehow
-    // mbedtls_asn1_sequence_free(&seq); // for some reason this is not needed
+    // dst is already freed by mbedtls_asn1_get_sequence_of
+    // mbedtls_asn1_sequence does not need to be freed.
     return ret;
 }
 }
@@ -186,26 +185,21 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
     mbedtls_asn1_sequence *current = &seq;
     current = current->next;
 
-    // printf("n\n");
     privatekey->n.len = current->buf.len;
     memcpy(privatekey->n.value, current->buf.p, privatekey->n.len);
 
-    // printf("e\n");
     current = current->next;
     privatekey->e.len = current->buf.len;
     memcpy(privatekey->e.value, current->buf.p, privatekey->e.len);
 
-    // printf("d\n");
     current = current->next;
     privatekey->d.len = current->buf.len;
     memcpy(privatekey->d.value, current->buf.p, privatekey->d.len);
 
-    // printf("p\n");
     current = current->next;
     privatekey->p.len = current->buf.len;
     memcpy(privatekey->p.value, current->buf.p, privatekey->p.len);
 
-    // printf("q\n");
     current = current->next;
     privatekey->q.len = current->buf.len;
     memcpy(privatekey->q.value, current->buf.p, privatekey->q.len);
@@ -214,9 +208,8 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
 
 exit:
 {
-    // following frees cause "pointer being freed was not allocated" error:
-    // free(dst); // is already freed on its own somehow
-    // mbedtls_asn1_sequence_free(&seq); // for some reason this is not needed
+    // dst is already freed by mbedtls_asn1_get_sequence_of
+    // mbedtls_asn1_sequence does not need to be freed.
     return ret;
 }
 }

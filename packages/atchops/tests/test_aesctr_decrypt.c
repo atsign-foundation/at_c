@@ -18,8 +18,8 @@ int main()
     memset(plaintext, 0, plaintextlen);
     unsigned long plaintextolen = 0;
 
-    unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_SIZE);
-    memset(iv, 0, ATCHOPS_IV_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
+    unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
     ret = atchops_aesctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), ATCHOPS_AES_256, iv, (const unsigned char *) CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext, plaintextlen, &plaintextolen);
     if(ret != 0)

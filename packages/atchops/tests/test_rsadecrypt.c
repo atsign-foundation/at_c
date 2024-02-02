@@ -18,7 +18,7 @@ int main()
     const unsigned long ciphertextlen = strlen(ciphertext);
 
     atchops_rsakey_privatekey privatekey;
-    atchops_rsakey_init_privatekey(&privatekey);
+    atchops_rsakey_privatekey_init(&privatekey);
 
     // printf("1\n");
     ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);

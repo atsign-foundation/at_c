@@ -33,6 +33,7 @@ int main()
 
 exit:
 {
+    cJSON_Delete(root);
     return ret;
 }
 }

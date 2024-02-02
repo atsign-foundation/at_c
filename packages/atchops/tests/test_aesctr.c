@@ -18,8 +18,8 @@ int main(int argc, char **argv)
     const unsigned long plaintextlen = strlen(plaintext);
     unsigned long olen = 0;
 
-    unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_SIZE);
-    memset(iv, 0, ATCHOPS_IV_SIZE);
+    unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE);
 
     unsigned long ciphertextlen = BUFFER_SIZE; // sufficient allocation
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);

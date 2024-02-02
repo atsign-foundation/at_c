@@ -22,7 +22,7 @@ int main()
     const unsigned long privatekeybase64len = strlen(privatekeybase64);
 
     atchops_rsakey_privatekey privatekey;
-    atchops_rsakey_init_privatekey(&privatekey);
+    atchops_rsakey_privatekey_init(&privatekey);
     ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
     if (ret != 0)
     {

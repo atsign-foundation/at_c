@@ -28,6 +28,7 @@ void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile)
 int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
 {
     int ret = 1;
+    cJSON *root = NULL;
 
     FILE *file = fopen(path, "r");
 
@@ -49,9 +50,13 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    cJSON *root = cJSON_Parse(readbuf.str);
-
+    root = cJSON_Parse(readbuf.str);
+    cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
     cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
+    cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
+    cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
+    cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
+
     if (aespkamprivatekey == NULL)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPrivateKey!\n");
@@ -59,7 +64,6 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
     if (aespkampublickey == NULL)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPublicKey!\n");
@@ -67,7 +71,6 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
     if (aesencryptprivatekey == NULL)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPrivateKey!\n");
@@ -75,7 +78,6 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
     if (aesencryptpublickey == NULL)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPublicKey!\n");
@@ -83,7 +85,6 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
         goto exit;
     }
 
-    cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
     if (selfencryptionkey == NULL)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading selfEncryptionKey!\n");
@@ -127,8 +128,13 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path)
     }
     goto exit;
 
+
 exit:
 {
+    if(root != NULL)
+    {
+        cJSON_Delete(root);
+    }
     fclose(file);
     atclient_atstr_free(&readbuf);
     return ret;
@@ -154,6 +160,14 @@ int atclient_atkeysfile_write(atclient_atkeysfile *atkeysfile, const char *path,
 
     atclient_atstr selfencryptionkey;
     atclient_atstr_init(&selfencryptionkey, atkeysfile->selfencryptionkeystr.olen + 1);
+
+    // create cJSON object
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "aesPkamPrivateKey", aespkamprivatekey.str);
+    cJSON_AddStringToObject(root, "aesPkamPublicKey", aespkampublickey.str);
+    cJSON_AddStringToObject(root, "aesEncryptPrivateKey", aesencryptprivatekey.str);
+    cJSON_AddStringToObject(root, "aesEncryptPublicKey", aesencryptpublickey.str);
+    cJSON_AddStringToObject(root, "selfEncryptionKey", selfencryptionkey.str);
 
     ret = atclient_atstr_set(&aespkampublickey, atkeysfile->aespkampublickeystr.str, atkeysfile->aespkampublickeystr.olen);
     if(ret != 0)
@@ -198,14 +212,6 @@ int atclient_atkeysfile_write(atclient_atkeysfile *atkeysfile, const char *path,
         goto exit;
     }
 
-    // create cJSON object
-    cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "aesPkamPrivateKey", aespkamprivatekey.str);
-    cJSON_AddStringToObject(root, "aesPkamPublicKey", aespkampublickey.str);
-    cJSON_AddStringToObject(root, "aesEncryptPrivateKey", aesencryptprivatekey.str);
-    cJSON_AddStringToObject(root, "aesEncryptPublicKey", aesencryptpublickey.str);
-    cJSON_AddStringToObject(root, "selfEncryptionKey", selfencryptionkey.str);
-
     ret = 0;
 
     goto exit;
@@ -217,6 +223,7 @@ exit:
     atclient_atstr_free(&aesencryptprivatekey);
     atclient_atstr_free(&aesencryptpublickey);
     atclient_atstr_free(&selfencryptionkey);
+    cJSON_Delete(root);
     return ret;
 }
 }
