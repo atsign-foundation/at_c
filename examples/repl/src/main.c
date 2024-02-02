@@ -20,11 +20,11 @@ static char *get_home_dir()
 int main(int argc, char *argv[])
 {
     int ret = 1;
-    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
     if(argc < 2 || argc > 3)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Usage: ./repl <atsign> [rootUrl]");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Usage: ./repl <atsign> [rootUrl]");
         ret = 1;
         goto exit;
     }
@@ -45,14 +45,14 @@ int main(int argc, char *argv[])
         strcat(temp, atsign);
         atsign = temp;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using atSign \"%s\" and rootUrl \"%s:%d\"\n", atsign, roothost, rootport);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using atSign \"%s\" and rootUrl \"%s:%d\"\n", atsign, roothost, rootport);
 
     atclient_atkeys atkeys;
     atclient_atkeys_init(&atkeys);
     char *homedir = get_home_dir();
     if(homedir == NULL || strlen(homedir) == 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get home directory\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get home directory\n");
         ret = 1;
         goto exit;
     }
@@ -60,28 +60,28 @@ int main(int argc, char *argv[])
     sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
     if(atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath) != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path %s\n", atkeysfilepath);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path %s\n", atkeysfilepath);
         ret = 1;
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Read atKeys file at path %s\n" , atkeysfilepath);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Read atKeys file at path %s\n" , atkeysfilepath);
 
     atclient atclient;
     atclient_init(&atclient);
     ret = atclient_start_root_connection(&atclient, roothost, rootport);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_root_connection: %d | failed to connect to root\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_root_connection: %d | failed to connect to root\n", ret);
         goto exit;
     }
 
     ret = atclient_pkam_authenticate(&atclient, atkeys, atsign, strlen(atsign));
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n", atsign);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n", atsign);
 
 
 

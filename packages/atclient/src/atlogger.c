@@ -17,10 +17,10 @@ static char *prefix;
 
 typedef struct atlogger_ctx
 {
-    atlogger_logging_level level;
+    atclient_atlogger_logging_level level;
 } atlogger_ctx;
 
-static void atlogger_get_prefix(atlogger_logging_level logging_level, char *prefix, unsigned long prefixlen)
+static void atlogger_get_prefix(atclient_atlogger_logging_level logging_level, char *prefix, unsigned long prefixlen)
 {
     memset(prefix, 0, prefixlen);
     switch(logging_level)
@@ -66,19 +66,19 @@ static atlogger_ctx *atlogger_get_instance()
     return ctx;
 }
 
-atlogger_logging_level atlogger_get_logging_level()
+atclient_atlogger_logging_level atlogger_get_logging_level()
 {
     atlogger_ctx *ctx = atlogger_get_instance();
     return ctx->level;
 }
 
-void atlogger_set_logging_level(atlogger_logging_level level)
+void atclient_atlogger_set_logging_level(atclient_atlogger_logging_level level)
 {
     atlogger_ctx *ctx = atlogger_get_instance();
     ctx->level = level;
 }
 
-void atlogger_log(const char *tag, atlogger_logging_level level, const char *format, ...)
+void atclient_atlogger_log(const char *tag, atclient_atlogger_logging_level level, const char *format, ...)
 {
     atlogger_ctx *ctx = atlogger_get_instance();
 

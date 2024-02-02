@@ -13,7 +13,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignle
     int ret = 1;
     if(atsignlen + 1 < originalatsignlen)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n", atsignlen);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n", atsignlen);
         ret = 1;
         goto exit;
     }
@@ -21,7 +21,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignle
     if(originalatsignlen <= 0)
     {
         ret = 2;
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
         goto exit;
     }
 

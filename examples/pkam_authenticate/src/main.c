@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
     int ret = 1;
 
-    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
     // 1. init atkeys
 
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     {
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
 
     // 1b. populate `atkeys` struct
     atclient_atkeys atkeys;
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     {
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
 
     // 2. pkam auth
     atclient atclient;

@@ -63,28 +63,28 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy), NULL, NULL);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ctr_drbg_seed failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ctr_drbg_seed failed with exit code: %d\n", ret);
         goto exit;
     }
 
     ret = mbedtls_x509_crt_parse(&(ctx->cacert), cas_pem, cas_pem_len);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_x509_crt_parse failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_x509_crt_parse failed with exit code: %d\n", ret);
         goto exit;
     }
 
     ret = mbedtls_net_connect(&(ctx->net), host, portstr, MBEDTLS_NET_PROTO_TCP);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_net_connect failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_net_connect failed with exit code: %d\n", ret);
         goto exit;
     }
 
     ret = mbedtls_ssl_config_defaults(&(ctx->ssl_config), MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_config_defaults failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_config_defaults failed with exit code: %d\n", ret);
         goto exit;
     }
 
@@ -96,14 +96,14 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_setup failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_setup failed with exit code: %d\n", ret);
         goto exit;
     }
 
     ret = mbedtls_ssl_set_hostname(&(ctx->ssl), host);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_set_hostname failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_set_hostname failed with exit code: %d\n", ret);
         goto exit;
     }
 
@@ -112,14 +112,14 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     ret = mbedtls_ssl_handshake(&(ctx->ssl));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_handshake failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_handshake failed with exit code: %d\n", ret);
         goto exit;
     }
 
     ret = mbedtls_ssl_get_verify_result(&(ctx->ssl));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
         goto exit;
     }
 
@@ -131,7 +131,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     ret = mbedtls_ssl_read(&(ctx->ssl), readbuf.str, readbuf.len);
     if (ret < 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
         goto exit;
     }
 
@@ -139,7 +139,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     ret = mbedtls_ssl_write(&(ctx->ssl), (const unsigned char *) "\r\n", 2);
     if (ret < 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
         goto exit;
     }
 
@@ -147,7 +147,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     ret = mbedtls_ssl_read(&(ctx->ssl), readbuf.str, readbuf.len);
     if (ret < 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
         goto exit;
     }
 
@@ -174,7 +174,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     {
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tSENT: \"%.*s\"\n", (int) srclen, src);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tSENT: \"%.*s\"\n", (int) srclen, src);
 
     memset(recv, 0, recvlen);
     int found = 0;
@@ -220,7 +220,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     {
         ret = 0;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tRECV: \"%.*s\"\n", (int) *olen, recv);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\tRECV: \"%.*s\"\n", (int) *olen, recv);
 
     goto exit;
 
@@ -284,7 +284,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
     char *colon = strchr(url.str, ':');
     if (colon == NULL)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "no colon in url\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "no colon in url\n");
         ret = 1;
         goto exit;
     }
@@ -292,7 +292,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
     int hostlen = colon - url.str;
     if (hostlen > ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "hostlen > ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "hostlen > ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE\n");
         ret = 1;
         goto exit;
     }
@@ -303,7 +303,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
     *port = atoi(colon + 1);
     if(*port == 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "port is 0\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "port is 0\n");
         ret = 1;
         goto exit;
     }
