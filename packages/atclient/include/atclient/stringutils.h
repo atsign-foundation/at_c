@@ -34,7 +34,7 @@ int atclient_stringutils_starts_with(const char *string, const unsigned long str
 int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix, const unsigned long suffixlen);
 
 /**
- * @brief splits a string into tokens
+ * @brief splits a string into tokens. each token is written to the tokens array and is null-terminated.
  *
  * @param string the string to split, this will not be modified
  * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
