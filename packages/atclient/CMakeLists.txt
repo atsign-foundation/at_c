@@ -17,6 +17,7 @@ set(atclient_srcs
 	${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
 	${CMAKE_CURRENT_LIST_DIR}/src/connection.c
 	${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
+	${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
 )
 
 # 1b. Manually add your include directories here
