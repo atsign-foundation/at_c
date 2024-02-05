@@ -51,7 +51,7 @@ exit:
 }
 }
 
-int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix)
+int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix, const unsigned long prefixlen)
 {
     int ret = -1;
     if (string == NULL || prefix == NULL)
@@ -60,11 +60,18 @@ int atclient_stringutils_starts_with(const char *string, const unsigned long str
         goto exit;
     }
 
-    if (stringlen == 0)
+    if (stringlen == 0 || prefixlen == 0)
     {
         ret = -1;
         goto exit;
     }
+
+    if(stringlen < prefixlen)
+    {
+        ret = -1;
+        goto exit;
+    }
+
 
     ret = strncmp(string, prefix, strlen(prefix));
     if(ret == 0)
@@ -83,7 +90,7 @@ exit:
 }
 }
 
-int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix)
+int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix, const unsigned long suffixlen)
 {
     int ret = -1;
     if(string == NULL || suffix == NULL)
@@ -91,12 +98,17 @@ int atclient_stringutils_ends_with(const char *string, const unsigned long strin
         ret = -1;
         goto exit;
     }
-    if(strlen == 0)
+    if(stringlen == 0 || suffixlen == 0)
     {
         ret = -1;
         goto exit;
     }
-    ret = strncmp(string + stringlen - strlen(suffix), suffix, strlen(suffix));
+    if(stringlen < suffixlen)
+    {
+        ret = -1;
+        goto exit;
+    }
+    ret = strncmp(string + stringlen - suffixlen, suffix, suffixlen);
     if(ret == 0)
     {
         ret = 1; // true

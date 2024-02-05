@@ -32,7 +32,7 @@ int main()
 
     int startswith;
 
-    startswith = atclient_stringutils_starts_with(str, strlen(str), "@");
+    startswith = atclient_stringutils_starts_with(str, strlen(str), "@", strlen("@"));
     if(startswith != 1)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, str, "@");
@@ -40,7 +40,7 @@ int main()
         goto exit;
     }
 
-    startswith = atclient_stringutils_starts_with(str, strlen(str), "123");
+    startswith = atclient_stringutils_starts_with(str, strlen(str), "123", strlen("123"));
     if(startswith != 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, str, "bob");
@@ -51,7 +51,7 @@ int main()
     int endswith;
     str = "root.atsign.org:64";
 
-    endswith = atclient_stringutils_ends_with(str, strlen(str), "64");
+    endswith = atclient_stringutils_ends_with(str, strlen(str), "64", strlen("64"));
     if(endswith != 1)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret, str, "64");
@@ -60,7 +60,7 @@ int main()
     }
 
     printf("a\n");
-    endswith = atclient_stringutils_ends_with(str, strlen(str), "org");
+    endswith = atclient_stringutils_ends_with(str, strlen(str), "org", strlen("org"));
     if(endswith != 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret, str, "org");

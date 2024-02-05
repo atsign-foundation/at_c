@@ -21,7 +21,7 @@ int atclient_stringutils_trim_whitespace(const char *string, const unsigned long
  * @param prefix the prefix to check for
  * @return int 1 (true) if the string starts with the prefix, 0 (false) otherwise
  */
-int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix);
+int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix, const unsigned long prefixlen);
 
 /**
  * @brief returns 1 (true) if the string ends with the suffix, 0 (false) otherwise
@@ -31,7 +31,7 @@ int atclient_stringutils_starts_with(const char *string, const unsigned long str
  * @param suffix the suffix to check for
  * @return int 1 (true) if the string ends with the suffix, 0 (false) otherwise
  */
-int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix);
+int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix, const unsigned long suffixlen);
 
 /**
  * @brief splits a string into tokens
