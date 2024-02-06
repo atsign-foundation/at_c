@@ -3,6 +3,7 @@
 
 #include "atclient/connection.h"
 #include "atclient/atkeys.h"
+#include "atclient/atsign.h"
 
 /**
  * @brief represents atclient
@@ -12,6 +13,8 @@ typedef struct atclient_ctx
 {
     atclient_connection_ctx root_connection;
     atclient_connection_ctx secondary_connection;
+    atsign atsign;
+    atclient_atkeys atkeys;
 } atclient_ctx;
 
 /**
@@ -19,7 +22,7 @@ typedef struct atclient_ctx
  *
  * @param ctx pointer to the atclient context to initialize
  */
-void atclient_init(atclient_ctx *ctx);
+void atclient_init(atclient_ctx *ctx, char *atsign_str);
 
 /**
  * @brief initalize the atclient's root connection to the specified host and port
