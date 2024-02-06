@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
     int ret = 1;
 
-    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
     // 1. init atkeys
 
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     {
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
 
     // 1b. populate `atkeys` struct
     atclient_atkeys atkeys;
@@ -39,10 +39,10 @@ int main(int argc, char **argv)
     {
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
 
     // 2. pkam auth
-    atclient_ctx atclient;
+    atclient atclient;
     atclient_init(&atclient);
     ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
     // printf("atclient_init_root_connection_code: %d\n", ret);
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
         goto exit;
     }
 
-    ret = atclient_pkam_authenticate(&atclient, atkeys, ATSIGN);
+    ret = atclient_pkam_authenticate(&atclient, atkeys, ATSIGN, strlen(ATSIGN));
     // printf("atclient_pkam_authenticate_code: %d\n", ret);
     if (ret != 0)
     {

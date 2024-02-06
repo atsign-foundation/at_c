@@ -13,7 +13,7 @@ int main()
     const unsigned long publickeybase64len = strlen(publickeybase64);
 
     atchops_rsakey_publickey publickey;
-    atchops_rsakey_init_publickey(&publickey);
+    atchops_rsakey_publickey_init(&publickey);
 
     ret = atchops_rsakey_populate_publickey(&publickey, publickeybase64, publickeybase64len);
     if (ret != 0)

@@ -7,28 +7,27 @@
 #include "atclient/atlogger.h"
 #include "atclient/atkeys.h"
 #include "atclient/atstr.h"
+#include "atclient/constants.h"
 
 #define TAG "atkeys"
-
-#define BUFFER_SIZE 4096 // the max size of an RSA key base 64 encoded (unencrypted)
 
 void atclient_atkeys_init(atclient_atkeys *atkeys)
 {
     memset(atkeys, 0, sizeof(atclient_atkeys));
 
-    atclient_atstr_init(&(atkeys->pkampublickeystr), BUFFER_SIZE);
-    atchops_rsakey_init_publickey(&(atkeys->pkampublickey));
+    atclient_atstr_init(&(atkeys->pkampublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+    atchops_rsakey_publickey_init(&(atkeys->pkampublickey));
 
-    atclient_atstr_init(&(atkeys->pkamprivatekeystr), BUFFER_SIZE);
-    atchops_rsakey_init_privatekey(&(atkeys->pkamprivatekey));
+    atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+    atchops_rsakey_privatekey_init(&(atkeys->pkamprivatekey));
 
-    atclient_atstr_init(&(atkeys->encryptpublickeystr), BUFFER_SIZE);
-    atchops_rsakey_init_publickey(&(atkeys->encryptpublickey));
+    atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+    atchops_rsakey_publickey_init(&(atkeys->encryptpublickey));
 
-    atclient_atstr_init(&(atkeys->encryptprivatekeystr), BUFFER_SIZE);
-    atchops_rsakey_init_privatekey(&(atkeys->encryptprivatekey));
+    atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+    atchops_rsakey_privatekey_init(&(atkeys->encryptprivatekey));
 
-    atclient_atstr_init(&(atkeys->selfencryptionkeystr), BUFFER_SIZE);
+    atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
 }
 
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
@@ -45,8 +44,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
 {
     int ret = 1;
 
-    unsigned char *iv = (unsigned char *) malloc(sizeof(unsigned char) * ATCHOPS_IV_SIZE);
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     const unsigned long recvlen = 32768;
     unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
@@ -58,7 +57,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
     ret = atclient_atstr_set(&(atkeys->selfencryptionkeystr), selfencryptionkeystr, selfencryptionkeylen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
         goto exit;
     }
 
@@ -69,10 +68,10 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         (unsigned char *) atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.len, &(atkeys->pkampublickeystr.olen));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
         goto exit;
     }
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     // 1c. pkam private key
     ret = atchops_aesctr_decrypt(
@@ -81,10 +80,10 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         (unsigned char *) atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.len, &(atkeys->pkamprivatekeystr.olen));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
         goto exit;
     }
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     // 1d. encrypt public key
     ret = atchops_aesctr_decrypt(
@@ -93,10 +92,10 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         (unsigned char *) atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len, &(atkeys->encryptpublickeystr.olen));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
         goto exit;
     }
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
     // 1e. encrypt private key
     ret = atchops_aesctr_decrypt(
@@ -105,7 +104,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
         (unsigned char *) atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.len, &(atkeys->encryptprivatekeystr.olen));
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt encrypt private key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt encrypt private key\n", ret);
         goto exit;
     }
 
@@ -115,28 +114,28 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
     ret = atchops_rsakey_populate_publickey(&(atkeys->pkampublickey), atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d | failed to populate pkam public key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d | failed to populate pkam public key\n", ret);
         goto exit;
     }
 
     ret = atchops_rsakey_populate_privatekey(&(atkeys->pkamprivatekey), atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_privatekey: %d | failed to populate pkam private key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_privatekey: %d | failed to populate pkam private key\n", ret);
         goto exit;
     }
 
     ret = atchops_rsakey_populate_privatekey(&(atkeys->encryptprivatekey), atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_privatekey: %d | failed to populate encrypt private key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_privatekey: %d | failed to populate encrypt private key\n", ret);
         goto exit;
     }
 
     ret = atchops_rsakey_populate_publickey(&(atkeys->encryptpublickey), atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d | failed to populate encrypt public key\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d | failed to populate encrypt public key\n", ret);
         goto exit;
     }
 
@@ -144,7 +143,6 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys,
 
 exit:
 {
-    free(iv);
     free(recv);
     return ret;
 }
@@ -162,7 +160,7 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, atclient_a
         atkeysfile.selfencryptionkeystr.str, atkeysfile.selfencryptionkeystr.olen);
     if(ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
         goto exit;
     }
 
@@ -184,14 +182,14 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
     ret = atclient_atkeysfile_read(&atkeysfile, path);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeysfile_read: %d | failed to read file at path: %s\n", ret, path);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeysfile_read: %d | failed to read file at path: %s\n", ret, path);
         goto exit;
     }
 
     ret = atclient_atkeys_populate_from_atkeysfile(atkeys, atkeysfile);
     if (ret != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d | failed to decrypt & populate struct \n", ret);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d | failed to decrypt & populate struct \n", ret);
         goto exit;
     }
 
@@ -230,12 +228,12 @@ exit:
 void atclient_atkeys_free(atclient_atkeys *atkeys)
 {
     atclient_atstr_free(&(atkeys->pkampublickeystr));
-    atchops_rsakey_free_publickey(&(atkeys->pkampublickey));
+    atchops_rsakey_publickey_free(&(atkeys->pkampublickey));
     atclient_atstr_free(&(atkeys->pkamprivatekeystr));
-    atchops_rsakey_free_privatekey(&(atkeys->pkamprivatekey));
+    atchops_rsakey_privatekey_free(&(atkeys->pkamprivatekey));
     atclient_atstr_free(&(atkeys->encryptpublickeystr));
-    atchops_rsakey_free_publickey(&(atkeys->encryptpublickey));
+    atchops_rsakey_publickey_free(&(atkeys->encryptpublickey));
     atclient_atstr_free(&(atkeys->encryptprivatekeystr));
-    atchops_rsakey_free_privatekey(&(atkeys->encryptprivatekey));
+    atchops_rsakey_privatekey_free(&(atkeys->encryptprivatekey));
     atclient_atstr_free(&(atkeys->selfencryptionkeystr));
 }

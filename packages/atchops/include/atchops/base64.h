@@ -3,7 +3,7 @@
 
 /**
  * @brief Base64 encode some bytes
- * 
+ *
  * @param src src bytes that you want to encode
  * @param srclen the length of the src bytes
  * @param dst the buffer where the base64 encoded result will be
@@ -15,7 +15,7 @@ int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, 
 
 /**
  * @brief Base64 decode some bytes
- * 
+ *
  * @param src src bytes that you want to decode
  * @param srclen the length of the src bytes
  * @param dst the buffer where the base64 decoded result will be

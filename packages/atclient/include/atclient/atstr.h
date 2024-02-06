@@ -17,7 +17,7 @@ typedef struct atclient_atstr
  * @param atstr pointer to atstr to initialize
  * @param bufferlen length of buffer to allocate in bytes (recommended to use a number that is a power of 2). the bufferlen is the length of the buffer generated. we do not add 1 for null terminator.
  */
-void atclient_atstr_init(atclient_atstr *atstr, unsigned long bufferlen);
+void atclient_atstr_init(atclient_atstr *atstr, const unsigned long bufferlen);
 
 /**
  * @brief initialize an atstr with a literal string
@@ -25,7 +25,14 @@ void atclient_atstr_init(atclient_atstr *atstr, unsigned long bufferlen);
  * @param atstr the atstr struct to populate
  * @param str the string to set atstr to. best to use string literals here. (or a null-terminated string)
  */
-void atclient_atstr_init_literal(atclient_atstr *atstr, const char *str);
+int atclient_atstr_init_literal(atclient_atstr *atstr, const unsigned long bufferlen, const char *format, ...);
+
+/**
+ * @brief set an atstr to an empty string
+ *
+ * @param atstr the atstr struct to reset
+ */
+void atclient_atstr_reset(atclient_atstr *atstr);
 
 /**
  * @brief set an atstr to a string
@@ -42,7 +49,7 @@ int atclient_atstr_set(atclient_atstr *atstr, const char *str, const unsigned lo
  * @param atstr atstr struct to populate
  * @param str null-terminated string to set atstr to. Best to use string literals here
  */
-int atclient_atstr_set_literal(atclient_atstr *atstr, const char *str);
+int atclient_atstr_set_literal(atclient_atstr *atstr, const char *format, ...);
 
 /**
  * @brief Copy what is in an atstr to another atstr
@@ -58,5 +65,27 @@ int atclient_atstr_copy(atclient_atstr *atstr, atclient_atstr *data);
  * @param atstr pointer to atstr to free from the heap
  */
 void atclient_atstr_free(atclient_atstr *atstr);
+
+/**
+ * @brief Copy what is in original to substring and then set substring to a substring of original
+ * 
+ * @param substring the atstr to set to the substring. Assumed that this is already initialized (via atclient_atstr_init)
+ * @param original the atstr to get the substring from. Assumed that this is already initialized (via atclient_atstr_init)
+ * @param start the start index of the substring
+ * @param end the end index of the substring
+ * @return int 0 on success, non-zero on failure
+ */
+int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr original, const unsigned long start, const unsigned long end);
+
+/**
+ * @brief Append a string to an atstr
+ * 
+ * @param atstr the atstr to append to
+ * @param format the format of the string to append
+ * @param ...   the arguments to format
+ * @return int 0 on success
+ */
+int atclient_atstr_append(atclient_atstr *atstr, const char *format, ...);
+
 
 #endif

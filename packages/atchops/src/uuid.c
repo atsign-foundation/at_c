@@ -7,7 +7,8 @@ int atchops_uuid_init(void)
 {
     return uuid4_init();
 }
-int atchops_uuid_generate(char *uuidstr, int uuidstrlen)
+
+int atchops_uuid_generate(char *uuidstr, const unsigned long uuidstrlen)
 {
     int ret;
     if (uuidstrlen < 37)
