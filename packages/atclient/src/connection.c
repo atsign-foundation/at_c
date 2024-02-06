@@ -6,7 +6,7 @@
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
-#include "atclient/atlogger.h"
+#include "atlogger/atlogger.h"
 #include "atclient/cacerts.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
