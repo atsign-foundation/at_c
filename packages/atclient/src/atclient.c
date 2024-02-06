@@ -8,7 +8,7 @@
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
 #include "atclient/connection.h"
-#include "atclient/atlogger.h"
+#include "atlogger/atlogger.h"
 #include "atclient/atstr.h"
 #include "atclient/atbytes.h"
 #include "atclient/atsign.h"
