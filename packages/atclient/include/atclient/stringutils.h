@@ -45,6 +45,8 @@ int atclient_stringutils_ends_with(const char *string, const unsigned long strin
  * @param tokenlen the string max length of each individual token
  * @return int 0 on success, non-zero on failure
  */
-int atclient_stringutils_split(const char *string, const unsigned long stringlen, const char *delim, char **tokens, const unsigned long tokensarrlen, unsigned long *tokensolen, const unsigned long tokenlen);
+int atclient_stringutils_split(char *string, const unsigned long stringlen, const char *delim, char **tokens, unsigned long *tokensolen)
+;
+
 
 #endif

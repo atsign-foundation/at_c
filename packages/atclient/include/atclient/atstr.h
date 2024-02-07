@@ -87,5 +87,16 @@ int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr ori
  */
 int atclient_atstr_append(atclient_atstr *atstr, const char *format, ...);
 
+/**
+ * @brief Returns a set of tokens from a string
+ *
+ * @param atstr the string to read and split from
+ * @param delimiter the delimiter to split the string by
+ * @param tokens the array of tokens to populate
+ * @param tokensarrlen the size of the tokens array (the max number of tokens to populate)
+ * @return int 0 on success, non-zero on failure
+ */
+int atclient_atstr_split(const atclient_atstr atstr, const char delimiter, char **tokens, const unsigned long tokensarrlen);
+
 
 #endif

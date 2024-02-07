@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <ctype.h>
 #include "atclient/stringutils.h"
 
@@ -125,44 +126,44 @@ exit:
 }
 }
 
-int atclient_stringutils_split(const char *string, const unsigned long stringlen, const char *delim, char **tokens, const unsigned long tokensarrlen, unsigned long *tokensolen, const unsigned long tokenlen)
+int atclient_stringutils_split(char *string, const unsigned long stringlen, const char *delim, char **tokens, unsigned long *tokensolen)
 {
     int ret = 1;
-    if (string == NULL || delim == NULL || tokens == NULL || tokensolen == NULL)
+    if(string == NULL || *string == NULL || delim == NULL)
     {
         ret = 1;
         goto exit;
     }
-
-    char *token;
-    char *str_copy = strdup(string);  // Duplicate the string to avoid modifying the original
-    char *saveptr;
-
-    if (str_copy == NULL) {
-        ret = -1;  // Indicate memory allocation failure
+    if(stringlen == 0)
+    {
+        ret = 1;
         goto exit;
     }
-
-    unsigned long token_count = 0;
-    token = strtok_r(str_copy, delim, &saveptr);
-    while (token != NULL && token_count < tokensarrlen)
+    char *copy = strndup(string, stringlen);
+    printf("copy: %s\n", copy);
+    *tokensolen = 0;
+    char *token = NULL;
+    char *saveptr = NULL;
+    token = strtok_r(copy, delim, &saveptr);
+    while(token != NULL)
     {
-        strncpy(tokens[token_count], token, tokenlen - 1);
-        tokens[token_count][tokenlen - 1] = '\0';  // Ensure null-terminated
-
+        printf("token: %s\n", token);
+        tokens[*tokensolen] = token;
+        (*tokensolen)++;
         token = strtok_r(NULL, delim, &saveptr);
-        token_count++;
+    }
+    memcpy(string, copy, stringlen);
+    for(int i = 0; i < *tokensolen; i++)
+    {
+        *(tokens + i) = string + (*(tokens + i) - copy);
     }
 
-    // Store the number of tokens generated in the variable pointed to by tokenolen
-    *tokensolen = token_count;
+
 
     ret = 0;
 
 exit:
-    // Free the duplicated string
-    if (str_copy != NULL) {
-        free(str_copy);
-    }
+{
     return ret;
+}
 }
