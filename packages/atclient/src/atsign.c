@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdio.h>
-#include "atclient/atlogger.h"
+#include "atlogger/atlogger.h"
 #include "atclient/atsign.h"
 #include "atclient/atutils.h"
 
