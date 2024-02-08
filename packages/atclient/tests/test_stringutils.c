@@ -22,9 +22,9 @@ int main()
     memset(string, 0, sizeof(char) * stringlen);
     strcpy(string, "@bob");
 
-    char *tokens[8]; // array of char pointers
-    memset(tokens, 0, sizeof(char *) * 8);
-    unsigned long tokensolen = 0;
+    // char *tokens[8]; // array of char pointers
+    // memset(tokens, 0, sizeof(char *) * 8);
+    // unsigned long tokensolen = 0;
 
     int startswith;
 
