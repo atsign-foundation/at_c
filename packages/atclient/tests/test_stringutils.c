@@ -22,10 +22,11 @@ int main()
     memset(string, 0, sizeof(char) * stringlen);
     strcpy(string, "@bob");
 
-    const unsigned long tokenslen = 8;
-    char **tokens = malloc(sizeof(char *) * tokenslen); // array of char pointers
-    memset(tokens, 0, sizeof(char *) * tokenslen); // set all pointers to NULL (0
-    unsigned long tokensolen = 0;
+    // const unsigned long tokenslen = 8;
+    // char **tokens = malloc(sizeof(char *) * tokenslen); // array of char pointers
+    // memset(tokens, 0, sizeof(char *) * tokenslen); // set all pointers to NULL (0
+    // unsigned long tokensolen = 0;
+        
 
     int startswith;
 
