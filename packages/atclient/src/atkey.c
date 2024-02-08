@@ -1,9 +1,12 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "atclient/atkey.h"
 #include "atlogger/atlogger.h"
 #include "atclient/metadata.h"
 #include "atclient/atstr.h"
+#include "atclient/atsign.h"
+#include "atclient/constants.h"
 #include "atclient/stringutils.h"
 
 #define TAG "atkey"
@@ -78,13 +81,14 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     //      namespace = NULL
     //      cached = false
     int ret = 1;
+    char *saveptr;
     char *copy = strndup(atkeystr, atkeylen);
     if(copy == NULL)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdndup failed\n");
         goto exit;
     }
-    char *token = strtok(copy, ":");
+    char *token = strtok_r(copy, ":", &saveptr);
     unsigned long tokenlen = strlen(token);
     if(token == NULL)
     {
@@ -96,16 +100,15 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     if(strncmp(token, "cached", strlen("cached")) == 0)
     {
         atkey->metadata.iscached = 1;
+        token = strtok_r(NULL, ":", &saveptr);
+        if(token == NULL)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tokens[1] is NULL\n");
+            ret = 1;
+            goto exit;
+        }
     }
 
-    // shift tokens array to the left
-    token = strtok(NULL, ":");
-    if(token == NULL)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tokens[1] is NULL\n");
-        ret = 1;
-        goto exit;
-    }
 
     if(atclient_stringutils_starts_with(token, tokenlen, "public", strlen("public")) == 1)
     {
@@ -113,7 +116,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
         atkey->metadata.ispublic = 1;
         atkey->atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
         // shift tokens array to the left
-        token = strtok(NULL, ":");
+        token = strtok_r(NULL, ":", &saveptr);
         if(token == NULL)
         {
             atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
@@ -132,7 +135,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
             atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
             goto exit;
         }
-        token = strtok(NULL, ":");
+        token = strtok_r(NULL, ":", &saveptr);
         if(token == NULL)
         {
             atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
@@ -151,9 +154,88 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
         atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
     }
     // set atkey->name
-    ret = atclient_atstr_set_literal(&(atkey->name), token, tokenlen);
+    token = strtok_r(token, "@", &saveptr);
+    if(token == NULL)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
+        ret = 1;
+        goto exit;
+    }
+    tokenlen = strlen(token);
+    char nameandnamespacestr[ATSIGN_BUFFER_LENGTH];
+    memset(nameandnamespacestr, 0, sizeof(char) * ATSIGN_BUFFER_LENGTH);
+    memcpy(nameandnamespacestr, token, tokenlen);
+    if(strchr(nameandnamespacestr, '.') != NULL)
+    {
+        // there is a namespace
+        char *saveptr2;
+        char *name = strtok_r(nameandnamespacestr, ".", &saveptr2);
+        if(name == NULL)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "name is NULL. %s atkey is probably incomplete\n", atkeystr);
+            ret = 1;
+            goto exit;
+        }
+        unsigned long namelen = strlen(name);
+        ret = atclient_atstr_set_literal(&(atkey->name), name, namelen);
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+            goto exit;
+        }
+        char *namespacestr = strtok_r(NULL, ".", &saveptr2);
+        if(namespacestr == NULL)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is NULL. %s atkey is probably incomplete\n", atkeystr);
+            ret = 1;
+            goto exit;
+        }
+        unsigned long namespacestrlen = strlen(namespacestr);
+        ret = atclient_atstr_set_literal(&(atkey->namespacestr), namespacestr, namespacestrlen);
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+            goto exit;
+        }
+    } else {
+        // there is no namespace
+        unsigned long namelen = strlen(nameandnamespacestr);
+        ret = atclient_atstr_set_literal(&(atkey->name), nameandnamespacestr, namelen);
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+            goto exit;
+        }
+    }
+    // set atkey->sharedby
+    token = strtok_r(NULL, "", &saveptr);
+    if(token == NULL)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
+        ret = 1;
+        goto exit;
+    }
+    tokenlen = strlen(token);
+    char sharedbystr[ATSIGN_BUFFER_LENGTH];
+    memset(sharedbystr, 0, sizeof(char) * ATSIGN_BUFFER_LENGTH);
+    unsigned long sharedbystrolen = 0;
+    ret = atclient_atsign_with_at_symbol(sharedbystr, ATSIGN_BUFFER_LENGTH, &sharedbystrolen, token, tokenlen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
+        goto exit;
+    }
+    ret = atclient_atstr_set_literal(&(atkey->sharedby), sharedbystr, sharedbystrolen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+    ret = 0;
+    goto exit;
 exit:
 {
+    free(copy);
     return ret;
 }
 }
