@@ -115,6 +115,7 @@ int main()
     // 4b. split cached:public:publickey@bob into cached, public, publickey@bob
     memset(tokens, 0, sizeof(char *) * 8);
     tokensolen = 0;
+    memset(string, 0, sizeof(char) * stringlen);
     strcpy(string, "cached:public:publickey@bob");
     ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
     if(ret != 0)
