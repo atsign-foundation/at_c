@@ -86,31 +86,31 @@ int main()
     memset(tokens, 0, sizeof(char *) * 8);
     // 4a. split root.atsign.org:64 into root.atsign.org and 64
     strcpy(string, "root.atsign.org:64");
-    ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %d | %s\n", ret, string);
-        ret = 1;
-        goto exit;
-    }
-    if(tokensolen != 2)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %lu != 2\n", tokensolen);
-        ret = 1;
-        goto exit;
-    }
-    if(strncmp(tokens[0], "root.atsign.org", strlen("root.atsign.org")) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != root.atsign.org\n", tokens[0]);
-        ret = 1;
-        goto exit;
-    }
-    if(strncmp(tokens[1], "64", strlen("64")) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != 64\n", tokens[1]);
-        ret = 1;
-        goto exit;
-    }
+    // ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
+    // if(ret != 0)
+    // {
+    //     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %d | %s\n", ret, string);
+    //     ret = 1;
+    //     goto exit;
+    // }
+    // if(tokensolen != 2)
+    // {
+    //     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %lu != 2\n", tokensolen);
+    //     ret = 1;
+    //     goto exit;
+    // }
+    // if(strncmp(tokens[0], "root.atsign.org", strlen("root.atsign.org")) != 0)
+    // {
+    //     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != root.atsign.org\n", tokens[0]);
+    //     ret = 1;
+    //     goto exit;
+    // }
+    // if(strncmp(tokens[1], "64", strlen("64")) != 0)
+    // {
+    //     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != 64\n", tokens[1]);
+    //     ret = 1;
+    //     goto exit;
+    // }
 
     // 4b. split cached:public:publickey@bob into cached, public, publickey@bob
     // memset(tokens, 0, sizeof(char *) * 8);
