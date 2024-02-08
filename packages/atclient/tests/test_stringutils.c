@@ -23,15 +23,15 @@ int main()
     strcpy(string, "@bob");
 
     const unsigned long tokenslen = 64LU;
-    char **tokens = malloc(sizeof(char *) * tokenslen); // array of char pointers
-    if(tokens == NULL)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc: %s\n", "tokens");
-        ret = 1;
-        goto exit;
-    }
-    memset(tokens, 0, sizeof(char *) * tokenslen); // set all pointers to NULL (0
-    unsigned long tokensolen = 0;
+    // char **tokens = malloc(sizeof(char *) * tokenslen); // array of char pointers
+    // if(tokens == NULL)
+    // {
+    //     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc: %s\n", "tokens");
+    //     ret = 1;
+    //     goto exit;
+    // }
+    // memset(tokens, 0, sizeof(char *) * tokenslen); // set all pointers to NULL (0
+    // unsigned long tokensolen = 0;
 
     int startswith;
 
