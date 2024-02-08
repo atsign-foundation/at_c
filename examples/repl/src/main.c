@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <atclient/connection.h>
 #include <atclient/atkeysfile.h>
-#include <atclient/atlogger.h>
+#include <atlogger/atlogger.h>
 #include <atclient/atclient.h>
 #include <atclient/atkeys.h>
 #include <atclient/atbytes.h>
