@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include "atclient/atlogger.h"
-
+#include "atlogger/atlogger.h"
 
 
 #define PREFIX_BUFFER_LEN 64
@@ -91,7 +90,7 @@ void atclient_atlogger_log(const char *tag, atclient_atlogger_logging_level leve
 
     va_list args;
     va_start(args, format);
-    printf(" %.*s", strlen(prefix), prefix);
+    printf(" %.*s", (int)strlen(prefix), prefix);
     if(tag != NULL)
     {
         printf("\t%s", tag);

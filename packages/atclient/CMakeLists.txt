@@ -37,6 +37,7 @@ set(CJSON_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cJSON)
 # or you may edit the defaults here
 
 option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
+option(ATCLIENT_EXPORT_ATLOGGER "Export atlogger as a standalone library" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
 
 # #########################################################
 # 2. Build for ESP32 or Desktop?
@@ -148,6 +149,24 @@ if(NOT ESP_PLATFORM)
 	list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson-static)
 
 	# #########################################################
+  # 5D. Create atlogger library
+  # - atlogger header files are installed to `/usr/local/include/atlogger`
+  # - atlogger library is automatically linked as part of atclient library (when you install atclient, it already includes atlogger)
+  # - atlogger library is only exported as a standalone library if ATCLIENT_EXPORT_ATLOGGER is set to ON
+	# #########################################################
+  if(ATCLIENT_EXPORT_ATLOGGER)
+    add_library(atlogger STATIC ${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c)
+    add_library(${PROJECT_NAME}::atlogger ALIAS atlogger)
+
+    target_include_directories(atlogger PUBLIC
+      $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/atlogger>
+    )
+
+	  list(APPEND ATCLIENT_TARGETS_TO_INSTALL atlogger) # install atlogger
+  endif()
+
+	# #########################################################
 	# 6. Create atclient library
 	# #########################################################
 
@@ -168,6 +187,11 @@ if(NOT ESP_PLATFORM)
 		$<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
+
+  install(
+    DIRECTORY ${ATCLIENT_INCLUDE_DIR}/atlogger
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
 
 	# #########################################################
 	# 7. Install atclient library
@@ -194,8 +218,8 @@ if(NOT ESP_PLATFORM)
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	)
 
-	# #########################################################
-	# 8. Export in case people use us in a subdirectory
+ 	# #########################################################
+	# 9. Export in case people use us in a subdirectory
 	# Allows other Cmake projects to do `add_subdirectory(/path/to/atclient)` and then `target_link_libraries(their_target atclient::atclient)`
 	# #########################################################
 
@@ -219,9 +243,8 @@ if(NOT ESP_PLATFORM)
 		)
 	endif()
 
-
 	# #########################################################
-	# 9. Add tests
+	# 10. Add tests
 	# Run the tests via cd build && make all && cd tests && ctest
 	# configure with -DATCLIENT_BUILD_TESTS=ON
 	# #########################################################
