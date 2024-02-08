@@ -22,7 +22,7 @@ int main()
     memset(string, 0, sizeof(char) * stringlen);
     strcpy(string, "@bob");
 
-    const unsigned long tokenslen = 64LU;
+    // const unsigned long tokenslen = 64;
     // char **tokens = malloc(sizeof(char *) * tokenslen); // array of char pointers
     // if(tokens == NULL)
     // {
