@@ -83,7 +83,7 @@ int main()
 
     char *tokens[8]; // array of char pointers
     unsigned long tokensolen = 0;
-
+    memset(tokens, 0, sizeof(char *) * 8);
     // 4a. split root.atsign.org:64 into root.atsign.org and 64
     strcpy(string, "root.atsign.org:64");
     ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
