@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "atclient/stringutils.h"
-#include "atclient/atlogger.h"
+#include "atlogger/atlogger.h"
 
 #define TAG "test_stringutils"
 
