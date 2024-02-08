@@ -17,73 +17,133 @@ int main()
 
     atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
-    char *str = "@bob";
+    const unsigned long stringlen = 4096;
+    char *string = (char *) malloc(sizeof(char) * stringlen);
+    memset(string, 0, sizeof(char) * stringlen);
+    strcpy(string, "@bob");
 
     int startswith;
 
-    startswith = atclient_stringutils_starts_with(str, strlen(str), "@", strlen("@"));
+    // 1a. @bob starts with @
+    startswith = atclient_stringutils_starts_with(string, strlen(string), "@", strlen("@"));
     if(startswith != 1)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, str, "@");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, string, "@");
         ret = 1;
         goto exit;
     }
 
-    startswith = atclient_stringutils_starts_with(str, strlen(str), "123", strlen("123"));
+    // 1b. @bob does not start with 123
+    startswith = atclient_stringutils_starts_with(string, strlen(string), "123", strlen("123"));
     if(startswith != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, str, "bob");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, string, "bob");
         ret = 1;
         goto exit;
     }
+
 
     int endswith;
-    str = "root.atsign.org:64";
-
-    endswith = atclient_stringutils_ends_with(str, strlen(str), "64", strlen("64"));
+    strcpy(string, "root.atsign.org:64");
+    // 2a. root.atsign.org:64 ends with 64
+    endswith = atclient_stringutils_ends_with(string, strlen(string), "64", strlen("64"));
     if(endswith != 1)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret, str, "64");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret, string, "64");
         ret = 1;
         goto exit;
     }
 
-    printf("a\n");
-    endswith = atclient_stringutils_ends_with(str, strlen(str), "org", strlen("org"));
+    // 2b. root.atsign.org:64 does not end with org
+    endswith = atclient_stringutils_ends_with(string, strlen(string), "org", strlen("org"));
     if(endswith != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret, str, "org");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret, string, "org");
         ret = 1;
         goto exit;
     }
 
-    str = "  scan jeremy_0\n";
+    // 3. trim whitespace and newline
+    strcpy(string, "   scan jeremy_0\n ");
     const char *expectedresult  = "scan jeremy_0";
-    ret = atclient_stringutils_trim_whitespace(str, strlen(str), out, outlen, &outolen);
+    ret = atclient_stringutils_trim_whitespace(string, strlen(string), out, outlen, &outolen);
     if(ret != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: %d | %s\n", ret, str);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: %d | %s\n", ret, string);
         ret = 1;
         goto exit;
     }
 
     if(strncmp(out, expectedresult, strlen(expectedresult)) != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: \"%s\" != \"%s\"\n", str, expectedresult);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: \"%s\" != \"%s\"\n", string, expectedresult);
         ret = 1;
         goto exit;
     }
 
-    str = "root.atsign.org:64";
-    // todo
+    char *tokens[8]; // array of char pointers
+    unsigned long tokensolen = 0;
 
-    str = "cached:public:publickey@bob";
-    char **tokens; // array of char pointers
-    unsigned long *tokensolen;
-    ret = atclient_stringutils_split(str, strlen(str), ":", tokens, tokensolen);
+    // 4a. split root.atsign.org:64 into root.atsign.org and 64
+    strcpy(string, "root.atsign.org:64");
+    ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
     if(ret != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %d | %s\n", ret, str);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %d | %s\n", ret, string);
+        ret = 1;
+        goto exit;
+    }
+    if(tokensolen != 2)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %lu != 2\n", tokensolen);
+        ret = 1;
+        goto exit;
+    }
+    if(strncmp(tokens[0], "root.atsign.org", strlen("root.atsign.org")) != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != root.atsign.org\n", tokens[0]);
+        ret = 1;
+        goto exit;
+    }
+    if(strncmp(tokens[1], "64", strlen("64")) != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != 64\n", tokens[1]);
+        ret = 1;
+        goto exit;
+    }
+
+    // 4b. split cached:public:publickey@bob into cached, public, publickey@bob
+    memset(tokens, 0, sizeof(char *) * 8);
+    tokensolen = 0;
+    strcpy(string, "cached:public:publickey@bob");
+    ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %d | %s\n", ret, string);
+        ret = 1;
+        goto exit;
+    }
+    if(tokensolen != 3)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %lu != 3\n", tokensolen);
+        ret = 1;
+        goto exit;
+    }
+    if(strncmp(tokens[0], "cached", strlen("cached")) != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != cached\n", tokens[0]);
+        ret = 1;
+        goto exit;
+    }
+    if(strncmp(tokens[1], "public", strlen("public")) != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != public\n", tokens[1]);
+        ret = 1;
+        goto exit;
+    }
+    if(strncmp(tokens[2], "publickey", strlen("publickey")) != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_split: %s != publickey\n", tokens[2]);
         ret = 1;
         goto exit;
     }
@@ -93,6 +153,8 @@ int main()
     goto exit;
 exit:
 {
+    free(out);
+    free(string);
     return ret;
 }
 }

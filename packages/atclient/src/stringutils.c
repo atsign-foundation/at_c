@@ -139,26 +139,16 @@ int atclient_stringutils_split(char *string, const unsigned long stringlen, cons
         ret = 1;
         goto exit;
     }
-    char *copy = strndup(string, stringlen);
-    printf("copy: %s\n", copy);
     *tokensolen = 0;
     char *token = NULL;
     char *saveptr = NULL;
-    token = strtok_r(copy, delim, &saveptr);
+    token = strtok_r(string, delim, &saveptr);
     while(token != NULL)
     {
-        printf("token: %s\n", token);
         tokens[*tokensolen] = token;
         (*tokensolen)++;
         token = strtok_r(NULL, delim, &saveptr);
     }
-    memcpy(string, copy, stringlen);
-    for(int i = 0; i < *tokensolen; i++)
-    {
-        *(tokens + i) = string + (*(tokens + i) - copy);
-    }
-
-
 
     ret = 0;
 
