@@ -120,7 +120,7 @@ int main()
         goto exit;
     }
 
-    4b. split cached:public:publickey@bob into cached, public, publickey@bob
+    // 4b. split cached:public:publickey@bob into cached, public, publickey@bob
     memset(tokens, 0, sizeof(char *) * 8);
     tokensolen = 0;
     memset(string, 0, sizeof(char) * stringlen);
