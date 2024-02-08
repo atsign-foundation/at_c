@@ -10,17 +10,21 @@ int main()
 {
     int ret = 1;
 
+    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+
     const unsigned long outlen = 4096;
     char *out = (char *) malloc(sizeof(char) * outlen);
     memset(out, 0, sizeof(char) * outlen);
     unsigned long outolen = 0;
 
-    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
-
     const unsigned long stringlen = 4096;
     char *string = (char *) malloc(sizeof(char) * stringlen);
     memset(string, 0, sizeof(char) * stringlen);
     strcpy(string, "@bob");
+
+    char *tokens[8]; // array of char pointers
+    memset(tokens, 0, sizeof(char *) * 8);
+    unsigned long tokensolen = 0;
 
     int startswith;
 
@@ -81,9 +85,6 @@ int main()
         goto exit;
     }
 
-    char *tokens[8]; // array of char pointers
-    unsigned long tokensolen = 0;
-    memset(tokens, 0, sizeof(char *) * 8);
     // 4a. split root.atsign.org:64 into root.atsign.org and 64
     strcpy(string, "root.atsign.org:64");
     // ret = atclient_stringutils_split(string, strlen(string), ":", tokens, &tokensolen);
