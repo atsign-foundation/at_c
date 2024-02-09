@@ -125,35 +125,3 @@ exit:
     return ret;
 }
 }
-
-int atclient_stringutils_split(char *string, const unsigned long stringlen, const char *delim, char **tokens, unsigned long *tokensolen)
-{
-    int ret = 1;
-    if(string == NULL || *string == NULL || delim == NULL)
-    {
-        ret = 1;
-        goto exit;
-    }
-    if(stringlen == 0)
-    {
-        ret = 1;
-        goto exit;
-    }
-    *tokensolen = 0;
-    char *token = NULL;
-    char *saveptr = NULL;
-    token = strtok_r(string, delim, &saveptr);
-    while(token != NULL)
-    {
-        tokens[*tokensolen] = token;
-        (*tokensolen)++;
-        token = strtok_r(NULL, delim, &saveptr);
-    }
-
-    ret = 0;
-
-exit:
-{
-    return ret;
-}
-}
