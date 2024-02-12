@@ -4,6 +4,8 @@
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
 
+#define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
+
 typedef enum atclient_atkey_type
 {
 	ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
@@ -68,7 +70,7 @@ int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr)
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen, unsigned long *atkeystrolen);
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen, unsigned long *atkeystrolen);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public AtKey would be 'public:name.namespace@alice'. Public AtKeys typically hold unencrypted values and can be seen by unauthenticated atsigns. Be sure to call the atclient_atkey_init function before calling this function.

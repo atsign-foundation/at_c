@@ -11,8 +11,6 @@
 
 #define TAG "atkey"
 
-#define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
-
 void atclient_atkey_init(atclient_atkey *atkey)
 {
     memset(atkey, 0, sizeof(atclient_atkey));
@@ -245,9 +243,102 @@ int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr)
     return atclient_atkey_from_string(atkey, atstr.str, atstr.olen);
 }
 
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen, unsigned long *atkeystrolen)
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen, unsigned long *atkeystrolen)
 {
-    return 1; // TODO: implement
+    int ret = 1;
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    if(atkey.metadata.iscached == 1)
+    {
+        ret = atclient_atstr_append(&string, "cached:");
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
+            goto exit;
+        }
+    }
+
+    if(atkey.metadata.ispublic == 1 && atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY)
+    {
+        ret = atclient_atstr_append(&string, "public:");
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
+            goto exit;
+        }
+    }
+    else if(atkey.metadata.ispublic == 1 || atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "either atkey's metadata ispublic is not set to 1 or atkey's atkeytype is not set to ATCLIENT_ATKEY_TYPE_PUBLICKEY for atkey: %.*s\n", (int) atkey.name.olen, atkey.name.str);
+    }
+    else if(atkey.atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY)
+    {
+
+        ret = atclient_atstr_append(&string, "%.s", (int) atkey.sharedwith.olen, atkey.sharedwith.str);
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
+            goto exit;
+        }
+    } else if(atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY)
+    {
+        ret = atclient_atstr_append(&string, "_");
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
+            goto exit;
+        }
+    }
+
+    ret = atclient_atstr_append(&string, atkey.name.str, atkey.name.olen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
+        goto exit;
+    }
+
+    if(atkey.namespacestr.olen > 0)
+    {
+        ret = atclient_atstr_append(&string, ".");
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
+            goto exit;
+        }
+        ret = atclient_atstr_append(&string, atkey.namespacestr.str, atkey.namespacestr.olen);
+        if(ret != 0)
+        {
+            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
+            goto exit;
+        }
+    }
+
+    ret = atclient_atstr_append(&string, "%.*s", (int) atkey.sharedby.olen, atkey.sharedby.str);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
+        goto exit;
+    }
+
+    if(string.olen > atkeystrlen)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystr is too small\n");
+        ret = 1;
+        goto exit;
+    }
+
+    memcpy(atkeystr, string.str, string.olen);
+    *atkeystrolen = string.olen;
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    atclient_atstr_free(&string);
+    return ret;
+}
 }
 
 int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr)
