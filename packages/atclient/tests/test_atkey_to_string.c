@@ -336,7 +336,7 @@ static int test2b()
     atkey.metadata.iscached = 1;
     atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
-    ret = atclient_atstr_set_literal(&(atkey.sharedby), "@bob");
+    ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@bob");
     if(ret != 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
@@ -350,7 +350,7 @@ static int test2b()
         goto exit;
     }
 
-    ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@alice");
+    ret = atclient_atstr_set_literal(&(atkey.sharedby), "@alice");
     if(ret != 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");

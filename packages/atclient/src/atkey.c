@@ -275,8 +275,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
     }
     else if(atkey.atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY)
     {
-
-        ret = atclient_atstr_append(&string, "%.s", (int) atkey.sharedwith.olen, atkey.sharedwith.str);
+        ret = atclient_atstr_append(&string, "%.*s:", (int) atkey.sharedwith.olen, atkey.sharedwith.str);
         if(ret != 0)
         {
             atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
