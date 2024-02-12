@@ -510,16 +510,16 @@ static int test2c()
         goto exit;
     }
 
-    if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0)
+    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n", atkey.sharedby.str);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
         ret = 1;
         goto exit;
     }
 
-    if (strncmp(atkey.sharedwith.str, "@alice", atkey.sharedwith.olen) != 0)
+    if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @alice, it is \"%s\"\n", atkey.sharedwith.str);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n", atkey.sharedwith.str);
         ret = 1;
         goto exit;
     }
@@ -585,16 +585,16 @@ static int test2d()
         goto exit;
     }
 
-    if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0)
+    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n", atkey.sharedby.str);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
         ret = 1;
         goto exit;
     }
 
-    if (strncmp(atkey.sharedwith.str, "@alice", atkey.sharedwith.olen) != 0)
+    if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @alice, it is \"%s\"\n", atkey.sharedwith.str);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n", atkey.sharedwith.str);
         ret = 1;
         goto exit;
     }
