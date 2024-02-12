@@ -98,7 +98,40 @@ static int test1b()
     atclient_atstr string;
     atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
 
-    // TODO: implement test
+    const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
+    const unsigned long expectedlen = strlen(expected);
+
+    atkey.metadata.ispublic = 1;
+    atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
+
+    ret = atclient_atstr_set_literal(&(atkey.name), "publickey");
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atstr_set_literal(&(atkey.sharedby), "@alice");
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
+        goto exit;
+    }
+
+    ret = strncmp(string.str, expected, expectedlen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string.str);
+        ret = 1;
+        goto exit;
+    }
 
     ret = 0;
     goto exit;
@@ -298,6 +331,76 @@ int main()
     if (ret != 0)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1a failed\n");
+        goto exit;
+    }
+
+    ret = test1b();
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1b failed\n");
+        goto exit;
+    }
+
+    ret = test1c();
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1c failed\n");
+        goto exit;
+    }
+
+    ret = test1d();
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1d failed\n");
+        goto exit;
+    }
+
+    ret = test2a();
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2a failed\n");
+        goto exit;
+    }
+
+    ret = test2b();
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2b failed\n");
+        goto exit;
+    }
+
+    ret = test2c();
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2c failed\n");
+        goto exit;
+    }
+
+    ret = test2d();
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2d failed\n");
+        goto exit;
+    }
+
+    ret = test3a();
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test3a failed\n");
+        goto exit;
+    }
+
+    ret = test4a();
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4a failed\n");
+        goto exit;
+    }
+
+    ret = test4b();
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4b failed\n");
         goto exit;
     }
 
