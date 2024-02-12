@@ -272,7 +272,45 @@ static int test2a()
     atclient_atstr string;
     atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
 
-    // TODO: implement test
+    const char *expected = TEST_ATKEY_TO_STRING_2A; // "@alice:name.wavi@bob"
+    const unsigned long expectedlen = strlen(expected);
+
+    atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
+
+    ret = atclient_atstr_set_literal(&(atkey.sharedby), "@bob");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atstr_set_literal(&(atkey.name), "name");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atstr_set_literal(&(atkey.namespacestr), "wavi");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@alice");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
+        goto exit;
+    }
 
     ret = 0;
     goto exit;
