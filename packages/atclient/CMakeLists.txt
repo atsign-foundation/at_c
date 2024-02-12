@@ -31,11 +31,9 @@ set(ATCHOPS_DIR ${CMAKE_CURRENT_LIST_DIR}/../atchops)
 # 1d. cJSON package directory
 set(CJSON_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cJSON)
 
-
 # 1d. Set compile definitions
 # you may set any of these flags in the CMake configuration step via: `-DATCLIENT_BUILD_TESTS=ON` (example: `cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF)
 # or you may edit the defaults here
-
 option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
 option(ATCLIENT_EXPORT_ATLOGGER "Export atlogger as a standalone library" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
 
@@ -85,13 +83,13 @@ if(NOT ESP_PLATFORM)
 	include(GNUInstallDirs)
 
 	# Determine if atclient is being built as a subproject
-    if(NOT DEFINED ATCLIENT_AS_SUBPROJECT)
-        set(ATCLIENT_AS_SUBPROJECT ON)
+	if(NOT DEFINED ATCLIENT_AS_SUBPROJECT)
+		set(ATCLIENT_AS_SUBPROJECT ON)
 
-        if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-            set(ATCLIENT_AS_SUBPROJECT OFF)
-        endif()
-    endif()
+		if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+			set(ATCLIENT_AS_SUBPROJECT OFF)
+		endif()
+	endif()
 
 	# #########################################################
 	# 4. Set CMake policies
@@ -109,6 +107,7 @@ if(NOT ESP_PLATFORM)
 	# 5A. atchops
 	# #########################################################
 	find_package(atchops QUIET)
+
 	if(NOT atchops_FOUND)
 		message(STATUS "[ATCLIENT] atchops not found, fetching from local repository..")
 		FetchContent_Declare(
@@ -125,12 +124,13 @@ if(NOT ESP_PLATFORM)
 	# 5B. MbedTLS
 	# #########################################################
 	find_package(MbedTLS QUIET)
+
 	if(NOT MbedTLS_FOUND)
 		message(STATUS "[ATCLIENT] MbedTLS not found, fetching from GitHub..")
 		FetchContent_Declare(
 			MbedTLS
 			URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
-            URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
+			URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
 		)
 		list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto p256m everest) # since we've fetched it, we have to install the targets
 		list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS) # we have to make it available later on with FetchContent_MakeAvailable
@@ -149,22 +149,22 @@ if(NOT ESP_PLATFORM)
 	list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson-static)
 
 	# #########################################################
-  # 5D. Create atlogger library
-  # - atlogger header files are installed to `/usr/local/include/atlogger`
-  # - atlogger library is automatically linked as part of atclient library (when you install atclient, it already includes atlogger)
-  # - atlogger library is only exported as a standalone library if ATCLIENT_EXPORT_ATLOGGER is set to ON
+	# 5D. Create atlogger library
+	# - atlogger header files are installed to `/usr/local/include/atlogger`
+	# - atlogger library is automatically linked as part of atclient library (when you install atclient, it already includes atlogger)
+	# - atlogger library is only exported as a standalone library if ATCLIENT_EXPORT_ATLOGGER is set to ON
 	# #########################################################
-  if(ATCLIENT_EXPORT_ATLOGGER)
-    add_library(atlogger STATIC ${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c)
-    add_library(${PROJECT_NAME}::atlogger ALIAS atlogger)
+	if(ATCLIENT_EXPORT_ATLOGGER)
+		add_library(atlogger STATIC ${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c)
+		add_library(${PROJECT_NAME}::atlogger ALIAS atlogger)
 
-    target_include_directories(atlogger PUBLIC
-      $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/atlogger>
-    )
+		target_include_directories(atlogger PUBLIC
+			$<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/atlogger>
+		)
 
-	  list(APPEND ATCLIENT_TARGETS_TO_INSTALL atlogger) # install atlogger
-  endif()
+		list(APPEND ATCLIENT_TARGETS_TO_INSTALL atlogger) # install atlogger
+	endif()
 
 	# #########################################################
 	# 6. Create atclient library
@@ -188,10 +188,10 @@ if(NOT ESP_PLATFORM)
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
 
-  install(
-    DIRECTORY ${ATCLIENT_INCLUDE_DIR}/atlogger
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  )
+	install(
+		DIRECTORY ${ATCLIENT_INCLUDE_DIR}/atlogger
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
 
 	# #########################################################
 	# 7. Install atclient library
@@ -218,11 +218,10 @@ if(NOT ESP_PLATFORM)
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	)
 
- 	# #########################################################
+	# #########################################################
 	# 9. Export in case people use us in a subdirectory
 	# Allows other Cmake projects to do `add_subdirectory(/path/to/atclient)` and then `target_link_libraries(their_target atclient::atclient)`
 	# #########################################################
-
 	if(NOT ATCLIENT_AS_SUBPROJECT) # if it is not a sub project, we should install the -config.cmake
 		export(
 			EXPORT ${PROJECT_NAME}-config
