@@ -1,7 +1,7 @@
 #include <string.h>
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
-#include "atclient/atlogger.h"
+#include "atlogger/atlogger.h"
 
 #define TAG "test_atkey_to_string"
 
@@ -84,6 +84,206 @@ exit:
 {
     atclient_atkey_free(&atkey);
     atclient_atstr_free(&string);
+    return ret;
+}
+}
+
+static int test1b()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test1c()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test1d()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test2a()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test2b()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test2c()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test2d()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test3a()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test4a()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
+    return ret;
+}
+}
+
+static int test4b()
+{
+    int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    atclient_atstr string;
+    atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+
+    // TODO: implement test
+
+    ret = 0;
+    goto exit;
+exit:
+{
     return ret;
 }
 }
