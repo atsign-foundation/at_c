@@ -68,7 +68,7 @@ void atclient_atstr_free(atclient_atstr *atstr);
 
 /**
  * @brief Copy what is in original to substring and then set substring to a substring of original
- * 
+ *
  * @param substring the atstr to set to the substring. Assumed that this is already initialized (via atclient_atstr_init)
  * @param original the atstr to get the substring from. Assumed that this is already initialized (via atclient_atstr_init)
  * @param start the start index of the substring
@@ -79,24 +79,12 @@ int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr ori
 
 /**
  * @brief Append a string to an atstr
- * 
+ *
  * @param atstr the atstr to append to
  * @param format the format of the string to append
  * @param ...   the arguments to format
  * @return int 0 on success
  */
 int atclient_atstr_append(atclient_atstr *atstr, const char *format, ...);
-
-/**
- * @brief Returns a set of tokens from a string
- *
- * @param atstr the string to read and split from
- * @param delimiter the delimiter to split the string by
- * @param tokens the array of tokens to populate
- * @param tokensarrlen the size of the tokens array (the max number of tokens to populate)
- * @return int 0 on success, non-zero on failure
- */
-int atclient_atstr_split(const atclient_atstr atstr, const char delimiter, char **tokens, const unsigned long tokensarrlen);
-
 
 #endif

@@ -155,18 +155,6 @@ exit:
 }
 }
 
-int atclient_atstr_split(const atclient_atstr atstr, const char delimiter, char **tokens, const unsigned long tokensarrlen)
-{
-    int ret = 1;
-    
-    ret = 0;
-    goto exit;
-exit:
-{
-    return ret;
-}
-}
-
 void atclient_atstr_free(atclient_atstr *atstr)
 {
     free(atstr->str);
