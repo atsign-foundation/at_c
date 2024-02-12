@@ -290,8 +290,19 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
             atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
             goto exit;
         }
+    } else if(atkey.atkeytype == NULL || atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY || atkey.atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's atkeytype is %d: %.*s\n", atkey.atkeytype, (int) atkey.name.olen, atkey.name.str);
+        ret = 1;
+        goto exit;
     }
 
+    if(atkey.name.str == NULL || atkey.name.olen == 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's name is NULL or empty. atkey.name.str: \"%s\", atkey.name.olen: %d\n", atkey.name.str, atkey.name.olen);
+        ret = 1;
+        goto exit;
+    }
     ret = atclient_atstr_append(&string, atkey.name.str, atkey.name.olen);
     if(ret != 0)
     {
@@ -315,6 +326,12 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
         }
     }
 
+    if(atkey.sharedby.str == NULL || atkey.sharedby.olen == 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is NULL or empty. atkey.sharedby.str: \"%s\", atkey.sharedby.olen: %d\n", atkey.sharedby.str, atkey.sharedby.olen);
+        ret = 1;
+        goto exit;
+    }
     ret = atclient_atstr_append(&string, "%.*s", (int) atkey.sharedby.olen, atkey.sharedby.str);
     if(ret != 0)
     {
