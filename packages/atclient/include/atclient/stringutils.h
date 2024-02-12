@@ -1,0 +1,36 @@
+#ifndef ATCLIENT_STRINGUTILS_H
+#define ATCLIENT_STRINGUTILS_H
+
+/**
+ * @brief trims leading/trailing whitespace/newline
+ *
+ * @param string string to read from
+ * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
+ * @param out the output buffer
+ * @param outlen the size of the output buffer that you allocated
+ * @param outolen the output length of the output buffer that is actually used
+ * @return int 0 on success, non-zero on failure
+ */
+int atclient_stringutils_trim_whitespace(const char *string, const unsigned long stringlen, char *out, const unsigned long outlen, unsigned long *outolen);
+
+/**
+ * @brief returns 1 (true) if the string starts with the prefix, 0 (false) otherwise
+ *
+ * @param string the string to check
+ * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
+ * @param prefix the prefix to check for
+ * @return int 1 (true) if the string starts with the prefix, 0 (false) otherwise
+ */
+int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix, const unsigned long prefixlen);
+
+/**
+ * @brief returns 1 (true) if the string ends with the suffix, 0 (false) otherwise
+ *
+ * @param string the string to check
+ * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
+ * @param suffix the suffix to check for
+ * @return int 1 (true) if the string ends with the suffix, 0 (false) otherwise
+ */
+int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix, const unsigned long suffixlen);
+
+#endif

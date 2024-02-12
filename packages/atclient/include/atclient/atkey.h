@@ -6,20 +6,21 @@
 
 typedef enum atclient_atkey_type
 {
-	UNKNOWN = 0,
-	PUBLICKEY,
-	SELFKEY,
-	SHAREDKEY,
+	ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
+	ATCLIENT_ATKEY_TYPE_PUBLICKEY,
+	ATCLIENT_ATKEY_TYPE_SELFKEY,
+	ATCLIENT_ATKEY_TYPE_SHAREDKEY,
+	ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey
 {
+	atclient_atkey_type atkeytype;
+
 	atclient_atstr name;
 	atclient_atstr namespacestr;
 	atclient_atstr sharedby;
 	atclient_atstr sharedwith;
-
-	atclient_atkey_type atkeytype;
 
 	atclient_atkey_metadata metadata;
 
@@ -50,6 +51,15 @@ void atclient_atkey_free(atclient_atkey *atkey);
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen);
 
 /**
+ * @brief populate an atkey struct given a string (atclient_atstr).
+ *
+ * @param atkey the atkey struct to populate
+ * @param atstr the atstr to derive from. For example, this atstr could've been created from a string like 'public:bob@publickey'
+ * @return int 0 on success, non-zero on failure
+ */
+int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr);
+
+/**
  * @brief convert an atkey struct to its string format
  *
  * @param atkey atkey struct to read
@@ -58,7 +68,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen, unsigned long atkeystrolen);
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen, unsigned long *atkeystrolen);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public AtKey would be 'public:name.namespace@alice'. Public AtKeys typically hold unencrypted values and can be seen by unauthenticated atsigns. Be sure to call the atclient_atkey_init function before calling this function.

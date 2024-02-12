@@ -68,7 +68,7 @@ void atclient_atstr_free(atclient_atstr *atstr);
 
 /**
  * @brief Copy what is in original to substring and then set substring to a substring of original
- * 
+ *
  * @param substring the atstr to set to the substring. Assumed that this is already initialized (via atclient_atstr_init)
  * @param original the atstr to get the substring from. Assumed that this is already initialized (via atclient_atstr_init)
  * @param start the start index of the substring
@@ -79,13 +79,12 @@ int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr ori
 
 /**
  * @brief Append a string to an atstr
- * 
+ *
  * @param atstr the atstr to append to
  * @param format the format of the string to append
  * @param ...   the arguments to format
  * @return int 0 on success
  */
 int atclient_atstr_append(atclient_atstr *atstr, const char *format, ...);
-
 
 #endif

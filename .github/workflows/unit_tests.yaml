@@ -35,4 +35,4 @@ jobs:
       - name: CTest AtClient
         working-directory: packages/atclient/build/tests
         run: |
-          ctest -V --output-on-failure --timeout 2
+          ctest -V --output-on-failure --timeout 10
