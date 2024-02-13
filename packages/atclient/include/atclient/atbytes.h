@@ -9,9 +9,9 @@
  * @brief Represents a buffer of bytes. Similar to atclient_atstr
  */
 typedef struct atclient_atbytes {
-    unsigned long len; // the allocated length of the buffer
-    unsigned char *bytes; // the buffer of bytes (pointer to the first byte in the buffer on the heap)
-    unsigned long olen; // the output length of the buffer
+  unsigned long len;    // the allocated length of the buffer
+  unsigned char *bytes; // the buffer of bytes (pointer to the first byte in the buffer on the heap)
+  unsigned long olen;   // the output length of the buffer
 } atclient_atbytes;
 
 /**
@@ -41,7 +41,7 @@ int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, 
 
 /**
  * @brief Convert a string to atbytes
- * 
+ *
  * @param atbytes the atbytes to convert to
  * @param str the string to convert from
  * @param strlen the length of the string
@@ -51,7 +51,7 @@ int atclient_atbytes_convert(atclient_atbytes *atbytes, const char *str, const u
 
 /**
  * @brief Converts an atstr to atbytes
- * 
+ *
  * @param atbytes atbytes to write to
  * @param atstr the atstr to copy from
  * @return int 0 on success

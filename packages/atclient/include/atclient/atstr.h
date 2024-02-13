@@ -4,18 +4,18 @@
 /**
  * @brief Represents a string that is allocated on the heap
  */
-typedef struct atclient_atstr
-{
-    unsigned long len;  // buffer length
-    char *str;          // string
-    unsigned long olen; // output length (length of string)
+typedef struct atclient_atstr {
+  unsigned long len;  // buffer length
+  char *str;          // string
+  unsigned long olen; // output length (length of string)
 } atclient_atstr;
 
 /**
  * @brief Initialize an atstr
  *
  * @param atstr pointer to atstr to initialize
- * @param bufferlen length of buffer to allocate in bytes (recommended to use a number that is a power of 2). the bufferlen is the length of the buffer generated. we do not add 1 for null terminator.
+ * @param bufferlen length of buffer to allocate in bytes (recommended to use a number that is a power of 2). the
+ * bufferlen is the length of the buffer generated. we do not add 1 for null terminator.
  */
 void atclient_atstr_init(atclient_atstr *atstr, const unsigned long bufferlen);
 
@@ -69,13 +69,16 @@ void atclient_atstr_free(atclient_atstr *atstr);
 /**
  * @brief Copy what is in original to substring and then set substring to a substring of original
  *
- * @param substring the atstr to set to the substring. Assumed that this is already initialized (via atclient_atstr_init)
- * @param original the atstr to get the substring from. Assumed that this is already initialized (via atclient_atstr_init)
+ * @param substring the atstr to set to the substring. Assumed that this is already initialized (via
+ * atclient_atstr_init)
+ * @param original the atstr to get the substring from. Assumed that this is already initialized (via
+ * atclient_atstr_init)
  * @param start the start index of the substring
  * @param end the end index of the substring
  * @return int 0 on success, non-zero on failure
  */
-int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr original, const unsigned long start, const unsigned long end);
+int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr original, const unsigned long start,
+                             const unsigned long end);
 
 /**
  * @brief Append a string to an atstr

@@ -1,25 +1,22 @@
 #ifndef ATCHOPS_RSAKEY_H
 #define ATCHOPS_RSAKEY_H
 
-typedef struct atchops_rsakey_param
-{
-    unsigned long len;    // length of the number in bytes
-    unsigned char *value; // hex byte array of the number
+typedef struct atchops_rsakey_param {
+  unsigned long len;    // length of the number in bytes
+  unsigned char *value; // hex byte array of the number
 } atchops_rsakey_param;
 
-typedef struct atchops_rsakey_publickey
-{
-    atchops_rsakey_param n; // modulus
-    atchops_rsakey_param e; // public exponent
+typedef struct atchops_rsakey_publickey {
+  atchops_rsakey_param n; // modulus
+  atchops_rsakey_param e; // public exponent
 } atchops_rsakey_publickey;
 
-typedef struct atchops_rsakey_privatekey
-{
-    atchops_rsakey_param n; // modulus
-    atchops_rsakey_param e; // public exponent
-    atchops_rsakey_param d; // private exponent
-    atchops_rsakey_param p; // prime 1
-    atchops_rsakey_param q; // prime 2
+typedef struct atchops_rsakey_privatekey {
+  atchops_rsakey_param n; // modulus
+  atchops_rsakey_param e; // public exponent
+  atchops_rsakey_param d; // private exponent
+  atchops_rsakey_param p; // prime 1
+  atchops_rsakey_param q; // prime 2
 } atchops_rsakey_privatekey;
 
 void atchops_rsakey_publickey_init(atchops_rsakey_publickey *publickey);
@@ -36,7 +33,8 @@ void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey);
  * @param publickeybase64len the length of the base64 string
  * @return int 0 on success
  */
-int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickeystruct, const char *publickeybase64, const unsigned long publickeybase64len);
+int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickeystruct, const char *publickeybase64,
+                                      const unsigned long publickeybase64len);
 
 /**
  * @brief Populate a private key struct from a base64 string
@@ -46,6 +44,7 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickeystruct,
  * @param privatekeybase64len the length of the base64 string
  * @return int 0 on success
  */
-int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekeystruct, const char *privatekeybase64, const unsigned long privatekeybase64len);
+int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekeystruct, const char *privatekeybase64,
+                                       const unsigned long privatekeybase64len);
 
 #endif
