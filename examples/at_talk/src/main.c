@@ -3,53 +3,120 @@
 #include <atclient/atclient.h>
 #include <atclient/atsign.h>
 #include <atclient/atkeysfile.h>
-#include <atclient/atlogger.h>
+#include <atlogger/atlogger.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
 #define ATKEYSFILE_PATH "/home/realvarx/.atsign/keys/@arrogantcheetah_key.atKeys"
 #define ATSIGN "@arrogantcheetah"
+#define RECIPIENT "@secondaryjackal"
 
 #define TAG "at_talk"
 
 int main(int argc, char **argv)
 {
-    int ret = 1;
+    int ret = 0;
 
-    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
-    atclient_ctx atclient;
-    atclient_init(&atclient, ATSIGN);
+    // Init atclient
+    atclient atclient;
+    atclient_init(&atclient);
 
-    ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
+    // Init myatsign: the atsign that you'd like to use as a client
+    // and assign it to the atclient "atsign" parameter
+    atclient_atsign myatsign;
+    ret = atclient_atsign_init(&myatsign, ATSIGN);
     if (ret != 0)
     {
-        goto exit;
+        atclient_free(&atclient);
+        return ret;
     }
+    atclient.atsign = myatsign;
 
-    ret = atclient_pkam_authenticate(&atclient, atclient.atkeys, ATSIGN);
+    // Init atkeysfile and read keys
+    atclient_atkeysfile atkeysfile;
+    atclient_atkeysfile_init(&atkeysfile);
+    ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
     if (ret != 0)
     {
-        goto exit;
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
+        atclient_free(&atclient);
+        atclient_atkeysfile_free(&atkeysfile);
+        return ret;
     }
 
+    // Init atkeys and assign them to the atclient "atkeys" parameter
+    atclient_atkeys atkeys;
+    atclient_atkeys_init(&atkeys);
+    ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
+    if (ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+        goto exit1;
+    }
+    atclient.atkeys = atkeys;
+
+    // Root connection and pkam auth
+    ret = atclient_start_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
+    if (ret != 0)
+    {
+        goto exit2;
+    }
+
+    ret = atclient_pkam_authenticate(&atclient, atclient.atkeys, ATSIGN, strlen(ATSIGN));
+    if (ret != 0)
+    {
+        goto exit2;
+    }
+    
+    // Init recipient's atsign
+    atclient_atsign recipient;
+    ret = atclient_atsign_init(&recipient, RECIPIENT);
+    if (ret != 0)
+    {
+        goto exit2;
+    }
+    
+    // Init variables and get the encryption keys
+    
     char *enc_key_shared_by_me = malloc(45);
+    ret = atclient_get_encryption_key_shared_by_me(&atclient, &recipient, enc_key_shared_by_me);
+    if (ret != 0)
+    {
+        free(enc_key_shared_by_me);
+        goto exit2;
+    }
+
     char *enc_key_shared_by_other = malloc(45);
-    get_encryption_key_shared_by_me(&atclient, "secondaryjackal", enc_key_shared_by_me);
-    get_encryption_key_shared_by_other(&atclient, "secondaryjackal", enc_key_shared_by_other);
-    printf("enc_key_shared_by_me: %s\n", enc_key_shared_by_me);
-    printf("enc_key_shared_by_other: %s\n", enc_key_shared_by_other);
+    ret = atclient_get_encryption_key_shared_by_other(&atclient, &recipient, enc_key_shared_by_other);
+    if (ret != 0)
+    {
+        free(enc_key_shared_by_me);
+        free(enc_key_shared_by_other);
+        goto exit2;
+    }
+    
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enc_key_shared_by_me: %s\n", enc_key_shared_by_me);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enc_key_shared_by_other: %s\n", enc_key_shared_by_other);
 
-    attalk_send(&atclient, atclient.atkeys, "arrogantcheetah", "secondaryjackal", enc_key_shared_by_me, "hello from at_c!");
-    puts("Finished");
-    goto exit;
+    return ret;
 
-exit:
+exit1:
 {
-    // atclient_atkeysfile_free(&atkeysfile);
-    // atclient_atkeys_free(&atkeys);
     atclient_free(&atclient);
-    return 0;
+    atclient_atkeysfile_free(&atkeysfile);
+    atclient_atkeys_free(&atkeys);
+    return ret;
+}
+exit2:
+{
+    atclient_free(&atclient);
+    atclient_atkeysfile_free(&atkeysfile);
+    atclient_atkeys_free(&atkeys);
+    atclient_connection_disconnect(&(atclient.root_connection));
+    atclient_connection_free(&(atclient.root_connection));
+    return ret;
 }
 }

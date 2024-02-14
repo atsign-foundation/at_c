@@ -1,16 +1,21 @@
 #!/bin/bash
 set -eu
-sudo rm -rf /usr/local/include/atclient
-sudo rm -rf /usr/local/include/atchops
-cd ../../packages/atclient
-sudo cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=ON
-sudo sudo cmake --build build --target install
-cd ../../examples/at_talk
-sudo cmake -S . -B build
-sudo cmake --build build --target clean
-sudo cmake --build build --target all
-echo "Running main:"
-echo ""
-echo ""
-cd build && ./main
-cd ..
+
+# clean
+rm -f build/CMakeCache.txt
+sudo rm -f bin/at_talk
+
+# install dependencies
+FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
+SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
+"$SCRIPT_DIRECTORY/../../packages/atclient/tools/install.sh"
+cd "$SCRIPT_DIRECTORY"
+
+# configure
+cmake -S . -B build
+
+# build & install
+sudo cmake --build build --target install
+
+# run
+./bin/at_talk $@

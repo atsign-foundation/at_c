@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 
 project(
-    repl
+    at_talk
     VERSION 0.0.1
     LANGUAGES C
     HOMEPAGE_URL https://atsign.com
@@ -10,22 +10,19 @@ project(
 include(GNUInstallDirs)
 include(FetchContent)
 
-# FetchContent_Declare(
-#     atclient
-#     SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../atclient
-# )
-# FetchContent_MakeAvailable(atclient)
 find_package(atclient REQUIRED CONFIG)
+find_package (atchops CONFIG QUIET)
+find_package (MbedTLS CONFIG QUIET)
 
 message(STATUS "atclient was found")
 
-add_executable(repl)
+add_executable(at_talk)
 
-target_sources(repl PRIVATE src/main.c)
-target_link_libraries(repl PRIVATE atclient::atclient)
+target_sources(at_talk PRIVATE src/main.c)
+target_link_libraries(at_talk PRIVATE atclient::atclient)
 
-# the target executable will be delivered to the packages/repl/bin directory, when building the `install` target.
+# the target executable will be delivered to the packages/at_talk/bin directory, when building the `install` target.
 install(
-    TARGETS repl
+    TARGETS at_talk
     DESTINATION ${CMAKE_CURRENT_LIST_DIR}/bin
 )
