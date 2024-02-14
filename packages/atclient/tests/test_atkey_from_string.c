@@ -646,7 +646,7 @@ static int test3a()
         goto exit;
     }
 
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY)
+    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY, it is %d\n", atkey.atkeytype);
         ret = 1;
