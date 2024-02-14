@@ -173,7 +173,7 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
 {
     int ret = 1;
 
-    const unsigned long ciphertextlen = plaintextlen; // the result of the base64 decode of the cipher text should be of sufficient length for the plaintext length they are expecting
+    const unsigned long ciphertextlen = ciphertextbase64len; // the result of the base64 decode of the cipher text should be of sufficient length for the plaintext length they are expecting
     unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
     memset(ciphertext, 0, ciphertextlen);
     unsigned long ciphertextolen = 0;

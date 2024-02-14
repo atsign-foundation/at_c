@@ -11,9 +11,9 @@
  */
 typedef struct atclient
 {
-    atclient_connection_ctx root_connection;
-    atclient_connection_ctx secondary_connection;
-    atsign atsign;
+    atclient_connection root_connection;
+    atclient_connection secondary_connection;
+    atclient_atsign atsign;
     atclient_atkeys atkeys;
 } atclient;
 
@@ -22,7 +22,7 @@ typedef struct atclient
  *
  * @param ctx pointer to the atclient context to initialize
  */
-void atclient_init(atclient_ctx *ctx);
+void atclient_init(atclient *ctx);
 
 /**
  * @brief initalize the atclient's root connection to the specified host and port
@@ -57,5 +57,11 @@ int atclient_put(atclient *ctx, const char *key, const char *value);
 int atclient_get(atclient *ctx, const char *key, char *value, const unsigned long valuelen);
 int atclient_delete(atclient *ctx, const char *key);
 void atclient_free(atclient *ctx);
+
+int atclient_get_encryption_key_shared_by_me(atclient *ctx, atclient_atsign *recipient, char *enc_key_shared_by_me);
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_atsign *recipient, char *enc_key_shared_by_other);
+// int atclient_attalk_send(atclient *ctx, atsign *recipient, char *enc_key_shared_by_me, char *msg);
+// int atclient_notify(atclient *ctx, atclient_atkey *at_key, char *value, char *recv, const unsigned long recvlen, char *operation, char *session_uuid);
+
 
 #endif
