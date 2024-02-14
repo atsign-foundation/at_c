@@ -58,19 +58,14 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   //      sharedwith = "bar"
   //      namespace = "wavi"
   //      cached = true
-  // 5. PrivateHiddenKey:     "_latestnotificationid.wavi@smoothalligator"
-  //      name == "_latestnotificationid"
-  //      sharedby = "smoothalligator"
-  //      namespace = "wavi"
-  //      cached = false
-  // 6. SelfKey:              "name.wavi@smoothalligator"
+  // 5. SelfKey:              "name.wavi@smoothalligator"
   //      name == "name"
   //      sharedby = "smoothalligator"
   //      sharedwith = NULL
   //      namespace = "wavi"
   //      cached = false
   // more scenarios
-  // 7. No Namespace, SelfKey:
+  // 6. No Namespace, SelfKey:
   // "name@smoothalligator"
   //      name == "name"
   //      sharedby = "smoothalligator"
