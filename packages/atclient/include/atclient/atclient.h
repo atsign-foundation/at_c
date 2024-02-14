@@ -1,6 +1,7 @@
 #ifndef ATCLIENT_H
 #define ATCLIENT_H
 
+#include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
@@ -45,14 +46,16 @@ int atclient_start_root_connection(atclient *ctx, const char *roothost, const in
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport);
 
 /**
- * @brief authenticate with secondary server with RSA pkam private key. it is expected atkeys has been populated with the pkam private key and atclient context is connected to the root server
+ * @brief authenticate with secondary server with RSA pkam private key. it is expected atkeys has been populated with
+ * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign, const unsigned long atsignlen);
+int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign,
+                               const unsigned long atsignlen);
 int atclient_put(atclient *ctx, const char *key, const char *value);
 int atclient_get(atclient *ctx, const char *key, char *value, const unsigned long valuelen);
 int atclient_delete(atclient *ctx, const char *key);

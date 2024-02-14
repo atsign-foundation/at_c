@@ -1,23 +1,23 @@
 #ifndef ATCLIENT_CONNECTION_H
 #define ATCLIENT_CONNECTION_H
 
-#include <mbedtls/ssl.h>
-#include <mbedtls/net_sockets.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
-#include "atclient/constants.h"
 #include "atclient/atstr.h"
+#include "atclient/constants.h"
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/net_sockets.h>
+#include <mbedtls/ssl.h>
 
 typedef struct atclient_connection {
-    // char *host; // assume null terminated, example: "root.atsign.org"
-    char host[ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE];
-    int port; // example: 64
-    mbedtls_net_context net;
-    mbedtls_ssl_context ssl;
-    mbedtls_ssl_config ssl_config;
-    mbedtls_x509_crt cacert;
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
+  // char *host; // assume null terminated, example: "root.atsign.org"
+  char host[ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE];
+  int port; // example: 64
+  mbedtls_net_context net;
+  mbedtls_ssl_context ssl;
+  mbedtls_ssl_config ssl_config;
+  mbedtls_x509_crt cacert;
+  mbedtls_entropy_context entropy;
+  mbedtls_ctr_drbg_context ctr_drbg;
 } atclient_connection;
 
 /**
@@ -48,7 +48,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  * @param olen the length of the data received
  * @return int 0 on success, otherwise error
  */
-int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const unsigned long srclen, unsigned char *recv, const unsigned long recvlen, unsigned long *olen);
+int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const unsigned long srclen,
+                             unsigned char *recv, const unsigned long recvlen, unsigned long *olen);
 
 /**
  * @brief disconnect a connection
@@ -76,7 +77,8 @@ void atclient_connection_free(atclient_connection *ctx);
 /**
  * @brief get the host and port from a url
  *
- * @param host a pointer to an atclient_atstr to store the host, will hold "root.atsign.org" after the function call, for example. Assumed that this is already initialized via atclient_atstr_init(&host)
+ * @param host a pointer to an atclient_atstr to store the host, will hold "root.atsign.org" after the function call,
+ * for example. Assumed that this is already initialized via atclient_atstr_init(&host)
  * @param port a pointer to an int to store the port, will hold 64 after the function call, for example
  * @param url the url to parse (example "root.atsign.org:64")
  * @return int 0 on success, otherwise error

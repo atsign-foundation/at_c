@@ -4,11 +4,11 @@
 #include "atclient/atstr.h"
 
 typedef struct atclient_atkeysfile {
-    atclient_atstr aespkamprivatekeystr;
-    atclient_atstr aespkampublickeystr;
-    atclient_atstr aesencryptprivatekeystr;
-    atclient_atstr aesencryptpublickeystr;
-    atclient_atstr selfencryptionkeystr;
+  atclient_atstr aespkamprivatekeystr;
+  atclient_atstr aespkampublickeystr;
+  atclient_atstr aesencryptprivatekeystr;
+  atclient_atstr aesencryptpublickeystr;
+  atclient_atstr selfencryptionkeystr;
 } atclient_atkeysfile;
 
 void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile);
