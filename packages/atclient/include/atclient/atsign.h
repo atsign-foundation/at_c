@@ -13,7 +13,7 @@ typedef struct atclient_atsign {
 } atclient_atsign;
 
 // Function to initialize an AtSign object
-int atclient_atsign_init(atclient_atsign *atsign, char *atsign_str);
+int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str);
 
 // int atclient_atsign_populate_from_str(atclient_atsign *atsign, const char* atsign_str);
 

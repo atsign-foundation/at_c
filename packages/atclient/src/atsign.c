@@ -5,7 +5,7 @@
 
 #define TAG "atsign"
 
-int atclient_atsign_init(atclient_atsign *atsign, char *atsign_str) {
+int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   int ret = 0;
 
   // atsign_str is longer than expected or null/empty
