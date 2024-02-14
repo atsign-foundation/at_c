@@ -217,7 +217,7 @@ int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr)
   return atclient_atkey_from_string(atkey, atstr.str, atstr.olen);
 }
 
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen, unsigned long *atkeystrolen)
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
 {
     int ret = 1;
 
