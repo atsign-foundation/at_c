@@ -3,14 +3,15 @@
 
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
+#include <stddef.h>
 
 #define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
 
 typedef enum atclient_atkey_type {
-	ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
-	ATCLIENT_ATKEY_TYPE_PUBLICKEY,
-	ATCLIENT_ATKEY_TYPE_SELFKEY,
-	ATCLIENT_ATKEY_TYPE_SHAREDKEY,
+  ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
+  ATCLIENT_ATKEY_TYPE_PUBLICKEY,
+  ATCLIENT_ATKEY_TYPE_SELFKEY,
+  ATCLIENT_ATKEY_TYPE_SHAREDKEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
@@ -75,7 +76,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
 
 /**
  * @brief convert an atkey struct to its atstr format
- * 
+ *
  * @param atkey the atkey struct to read, assumed that this was already initialized via atclient_atkey_init
  * @param atstr the atstr to write to, assumed that this was already initialized via atclient_atstr_init
  * @return int 0 on success
