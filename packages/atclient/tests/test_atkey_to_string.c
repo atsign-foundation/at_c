@@ -524,7 +524,46 @@ static int test3a()
     atclient_atstr string;
     atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
 
-    // TODO: implement test
+    const char *expected = TEST_ATKEY_TO_STRING_3A; // "_lastnotificationid@alice123_4😘"
+    const unsigned long expectedlen = strlen(expected);
+
+    atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
+
+    ret = atclient_atstr_set_literal(&(atkey.name), "_lastnotificationid");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atstr_set_literal(&(atkey.sharedby), "@alice123_4😘");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
+        goto exit;
+    }
+
+    if(atkey.namespacestr.olen > 0 || strlen(atkey.namespacestr.str) > 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.olen > 0: %d or strlen(%s) > 0\n", atkey.namespacestr.olen, atkey.namespacestr.str);
+        ret = 1;
+        goto exit;
+    }
+
+    ret = strncmp(string.str, expected, expectedlen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string.str);
+        ret = 1;
+        goto exit;
+    }
 
     ret = 0;
     goto exit;
@@ -544,7 +583,46 @@ static int test4a()
     atclient_atstr string;
     atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
 
-    // TODO: implement test
+    const char *expected = TEST_ATKEY_TO_STRING_4A; // "name@alice"
+    const unsigned long expectedlen = strlen(expected);
+
+    atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
+
+    ret = atclient_atstr_set_literal(&(atkey.name), "name");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atstr_set_literal(&(atkey.sharedby), "@alice");
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+        goto exit;
+    }
+
+    ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
+        goto exit;
+    }
+
+    if(atkey.namespacestr.olen > 0 || strlen(atkey.namespacestr.str) > 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.olen > 0: %d or strlen(%s) > 0\n", atkey.namespacestr.olen, atkey.namespacestr.str);
+        ret = 1;
+        goto exit;
+    }
+
+    ret = strncmp(string.str, expected, expectedlen);
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string.str);
+        ret = 1;
+        goto exit;
+    }
 
     ret = 0;
     goto exit;
