@@ -20,5 +20,3 @@ __pycache__/
 .pio/
 
 test/*/test_*
-
-.clang-format
