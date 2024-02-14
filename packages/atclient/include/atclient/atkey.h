@@ -12,7 +12,6 @@ typedef enum atclient_atkey_type
 	ATCLIENT_ATKEY_TYPE_PUBLICKEY,
 	ATCLIENT_ATKEY_TYPE_SELFKEY,
 	ATCLIENT_ATKEY_TYPE_SHAREDKEY,
-	ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey

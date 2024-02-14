@@ -143,8 +143,9 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     }
     else if(atclient_stringutils_starts_with(token, tokenlen, "_", strlen("_")) == 1)
     {
-        // it is a private hidden key
-        atkey->atkeytype = ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY;
+        // it is an internal key
+        atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
+        atkey->metadata.ishidden = 1;
     }
     else
     {
@@ -276,14 +277,6 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
     else if(atkey.atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY)
     {
         ret = atclient_atstr_append(&string, "%.*s:", (int) atkey.sharedwith.olen, atkey.sharedwith.str);
-        if(ret != 0)
-        {
-            atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
-            goto exit;
-        }
-    } else if(atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY)
-    {
-        ret = atclient_atstr_append(&string, "_");
         if(ret != 0)
         {
             atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
