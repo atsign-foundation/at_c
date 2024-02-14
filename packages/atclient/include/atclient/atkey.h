@@ -94,8 +94,8 @@ int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr);
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                    const char *namespacestr);
+int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
+                                    const size_t sharedbylen, const char *namespacestr, const size_t namespacestrlen);
 
 /**
  * @brief Populate an atkey struct representing a SelfKey AtKey with null terminated strings. An example of a SelfKey
@@ -108,8 +108,8 @@ int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, con
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                  const char *namespacestr);
+int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
+                                  const size_t sharedbylen, const char *namespacestr, const size_t namespacestrlen);
 
 /**
  * @brief Populate an atkey struct representing a SharedKey AtKey given null terminated strings. An example of a
@@ -124,7 +124,8 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                    const char *sharedwith, char *namespacestr);
+int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
+                                    const size_t sharedbylen, const char *sharedwith, const size_t sharedwithlen,
+                                    const char *namespacestr, const size_t namespacestrlen);
 
 #endif
