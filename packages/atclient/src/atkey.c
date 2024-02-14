@@ -328,6 +328,21 @@ exit:
 }
 }
 
+int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr) {
+    int ret = 1;
+
+    ret = atclient_atkey_to_string(atkey, atstr->str, atstr->olen, &(atstr->olen));
+    if(ret != 0)
+    {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
+        goto exit;
+    }
+
+    ret = 0;
+    goto exit;
+exit: { return ret; }
+}
+
 int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby,
                                     const char *namespacestr) {
   return 1; // TODO: implement

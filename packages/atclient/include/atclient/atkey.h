@@ -70,8 +70,17 @@ int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr)
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen,
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
                              unsigned long *atkeystrolen);
+
+/**
+ * @brief convert an atkey struct to its atstr format
+ * 
+ * @param atkey the atkey struct to read
+ * @param atstr the atstr to write to
+ * @return int 0 on success
+ */
+int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public
