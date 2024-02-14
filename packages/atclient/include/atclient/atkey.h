@@ -4,12 +4,13 @@
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
 
+#define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
+
 typedef enum atclient_atkey_type {
-  ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
-  ATCLIENT_ATKEY_TYPE_PUBLICKEY,
-  ATCLIENT_ATKEY_TYPE_SELFKEY,
-  ATCLIENT_ATKEY_TYPE_SHAREDKEY,
-  ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY,
+	ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
+	ATCLIENT_ATKEY_TYPE_PUBLICKEY,
+	ATCLIENT_ATKEY_TYPE_SELFKEY,
+	ATCLIENT_ATKEY_TYPE_SHAREDKEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
@@ -42,7 +43,7 @@ void atclient_atkey_free(atclient_atkey *atkey);
  * @brief populate an atkey struct given a null terminated string. Be sure to call the atclient_atkey_init function
  * before calling this function.
  *
- * @param atkey the atkey struct to populate
+ * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param atkeystr the atkeystr to derive from (e.g. 'public:name.wavi@alice')
  * @param atkeylen the length of the atkeystr
  * @return int 0 on success, that a struct was able to be created from the string. (the string followed proper key
@@ -53,7 +54,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
 /**
  * @brief populate an atkey struct given a string (atclient_atstr).
  *
- * @param atkey the atkey struct to populate
+ * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param atstr the atstr to derive from. For example, this atstr could've been created from a string like
  * 'public:bob@publickey'
  * @return int 0 on success, non-zero on failure
@@ -63,21 +64,30 @@ int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr)
 /**
  * @brief convert an atkey struct to its string format
  *
- * @param atkey atkey struct to read
- * @param atkeystr buffer to write to
+ * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
+ * @param atkeystr buffer to write to, assumed that this was already allocated
  * @param atkeystrlen buffer allocated size
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, unsigned long *atkeystrlen,
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
                              unsigned long *atkeystrolen);
+
+/**
+ * @brief convert an atkey struct to its atstr format
+ * 
+ * @param atkey the atkey struct to read, assumed that this was already initialized via atclient_atkey_init
+ * @param atstr the atstr to write to, assumed that this was already initialized via atclient_atstr_init
+ * @return int 0 on success
+ */
+int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public
  * AtKey would be 'public:name.namespace@alice'. Public AtKeys typically hold unencrypted values and can be seen by
  * unauthenticated atsigns. Be sure to call the atclient_atkey_init function before calling this function.
  *
- * @param atkey the atkey struct to populate
+ * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name the name of the atkey, e.g.: "name"
  * @param sharedby the sharedby (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
@@ -91,7 +101,7 @@ int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, con
  * AtKey would be 'name.namespace@alice'. SelfKeys can only be accessible by the sharedby (creator) atsign. Be sure to
  * call the atclient_atkey_init function before calling this function.
  *
- * @param atkey the atkey struct to populate
+ * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name the name of the atkey, e.g.: "name"
  * @param sharedby the sharedby (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
@@ -106,7 +116,7 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
  * and sharedby atsigns, as they are encrypted with a shared AES key which is encrypted with the each of their RSA keys.
  * Be sure to call the atclient_atkey_init function before calling this function.
  *
- * @param atkey the atkey struct to populate
+ * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name name of your key, e.g. "name"
  * @param sharedby the shared by atsign, e.g. "@alice"
  * @param sharedwith the sharedwith atsign, atsign you are going to share it with, e.g. "@bob"
