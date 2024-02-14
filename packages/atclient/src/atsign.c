@@ -1,5 +1,4 @@
 #include "atclient/atsign.h"
-#include "atclient/atutils.h"
 #include "atlogger/atlogger.h"
 #include <stdio.h>
 #include <string.h>
