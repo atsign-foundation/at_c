@@ -11,7 +11,8 @@
  * @param writtenlen the length of the result after operation
  * @return int 0 on success
  */
-int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, unsigned char *dst, unsigned long dstlen, unsigned long *writtenlen);
+int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, unsigned char *dst,
+                          unsigned long dstlen, unsigned long *writtenlen);
 
 /**
  * @brief Base64 decode some bytes
@@ -23,6 +24,7 @@ int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, 
  * @param writtenlen the length of the result after operation
  * @return int 0 on success
  */
-int atchops_base64_decode(const unsigned char *src, const unsigned long srclen, unsigned char *dst, unsigned long dstlen, unsigned long *writtenlen);
+int atchops_base64_decode(const unsigned char *src, const unsigned long srclen, unsigned char *dst,
+                          unsigned long dstlen, unsigned long *writtenlen);
 
 #endif

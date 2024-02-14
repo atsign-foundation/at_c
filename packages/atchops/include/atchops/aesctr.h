@@ -12,21 +12,16 @@
  * @param iv the initialization vector (always 16 bytes long)
  * @param plaintext the plaintext to encrypt
  * @param plaintextlen the length of the plaintext string
- * @param ciphertextbase64 the ciphertext buffer to write to    
+ * @param ciphertextbase64 the ciphertext buffer to write to
  * @param ciphertextbase64len the memory allocated length of the ciphertext buffer
  * @param ciphertextbase64olen the written length of the ciphertext buffer
  * @return int 0 on success
  */
-int atchops_aesctr_encrypt(
-    const char *keybase64,
-    const unsigned long keybase64len,
-    const atchops_aes_keysize keybits,
-    unsigned char *iv, // always 16 bytes long
-    const unsigned char *plaintext,
-    const unsigned long plaintextlen,
-    unsigned char *ciphertextbase64,
-    const unsigned long ciphertextbase64len,
-    unsigned long *ciphertextbase64olen);
+int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64len, const atchops_aes_keysize keybits,
+                           unsigned char *iv, // always 16 bytes long
+                           const unsigned char *plaintext, const unsigned long plaintextlen,
+                           unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len,
+                           unsigned long *ciphertextbase64olen);
 
 /**
  * @brief AES CTR decrypt ciphertextbase64 to plaintext
@@ -42,15 +37,9 @@ int atchops_aesctr_encrypt(
  * @param plaintextolen the written length of the plaintext buffer
  * @return int 0 on success
  */
-int atchops_aesctr_decrypt(
-    const char *keybase64,
-    const unsigned long keybase64len,
-    const atchops_aes_keysize keybits,
-    unsigned char *iv, // always 16 bytes long
-    const unsigned char *ciphertextbase64,
-    const unsigned long ciphertextbase64len,
-    unsigned char *plaintext,
-    const unsigned long plaintextlen,
-    unsigned long *plaintextolen);
+int atchops_aesctr_decrypt(const char *keybase64, const unsigned long keybase64len, const atchops_aes_keysize keybits,
+                           unsigned char *iv, // always 16 bytes long
+                           const unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len,
+                           unsigned char *plaintext, const unsigned long plaintextlen, unsigned long *plaintextolen);
 
 #endif
