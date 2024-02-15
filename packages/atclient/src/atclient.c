@@ -1,21 +1,16 @@
+#include <mbedtls/md.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mbedtls/md.h>
-// #include "atchops/rsa.h"
-// #include "atchops/aesctr.h"
-#include "atclient/atclient.h"
 #include "atclient/atbytes.h"
+#include "atclient/atclient.h"
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
-#include "atlogger/atlogger.h"
-#include "atclient/atstr.h"
-#include "atclient/atsign.h"
-#include "atclient/atbytes.h"
 #include "atclient/stringutils.h"
+#include "atlogger/atlogger.h"
 #include "uuid4/uuid4.h"
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
@@ -39,7 +34,7 @@ int atclient_start_root_connection(atclient *ctx, const char *roothost, const in
 
   goto exit;
 
-exit: { return ret; }
+exit : { return ret; }
 }
 
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
@@ -56,7 +51,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 
   goto exit;
 
-exit: { return ret; }
+exit : { return ret; }
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign,
@@ -225,7 +220,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
   ret = 0;
 
   goto exit;
-exit: {
+exit : {
   atclient_atbytes_free(&src);
   atclient_atbytes_free(&recv);
   atclient_atstr_free(&withoutat);
@@ -246,143 +241,135 @@ void atclient_free(atclient *ctx) {
   atclient_connection_free(&(ctx->secondary_connection));
 }
 
-int atclient_get_encryption_key_shared_by_me(atclient *ctx, atclient_atsign *recipient, char *enc_key_shared_by_me)
-{
-    //  atclient_atkeys atkeys, const char *myatsign
-    int ret = 1;
+int atclient_get_encryption_key_shared_by_me(atclient *ctx, atclient_atsign *recipient, char *enc_key_shared_by_me) {
+  //  atclient_atkeys atkeys, const char *myatsign
+  int ret = 1;
 
-    // llookup:shared_key.recipient_atsign@myatsign
-    char *command_prefix = "llookup:shared_key.";
+  // llookup:shared_key.recipient_atsign@myatsign
+  char *command_prefix = "llookup:shared_key.";
 
-    char *command = (char *)malloc(strlen(command_prefix) + (strlen(ctx->atsign.atsign)*2 - 1) + 3);
-    strcpy(command, command_prefix);
-    strcat(command, recipient->without_prefix_str);
-    strcat(command, ctx->atsign.atsign);
-    strcat(command, "\r\n");
+  char *command = (char *)malloc(strlen(command_prefix) + (strlen(ctx->atsign.atsign) * 2 - 1) + 3);
+  strcpy(command, command_prefix);
+  strcat(command, recipient->without_prefix_str);
+  strcat(command, ctx->atsign.atsign);
+  strcat(command, "\r\n");
 
-    const unsigned long recvlen = 1024;
-    unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
-    memset(recv, 0, sizeof(unsigned char) * recvlen);
-    unsigned long olen = 0;
-    ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
-    if (ret != 0)
-    {
-        return ret;
+  const unsigned long recvlen = 1024;
+  unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
+  memset(recv, 0, sizeof(unsigned char) * recvlen);
+  unsigned long olen = 0;
+  ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
+  if (ret != 0) {
+    return ret;
+  }
+
+  char *response = recv;
+
+  // Truncate response: "@" + myatsign + "@"
+  int response_prefix_len = strlen(ctx->atsign.without_prefix_str) + 3;
+  char *response_prefix = (char *)malloc(response_prefix_len);
+  strcpy(response_prefix, "@");
+  strcat(response_prefix, ctx->atsign.without_prefix_str);
+  strcat(response_prefix, "@");
+
+  if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
+    response = response + response_prefix_len;
+  }
+
+  if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len)) {
+    response[strlen(response) - strlen(response_prefix) - 1] = '\0';
+  }
+
+  // does my atSign already have the recipient's shared key?
+  if (atclient_stringutils_starts_with(response, recvlen, "data:", strlen("data:"))) {
+
+    response = response + 5;
+
+    // 44 + 1
+    unsigned long plaintextlen = 45;
+    unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
+    memset(plaintext, 0, plaintextlen);
+    unsigned long plaintextolen = 0;
+
+    ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response),
+                              plaintext, plaintextlen, &plaintextolen);
+    if (ret != 0) {
+      printf("atchops_rsa_decrypt (failed): %d\n", ret);
+      return ret;
     }
+    memcpy(enc_key_shared_by_me, plaintext, plaintextlen);
+  }
 
-    char *response = recv;
-
-    // Truncate response: "@" + myatsign + "@"
-    int response_prefix_len = strlen(ctx->atsign.without_prefix_str) + 3;
-    char *response_prefix = (char *)malloc(response_prefix_len);
-    strcpy(response_prefix, "@");
-    strcat(response_prefix, ctx->atsign.without_prefix_str);
-    strcat(response_prefix, "@");
-
-    if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len))
-    {
-        response = response + response_prefix_len;
-    }
-
-    if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len))
-    {
-        response[strlen(response) - strlen(response_prefix) - 1] = '\0';
-    }
-
-    // does my atSign already have the recipient's shared key?
-    if (atclient_stringutils_starts_with(response, recvlen, "data:", strlen("data:")))
-    {
-
-        response = response + 5;
-
-        // 44 + 1
-        unsigned long plaintextlen = 45;
-        unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
-        memset(plaintext, 0, plaintextlen);
-        unsigned long plaintextolen = 0;
-
-        ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response), plaintext, plaintextlen, &plaintextolen);
-        if (ret != 0)
-        {
-            printf("atchops_rsa_decrypt (failed): %d\n", ret);
-            return ret;
-        }
-        memcpy(enc_key_shared_by_me, plaintext, plaintextlen);
-    }
-    
-    else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found", strlen("error:AT0015-key not found")))
-    {
-        // TODO: or do I need to create, store and share a new shared key?
-    }
-    return 0;
+  else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
+                                            strlen("error:AT0015-key not found"))) {
+    // TODO: or do I need to create, store and share a new shared key?
+  }
+  return 0;
 }
 
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_atsign *recipient, char *enc_key_shared_by_other)
-{
-    int ret = 1;
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_atsign *recipient,
+                                                char *enc_key_shared_by_other) {
+  int ret = 1;
 
-    // llookup:cached:@myatsign:shared_key@recipient_atsign
-    // lookup:shared_key@recipient_atsign
-    char *command_prefix = "lookup:shared_key@";
+  // llookup:cached:@myatsign:shared_key@recipient_atsign
+  // lookup:shared_key@recipient_atsign
+  char *command_prefix = "lookup:shared_key@";
 
-    char *command = (char *)malloc(strlen(command_prefix) + strlen(recipient->without_prefix_str) + 3);
-    strcpy(command, command_prefix);
-    strcat(command, recipient->without_prefix_str);
-    strcat(command, "\r\n");
+  char *command = (char *)malloc(strlen(command_prefix) + strlen(recipient->without_prefix_str) + 3);
+  strcpy(command, command_prefix);
+  strcat(command, recipient->without_prefix_str);
+  strcat(command, "\r\n");
 
-    const unsigned long recvlen = 1024;
-    unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
-    memset(recv, 0, sizeof(unsigned char) * recvlen);
-    unsigned long olen = 0;
+  const unsigned long recvlen = 1024;
+  unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
+  memset(recv, 0, sizeof(unsigned char) * recvlen);
+  unsigned long olen = 0;
 
-    ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
-    if (ret != 0)
-    {
-        return ret;
+  ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
+  if (ret != 0) {
+    return ret;
+  }
+
+  char *response = recv;
+
+  // Truncate response: "@" + myatsign + "@"
+  int response_prefix_len = strlen(ctx->atsign.without_prefix_str) + 3;
+  char *response_prefix = (char *)malloc(response_prefix_len);
+  strcpy(response_prefix, "@");
+  strcat(response_prefix, ctx->atsign.without_prefix_str);
+  strcat(response_prefix, "@");
+
+  if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
+    response = response + response_prefix_len;
+  }
+
+  if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len)) {
+    response[strlen(response) - strlen(response_prefix) - 1] = '\0';
+  }
+
+  // does my atSign already have the recipient's shared key?
+  if (atclient_stringutils_starts_with(response, recvlen, "data:", strlen("data:"))) {
+
+    response = response + 5;
+
+    // 44 + 1
+    unsigned long plaintextlen = 45;
+    unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
+    memset(plaintext, 0, plaintextlen);
+    unsigned long plaintextolen = 0;
+
+    ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response),
+                              plaintext, plaintextlen, &plaintextolen);
+    if (ret != 0) {
+      printf("atchops_rsa_decrypt (failed): %d\n", ret);
+      return ret;
     }
-
-    char *response = recv;
-
-    // Truncate response: "@" + myatsign + "@"
-    int response_prefix_len = strlen(ctx->atsign.without_prefix_str) + 3;
-    char *response_prefix = (char *)malloc(response_prefix_len);
-    strcpy(response_prefix, "@");
-    strcat(response_prefix, ctx->atsign.without_prefix_str);
-    strcat(response_prefix, "@");
-
-    if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len))
-    {
-        response = response + response_prefix_len;
-    }
-
-    if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len))
-    {
-        response[strlen(response) - strlen(response_prefix) - 1] = '\0';
-    }
-
-    // does my atSign already have the recipient's shared key?
-    if (atclient_stringutils_starts_with(response, recvlen, "data:", strlen("data:")))
-    {
-
-        response = response + 5;
-
-        // 44 + 1
-        unsigned long plaintextlen = 45;
-        unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
-        memset(plaintext, 0, plaintextlen);
-        unsigned long plaintextolen = 0;
-
-        ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response), plaintext, plaintextlen, &plaintextolen);
-        if (ret != 0)
-        {
-            printf("atchops_rsa_decrypt (failed): %d\n", ret);
-            return ret;
-        }
-        memcpy(enc_key_shared_by_other, plaintext, plaintextlen);
-    }
-    else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found", strlen("error:AT0015-key not found")))
-    {
-        // TODO: or do I need to create, store and share a new shared key?
-    }
-    return 0;
+    memcpy(enc_key_shared_by_other, plaintext, plaintextlen);
+  } else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
+                                              strlen("error:AT0015-key not found"))) {
+    // There is nothing we can do, except wait for the recipient to share a new key
+    ret = 1;
+    return ret;
+  }
+  return 0;
 }
