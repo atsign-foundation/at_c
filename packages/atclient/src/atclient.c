@@ -1,9 +1,5 @@
-#include <mbedtls/md.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "atclient/atbytes.h"
 #include "atclient/atclient.h"
+#include "atclient/atbytes.h"
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
 #include "atclient/atsign.h"
@@ -12,6 +8,10 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include "uuid4/uuid4.h"
+#include <mbedtls/md.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
 
@@ -241,7 +241,8 @@ void atclient_free(atclient *ctx) {
   atclient_connection_free(&(ctx->secondary_connection));
 }
 
-int atclient_get_encryption_key_shared_by_me(atclient *ctx, atclient_atsign *recipient, char *enc_key_shared_by_me) {
+int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
+                                             char *enc_key_shared_by_me) {
   //  atclient_atkeys atkeys, const char *myatsign
   int ret = 1;
 
@@ -307,7 +308,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, atclient_atsign *rec
   return 0;
 }
 
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_atsign *recipient,
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
                                                 char *enc_key_shared_by_other) {
   int ret = 1;
 
