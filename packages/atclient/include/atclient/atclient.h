@@ -2,6 +2,7 @@
 #define ATCLIENT_H
 
 #include "atclient/atkeys.h"
+#include "atclient/atsign.h"
 #include "atclient/connection.h"
 
 /**
@@ -11,6 +12,8 @@
 typedef struct atclient {
   atclient_connection root_connection;
   atclient_connection secondary_connection;
+  atclient_atsign atsign;
+  atclient_atkeys atkeys;
 } atclient;
 
 /**
@@ -55,5 +58,30 @@ int atclient_put(atclient *ctx, const char *key, const char *value);
 int atclient_get(atclient *ctx, const char *key, char *value, const unsigned long valuelen);
 int atclient_delete(atclient *ctx, const char *key);
 void atclient_free(atclient *ctx);
+
+/**
+ * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.
+ * If no key is found, it will create, store and share a new one with the recipient's atsign.
+ *
+ * @param ctx initialized atclient context (required)
+ * @param recipient an atclient_atsign struct corresponding to the atsign with whom the key was shared (required)
+ * @param enc_key_shared_by_me the output shared key in b64 format (required)
+ * @return int 0 on success, error otherwise
+ */
+int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
+                                             char *enc_key_shared_by_me);
+
+/**
+ * @brief Looks up the symmetric shared key which the recipient's atsign shared with atclient's atsign.
+ * If no key is found, the function will return an error.
+ *
+ * @param ctx initialized atclient context (required)
+ * @param atkeys an atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
+ * (required)
+ * @param enc_key_shared_by_other the output shared key in b64 format (required)
+ * @return int 0 on success, error otherwise
+ */
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
+                                                char *enc_key_shared_by_other);
 
 #endif

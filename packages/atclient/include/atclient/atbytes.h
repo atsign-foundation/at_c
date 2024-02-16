@@ -1,5 +1,3 @@
-
-
 #ifndef ATCLIENT_ATBYTES_H
 #define ATCLIENT_ATBYTES_H
 
