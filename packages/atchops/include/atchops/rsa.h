@@ -2,7 +2,6 @@
 #define ATCHOPS_RSA_H
 
 #include "atchops/rsakey.h"
-#include "atchops/sha.h"
 #include <mbedtls/md.h>
 
 /**
