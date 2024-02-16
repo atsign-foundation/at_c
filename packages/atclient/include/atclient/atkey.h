@@ -3,14 +3,15 @@
 
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
+#include <stddef.h>
 
 #define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
 
 typedef enum atclient_atkey_type {
-	ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
-	ATCLIENT_ATKEY_TYPE_PUBLICKEY,
-	ATCLIENT_ATKEY_TYPE_SELFKEY,
-	ATCLIENT_ATKEY_TYPE_SHAREDKEY,
+  ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
+  ATCLIENT_ATKEY_TYPE_PUBLICKEY,
+  ATCLIENT_ATKEY_TYPE_SELFKEY,
+  ATCLIENT_ATKEY_TYPE_SHAREDKEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
@@ -75,7 +76,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
 
 /**
  * @brief convert an atkey struct to its atstr format
- * 
+ *
  * @param atkey the atkey struct to read, assumed that this was already initialized via atclient_atkey_init
  * @param atstr the atstr to write to, assumed that this was already initialized via atclient_atstr_init
  * @return int 0 on success
@@ -93,8 +94,8 @@ int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr);
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                    const char *namespacestr);
+int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
+                                    const size_t sharedbylen, const char *namespacestr, const size_t namespacestrlen);
 
 /**
  * @brief Populate an atkey struct representing a SelfKey AtKey with null terminated strings. An example of a SelfKey
@@ -107,8 +108,8 @@ int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, con
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                  const char *namespacestr);
+int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
+                                  const size_t sharedbylen, const char *namespacestr, const size_t namespacestrlen);
 
 /**
  * @brief Populate an atkey struct representing a SharedKey AtKey given null terminated strings. An example of a
@@ -123,7 +124,8 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                    const char *sharedwith, char *namespacestr);
+int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
+                                    const size_t sharedbylen, const char *sharedwith, const size_t sharedwithlen,
+                                    const char *namespacestr, const size_t namespacestrlen);
 
 #endif
