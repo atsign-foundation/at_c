@@ -27,7 +27,7 @@ int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const
   return 1; // TODO: implement
 }
 
-int atclient_atkey_metadata_to_string(atclient_atkey_metadata *metadata, char *metadatastr,
+int atclient_atkey_metadata_to_string(const atclient_atkey_metadata metadata, char *metadatastr,
                                       const unsigned long metadatastrlen, unsigned long *metadatastrolen) {
   return 1; // TODO: implement
 }

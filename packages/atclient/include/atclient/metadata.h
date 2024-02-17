@@ -2,6 +2,7 @@
 #ifndef ATCLIENT_METADATA_H
 #define ATCLIENT_METADATA_H
 
+#include <stdbool.h>
 #include "atclient/atstr.h"
 
 #define DATE_STR_BUFFER_LENGTH 256 // can hold most date strings found in metadata
@@ -21,9 +22,9 @@ typedef struct atclient_atkey_metadata {
   unsigned long ttr; // time to refresh. -1 means corresponding cached keys will not be refreshed and can be cached
                      // forever, 0 means do not refresh, ttr > 0 means refresh the key every ttr milliseconds, ttr null
                      // means it is non-applicable (aka this key cannot be cached) which has the same effect as 0
-  int ccd; // cascade delete; (1) => cached key will be deleted upon the deletion of this key, (0) => no cascade delete
-  int isbinary;                // (1) => key points to binary data, (0) => otherwise
-  int isencrypted;             // (1) => key points to value is encrypted
+  bool ccd; // cascade delete; (1) => cached key will be deleted upon the deletion of this key, (0) => no cascade delete
+  bool isbinary;                // (1) => key points to binary data, (0) => otherwise
+  bool isencrypted;             // (1) => key points to value is encrypted
   atclient_atstr sharedkeyenc; // stores the shared key that the data is encrypted with. this is only set if sharedWith
                                // is set. the contents will be encrypted using the public key of the sharedWith atSign
   atclient_atstr pubkeycs; // public key checksum. Stores the checksum of the encryption public key used to encrypt the
@@ -45,17 +46,19 @@ typedef struct atclient_atkey_metadata {
   atclient_atstr availableat; // derived field via [ttb]
   atclient_atstr expiresat;   // derived field via [ttl]
   atclient_atstr refreshat;   // derived field via [ttr]
-  int iscached;               // (1) means key contains 'cached:'
-  int ispublic; // contains public:. if true (1), then this key is accessible by all atSigns and contains non-encrypted
+  bool iscached;               // (1) means key contains 'cached:'
+  bool ispublic; // contains public:. if true (1), then this key is accessible by all atSigns and contains non-encrypted
                 // data. if false (0), then it is only accessible by either sharedWith or sharedBy
-  int ishidden; // (1) => key begins with '_', (0) otherwise
+  bool ishidden; // (1) => key begins with '_', (0) otherwise
 } atclient_atkey_metadata;
 
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
 int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr,
                                         const unsigned long metadatastrlen);
-int atclient_atkey_metadata_to_string(atclient_atkey_metadata *metadata, char *metadatastr,
+                                       
+int atclient_atkey_metadata_to_string(const atclient_atkey_metadata metadata, char *metadatastr,
                                       const unsigned long metadatastrlen, unsigned long *metadatastrolen);
+                                      
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata);
 
 #endif

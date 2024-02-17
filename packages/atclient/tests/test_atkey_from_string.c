@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "atclient/atkey.h"
 #include "atclient/atsign.h"
 #include "atlogger/atlogger.h"
@@ -51,15 +52,15 @@ static int test1a()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 1)
+    if (atkey.metadata.iscached != true)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not true\n");
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 1)
+    if (atkey.metadata.ispublic != true)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n", atkey.metadata.ispublic);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not true, it is %d\n", atkey.metadata.ispublic);
         goto exit;
     }
 
@@ -106,14 +107,14 @@ static int test1b()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 1)
+    if (atkey.metadata.ispublic != true)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -181,14 +182,14 @@ static int test1c()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not false\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 1)
+    if (atkey.metadata.ispublic != true)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -256,16 +257,16 @@ static int test1d()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 1)
+    if (atkey.metadata.iscached != true)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not true\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 1)
+    if (atkey.metadata.ispublic != true)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n", atkey.metadata.ispublic);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not true, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
         goto exit;
     }
@@ -333,16 +334,16 @@ static int test2a()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not false\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not false, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
         goto exit;
     }
@@ -408,14 +409,14 @@ static int test2b()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 1)
+    if (atkey.metadata.iscached != true)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -482,14 +483,14 @@ static int test2c()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -557,14 +558,14 @@ static int test2d()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 1)
+    if (atkey.metadata.iscached != true)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -632,14 +633,14 @@ static int test3a()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -708,14 +709,14 @@ static int test4a()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
@@ -785,14 +786,14 @@ static int test4b()
         goto exit;
     }
 
-    if (atkey.metadata.iscached != 0)
+    if (atkey.metadata.iscached != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
         ret = 1;
         goto exit;
     }
 
-    if (atkey.metadata.ispublic != 0)
+    if (atkey.metadata.ispublic != false)
     {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
         ret = 1;
