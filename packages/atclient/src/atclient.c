@@ -518,17 +518,18 @@ static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsi
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   unsigned long olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+                                 recvlen, &olen);
   if (ret != 0) {
     return ret;
   }
 
-  char *response = recv;
+  char *response = (char *)recv;
 
   if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
     response = response + 5;
     memcpy(public_encryption_key, response, 1024);
-  } else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
+  } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
                                               strlen("error:AT0015-key not found"))) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n",
                           ret);

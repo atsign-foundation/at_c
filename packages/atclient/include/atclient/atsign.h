@@ -1,18 +1,13 @@
 #ifndef ATCLIENT_ATSIGN_H
 #define ATCLIENT_ATSIGN_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #define MAX_ATSIGN_CHARACTERS (55 + 1) // 55 + @
-#define MAX_ATSIGN_STR_BUFFER (MAX_ATSIGN_CHARACTERS * 6) + 1 
+#define MAX_ATSIGN_STR_BUFFER (MAX_ATSIGN_CHARACTERS * 6) + 1
 
 // Structure to represent the AtSign class
 typedef struct atclient_atsign {
-    char* atsign;
-    char* without_prefix_str;
+  char *atsign;
+  char *without_prefix_str;
 } atclient_atsign;
 
 // Function to initialize an AtSign object
@@ -21,7 +16,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str);
 // int atclient_atsign_populate_from_str(atclient_atsign *atsign, const char* atsign_str);
 
 // Function to free the memory used by an AtSign object
-void atclient_atsign_free(atclient_atsign* atsign) ;
+void atclient_atsign_free(atclient_atsign *atsign);
 /**
  * @brief populates *atsign and *atsignolen with the atsign without the prefixed `@` symbol . Calling this function will
  * guarantee that *atsign is always withot a prefixed `@` symbol, whether if it started with one or not.
