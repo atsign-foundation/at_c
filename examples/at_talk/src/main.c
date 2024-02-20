@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   atclient_atkeysfile_init(&atkeysfile);
   ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_read: %d\n", ret);
     atclient_free(&atclient);
     atclient_atkeysfile_free(&atkeysfile);
     return ret;
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   atclient_atkeys_init(&atkeys);
   ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
     goto exit1;
   }
   atclient.atkeys = atkeys;
