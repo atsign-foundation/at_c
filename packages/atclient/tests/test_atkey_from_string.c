@@ -1,9 +1,8 @@
+#include "atclient/atkey.h"
+#include "atlogger/atlogger.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
-#include "atclient/atkey.h"
-#include "atclient/atsign.h"
-#include "atlogger/atlogger.h"
 
 #define TAG "test_atkey_from_string"
 
@@ -35,920 +34,856 @@
 #define TEST_ATKEY_FROM_STRING_4B "name.wavi@jeremy_0"
 
 // cached:public:publickey@bob
-static int test1a()
-{
-    int ret = 1;
+static int test1a() {
+  int ret = 1;
 
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_1A;
-    const unsigned long atkeystrlen = strlen(atkeystr);
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_1A;
+  const unsigned long atkeystrlen = strlen(atkeystr);
 
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
 
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not true\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not true, it is %d\n", atkey.metadata.ispublic);
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "publickey", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not publickey, it is \"%s\"\n", atkey.name.str);
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n", atkey.sharedby.str);
-        goto exit;
-    }
-    ret = 0;
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
     goto exit;
-exit:
-{
-    return ret;
-    atclient_atkey_free(&atkey);
-}
-}
+  }
 
-static int test1b()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_1B;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "publickey", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not publickey, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.namespacestr.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n", atkey.namespacestr.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.sharedwith.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n", atkey.sharedwith.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (atkey.metadata.iscached != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
     goto exit;
+  }
 
-exit:{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
-
-static int test1c()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_1C;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not false\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.sharedwith.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n", atkey.sharedwith.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n", atkey.namespacestr.str);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (atkey.metadata.ispublic != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
+                          atkey.metadata.ispublic);
     goto exit;
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
+  }
 
-static int test1d()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_1D;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not true\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not true, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n", atkey.sharedwith.olen);
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n", atkey.namespacestr.str);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
     goto exit;
+  }
 
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
-
-static int test2a()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_2A;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not false\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not false, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "name.wavi", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name.wavi, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedwith.str, "@alice", atkey.sharedwith.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @alice, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n", atkey.namespacestr.str);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (strncmp(atkey.name.str, "publickey", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not publickey, it is \"%s\"\n",
+                          atkey.name.str);
     goto exit;
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
+  }
 
-static int test2b()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_2B;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.namespacestr.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n", atkey.namespacestr.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n",
+                          atkey.sharedby.str);
     goto exit;
-exit:
-{
-    return ret;
+  }
+  ret = 0;
+  goto exit;
+exit: {
+  return ret;
+  atclient_atkey_free(&atkey);
 }
 }
 
-static int test2c()
-{
-    int ret = 1;
+static int test1b() {
+  int ret = 1;
 
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_2C;
-    const unsigned long atkeystrlen = strlen(atkeystr);
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_1B;
+  const unsigned long atkeystrlen = strlen(atkeystr);
 
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
 
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.namespacestr.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n", atkey.namespacestr.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
     goto exit;
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
+  }
 
-static int test2d()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_2D;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != true)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n", atkey.namespacestr.str);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
     goto exit;
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
+  }
 
-static int test3a()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_3A;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "_lastnotificationid", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not _lastnotificationid, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@alice123_4😘", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice123_4😘, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.sharedwith.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n", atkey.sharedwith.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.namespacestr.olen != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n", atkey.namespacestr.olen);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (atkey.metadata.ispublic != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
     goto exit;
+  }
 
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
-
-static int test4a()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_4A;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n", atkey.sharedwith.olen);
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.namespacestr.olen != 0 && strlen(atkey.namespacestr.str) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n", atkey.namespacestr.olen);
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.str is not empty, it is \"%s\"\n", atkey.namespacestr.str);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
     goto exit;
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
+  }
 
-static int test4b()
-{
-    int ret = 1;
-
-    const char *atkeystr = TEST_ATKEY_FROM_STRING_4B;
-    const unsigned long atkeystrlen = strlen(atkeystr);
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-        goto exit;
-    }
-
-    if (atkey.metadata.iscached != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-        ret = 1;
-        goto exit;
-    }
-
-    if (atkey.metadata.ispublic != false)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n", atkey.metadata.ispublic);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n", atkey.atkeytype);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if (strncmp(atkey.sharedby.str, "@jeremy_0", atkey.sharedby.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy_0, it is \"%s\"\n", atkey.sharedby.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n", atkey.sharedwith.olen);
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n", atkey.sharedwith.str);
-        ret = 1;
-        goto exit;
-    }
-
-    if(strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n", atkey.namespacestr.str);
-        ret = 1;
-        goto exit;
-    }
-
-    ret = 0;
+  if (strncmp(atkey.name.str, "publickey", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not publickey, it is \"%s\"\n",
+                          atkey.name.str);
+    ret = 1;
     goto exit;
-exit:
-{
-    atclient_atkey_free(&atkey);
-    return ret;
-}
-}
+  }
 
-int main()
-{
-    int ret = 1;
-
-    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
-
-    // test 1a. cached public key (cached:public:publickey@bob)
-    ret = test1a();
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1a failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    // test 1b. non-cached public key (public:publickey@alice)
-    ret = test1b();
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1b failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    // test 1c
-    ret = test1c();
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1c failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    // test 1d
-    ret = test1d();
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1d failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    // test 2a. non-cached sharedkey with namespace (@alice:name.wavi@bob)
-    ret = test2a();
-    if (ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2a failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    ret = test2b();
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2b failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    ret = test2c();
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2c failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    ret = test2d();
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2d failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    ret = test3a();
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test3a failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    ret = test4a();
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4a failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-    ret = test4b();
-    if(ret != 0)
-    {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4b failed\n");
-        ret = 1;
-        goto exit;
-    }
-
-
-    ret = 0;
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
     goto exit;
-exit:
-{
-    return ret;
+  }
+
+  if (atkey.namespacestr.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
+                          atkey.namespacestr.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.sharedwith.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
+                          atkey.sharedwith.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
 }
+}
+
+static int test1c() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_1C;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.sharedwith.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
+                          atkey.sharedwith.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
+                          atkey.namespacestr.str);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test1d() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_1D;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
+                          atkey.sharedwith.olen);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
+                          atkey.namespacestr.str);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test2a() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_2A;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name.wavi", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name.wavi, it is \"%s\"\n",
+                          atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedwith.str, "@alice", atkey.sharedwith.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @alice, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
+                          atkey.namespacestr.str);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test2b() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_2B;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.namespacestr.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
+                          atkey.namespacestr.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int test2c() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_2C;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.namespacestr.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
+                          atkey.namespacestr.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test2d() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_2D;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 1) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
+                          atkey.namespacestr.str);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test3a() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_3A;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_PRIVATEHIDDENKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "_lastnotificationid", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not _lastnotificationid, it is \"%s\"\n",
+                          atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@alice123_4😘", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice123_4😘, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.sharedwith.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
+                          atkey.sharedwith.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.namespacestr.olen != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
+                          atkey.namespacestr.olen);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test4a() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_4A;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
+                          atkey.sharedwith.olen);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.namespacestr.olen != 0 && strlen(atkey.namespacestr.str) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
+                          atkey.namespacestr.olen);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.str is not empty, it is \"%s\"\n",
+                          atkey.namespacestr.str);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+static int test4b() {
+  int ret = 1;
+
+  const char *atkeystr = TEST_ATKEY_FROM_STRING_4B;
+  const unsigned long atkeystrlen = strlen(atkeystr);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  ret = atclient_atkey_from_string(&atkey, atkeystr, atkeystrlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (atkey.metadata.iscached != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.metadata.ispublic != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
+                          atkey.metadata.ispublic);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atkey.atkeytype is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n", atkey.atkeytype);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.sharedby.str, "@jeremy_0", atkey.sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy_0, it is \"%s\"\n",
+                          atkey.sharedby.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
+                          atkey.sharedwith.olen);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
+                          atkey.sharedwith.str);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
+                          atkey.namespacestr.str);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
+}
+
+int main() {
+  int ret = 1;
+
+  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+
+  // test 1a. cached public key (cached:public:publickey@bob)
+  ret = test1a();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1a failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  // test 1b. non-cached public key (public:publickey@alice)
+  ret = test1b();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1b failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  // test 1c
+  ret = test1c();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1c failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  // test 1d
+  ret = test1d();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1d failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  // test 2a. non-cached sharedkey with namespace (@alice:name.wavi@bob)
+  ret = test2a();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2a failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = test2b();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2b failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = test2c();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2c failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = test2d();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2d failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = test3a();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test3a failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = test4a();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4a failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = test4b();
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4b failed\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }

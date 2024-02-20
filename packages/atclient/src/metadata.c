@@ -753,6 +753,7 @@ int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata metadat
 
   ret = 0;
   goto exit;
+  
 exit: {
   atclient_atstr_free(&buffer);
   return ret;

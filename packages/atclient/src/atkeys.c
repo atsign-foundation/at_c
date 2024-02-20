@@ -5,7 +5,6 @@
 #include <atchops/aesctr.h>
 #include <atchops/iv.h>
 #include <atchops/rsakey.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -57,8 +56,9 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 1b. pkam public key
   ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               aespkampublickeystr, aespkampublickeylen, (unsigned char *)atkeys->pkampublickeystr.str,
-                               atkeys->pkampublickeystr.len, &(atkeys->pkampublickeystr.olen));
+                               (unsigned char *)aespkampublickeystr, aespkampublickeylen,
+                               (unsigned char *)atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.len,
+                               &(atkeys->pkampublickeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
@@ -67,10 +67,10 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
   // 1c. pkam private key
-  ret =
-      atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                             aespkamprivatekeystr, aespkamprivatekeylen, (unsigned char *)atkeys->pkamprivatekeystr.str,
-                             atkeys->pkamprivatekeystr.len, &(atkeys->pkamprivatekeystr.olen));
+  ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
+                               (unsigned char *)aespkamprivatekeystr, aespkamprivatekeylen,
+                               (unsigned char *)atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.len,
+                               &(atkeys->pkamprivatekeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
@@ -80,7 +80,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 1d. encrypt public key
   ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               aesencryptpublickeystr, aesencryptpublickeylen,
+                               (unsigned char *)aesencryptpublickeystr, aesencryptpublickeylen,
                                (unsigned char *)atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
                                &(atkeys->encryptpublickeystr.olen));
   if (ret != 0) {
@@ -92,7 +92,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 1e. encrypt private key
   ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               aesencryptprivatekeystr, aesencryptprivatekeylen,
+                               (unsigned char *)aesencryptprivatekeystr, aesencryptprivatekeylen,
                                (unsigned char *)atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.len,
                                &(atkeys->encryptprivatekeystr.olen));
   if (ret != 0) {

@@ -1,6 +1,7 @@
 #include "atclient/atsign.h"
 #include "atlogger/atlogger.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define TAG "atsign"
@@ -60,7 +61,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignle
   *atsignolen = originalatsignlen - 1;
   ret = 0;
   goto exit;
-exit : { return ret; }
+exit: { return ret; }
 }
 
 int atclient_atsign_with_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen,
@@ -94,5 +95,5 @@ int atclient_atsign_with_at_symbol(char *atsign, const unsigned long atsignlen, 
   *atsignolen = originalatsignlen + 1;
   ret = 0;
   goto exit;
-exit : { return ret; }
+exit: { return ret; }
 }
