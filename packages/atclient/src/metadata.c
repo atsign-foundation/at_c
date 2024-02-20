@@ -12,46 +12,34 @@
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
   memset(metadata, 0, sizeof(atclient_atkey_metadata));
 
-  atclient_atstr_init(&(metadata->createdby), MAX_ATSIGN_STR_BUFFER);
-  atclient_atstr_init(&(metadata->updatedby), MAX_ATSIGN_STR_BUFFER);
-  atclient_atstr_init(&(metadata->createdat), DATE_STR_BUFFER_SIZE);
-  atclient_atstr_init(&(metadata->updatedat), DATE_STR_BUFFER_SIZE);
-
-  metadata->version = 0;
   metadata->ttl = 0; // 0 is our null value, fall back to protocol default
   metadata->ttb = 0; // 0 is our null value, fall back to protocol default
   metadata->ttr = -2; // -2 is our null value, fall back to protocol default
-
   metadata->ccd = false;
+  atclient_atstr_init(&(metadata->availableat), DATE_STR_BUFFER_SIZE);
+  atclient_atstr_init(&(metadata->expiresat), DATE_STR_BUFFER_SIZE);
+  atclient_atstr_init(&(metadata->refreshat), DATE_STR_BUFFER_SIZE);
+  atclient_atstr_init(&(metadata->createdat), DATE_STR_BUFFER_SIZE);
+  atclient_atstr_init(&(metadata->updatedat), DATE_STR_BUFFER_SIZE);
+  atclient_atstr_init(&(metadata->datasignature), GENERAL_BUFFER_SIZE);
+  atclient_atstr_init(&(metadata->sharedkeystatus), GENERAL_BUFFER_SIZE);
+  metadata->ispublic = false;
+  metadata->ishidden = false;
   metadata->isbinary = false;
   metadata->isencrypted = false;
-
-  atclient_atstr_init(&(metadata->status), GENERAL_BUFFER_SIZE);
-  atclient_atstr_init(&(metadata->datasignature), GENERAL_BUFFER_SIZE);
-
+  metadata->iscached = false;
   atclient_atstr_init(&(metadata->sharedkeyenc), GENERAL_BUFFER_SIZE);
   atclient_atstr_init(&(metadata->pubkeyhash), GENERAL_BUFFER_SIZE);
   atclient_atstr_init(&(metadata->pubkeyalgo), GENERAL_BUFFER_SIZE);
   atclient_atstr_init(&(metadata->encoding), GENERAL_BUFFER_SIZE);
-  atclient_atstr_init(&(metadata->ivnonce), GENERAL_BUFFER_SIZE);
-
   atclient_atstr_init(&(metadata->enckeyname), GENERAL_BUFFER_SIZE);
   atclient_atstr_init(&(metadata->encalgo), GENERAL_BUFFER_SIZE);
-
+  atclient_atstr_init(&(metadata->ivnonce), GENERAL_BUFFER_SIZE);
   atclient_atstr_init(&(metadata->skeenckeyname), GENERAL_BUFFER_SIZE);
   atclient_atstr_init(&(metadata->skeencalgo), GENERAL_BUFFER_SIZE);
-
-  atclient_atstr_init(&(metadata->availableat), DATE_STR_BUFFER_SIZE);
-  atclient_atstr_init(&(metadata->expiresat), DATE_STR_BUFFER_SIZE);
-  atclient_atstr_init(&(metadata->refreshat), DATE_STR_BUFFER_SIZE);
-
-  metadata->iscached = false;
-  metadata->ispublic = false;
-  metadata->ishidden = false;
 }
 
-int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr,
-                                        const unsigned long metadatastrlen) {
+int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr, const unsigned long metadatastrlen) {
   // example:
   // "metaData":{
   //  "createdBy":"@qt_thermostat",
@@ -88,86 +76,157 @@ int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const
     goto exit;
   }
 
-  cJSON *createdby = cJSON_GetObjectItem(root, "createdBy");
-  if (createdby == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get createdBy\n");
-    goto exit;
-  }
-
-  cJSON *updatedby = cJSON_GetObjectItem(root, "updatedBy");
-  if (updatedby == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get updatedBy\n");
-    goto exit;
-  }
-
-  cJSON *createdat = cJSON_GetObjectItem(root, "createdAt");
-  if (createdat == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get createdAt\n");
-    goto exit;
-  }
-
-  cJSON *updatedat = cJSON_GetObjectItem(root, "updatedAt");
-  if(updatedat == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get updatedAt\n");
-    goto exit;
+  cJSON *availableat = cJSON_GetObjectItem(root, "availableAt");
+  if (availableat != NULL) {
+    if (availableat->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->availableat), availableat->valuestring, strlen(availableat->valuestring));
+    }
   }
 
   cJSON *expiresat = cJSON_GetObjectItem(root, "expiresAt");
-  if(expiresat == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get expiresAt\n");
-    goto exit;
+  if (expiresat != NULL) {
+    if (expiresat->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->expiresat), expiresat->valuestring, strlen(expiresat->valuestring));
+    }
   }
 
-  cJSON *status = cJSON_GetObjectItem(root, "status");
-  if(status == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get status\n");
-    goto exit;
+  cJSON *refreshat = cJSON_GetObjectItem(root, "refreshAt");
+  if (refreshat != NULL) {
+    if (refreshat->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->refreshat), refreshat->valuestring, strlen(refreshat->valuestring));
+    }
   }
 
-  cJSON *version = cJSON_GetObjectItem(root, "version");
-  if(version == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get version\n");
-    goto exit;
+  cJSON *createdat = cJSON_GetObjectItem(root, "createdAt");
+  if (createdat != NULL) {
+    if (createdat->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->createdat), createdat->valuestring, strlen(createdat->valuestring));
+    }
   }
 
-  cJSON *ttl = cJSON_GetObjectItem(root, "ttl");
-  if(ttl == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get ttl\n");
-    goto exit;
+  cJSON *updatedat = cJSON_GetObjectItem(root, "updatedAt");
+  if (updatedat != NULL) {
+    if (updatedat->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->updatedat), updatedat->valuestring, strlen(updatedat->valuestring));
+    }
+  }
+
+  cJSON *datasignature = cJSON_GetObjectItem(root, "dataSignature");
+  if (datasignature != NULL) {
+    if (datasignature->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->datasignature), datasignature->valuestring, strlen(datasignature->valuestring));
+    }
+  }
+
+  cJSON *sharedkeystatus = cJSON_GetObjectItem(root, "sharedKeyStatus");
+  if (sharedkeystatus != NULL) {
+    if (sharedkeystatus->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->sharedkeystatus), sharedkeystatus->valuestring, strlen(sharedkeystatus->valuestring));
+    }
+  }
+
+  cJSON *ispublic = cJSON_GetObjectItem(root, "isPublic");
+  if(ispublic != NULL) {
+    metadata->ispublic = cJSON_IsTrue(ispublic);
+  }
+
+  cJSON *ishidden = cJSON_GetObjectItem(root, "isHidden");
+  if(ishidden != NULL) {
+    metadata->ishidden = cJSON_IsTrue(ishidden);
   }
 
   cJSON *isbinary = cJSON_GetObjectItem(root, "isBinary");
-  if(isbinary == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get isBinary\n");
-    goto exit;
+  if (isbinary != NULL) {
+    metadata->isbinary = cJSON_IsTrue(isbinary);
   }
 
   cJSON *isencrypted = cJSON_GetObjectItem(root, "isEncrypted");
-  if(isencrypted == NULL) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_string: failed to get isEncrypted\n");
-    goto exit;
+  if (isencrypted != NULL) {
+    metadata->isencrypted = cJSON_IsTrue(isencrypted);
   }
 
-  atclient_atstr_set(&(metadata->createdby), createdby->valuestring, strlen(createdby->valuestring));
-  atclient_atstr_set(&(metadata->updatedby), updatedby->valuestring, strlen(updatedby->valuestring));
-  atclient_atstr_set(&(metadata->createdat), createdat->valuestring, strlen(createdat->valuestring));
-  atclient_atstr_set(&(metadata->updatedat), updatedat->valuestring, strlen(updatedat->valuestring));
-  atclient_atstr_set(&(metadata->expiresat), expiresat->valuestring, strlen(expiresat->valuestring));
-  atclient_atstr_set(&(metadata->status), status->valuestring, strlen(status->valuestring));
-  metadata->version = version->valueint;
-  metadata->ttl = ttl->valueint;
-  metadata->isbinary = isbinary->valueint;
-  metadata->isencrypted = isencrypted->valueint;
+  cJSON *ttl = cJSON_GetObjectItem(root, "ttl");
+  if (ttl != NULL) {
+    metadata->ttl = ttl->valueint;
+  }
+
+  cJSON *ttb = cJSON_GetObjectItem(root, "ttb");
+  if (ttb != NULL) {
+    metadata->ttb = ttb->valueint;
+  }
+
+  cJSON *ttr = cJSON_GetObjectItem(root, "ttr");
+  if (ttr != NULL) {
+    metadata->ttr = ttr->valueint;
+  }
+
+  cJSON *ccd = cJSON_GetObjectItem(root, "ccd");
+  if (ccd != NULL) {
+    metadata->ccd = cJSON_IsTrue(ccd);
+  }
+
+  cJSON *sharedkeyenc = cJSON_GetObjectItem(root, "sharedKeyEnc");
+  if (sharedkeyenc != NULL) {
+    if (sharedkeyenc->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->sharedkeyenc), sharedkeyenc->valuestring, strlen(sharedkeyenc->valuestring));
+    }
+  }
+
+  cJSON *pubkeyhash = cJSON_GetObjectItem(root, "pubKeyHash");
+  if (pubkeyhash != NULL) {
+    if (pubkeyhash->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->pubkeyhash), pubkeyhash->valuestring, strlen(pubkeyhash->valuestring));
+    }
+  }
+
+  cJSON *pubkeyalgo = cJSON_GetObjectItem(root, "pubKeyAlgo");
+  if (pubkeyalgo != NULL) {
+    if (pubkeyalgo->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->pubkeyalgo), pubkeyalgo->valuestring, strlen(pubkeyalgo->valuestring));
+    }
+  }
+
+  cJSON *encoding = cJSON_GetObjectItem(root, "encoding");
+  if (encoding != NULL) {
+    if (encoding->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->encoding), encoding->valuestring, strlen(encoding->valuestring));
+    }
+  }
+
+  cJSON *ivnonce = cJSON_GetObjectItem(root, "ivNonce");
+  if (ivnonce != NULL) {
+    if (ivnonce->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->ivnonce), ivnonce->valuestring, strlen(ivnonce->valuestring));
+    }
+  }
+
+  cJSON *enckeyname = cJSON_GetObjectItem(root, "encKeyName");
+  if (enckeyname != NULL) {
+    if (enckeyname->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->enckeyname), enckeyname->valuestring, strlen(enckeyname->valuestring));
+    }
+  }
+
+  cJSON *encalgo = cJSON_GetObjectItem(root, "encAlgo");
+  if (encalgo != NULL) {
+    if (encalgo->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->encalgo), encalgo->valuestring, strlen(encalgo->valuestring));
+    }
+  }
+
+  cJSON *skeenckeyname = cJSON_GetObjectItem(root, "skeEncKeyName");
+  if (skeenckeyname != NULL) {
+    if (skeenckeyname->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->skeenckeyname), skeenckeyname->valuestring, strlen(skeenckeyname->valuestring));
+    }
+  }
+
+  cJSON *skeencalgo = cJSON_GetObjectItem(root, "skeEncAlgo");
+  if (skeencalgo != NULL) {
+    if (skeencalgo->valuestring != NULL) {
+      atclient_atstr_set(&(metadata->skeencalgo), skeencalgo->valuestring, strlen(skeencalgo->valuestring));
+    }
+  }
 
   ret = 0;
   goto exit;
@@ -701,13 +760,13 @@ exit: {
 }
 
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
-  atclient_atstr_free(&(metadata->createdby));
-  atclient_atstr_free(&(metadata->updatedby));
+  atclient_atstr_free(&(metadata->availableat));
+  atclient_atstr_free(&(metadata->expiresat));
+  atclient_atstr_free(&(metadata->refreshat));
   atclient_atstr_free(&(metadata->createdat));
   atclient_atstr_free(&(metadata->updatedat));
-  atclient_atstr_free(&(metadata->expiresat));
-  atclient_atstr_free(&(metadata->status));
   atclient_atstr_free(&(metadata->datasignature));
+  atclient_atstr_free(&(metadata->sharedkeystatus));
   atclient_atstr_free(&(metadata->sharedkeyenc));
   atclient_atstr_free(&(metadata->pubkeyhash));
   atclient_atstr_free(&(metadata->pubkeyalgo));
@@ -715,9 +774,5 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&(metadata->ivnonce));
   atclient_atstr_free(&(metadata->enckeyname));
   atclient_atstr_free(&(metadata->encalgo));
-  atclient_atstr_free(&(metadata->skeenckeyname));
-  atclient_atstr_free(&(metadata->skeencalgo));
-  atclient_atstr_free(&(metadata->availableat));
-  atclient_atstr_free(&(metadata->expiresat));
-  atclient_atstr_free(&(metadata->refreshat));
+
 }
