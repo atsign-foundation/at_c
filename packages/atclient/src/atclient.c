@@ -253,7 +253,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
   short command_prefix_len = 19;
   short atsign_with_at_len = (short)strlen(ctx->atsign.atsign);
 
-  short command_len = command_prefix_len + (atsign_with_at_len * 2 - 1) + 3;
+  short command_len = command_prefix_len + (short)strlen(recipient->without_prefix_str) + atsign_with_at_len + 3;
   char command[command_len];
   snprintf(command, command_len, "llookup:shared_key.%s%s\r\n", recipient->without_prefix_str, ctx->atsign.atsign);
 
