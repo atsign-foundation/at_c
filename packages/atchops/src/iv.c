@@ -16,20 +16,12 @@ int atchops_iv_generate(unsigned char *iv) {
   if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                    (const unsigned char *)ATCHOPS_RNG_PERSONALIZATION,
                                    strlen(ATCHOPS_RNG_PERSONALIZATION))) != 0) {
-    // printf("Error initializing CTR_DRBG\n");
     goto exit;
   }
 
   if ((ret = mbedtls_ctr_drbg_random(&ctr_drbg, iv, ATCHOPS_IV_BUFFER_SIZE)) != 0) {
-    // printf("Error generating random IV\n");
     goto exit;
   }
-
-  // printf("Generated IV: ");
-  // for (int i = 0; i < ATCHOPS_IV_SIZE; i++) {
-  //     printf("%02x", iv[i]);
-  // }
-  // printf("\n");
 
   goto exit;
 
