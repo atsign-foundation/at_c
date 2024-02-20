@@ -257,10 +257,10 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
   char command[command_len];
   snprintf(command, command_len, "llookup:shared_key.%s%s\r\n", recipient->without_prefix_str, ctx->atsign.atsign);
 
-  const unsigned long recvlen = 1024;
+  const size_t recvlen = 1024;
   unsigned char recv[sizeof(unsigned char) * recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
   if (ret != 0) {
@@ -287,10 +287,10 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
     response = response + 5;
 
     // 44 + 1
-    unsigned long plaintextlen = 45;
+    size_t plaintextlen = 45;
     unsigned char plaintext[sizeof(unsigned char) * plaintextlen];
     memset(plaintext, 0, plaintextlen);
-    unsigned long plaintextolen = 0;
+    size_t plaintextolen = 0;
 
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response),
                               plaintext, plaintextlen, &plaintextolen);
@@ -328,10 +328,10 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   char command[command_len];
   snprintf(command, command_len, "lookup:shared_key@%s\r\n", recipient->without_prefix_str);
 
-  const unsigned long recvlen = 1024;
+  const size_t recvlen = 1024;
   unsigned char recv[sizeof(unsigned char) * recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
   if (ret != 0) {
@@ -359,10 +359,10 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
     response = response + 5;
 
     // 44 + 1
-    unsigned long plaintextlen = 45;
+    size_t plaintextlen = 45;
     unsigned char plaintext[sizeof(unsigned char) * plaintextlen];
     memset(plaintext, 0, plaintextlen);
-    unsigned long plaintextolen = 0;
+    size_t plaintextolen = 0;
 
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response),
                               plaintext, plaintextlen, &plaintextolen);
@@ -385,7 +385,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   int ret = 1;
 
   // get client and recipient public encryption keys
-  const unsigned long bufferlen = 1024;
+  const size_t bufferlen = 1024;
   char client_public_encryption_key[sizeof(unsigned char) * bufferlen];
   char recipient_public_encryption_key[sizeof(unsigned char) * bufferlen];
   ret = atclient_get_public_encryption_key(ctx, NULL, client_public_encryption_key);
@@ -400,10 +400,10 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   }
 
   // generate a new aes key
-  const unsigned long keybase64len = 45;
+  const size_t keybase64len = 45;
   unsigned char new_shared_encryption_key_b64[keybase64len];
   memset(new_shared_encryption_key_b64, 0, keybase64len);
-  unsigned long keybase64olen = 0;
+  size_t keybase64olen = 0;
   ret = atchops_aes_generate_keybase64(new_shared_encryption_key_b64, keybase64len, &keybase64olen, ATCHOPS_AES_256);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -412,8 +412,8 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
     return ret;
   }
 
-  const unsigned long ciphertextlen = 1024;
-  unsigned long ciphertextolen = 0;
+  const size_t ciphertextlen = 1024;
+  size_t ciphertextolen = 0;
 
   // encrypt new shared key with client's public key
   atchops_rsakey_publickey client_publickey;
@@ -505,10 +505,10 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
   snprintf(command, command_len, "plookup:publickey%s\r\n", pub_enc_key_atsign->atsign);
 
   // execute command
-  const unsigned long recvlen = 1024;
+  const size_t recvlen = 1024;
   unsigned char recv[sizeof(unsigned char) * recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
   if (ret != 0) {
