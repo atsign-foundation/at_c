@@ -250,7 +250,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
       goto exit;
     }
-  } else if (atkey.atkeytype == NULL || atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY ||
+  } else if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY ||
              atkey.atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's atkeytype is %d: %.*s\n", atkey.atkeytype,
                           (int)atkey.name.olen, atkey.name.str);
