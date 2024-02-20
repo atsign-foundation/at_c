@@ -76,7 +76,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
  * If no key is found, the function will return an error.
  *
  * @param ctx initialized atclient context (required)
- * @param atkeys an atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
+ * @param recipient an atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
  * (required)
  * @param enc_key_shared_by_other the output shared key in b64 format (required)
  * @return int 0 on success, error otherwise
@@ -84,10 +84,28 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
 int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
                                                 char *enc_key_shared_by_other);
 
-static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient,
-                                                 char *enc_key_shared_by_me);
+/**
+ * @brief Creates a symmetric shared key, which the atclient atsign shares with the recipient atsign.
+ *
+ * @param ctx Initialized atclient context (required)
+ * @param recipient An atclient_atsign struct corresponding to the atsign with which you want to create the shared key
+ * (required)
+ * @param enc_key_shared_by_me The output new shared key (which was already stored in the server) in b64 format
+ * (required)
+ * @return int 0 on success, error otherwise
+ */
+int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me);
 
-static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
-                                              char *public_encryption_key);
+/**
+ * @brief Retreives the public encryption key of a given atsign.
+ *
+ * @param ctx Initialized atclient context (required)
+ * @param recipient An atclient_atsign struct corresponding to the atsign which public encryption key you would like to
+ * obtain. It may receive a NULL value, in which case, the atclient_atsign contained in the ctx parameter will be used
+ * (required)
+ * @param public_encryption_key The output public key in b64 format (required)
+ * @return int 0 on success, error otherwise
+ */
+int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key);
 
 #endif
