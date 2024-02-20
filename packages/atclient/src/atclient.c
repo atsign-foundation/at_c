@@ -258,7 +258,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
   snprintf(command, command_len, "llookup:shared_key.%s%s\r\n", recipient->without_prefix_str, ctx->atsign.atsign);
 
   const size_t recvlen = 1024;
-  unsigned char recv[sizeof(unsigned char) * recvlen];
+  unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
@@ -288,7 +288,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
 
     // 44 + 1
     size_t plaintextlen = 45;
-    unsigned char plaintext[sizeof(unsigned char) * plaintextlen];
+    unsigned char plaintext[plaintextlen];
     memset(plaintext, 0, plaintextlen);
     size_t plaintextolen = 0;
 
@@ -329,7 +329,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   snprintf(command, command_len, "lookup:shared_key@%s\r\n", recipient->without_prefix_str);
 
   const size_t recvlen = 1024;
-  unsigned char recv[sizeof(unsigned char) * recvlen];
+  unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
@@ -360,7 +360,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
 
     // 44 + 1
     size_t plaintextlen = 45;
-    unsigned char plaintext[sizeof(unsigned char) * plaintextlen];
+    unsigned char plaintext[plaintextlen];
     memset(plaintext, 0, plaintextlen);
     size_t plaintextolen = 0;
 
@@ -386,8 +386,8 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
 
   // get client and recipient public encryption keys
   const size_t bufferlen = 1024;
-  char client_public_encryption_key[sizeof(unsigned char) * bufferlen];
-  char recipient_public_encryption_key[sizeof(unsigned char) * bufferlen];
+  char client_public_encryption_key[bufferlen];
+  char recipient_public_encryption_key[bufferlen];
   ret = atclient_get_public_encryption_key(ctx, NULL, client_public_encryption_key);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
@@ -506,7 +506,7 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
 
   // execute command
   const size_t recvlen = 1024;
-  unsigned char recv[sizeof(unsigned char) * recvlen];
+  unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
