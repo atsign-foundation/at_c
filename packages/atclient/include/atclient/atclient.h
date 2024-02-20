@@ -84,4 +84,10 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
 int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
                                                 char *enc_key_shared_by_other);
 
+static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient,
+                                                 char *enc_key_shared_by_me);
+
+static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
+                                              char *public_encryption_key);
+
 #endif

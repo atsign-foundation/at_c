@@ -1,4 +1,6 @@
 #include "atclient/atclient.h"
+#include "atchops/aes.h"
+#include "atchops/rsa.h"
 #include "atclient/atbytes.h"
 #include "atclient/atkeys.h"
 #include "atclient/atkeysfile.h"
@@ -6,15 +8,13 @@
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
 #include "atclient/stringutils.h"
-#include "atchops/aes.h"
-#include "atchops/rsa.h"
 #include "atlogger/atlogger.h"
 #include "uuid4/uuid4.h"
+#include <limits.h>
 #include <mbedtls/md.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
 
@@ -244,12 +244,6 @@ void atclient_free(atclient *ctx) {
   atclient_connection_free(&(ctx->secondary_connection));
 }
 
-static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient,
-                                                 char *enc_key_shared_by_me);
-
-static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
-                                              char *public_encryption_key);
-
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
                                              char *enc_key_shared_by_me) {
   int ret = 1;
@@ -387,8 +381,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   return 0;
 }
 
-static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient,
-                                                 char *enc_key_shared_by_me) {
+int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me) {
   int ret = 1;
 
   // get client and recipient public encryption keys
@@ -433,8 +426,7 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
     return ret;
   }
 
-  unsigned char
-      new_shared_encryption_key_b64_encrypted_with_client_public_key_b64[ciphertextlen];
+  unsigned char new_shared_encryption_key_b64_encrypted_with_client_public_key_b64[ciphertextlen];
   memset(new_shared_encryption_key_b64_encrypted_with_client_public_key_b64, 0, ciphertextlen);
 
   ret = atchops_rsa_encrypt(client_publickey, (const unsigned char *)new_shared_encryption_key_b64, keybase64len,
@@ -456,8 +448,7 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
     return ret;
   }
 
-  unsigned char
-      new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64[ciphertextlen];
+  unsigned char new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64[ciphertextlen];
   memset(new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64, 0, ciphertextlen);
 
   ret = atchops_rsa_encrypt(recipient_publickey, (const unsigned char *)new_shared_encryption_key_b64, keybase64len,
@@ -500,8 +491,7 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
   return 0;
 }
 
-static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
-                                              char *public_encryption_key) {
+int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key) {
 
   int ret = 1;
 
