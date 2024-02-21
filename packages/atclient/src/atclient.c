@@ -10,11 +10,14 @@
 #include "atlogger/atlogger.h"
 #include <limits.h>
 #include <mbedtls/md.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
+
+#define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
 
 #define TAG "atclient"
 
@@ -242,29 +245,23 @@ void atclient_free(atclient *ctx) {
   atclient_connection_free(&(ctx->secondary_connection));
 }
 
-static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient,
-                                                 char *enc_key_shared_by_me);
-
-static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
-                                              char *public_encryption_key);
-
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
-                                             char *enc_key_shared_by_me) {
+                                             char *enc_key_shared_by_me, bool create_new_if_not_found) {
   int ret = 1;
 
   // llookup:shared_key.recipient_atsign@myatsign
   char *command_prefix = "llookup:shared_key.";
-  short command_prefix_len = 19;
+  const short command_prefix_len = 19;
   short atsign_with_at_len = (short)strlen(ctx->atsign.atsign);
 
-  short command_len = command_prefix_len + (atsign_with_at_len * 2 - 1) + 3;
+  short command_len = command_prefix_len + (short)strlen(recipient->without_prefix_str) + atsign_with_at_len + 3;
   char command[command_len];
   snprintf(command, command_len, "llookup:shared_key.%s%s\r\n", recipient->without_prefix_str, ctx->atsign.atsign);
 
-  const unsigned long recvlen = 1024;
-  unsigned char recv[sizeof(unsigned char) * recvlen];
+  const size_t recvlen = 1024;
+  unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
                                  recvlen, &olen);
@@ -292,10 +289,10 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
     response = response + 5;
 
     // 44 + 1
-    unsigned long plaintextlen = 45;
-    unsigned char plaintext[sizeof(unsigned char) * plaintextlen];
+    const size_t plaintextlen = 45;
+    unsigned char plaintext[plaintextlen];
     memset(plaintext, 0, plaintextlen);
-    unsigned long plaintextolen = 0;
+    size_t plaintextolen = 0;
 
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response),
                               plaintext, plaintextlen, &plaintextolen);
@@ -309,12 +306,17 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
 
   else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
                                             strlen("error:AT0015-key not found"))) {
-    // TODO: or do I need to create, store and share a new shared key?
-    // ret = atclient_create_shared_encryption_key(ctx, recipient, enc_key_shared_by_me);
-    // if (ret != 0) {
-    //   atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
-    //   return ret;
-    // }
+    // or do I need to create, store and share a new shared key?
+    if (create_new_if_not_found) {
+      ret = atclient_create_shared_encryption_key(ctx, recipient, enc_key_shared_by_me);
+      if (ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
+        return ret;
+      }
+    } else {
+      ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
+      return ret;
+    }
   }
 
   return 0;
@@ -327,16 +329,16 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   // llookup:cached:@myatsign:shared_key@recipient_atsign
   // lookup:shared_key@recipient_atsign
   char *command_prefix = "lookup:shared_key@";
-  short command_prefix_len = 18;
+  const short command_prefix_len = 18;
 
   short command_len = command_prefix_len + strlen(recipient->without_prefix_str) + 3;
   char command[command_len];
   snprintf(command, command_len, "lookup:shared_key@%s\r\n", recipient->without_prefix_str);
 
-  const unsigned long recvlen = 1024;
-  unsigned char recv[sizeof(unsigned char) * recvlen];
+  const size_t recvlen = 1024;
+  unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
                                  recvlen, &olen);
@@ -365,10 +367,10 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
     response = response + 5;
 
     // 44 + 1
-    unsigned long plaintextlen = 45;
-    unsigned char plaintext[sizeof(unsigned char) * plaintextlen];
+    const size_t plaintextlen = 45;
+    unsigned char plaintext[plaintextlen];
     memset(plaintext, 0, plaintextlen);
-    unsigned long plaintextolen = 0;
+    size_t plaintextolen = 0;
 
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, (const unsigned char *)response, strlen((char *)response),
                               plaintext, plaintextlen, &plaintextolen);
@@ -381,20 +383,19 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
                                               strlen("error:AT0015-key not found"))) {
     // There is nothing we can do, except wait for the recipient to share a new key
     // We want to mark this situation with a easily distinguishable return value
-    ret = INT_MAX;
+    ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
     return ret;
   }
   return 0;
 }
 
-static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient,
-                                                 char *enc_key_shared_by_me) {
+int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me) {
   int ret = 1;
 
   // get client and recipient public encryption keys
-  const unsigned long bufferlen = 1024;
-  char client_public_encryption_key[sizeof(unsigned char) * bufferlen];
-  char recipient_public_encryption_key[sizeof(unsigned char) * bufferlen];
+  const size_t bufferlen = 1024;
+  char client_public_encryption_key[bufferlen];
+  char recipient_public_encryption_key[bufferlen];
   ret = atclient_get_public_encryption_key(ctx, NULL, client_public_encryption_key);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
@@ -407,10 +408,10 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
   }
 
   // generate a new aes key
-  const unsigned long keybase64len = 45;
+  const size_t keybase64len = 45;
   unsigned char new_shared_encryption_key_b64[keybase64len];
   memset(new_shared_encryption_key_b64, 0, keybase64len);
-  unsigned long keybase64olen = 0;
+  size_t keybase64olen = 0;
   ret = atchops_aes_generate_keybase64(new_shared_encryption_key_b64, keybase64len, &keybase64olen, ATCHOPS_AES_256);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -419,8 +420,8 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
     return ret;
   }
 
-  const unsigned long ciphertextlen = 1024;
-  unsigned long ciphertextolen = 0;
+  const size_t ciphertextlen = 1024;
+  size_t ciphertextolen = 0;
 
   // encrypt new shared key with client's public key
   atchops_rsakey_publickey client_publickey;
@@ -472,7 +473,7 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
   // save encrypted key for us
   // update:shared_key.recipient@client key\r\n\0
   char *command1_prefix = "update:shared_key.";
-  short command1_prefix_len = 18;
+  const short command1_prefix_len = 18;
 
   short command1_len = command1_prefix_len + recipient_without_at_len + client_with_at_len +
                        strlen((char *)new_shared_encryption_key_b64_encrypted_with_client_public_key_b64) + 4;
@@ -484,7 +485,7 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
   // ttr = 3888000 (45 days)
   // update:ttr:3888000:recipient:shared_key@client key\r\n\0
   char *command2_prefix = "update:ttr:3888000:";
-  short command2_prefix_len = 19;
+  const short command2_prefix_len = 19;
 
   short command2_len = command2_prefix_len + recipient_without_at_len + client_with_at_len +
                        strlen((char *)new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64) + 5;
@@ -498,14 +499,13 @@ static int atclient_create_shared_encryption_key(atclient *ctx, const atclient_a
   return 0;
 }
 
-static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
-                                              char *public_encryption_key) {
+int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key) {
 
   int ret = 1;
 
   // plookup:publickey@atsign
   char *command_prefix = "plookup:publickey";
-  short command_prefix_len = 17;
+  const short command_prefix_len = 17;
 
   const atclient_atsign *pub_enc_key_atsign = atsign != NULL ? atsign : &ctx->atsign;
   short command_len = command_prefix_len + strlen(pub_enc_key_atsign->atsign) + 3;
@@ -513,10 +513,10 @@ static int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsi
   snprintf(command, command_len, "plookup:publickey%s\r\n", pub_enc_key_atsign->atsign);
 
   // execute command
-  const unsigned long recvlen = 1024;
-  unsigned char recv[sizeof(unsigned char) * recvlen];
+  const size_t recvlen = 1024;
+  unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
                                  recvlen, &olen);

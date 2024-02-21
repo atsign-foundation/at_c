@@ -4,6 +4,7 @@
 #include <atlogger/atlogger.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
@@ -38,7 +39,7 @@ int main(int argc, char **argv) {
   atclient_atkeysfile_init(&atkeysfile);
   ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_read: %d\n", ret);
     atclient_free(&atclient);
     atclient_atkeysfile_free(&atkeysfile);
     return ret;
@@ -49,7 +50,7 @@ int main(int argc, char **argv) {
   atclient_atkeys_init(&atkeys);
   ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
     goto exit1;
   }
   atclient.atkeys = atkeys;
@@ -75,7 +76,7 @@ int main(int argc, char **argv) {
   // Init variables and get the encryption keys
 
   char *enc_key_shared_by_me = malloc(45);
-  ret = atclient_get_encryption_key_shared_by_me(&atclient, &recipient, enc_key_shared_by_me);
+  ret = atclient_get_encryption_key_shared_by_me(&atclient, &recipient, enc_key_shared_by_me, true);
   if (ret != 0) {
     free(enc_key_shared_by_me);
     goto exit2;
