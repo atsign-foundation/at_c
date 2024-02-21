@@ -1,8 +1,6 @@
 #ifndef ATCLIENT_ATKEYS_H
 #define ATCLIENT_ATKEYS_H
 
-#include "atchops/rsa.h"
-#include "atclient/atstr.h"
 #include "atclient/atkeysfile.h"
 #include "atclient/atstr.h"
 #include <atchops/rsa.h>

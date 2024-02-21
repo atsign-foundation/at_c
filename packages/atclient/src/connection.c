@@ -1,15 +1,6 @@
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <mbedtls/ssl.h>
-#include <mbedtls/net_sockets.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
-#include "atlogger/atlogger.h"
-#include "atchops/constants.h"
-#include "atclient/cacerts.h"
 #include "atclient/connection.h"
+#include "atchops/constants.h"
 #include "atclient/atstr.h"
 #include "atclient/cacerts.h"
 #include "atclient/constants.h"
@@ -60,13 +51,14 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   char portstr[6];
   sprintf(portstr, "%d", ctx->port);
 
-  ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy), ATCHOPS_RNG_PERSONALIZATION, strlen(ATCHOPS_RNG_PERSONALIZATION));
+  ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy), ATCHOPS_RNG_PERSONALIZATION,
+                              strlen(ATCHOPS_RNG_PERSONALIZATION));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ctr_drbg_seed failed with exit code: %d\n", ret);
     goto exit;
   }
 
-  ret = mbedtls_x509_crt_parse(&(ctx->cacert), cas_pem, cas_pem_len);
+  ret = mbedtls_x509_crt_parse(&(ctx->cacert), (unsigned char *)cas_pem, cas_pem_len);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_x509_crt_parse failed with exit code: %d\n", ret);
     goto exit;
@@ -124,7 +116,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // ===============
 
   // read anything that was already sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), readbuf.str, readbuf.len);
+  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.len);
   if (ret < 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -138,7 +130,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   // read anything that was sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), readbuf.str, readbuf.len);
+  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.len);
   if (ret < 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -277,16 +269,15 @@ exit: {
 }
 }
 
-int atclient_connection_disconnect(atclient_connection *ctx)
-{
-    int ret = 0;
-    do {
-        ret = mbedtls_ssl_close_notify(&(ctx->ssl));
-    } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
-    ret = 0;
+int atclient_connection_disconnect(atclient_connection *ctx) {
+  int ret = 0;
+  do {
+    ret = mbedtls_ssl_close_notify(&(ctx->ssl));
+  } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+  ret = 0;
 
-    atclient_connection_free(ctx);
-    return ret;
+  atclient_connection_free(ctx);
+  return ret;
 }
 
 int atclient_connection_is_connected(atclient_connection *ctx) {

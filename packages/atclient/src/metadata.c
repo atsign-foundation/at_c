@@ -1,6 +1,5 @@
 #include "atclient/metadata.h"
 #include "atclient/constants.h"
-#include <stdlib.h>
 #include <string.h>
 
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {

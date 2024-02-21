@@ -3,13 +3,12 @@
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
 #include "atclient/atkeys.h"
-#include "atclient/atkeysfile.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
-#include "uuid4/uuid4.h"
+#include <limits.h>
 #include <mbedtls/md.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -39,7 +38,7 @@ int atclient_start_root_connection(atclient *ctx, const char *roothost, const in
 
   goto exit;
 
-exit : { return ret; }
+exit: { return ret; }
 }
 
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
@@ -56,7 +55,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 
   goto exit;
 
-exit : { return ret; }
+exit: { return ret; }
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign,
@@ -225,7 +224,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
   ret = 0;
 
   goto exit;
-exit : {
+exit: {
   atclient_atbytes_free(&src);
   atclient_atbytes_free(&recv);
   atclient_atstr_free(&withoutat);
@@ -264,12 +263,13 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+                                 recvlen, &olen);
   if (ret != 0) {
     return ret;
   }
 
-  char *response = recv;
+  char *response = (char *)recv;
 
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
@@ -304,7 +304,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
     memcpy(enc_key_shared_by_me, plaintext, plaintextlen);
   }
 
-  else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
+  else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
                                             strlen("error:AT0015-key not found"))) {
     // or do I need to create, store and share a new shared key?
     if (create_new_if_not_found) {
@@ -340,12 +340,13 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+                                 recvlen, &olen);
   if (ret != 0) {
     return ret;
   }
 
-  char *response = recv;
+  char *response = (char *)recv;
 
   // Truncate response: "@" + myatsign + "@"
   short response_prefix_len = (short)strlen(ctx->atsign.without_prefix_str) + 3;
@@ -378,7 +379,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
       return ret;
     }
     memcpy(enc_key_shared_by_other, plaintext, plaintextlen);
-  } else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
+  } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
                                               strlen("error:AT0015-key not found"))) {
     // There is nothing we can do, except wait for the recipient to share a new key
     // We want to mark this situation with a easily distinguishable return value
@@ -475,7 +476,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   const short command1_prefix_len = 18;
 
   short command1_len = command1_prefix_len + recipient_without_at_len + client_with_at_len +
-                       strlen(new_shared_encryption_key_b64_encrypted_with_client_public_key_b64) + 4;
+                       strlen((char *)new_shared_encryption_key_b64_encrypted_with_client_public_key_b64) + 4;
   char command1[command1_len];
   snprintf(command1, command1_len, "update:shared_key.%s%s %s\r\n", recipient->without_prefix_str, ctx->atsign.atsign,
            new_shared_encryption_key_b64_encrypted_with_client_public_key_b64);
@@ -487,7 +488,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   const short command2_prefix_len = 19;
 
   short command2_len = command2_prefix_len + recipient_without_at_len + client_with_at_len +
-                       strlen(new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64) + 5;
+                       strlen((char *)new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64) + 5;
   char command2[command2_len];
   snprintf(command2, command2_len, "update:ttr:3888000:%s:shared_key%s %s\r\n", recipient->without_prefix_str,
            ctx->atsign.atsign, new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64);
@@ -517,17 +518,18 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), command, strlen((char *)command), recv, recvlen, &olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+                                 recvlen, &olen);
   if (ret != 0) {
     return ret;
   }
 
-  char *response = recv;
+  char *response = (char *)recv;
 
   if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
     response = response + 5;
     memcpy(public_encryption_key, response, 1024);
-  } else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
+  } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
                                               strlen("error:AT0015-key not found"))) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n",
                           ret);
