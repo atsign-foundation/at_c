@@ -74,7 +74,7 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
  * strlen(metadatastr)
  * @return int 0 on success
  */
-int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr,
+int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
                                         const unsigned long metadatastrlen);
 
 /**

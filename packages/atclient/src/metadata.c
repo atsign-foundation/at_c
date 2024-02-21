@@ -38,7 +38,7 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
   atclient_atstr_init(&(metadata->skeencalgo), GENERAL_BUFFER_SIZE);
 }
 
-int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const char *metadatastr,
+int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
                                         const unsigned long metadatastrlen) {
   // example:
   // "metaData":{
@@ -57,6 +57,7 @@ int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const
 
   cJSON *root = NULL;
 
+  // 1. check arguments for errors
   if (metadatastr == NULL) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -71,6 +72,7 @@ int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const
     goto exit;
   }
 
+  // 2. Parse JSON string (e.g. "metadata": {".." : "..", ...})
   root = cJSON_Parse(metadatastr);
   if (root == NULL) {
     ret = 1;
@@ -148,6 +150,11 @@ int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const
   cJSON *isencrypted = cJSON_GetObjectItem(root, "isEncrypted");
   if (isencrypted != NULL) {
     metadata->isencrypted = cJSON_IsTrue(isencrypted);
+  }
+
+  cJSON *iscached = cJSON_GetObjectItem(root, "isCached");
+  if (iscached != NULL) {
+    metadata->iscached = cJSON_IsTrue(iscached);
   }
 
   cJSON *ttl = cJSON_GetObjectItem(root, "ttl");
@@ -231,6 +238,147 @@ int atclient_atkey_metadata_from_string(atclient_atkey_metadata *metadata, const
     if (skeencalgo->valuestring != NULL) {
       atclient_atstr_set(&(metadata->skeencalgo), skeencalgo->valuestring, strlen(skeencalgo->valuestring));
     }
+  }
+
+  // 3. Populate *metadata with parsed values
+
+  metadata->ttl =  (long) cJSON_GetNumberValue(ttl);
+  metadata->ttb =  (long) cJSON_GetNumberValue(ttb);
+  metadata->ttr =  (long) cJSON_GetNumberValue(ttr);
+  metadata->ccd = cJSON_IsTrue(ccd);
+
+  const char *availableatstr = cJSON_GetStringValue(availableat);
+  const size_t availableatstrlen = strlen(availableatstr);
+  if((ret = atclient_atstr_set(&(metadata->availableat), availableatstr, availableatstrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set availableat\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *expiresatstr = cJSON_GetStringValue(expiresat);
+  const size_t expiresatstrlen = strlen(expiresatstr);
+  if((ret = atclient_atstr_set(&(metadata->expiresat), expiresatstr, expiresatstrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set expiresat\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *refreshatstr = cJSON_GetStringValue(refreshat);
+  const size_t refreshatstrlen = strlen(refreshatstr);
+  if((ret = atclient_atstr_set(&(metadata->refreshat), refreshatstr, refreshatstrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set refreshat\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *createdatstr = cJSON_GetStringValue(createdat);
+  const size_t createdatstrlen = strlen(createdatstr);
+  if((ret = atclient_atstr_set(&(metadata->createdat), createdatstr, createdatstrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set createdat\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *updatedatstr = cJSON_GetStringValue(updatedat);
+  const size_t updatedatstrlen = strlen(updatedatstr);
+  if((ret = atclient_atstr_set(&(metadata->updatedat), updatedatstr, updatedatstrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set updatedat\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *datasignaturestr = cJSON_GetStringValue(datasignature);
+  const size_t datasignaturestrlen = strlen(datasignaturestr);
+  if((ret = atclient_atstr_set(&(metadata->datasignature), datasignaturestr, datasignaturestrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set datasignature\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *sharedkeystatusstr = cJSON_GetStringValue(sharedkeystatus);
+  const size_t sharedkeystatusstrlen = strlen(sharedkeystatusstr);
+  if((ret = atclient_atstr_set(&(metadata->sharedkeystatus), sharedkeystatusstr, sharedkeystatusstrlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set sharedkeystatus\n");
+    ret = 1;
+    goto exit;
+  }
+
+  metadata->ispublic = cJSON_IsTrue(ispublic);
+  metadata->ishidden = cJSON_IsTrue(ishidden);
+  metadata->isbinary = cJSON_IsTrue(isbinary);
+  metadata->isencrypted = cJSON_IsTrue(isencrypted);
+  metadata->iscached = cJSON_IsTrue(iscached);
+
+  const char *sharedkeyencstr = cJSON_GetStringValue(sharedkeyenc);
+  const size_t sharedkeyenclen = strlen(sharedkeyencstr);
+  if((ret = atclient_atstr_set(&(metadata->sharedkeyenc), sharedkeyencstr, sharedkeyenclen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set sharedkeyenc\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *pubkeyhashstr = cJSON_GetStringValue(pubkeyhash);
+  const size_t pubkeyhashlen = strlen(pubkeyhashstr);
+  if((ret = atclient_atstr_set(&(metadata->pubkeyhash), pubkeyhashstr, pubkeyhashlen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set pubkeyhash\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *pubkeyalgostr = cJSON_GetStringValue(pubkeyalgo);
+  const size_t pubkeyalgolen = strlen(pubkeyalgostr);
+  if((ret = atclient_atstr_set(&(metadata->pubkeyalgo), pubkeyalgostr, pubkeyalgolen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set pubkeyalgo\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *encodingstr = cJSON_GetStringValue(encoding);
+  const size_t encodinglen = strlen(encodingstr);
+  if((ret = atclient_atstr_set(&(metadata->encoding), encodingstr, encodinglen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set encoding\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *enckeynamestr = cJSON_GetStringValue(enckeyname);
+  const size_t enckeynamelen = strlen(enckeynamestr);
+  if((ret = atclient_atstr_set(&(metadata->enckeyname), enckeynamestr, enckeynamelen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set enckeyname\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *encalgostr = cJSON_GetStringValue(encalgo);
+  const size_t encalgolen = strlen(encalgostr);
+  if((ret = atclient_atstr_set(&(metadata->encalgo), encalgostr, encalgolen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set encalgo\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *ivnoncestr = cJSON_GetStringValue(ivnonce);
+  const size_t ivnoncelen = strlen(ivnoncestr);
+  if((ret = atclient_atstr_set(&(metadata->ivnonce), ivnoncestr, ivnoncelen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set ivnonce\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *skeenckeynamestr = cJSON_GetStringValue(skeenckeyname);
+  const size_t skeenckeynamelen = strlen(skeenckeynamestr);
+  if((ret = atclient_atstr_set(&(metadata->skeenckeyname), skeenckeynamestr, skeenckeynamelen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set skeenckeyname\n");
+    ret = 1;
+    goto exit;
+  }
+
+  const char *skeencalgostr = cJSON_GetStringValue(skeencalgo);
+  const size_t skeencalgolen = strlen(skeencalgostr);
+  if((ret = atclient_atstr_set(&(metadata->skeencalgo), skeencalgostr, skeencalgolen))) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: failed to set skeencalgo\n");
+    ret = 1;
+    goto exit;
   }
 
   ret = 0;
@@ -614,11 +762,6 @@ exit: {
   atclient_atstr_free(&buffer);
   return ret;
 }
-}
-
-int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
-                                              const unsigned long datasignaturelen) {
-  return atclient_atstr_set(&(metadata->datasignature), datasignature, datasignaturelen);
 }
 
 int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
