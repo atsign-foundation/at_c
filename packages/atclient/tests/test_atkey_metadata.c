@@ -292,16 +292,16 @@ static int test_atkey_metadata_to_jsonstr() {
     atclient_atkey_metadata metadata;
     atclient_atkey_metadata_init(&metadata);
 
+    const size_t jsonstrlen = 4096;
+    char jsonstr[jsonstrlen];
+    memset(jsonstr, 0, sizeof(char) * jsonstrlen);
+    size_t jsonstrlenout = 0;
+
     ret = atclient_atkey_metadata_from_jsonstr(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR, strlen(TEST_ATKEY_METADATA_FROM_JSONSTR));
     if(ret != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr failed");
         goto exit;
     }
-
-    const size_t jsonstrlen = 4096;
-    char jsonstr[jsonstrlen];
-    memset(jsonstr, 0, sizeof(char) * jsonstrlen);
-    size_t jsonstrlenout = 0;
 
     ret = atclient_atkey_metadata_to_jsonstr(metadata, jsonstr, jsonstrlen, &jsonstrlenout);
     if(ret != 0) {
