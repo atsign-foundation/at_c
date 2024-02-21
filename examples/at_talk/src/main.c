@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
   // Init variables and get the encryption keys
 
   char *enc_key_shared_by_me = malloc(45);
-  ret = atclient_get_encryption_key_shared_by_me(&atclient, &recipient, enc_key_shared_by_me);
+  ret = atclient_get_encryption_key_shared_by_me(&atclient, &recipient, enc_key_shared_by_me, true);
   if (ret != 0) {
     free(enc_key_shared_by_me);
     goto exit2;

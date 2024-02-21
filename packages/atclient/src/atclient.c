@@ -10,13 +10,15 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include "uuid4/uuid4.h"
-#include <limits.h>
 #include <mbedtls/md.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
+
+#define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
 
 #define TAG "atclient"
 
@@ -245,7 +247,7 @@ void atclient_free(atclient *ctx) {
 }
 
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
-                                             char *enc_key_shared_by_me) {
+                                             char *enc_key_shared_by_me, bool create_new_if_not_found) {
   int ret = 1;
 
   // llookup:shared_key.recipient_atsign@myatsign
@@ -304,12 +306,17 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
 
   else if (atclient_stringutils_starts_with(recv, recvlen, "error:AT0015-key not found",
                                             strlen("error:AT0015-key not found"))) {
-    // TODO: or do I need to create, store and share a new shared key?
-    // ret = atclient_create_shared_encryption_key(ctx, recipient, enc_key_shared_by_me);
-    // if (ret != 0) {
-    //   atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
-    //   return ret;
-    // }
+    // or do I need to create, store and share a new shared key?
+    if (create_new_if_not_found) {
+      ret = atclient_create_shared_encryption_key(ctx, recipient, enc_key_shared_by_me);
+      if (ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
+        return ret;
+      }
+    } else {
+      ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
+      return ret;
+    }
   }
 
   return 0;
@@ -375,7 +382,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
                                               strlen("error:AT0015-key not found"))) {
     // There is nothing we can do, except wait for the recipient to share a new key
     // We want to mark this situation with a easily distinguishable return value
-    ret = INT_MAX;
+    ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
     return ret;
   }
   return 0;
