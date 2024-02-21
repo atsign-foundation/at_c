@@ -252,7 +252,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
 
   // llookup:shared_key.recipient_atsign@myatsign
   char *command_prefix = "llookup:shared_key.";
-  short command_prefix_len = 19;
+  const short command_prefix_len = 19;
   short atsign_with_at_len = (short)strlen(ctx->atsign.atsign);
 
   short command_len = command_prefix_len + (short)strlen(recipient->without_prefix_str) + atsign_with_at_len + 3;
@@ -289,7 +289,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
     response = response + 5;
 
     // 44 + 1
-    size_t plaintextlen = 45;
+    const size_t plaintextlen = 45;
     unsigned char plaintext[plaintextlen];
     memset(plaintext, 0, plaintextlen);
     size_t plaintextolen = 0;
@@ -329,7 +329,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   // llookup:cached:@myatsign:shared_key@recipient_atsign
   // lookup:shared_key@recipient_atsign
   char *command_prefix = "lookup:shared_key@";
-  short command_prefix_len = 18;
+  const short command_prefix_len = 18;
 
   short command_len = command_prefix_len + strlen(recipient->without_prefix_str) + 3;
   char command[command_len];
@@ -366,7 +366,7 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
     response = response + 5;
 
     // 44 + 1
-    size_t plaintextlen = 45;
+    const size_t plaintextlen = 45;
     unsigned char plaintext[plaintextlen];
     memset(plaintext, 0, plaintextlen);
     size_t plaintextolen = 0;
@@ -472,7 +472,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   // save encrypted key for us
   // update:shared_key.recipient@client key\r\n\0
   char *command1_prefix = "update:shared_key.";
-  short command1_prefix_len = 18;
+  const short command1_prefix_len = 18;
 
   short command1_len = command1_prefix_len + recipient_without_at_len + client_with_at_len +
                        strlen(new_shared_encryption_key_b64_encrypted_with_client_public_key_b64) + 4;
@@ -484,7 +484,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   // ttr = 3888000 (45 days)
   // update:ttr:3888000:recipient:shared_key@client key\r\n\0
   char *command2_prefix = "update:ttr:3888000:";
-  short command2_prefix_len = 19;
+  const short command2_prefix_len = 19;
 
   short command2_len = command2_prefix_len + recipient_without_at_len + client_with_at_len +
                        strlen(new_shared_encryption_key_b64_encrypted_with_recipient_public_key_b64) + 5;
@@ -504,7 +504,7 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
 
   // plookup:publickey@atsign
   char *command_prefix = "plookup:publickey";
-  short command_prefix_len = 17;
+  const short command_prefix_len = 17;
 
   const atclient_atsign *pub_enc_key_atsign = atsign != NULL ? atsign : &ctx->atsign;
   short command_len = command_prefix_len + strlen(pub_enc_key_atsign->atsign) + 3;
