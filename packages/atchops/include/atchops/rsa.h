@@ -25,13 +25,14 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
  *
  * @param publickey the public key to use for verification, see atchops_rsakey_populate_publickey
  * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
+ * @param message the original message to hash
+ * @param messagelen the length of the original message, most people use strlen() to find this length
  * @param signature the signature to verify
  * @param signaturelen the length of the signature, most people use strlen() to find this length
- * @param result 1 if the signature is valid, 0 if the signature is invalid
  * @return int 0 on success
  */
-int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const unsigned char *signature,
-                       const unsigned long signaturelen, int *result);
+int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const char *message,
+                       const size_t messagelen, const unsigned char *signature, const unsigned long signaturelen);
 
 /**
  * @brief Encrypt bytes with an RSA public key
