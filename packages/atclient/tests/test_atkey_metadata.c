@@ -251,8 +251,8 @@ static int test_atkey_metadata_to_protocolstr() {
     const size_t protocolfragmentlen = 1024;
     char protocolfragment[1024] = {0};
     size_t protocolfragmentolen = 0;
-    
-    ret = atclient_atkey_metadata_to_protocolstr(&metadata, protocolfragment, protocolfragmentlen, &protocolfragmentolen);
+
+    ret = atclient_atkey_metadata_to_protocolstr(metadata, protocolfragment, protocolfragmentlen, &protocolfragmentolen);
     if(ret != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr failed");
         goto exit;
@@ -290,6 +290,22 @@ static int test_atkey_metadata_to_jsonstr() {
 
     atclient_atkey_metadata metadata;
     atclient_atkey_metadata_init(&metadata);
+
+    ret = atclient_atkey_metadata_from_jsonstr(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR, strlen(TEST_ATKEY_METADATA_FROM_JSONSTR));
+    if(ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr failed");
+        goto exit;
+    }
+
+    const size_t jsonstrlen = 4096;
+    char jsonstr[jsonstrlen] = {0};
+    size_t jsonstrlenout = 0;
+
+    ret = atclient_atkey_metadata_to_jsonstr(metadata, jsonstr, jsonstrlen, &jsonstrlenout);
+    if(ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_jsonstr failed");
+        goto exit;
+    }
 
     ret = 0;
     goto exit;
