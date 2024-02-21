@@ -249,7 +249,8 @@ static int test_atkey_metadata_to_protocolstr() {
     atclient_atkey_metadata_set_ivnonce(&metadata, "abcdefghijk", strlen("abcdefghijk"));
 
     const size_t protocolfragmentlen = 1024;
-    char protocolfragment[1024] = {0};
+    char protocolfragment[protocolfragmentlen];
+    memset(protocolfragment, 0, sizeof(char) * protocolfragmentlen);
     size_t protocolfragmentolen = 0;
 
     ret = atclient_atkey_metadata_to_protocolstr(metadata, protocolfragment, protocolfragmentlen, &protocolfragmentolen);
@@ -298,7 +299,8 @@ static int test_atkey_metadata_to_jsonstr() {
     }
 
     const size_t jsonstrlen = 4096;
-    char jsonstr[jsonstrlen] = {0};
+    char jsonstr[jsonstrlen];
+    memset(jsonstr, 0, sizeof(char) * jsonstrlen);
     size_t jsonstrlenout = 0;
 
     ret = atclient_atkey_metadata_to_jsonstr(metadata, jsonstr, jsonstrlen, &jsonstrlenout);
