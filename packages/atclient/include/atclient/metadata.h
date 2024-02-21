@@ -22,9 +22,11 @@ typedef struct atclient_atkey_metadata {
   bool ccd; // cascade delete; (1) => cached key will be deleted upon the deletion of this key, (0) => no cascade
             // delete, writeable
   // derived fields
-  atclient_atstr availableat;     // derived field via [ttb], read only
-  atclient_atstr expiresat;       // derived field via [ttl], read only
-  atclient_atstr refreshat;       // derived field via [ttr], read only
+  atclient_atstr
+      availableat; // date and time representing when atkey will be available at, derived field via [ttb], read only
+  atclient_atstr expiresat; // date and time representing when atkey will expire, derived field via [ttl], read only
+  atclient_atstr
+      refreshat; // date and time representing when atkey will refresh next, derived field via [ttr], read only
   atclient_atstr createdat;       // date and time representing when the key was created, read only
   atclient_atstr updatedat;       // date and time representing when the key was last updated, read only
   atclient_atstr datasignature;   // public data is signed using the key owner's encryptPrivateKey and result is stored
@@ -86,7 +88,8 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
                                          const size_t metadatastrlen);
 
 /**
- * @brief reads metadata struct and converts it to a json formatted string
+ * @brief reads metadata struct and converts it to a json formatted string. This function should mostly be used for
+ * debugging only. See atclient_atkey_metadata_to_protocolstr for a more useful function when working with atProtocol
  *
  * @param metadata the metadata struct to convert to a string
  * @param metadatastr the buffer to write the metadata to
