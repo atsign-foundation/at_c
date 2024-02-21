@@ -4,6 +4,7 @@
 #include <atlogger/atlogger.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
