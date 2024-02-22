@@ -1,6 +1,7 @@
 #include "atclient/atkey.h"
 #include "atlogger/atlogger.h"
 #include <string.h>
+#include <stdbool.h>
 
 #define TAG "test_atkey_to_string"
 
@@ -43,8 +44,8 @@ static int test1a() {
   const char *expected = TEST_ATKEY_TO_STRING_1A;
   const unsigned long expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = 1;
-  atkey.metadata.ispublic = 1;
+  atkey.metadata.iscached = true;
+  atkey.metadata.ispublic = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "publickey");
@@ -94,7 +95,7 @@ static int test1b() {
   const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
   const unsigned long expectedlen = strlen(expected);
 
-  atkey.metadata.ispublic = 1;
+  atkey.metadata.ispublic = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "publickey");
@@ -140,7 +141,7 @@ static int test1c() {
   const char *expected = TEST_ATKEY_TO_STRING_1C; // "public:name.wavi@jeremy"
   const unsigned long expectedlen = strlen(expected);
 
-  atkey.metadata.ispublic = 1;
+  atkey.metadata.ispublic = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "name");
@@ -192,8 +193,8 @@ static int test1d() {
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
   const unsigned long expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = 1;
-  atkey.metadata.ispublic = 1;
+  atkey.metadata.iscached = true;
+  atkey.metadata.ispublic = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "name");
@@ -294,7 +295,7 @@ static int test2b() {
   const char *expected = TEST_ATKEY_TO_STRING_2B; // "cached:@bob:name@alice"
   const unsigned long expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = 1;
+  atkey.metadata.iscached = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@bob");
@@ -404,7 +405,7 @@ static int test2d() {
   const char *expected = TEST_ATKEY_TO_STRING_2D; // "cached:@bob:name.wavi@alice"
   const unsigned long expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = 1;
+  atkey.metadata.iscached = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@bob");
