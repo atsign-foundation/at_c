@@ -102,8 +102,7 @@ int main() {
     printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
     goto exit;
   }
-  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, EXPECTED_SIGNATURE,
-                           strlen(EXPECTED_SIGNATURE));
+  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, signature, signatureolen);
   if (ret != 0) {
     printf("atchops_rsakey_verify (failed): %d\n", ret);
     goto exit;

@@ -93,7 +93,14 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
                        const size_t messagelen, const unsigned char *signature, const unsigned long signaturelen) {
   int ret;
   mbedtls_rsa_context rsa;
-  unsigned char hash[32];
+
+  size_t hashlen = 32;
+  size_t hasholen;
+  unsigned char hash[hashlen];
+
+  size_t decoded_sig_len = 512;
+  size_t decoded_sig_olen;
+  unsigned char decoded_sig[decoded_sig_len];
 
   mbedtls_rsa_init(&rsa);
   if ((ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1,
@@ -102,23 +109,20 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
   }
 
   // compute the hash of the input message
-  // if ((ret = mbedtls_md(mbedtls_md_info_from_type(mdtype), (unsigned char *)message, messagelen, hash)) != 0) {
-  //   goto exit;
-  // }
+  if ((ret = atchops_sha_hash(mdtype, (unsigned char *)message, messagelen, hash, hashlen, &hasholen)) != 0) {
+    goto exit;
+  }
+  printf("hashlen: %lu - %lu\n", hashlen, hasholen);
 
+  // decode the signature
+  ret = atchops_base64_decode(signature, signaturelen, decoded_sig, decoded_sig_len, &decoded_sig_olen);
+  if (ret != 0) {
+    goto exit;
+  }
+
+  printf("sig_len: %lu - %lu\n", decoded_sig_len, decoded_sig_olen);
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, messagelen, message, signature)) != 0) {
-    printf("MSG: %s\n", message);
-
-    printf("HASH: %s\n", hash);
-
-    printf("SIG: %s\n", signature);
-    printf("sig_len: %lu\n", rsa.private_len);
-
-    size_t rsa_len = mbedtls_rsa_get_len(&rsa);
-    printf("rsa_len: %lu\n", rsa_len);
-
-    printf("padding: %d\n", rsa.private_padding);
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, MBEDTLS_MD_SHA256, hasholen, hash, decoded_sig)) != 0) {
 
     printf("VERIFY: -0x%04X\n", -ret);
     goto exit;
