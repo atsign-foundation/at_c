@@ -240,11 +240,6 @@ exit: {
 }
 }
 
-void atclient_free(atclient *ctx) {
-  atclient_connection_free(&(ctx->root_connection));
-  atclient_connection_free(&(ctx->secondary_connection));
-}
-
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
                                              char *enc_key_shared_by_me, bool create_new_if_not_found) {
   int ret = 1;
@@ -538,4 +533,9 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
   }
 
   return 0;
+}
+
+void atclient_free(atclient *ctx) {
+  atclient_connection_free(&(ctx->root_connection));
+  atclient_connection_free(&(ctx->secondary_connection));
 }

@@ -112,4 +112,6 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
  */
 int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key);
 
+void atclient_free(atclient *ctx);
+
 #endif
