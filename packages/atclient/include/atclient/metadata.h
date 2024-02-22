@@ -8,6 +8,43 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// initializedfields[0]
+#define ATKEY_METADATA_CREATEDBY_INITIALIZED 0b00000001
+#define ATKEY_METADATA_UPDATEDBY_INITIALIZED 0b00000010
+#define ATKEY_METADATA_STATUS_INITIALIZED 0b00000100
+#define ATKEY_METADATA_VERSION_INITIALIZED 0b00001000
+#define ATKEY_METADATA_EXPIRESAT_INITIALIZED 0b00010000
+#define ATKEY_METADATA_AVAILABLEAT_INITIALIZED 0b00100000
+#define ATKEY_METADATA_REFRESHAT_INITIALIZED 0b01000000
+#define ATKEY_METADATA_CREATEDAT_INITIALIZED 0b10000000
+
+// initializedfields[1]
+#define ATKEY_METADATA_UPDATEDAT_INITIALIZED 0b00000001
+#define ATKEY_METADATA_ISPUBLIC_INITIALIZED 0b00000010
+#define ATKEY_METADATA_ISHIDDEN_INITIALIZED 0b00000100
+#define ATKEY_METADATA_ISCACHED_INITIALIZED 0b00001000
+#define ATKEY_METADATA_TTL_INITIALIZED 0b00010000
+#define ATKEY_METADATA_TTB_INITIALIZED 0b00100000
+#define ATKEY_METADATA_TTR_INITIALIZED 0b01000000
+#define ATKEY_METADATA_CCD_INITIALIZED 0b10000000
+
+// initializedfields[2]
+#define ATKEY_METADATA_ISBINARY_INITIALIZED 0b00000001
+#define ATKEY_METADATA_ISENCRYPTED_INITIALIZED 0b00000010
+#define ATKEY_METADATA_DATASIGNATURE_INITIALIZED 0b00000001
+#define ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED 0b00000010
+#define ATKEY_METADATA_SHAREDKEYENC_INITIALIZED 0b00000100
+#define ATKEY_METADATA_PUBKEYHASH_INITIALIZED 0b00001000
+#define ATKEY_METADATA_PUBKEYALGO_INITIALIZED 0b00010000
+#define ATKEY_METADATA_ENCODING_INITIALIZED 0b00100000
+#define ATKEY_METADATA_ENCKEYNAME_INITIALIZED 0b01000000
+#define ATKEY_METADATA_ENCALGO_INITIALIZED 0b10000000
+
+// initializedfields[3]
+#define ATKEY_METADATA_IVNONCE_INITIALIZED 0b00000001
+#define ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED 0b00000010
+#define ATKEY_METADATA_SKEENCALGO_INITIALIZED 0b00000100
+
 #define DATE_STR_BUFFER_SIZE 256 // can hold most date strings found in metadata
 #define GENERAL_BUFFER_SIZE 8192 // can hold most metadata strings
 
@@ -186,7 +223,7 @@ typedef struct atclient_atkey_metadata {
   atclient_atstr skeencalgo;
 
   // Holds the metadata fields that have not been initialized (0) or have been initialized (1)
-  uint8_t initializedfields[3];
+  uint8_t initializedfields[4];
 } atclient_atkey_metadata;
 
 /**
@@ -265,6 +302,46 @@ bool atclient_atkey_metadata_is_encalgo_initialized(const atclient_atkey_metadat
 bool atclient_atkey_metadata_is_ivnonce_initialized(const atclient_atkey_metadata metadata);
 bool atclient_atkey_metadata_is_skeenckeyname_initialized(const atclient_atkey_metadata metadata);
 bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_metadata metadata);
+
+void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
+
+void atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
+
+void atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
+
+void atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl);
+
+void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb);
+
+void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr);
+
+void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
+
+void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary);
+
+void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted);
+
+int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature, const size_t datasignaturelen);
+
+int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus, const size_t sharedkeystatuslen);
+
+int atclient_atkey_metadata_set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc, const size_t sharedkeyenclen);
+
+int atclient_atkey_metadata_set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash, const size_t pubkeyhashlen);
+
+int atclient_atkey_metadata_set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo, const size_t pubkeyalgolen);
+
+int atclient_atkey_metadata_set_encoding(atclient_atkey_metadata *metadata, const char *encoding, const size_t encodinglen);
+
+int atclient_atkey_metadata_set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname, const size_t enckeynamelen);
+
+int atclient_atkey_metadata_set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, const size_t encalgolen);
+
+int atclient_atkey_metadata_set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, const size_t ivnoncelen);
+
+int atclient_atkey_metadata_set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname, const size_t skeenckeynamelen);
+
+int atclient_atkey_metadata_set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo, const size_t skeencalgolen);
 
 /**
  * @brief frees the metadata struct's variables that were allocated in the atclient_atkey_metadata_init function.
