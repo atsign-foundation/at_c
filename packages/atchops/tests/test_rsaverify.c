@@ -5,38 +5,59 @@
 #include <string.h>
 
 #define PRIVATE_KEY_BASE64                                                                                             \
-  "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCDc/"                                                             \
-  "uZ5+pmDYY1A+IQdiKeZNhRxttbYCv1aLksIP+5Fk1GJAnKlsBBum+"                                                              \
-  "Tp8CjXCHk22nWSM8YesiKRQFVEQi1OS6Whs449U1oLkVSDzqRAnZaT5nI9oIh+u2jsa/"                                               \
-  "7KfYOIqqN1h17GOZopsw73RZJnvISYLaarxtFABIPQ+"                                                                        \
-  "gbdFfWySEaRXUW89sfg4QO7MzEd8ZwK8KLf4E9xuCMshP90p7bMAdLn98T04rVvP78W60lMXwzospBjwT6HZxCNMSfdFEmVwynivCr/"            \
-  "QY2abeY1jkSFRxqYqJJYgsb1rydjN4hRp9eYRIJmT4nXJW71ByZc/wOiS/7gou/vr9jVGypAgMBAAECggEAFTkjlQypfoKOeX6///"              \
-  "Ji0nnrpwBZKB6V2lBnHSXSw7pDDaEB57CBJ9uG6ir6YiWc30tBgjRNI2GngRN1DJvscP3jdLAdGXsZXUmjLYWB6imgnCIf7R9HkV7nATfN9tomfM/"  \
-  "CA5ZfOiGiCaFsdfnTAF3mLWtp7/"                                                                                        \
-  "13hKNnRwmqrsvUzJrqzNFqZty7YRtkm2pxxetsycq2WGKkOjwEyJdDZSI5XbQyAzuu878WEi+Th4EI2MV21jAuP7WEAZC/"                     \
-  "tBSLLFSZgiHnMaMnQ9ogWnxCbdIJfWPBiK54kcDRN2o/I7iXAVD5W3oadEYgEn6SBuG4ZQtqTM8cFSofxrGuVfyQgQKBgQDZnwC501pza1Jm4/H/"   \
-  "lvB67kup9EFwQFbCTjJKuHd1NuV1O0LcHER5wfgLOac2My7kXva8gsheLHdi9ciPNtqhHrJVpl4QyXYd6h7m3FImGCfd1xwqrfWPPA0aMM8e8QZGAN" \
-  "rX7Z20xzEzSgMu/"                                                                                                    \
-  "0trg7WS4P7ChO2VHXviEn4mMQKBgQCaorqBjvajf9wkwh5V06HmpaI8Ji7JvRD44l1G0eGJgCrSYbvFUQr4KzfaQltfwaMJnqoNVrqey9yhPaFacjI" \
-  "2QbBM3zECjmasy9m20VS70QsV7XKq7tKco8M+YfUwzOFOKrpxUm/"                                                               \
-  "AG7SoTmTIwsg+VkZNTPWQB74kwKmRkkj3+QKBgGxnXi8y702rWmLSjYvqHmS+K4a/"                                                  \
-  "m5FVG2KzHS5HcYo8DFU3bfjDRAD69Jpy366KFIPCIlqJM1JmCBqNoJhmlMXJysALnbPzBxmjtDz/5xP+2G0TaH6CJV5yZXx0b9hT6/"             \
-  "IXHuyM+xBAYWvRJIDWvzURaPN/jKhNGyQ6ial12M0hAoGAdFadbr+6O0QEwfrxi6zPD5HpvssTRF/"                                      \
-  "kFvtnJdLdle9BSEqTVF4mnJMXUDPAPwiVurUORz7K5JGHih+t9zgXIs7E7vC0FLJB+"                                                 \
-  "RrczzgqQauCZZrhPEy1U3e5eoOETpS1pXNsFbnprWSqxD1GgexZbtzFw350+Ul5+"                                                   \
-  "nigmo6uKzECgYBuZVdUFt0XpIWZ8hugSMhCxHhNZMrOAIbQp0eXMs3U25zd8RpUx4qXK39Sp+X6Ifs8jCfSjThhI5Ip0L0/"                    \
-  "vz5IyBrTUwbaCJVmLZU69UHNm2g8I6FoMQx3w7/ILo2mlfhd9QwTEzyT9dsdXq23HJeMkWzoVLieTHySu20n+PxXbQ=="
+  "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC4DsqZasg9wpMf"                                                   \
+  "eFLOwNnKzrSTFqoqAd5O4YLCDMdKLZKQxX2JgEJ3b/8pqBZWhQpbK4jYo5CjZYWy"                                                   \
+  "WoU6M6yPg2qWEzcRqYGpmpUUjkhQe1M1tdx5reKCnidVagfA8fIk2Ix/QjSsdJR6"                                                   \
+  "K4Bt5HnqVgYTxvrh9fMqRHJDthFXKunse1hGuYDbvEYO0ApP2av7RP7mXOwdHVgt"                                                   \
+  "PdxqmWWeVR/nDynqXwMnioac4Okbj+A6CASvofn9oBWMafxYa5Fj13tJksl95gb6"                                                   \
+  "8nX+j8/fsvn/uxzYPqRhLVCHjkQ3SNQXwgtFQlE0UpmmpYOfrgsocoLArPTQ1Po4"                                                   \
+  "A1Qc10VrAgMBAAECggEBAJ+FMlKFGcdtO9WqkxpeSmRbgmV430JJHEOBb7J/ILpJ"                                                   \
+  "hR20DHl/kBu0FZIk/DdAVxltQc2A9XqoIpfRnGY1Ivm/DEHFpZTJNHeqYkrOhh46"                                                   \
+  "xINoew16hzZtm+mLW+z9xL/qbtpcpwpQf97ilQypWICgzeOWMRpl77pSWDYXNjA0"                                                   \
+  "qQP/Y6A2ocAYBVkBz/SGtpWBRKb/CouzvDUqiDAa0EEKTu/Ywa9yz2GGd+eUxk2F"                                                   \
+  "sM20zTmZfUipaIWkrS0bOevAcUvcVaX9Ydq1vKXa34+oZcNQqW/sS4+B+RM3ogl8"                                                   \
+  "Lg2PCLYQG7azSSFHCJPwG5u7RyMWjLXwPrVkT1Nj3wECgYEA2guA5gMp7LAtmH1k"                                                   \
+  "PFOz2kENveBYW1o/xzgvaBlLCZUubQCE55zlbyAMQUtEuzkyz8dT6SDLkllsDASt"                                                   \
+  "30et9g8rDqa2//gK3O/mfSsx64pOqRXgr0Fb1OmHP0ESGoj3xt4pS8wENtUiwfeA"                                                   \
+  "U2j+NPU4t9Y1iqslVsBJVIImLpcCgYEA2BjBcWZ9QNmFbE0rlX3+G3GQH4amc5RJ"                                                   \
+  "2AUt6EyIexAZNr+1cpTGKswePw3EWwQz0sbC/Fci4qfsR5+d4rfcJp75mSV3HHEl"                                                   \
+  "Z6m7iH50zKIVePSRrlgMzOPmpEoo2VelLFVx/sP70s4sPNZyKQZngn78MgtcOqQK"                                                   \
+  "jTtIU96JDk0CgYEAiLLTkeCD5Tair0pVkBit1fQY6GSBIGyZNY288teAmrZjT8UW"                                                   \
+  "jZpooN2HsVu98F6ww2Dk83AzEEJtoa9BTo1Cu9PQm7PbYOih7tecOfbdqhygqhLk"                                                   \
+  "NRuVtgreVsK11dru9EeNvk5eif3fd5lyY1icnpjqgR6TnKcllpigoJGj3GsCgYA0"                                                   \
+  "mHnkruxHb2oA/RthjEPfzBknAy/aK7p5YHFW++GwCjAI2kpAdCNzYTDvadtjx7cR"                                                   \
+  "Ux08K70q63If0KKt/tAPelwHwU2nV4aiH3asdxLYh46wXN5kT7v11nZZgE9G7wUd"                                                   \
+  "sEJJnsvY+CNeP1eT0qI46c1aJNey0iBbVZV6DEzRdQKBgQCPtEKSHGDom9bTErpL"                                                   \
+  "TJ//6ZIrUlS+5mpCIOTgA1lyTORq9Xe+qMD7FbFQNDdlNuXtBKvwu5vYJ6Ib+VIt"                                                   \
+  "sDFCwDRQsGFXNkdnSFZovMfmNQp+p6fuOgrnuSfLR1gI8nV3JQy8U/eZT5ABh06j"                                                   \
+  "3A6sUy0M7TXTd6ljRS3MRBatOA=="
 
 #define SIGNATURE_BUFFER_LEN 5000
 
 #define MESSAGE "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182"
 
+#define EXPECTED_SIGNATURE                                                                                             \
+  "OHgiJttksA/47D6fvjwb5LhR8AqxFzegf/QfkFvPZgnCM1OtMY7qML7NuuO4hQI0685Yap"                                             \
+  "xzMDqYNOwpFylKRJJ83V7GHrcBbAs37/UykDvqw6U9L5lo1BXrwJfcBMUejMcgnmTYOP+z"                                             \
+  "/VRzrCAwCYtfWBAwOM0huYQB0nwIc/UOUX1qNbjGeZVwe09WjjpgOxRdSLgC2rF4E9hAt"                                              \
+  "hnIppWX5yXScbbZgcaTZjp57z5H959nc424ScItxOqM1+hVX64pXHHKHjOFQknHsgw9e6"                                              \
+  "qh7LeuVvActKJwlFF0yUbiSX4v1Urm50Lk9IqMEqLrbo49BW2eYblEjMsMBlcJag=="
+
+// #define EXPECTED_SIGNATURE                                                                                             \
+//   "WVexAvo14a1bYRYxuB7OYDi0TKJDlgIxGfKf7WHAUojcmTx9VPnTCLiGDek37PDAyIWpZI"                                             \
+//   "oD+EhYQz+RJSbDsJnEBYZls0VuntlORXvSpppNy7SPE3BeZLc5PueRoeXOrLuz73UIlF/x"                                             \
+//   "6KPsxATI+cxa0/+X13kBQ16j0jZlxiSnOdYBSNreYnnMdDRitBw/6uu3C90jw8O2G4HbRW"                                             \
+//   "lil+G7YwBBvhDctAShyS2CuIevBBTbMo68u1quZzHgsITJ0M2mtzpWt+KgZKg0+FfYg+rc"                                             \
+//   "TlAWaaBgYYm0Nc1zvpgrcLNlPsi7Gan298NPQbOOzUwqT23RyvEx0kV+Xazs7Q=="
+
 #define PUBLIC_KEY_BASE64                                                                                              \
-  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg3P7mefqZg2GNQPiEHYinmTYUcbbW2Ar9Wi5LCD/"                               \
-  "uRZNRiQJypbAQbpvk6fAo1wh5Ntp1kjPGHrIikUBVREItTkulobOOPVNaC5FUg86kQJ2Wk+ZyPaCIfrto7Gv+"                              \
-  "yn2DiKqjdYdexjmaKbMO90WSZ7yEmC2mq8bRQASD0PoG3RX1skhGkV1FvPbH4OEDuzMxHfGcCvCi3+BPcbgjLIT/dKe2zAHS5/fE9OK1bz+/"       \
-  "FutJTF8M6LKQY8E+h2cQjTEn3RRJlcMp4rwq/0GNmm3mNY5EhUcamKiSWILG9a8nYzeIUafXmESCZk+J1yVu9QcmXP8Dokv+4KLv76/"            \
-  "Y1RsqQIDAQAB"
+  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuA7KmWrIPcKTH3hSzsDZ"                                                   \
+  "ys60kxaqKgHeTuGCwgzHSi2SkMV9iYBCd2//KagWVoUKWyuI2KOQo2WFslqFOjOs"                                                   \
+  "j4NqlhM3EamBqZqVFI5IUHtTNbXcea3igp4nVWoHwPHyJNiMf0I0rHSUeiuAbeR5"                                                   \
+  "6lYGE8b64fXzKkRyQ7YRVyrp7HtYRrmA27xGDtAKT9mr+0T+5lzsHR1YLT3capll"                                                   \
+  "nlUf5w8p6l8DJ4qGnODpG4/gOggEr6H5/aAVjGn8WGuRY9d7SZLJfeYG+vJ1/o/P"                                                   \
+  "37L5/7sc2D6kYS1Qh45EN0jUF8ILRUJRNFKZpqWDn64LKHKCwKz00NT6OANUHNdF"                                                   \
+  "awIDAQAB"
 
 int main() {
   int ret = 1;
@@ -65,6 +86,14 @@ int main() {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;
   }
+
+  // ret = memcmp(signature, (const unsigned char *)EXPECTED_SIGNATURE, signatureolen);
+  // if (ret != 0) {
+  //   printf("memcmp (failed): %d\n", ret);
+  //   printf("got: \"%s\" | expected: \"%s\"\n", signature, EXPECTED_SIGNATURE);
+  //   goto exit;
+  // }
+  //
   atchops_rsakey_publickey publickey;
   atchops_rsakey_publickey_init(&publickey);
 
@@ -73,7 +102,8 @@ int main() {
     printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
     goto exit;
   }
-  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, signature, signatureolen);
+  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, EXPECTED_SIGNATURE,
+                           strlen(EXPECTED_SIGNATURE));
   if (ret != 0) {
     printf("atchops_rsakey_verify (failed): %d\n", ret);
     goto exit;

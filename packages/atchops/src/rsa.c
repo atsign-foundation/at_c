@@ -102,12 +102,12 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
   }
 
   // compute the hash of the input message
-  if ((ret = mbedtls_md(mbedtls_md_info_from_type(mdtype), (unsigned char *)message, messagelen, hash)) != 0) {
-    goto exit;
-  }
+  // if ((ret = mbedtls_md(mbedtls_md_info_from_type(mdtype), (unsigned char *)message, messagelen, hash)) != 0) {
+  //   goto exit;
+  // }
 
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, 32, hash, signature)) != 0) {
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, messagelen, message, signature)) != 0) {
     printf("MSG: %s\n", message);
 
     printf("HASH: %s\n", hash);
