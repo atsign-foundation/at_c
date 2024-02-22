@@ -53,16 +53,6 @@ void atclient_atkey_free(atclient_atkey *atkey);
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen);
 
 /**
- * @brief populate an atkey struct given a string (atclient_atstr).
- *
- * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
- * @param atstr the atstr to derive from. For example, this atstr could've been created from a string like
- * 'public:bob@publickey'
- * @return int 0 on success, non-zero on failure
- */
-int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr);
-
-/**
  * @brief convert an atkey struct to its string format
  *
  * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
@@ -73,15 +63,6 @@ int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr)
  */
 int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
                              unsigned long *atkeystrolen);
-
-/**
- * @brief convert an atkey struct to its atstr format
- *
- * @param atkey the atkey struct to read, assumed that this was already initialized via atclient_atkey_init
- * @param atstr the atstr to write to, assumed that this was already initialized via atclient_atstr_init
- * @return int 0 on success
- */
-int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public
