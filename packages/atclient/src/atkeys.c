@@ -191,23 +191,6 @@ exit: {
 }
 }
 
-int atclient_atkeys_populate_from_atstrs(atclient_atkeys *atkeys, const atclient_atstr aespkampublickeystr,
-                                         const atclient_atstr aespkamprivatekeystr,
-                                         const atclient_atstr aesencryptpublickeystr,
-                                         const atclient_atstr aesencryptprivatekeystr,
-                                         const atclient_atstr selfencryptionkeystr) {
-  int ret = 1;
-
-  ret = atclient_atkeys_populate_from_strings(
-      atkeys, aespkampublickeystr.str, aespkampublickeystr.olen, aespkamprivatekeystr.str, aespkamprivatekeystr.olen,
-      aesencryptpublickeystr.str, aesencryptpublickeystr.olen, aesencryptprivatekeystr.str,
-      aesencryptprivatekeystr.olen, selfencryptionkeystr.str, selfencryptionkeystr.olen);
-
-  goto exit;
-
-exit: { return ret; }
-}
-
 void atclient_atkeys_free(atclient_atkeys *atkeys) {
   atclient_atstr_free(&(atkeys->pkampublickeystr));
   atchops_rsakey_publickey_free(&(atkeys->pkampublickey));

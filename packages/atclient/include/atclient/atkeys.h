@@ -82,23 +82,6 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, atclient_a
 int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path);
 
 /**
- * @brief populates the struct by decrypting the encrypted RSA keys found in a populated atclient_atkeysfile struct
- *
- * @param atkeys the struct to populate
- * @param aespkampublickeystr the encrypted RSA public key (encrypted with AES-256 selfencryptionkey) in base64 format
- * @param aespkamprivatekeystr the encrypted RSA private key (encrypted with AES-256 selfencryptionkey) in base64 format
- * @param aesencryptpublickeystr  the encrypted RSA public key (encrypted with AES-256 selfencryptionkey) in base64
- * format
- * @param aesencryptprivatekeystr the encrypted RSA private key (encrypted with AES-256 selfencryptionkey) in base64
- * format
- * @param selfencryptionkeystr the AES-256 selfencryptionkey in base64 format
- * @return int 0 on success, non-zero on failure
- */
-int atclient_atkeys_populate_from_atstrs(atclient_atkeys *atkeys, atclient_atstr aespkampublickeystr,
-                                         atclient_atstr aespkamprivatekeystr, atclient_atstr aesencryptpublickeystr,
-                                         atclient_atstr aesencryptprivatekeystr, atclient_atstr selfencryptionkeystr);
-
-/**
  * @brief free memory allocated by the init function
  *
  * @param atkeys the atkeys struct to free
