@@ -89,7 +89,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   }
   // check if cached
   if (strncmp(token, "cached", strlen("cached")) == 0) {
-    atkey->metadata.iscached = true;
+    atclient_atkey_metadata_set_iscached(&(atkey->metadata), true);
     token = strtok_r(NULL, ":", &saveptr);
     if (token == NULL) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tokens[1] is NULL\n");
@@ -100,7 +100,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
 
   if (atclient_stringutils_starts_with(token, tokenlen, "public", strlen("public")) == 1) {
     // it is a public key
-    atkey->metadata.ispublic = true;
+    atclient_atkey_metadata_set_ispublic(&(atkey->metadata), true);
     atkey->atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
     // shift tokens array to the left
     token = strtok_r(NULL, ":", &saveptr);
@@ -129,7 +129,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   } else if (atclient_stringutils_starts_with(token, tokenlen, "_", strlen("_")) == 1) {
     // it is an internal key
     atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
-    atkey->metadata.ishidden = 1;
+    atclient_atkey_metadata_set_ishidden(&(atkey->metadata), true);
   } else {
     // it is a self key
     atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
@@ -221,7 +221,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
   atclient_atstr string;
   atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
 
-  if (atkey.metadata.iscached == true) {
+  if (atkey.metadata.iscached) {
     ret = atclient_atstr_append(&string, "cached:");
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
@@ -229,13 +229,13 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
     }
   }
 
-  if (atkey.metadata.ispublic == true && atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  if (atkey.metadata.ispublic && atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     ret = atclient_atstr_append(&string, "public:");
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
       goto exit;
     }
-  } else if (atkey.metadata.ispublic == true || atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  } else if (atkey.metadata.ispublic || atkey.atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
                           "either atkey's metadata ispublic is not set to 1 or atkey's atkeytype is not set to "
                           "ATCLIENT_ATKEY_TYPE_PUBLICKEY for atkey: %.*s\n",
@@ -329,7 +329,7 @@ int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, con
   }
 
   atkey->atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
-  atkey->metadata.ispublic = true;
+  atclient_atkey_metadata_set_ispublic(&(atkey->metadata), true);
 
   ret = atclient_atstr_set_literal(&(atkey->name), name, namelen);
   if (ret != 0) {
