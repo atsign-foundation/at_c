@@ -2,6 +2,7 @@
 #include "atchops/aes.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
+#include "atclient/atkey.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
@@ -238,6 +239,34 @@ exit: {
   atclient_atstr_free(&pkamcmd);
   return ret;
 }
+}
+
+int atclient_put(const atclient atclient, const atclient_atkey atkey, const char *value, const size_t valuelen) {
+  int ret = 1;
+
+  // TODO: implement
+
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_get(const atclient atclient, const atclient_atkey atkey, char *value, const size_t valuelen,
+                 size_t *valueolen) {
+  int ret = 1;
+
+  // TODO: implement
+
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_delete(const atclient atclient, const atclient_atkey atkey) {
+  int ret = 1;
+
+  // TODO: implement
+
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
