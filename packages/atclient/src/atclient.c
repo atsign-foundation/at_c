@@ -287,7 +287,7 @@ int atclient_delete(const atclient atclient, const atclient_atkey atkey) {
     goto exit;
   }
 
-  ret = atclient_atstr_append(&cmdbuffer, "%.*s", (int) atkeystrolen, atkeystr);
+  ret = atclient_atstr_append(&cmdbuffer, "%.*s\n", (int) atkeystrolen, atkeystr);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
     goto exit;
