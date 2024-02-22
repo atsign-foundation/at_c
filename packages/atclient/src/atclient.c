@@ -222,6 +222,14 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     goto exit;
   }
 
+  // check for data:success
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", strlen("data:success"))) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
+                          (int)recv.olen, recv.bytes);
+    goto exit;
+  }
+
   ret = 0;
 
   goto exit;
