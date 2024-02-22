@@ -213,10 +213,6 @@ exit: {
 }
 }
 
-int atclient_atkey_from_atstr(atclient_atkey *atkey, const atclient_atstr atstr) {
-  return atclient_atkey_from_string(atkey, atstr.str, atstr.olen);
-}
-
 int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
                              unsigned long *atkeystrolen) {
   int ret = 1;
@@ -310,20 +306,6 @@ exit: {
   atclient_atstr_free(&string);
   return ret;
 }
-}
-
-int atclient_atkey_to_atstr(const atclient_atkey atkey, atclient_atstr *atstr) {
-  int ret = 1;
-
-  ret = atclient_atkey_to_string(atkey, atstr->str, atstr->olen, &(atstr->olen));
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
-    goto exit;
-  }
-
-  ret = 0;
-  goto exit;
-exit: { return ret; }
 }
 
 int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
