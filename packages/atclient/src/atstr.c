@@ -10,9 +10,6 @@
 void atclient_atstr_init(atclient_atstr *atstr, const unsigned long bufferlen) {
   memset(atstr, 0, sizeof(atclient_atstr));
   atstr->len = bufferlen;
-  if (atstr->str != NULL) {
-    free(atstr->str);
-  }
   atstr->str = (char *)malloc(sizeof(char) * atstr->len);
   atstr->olen = 0;
 }
