@@ -390,8 +390,13 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   ret = 0;
   goto exit;
 exit: {
-  // TODO: free stuff
-  return ret; 
+  atclient_atstr_free(&cmdbuffer);
+  atclient_atstr_free(&atkeystr);
+  atclient_atbytes_free(&recv);
+  if(root != NULL) {
+    cJSON_Delete(root);
+  }
+  return ret;
 }
 }
 
