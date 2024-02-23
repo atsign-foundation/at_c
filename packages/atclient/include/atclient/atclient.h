@@ -1,6 +1,7 @@
 #ifndef ATCLIENT_H
 #define ATCLIENT_H
 
+#include "atclient/atkey.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/connection.h"
@@ -55,10 +56,64 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  */
 int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign,
                                const unsigned long atsignlen);
-int atclient_put(atclient *ctx, const char *key, const char *value);
-int atclient_get(atclient *ctx, const char *key, char *value, const unsigned long valuelen);
-int atclient_delete(atclient *ctx, const char *key);
-void atclient_free(atclient *ctx);
+
+/**
+ * @brief Put a string value into your atServer.
+ * `atclient` must satisfy two conditions before calling this function:
+ * 1. initialized with atclient_init()
+ * 2. authenticated via atclient_pkam_authenticate()
+ *
+ * `atkey` must satisfy the following condition before calling this function:
+ * 1. initialized with atclient_atkey_init()
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * associated with your value.
+ *
+ * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
+ * @param value the value to put into atServer
+ * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for this
+ * value)
+ * @return int 0 on success
+ */
+int atclient_put(const atclient atclient, const atclient_atkey atkey, const char *value, const size_t valuelen);
+
+/**
+ * @brief Get a string value from your atServer, or a valid value from another atServer (public atkey or shared atkey that is shared with you).
+ * `atclient` must satisfy two conditions before calling this function:
+ * 1. initialized with atclient_init()
+ * 2. authenticated via atclient_pkam_authenticate()
+ *
+ * `atkey` must satisfy the following condition before calling this function:
+ * 1. initialized with atclient_atkey_init()
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * associated with your value.
+ *
+ * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
+ * @param value the buffer to hold value gotten from atServer
+ * @param valuelen the buffer length allocated for the value
+ * @param valueolen the output length of the value gotten from atServer
+ * @return int 0 on success
+ */
+int atclient_get(const atclient atclient, const atclient_atkey atkey, char *value, const size_t valuelen,
+                 size_t *valueolen);
+
+/**
+ * @brief Delete an atkey from your atserver
+ * `atclient` must satisfy two conditions before calling this function:
+ * 1. initialized with atclient_init()
+ * 2. authenticated via atclient_pkam_authenticate()
+ *
+ * `atkey` must satisfy the following condition before calling this function:
+ * 1. initialized with atclient_atkey_init()
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * associated with your value.
+ *
+ * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param atkey the populated atkey to delete from atServer (must satisfy the two conditions stated above)
+ * @return int 0 on success
+ */
+int atclient_delete(const atclient atclient, const atclient_atkey atkey);
 
 /**
  * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.
@@ -111,5 +166,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
  * @return int 0 on success, error otherwise
  */
 int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key);
+
+void atclient_free(atclient *ctx);
 
 #endif

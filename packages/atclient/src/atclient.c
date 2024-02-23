@@ -2,6 +2,7 @@
 #include "atchops/aes.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
+#include "atclient/atkey.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
@@ -221,6 +222,14 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     goto exit;
   }
 
+  // check for data:success
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", strlen("data:success"))) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
+                          (int)recv.olen, recv.bytes);
+    goto exit;
+  }
+
   ret = 0;
 
   goto exit;
@@ -240,9 +249,69 @@ exit: {
 }
 }
 
-void atclient_free(atclient *ctx) {
-  atclient_connection_free(&(ctx->root_connection));
-  atclient_connection_free(&(ctx->secondary_connection));
+int atclient_put(const atclient atclient, const atclient_atkey atkey, const char *value, const size_t valuelen) {
+  int ret = 1;
+
+  // TODO: implement
+
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_get(const atclient atclient, const atclient_atkey atkey, char *value, const size_t valuelen,
+                 size_t *valueolen) {
+  int ret = 1;
+
+  // TODO: implement
+
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_delete(const atclient atclient, const atclient_atkey atkey) {
+  int ret = 1;
+
+  atclient_atstr cmdbuffer;
+  atclient_atstr_init_literal(&cmdbuffer, ATKEY_GENERAL_BUFFER_SIZE + strlen("delete:"), "delete:");
+
+  char atkeystr[ATKEY_GENERAL_BUFFER_SIZE];
+  memset(atkeystr, 0, sizeof(char) * ATKEY_GENERAL_BUFFER_SIZE);
+  size_t atkeystrolen = 0;
+
+  unsigned char recv[4096] = {0};
+  size_t recvolen = 0;
+
+  ret = atclient_atkey_to_string(atkey, atkeystr, ATKEY_GENERAL_BUFFER_SIZE, &atkeystrolen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_atstr_append(&cmdbuffer, "%.*s\n", (int) atkeystrolen, atkeystr);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_connection_send(&(atclient.secondary_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.olen, recv,
+                                 4096, &recvolen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  if (!atclient_stringutils_starts_with((char *)recv, recvolen, "data:", 5)) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n", (int) recvolen, recv);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atstr_free(&cmdbuffer);
+  return ret;
+}
 }
 
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
@@ -538,4 +607,9 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
   }
 
   return 0;
+}
+
+void atclient_free(atclient *ctx) {
+  atclient_connection_free(&(ctx->root_connection));
+  atclient_connection_free(&(ctx->secondary_connection));
 }
