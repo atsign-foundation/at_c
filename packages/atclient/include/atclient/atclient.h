@@ -75,10 +75,10 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
  * value)
  * @return int 0 on success
  */
-int atclient_put(const atclient atclient, const atclient_atkey atkey, const char *value, const size_t valuelen);
+int atclient_put(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen);
 
 /**
- * @brief Get a string value from your atServer, or a valid value from another atServer (public atkey or shared atkey that is shared with you).
+ * @brief Get a string value from your atServer.
  * `atclient` must satisfy two conditions before calling this function:
  * 1. initialized with atclient_init()
  * 2. authenticated via atclient_pkam_authenticate()
@@ -95,8 +95,50 @@ int atclient_put(const atclient atclient, const atclient_atkey atkey, const char
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get(const atclient atclient, const atclient_atkey atkey, char *value, const size_t valuelen,
-                 size_t *valueolen);
+int atclient_get_selfkey(const atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
+                         size_t *valueolen);
+
+/**
+ * @brief Get a publickey from your atServer or another atServer
+ * `atclient` must satisfy two conditions before calling this function:
+ * 1. initialized with atclient_init()
+ * 2. authenticated via atclient_pkam_authenticate()
+ *
+ * `atkey` must satisfy the following condition before calling this function:
+ * 1. initialized with atclient_atkey_init()
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * associated with your value.
+ *
+ * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
+ * @param value the buffer to hold value gotten from atServer
+ * @param valuelen the buffer length allocated for the value
+ * @param valueolen the output length of the value gotten from atServer
+ * @return int 0 on success
+ */
+int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+                           size_t *valueolen);
+
+/**
+ * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
+ * `atclient` must satisfy two conditions before calling this function:
+ * 1. initialized with atclient_init()
+ * 2. authenticated via atclient_pkam_authenticate()
+ *
+ * `atkey` must satisfy the following condition before calling this function:
+ * 1. initialized with atclient_atkey_init()
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * associated with your value.
+ *
+ * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
+ * @param value the buffer to hold value gotten from atServer
+ * @param valuelen the buffer length allocated for the value
+ * @param valueolen the output length of the value gotten from atServer
+ * @return int 0 on success
+ */
+int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+                           size_t *valueolen);
 
 /**
  * @brief Delete an atkey from your atserver
@@ -113,7 +155,7 @@ int atclient_get(const atclient atclient, const atclient_atkey atkey, char *valu
  * @param atkey the populated atkey to delete from atServer (must satisfy the two conditions stated above)
  * @return int 0 on success
  */
-int atclient_delete(const atclient atclient, const atclient_atkey atkey);
+int atclient_delete(const atclient *atclient, const atclient_atkey *atkey);
 
 /**
  * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.
