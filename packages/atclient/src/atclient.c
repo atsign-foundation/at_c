@@ -270,14 +270,129 @@ exit: { return ret; }
 }
 
 int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen) {
+                           size_t *valueolen, bool bypasscache) {
   int ret = 1;
 
-  // TODO: implement
+  atclient_atstr cmdbuffer;
+  atclient_atstr_init_literal(&cmdbuffer, 4096, "plookup:");
+
+  atclient_atstr atkeystr;
+  atclient_atstr_init(&atkeystr, ATKEY_GENERAL_BUFFER_SIZE);
+
+  const size_t recvlen = 4096;
+  atclient_atbytes recv;
+  atclient_atbytes_init(&recv, recvlen);
+
+  cJSON *root = NULL;
+
+  if(atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
+    goto exit;
+  }
+
+  // 1. build command
+  if(bypasscache) {
+    ret = atclient_atstr_append(&cmdbuffer, "bypassCache:true:");
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  ret = atclient_atstr_append(&cmdbuffer, "all:");
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_atkey_to_string(*atkey, atkeystr.str, atkeystr.len, &atkeystr.olen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
+    goto exit;
+  }
+
+  char *atkeystrwithoutpublic = NULL;
+  char *ptr = strstr(atkeystr.str, "public:");
+  if(ptr != NULL) {
+    atkeystrwithoutpublic = ptr + strlen("public:");
+  } else {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n", atkeystr.str);
+    goto exit;
+  }
+
+  ret = atclient_atstr_append(&cmdbuffer, atkeystrwithoutpublic);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_atstr_append(&cmdbuffer, "\r\n");
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+    goto exit;
+  }
+
+  // 2. send command
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.olen,
+                                 recv.bytes, recv.len, &recv.olen);
+  if(ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  // 3. parse response
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:", 5)) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                          (int)recv.olen, recv.bytes);
+    goto exit;
+  }
+
+  // remove data:
+  char *recvwithoutdata = (char *)recv.bytes + 5;
+
+  root = cJSON_Parse(recvwithoutdata);
+  if (root == NULL) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+    goto exit;
+  }
+
+  // {"data":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyM92TUD/r5dKyCU4l9QLWpH3u284kFifQD5uYfF6N4OZ0jWD4XKF6AxVQeF7YWzCGYvJDtEeVVorr5RdoB+Ck1sFJM4ylZhpMTYEIZnI0KFvf3dsEL0SC8qjQDHLy/eAk7VlrOYTLY6ZKMMg5rva6ClZQhdgs8WqWCge3Hdv70MGGcS51BjEkJOUhXPiZ/P3+VQFaQY9Ku6KSkizvqySjJKfCGhqSsrqID618ghvYK9Xoc6gelfLBQUnOzwq76IV/fJFF/ed0PF4LwWda62uqUWW3WGxKD/zKlxIfqcaGfMSScTjDpe6A9suUSuDQgazC5vAXJCyRucilcyZ0SadNQIDAQAB","metaData":{"createdBy":"@jeremy_0","updatedBy":"@jeremy_0","createdAt":"2023-03-23 16:08:35.866Z","updatedAt":"2024-01-20 01:00:43.673Z","status":"active","version":228,"ttr":-1,"ccd":false,"isBinary":false},"key":"public:publickey@jeremy_0"}
+
+  cJSON *data = cJSON_GetObjectItem(root, "data");
+  if (data == NULL) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+    goto exit;
+  }
+
+  memset(value, 0, valuelen);
+  strcpy(value, data->valuestring);
+  *valueolen = strlen(value);
+
+  cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
+  if(metadata == NULL) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+    goto exit;
+  }
+
+  char *metadatastr = cJSON_Print(metadata);
+
+  ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+  if(ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  // TODO: free stuff
+  return ret; 
+}
 }
 
 int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
