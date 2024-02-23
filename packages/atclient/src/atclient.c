@@ -273,6 +273,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
                            size_t *valueolen, bool bypasscache) {
   int ret = 1;
 
+  // 1. initialize variables
   atclient_atstr cmdbuffer;
   atclient_atstr_init_literal(&cmdbuffer, 4096, "plookup:");
 
@@ -291,7 +292,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  // 1. build command
+  // 2. build plookup: command
   if(bypasscache) {
     ret = atclient_atstr_append(&cmdbuffer, "bypassCache:true:");
     if (ret != 0) {
@@ -333,7 +334,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  // 2. send command
+  // 3. send plookup: command
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.olen,
                                  recv.bytes, recv.len, &recv.olen);
   if(ret != 0) {
@@ -341,7 +342,9 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  // 3. parse response
+  // 4. parse response
+
+  // 4a. if recv does not start with "data:", we probably got an error
   if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:", 5)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
@@ -349,7 +352,6 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  // remove data:
   char *recvwithoutdata = (char *)recv.bytes + 5;
 
   root = cJSON_Parse(recvwithoutdata);
@@ -359,8 +361,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  // {"data":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyM92TUD/r5dKyCU4l9QLWpH3u284kFifQD5uYfF6N4OZ0jWD4XKF6AxVQeF7YWzCGYvJDtEeVVorr5RdoB+Ck1sFJM4ylZhpMTYEIZnI0KFvf3dsEL0SC8qjQDHLy/eAk7VlrOYTLY6ZKMMg5rva6ClZQhdgs8WqWCge3Hdv70MGGcS51BjEkJOUhXPiZ/P3+VQFaQY9Ku6KSkizvqySjJKfCGhqSsrqID618ghvYK9Xoc6gelfLBQUnOzwq76IV/fJFF/ed0PF4LwWda62uqUWW3WGxKD/zKlxIfqcaGfMSScTjDpe6A9suUSuDQgazC5vAXJCyRucilcyZ0SadNQIDAQAB","metaData":{"createdBy":"@jeremy_0","updatedBy":"@jeremy_0","createdAt":"2023-03-23 16:08:35.866Z","updatedAt":"2024-01-20 01:00:43.673Z","status":"active","version":228,"ttr":-1,"ccd":false,"isBinary":false},"key":"public:publickey@jeremy_0"}
-
+  // 4b. set *value and *valueolen
   cJSON *data = cJSON_GetObjectItem(root, "data");
   if (data == NULL) {
     ret = 1;
@@ -372,6 +373,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   strcpy(value, data->valuestring);
   *valueolen = strlen(value);
 
+  // 4c. write to atkey->metadata 
   cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
   if(metadata == NULL) {
     ret = 1;
