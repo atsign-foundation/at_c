@@ -372,7 +372,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   memcpy(value, data->valuestring, strlen(data->valuestring));
   *valueolen = strlen(value);
 
-  // 4c. write to atkey->metadata 
+  // 4c. write to atkey->metadata
   cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
   if(metadata == NULL) {
     ret = 1;
