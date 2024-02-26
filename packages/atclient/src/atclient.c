@@ -313,7 +313,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   }
 
   char *atkeystrwithoutpublic = NULL;
-  char *ptr = strstr(atkeystr.str, "public:");
+  char *ptr = strnstr(atkeystr.str, "public:", atkeystr.olen);
   if(ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
