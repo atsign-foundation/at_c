@@ -3,6 +3,7 @@
 #include "atchops/aesctr.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
+#include "atchops/iv.h"
 #include "atclient/atbytes.h"
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
@@ -263,8 +264,118 @@ int atclient_get_selfkey(const atclient *atclient, atclient_atkey *atkey, char *
                          size_t *valueolen) {
   int ret = 1;
 
-  // TODO: implement
+  // 1. initialize variables
+  atclient_atstr cmdbuffer;
+  atclient_atstr_init_literal(&cmdbuffer, 4096, "llookup:all:");
 
+  atclient_atstr atkeystr;
+  atclient_atstr_init(&atkeystr, ATKEY_GENERAL_BUFFER_SIZE);
+
+  const size_t recvlen = 4096;
+  atclient_atbytes recv;
+  atclient_atbytes_init(&recv, recvlen);
+
+  const size_t ivlen = ATCHOPS_IV_BUFFER_SIZE;
+  unsigned char iv[ivlen];
+
+  const *root = NULL;
+
+  if(atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_SELF\n");
+    goto exit;
+  }
+
+  // 2. build llookup: command
+  ret = atclient_atkey_to_string(*atkey, atkeystr.str, atkeystr.len, &atkeystr.olen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_atstr_append(&cmdbuffer, atkeystr.str);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_atstr_append(&cmdbuffer, "\r\n");
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
+    goto exit;
+  }
+
+  // 3. send llookup: command
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.olen,
+                                 recv.bytes, recv.len, &recv.olen);
+  if(ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  // 4. parse response
+  if(!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:", 5)) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n", (int)recv.olen, recv.bytes);
+    goto exit;
+  }
+
+  char *recvwithoutdata = (char *)recv.bytes + 5;
+
+  root = cJSON_Parse(recvwithoutdata);
+  if(root == NULL) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+    goto exit;
+  }
+
+  cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
+  if(metadata == NULL) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+    goto exit;
+  }
+
+  char *metadatastr = cJSON_Print(metadata);
+
+  ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+  if(ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+    goto exit;
+  }
+
+  if(atclient_atkey_metadata_is_ivnonce_initialized(atkey->metadata)) {
+    size_t ivolen;
+    ret = atchops_base64_decode((unsigned char *) atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv, ivlen, &ivolen);
+    if(ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      goto exit;
+    }
+
+    if(ivolen != ivlen) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen, ivlen);
+      goto exit;
+    }
+  } else {
+    // use legacy IV
+    memset(iv, 0, sizeof(unsigned char) * ivlen);
+  }
+
+  cJSON *data = cJSON_GetObjectItem(root, "data");
+  if(data == NULL) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen, ATCHOPS_AES_256, iv, (unsigned char *) data->valuestring, strlen(data->valuestring), value, valuelen, valueolen);
+  if(ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
   goto exit;
 exit: { return ret; }
 }

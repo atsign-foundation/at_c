@@ -376,21 +376,26 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
 
   atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
 
-  ret = atclient_atstr_set_literal(&(atkey->name), name, namelen);
+  ret = atclient_atstr_set_literal(&(atkey->name), "%.*s", (int) namelen, name);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
     goto exit;
   }
 
   if (namespacestr != NULL) {
-    ret = atclient_atstr_set_literal(&(atkey->namespacestr), namespacestr, namespacestrlen);
+    if(namespacestrlen == 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestrlen is 0. This is a required argument.\n");
+      ret = 1;
+      goto exit;
+    }
+    ret = atclient_atstr_set_literal(&(atkey->namespacestr), "%.*s", (int) namespacestrlen, namespacestr);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
       goto exit;
     }
   }
 
-  ret = atclient_atstr_set_literal(&(atkey->sharedby), sharedby, sharedbylen);
+  ret = atclient_atstr_set_literal(&(atkey->sharedby), "%.*s", (int) sharedbylen, sharedby);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
     goto exit;
