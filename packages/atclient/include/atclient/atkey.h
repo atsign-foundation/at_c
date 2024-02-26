@@ -71,8 +71,11 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name the name of the atkey, e.g.: "name"
+ * @param namelen the length of the name (use strlen in most cases)
  * @param sharedby the sharedby (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
+ * @param sharedbylen the length of the sharedby (use strlen in most cases)
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
+ * @param namespacestrlen the length of the namespacestr (use strlen in most cases)
  * @return int 0 on success
  */
 int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
@@ -103,9 +106,13 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name name of your key, e.g. "name"
+ * @param namelen the length of the name (use strlen in most cases)
  * @param sharedby the shared by atsign, e.g. "@alice"
+ * @param sharedbylen the length of the sharedby (use strlen in most cases)
  * @param sharedwith the sharedwith atsign, atsign you are going to share it with, e.g. "@bob"
+ * @param sharedwithlen the length of the sharedwith (use strlen in most cases)
  * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
+ * @param namespacestrlen the length of the namespacestr (use strlen in most cases)
  * @return int 0 on success
  */
 int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
