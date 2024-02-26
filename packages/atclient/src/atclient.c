@@ -369,7 +369,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   }
 
   memset(value, 0, valuelen);
-  strcpy(value, data->valuestring);
+  memcpy(value, data->valuestring, strlen(data->valuestring));
   *valueolen = strlen(value);
 
   // 4c. write to atkey->metadata 
