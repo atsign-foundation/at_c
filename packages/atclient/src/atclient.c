@@ -273,6 +273,11 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
                            size_t *valueolen, bool bypasscache) {
   int ret = 1;
 
+  if(atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
+    return 1;
+  }
+
   // 1. initialize variables
   atclient_atstr cmdbuffer;
   atclient_atstr_init_literal(&cmdbuffer, 4096, "plookup:");
@@ -285,12 +290,6 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   atclient_atbytes_init(&recv, recvlen);
 
   cJSON *root = NULL;
-
-  if(atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
-    ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
-    goto exit;
-  }
 
   // 2. build plookup: command
   if(bypasscache) {
