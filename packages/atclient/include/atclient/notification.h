@@ -51,33 +51,32 @@ typedef struct atclient_notify_params {
   atclient_atstr value;
 } atclient_notify_params;
 
-// This macro function applies another macro function to each atstr in atclient_notify_params
-#define FOREACH_NOTIFY_PARAMS_ATSTR_DO(_)                                                                              \
-  _(id)                                                                                                                \
-  _(operation)                                                                                                         \
-  _(message_type)                                                                                                      \
-  _(priority)                                                                                                          \
-  _(strategy)                                                                                                          \
-  _(latest_n)                                                                                                          \
-  _(notifier)                                                                                                          \
-  _(ttln)                                                                                                              \
-  _(is_public)                                                                                                         \
-  _(value)
-
-// all is_X_initialized functions for atclient_notify_params
-#define DECLARE_IS_INITIALIZED(X) bool atclient_notify_params_is_##X##_initialized(atclient_notify_params *params);
 bool atclient_notify_params_is_key_initialized(atclient_notify_params *params);
-FOREACH_NOTIFY_PARAMS_ATSTR_DO(DECLARE_IS_INITIALIZED);
-#undef DECLARE_IS_INITIALIZED
+bool atclient_notify_params_is_id_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_operation_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_message_type_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_priority_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_strategy_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_latest_n_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_notifier_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_ttln_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_is_public_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_value_initialized(atclient_notify_params *params);
 
-// all set_X functions for atclient_notify_params
-#define DECLARE_SET_ATSTR(X)                                                                                           \
-  int atclient_notify_params_set##X(atclient_notify_params *params, const char *X, const size_t X##_len);
 int atclient_notify_params_set_key(atclient_notify_params *params, const atclient_atkey *key);
-FOREACH_NOTIFY_PARAMS_ATSTR_DO(DECLARE_SET_ATSTR);
-#undef DECLARE_SET_ATSTR
-
-#undef FOREACH_NOTIFY_PARAMS_ATSTR_DO
+int atclient_notify_params_setid(atclient_notify_params *params, const char *id, const size_t id_len);
+int atclient_notify_params_setoperation(atclient_notify_params *params, const char *operation,
+                                        const size_t operation_len);
+int atclient_notify_params_setmessage_type(atclient_notify_params *params, const char *message_type,
+                                           const size_t message_type_len);
+int atclient_notify_params_setpriority(atclient_notify_params *params, const char *priority, const size_t priority_len);
+int atclient_notify_params_setstrategy(atclient_notify_params *params, const char *strategy, const size_t strategy_len);
+int atclient_notify_params_setlatest_n(atclient_notify_params *params, const char *latest_n, const size_t latest_n_len);
+int atclient_notify_params_setnotifier(atclient_notify_params *params, const char *notifier, const size_t notifier_len);
+int atclient_notify_params_setttln(atclient_notify_params *params, const char *ttln, const size_t ttln_len);
+int atclient_notify_params_setis_public(atclient_notify_params *params, const char *is_public,
+                                        const size_t is_public_len);
+int atclient_notify_params_setvalue(atclient_notify_params *params, const char *value, const size_t value_len);
 
 // Receiving notifications
 typedef struct atclient_atnotification {
