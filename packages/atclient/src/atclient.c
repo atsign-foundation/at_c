@@ -279,37 +279,28 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   }
 
   // 1. initialize variables
-  atclient_atstr cmdbuffer;
-  atclient_atstr_init_literal(&cmdbuffer, 4096, "plookup:");
-
+  const size_t atkeystrlen = ATKEY_GENERAL_BUFFER_SIZE;
   atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATKEY_GENERAL_BUFFER_SIZE);
+  atclient_atstr_init(&atkeystr, atkeystrlen);
 
   const size_t recvlen = 4096;
   atclient_atbytes recv;
   atclient_atbytes_init(&recv, recvlen);
 
   cJSON *root = NULL;
+  char *cmdbuffer = NULL;
+  char *metadatastr = NULL;
 
   // 2. build plookup: command
-  if(bypasscache) {
-    ret = atclient_atstr_append(&cmdbuffer, "bypassCache:true:");
-    if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
-      goto exit;
-    }
-  }
-
-  ret = atclient_atstr_append(&cmdbuffer, "all:");
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
-    goto exit;
-  }
-
   ret = atclient_atkey_to_string(*atkey, atkeystr.str, atkeystr.len, &atkeystr.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
+  }
+
+  char *bypasscachestr = NULL;
+  if(bypasscache) {
+    bypasscachestr = "bypassCache:true:";
   }
 
   char *atkeystrwithoutpublic = NULL;
@@ -321,21 +312,15 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  ret = atclient_atstr_append(&cmdbuffer, atkeystrwithoutpublic);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_atstr_append(&cmdbuffer, "\r\n");
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
-    goto exit;
-  }
+  const size_t cmdbufferlen = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) + strlen(atkeystrwithoutpublic) + 1;
+  cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
+  memset(cmdbuffer, 0, cmdbufferlen);
+  snprintf(cmdbuffer, cmdbufferlen, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "", atkeystrwithoutpublic);
+  const size_t cmdbufferolen = strlen(cmdbuffer);
 
   // 3. send plookup: command
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.olen,
-                                 recv.bytes, recv.len, &recv.olen);
+  ret = atclient_connection_send(&(atclient->secondary_connection), cmdbuffer, cmdbufferolen,
+    recv.bytes, recv.len, &recv.olen);
   if(ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -380,7 +365,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
     goto exit;
   }
 
-  char *metadatastr = cJSON_Print(metadata);
+  metadatastr = cJSON_Print(metadata);
 
   ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
   if(ret != 0) {
@@ -391,11 +376,16 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   ret = 0;
   goto exit;
 exit: {
-  atclient_atstr_free(&cmdbuffer);
   atclient_atstr_free(&atkeystr);
   atclient_atbytes_free(&recv);
   if(root != NULL) {
     cJSON_Delete(root);
+  }
+  if(metadatastr != NULL) {
+    free(metadatastr);
+  }
+  if(cmdbuffer != NULL) {
+    free(cmdbuffer);
   }
   return ret;
 }
