@@ -5,7 +5,7 @@
 #include "atclient/metadata.h"
 #include <stddef.h>
 
-#define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
+#define ATKEY_GENERAL_BUFFER_SIZE 256 // 255 utf7 chars + '\0'
 
 typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
