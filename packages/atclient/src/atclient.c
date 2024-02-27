@@ -1,7 +1,5 @@
 #include "atclient/atclient.h"
 #include "atchops/aes.h"
-#include "atchops/aesctr.h"
-#include "atchops/base64.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
 #include "atclient/atkey.h"
@@ -12,7 +10,6 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON/cJSON.h>
-#include <limits.h>
 #include <mbedtls/md.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -252,14 +249,14 @@ exit: {
 }
 }
 
-int atclient_put(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen) {
+int atclient_put(atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen) {
   int ret = 1;
 
   goto exit;
 exit: { return ret; }
 }
 
-int atclient_get_selfkey(const atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
                          size_t *valueolen) {
   int ret = 1;
 
@@ -269,7 +266,7 @@ int atclient_get_selfkey(const atclient *atclient, atclient_atkey *atkey, char *
 exit: { return ret; }
 }
 
-int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_publickey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
                            size_t *valueolen) {
   int ret = 1;
 
@@ -280,7 +277,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
 exit: { return ret; }
 }
 
-int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
                            size_t *valueolen) {
   int ret = 1;
 
@@ -290,7 +287,7 @@ int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey
 exit: { return ret; }
 }
 
-int atclient_delete(const atclient *atclient, const atclient_atkey *atkey) {
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
   atclient_atstr cmdbuffer;

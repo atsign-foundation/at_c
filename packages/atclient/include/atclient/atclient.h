@@ -75,7 +75,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
  * value)
  * @return int 0 on success
  */
-int atclient_put(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen);
+int atclient_put(atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen);
 
 /**
  * @brief Get a string value from your atServer.
@@ -95,7 +95,7 @@ int atclient_put(const atclient *atclient, const atclient_atkey *atkey, const ch
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_selfkey(const atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
                          size_t *valueolen);
 
 /**
@@ -116,7 +116,7 @@ int atclient_get_selfkey(const atclient *atclient, atclient_atkey *atkey, char *
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_publickey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
                            size_t *valueolen);
 
 /**
@@ -137,7 +137,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
                            size_t *valueolen);
 
 /**
@@ -155,7 +155,7 @@ int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey
  * @param atkey the populated atkey to delete from atServer (must satisfy the two conditions stated above)
  * @return int 0 on success
  */
-int atclient_delete(const atclient *atclient, const atclient_atkey *atkey);
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
 
 /**
  * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.

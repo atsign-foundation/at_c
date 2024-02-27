@@ -1,14 +1,13 @@
 #include "atclient/atkey.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
-#include "atclient/constants.h"
 #include "atclient/metadata.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #define TAG "atkey"
 
@@ -143,8 +142,8 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char nameandnamespacestr[ATSIGN_BUFFER_LENGTH];
-  memset(nameandnamespacestr, 0, sizeof(char) * ATSIGN_BUFFER_LENGTH);
+  char nameandnamespacestr[MAX_ATSIGN_CHARACTERS];
+  memset(nameandnamespacestr, 0, sizeof(char) * MAX_ATSIGN_CHARACTERS);
   memcpy(nameandnamespacestr, token, tokenlen);
   if (strchr(nameandnamespacestr, '.') != NULL) {
     // there is a namespace
@@ -193,10 +192,10 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char sharedbystr[ATSIGN_BUFFER_LENGTH];
-  memset(sharedbystr, 0, sizeof(char) * ATSIGN_BUFFER_LENGTH);
+  char sharedbystr[MAX_ATSIGN_CHARACTERS];
+  memset(sharedbystr, 0, sizeof(char) * MAX_ATSIGN_CHARACTERS);
   unsigned long sharedbystrolen = 0;
-  ret = atclient_atsign_with_at_symbol(sharedbystr, ATSIGN_BUFFER_LENGTH, &sharedbystrolen, token, tokenlen);
+  ret = atclient_atsign_with_at_symbol(sharedbystr, MAX_ATSIGN_CHARACTERS, &sharedbystrolen, token, tokenlen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
     goto exit;
@@ -246,8 +245,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
       goto exit;
     }
-  } else if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY ||
-             atkey.atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
+  } else if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY || atkey.atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's atkeytype is %d: %.*s\n", atkey.atkeytype,
                           (int)atkey.name.olen, atkey.name.str);
     ret = 1;

@@ -2,12 +2,13 @@
 #define ATCLIENT_CONNECTION_H
 
 #include "atclient/atstr.h"
-#include "atclient/constants.h"
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
 
+#define ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE 128 // the size of the buffer for the host name
+//
 typedef struct atclient_connection {
   // char *host; // assume null terminated, example: "root.atsign.org"
   char host[ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE];
