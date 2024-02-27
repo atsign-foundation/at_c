@@ -12,7 +12,6 @@
  *
  */
 typedef struct atclient {
-  atclient_connection root_connection;
   atclient_connection secondary_connection;
   atclient_atsign atsign;
   atclient_atkeys atkeys;
@@ -28,12 +27,12 @@ void atclient_init(atclient *ctx);
 /**
  * @brief initalize the atclient's root connection to the specified host and port
  *
- * @param ctx initialized atclient context
+ * @param root_conn initialized root connection
  * @param roothost host of root (e.g. root.atsign.org)
  * @param rootport  port of the root (e.g. 64)
  * @return int 0 on success, error otherwise
  */
-int atclient_start_root_connection(atclient *ctx, const char *roothost, const int rootport);
+int atclient_start_root_connection(atclient_connection *root_conn, const char *roothost, const int rootport);
 
 /**
  * @brief initialize the atclient's secondary connection to the specified host and port
@@ -50,12 +49,13 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
+ * @param root_conn initialized root connection
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign,
-                               const unsigned long atsignlen);
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
+                               const char *atsign, const unsigned long atsignlen);
 
 /**
  * @brief Put a string value into your atServer.
@@ -69,13 +69,17 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param root_conn initialized root connection
  * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
  * @param value the value to put into atServer
  * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for this
  * value)
  * @return int 0 on success
  */
-int atclient_put(atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen);
+int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
+                 const size_t valuelen);
+
+// TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 
 /**
  * @brief Get a string value from your atServer.
@@ -110,14 +114,15 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param root_conn initialized root connection
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
  * @param valuelen the buffer length allocated for the value
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen);
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
@@ -131,14 +136,15 @@ int atclient_get_publickey(atclient *atclient, const atclient_atkey *atkey, char
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
+ * @param root_conn initialized root connection
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
  * @param valuelen the buffer length allocated for the value
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen);
+int atclient_get_sharedkey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen);
 
 /**
  * @brief Delete an atkey from your atserver
@@ -177,37 +183,42 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
  * If no key is found, the function will return an error.
  *
  * @param ctx Initialized atclient context (required)
+ * @param root_conn initialized root connection
  * @param recipient An atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
  * (required)
  * @param enc_key_shared_by_other the output shared key in b64 format (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
-                                                char *enc_key_shared_by_other);
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_connection *root_conn,
+                                                const atclient_atsign *recipient, char *enc_key_shared_by_other);
 
 /**
  * @brief Creates a symmetric shared key, which the atclient atsign shares with the recipient atsign.
  *
  * @param ctx Initialized atclient context (required)
+ * @param root_conn initialized root connection
  * @param recipient An atclient_atsign struct corresponding to the atsign with which you want to create the shared key
  * (required)
  * @param enc_key_shared_by_me The output new shared key (which was already stored in the server) in b64 format
  * (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me);
+int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *root_conn,
+                                          const atclient_atsign *recipient, char *enc_key_shared_by_me);
 
 /**
  * @brief Retreives the public encryption key of a given atsign.
  *
  * @param ctx Initialized atclient context (required)
+ * @param root_conn initialized root connection
  * @param recipient An atclient_atsign struct corresponding to the atsign which public encryption key you would like to
  * obtain. It may receive a NULL value, in which case, the atclient_atsign contained in the ctx parameter will be used
  * (required)
  * @param public_encryption_key The output public key in b64 format (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key);
+int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_conn, const atclient_atsign *atsign,
+                                       char *public_encryption_key);
 
 void atclient_free(atclient *ctx);
 
