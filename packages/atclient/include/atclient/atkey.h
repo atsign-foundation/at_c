@@ -5,9 +5,6 @@
 #include "atclient/metadata.h"
 #include <stddef.h>
 
-#define ATCLIENT_MAX_ATKEY_LEN 256       // 255 utf7 chars + '\0'
-#define ATCLIENT_MAX_INNER_ATKEY_LEN 112 // 111 utf7 chars + '\0'
-
 typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
   ATCLIENT_ATKEY_TYPE_PUBLICKEY,

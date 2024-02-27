@@ -1,8 +1,6 @@
 #ifndef ATCLIENT_ATSIGN_H
 #define ATCLIENT_ATSIGN_H
 
-#define ATCLIENT_MAX_ATSIGN_LEN 57 // '@' + 55 utf7 chars + '\0'
-
 // Structure to represent the AtSign class
 typedef struct atclient_atsign {
   char *atsign;

@@ -1,4 +1,5 @@
 #include "atclient/atsign.h"
+#include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,8 +10,9 @@
 int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   int ret = 0;
 
+  const unsigned long maxatlen = ATCLIENT_ATSIGN_FULL_LEN + 1;
   // atsign_str is longer than expected or null/empty
-  if ((strlen(atsign_str) > ATCLIENT_MAX_ATSIGN_LEN) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
+  if ((strlen(atsign_str) > maxatlen) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     return ret;
@@ -19,7 +21,6 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   memset(atsign, 0, sizeof(atclient_atsign));
   atsign->atsign = malloc(strlen(atsign_str) + 1);
 
-  const unsigned long maxatlen = ATCLIENT_MAX_ATSIGN_LEN;
   unsigned long atolen = 0;
   ret = atclient_atsign_with_at_symbol(atsign->atsign, maxatlen, &(atolen), atsign_str, strlen(atsign_str));
   if (ret != 0) {
