@@ -7,6 +7,7 @@
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
+#include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON/cJSON.h>
@@ -291,16 +292,16 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
   atclient_atstr cmdbuffer;
-  atclient_atstr_init_literal(&cmdbuffer, ATCLIENT_MAX_ATSIGN_LEN + strlen("delete:"), "delete:");
+  atclient_atstr_init_literal(&cmdbuffer, ATCLIENT_ATKEY_FULL_LEN + strlen("delete:"), "delete:");
 
-  char atkeystr[ATCLIENT_MAX_ATSIGN_LEN];
-  memset(atkeystr, 0, sizeof(char) * ATCLIENT_MAX_ATSIGN_LEN);
+  char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
+  memset(atkeystr, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
   size_t atkeystrolen = 0;
 
   unsigned char recv[4096] = {0};
   size_t recvolen = 0;
 
-  ret = atclient_atkey_to_string(*atkey, atkeystr, ATCLIENT_MAX_ATSIGN_LEN, &atkeystrolen);
+  ret = atclient_atkey_to_string(*atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
