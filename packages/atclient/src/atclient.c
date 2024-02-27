@@ -291,16 +291,16 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
   atclient_atstr cmdbuffer;
-  atclient_atstr_init_literal(&cmdbuffer, ATKEY_GENERAL_BUFFER_SIZE + strlen("delete:"), "delete:");
+  atclient_atstr_init_literal(&cmdbuffer, ATCLIENT_MAX_ATSIGN_LEN + strlen("delete:"), "delete:");
 
-  char atkeystr[ATKEY_GENERAL_BUFFER_SIZE];
-  memset(atkeystr, 0, sizeof(char) * ATKEY_GENERAL_BUFFER_SIZE);
+  char atkeystr[ATCLIENT_MAX_ATSIGN_LEN];
+  memset(atkeystr, 0, sizeof(char) * ATCLIENT_MAX_ATSIGN_LEN);
   size_t atkeystrolen = 0;
 
   unsigned char recv[4096] = {0};
   size_t recvolen = 0;
 
-  ret = atclient_atkey_to_string(*atkey, atkeystr, ATKEY_GENERAL_BUFFER_SIZE, &atkeystrolen);
+  ret = atclient_atkey_to_string(*atkey, atkeystr, ATCLIENT_MAX_ATSIGN_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;

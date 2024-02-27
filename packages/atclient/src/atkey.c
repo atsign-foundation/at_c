@@ -142,8 +142,8 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char nameandnamespacestr[MAX_ATSIGN_CHARACTERS];
-  memset(nameandnamespacestr, 0, sizeof(char) * MAX_ATSIGN_CHARACTERS);
+  char nameandnamespacestr[ATCLIENT_MAX_INNER_ATKEY_LEN];
+  memset(nameandnamespacestr, 0, sizeof(char) * ATCLIENT_MAX_INNER_ATKEY_LEN);
   memcpy(nameandnamespacestr, token, tokenlen);
   if (strchr(nameandnamespacestr, '.') != NULL) {
     // there is a namespace
@@ -192,10 +192,10 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char sharedbystr[MAX_ATSIGN_CHARACTERS];
-  memset(sharedbystr, 0, sizeof(char) * MAX_ATSIGN_CHARACTERS);
+  char sharedbystr[ATCLIENT_MAX_INNER_ATKEY_LEN];
+  memset(sharedbystr, 0, sizeof(char) * ATCLIENT_MAX_INNER_ATKEY_LEN);
   unsigned long sharedbystrolen = 0;
-  ret = atclient_atsign_with_at_symbol(sharedbystr, MAX_ATSIGN_CHARACTERS, &sharedbystrolen, token, tokenlen);
+  ret = atclient_atsign_with_at_symbol(sharedbystr, ATCLIENT_MAX_INNER_ATKEY_LEN, &sharedbystrolen, token, tokenlen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
     goto exit;

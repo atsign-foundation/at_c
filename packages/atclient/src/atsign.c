@@ -10,7 +10,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   int ret = 0;
 
   // atsign_str is longer than expected or null/empty
-  if ((strlen(atsign_str) > MAX_ATSIGN_STR_BUFFER) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
+  if ((strlen(atsign_str) > ATCLIENT_MAX_ATSIGN_LEN) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     return ret;
@@ -19,7 +19,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   memset(atsign, 0, sizeof(atclient_atsign));
   atsign->atsign = malloc(strlen(atsign_str) + 1);
 
-  const unsigned long maxatlen = MAX_ATSIGN_STR_BUFFER;
+  const unsigned long maxatlen = ATCLIENT_MAX_ATSIGN_LEN;
   unsigned long atolen = 0;
   ret = atclient_atsign_with_at_symbol(atsign->atsign, maxatlen, &(atolen), atsign_str, strlen(atsign_str));
   if (ret != 0) {
