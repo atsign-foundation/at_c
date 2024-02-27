@@ -25,12 +25,12 @@
 
 void atclient_init(atclient *ctx) { memset(ctx, 0, sizeof(atclient)); }
 
-int atclient_start_root_connection(atclient *ctx, const char *roothost, const int rootport) {
+int atclient_start_root_connection(atclient_connection *root_conn, const char *roothost, const int rootport) {
   int ret = 1; // error by default
 
-  atclient_connection_init(&(ctx->root_connection));
+  atclient_connection_init(root_conn);
 
-  ret = atclient_connection_connect(&(ctx->root_connection), roothost, rootport);
+  ret = atclient_connection_connect(root_conn, roothost, rootport);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
     goto exit;
@@ -60,8 +60,8 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 exit: { return ret; }
 }
 
-int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, const char *atsign,
-                               const unsigned long atsignlen) {
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
+                               const char *atsign, const unsigned long atsignlen) {
   int ret = 1; // error by default
 
   // 1. init root connection
@@ -127,7 +127,7 @@ int atclient_pkam_authenticate(atclient *ctx, const atclient_atkeys atkeys, cons
     goto exit;
   }
 
-  ret = atclient_connection_send(&(ctx->root_connection), src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
+  ret = atclient_connection_send(root_conn, src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n",
                           ret, withoutat.olen, withoutat);
@@ -250,7 +250,8 @@ exit: {
 }
 }
 
-int atclient_put(atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuelen) {
+int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
+                 const size_t valuelen) {
   int ret = 1;
 
   goto exit;
@@ -267,8 +268,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 exit: { return ret; }
 }
 
-int atclient_get_publickey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen) {
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen) {
   int ret = 1;
 
   // TODO: implement
@@ -278,8 +279,8 @@ int atclient_get_publickey(atclient *atclient, const atclient_atkey *atkey, char
 exit: { return ret; }
 }
 
-int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen) {
+int atclient_get_sharedkey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen) {
   int ret = 1;
 
   // TODO: implement
@@ -398,7 +399,8 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
                                             strlen("error:AT0015-key not found"))) {
     // or do I need to create, store and share a new shared key?
     if (create_new_if_not_found) {
-      ret = atclient_create_shared_encryption_key(ctx, recipient, enc_key_shared_by_me);
+      // TODO: instead return a specific signal indiciating key not found and let the developer create their own key
+      // ret = atclient_create_shared_encryption_key(ctx, root_conn, recipient, enc_key_shared_by_me);
       if (ret != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
         return ret;
@@ -412,8 +414,8 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
   return 0;
 }
 
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
-                                                char *enc_key_shared_by_other) {
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_connection *root_conn,
+                                                const atclient_atsign *recipient, char *enc_key_shared_by_other) {
   int ret = 1;
 
   // llookup:cached:@myatsign:shared_key@recipient_atsign
@@ -479,19 +481,20 @@ int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_at
   return 0;
 }
 
-int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me) {
+int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *root_conn,
+                                          const atclient_atsign *recipient, char *enc_key_shared_by_me) {
   int ret = 1;
 
   // get client and recipient public encryption keys
   const size_t bufferlen = 1024;
   char client_public_encryption_key[bufferlen];
   char recipient_public_encryption_key[bufferlen];
-  ret = atclient_get_public_encryption_key(ctx, NULL, client_public_encryption_key);
+  ret = atclient_get_public_encryption_key(ctx, root_conn, NULL, client_public_encryption_key);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
     return ret;
   }
-  ret = atclient_get_public_encryption_key(ctx, recipient, recipient_public_encryption_key);
+  ret = atclient_get_public_encryption_key(ctx, root_conn, recipient, recipient_public_encryption_key);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
     return ret;
@@ -589,7 +592,8 @@ int atclient_create_shared_encryption_key(atclient *ctx, const atclient_atsign *
   return 0;
 }
 
-int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key) {
+int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_conn, const atclient_atsign *atsign,
+                                       char *public_encryption_key) {
 
   int ret = 1;
 
@@ -630,7 +634,4 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
   return 0;
 }
 
-void atclient_free(atclient *ctx) {
-  atclient_connection_free(&(ctx->root_connection));
-  atclient_connection_free(&(ctx->secondary_connection));
-}
+void atclient_free(atclient *ctx) { atclient_connection_free(&(ctx->secondary_connection)); }
