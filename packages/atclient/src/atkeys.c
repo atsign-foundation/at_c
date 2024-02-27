@@ -1,9 +1,9 @@
 #include "atclient/atkeys.h"
 #include "atclient/atstr.h"
-#include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aesctr.h>
 #include <atchops/iv.h>
+#include <atchops/rsa.h>
 #include <atchops/rsakey.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,19 +13,19 @@
 void atclient_atkeys_init(atclient_atkeys *atkeys) {
   memset(atkeys, 0, sizeof(atclient_atkeys));
 
-  atclient_atstr_init(&(atkeys->pkampublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->pkampublickeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_publickey_init(&(atkeys->pkampublickey));
 
-  atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_privatekey_init(&(atkeys->pkamprivatekey));
 
-  atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_publickey_init(&(atkeys->encryptpublickey));
 
-  atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_privatekey_init(&(atkeys->encryptprivatekey));
 
-  atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCHOPS_RSA_4096);
 }
 
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
@@ -144,7 +144,7 @@ exit: {
 }
 }
 
-int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, atclient_atkeysfile atkeysfile) {
+int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atclient_atkeysfile atkeysfile) {
   int ret = 1;
 
   ret = atclient_atkeys_populate_from_strings(

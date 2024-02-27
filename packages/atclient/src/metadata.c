@@ -1063,12 +1063,12 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
   }
 
   if (atclient_atkey_metadata_is_sharedkeystatus_initialized(*metadata)) {
-    atclient_atsign_free(&metadata->sharedkeystatus);
+    atclient_atstr_free(&metadata->sharedkeystatus);
     metadata->initializedfields[2] &= ~ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
   }
 
   if (atclient_atkey_metadata_is_sharedkeyenc_initialized(*metadata)) {
-    atclient_atsign_free(&metadata->sharedkeyenc);
+    atclient_atstr_free(&metadata->sharedkeyenc);
     metadata->initializedfields[2] &= ~ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
   }
 
@@ -1088,7 +1088,7 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
   }
 
   if (atclient_atkey_metadata_is_enckeyname_initialized(*metadata)) {
-    atclient_atsign_free(&metadata->enckeyname);
+    atclient_atstr_free(&metadata->enckeyname);
     metadata->initializedfields[2] &= ~ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
   }
 
@@ -1103,7 +1103,7 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
   }
 
   if (atclient_atkey_metadata_is_skeenckeyname_initialized(*metadata)) {
-    atclient_atsign_free(&metadata->skeenckeyname);
+    atclient_atstr_free(&metadata->skeenckeyname);
     metadata->initializedfields[3] &= ~ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
   }
 
