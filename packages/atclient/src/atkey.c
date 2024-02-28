@@ -5,21 +5,19 @@
 #include "atclient/metadata.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #define TAG "atkey"
 
-#define ATKEY_GENERAL_BUFFER_SIZE 4096 // sufficient memory for keyName, namespace, sharedWith, and sharedBy strings
-
 void atclient_atkey_init(atclient_atkey *atkey) {
   memset(atkey, 0, sizeof(atclient_atkey));
-  atclient_atstr_init(&(atkey->name), ATKEY_GENERAL_BUFFER_SIZE);
-  atclient_atstr_init(&(atkey->namespacestr), ATKEY_GENERAL_BUFFER_SIZE);
-  atclient_atstr_init(&(atkey->sharedby), ATKEY_GENERAL_BUFFER_SIZE);
-  atclient_atstr_init(&(atkey->sharedwith), ATKEY_GENERAL_BUFFER_SIZE);
+  atclient_atstr_init(&(atkey->name), ATCLIENT_ATKEY_KEY_LEN + 1);
+  atclient_atstr_init(&(atkey->namespacestr), ATCLIENT_ATKEY_NAMESPACE_LEN + 1);
+  atclient_atstr_init(&(atkey->sharedby), ATCLIENT_ATKEY_FULL_LEN);
+  atclient_atstr_init(&(atkey->sharedwith), ATCLIENT_ATKEY_FULL_LEN);
 
   atclient_atkey_metadata_init(&(atkey->metadata));
 }
@@ -143,8 +141,8 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char nameandnamespacestr[ATSIGN_BUFFER_LENGTH];
-  memset(nameandnamespacestr, 0, sizeof(char) * ATSIGN_BUFFER_LENGTH);
+  char nameandnamespacestr[ATCLIENT_ATKEY_COMPOSITE_LEN + 1];
+  memset(nameandnamespacestr, 0, sizeof(char) * ATCLIENT_ATKEY_COMPOSITE_LEN + 1);
   memcpy(nameandnamespacestr, token, tokenlen);
   if (strchr(nameandnamespacestr, '.') != NULL) {
     // there is a namespace
@@ -193,10 +191,10 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char sharedbystr[ATSIGN_BUFFER_LENGTH];
-  memset(sharedbystr, 0, sizeof(char) * ATSIGN_BUFFER_LENGTH);
+  char sharedbystr[ATCLIENT_ATKEY_FULL_LEN + 1];
+  memset(sharedbystr, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN + 1);
   unsigned long sharedbystrolen = 0;
-  ret = atclient_atsign_with_at_symbol(sharedbystr, ATSIGN_BUFFER_LENGTH, &sharedbystrolen, token, tokenlen);
+  ret = atclient_atsign_with_at_symbol(sharedbystr, ATCLIENT_ATSIGN_FULL_LEN, &sharedbystrolen, token, tokenlen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
     goto exit;
@@ -219,7 +217,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
   int ret = 1;
 
   atclient_atstr string;
-  atclient_atstr_init(&string, ATKEY_GENERAL_BUFFER_SIZE);
+  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   if (atkey.metadata.iscached) {
     ret = atclient_atstr_append(&string, "cached:");
@@ -246,8 +244,7 @@ int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const u
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append_literal failed\n");
       goto exit;
     }
-  } else if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY ||
-             atkey.atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
+  } else if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY || atkey.atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's atkeytype is %d: %.*s\n", atkey.atkeytype,
                           (int)atkey.name.olen, atkey.name.str);
     ret = 1;

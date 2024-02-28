@@ -260,6 +260,7 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
 int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata metadata, char *metadatastr,
                                        const size_t metadatastrlen, size_t *metadatastrolen);
 
+// TODO: get a buffer size calculator function for this, so buffer can be pre-computed rather than over allocated
 /**
  * @brief Creates a fragment which can be included in any atProtocol commands which use metadata (e.g. update,
  * update:meta and notify)

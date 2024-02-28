@@ -68,7 +68,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
  * @param atkeysfile the struct containing the encrypted RSA keys, typically already read from the *.atKeys file
  * @return int 0 on success, non-zero on failure
  */
-int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, atclient_atkeysfile atkeysfile);
+int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atclient_atkeysfile atkeysfile);
 
 /**
  * @brief populates the atkeys struct by reading the *.atKeys file,
