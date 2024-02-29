@@ -52,6 +52,7 @@ void atclient_atkey_free(atclient_atkey *atkey);
  */
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen);
 
+size_t atclient_atkey_strlen(const atclient_atkey *atkey);
 /**
  * @brief convert an atkey struct to its string format
  *
@@ -61,7 +62,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
+int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const unsigned long atkeystrlen,
                              unsigned long *atkeystrolen);
 
 /**

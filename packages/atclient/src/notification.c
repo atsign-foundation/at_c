@@ -16,6 +16,7 @@ void atclient_notify_params_init(atclient_notify_params *params) {
   params->notifier = ATCLIENT_DEFAULT_NOTIFIER;
   params->notification_expiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 }
+
 void atclient_notify_params_free(atclient_notify_params *params) {
   atclient_atstr_free(&params->id);
   atclient_atkey_free(&params->key);
@@ -53,19 +54,12 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
                20;         // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
   }
 
-  char metadatastr[4096];
-  size_t metadatalen;
-  // TODO: calc metadata len without having to do this conversion
-  res = atclient_atkey_metadata_to_protocolstr(&params->key.metadata, metadatastr, 4096, &metadatalen);
-  if (res != 0) {
-    atclient_atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
-                          "generating metadata fragmennt failed with code %d\n", res);
-    return res;
-  }
-
+  // add metadata fragment length
+  size_t metadatalen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
   bufsize += metadatalen;
 
-  bufsize += 0; // TODO: atkey size
+  // atkey parts length
+  bufsize += params->key.name.olen;
 
   res = atchops_uuid_init();
   if (res != 0) {

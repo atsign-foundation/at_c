@@ -267,7 +267,7 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
 int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
                                        const size_t metadatastrlen, size_t *metadatastrolen);
 
-// TODO: get a buffer size calculator function for this, so buffer can be pre-computed rather than over allocated
+size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *metadata);
 /**
  * @brief Creates a fragment which can be included in any atProtocol commands which use metadata (e.g. update,
  * update:meta and notify)
@@ -311,22 +311,44 @@ bool atclient_atkey_metadata_is_ivnonce_initialized(const atclient_atkey_metadat
 bool atclient_atkey_metadata_is_skeenckeyname_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_metadata *metadata);
 
+size_t atclient_atkey_metadata_createdby_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_updatedby_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_status_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_version_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_expiresat_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_availableat_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_refreshat_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_createdat_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_updatedat_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ispublic_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ishidden_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_iscached_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ttl_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_isbinary_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_isencrypted_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_datasignature_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_sharedkeystatus_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_sharedkeyenc_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_pubkeyhash_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_pubkeyalgo_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_encoding_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_enckeyname_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_encalgo_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_ivnonce_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_skeenckeyname_strlen(const atclient_atkey_metadata *metadata);
+size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *metadata);
+
 void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
-
 void atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
-
 void atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
-
 void atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl);
-
 void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb);
-
 void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr);
-
 void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
-
 void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary);
-
 void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted);
 
 int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
