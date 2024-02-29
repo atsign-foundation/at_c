@@ -21,6 +21,7 @@ typedef struct atclient_connection {
   mbedtls_ctr_drbg_context ctr_drbg;
 } atclient_connection;
 
+// TODO: where can ctx be made a const * ?
 /**
  * @brief initialize the context for a connection. this function should be called before use of any other function
  *

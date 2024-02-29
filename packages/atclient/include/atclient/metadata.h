@@ -4,6 +4,7 @@
 
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
+#include "cJSON/cJSON.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -246,7 +247,13 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
  */
 int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
                                          const size_t metadatastrlen);
-
+/**
+ * @brief Populates the metadata struct from a cJSON pointer. This function is good for debugging.
+ *
+ * @param metadata the metadata struct to populate
+ * @param json the json object to populate from
+ */
+void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json);
 /**
  * @brief Reads metadata struct and converts it to a json formatted string. This function should mostly be used for
  * debugging only. See atclient_atkey_metadata_to_protocolstr for a more useful function when working with atProtocol
@@ -257,7 +264,7 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
  * @param metadatastrolen the length of the metadata string written to metadatastr once the operation is complete
  * @return int 0 on success
  */
-int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata metadata, char *metadatastr,
+int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
                                        const size_t metadatastrlen, size_t *metadatastrolen);
 
 // TODO: get a buffer size calculator function for this, so buffer can be pre-computed rather than over allocated
@@ -271,38 +278,38 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata metadata, c
  * @param metadatastrolen the length of the metadata string written to metadatastr once the operation is complete
  * @return int 0 on success
  */
-int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata metadata, char *metadatastr,
+int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata *metadata, char *metadatastr,
                                            const size_t metadatastrlen, size_t *metadatastrolen);
 
-bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_status_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_version_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_expiresat_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_availableat_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_refreshat_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_createdat_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_updatedat_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ispublic_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ishidden_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_iscached_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ttl_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ttb_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ttr_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ccd_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_isbinary_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_isencrypted_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_datasignature_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_sharedkeystatus_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_sharedkeyenc_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_pubkeyhash_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_pubkeyalgo_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_encoding_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_enckeyname_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_encalgo_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_ivnonce_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_skeenckeyname_initialized(const atclient_atkey_metadata metadata);
-bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_metadata metadata);
+bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_status_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_version_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_expiresat_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_availableat_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_refreshat_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_createdat_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_updatedat_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ispublic_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ishidden_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_iscached_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ttl_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ttb_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ttr_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ccd_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_isbinary_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_isencrypted_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_datasignature_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_sharedkeystatus_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_sharedkeyenc_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_pubkeyhash_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_pubkeyalgo_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_encoding_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_enckeyname_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_encalgo_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_ivnonce_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_skeenckeyname_initialized(const atclient_atkey_metadata *metadata);
+bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_metadata *metadata);
 
 void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
 

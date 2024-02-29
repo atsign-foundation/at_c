@@ -27,6 +27,8 @@ void atclient_atkey_free(atclient_atkey *atkey) {
   free(atkey->namespacestr.str);
   free(atkey->sharedwith.str);
   free(atkey->sharedby.str);
+
+  atclient_atkey_metadata_free(&atkey->metadata);
 }
 
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen) {

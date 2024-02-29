@@ -13,8 +13,10 @@ typedef enum atclient_atkey_type {
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
+  // TODO: remove atkey_type and replace it with a policy function that infers atkeytype given atclient_atkey & atclient
   atclient_atkey_type atkeytype;
 
+  // TODO: this should be called atkey.key to be consistent with dart
   atclient_atstr name;
   atclient_atstr namespacestr;
   atclient_atstr sharedby;
