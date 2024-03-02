@@ -9,14 +9,15 @@ It is not mandatory to build [atchops](../atchops/README.md) or [MbedTLS](https:
 <!-- build table of contents with: https://derlin.github.io/bitdowntoc/ -->
 
 - [atclient](#atclient)
-  * [Building Source](#building-source)
-    + [Installing on Linux/MacOS](#installing-on-linuxmacos)
-    + [Installing on Windows](#installing-on-windows)
-  * [Running Tests on Linux/MacOS](#running-tests-on-linuxmacos)
-  * [Contributing](#contributing)
-    + [Creating Tests](#creating-tests)
-    + [Adding New Source Files](#adding-new-source-files)
-    + [Adding New Include Headers](#adding-new-include-headers)
+   * [Building Source](#building-source)
+      + [Installing on Linux/MacOS](#installing-on-linuxmacos)
+      + [Installing on Windows](#installing-on-windows)
+   * [Running Tests](#running-tests)
+      + [Running Tests on Linux/MacOS](#running-tests-on-linuxmacos)
+   * [Contributing](#contributing)
+      + [Creating Tests](#creating-tests)
+      + [Adding New Source Files](#adding-new-source-files)
+      + [Adding New Include Headers](#adding-new-include-headers)
 
 
 ## Building Source
@@ -24,6 +25,8 @@ It is not mandatory to build [atchops](../atchops/README.md) or [MbedTLS](https:
 To build the source code you will need to have [CMake](https://cmake.org/) installed like [Unix Makefiles](https://cmake.org/cmake/help/latest/generator/Unix%20Makefiles.html) (which is installed by default on most Linux distros).
 
 ### Installing on Linux/MacOS
+
+Check out the [run_ctest.sh](./tools/run_ctest.sh) as an example.
 
 1. Get ahold of the source code either via git clone or from downloading the source from our releases:
 
@@ -104,7 +107,11 @@ cmake --build build --config Debug
 
 You may also specify a generator in the configure step with something like: `-G "MinGW Makefiles"`
 
-## Running Tests on Linux/MacOS
+## Running Tests
+
+### Running Tests on Linux/MacOS
+
+Check out the [run_ctest.sh](./tools/run_ctest.sh) as an example.
 
 1. Get ahold of the source code either via git clone or from downloading the source from our releases:
 
