@@ -2,9 +2,9 @@
 
 atclient is the core dependency for anything Atsign technology related. atclient depends on [atchops](../atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls).
 
-This client SDK implements the atProtocol. It is written in C and is intended to be used in embedded systems. This package and the following documentation will assist you in building and using the C SDK for desktop. To use this SDK in something like an ESP32, checkout [atclient_espidf](../atclient_espidf/README.md).
+This client SDK implements the atProtocol. It is written in C and is intended to be used as a library in other C/C++ applications, such as embedded systems. This package and the following documentation will assist you in building and using the C SDK for desktop. To use this SDK in something like an ESP32, checkout [atclient_espidf](../atclient_espidf/README.md).
 
-It is not mandatory to build [atchops](../atchops/README.md) or [MbedTLS](https://github.com/Mbed-TLS/mbedtls) from source to use this package. However, you have the option of doing so if you want faster building/debugging times. You can avoid fetching these packages everytime by setting the `ATCLIENT_FETCH_MBEDTLS` and `ATCLIENT_FETCH_ATCHOPS` to off during the configure step. These steps are illustrated in the [Installing on Linux/MacOS](#installing-on-linuxmacos) section.
+It is not mandatory to build [atchops](../atchops/README.md) or [MbedTLS](https://github.com/Mbed-TLS/mbedtls) from source to use this package. However, you have the option of doing so if you want faster building/debugging times. Our [CMakeLists.txt](./CMakeLists.txt) allows the option to build atclient with or without installing [atchops](../atchops/README.md) or [MbedTLS](https://github.com/Mbed-TLS/mbedtls) beforehand.
 
 <!-- build table of contents with: https://derlin.github.io/bitdowntoc/ -->
 
@@ -21,7 +21,7 @@ It is not mandatory to build [atchops](../atchops/README.md) or [MbedTLS](https:
 
 ## Building Source
 
-To build the source code you will need to have [CMake](https://cmake.org/) installed and a generator like [Ninja](https://ninja-build.org/) or [Unix Makefiles](https://cmake.org/cmake/help/latest/generator/Unix%20Makefiles.html) (which is installed by default on most Linux distros).
+To build the source code you will need to have [CMake](https://cmake.org/) installed like [Unix Makefiles](https://cmake.org/cmake/help/latest/generator/Unix%20Makefiles.html) (which is installed by default on most Linux distros).
 
 ### Installing on Linux/MacOS
 
@@ -38,13 +38,7 @@ cd at_c/packages/atclient
 cmake -S . -B build
 ```
 
-Alternatively, if you have installed MbedTLS and/or AtChops from source already, you can avoid fetching it everytime with `ATCLIENT_FETCH_MBEDTLS=OFF` and `ATCLIENT_FETCH_ATCHOPS=OFF` respectively. Doing this drastically reduces the time it takes to configure the project:
-
-```sh
-cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=OFF -DATCLIENT_FETCH_ATCHOPS=OFF
-```
-
-If you would not like the static libraries and include header files to be installed on your system directly, you can specify a custom install directory with `-DCMAKE_INSTALL_PREFIX=/path/to/install`:
+Alternatively, if you would not like the static libraries and include header files to be installed on your system directly, you can specify a custom install directory with `-DCMAKE_INSTALL_PREFIX=/path/to/install`:
 
 Example:
 
@@ -59,7 +53,7 @@ Example of the install directory structure:
 ```bash
 .
 └── install/
-    ├── bin
+    ├── bin/
     ├── include/
     │   ├── atclient/
     │   │   └── *.h
@@ -80,7 +74,7 @@ Example of the install directory structure:
         └── libmbedx509.a
 ```
 
-3. Install.
+3. Once the configure step is complete, run install.
 
 ```sh
 cmake --build build --target install
@@ -101,10 +95,10 @@ target_link_libraries(myproj PRIVATE atclient::atclient)
 
 Coming Soon!
 
-For now, here are some experimental commands that may work:
+For now, here are some experimental commands that *may* work:
 
 ```
-cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DATCHOPS_BUILD_TESTS=ON
+cmake -S . -B build
 cmake --build build --config Debug
 ```
 
@@ -136,7 +130,7 @@ This is the same as doing `cd build && make all`, if you are using something lik
 4. Run tests
 
 ```sh
-cd build/tests && ctest -V --output-on-failure --timeout 10
+cd build/tests && ctest -V --timeout 10
 ```
 
 `--timeout 10` times out tests after 10 seconds
@@ -145,7 +139,7 @@ cd build/tests && ctest -V --output-on-failure --timeout 10
 
 ## Contributing
 
-When creating source files, include headers, or tests to certain packages, please follow the documentation in their according README files.
+When creating source files, header files, or tests to certain packages, please follow the documentation in their according README files.
 
 ### Creating Tests
 
@@ -173,4 +167,4 @@ target_sources(atclient PRIVATE
 
 Simply add the header inside of the `include/` directory. CMake will automatically detect it and add it to the include path.
 
-If it is added in a subdirectory (like `include/atclient/`), then the include path will be `atclient/` (e.g. `#include <atclient/new_header.h>`)
+If it is added in a subdirectory (like `include/atclient/`), then the include path will be `atclient/` (e.g. `#include <atclient/new_header.h>`). Putting your header file in a subdirectory is recommended to help keep our header files consistent and avoid any naming conflicts.
