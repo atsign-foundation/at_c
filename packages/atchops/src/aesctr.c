@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64len, const atchops_aes_keysize keybits,
+int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64len, const enum atchops_aes_size keybits,
                            unsigned char *iv,
                            const unsigned char *plaintext, // plaintext to encrypt
                            const unsigned long plaintextlen,
@@ -88,7 +88,7 @@ exit: {
 }
 }
 
-int atchops_aesctr_decrypt(const char *keybase64, const unsigned long keybase64len, const atchops_aes_keysize keybits,
+int atchops_aesctr_decrypt(const char *keybase64, const unsigned long keybase64len, const enum atchops_aes_size keybits,
                            unsigned char *iv, const unsigned char *ciphertextbase64,
                            const unsigned long ciphertextbase64len, unsigned char *plaintext,
                            const unsigned long plaintextlen, unsigned long *plaintextolen) {

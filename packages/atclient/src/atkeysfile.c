@@ -134,7 +134,7 @@ exit: {
 }
 }
 
-int atclient_atkeysfile_write(atclient_atkeysfile *atkeysfile, const char *path, const char *atsign) {
+int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char *path, const char *atsign) {
   int ret = 1;
 
   // guarantee that all values are null terminated and are of correct length

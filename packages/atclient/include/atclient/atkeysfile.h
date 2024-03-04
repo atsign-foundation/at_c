@@ -13,7 +13,7 @@ typedef struct atclient_atkeysfile {
 
 void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile);
 int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path);
-int atclient_atkeysfile_write(atclient_atkeysfile *atkeysfile, const char *path, const char *atsign);
+int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char *path, const char *atsign);
 void atclient_atkeysfile_free(atclient_atkeysfile *atkeysfile);
 
 #endif

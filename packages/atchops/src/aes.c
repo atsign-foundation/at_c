@@ -5,7 +5,7 @@
 #include <mbedtls/entropy.h>
 #include <string.h>
 
-int atchops_aes_generate_key(unsigned char *key, const atchops_aes_keysize keysize) {
+int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size keysize) {
   int ret = 1;
 
   const char *pers = ATCHOPS_RNG_PERSONALIZATION;
@@ -40,7 +40,7 @@ exit: {
 }
 
 int atchops_aes_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len,
-                                   unsigned long *keybase64olen, atchops_aes_keysize keysize) {
+                                   unsigned long *keybase64olen, const enum atchops_aes_size keysize) {
   int ret = 1;
 
   const unsigned long keylen = keysize / 8;
