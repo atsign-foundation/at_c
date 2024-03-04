@@ -383,12 +383,8 @@ exit: {
   if (root != NULL) {
     cJSON_Delete(root);
   }
-  if (metadatastr != NULL) {
-    free(metadatastr);
-  }
-  if (cmdbuffer != NULL) {
-    free(cmdbuffer);
-  }
+  free(metadatastr);
+  free(cmdbuffer);
   return ret;
 }
 }
