@@ -22,12 +22,12 @@ jobs:
           sudo cmake --build build --target install
 
       - name: Build sample_cmake_project
-        working-directory: examples/sample_cmake_project
+        working-directory: examples/desktop/sample_cmake_project
         run: |
           cmake -S . -B build
           cmake --build build
 
       - name: Run sample_cmake_project executable
-        working-directory: examples/sample_cmake_project
+        working-directory: examples/desktop/sample_cmake_project
         run: |
           ./build/exec

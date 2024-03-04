@@ -4,6 +4,10 @@
 
 ## Building Source
 
+### Installing on Linux/MacOS
+
+Check out the [install.sh](./tools//install.sh) as an example.
+
 To build atchops standalone:
 
 1. Get ahold of the source code either via git clone or from downloading the source from our releases:
@@ -74,15 +78,17 @@ You may need to use `sudo` depending on your system.
 
 ## Running Tests
 
+### Running Tests on Linux/MacOS
+
 Check out the [run_ctest.sh](./tools/run_ctest.sh) as an example.
 
-1. Build source with `-DATCHOPS_BUILD_TESTS=ON` flag set to ON
+1. Run the CMake configure step with `-DATCHOPS_BUILD_TESTS=ON` flag set to ON
 
 ```sh
 cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON
 ```
 
-2. Run `make all`
+2. Run `make all` (install step)
 ```sh
 cmake --build build --target all
 ```
@@ -91,12 +97,12 @@ cmake --build build --target all
 
 ```sh
 cd build/tests
-ctest -V
+ctest --output-on-failure
 ```
 
 ## Contributing
 
-When creating source files, include headers, or tests to certain packages, please follow the documentation in their according README files.
+When creating source files, header files, or tests to certain packages, please follow the documentation in their according README files.
 
 ### Creating Tests
 
@@ -124,4 +130,4 @@ target_sources(atchops PRIVATE
 
 Simply add the header inside of the `include/` directory. CMake will automatically detect it and add it to the include path.
 
-If it is added in a subdirectory (like `include/atchops/`), then the include path will be `atchops/` (e.g. `#include <atchops/new_header.h>`)
+If it is added in a subdirectory (like `include/atchops/`), then the include path will be `atchops/` (e.g. `#include <atchops/new_header.h>`). If it is added in the root of the `include/` directory, then the include path will be the root of the `include/` directory (e.g. `#include <new_header.h>`).
