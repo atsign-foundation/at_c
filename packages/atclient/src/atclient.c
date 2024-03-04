@@ -268,17 +268,17 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 exit: { return ret; }
 }
 
-int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen, bool bypasscache) {
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen, bool bypasscache) {
   int ret = 1;
 
-  if(atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
     return 1;
   }
 
   // 1. initialize variables
-  const size_t atkeystrlen = ATKEY_GENERAL_BUFFER_SIZE;
+  const size_t atkeystrlen = ATCLIENT_ATKEY_FULL_LEN;
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, atkeystrlen);
 
@@ -298,29 +298,32 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   }
 
   char *bypasscachestr = NULL;
-  if(bypasscache) {
+  if (bypasscache) {
     bypasscachestr = "bypassCache:true:";
   }
 
   char *atkeystrwithoutpublic = NULL;
   char *ptr = strnstr(atkeystr.str, "public:", atkeystr.olen);
-  if(ptr != NULL) {
+  if (ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n", atkeystr.str);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n",
+                          atkeystr.str);
     goto exit;
   }
 
-  const size_t cmdbufferlen = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) + strlen(atkeystrwithoutpublic) + 1;
+  const size_t cmdbufferlen = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) +
+                              strlen(atkeystrwithoutpublic) + 1;
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, cmdbufferlen);
-  snprintf(cmdbuffer, cmdbufferlen, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "", atkeystrwithoutpublic);
+  snprintf(cmdbuffer, cmdbufferlen, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "",
+           atkeystrwithoutpublic);
   const size_t cmdbufferolen = strlen(cmdbuffer);
 
   // 3. send plookup: command
-  ret = atclient_connection_send(&(atclient->secondary_connection), cmdbuffer, cmdbufferolen,
-    recv.bytes, recv.len, &recv.olen);
-  if(ret != 0) {
+  ret = atclient_connection_send(&(atclient->secondary_connection), cmdbuffer, cmdbufferolen, recv.bytes, recv.len,
+                                 &recv.olen);
+  if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -358,7 +361,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
 
   // 4c. write to atkey->metadata
   cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
     goto exit;
@@ -367,7 +370,7 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
   metadatastr = cJSON_Print(metadata);
 
   ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
-  if(ret != 0) {
+  if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
     goto exit;
   }
@@ -377,13 +380,13 @@ int atclient_get_publickey(const atclient *atclient, const atclient_atkey *atkey
 exit: {
   atclient_atstr_free(&atkeystr);
   atclient_atbytes_free(&recv);
-  if(root != NULL) {
+  if (root != NULL) {
     cJSON_Delete(root);
   }
-  if(metadatastr != NULL) {
+  if (metadatastr != NULL) {
     free(metadatastr);
   }
-  if(cmdbuffer != NULL) {
+  if (cmdbuffer != NULL) {
     free(cmdbuffer);
   }
   return ret;
