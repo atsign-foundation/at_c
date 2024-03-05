@@ -343,21 +343,21 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
   }
 
   // build command
-  const char *command_prefix = "llookup:";
-  const short command_prefix_len = 8;
+  // command_prefix = "llookup:all:"
+  const short command_prefix_len = 12;
 
   const size_t command_len = command_prefix_len + atkey_out_len + 3;
   char command[command_len];
-  snprintf(command, command_len, "llookup:%s\r\n", atkey_str_buff);
+  snprintf(command, command_len, "llookup:all:%s\r\n", atkey_str_buff);
 
   // send command and recv response
-  const size_t recvlen = 1024;
+  const size_t recvlen = 4096;
   unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  size_t olen = 0;
+  size_t recv_olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
-                                 recvlen, &olen);
+                                 recvlen, &recv_olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -383,21 +383,67 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
   if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
     response = response + 5;
 
-    // decrypt response
-    const size_t plaintextlen = valuelen;
-    unsigned char plaintext[plaintextlen];
-    memset(plaintext, 0, plaintextlen);
-    size_t plaintextolen = 0;
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+    const *root = cJSON_Parse(response);
+    if (root == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+      goto exit;
+    }
 
-    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, atkey->metadata.ivnonce.str,
-                                 response, recvlen, plaintext, plaintextlen, &plaintextolen);
+    cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
+    if (metadata == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    char *metadatastr = cJSON_Print(metadata);
+
+    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+      goto exit;
+    }
+
+    // manage IV
+    if (atclient_atkey_metadata_is_ivnonce_initialized(atkey->metadata)) {
+      size_t ivolen;
+      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
+                                  ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+      if (ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+        goto exit;
+      }
+
+      if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
+        ret = 1;
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+                              ATCHOPS_IV_BUFFER_SIZE);
+        goto exit;
+      }
+    } else {
+      // use legacy IV
+      memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    }
+
+    cJSON *data = cJSON_GetObjectItem(root, "data");
+    if (data == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    // decrypt response data
+    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv, response, recvlen, value,
+                                 valuelen, &valueolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
     }
-    memcpy(value, plaintext, valuelen);
   }
 
+  ret = 0;
   goto exit;
 exit : { return ret; }
 }
@@ -418,29 +464,31 @@ static int atclient_get_shared_by_other_with_me(const atclient *atclient, const 
 
   char *namespace = "";
   size_t namespace_len = 0;
-  short extra_point_len = 0;  // "." before namespace
+  short extra_point_len = 0; // "." before namespace
 
   if (atkey->namespacestr.str != NULL && atkey->namespacestr.str[0] != '\0') {
-      namespace = atkey->namespacestr.str;
-      namespace_len = atkey->namespacestr.olen;
-      extra_point_len = 1;
+    namespace = atkey->namespacestr.str;
+    namespace_len = atkey->namespacestr.olen;
+    extra_point_len = 1;
   }
 
   // build command
   // command_prefix = "lookup:"
-  const short command_prefix_len = 7;
-  const size_t command_len = command_prefix_len + atkey->name.olen + extra_point_len + namespace_len + atkey->sharedby.olen + 3;
+  const short command_prefix_len = 11;
+  const size_t command_len =
+      command_prefix_len + atkey->name.olen + extra_point_len + namespace_len + atkey->sharedby.olen + 3;
   char command[command_len];
-  snprintf(command, command_len, "lookup:%s%s%s%s\r\n", atkey->name.str, extra_point_len ? "." : "", namespace, atkey->sharedby.str);
+  snprintf(command, command_len, "lookup:all:%s%s%s%s\r\n", atkey->name.str, extra_point_len ? "." : "", namespace,
+           atkey->sharedby.str);
 
   // send command and recv response
-  const size_t recvlen = 1024;
+  const size_t recvlen = 4096;
   unsigned char recv[recvlen];
   memset(recv, 0, sizeof(unsigned char) * recvlen);
-  size_t olen = 0;
+  size_t recv_olen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
-                                 recvlen, &olen);
+                                 recvlen, &recv_olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -466,21 +514,67 @@ static int atclient_get_shared_by_other_with_me(const atclient *atclient, const 
   if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
     response = response + 5;
 
-    // decrypt response
-    const size_t plaintextlen = valuelen;
-    unsigned char plaintext[plaintextlen];
-    memset(plaintext, 0, plaintextlen);
-    size_t plaintextolen = 0;
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+    const *root = cJSON_Parse(response);
+    if (root == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+      goto exit;
+    }
 
-    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, atkey->metadata.ivnonce.str,
-                                 response, recvlen, plaintext, plaintextlen, &plaintextolen);
+    cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
+    if (metadata == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    char *metadatastr = cJSON_Print(metadata);
+
+    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+      goto exit;
+    }
+
+    // manage IV
+    if (atclient_atkey_metadata_is_ivnonce_initialized(atkey->metadata)) {
+      size_t ivolen;
+      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
+                                  ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+      if (ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+        goto exit;
+      }
+
+      if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
+        ret = 1;
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+                              ATCHOPS_IV_BUFFER_SIZE);
+        goto exit;
+      }
+    } else {
+      // use legacy IV
+      memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    }
+
+    cJSON *data = cJSON_GetObjectItem(root, "data");
+    if (data == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    // decrypt response data
+    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv, response, recvlen, value,
+                                 valuelen, &valueolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
     }
-    memcpy(value, plaintext, valuelen);
   }
 
+  ret = 0;
   goto exit;
 exit : { return ret; }
 }
