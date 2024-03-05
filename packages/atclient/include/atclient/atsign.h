@@ -1,9 +1,6 @@
 #ifndef ATCLIENT_ATSIGN_H
 #define ATCLIENT_ATSIGN_H
 
-#define MAX_ATSIGN_CHARACTERS (55 + 1) // 55 + @
-#define MAX_ATSIGN_STR_BUFFER (MAX_ATSIGN_CHARACTERS * 6) + 1
-
 // Structure to represent the AtSign class
 typedef struct atclient_atsign {
   char *atsign;

@@ -53,7 +53,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@47b3d888fe66b639e431abf22ebca059152f1eea # v3.24.5
+      uses: github/codeql-action/init@8a470fddafa5cbb6266ee11b37ef4d8aae19c571 # v3.24.6
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -67,21 +67,21 @@ jobs:
     - name: Install atclient
       working-directory: packages/atclient
       run: |
-        cmake -S . -B build -DATCLIENT_FETCH_MBEDTLS=ON -DATCLIENT_FETCH_ATCHOPS=ON
+        cmake -S . -B build
         sudo cmake --build build --target install
 
     - name: Build sample_cmake_project
-      working-directory: examples/sample_cmake_project
+      working-directory: examples/desktop/sample_cmake_project
       run: |
         cmake -S . -B build
         cmake --build build
 
     - name: Run sample_cmake_project executable
-      working-directory: examples/sample_cmake_project
+      working-directory: examples/desktop/sample_cmake_project
       run: |
         ./build/exec
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@47b3d888fe66b639e431abf22ebca059152f1eea # v3.24.5
+      uses: github/codeql-action/analyze@8a470fddafa5cbb6266ee11b37ef4d8aae19c571 # v3.24.6
       with:
         category: "/language:${{matrix.language}}"
