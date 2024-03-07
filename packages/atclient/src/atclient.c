@@ -2,6 +2,7 @@
 #include "atchops/aes.h"
 #include "atchops/aesctr.h"
 #include "atchops/base64.h"
+#include "atchops/iv.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
 #include "atclient/atkey.h"
@@ -281,7 +282,7 @@ exit : { return ret; }
 }
 
 static int atclient_get_shared_by_me_with_other(const atclient *atclient, const atclient_atkey *atkey, char *value,
-                                                const size_t valuelen, size_t *valueolen, const char *shared_enc_key,
+                                                const size_t valuelen, size_t *valueolen, char *shared_enc_key,
                                                 const bool create_new_encryption_key_shared_by_me_if_not_found);
 
 static int atclient_get_shared_by_other_with_me(const atclient *atclient, const atclient_atkey *atkey, char *value,
@@ -305,7 +306,7 @@ int atclient_get_sharedkey(const atclient *atclient, const atclient_atkey *atkey
       goto exit;
     }
   } else {
-    ret = atclient_get_shared_by_me_with_other(atclient, atkey, value, valuelen, valueolen, shared_enc_key);
+    ret = atclient_get_shared_by_me_with_other(atclient, atkey, value, valuelen, valueolen, shared_enc_key, false);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_by_me_with_other: %d\n", ret);
       goto exit;
@@ -317,12 +318,20 @@ exit : { return ret; }
 }
 
 static int atclient_get_shared_by_me_with_other(const atclient *atclient, const atclient_atkey *atkey, char *value,
-                                                const size_t valuelen, size_t *valueolen, const char *shared_enc_key,
+                                                const size_t valuelen, size_t *valueolen, char *shared_enc_key,
                                                 const bool create_new_encryption_key_shared_by_me_if_not_found) {
   int ret = 1;
+  short enc_key_mem = 0;
 
+  char *atkey_str_buff = NULL;
+  char *command = NULL;
+  char *response_prefix = NULL;
+  char *recv = NULL;
+
+  // check shared key
   char *enc_key = shared_enc_key;
   if (enc_key == NULL) {
+    enc_key_mem = 1;
     enc_key = malloc(45);
     ret = atclient_get_encryption_key_shared_by_me(atclient, atkey->sharedwith.str, enc_key,
                                                    create_new_encryption_key_shared_by_me_if_not_found);
@@ -332,8 +341,9 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
     }
   }
 
+  // atclient_atkey_to_string buffer
   const size_t atkey_str_buf_len = ATKEY_GENERAL_BUFFER_SIZE;
-  char atkey_str_buff[atkey_str_buf_len];
+  atkey_str_buff = malloc(atkey_str_buf_len * sizeof(char));
   size_t atkey_out_len = 0;
 
   ret = atclient_atkey_to_string(*atkey, atkey_str_buff, atkey_str_buf_len, &atkey_out_len);
@@ -347,29 +357,29 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
   const short command_prefix_len = 12;
 
   const size_t command_len = command_prefix_len + atkey_out_len + 3;
-  char command[command_len];
+  command = malloc(command_len * sizeof(char));
   snprintf(command, command_len, "llookup:all:%s\r\n", atkey_str_buff);
 
   // send command and recv response
   const size_t recvlen = 4096;
-  unsigned char recv[recvlen];
+  recv = malloc(recvlen * sizeof(unsigned char));
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t recv_olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
-                                 recvlen, &recv_olen);
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command),
+                                 recv, recvlen, &recv_olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
   char *response = (char *)recv;
-  short atsign_with_at_len = (short)strlen(ctx->atsign.atsign);
+  short atsign_with_at_len = (short)strlen(atclient->atsign.atsign);
 
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
-  char response_prefix[response_prefix_len];
-  snprintf(response_prefix, response_prefix_len, "@%s@", ctx->atsign.without_prefix_str);
+  response_prefix = malloc(response_prefix_len * sizeof(char));
+  snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
 
   if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
     response = response + response_prefix_len;
@@ -445,12 +455,19 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
 
   ret = 0;
   goto exit;
-exit : { return ret; }
+exit : {
+  if (enc_key_mem)
+    free(enc_key);
+  return ret;
+}
 }
 
 static int atclient_get_shared_by_other_with_me(const atclient *atclient, const atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, const char *shared_enc_key) {
   int ret = 1;
+  char *command = NULL;
+  unsigned char *recv = NULL;
+  char *response_prefix = NULL;
 
   char *enc_key = shared_enc_key;
   if (enc_key == NULL) {
@@ -477,17 +494,17 @@ static int atclient_get_shared_by_other_with_me(const atclient *atclient, const 
   const short command_prefix_len = 11;
   const size_t command_len =
       command_prefix_len + atkey->name.olen + extra_point_len + namespace_len + atkey->sharedby.olen + 3;
-  char command[command_len];
+  command = malloc(command_len * sizeof(char));
   snprintf(command, command_len, "lookup:all:%s%s%s%s\r\n", atkey->name.str, extra_point_len ? "." : "", namespace,
            atkey->sharedby.str);
 
   // send command and recv response
   const size_t recvlen = 4096;
-  unsigned char recv[recvlen];
+  recv = malloc(recvlen * sizeof(unsigned char));
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t recv_olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
                                  recvlen, &recv_olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -495,12 +512,12 @@ static int atclient_get_shared_by_other_with_me(const atclient *atclient, const 
   }
 
   char *response = (char *)recv;
-  short atsign_with_at_len = (short)strlen(ctx->atsign.atsign);
+  short atsign_with_at_len = (short)strlen(atclient->atsign.atsign);
 
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
-  char response_prefix[response_prefix_len];
-  snprintf(response_prefix, response_prefix_len, "@%s@", ctx->atsign.without_prefix_str);
+  response_prefix = (response_prefix_len * sizeof(char));
+  snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
 
   if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
     response = response + response_prefix_len;
