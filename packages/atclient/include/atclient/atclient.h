@@ -119,10 +119,11 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * @param value the buffer to hold value gotten from atServer
  * @param valuelen the buffer length allocated for the value
  * @param valueolen the output length of the value gotten from atServer
+ * @param bypasscache true if you want to bypass the cached publickey, that might be on your atServer, and get the most
+ * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
-                           const size_t valuelen, size_t *valueolen);
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value, const size_t valuelen, size_t *valueolen, bool bypasscache);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
