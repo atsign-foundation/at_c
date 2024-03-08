@@ -1,5 +1,4 @@
 #include "atclient/notification.h"
-#include "atclient/atstr.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "cJSON/cJSON.h"
