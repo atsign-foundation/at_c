@@ -216,7 +216,6 @@ exit: {
 
 size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
   size_t len = 0;
-  // TODO: calculate this
 
   return len;
 }

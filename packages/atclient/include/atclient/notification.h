@@ -3,9 +3,6 @@
 
 #include "atclient.h"
 #include "atkey.h"
-#include "atstr.h"
-#include "connection.h"
-#include "metadata.h"
 
 // For sending notifications
 enum atclient_notify_operation { NO_none, NO_update, NO_delete };
@@ -21,7 +18,7 @@ static const char *atclient_notify_message_type_str[] = {
 };
 
 enum atclient_notify_priority { NP_none, NP_low, NP_medium, NP_high };
-static const char *notify_priority_str[] = {
+static const char *atclient_notify_priority_str[] = {
     [NP_low] = "low",
     [NP_medium] = "medium",
     [NP_high] = "high",
@@ -34,9 +31,9 @@ static const char *atclient_notify_strategy_str[] = {
 };
 
 typedef struct atclient_notify_params {
-  atclient_atstr id;
+  char id[37]; // uuid v4 + '\0'
   atclient_atkey key;
-  atclient_atstr value;
+  char *value;
   enum atclient_notify_operation operation;
   enum atclient_notify_message_type message_type;
   enum atclient_notify_priority priority;
@@ -67,7 +64,7 @@ typedef struct atclient_atnotification {
 
 typedef void(atclient_monitor_handler)(const atclient_atnotification *notification);
 typedef struct atclient_monitor_params {
-  atclient_atstr regex;
+  char *regex;
   atclient_monitor_handler *handler;
 } atclient_monitor_params;
 

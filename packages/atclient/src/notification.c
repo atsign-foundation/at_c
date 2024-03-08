@@ -18,15 +18,15 @@ void atclient_notify_params_init(atclient_notify_params *params) {
 }
 
 void atclient_notify_params_free(atclient_notify_params *params) {
-  atclient_atstr_free(&params->id);
   atclient_atkey_free(&params->key);
-  atclient_atstr_free(&params->value);
+  free(params->value);
   free(params->notifier);
 }
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   int res = 1;
-  size_t bufsize = 6 + 1 + 2 + 1 + 36 + 1 +              // "notify:id:" + $uuid + '\0'
+  // Step 1 calculate the buffer size needed for the protocol command
+  size_t bufsize = 6 + 1 + 2 + 1 + 36 + 3 +              // "notify:id:" + $uuid + trailing '\r\n\0'
                    1 + 8 + 1 + strlen(params->notifier); // ":notifier:$notifier"
 
   // minimum viable: notify:update:key:value -> id
@@ -54,13 +54,19 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
                20;         // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
   }
 
+  if (params->value != NULL) {
+    bufsize += 1 + strlen(params->value); // :$value
+  }
+
   // add metadata fragment length
   size_t metadatalen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
   bufsize += metadatalen;
 
   // atkey parts length
-  bufsize += params->key.name.olen;
+  size_t atkeylen = atclient_atkey_strlen(&params->key);
+  bufsize += atkeylen;
 
+  // Step 2 generate / retrieve values which could potentially fail
   res = atchops_uuid_init();
   if (res != 0) {
     atclient_atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
@@ -68,8 +74,8 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
     return res;
   }
 
-  atclient_atstr_init(&params->id, 37);
-  res = atchops_uuid_generate(params->id.str, params->id.len);
+  // careful about when this is called, since it will write a null terminator to the 37th char
+  res = atchops_uuid_generate(params->id, 37);
   if (res != 0) {
     atclient_atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
                           "atchops_uuid_generate failed with code %d\n", res);
@@ -88,19 +94,83 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   unsigned long long ttln =
       (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000 + params->notification_expiry;
 
+  // Step 3 allocate the buffer and populate the full command
+  char cmd[bufsize];
+  snprintf(cmd, bufsize, "notify:id:%s", params->id);
+  // now overwrite the '\0' at the tail of params->id
+  const char *part;
+  size_t off = 46;
+  if (params->operation != NO_none) {
+    part = atclient_notify_operation_str[params->operation];
+    snprintf(cmd + off, bufsize - off, ":%s", part);
+    off += strlen(part);
+  }
+
+  if (params->message_type != NMT_none) {
+    part = atclient_notify_message_type_str[params->message_type];
+    snprintf(cmd + off, bufsize - off, ":%s", part);
+    off += strlen(part);
+  }
+
+  if (params->priority != NP_none) {
+    part = atclient_notify_priority_str[params->priority];
+    snprintf(cmd + off, bufsize - off, ":%s", part);
+    off += strlen(part);
+  }
+
+  if (params->strategy != NS_none) {
+    part = atclient_notify_strategy_str[params->strategy];
+    snprintf(cmd + off, bufsize - off, ":%s", part);
+    off += strlen(part);
+  }
+
+  if (params->notification_expiry > 0) {
+    char ttln_str[21];
+    sprintf(ttln_str, "%llu", ttln);
+    // TODO: check this for correctness
+    printf("str: %s, len: %lu", ttln_str, strlen(ttln_str));
+    off += strlen(ttln_str) - 1;
+    snprintf(cmd + off, bufsize - off, ":ttln:%llu", ttln);
+  }
+
+  size_t metadataolen;
+  atclient_atkey_metadata_to_protocolstr(&params->key.metadata, cmd + off, metadatalen, &metadataolen);
+  if (metadatalen != metadataolen) {
+    // TODO: error
+    return 1;
+  }
+  off += metadatalen;
+
+  size_t atkeyolen;
+  atclient_atkey_to_string(&params->key, cmd + off, atkeylen, &atkeyolen);
+  if (atkeylen != atkeyolen) {
+    // TODO: error
+    return 1;
+  }
+  off += atkeylen;
+
+  if (params->value != NULL) {
+    snprintf(cmd + off, bufsize - off, ":%s", params->value);
+  }
+
+  snprintf(cmd + off, bufsize - off, "\r\n");
+
+  // Step 4 send the command
+
   return 0;
 }
 
 int atclient_monitor(atclient *ctx, const atclient_monitor_params *params) {
   int res = 1;
   size_t cmd_len = 7 + 1; // "monitor" + '\0'
-  if (params->regex.olen > 0) {
-    cmd_len += params->regex.olen + 1;
+  size_t regex_len = strlen(params->regex);
+  if (regex_len > 0) {
+    cmd_len += regex_len + 1;
   }
 
   char cmd[cmd_len];
-  if (params->regex.olen > 0) {
-    snprintf(cmd, cmd_len, "%s %s", "monitor", params->regex.str);
+  if (regex_len > 0) {
+    snprintf(cmd, cmd_len, "%s %s", "monitor", params->regex);
   } else {
     snprintf(cmd, cmd_len, "%s", "monitor");
   }
@@ -108,7 +178,6 @@ int atclient_monitor(atclient *ctx, const atclient_monitor_params *params) {
   // Send the monitor command
   // poll for responses
   // find \n to
-  //
   res = mbedtls_ssl_write(&ctx->secondary_connection.ssl, (unsigned char *)cmd, cmd_len);
 
   char *buffer = calloc(0, sizeof(char));
@@ -141,7 +210,7 @@ int atclient_monitor(atclient *ctx, const atclient_monitor_params *params) {
     }
 
     // if we got a bad read, then skip this entire message
-    if (bad_read == 1) {
+    if (bad_read != 0) {
       bad_read = 0;
       goto reset_buffer;
     }
@@ -173,7 +242,7 @@ int atclient_monitor(atclient *ctx, const atclient_monitor_params *params) {
     cJSON *key = cJSON_GetObjectItem(root, "key");
     atclient_atkey_from_string(&notification.key, key->valuestring, strlen(key->valuestring));
 
-    if (false) { // TODO if regex doesnt match
+    if (false) { // TODO: if regex doesnt match
       cJSON_Delete(root);
       atclient_atkey_free(&notification.key);
       goto reset_buffer;

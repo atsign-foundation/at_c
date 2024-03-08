@@ -54,6 +54,16 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
 
 size_t atclient_atkey_strlen(const atclient_atkey *atkey);
 /**
+ * @brief get the length of the atkey string
+ *
+ * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
+ * @return size_t the length of the atkey string
+ *
+ * @note this excludes the null terminator and metadata string fragement
+ */
+size_t atclient_atkey_strlen(const atclient_atkey *atkey);
+
+/**
  * @brief convert an atkey struct to its string format
  *
  * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
