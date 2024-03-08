@@ -225,6 +225,7 @@ if(NOT ESP_PLATFORM)
   # # ########################################################
   if(NOT ATCLIENT_AS_SUBPROJECT) # if it is not a sub project, we should install the -config.cmake
     export(
+      EXPORT ${PROJECT_NAME}-config
       NAMESPACE ${PROJECT_NAME}::
       FILE ${PROJECT_NAME}-config.cmake
     )
