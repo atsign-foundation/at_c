@@ -123,7 +123,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value, const size_t valuelen, size_t *valueolen, bool bypasscache);
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen, bool bypasscache);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
