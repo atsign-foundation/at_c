@@ -265,7 +265,7 @@ static int test_atkey_metadata_to_protocolstr() {
   ret =
       atclient_atkey_metadata_to_protocol_str(&metadata, protocolfragment, protocolfragmentlen, &protocolfragmentolen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr failed");
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed");
     goto exit;
   }
 

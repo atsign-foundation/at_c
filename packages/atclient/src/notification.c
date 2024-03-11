@@ -134,7 +134,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   }
 
   size_t metadataolen;
-  atclient_atkey_metadata_to_protocolstr(&params->key.metadata, cmd + off, metadatalen, &metadataolen);
+  atclient_atkey_metadata_to_protocol_str(&params->key.metadata, cmd + off, metadatalen, &metadataolen);
   if (metadatalen != metadataolen) {
     // TODO: error
     return 1;

@@ -117,7 +117,7 @@ typedef struct atclient_atkey_metadata {
   // Represents the amount of time for atkey to exist from the point at birth to the point at death.
   // Example ttl=86400 means the atkey will live for a day.
   // This field is read from protocol string and and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   long ttl;
 
   // Time to birth in milliseconds
@@ -125,7 +125,7 @@ typedef struct atclient_atkey_metadata {
   // Example ttb=100 means the atkey will take 100 milliseconds to exist from the point the protocol command was sent
   // and received by the atServer
   // This field is read from protocol string and and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   long ttb;
 
   // Time to refresh in milliseconds
@@ -134,43 +134,43 @@ typedef struct atclient_atkey_metadata {
   // can be cached forever. 0 means do not refresh. ttr > 0 means refresh the key every ttr milliseconds. ttr null means
   // a ttr is not applicable to this type of atkey (because it may be a selfkey), which has the same effect as 0.
   // This field is read from protocol string and and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   long ttr;
 
   // Cascade Delete
   // ccd=1 means this cached keys will be deleted upon the deletion of the original copy
   // ccd=0 means this cached keys will not be deleted upon the deletion of the original copy
   // This field is read from protocol string and and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   bool ccd : 1;
 
   // isbinary=true means atkey stores binary data
   // isbinary=false means atkey stores non-binary data (like plain text)
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   bool isbinary : 1;
 
   // isencrypted=true means the value is encrypted, most commonly used for sharedkeys
   // isencrypted=false means the value is not encrypted
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   bool isencrypted : 1;
 
   // Public data is signed using the key owner's encryptPrivateKey and the result is stored here. This is to ensure that
   // the data came from the owner of the public/private keypair
   // This field is read from protocol string and can also be set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr datasignature;
 
   // Represents the status of the shared key.
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr sharedkeystatus;
 
   // Stores the sharedkey that the data is encrypted with. This is only set if sharedWith is set. The contents will be
   // encrypted using the public key of the sharedWith atSign.
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr sharedkeyenc;
 
   // Regarding the following 2 fields...
@@ -181,17 +181,17 @@ typedef struct atclient_atkey_metadata {
 
   // The hash of the public key used to encrypt the [sharedKeyEnc].
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr pubkeyhash;
 
   // The algorithm used to hash the public key used to encrypt the [sharedKeyEnc] (e.g. "sha256" or "sha512")
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr pubkeyalgo;
 
   // The type of encoding the value is (e.g. "base64")
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr encoding;
 
   // The name of the key used to encrypt the value. If not provided, use sharedKeyEnc in the metadata. If sharedKeyEnc
@@ -199,28 +199,28 @@ typedef struct atclient_atkey_metadata {
   // without the sharedWith suffix and sharedBy prefix, nor visibility prefix. Example '@bob:shared_key.wavi@alice',
   // must be only be 'shared_key.wavi'
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr enckeyname;
 
   // The name of the algorithm used to encrypt the value. For data, the default algorithm is 'AES/SIC/PKCS7Padding', for
   // cryptographic keys, the default algorithm is 'RSA'
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr encalgo;
 
   // The initialization vector or nonce used when the data was encrypted with the shared symmetric encryption key
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr ivnonce;
 
   // TODO: info about this metadata
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr skeenckeyname;
 
   // TODO: info about this metadata
   // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocol_str)
   atclient_atstr skeencalgo;
 
   // Holds the metadata fields that have not been initialized (0) or have been initialized (1)
@@ -256,7 +256,7 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
 void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json);
 /**
  * @brief Reads metadata struct and converts it to a json formatted string. This function should mostly be used for
- * debugging only. See atclient_atkey_metadata_to_protocolstr for a more useful function when working with atProtocol
+ * debugging only. See atclient_atkey_metadata_to_protocol_str for a more useful function when working with atProtocol
  *
  * @param metadata the metadata struct to convert to a string
  * @param metadatastr the buffer to write the metadata to
@@ -278,7 +278,7 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
  * @param metadatastrolen the length of the metadata string written to metadatastr once the operation is complete
  * @return int 0 on success
  */
-int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata *metadata, char *metadatastr,
+int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
                                            const size_t metadatastrlen, size_t *metadatastrolen);
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata);
