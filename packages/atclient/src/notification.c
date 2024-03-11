@@ -4,6 +4,7 @@
 #include "cJSON/cJSON.h"
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 

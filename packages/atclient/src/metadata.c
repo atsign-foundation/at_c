@@ -839,7 +839,7 @@ size_t atclient_atkey_metadata_skeenckeyname_strlen(const atclient_atkey_metadat
          + metadata->skeenckeyname.olen;
 }
 
-size_t atclient_atkey_metadata_skeencalog_strlen(const atclient_atkey_metadata *metadata) {
+size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *metadata) {
   return 12 // :skeEncAlgo:
          + metadata->skeencalgo.olen;
 }
