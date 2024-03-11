@@ -111,7 +111,7 @@ int long_strlen(long n) {
     len++; // for the minus sign
   }
 
-  for (long i = 1; i < n; i *= 10) {
+  for (long i = 1; i <= n; i *= 10) {
     len++;
   }
 
