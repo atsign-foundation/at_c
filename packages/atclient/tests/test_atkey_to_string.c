@@ -61,7 +61,7 @@ static int test1a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -111,7 +111,7 @@ static int test1b() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -163,7 +163,7 @@ static int test1c() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -216,7 +216,7 @@ static int test1d() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -273,7 +273,7 @@ static int test2a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -317,7 +317,7 @@ static int test2b() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -368,7 +368,7 @@ static int test2c() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -433,7 +433,7 @@ static int test2d() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -478,7 +478,7 @@ static int test3a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -530,7 +530,7 @@ static int test4a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;

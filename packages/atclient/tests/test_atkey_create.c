@@ -45,7 +45,7 @@ static int test_create_publickey() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &expectedolen);
+  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &expectedolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
@@ -113,7 +113,7 @@ static int test_create_selfkey() {
   }
 
   unsigned long atkeystrolen = 0;
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
+  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
@@ -193,7 +193,7 @@ static int test_create_sharedkey() {
   }
 
   unsigned long atkeystrolen = 0;
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
+  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
