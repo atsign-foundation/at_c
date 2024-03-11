@@ -63,25 +63,7 @@ int main()
 
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen, (int) atkeystr.olen, atkeystr.str);
 
-    ret = atclient_get_publickey(&atclient, &root_connection, &atkey, value.str, value.len, &value.olen, true);
-    if(ret != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
-        goto exit;
-    }
-
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Data: \"%.*s\"\n", (int) value.olen, value.str);
-
-    char metadatajsonstr[4096];
-    memset(metadatajsonstr, 0, 4096);
-    size_t metadatstrolen = 0;
-
-    ret = atclient_atkey_metadata_to_jsonstr(atkey.metadata, metadatajsonstr, 4096, &metadatstrolen);
-    if(ret != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert metadata to json string");
-        goto exit;
-    }
-
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Metadata: \"%.*s\"\n", (int) metadatstrolen, metadatajsonstr);
+    // TODO: atclient_put
 
     ret = 0;
     goto exit;
