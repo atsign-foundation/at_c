@@ -844,7 +844,9 @@ size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *
          + metadata->skeencalgo.olen;
 }
 
-int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr) {
+int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
+                                            size_t metadatastrlen, size_t *metadatastrolen) {
+
   int ret = 1;
   size_t pos = 0;
 
