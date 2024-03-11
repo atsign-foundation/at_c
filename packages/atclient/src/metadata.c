@@ -683,71 +683,71 @@ exit: {
 size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *metadata) {
   long len = 0;
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
-    len += atclient_atkey_metadata_ttl_strlen(metadata);
+    len += 5 + atclient_atkey_metadata_ttl_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
-    len += atclient_atkey_metadata_ttb_strlen(metadata);
+    len += 5 + atclient_atkey_metadata_ttb_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
-    len += atclient_atkey_metadata_ttr_strlen(metadata);
+    len += 5 + atclient_atkey_metadata_ttr_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ccd_initialized(metadata) && metadata->ccd) {
-    len += atclient_atkey_metadata_ccd_strlen(metadata) && metadata->ccd;
+    len += 5 + atclient_atkey_metadata_ccd_strlen(metadata) && metadata->ccd;
   }
 
   if (atclient_atkey_metadata_is_isbinary_initialized(metadata) && metadata->isbinary) {
-    len += atclient_atkey_metadata_isbinary_strlen(metadata) && metadata->isbinary;
+    len += 10 + atclient_atkey_metadata_isbinary_strlen(metadata) && metadata->isbinary;
   }
 
   if (atclient_atkey_metadata_is_isencrypted_initialized(metadata) && metadata->isencrypted) {
-    len += atclient_atkey_metadata_isencrypted_strlen(metadata) && metadata->isencrypted;
+    len += 13 + atclient_atkey_metadata_isencrypted_strlen(metadata) && metadata->isencrypted;
   }
 
   if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
-    len += atclient_atkey_metadata_datasignature_strlen(metadata);
+    len += 15 + atclient_atkey_metadata_datasignature_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_sharedkeystatus_initialized(metadata)) {
-    len += atclient_atkey_metadata_sharedkeystatus_strlen(metadata);
+    len += 17 + atclient_atkey_metadata_sharedkeystatus_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_sharedkeyenc_initialized(metadata)) {
-    len += atclient_atkey_metadata_sharedkeyenc_strlen(metadata);
+    len += 14 + atclient_atkey_metadata_sharedkeyenc_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_pubkeyhash_initialized(metadata)) {
-    len += atclient_atkey_metadata_pubkeyhash_strlen(metadata);
+    len += 6 + atclient_atkey_metadata_pubkeyhash_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_pubkeyalgo_initialized(metadata)) {
-    len += atclient_atkey_metadata_pubkeyalgo_strlen(metadata);
+    len += 6 + atclient_atkey_metadata_pubkeyalgo_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
-    len += atclient_atkey_metadata_encoding_strlen(metadata);
+    len += 10 + atclient_atkey_metadata_encoding_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
-    len += atclient_atkey_metadata_enckeyname_strlen(metadata);
+    len += 12 + atclient_atkey_metadata_enckeyname_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
-    len += atclient_atkey_metadata_encalgo_strlen(metadata);
+    len += 9 + atclient_atkey_metadata_encalgo_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
-    len += atclient_atkey_metadata_ivnonce_strlen(metadata);
+    len += 9 + atclient_atkey_metadata_ivnonce_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_skeenckeyname_initialized(metadata)) {
-    len += atclient_atkey_metadata_skeenckeyname_strlen(metadata);
+    len += 15 + atclient_atkey_metadata_skeenckeyname_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
-    len += atclient_atkey_metadata_skeencalgo_strlen(metadata);
+    len += 12 + atclient_atkey_metadata_skeencalgo_strlen(metadata);
   }
 
   return len;
