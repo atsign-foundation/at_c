@@ -74,10 +74,11 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  * @param value the value to put into atServer
  * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for this
  * value)
+ * @param commitid (optional) the output commitid of the put operation that the atServer returns
  * @return int 0 on success
  */
 int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
-                 const size_t valuelen);
+                const size_t valuelen, int *commitid);
 
 // TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 
@@ -123,7 +124,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value, const size_t valuelen, size_t *valueolen, bool bypasscache);
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+                           const size_t valuelen, size_t *valueolen, bool bypasscache);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
