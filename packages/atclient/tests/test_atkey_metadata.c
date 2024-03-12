@@ -245,7 +245,7 @@ exit: {
 static int test_atkey_metadata_to_protocolstr() {
   int ret = 1;
 
-  const char *expected = ":ttr:-1:isBinary:true:isEncrypted:true:ivNonce:abcdefghijk";
+  const char *expected = "ttr:-1:isBinary:true:isEncrypted:true:ivNonce:abcdefghijk:";
   const size_t expectedlen = strlen(expected);
 
   atclient_atkey_metadata metadata;
