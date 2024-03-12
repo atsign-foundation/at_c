@@ -684,70 +684,70 @@ int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata metadat
   atclient_atstr_init(&protocolstr, 4096);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":ttl:%ld", metadata.ttl) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "ttl:%ld:", metadata.ttl) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":ttb:%ld", metadata.ttb) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "ttb:%ld:", metadata.ttb) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":ttr:%ld", metadata.ttr) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "ttr:%ld:", metadata.ttr) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_ccd_initialized(metadata) && metadata.ccd) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":ccd:true") != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "ccd:true:") != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_isbinary_initialized(metadata) && metadata.isbinary) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":isBinary:true") != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "isBinary:true:") != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_isencrypted_initialized(metadata) && metadata.isencrypted) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":isEncrypted:true") != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "isEncrypted:true:") != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":dataSignature:%s", metadata.datasignature.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "dataSignature:%s:", metadata.datasignature.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_sharedkeystatus_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":sharedKeyStatus:%s", metadata.sharedkeystatus.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "sharedKeyStatus:%s:", metadata.sharedkeystatus.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_sharedkeyenc_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":sharedKeyEnc:%s", metadata.sharedkeyenc.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "sharedKeyEnc:%s:", metadata.sharedkeyenc.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_pubkeyhash_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":hash:%s", metadata.pubkeyhash.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "hash:%s:", metadata.pubkeyhash.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
@@ -761,28 +761,28 @@ int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata metadat
   }
 
   if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":encoding:%s", metadata.encoding.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "encoding:%s:", metadata.encoding.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":encKeyName:%s", metadata.enckeyname.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "encKeyName:%s:", metadata.enckeyname.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":encAlgo:%s", metadata.encalgo.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "encAlgo:%s:", metadata.encalgo.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
   }
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":ivNonce:%s", metadata.ivnonce.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "ivNonce:%s:", metadata.ivnonce.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }
@@ -796,7 +796,7 @@ int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata metadat
   }
 
   if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
-    if ((ret = atclient_atstr_append(&protocolstr, ":skeEncAlgo:%s", metadata.skeencalgo.str) != 0)) {
+    if ((ret = atclient_atstr_append(&protocolstr, "skeEncAlgo:%s:", metadata.skeencalgo.str) != 0)) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append failed\n");
       goto exit;
     }

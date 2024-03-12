@@ -318,20 +318,24 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
     goto exit;
   }
 
-  const size_t cmdbufferlen = strlen(" update:\r\n") + metadataprotocolstrolen + atkeystrolen + ciphertextolen + 1 + (metadataprotocolstrolen != 0 ? metadataprotocolstrolen + 1 : 0); // + 1 for null terminator and +(metadatastrolen + 1) in case metadata is not empty, we want to append update:<metadata>: including extra :,that's why +1
+  size_t cmdbufferlen =
+      strlen(" update:\r\n") + atkeystrolen + ciphertextolen + 1; // + 1 for null terminator
+
+  if (metadataprotocolstrolen > 0) {
+    cmdbufferlen += metadataprotocolstrolen;
+  }
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, sizeof(char) * cmdbufferlen);
 
-  snprintf(cmdbuffer, cmdbufferlen, "update:%.*s%.*s %.*s\r\n", (int) metadataprotocolstrolen, metadataprotocolstr,
-           (int) atkeystrolen, atkeystr, (int) ciphertextolen, ciphertext);
-  // printf("metadataprotocolstrolen: %lu\n", metadataprotocolstrolen);
-  // printf("atkeystrolen: %lu\n", atkeystrolen);
-  // printf("ciphertextolen: %lu\n", ciphertextolen);
-  // printf("cmdbufferlen: %lu\n", cmdbufferlen);
-  // printf("strlen(cmdbuffer): %lu\n", strlen(cmdbuffer));
+  snprintf(cmdbuffer, cmdbufferlen, "update:%.*s%.*s %.*s\r\n", (int) metadataprotocolstrolen, metadataprotocolstr, (int)atkeystrolen, atkeystr, (int)ciphertextolen, ciphertext);
+  printf("metadataprotocolstrolen: %lu\n", metadataprotocolstrolen);
+  printf("metadataprotocolstr: %s\n", metadataprotocolstr);
+  printf("atkeystrolen: %lu\n", atkeystrolen);
+  printf("ciphertextolen: %lu\n", ciphertextolen);
+  printf("cmdbufferlen: %lu\n", cmdbufferlen);
+  printf("strlen(cmdbuffer): %lu\n", strlen(cmdbuffer));
 
-
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen-1, recv,
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
                                  recvlen, &recvolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -345,7 +349,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
     goto exit;
   }
 
-  if(commitid != NULL) {
+  if (commitid != NULL) {
     char *recvwithoutdata = (char *)recv + 5;
     *commitid = atoi(recvwithoutdata);
   }
