@@ -272,6 +272,16 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
   memset(iv, 0, sizeof(unsigned char) * ivlen);
 
+  const size_t metadataprotocolstrlen = 2048;
+  char metadataprotocolstr[metadataprotocolstrlen];
+  memset(metadataprotocolstr, 0, sizeof(char) * metadataprotocolstrlen);
+  size_t metadataprotocolstrolen = 0;
+
+  const size_t ciphertextlen = 4096;
+  unsigned char ciphertext[4096];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextlen);
+  size_t ciphertextolen = 0;
+
   char *cmdbuffer = NULL;
 
   // 2. build update: command
@@ -281,22 +291,12 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
     goto exit;
   }
 
-  const size_t metadataprotocolstrlen = 2048;
-  char metadataprotocolstr[metadataprotocolstrlen];
-  memset(metadataprotocolstr, 0, sizeof(char) * metadataprotocolstrlen);
-  size_t metadataprotocolstrolen = 0;
-
   ret = atclient_atkey_metadata_to_protocolstr(atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
                                                &metadataprotocolstrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;
   }
-
-  const size_t ciphertextlen = 4096;
-  unsigned char ciphertext[4096];
-  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextlen);
-  size_t ciphertextolen = 0;
 
   if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     // no encryption
