@@ -328,12 +328,6 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
   memset(cmdbuffer, 0, sizeof(char) * cmdbufferlen);
 
   snprintf(cmdbuffer, cmdbufferlen, "update:%.*s%.*s %.*s\r\n", (int) metadataprotocolstrolen, metadataprotocolstr, (int)atkeystrolen, atkeystr, (int)ciphertextolen, ciphertext);
-  printf("metadataprotocolstrolen: %lu\n", metadataprotocolstrolen);
-  printf("metadataprotocolstr: %s\n", metadataprotocolstr);
-  printf("atkeystrolen: %lu\n", atkeystrolen);
-  printf("ciphertextolen: %lu\n", ciphertextolen);
-  printf("cmdbufferlen: %lu\n", cmdbufferlen);
-  printf("strlen(cmdbuffer): %lu\n", strlen(cmdbuffer));
 
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
                                  recvlen, &recvolen);
