@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PRIVATEKEYBASE64                                                                                               \
   "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCDc/"                                                             \
@@ -37,10 +38,10 @@ int main() {
   int ret = 1;
 
   const char *privatekeybase64 = PRIVATEKEYBASE64;
-  const unsigned long privatekeybase64len = strlen(privatekeybase64);
+  const size_t privatekeybase64len = strlen(privatekeybase64);
 
   const char *ciphertext = CIPHERTEXTBASE64;
-  const unsigned long ciphertextlen = strlen(ciphertext);
+  const size_t ciphertextlen = strlen(ciphertext);
 
   atchops_rsakey_privatekey privatekey;
   atchops_rsakey_privatekey_init(&privatekey);
@@ -53,10 +54,10 @@ int main() {
   }
   printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
 
-  unsigned long plaintextlen = 8192;
+  size_t plaintextlen = 8192;
   unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
   memset(plaintext, 0, plaintextlen);
-  unsigned long plaintextolen = 0;
+  size_t plaintextolen = 0;
 
   ret = atchops_rsa_decrypt(privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextlen,
                             &plaintextolen);

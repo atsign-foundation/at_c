@@ -2,6 +2,7 @@
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "test_atkey_from_string"
 
@@ -37,7 +38,7 @@ static int test1a() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_1A;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -88,7 +89,7 @@ static int test1b() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_1B;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -160,7 +161,7 @@ static int test1c() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_1C;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -230,7 +231,7 @@ static int test1d() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_1D;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -303,7 +304,7 @@ static int test2a() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2A;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -374,7 +375,7 @@ static int test2b() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2B;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -441,7 +442,7 @@ static int test2c() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2C;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -511,7 +512,7 @@ static int test2d() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2D;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -581,7 +582,7 @@ static int test3a() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_3A;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -653,7 +654,7 @@ static int test4a() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_4A;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -727,7 +728,7 @@ static int test4b() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_4B;
-  const unsigned long atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);

@@ -1,6 +1,8 @@
 #ifndef ATCHOPS_UUID_H
 #define ATCHOPS_UUID_H
 
+#include <stddef.h>
+
 /**
  * @brief Initializes the UUID generator. For example, opens /dev/urandom for reading
  *
@@ -15,6 +17,6 @@ int atchops_uuid_init(void);
  * @param uuidstrlen the length of the buffer
  * @return int 0 on success, 1 on error
  */
-int atchops_uuid_generate(char *uuidstr, const unsigned long uuidstrlen);
+int atchops_uuid_generate(char *uuidstr, const size_t uuidstrlen);
 
 #endif

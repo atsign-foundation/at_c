@@ -5,6 +5,7 @@
 #include "cJSON/cJSON.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "metadata"
 
@@ -364,7 +365,7 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
 }
 
 int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
-                                         const unsigned long metadatastrlen) {
+                                         const size_t metadatastrlen) {
   int ret = 1;
 
   cJSON *root = cJSON_Parse(metadatastr);
@@ -530,7 +531,7 @@ exit: { return ret; }
 }
 
 int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata metadata, char *metadatastr,
-                                       const unsigned long metadatastrlen, unsigned long *metadatastrolen) {
+                                       const size_t metadatastrlen, size_t *metadatastrolen) {
   int ret = 1;
 
   cJSON *root = cJSON_CreateObject();

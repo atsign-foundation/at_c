@@ -2,14 +2,15 @@
 #define ATCLIENT_ATBYTES_H
 
 #include "atclient/atstr.h"
+#include <stddef.h>
 
 /**
  * @brief Represents a buffer of bytes. Similar to atclient_atstr
  */
 typedef struct atclient_atbytes {
-  unsigned long len;    // the allocated length of the buffer
+  size_t len;    // the allocated length of the buffer
   unsigned char *bytes; // the buffer of bytes (pointer to the first byte in the buffer on the heap)
-  unsigned long olen;   // the output length of the buffer
+  size_t olen;   // the output length of the buffer
 } atclient_atbytes;
 
 /**
@@ -18,7 +19,7 @@ typedef struct atclient_atbytes {
  * @param atbytes the atbytes to initialize
  * @param atbyteslen the buffer length to allocate on the heap
  */
-void atclient_atbytes_init(atclient_atbytes *atbytes, const unsigned long atbyteslen);
+void atclient_atbytes_init(atclient_atbytes *atbytes, const size_t atbyteslen);
 
 /**
  * @brief Reset atbytes to all zeroes
@@ -35,7 +36,7 @@ void atclient_atbytes_reset(atclient_atbytes *atbytes);
  * @param byteslen the length of the bytes
  * @return int 0 on success, non-zero on failure
  */
-int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, const unsigned long byteslen);
+int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, const size_t byteslen);
 
 /**
  * @brief Convert a string to atbytes
@@ -45,7 +46,7 @@ int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, 
  * @param strlen the length of the string
  * @return int 0 on success
  */
-int atclient_atbytes_convert(atclient_atbytes *atbytes, const char *str, const unsigned long strlen);
+int atclient_atbytes_convert(atclient_atbytes *atbytes, const char *str, const size_t strlen);
 
 /**
  * @brief Converts an atstr to atbytes

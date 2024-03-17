@@ -6,6 +6,7 @@
 #include "atclient/atsign.h"
 #include "atclient/connection.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * @brief represents atclient
@@ -55,7 +56,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * @return int 0 on success
  */
 int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
-                               const char *atsign, const unsigned long atsignlen);
+                               const char *atsign, const size_t atsignlen);
 
 /**
  * @brief Put a string value into your atServer.

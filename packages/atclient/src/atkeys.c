@@ -7,6 +7,7 @@
 #include <atchops/rsakey.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "atkeys"
 
@@ -29,20 +30,20 @@ void atclient_atkeys_init(atclient_atkeys *atkeys) {
 }
 
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
-                                          const unsigned long aespkampublickeylen, const char *aespkamprivatekeystr,
-                                          const unsigned long aespkamprivatekeylen, const char *aesencryptpublickeystr,
-                                          const unsigned long aesencryptpublickeylen,
+                                          const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
+                                          const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
+                                          const size_t aesencryptpublickeylen,
                                           const char *aesencryptprivatekeystr,
-                                          const unsigned long aesencryptprivatekeylen, const char *selfencryptionkeystr,
-                                          const unsigned long selfencryptionkeylen) {
+                                          const size_t aesencryptprivatekeylen, const char *selfencryptionkeystr,
+                                          const size_t selfencryptionkeylen) {
   int ret = 1;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
-  const unsigned long recvlen = 32768;
+  const size_t recvlen = 32768;
   unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   // 1. decrypt *.atKeys and populate atkeys struct
 

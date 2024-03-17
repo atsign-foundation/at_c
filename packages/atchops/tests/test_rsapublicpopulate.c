@@ -2,6 +2,7 @@
 #include "atchops/rsakey.h"
 #include <stdio.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PUBLIC_KEY_BASE64                                                                                              \
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuuD88vWQ3Zunves9w5o3pLQ+7ClKONAMftVQ9dirJt6VD0xg5DNzX+"                \
@@ -13,7 +14,7 @@ int main() {
   int ret = 1;
 
   const char *publickeybase64 = PUBLIC_KEY_BASE64;
-  const unsigned long publickeybase64len = strlen(publickeybase64);
+  const size_t publickeybase64len = strlen(publickeybase64);
 
   atchops_rsakey_publickey publickey;
   atchops_rsakey_publickey_init(&publickey);
