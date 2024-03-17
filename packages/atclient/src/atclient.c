@@ -327,7 +327,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, sizeof(char) * cmdbufferlen);
 
-  snprintf(cmdbuffer, cmdbufferlen, "update:%.*s%.*s %.*s\r\n", (int) metadataprotocolstrolen, metadataprotocolstr, (int)atkeystrolen, atkeystr, (int)ciphertextolen, ciphertext);
+  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int) metadataprotocolstrolen, metadataprotocolstr, (int)atkeystrolen, atkeystr, (int)ciphertextolen, ciphertext);
 
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
                                  recvlen, &recvolen);
