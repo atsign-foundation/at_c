@@ -5,14 +5,15 @@
 #include <mbedtls/entropy.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
-int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64len, const enum atchops_aes_size keybits,
+int atchops_aesctr_encrypt(const char *keybase64, const size_t keybase64len, const enum atchops_aes_size keybits,
                            unsigned char *iv,
                            const unsigned char *plaintext, // plaintext to encrypt
-                           const unsigned long plaintextlen,
+                           const size_t plaintextlen,
                            unsigned char *ciphertextbase64,         // buffer to populate
-                           const unsigned long ciphertextbase64len, // the size of the buffer
-                           unsigned long *ciphertextbase64olen      // written actual length in the buffer
+                           const size_t ciphertextbase64len, // the size of the buffer
+                           size_t *ciphertextbase64olen      // written actual length in the buffer
 ) {
   int ret = 1;
 
@@ -21,7 +22,7 @@ int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64l
 
   // 1. pad the plaintext
   unsigned char *plaintextpadded;   // will contain the plaintext with padded trialing bytes
-  unsigned long plaintextpaddedlen; // the length of the plain text + padding (no null terminator)
+  size_t plaintextpaddedlen; // the length of the plain text + padding (no null terminator)
 
   const int numpadbytestoadd = 16 - (plaintextlen % 16);
   const unsigned char padval = numpadbytestoadd;
@@ -35,20 +36,20 @@ int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64l
   memset(plaintextpadded + plaintextlen, padval, numpadbytestoadd);
   plaintextpadded[plaintextpaddedlen] = '\0';
 
-  const unsigned long ciphertextlen =
+  const size_t ciphertextlen =
       plaintextlen * 8; // 8 times the plaintext length should be sufficient space for the ciphertext
   unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
   memset(ciphertext, 0, ciphertextlen);
-  unsigned long ciphertextolen = 0;
+  size_t ciphertextolen = 0;
 
-  unsigned long nc_off = 0;
+  size_t nc_off = 0;
   unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
   memset(stream_block, 0, 16);
 
   // 2. initialize AES key
-  const unsigned long keylen = keybits / 8; // 256/8 = 32 bytes long
+  const size_t keylen = keybits / 8; // 256/8 = 32 bytes long
   unsigned char *key = malloc(sizeof(unsigned char) * keylen);
-  unsigned long keyolen = 0;
+  size_t keyolen = 0;
 
   ret = atchops_base64_decode((const unsigned char *)keybase64, keybase64len, key, keylen, &keyolen);
   if (ret != 0) {
@@ -88,33 +89,33 @@ exit: {
 }
 }
 
-int atchops_aesctr_decrypt(const char *keybase64, const unsigned long keybase64len, const enum atchops_aes_size keybits,
+int atchops_aesctr_decrypt(const char *keybase64, const size_t keybase64len, const enum atchops_aes_size keybits,
                            unsigned char *iv, const unsigned char *ciphertextbase64,
-                           const unsigned long ciphertextbase64len, unsigned char *plaintext,
-                           const unsigned long plaintextlen, unsigned long *plaintextolen) {
+                           const size_t ciphertextbase64len, unsigned char *plaintext,
+                           const size_t plaintextlen, size_t *plaintextolen) {
   int ret = 1;
 
   mbedtls_aes_context aes;
   mbedtls_aes_init(&aes);
 
-  unsigned long keylen = keybits / 8;
+  size_t keylen = keybits / 8;
   unsigned char *key = malloc(sizeof(unsigned char) * keylen);
   memset(key, 0, keylen);
-  unsigned long keyolen = 0;
+  size_t keyolen = 0;
 
-  unsigned long ciphertextlen = ciphertextbase64len; // length of base64 should be greater than decoded text
+  size_t ciphertextlen = ciphertextbase64len; // length of base64 should be greater than decoded text
   unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
   memset(ciphertext, 0, ciphertextlen);
-  unsigned long ciphertextolen = 0;
+  size_t ciphertextolen = 0;
 
-  unsigned long nc_off = 0;
+  size_t nc_off = 0;
   unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
   memset(stream_block, 0, 16);
 
-  unsigned long plaintextpaddedlen = plaintextlen;
+  size_t plaintextpaddedlen = plaintextlen;
   unsigned char *plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedlen);
   memset(plaintextpadded, 0, plaintextpaddedlen);
-  unsigned long plaintextpaddedolen = 0;
+  size_t plaintextpaddedolen = 0;
 
   // 1. initialize AES key
   ret = atchops_base64_decode((const unsigned char *)keybase64, keybase64len, key, keylen, &keyolen);

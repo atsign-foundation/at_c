@@ -1,6 +1,8 @@
 #ifndef ATCHOPS_BASE64_H
 #define ATCHOPS_BASE64_H
 
+#include <stddef.h>
+
 /**
  * @brief Base64 encode some bytes
  *
@@ -11,8 +13,8 @@
  * @param writtenlen the length of the result after operation
  * @return int 0 on success
  */
-int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, unsigned char *dst,
-                          unsigned long dstlen, unsigned long *writtenlen);
+int atchops_base64_encode(const unsigned char *src, const size_t srclen, unsigned char *dst,
+                          size_t dstlen, size_t *writtenlen);
 
 /**
  * @brief Base64 decode some bytes
@@ -24,7 +26,7 @@ int atchops_base64_encode(const unsigned char *src, const unsigned long srclen, 
  * @param writtenlen the length of the result after operation
  * @return int 0 on success
  */
-int atchops_base64_decode(const unsigned char *src, const unsigned long srclen, unsigned char *dst,
-                          unsigned long dstlen, unsigned long *writtenlen);
+int atchops_base64_decode(const unsigned char *src, const size_t srclen, unsigned char *dst,
+                          size_t dstlen, size_t *writtenlen);
 
 #endif

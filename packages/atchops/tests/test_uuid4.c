@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 int main() {
 
   int ret = 1;
 
-  const unsigned long dstlen = 37;
+  const size_t dstlen = 37;
   char *dst = malloc(sizeof(char) * dstlen);
   memset(dst, 0, dstlen);
 

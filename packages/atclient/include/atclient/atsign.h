@@ -1,6 +1,8 @@
 #ifndef ATCLIENT_ATSIGN_H
 #define ATCLIENT_ATSIGN_H
 
+#include <stddef.h>
+
 // Structure to represent the AtSign class
 typedef struct atclient_atsign {
   char *atsign;
@@ -25,10 +27,10 @@ void atclient_atsign_free(atclient_atsign *atsign);
  * @param originalatsignlen the string length of the atsign being read
  * @return int 0 on success, 1 on if atsignlen is not large enough, 2 on if the originalatsignlen length passed is <= 0.
  */
-int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen,
-                                      const char *originalatsign, const unsigned long originalatsignlen);
+int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
+                                      const char *originalatsign, const size_t originalatsignlen);
 
-int atclient_atsign_with_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen,
-                                   const char *originalatsign, const unsigned long originalatsignlen);
+int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
+                                   const char *originalatsign, const size_t originalatsignlen);
 
 #endif

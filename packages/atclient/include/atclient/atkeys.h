@@ -4,6 +4,7 @@
 #include "atclient/atkeysfile.h"
 #include "atclient/atstr.h"
 #include <atchops/rsa.h>
+#include <stddef.h>
 
 /**
  * @brief represents the atkeys file
@@ -54,12 +55,12 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
  * @return int 0 on success, non-zero on failure
  */
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
-                                          const unsigned long aespkampublickeylen, const char *aespkamprivatekeystr,
-                                          const unsigned long aespkamprivatekeylen, const char *aesencryptpublickeystr,
-                                          const unsigned long aesencryptpublickeylen,
+                                          const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
+                                          const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
+                                          const size_t aesencryptpublickeylen,
                                           const char *aesencryptprivatekeystr,
-                                          const unsigned long aesencryptprivatekeylen, const char *selfencryptionkeystr,
-                                          const unsigned long selfencryptionkeylen);
+                                          const size_t aesencryptprivatekeylen, const char *selfencryptionkeystr,
+                                          const size_t selfencryptionkeylen);
 
 /**
  * @brief populates the struct by decrypting the encrypted RSA keys found in a populated atclient_atkeysfile struct

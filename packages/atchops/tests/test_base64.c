@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 // #define SRC_STRING "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="
 #define SRC_STRING                                                                                                     \
@@ -38,18 +39,18 @@ int main() {
   int retval;
 
   const char *src = SRC_STRING;
-  const unsigned long srclen = strlen(src);
+  const size_t srclen = strlen(src);
   printf("src (%lu): %s\n", srclen, src);
 
-  unsigned long dstlen = DST_BYTES_ALLOCATED;
+  size_t dstlen = DST_BYTES_ALLOCATED;
   unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
   memset(dst, 0, dstlen);
 
-  unsigned long dstlen2 = DST_BYTES_ALLOCATED;
+  size_t dstlen2 = DST_BYTES_ALLOCATED;
   unsigned char *dst2 = malloc(sizeof(unsigned char) * dstlen);
   memset(dst2, 0, dstlen2);
 
-  unsigned long *olen = malloc(sizeof(unsigned long));
+  size_t *olen = malloc(sizeof(size_t));
   *olen = 0;
 
   retval = atchops_base64_decode((unsigned char *)src, srclen, dst, dstlen, olen);

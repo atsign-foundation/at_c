@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define CIPHERTEXTBASE64                                                                                               \
   "yY9vOA8bbzyADNGOxFPdT6bGxySKmNd6usP5/"                                                                              \
@@ -39,10 +40,10 @@ int main() {
 
   int ret = 1;
 
-  const unsigned long plaintextlen = 8192;
+  const size_t plaintextlen = 8192;
   unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
   memset(plaintext, 0, plaintextlen);
-  unsigned long plaintextolen = 0;
+  size_t plaintextolen = 0;
 
   unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
   memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16

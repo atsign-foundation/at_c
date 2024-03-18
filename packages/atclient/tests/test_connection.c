@@ -1,6 +1,7 @@
 #include "atclient/connection.h"
 #include <stdio.h>
 #include <string.h>
+#include <stddef.h>
 
 int main() {
   int ret = 1;
@@ -14,10 +15,10 @@ int main() {
   atclient_connection connection;
   atclient_connection_init(&connection);
 
-  const unsigned long dstlen = 1024;
+  const size_t dstlen = 1024;
   unsigned char dst[dstlen];
   memset(dst, 0, sizeof(unsigned char) * dstlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_connect(&connection, host, port);
   printf("atclient_connection_connect: %d\n", ret);
@@ -26,7 +27,7 @@ int main() {
   }
 
   const char *cmd = "colin\r\n";
-  const unsigned long cmdlen = strlen(cmd);
+  const size_t cmdlen = strlen(cmd);
 
   ret = atclient_connection_send(&connection, (unsigned char *)cmd, cmdlen, dst, dstlen, &olen);
   printf("atclient_connection_send: %d\n", ret);

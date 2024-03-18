@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "atkey"
 
@@ -29,7 +30,7 @@ void atclient_atkey_free(atclient_atkey *atkey) {
   free(atkey->sharedby.str);
 }
 
-int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen) {
+int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen) {
   // 6 scenarios:
   // 1. PublicKey:            "public:name.wavi@smoothalligator"
   //      name == "name"
@@ -79,7 +80,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   char *token = strtok_r(copy, ":", &saveptr);
-  unsigned long tokenlen = strlen(token);
+  size_t tokenlen = strlen(token);
   if (token == NULL) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tokens[0] is NULL\n");
     ret = 1;
@@ -154,7 +155,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
       ret = 1;
       goto exit;
     }
-    unsigned long namelen = strlen(name);
+    size_t namelen = strlen(name);
     ret = atclient_atstr_set_literal(&(atkey->name), name, namelen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
@@ -167,7 +168,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
       ret = 1;
       goto exit;
     }
-    unsigned long namespacestrlen = strlen(namespacestr);
+    size_t namespacestrlen = strlen(namespacestr);
     ret = atclient_atstr_set_literal(&(atkey->namespacestr), namespacestr, namespacestrlen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
@@ -175,7 +176,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     }
   } else {
     // there is no namespace
-    unsigned long namelen = strlen(nameandnamespacestr);
+    size_t namelen = strlen(nameandnamespacestr);
     ret = atclient_atstr_set_literal(&(atkey->name), nameandnamespacestr, namelen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
@@ -193,7 +194,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   tokenlen = strlen(token);
   char sharedbystr[ATCLIENT_ATKEY_FULL_LEN + 1];
   memset(sharedbystr, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN + 1);
-  unsigned long sharedbystrolen = 0;
+  size_t sharedbystrolen = 0;
   ret = atclient_atsign_with_at_symbol(sharedbystr, ATCLIENT_ATSIGN_FULL_LEN, &sharedbystrolen, token, tokenlen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
@@ -212,8 +213,8 @@ exit: {
 }
 }
 
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const unsigned long atkeystrlen,
-                             unsigned long *atkeystrolen) {
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const size_t atkeystrlen,
+                             size_t *atkeystrolen) {
   int ret = 1;
 
   atclient_atstr string;

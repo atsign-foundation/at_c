@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
 
@@ -64,23 +65,23 @@ exit: { return ret; }
 }
 
 int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
-                               const char *atsign, const unsigned long atsignlen) {
+                               const char *atsign, const size_t atsignlen) {
   int ret = 1; // error by default
 
   // 1. init root connection
-  const unsigned long srclen = 1024;
+  const size_t srclen = 1024;
   atclient_atbytes src;
   atclient_atbytes_init(&src, srclen);
 
-  const unsigned long recvlen = 1024;
+  const size_t recvlen = 1024;
   atclient_atbytes recv;
   atclient_atbytes_init(&recv, recvlen);
 
-  const unsigned long withoutatlen = 1024;
+  const size_t withoutatlen = 1024;
   atclient_atstr withoutat;
   atclient_atstr_init(&withoutat, withoutatlen);
 
-  const unsigned long urllen = 256;
+  const size_t urllen = 256;
   atclient_atstr url;
   atclient_atstr_init(&url, 256);
 
@@ -88,27 +89,27 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atstr_init(&host, 256);
   int port = 0;
 
-  const unsigned long atsigncmdlen = 1024;
+  const size_t atsigncmdlen = 1024;
   atclient_atstr atsigncmd;
   atclient_atstr_init(&atsigncmd, atsigncmdlen);
 
-  const unsigned long fromcmdlen = 1024;
+  const size_t fromcmdlen = 1024;
   atclient_atstr fromcmd;
   atclient_atstr_init(&fromcmd, fromcmdlen);
 
-  const unsigned long challengelen = 1024;
+  const size_t challengelen = 1024;
   atclient_atstr challenge;
   atclient_atstr_init(&challenge, challengelen);
 
-  const unsigned long challengewithoutdatalen = 1024;
+  const size_t challengewithoutdatalen = 1024;
   atclient_atstr challengewithoutdata;
   atclient_atstr_init(&challengewithoutdata, challengewithoutdatalen);
 
-  const unsigned long challengebyteslen = 1024;
+  const size_t challengebyteslen = 1024;
   atclient_atbytes challengebytes;
   atclient_atbytes_init(&challengebytes, challengebyteslen);
 
-  const unsigned long pkamcmdlen = 1024;
+  const size_t pkamcmdlen = 1024;
   atclient_atstr pkamcmd;
   atclient_atstr_init(&pkamcmd, pkamcmdlen);
 

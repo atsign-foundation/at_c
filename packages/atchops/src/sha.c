@@ -2,9 +2,10 @@
 #include <mbedtls/md.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
-int atchops_sha_hash(mbedtls_md_type_t md_type, const unsigned char *input, const unsigned long inputlen,
-                     unsigned char *output, unsigned long outputlen, unsigned long *outputolen) {
+int atchops_sha_hash(mbedtls_md_type_t md_type, const unsigned char *input, const size_t inputlen,
+                     unsigned char *output, size_t outputlen, size_t *outputolen) {
   int ret = 1;
 
   mbedtls_md_context_t md_ctx;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PLAINTEXT "I like to eat pizza 123"
 #define AES_KEY "1DPU9OP3CYvamnVBMwGgL7fm8yB1klAap0Uc5Z9R79g="
@@ -14,13 +15,13 @@ int main(int argc, char **argv) {
 
   const char *aeskeybase64 = AES_KEY; // 32 byte key == 256 bits
   const char *plaintext = PLAINTEXT;
-  const unsigned long plaintextlen = strlen(plaintext);
-  unsigned long olen = 0;
+  const size_t plaintextlen = strlen(plaintext);
+  size_t olen = 0;
 
   unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
   memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE);
 
-  unsigned long ciphertextlen = BUFFER_SIZE; // sufficient allocation
+  size_t ciphertextlen = BUFFER_SIZE; // sufficient allocation
   unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
   memset(ciphertext, 0, ciphertextlen);
 
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
     goto exit;
   }
 
-  unsigned long plaintextlen2 = BUFFER_SIZE; // sufficient allocation
+  size_t plaintextlen2 = BUFFER_SIZE; // sufficient allocation
   unsigned char *plaintext2 = malloc(sizeof(unsigned char) * plaintextlen2);
   memset(plaintext2, 0, plaintextlen2);
   memset(iv, 0, 16);
