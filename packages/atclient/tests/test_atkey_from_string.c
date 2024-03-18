@@ -1,7 +1,6 @@
 #include "atclient/atkey.h"
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 
 #define TAG "test_atkey_from_string"

@@ -2,10 +2,12 @@
 #ifndef ATCLIENT_CONSTANTS_H
 #define ATCLIENT_CONSTANTS_H
 
-#define ATSIGN_BUFFER_LENGTH 4096 // sufficient memory for atSigns
-
-#define ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE 128 // the size of the buffer for the host name
-#define ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE                                                        \
-  4096 // represents the buffer size of a decrypted RSA key in base64 format
-
+#define ATCLIENT_ATSIGN_INNER_LEN 55                                                             // 55 utf7 chars
+#define ATCLIENT_ATSIGN_FULL_LEN (1 + ATCLIENT_ATSIGN_INNER_LEN)                                 // '@' + 55 utf7 chars
+#define ATCLIENT_ATKEY_KEY_LEN 55                                                                // 55 utf7 chars
+#define ATCLIENT_ATKEY_NAMESPACE_LEN 55                                                          // 55 utf7 chars
+#define ATCLIENT_ATKEY_COMPOSITE_LEN (ATCLIENT_ATKEY_KEY_LEN + 1 + ATCLIENT_ATKEY_NAMESPACE_LEN) // {key}.{namespace}
+#define ATCLIENT_ATKEY_FULL_LEN                                                                                        \
+  (ATCLIENT_ATSIGN_FULL_LEN + 1 + ATCLIENT_ATKEY_COMPOSITE_LEN +                                                       \
+   ATCLIENT_ATSIGN_FULL_LEN) // {full_atsign}:{composite_key}{full_atsign}
 #endif
