@@ -10,7 +10,8 @@ endif()
 
 foreach(file ${files})
     # ${filename} - without `.c`
-    get_filename_component(filename ${file} NAME_WE)
+    get_filename_component(filename ${file} NAME)
+    string(REPLACE ".c" "" filename ${filename})
 
     add_executable(${filename} ${file})
     target_link_libraries(${filename} PRIVATE atclient)
