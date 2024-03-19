@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "atstr"
 
-void atclient_atstr_init(atclient_atstr *atstr, const unsigned long bufferlen) {
+void atclient_atstr_init(atclient_atstr *atstr, const size_t bufferlen) {
   memset(atstr, 0, sizeof(atclient_atstr));
   atstr->len = bufferlen;
   atstr->str = (char *)malloc(sizeof(char) * atstr->len);
@@ -15,7 +16,7 @@ void atclient_atstr_init(atclient_atstr *atstr, const unsigned long bufferlen) {
   atstr->olen = 0;
 }
 
-int atclient_atstr_init_literal(atclient_atstr *atstr, const unsigned long bufferlen, const char *format, ...) {
+int atclient_atstr_init_literal(atclient_atstr *atstr, const size_t bufferlen, const char *format, ...) {
   int ret = 1;
   atclient_atstr_init(atstr, bufferlen);
   ret = atclient_atstr_set_literal(atstr, format);
@@ -52,7 +53,7 @@ int atclient_atstr_set_literal(atclient_atstr *atstr, const char *format, ...) {
 exit: { return ret; }
 }
 
-int atclient_atstr_set(atclient_atstr *atstr, const char *str, const unsigned long len) {
+int atclient_atstr_set(atclient_atstr *atstr, const char *str, const size_t len) {
   int ret = 1;
 
   if (len > atstr->len) {
@@ -81,8 +82,8 @@ int atclient_atstr_copy(atclient_atstr *atstr, atclient_atstr *data) {
 exit: { return ret; }
 }
 
-int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr original, const unsigned long start,
-                             const unsigned long end) {
+int atclient_atstr_substring(atclient_atstr *substring, const atclient_atstr original, const size_t start,
+                             const size_t end) {
   int ret = 1;
   if (start > original.olen || end > original.olen) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "start or end is greater than original.olen\n");

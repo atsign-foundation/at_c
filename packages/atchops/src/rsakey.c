@@ -3,6 +3,7 @@
 #include <mbedtls/asn1.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define BASE64_DECODED_KEY_BUFFER_SIZE 8192 // the max buffer size of a decoded RSA key
 
@@ -48,14 +49,14 @@ void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey) {
 }
 
 int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const char *publickeybase64,
-                                      const unsigned long publickeybase64len) {
+                                      const size_t publickeybase64len) {
   int ret = 0;
 
   // 1. base64 decode the key
-  unsigned long dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
+  size_t dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
   unsigned char *dst = (unsigned char *)malloc(sizeof(unsigned char) * dstlen);
   memset(dst, 0, dstlen);
-  unsigned long writtenlen = 0;
+  size_t writtenlen = 0;
   ret = atchops_base64_decode((const unsigned char *)publickeybase64, publickeybase64len, dst, dstlen, &writtenlen);
   if (ret != 0) {
     goto exit;
@@ -63,20 +64,20 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
 
   unsigned char *end = dst + writtenlen;
 
-  unsigned long lengthread = 0;
+  size_t lengthread = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
 
-  unsigned long lengthread2 = 0;
+  size_t lengthread2 = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread2, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
   dst = dst + (lengthread2);
 
-  unsigned long lengthread3 = 0;
+  size_t lengthread3 = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread3, MBEDTLS_ASN1_BIT_STRING);
   if (ret != 0) {
     goto exit;
@@ -113,13 +114,13 @@ exit: {
 }
 
 int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, const char *privatekeybase64,
-                                       const unsigned long privatekeybase64len) {
+                                       const size_t privatekeybase64len) {
   int ret = 1;
 
-  unsigned long dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
+  size_t dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
   unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
   memset(dst, 0, dstlen);
-  unsigned long writtenlen = 0;
+  size_t writtenlen = 0;
   ret = atchops_base64_decode((const unsigned char *)privatekeybase64, privatekeybase64len, dst, dstlen, &writtenlen);
   if (ret != 0) {
     goto exit;
@@ -127,27 +128,27 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
 
   unsigned char *end = dst + writtenlen;
 
-  unsigned long lengthread = 0;
+  size_t lengthread = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
 
-  unsigned long lengthread2 = 0;
+  size_t lengthread2 = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread2, MBEDTLS_ASN1_INTEGER);
   if (ret != 0) {
     goto exit;
   }
   dst = dst + lengthread2;
 
-  unsigned long lengthread3 = 0;
+  size_t lengthread3 = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread3, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
   dst = dst + lengthread3;
 
-  unsigned long lengthread4 = 0;
+  size_t lengthread4 = 0;
   ret = mbedtls_asn1_get_tag(&dst, end, &lengthread4, 0x04);
   if (ret != 0) {
     goto exit;

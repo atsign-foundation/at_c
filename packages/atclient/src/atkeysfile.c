@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 // represents the buffer size of an encrypted RSA key in base64 format
 #define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
@@ -39,7 +40,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
     goto exit;
   }
 
-  unsigned long bytesread = fread(readbuf.str, sizeof(char), readbuf.len, file);
+  size_t bytesread = fread(readbuf.str, sizeof(char), readbuf.len, file);
   if (bytesread == 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fread failed\n");
     ret = 1;

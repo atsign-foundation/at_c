@@ -2,10 +2,11 @@
 #include "atchops/uuid.h"
 #include <string.h>
 #include <uuid4/uuid4.h>
+#include <stddef.h>
 
 int atchops_uuid_init(void) { return uuid4_init(); }
 
-int atchops_uuid_generate(char *uuidstr, const unsigned long uuidstrlen) {
+int atchops_uuid_generate(char *uuidstr, const size_t uuidstrlen) {
   int ret;
   if (uuidstrlen < 37) {
     ret = 1; // UUID string is 36 characters long + 1 for null terminator = 37 minimum buffer length

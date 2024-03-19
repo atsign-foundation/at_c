@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 int main() {
   int ret = 1;
@@ -17,10 +18,10 @@ int main() {
   }
   printf("\n");
 
-  const unsigned long ivbase64len = 4096;
+  const size_t ivbase64len = 4096;
   unsigned char *ivbase64 = malloc(sizeof(unsigned char) * ivbase64len);
   memset(ivbase64, 0, ivbase64len);
-  unsigned long ivbase64olen = 0;
+  size_t ivbase64olen = 0;
   ret = atchops_iv_generate_base64(ivbase64, ivbase64len, &ivbase64olen);
   if (ret != 0) {
     printf("atchops_iv_generate_base64 (failed): %d\n", ret);

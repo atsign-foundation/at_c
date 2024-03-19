@@ -1,5 +1,6 @@
 #include <cJSON/cJSON.h>
 #include <stdio.h>
+#include <stddef.h>
 
 int main() {
   int ret = 1; // error by default

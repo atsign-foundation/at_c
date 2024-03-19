@@ -2,6 +2,8 @@
 #ifndef ATCHOPS_IV_H
 #define ATCHOPS_IV_H
 
+#include <stddef.h>
+
 #define ATCHOPS_IV_BUFFER_SIZE 16 // ivs are always 16 bytes long
 
 /**
@@ -20,6 +22,6 @@ int atchops_iv_generate(unsigned char *iv);
  * @param ivbase64olen the length of the generated IV
  * @return int 0 on success, non-zero on failure
  */
-int atchops_iv_generate_base64(unsigned char *ivbase64, const unsigned long ivbase64len, unsigned long *ivbase64olen);
+int atchops_iv_generate_base64(unsigned char *ivbase64, const size_t ivbase64len, size_t *ivbase64olen);
 
 #endif

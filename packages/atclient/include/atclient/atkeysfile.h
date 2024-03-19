@@ -2,6 +2,7 @@
 #define ATCLIENT_ATKEYSFILE_H
 
 #include "atclient/atstr.h"
+#include <stddef.h>
 
 typedef struct atclient_atkeysfile {
   atclient_atstr aespkamprivatekeystr;

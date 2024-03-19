@@ -6,6 +6,7 @@
 #include "atclient/atsign.h"
 #include "atclient/connection.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * @brief represents atclient
@@ -55,7 +56,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * @return int 0 on success
  */
 int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
-                               const char *atsign, const unsigned long atsignlen);
+                               const char *atsign, const size_t atsignlen);
 
 /**
  * @brief Put a string value into your atServer.
@@ -74,10 +75,11 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  * @param value the value to put into atServer
  * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for this
  * value)
+ * @param commitid (optional) the output commitid of the put operation that the atServer returns
  * @return int 0 on success
  */
 int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
-                 const size_t valuelen);
+                const size_t valuelen, int *commitid);
 
 // TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 
