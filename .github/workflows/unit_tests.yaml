@@ -15,24 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
-      - name: Install AtChops
-        working-directory: packages/atchops
+      - name: atchops CTest
+        working-directory: packages/atchops/tools
         run: |
-          cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON
-          sudo cmake --build build --target install
+          ./run_ctest.sh
 
-      - name: CTest AtChops
-        working-directory: packages/atchops/build/tests
+      - name: atclient CTest
+        working-directory: packages/atclient/tools
         run: |
-          ctest -V --output-on-failure --timeout 2
-
-      - name: Install AtClient
-        working-directory: packages/atclient
-        run: |
-          cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
-          sudo cmake --build build --target install
-
-      - name: CTest AtClient
-        working-directory: packages/atclient/build/tests
-        run: |
-          ctest -V --output-on-failure --timeout 10
+          ./run_ctest.sh

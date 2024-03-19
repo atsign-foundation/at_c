@@ -7,7 +7,12 @@ set -e
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 
-FILE=$1
+if [ -z "$1" ]; then
+    echo "Please provide a C source file as an argument."
+    exit 1
+fi
+
+FILE="$1"
 
 "$SCRIPT_DIRECTORY/../../../packages/atclient/tools/install.sh"
 cd "$SCRIPT_DIRECTORY"

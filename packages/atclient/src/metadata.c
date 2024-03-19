@@ -954,6 +954,8 @@ void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const lo
 
 void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr) { set_ttr(metadata, ttr); }
 
+void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd) { set_ccd(metadata, ccd); }
+
 void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
   set_isbinary(metadata, isbinary);
 }

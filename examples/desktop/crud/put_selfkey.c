@@ -56,13 +56,12 @@ int main()
         goto exit;
     }
 
-    if((ret = atclient_atkey_create_publickey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATSIGN, strlen(ATSIGN), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+    if((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATSIGN, strlen(ATSIGN), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
         goto exit;
     }
 
     atclient_atkey_metadata_set_ttl(&atkey.metadata, 60*1000*10); // 10 minutes
-    atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
     if((ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
@@ -76,8 +75,7 @@ int main()
         goto exit;
     }
 
-    // atclient_get_publickey
-    if((ret = atclient_get_publickey(&atclient, &root_connection, &atkey, value, valuelen, &valueolen, true)) != 0) {
+    if((ret = atclient_get_selfkey(&atclient, &atkey, value, valuelen, &valueolen)) != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
         goto exit;
     }
