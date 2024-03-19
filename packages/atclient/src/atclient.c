@@ -297,12 +297,12 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, cmdbufferlen);
 
-  snprintf(cmdbuffer, cmdbufferlen, "llookup:all:%.*s\r\n", (int) atkeystrolen, atkeystr);
+  snprintf(cmdbuffer, cmdbufferlen, "llookup:all:%.*s\r\n", (int)atkeystrolen, atkeystr);
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdbuffer: %.*s\n", (int) cmdbufferlen, cmdbuffer);
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdbuffer: %.*s\n", (int)cmdbufferlen, cmdbuffer);
 
   // 3. send llookup: command
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen-1, recv,
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
                                  recvlen, &recvolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -313,11 +313,11 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   if (!atclient_stringutils_starts_with((char *)recv, recvolen, "data:", 5)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                          (int) recvolen, recv);
+                          (int)recvolen, recv);
     goto exit;
   }
 
-  char *recvwithoutdata = (char *)recv  + 5;
+  char *recvwithoutdata = (char *)recv + 5;
 
   root = cJSON_Parse(recvwithoutdata);
   if (root == NULL) {
@@ -343,8 +343,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(atkey->metadata)) {
     size_t ivolen;
-    ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv, ATCHOPS_IV_BUFFER_SIZE,
-                                &ivolen);
+    ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
+                                ATCHOPS_IV_BUFFER_SIZE, &ivolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
@@ -352,7 +352,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
     if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen, ATCHOPS_IV_BUFFER_SIZE);
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+                            ATCHOPS_IV_BUFFER_SIZE);
       goto exit;
     }
   } else {
@@ -377,7 +378,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
@@ -415,7 +416,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, c
   }
 
   char *atkeystrwithoutpublic = NULL;
-  char *ptr = strnstr(atkeystr.str, "public:", atkeystr.olen);
+  char *ptr = strstr(atkeystr.str, "public:");
   if (ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
@@ -489,7 +490,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, c
 
   ret = 0;
   goto exit;
-exit: {
+exit : {
   if (root != NULL) {
     cJSON_Delete(root);
   }
@@ -499,15 +500,15 @@ exit: {
 }
 }
 
-static int atclient_get_shared_by_me_with_other(const atclient *atclient, const atclient_atkey *atkey, char *value,
+static int atclient_get_shared_by_me_with_other(atclient *atclient, const atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, char *shared_enc_key,
                                                 const bool create_new_encryption_key_shared_by_me_if_not_found);
 
-static int atclient_get_shared_by_other_with_me(const atclient *atclient, const atclient_atkey *atkey, char *value,
-                                                const size_t valuelen, size_t *valueolen, const char *shared_enc_key);
+static int atclient_get_shared_by_other_with_me(atclient *atclient, const atclient_atkey *atkey, char *value,
+                                                const size_t valuelen, size_t *valueolen, char *shared_enc_key);
 
-int atclient_get_sharedkey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen, const char *shared_enc_key,
+int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+                           size_t *valueolen, char *shared_enc_key,
                            const bool create_new_encryption_key_shared_by_me_if_not_found) {
   int ret = 1;
 
@@ -516,7 +517,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_connection *root_conn, c
     return ret;
   }
 
-  if ((atkey->sharedby.str != atclient->atsign.atsign)) {
+  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.olen) != 0) {
     //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
     ret = atclient_get_shared_by_other_with_me(atclient, atkey, value, valuelen, valueolen, shared_enc_key);
     if (ret != 0) {
@@ -535,7 +536,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_connection *root_conn, c
 exit : { return ret; }
 }
 
-static int atclient_get_shared_by_me_with_other(const atclient *atclient, const atclient_atkey *atkey, char *value,
+static int atclient_get_shared_by_me_with_other(atclient *atclient, const atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, char *shared_enc_key,
                                                 const bool create_new_encryption_key_shared_by_me_if_not_found) {
   int ret = 1;
@@ -551,7 +552,12 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
   if (enc_key == NULL) {
     enc_key_mem = 1;
     enc_key = malloc(45);
-    ret = atclient_get_encryption_key_shared_by_me(atclient, atkey->sharedwith.str, enc_key,
+    atclient_atsign recipient;
+    ret = atclient_atsign_init(&recipient, atkey->sharedwith.str);
+    if (ret != 0) {
+      goto exit;
+    }
+    ret = atclient_get_encryption_key_shared_by_me(atclient, &recipient, enc_key,
                                                    create_new_encryption_key_shared_by_me_if_not_found);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
@@ -560,8 +566,8 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
   }
 
   // atclient_atkey_to_string buffer
-  const size_t atkey_str_buf_len = ATKEY_GENERAL_BUFFER_SIZE;
-  atkey_str_buff = malloc(atkey_str_buf_len * sizeof(char));
+  const size_t atkey_str_buf_len = 4096;
+  atkey_str_buff = calloc(atkey_str_buf_len, sizeof(char));
   size_t atkey_out_len = 0;
 
   ret = atclient_atkey_to_string(*atkey, atkey_str_buff, atkey_str_buf_len, &atkey_out_len);
@@ -580,7 +586,151 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
 
   // send command and recv response
   const size_t recvlen = 4096;
-  recv = malloc(recvlen * sizeof(unsigned char));
+  recv = calloc(recvlen, sizeof(unsigned char));
+  memset(recv, 0, sizeof(unsigned char) * recvlen);
+  size_t recv_olen = 0;
+
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command),
+                                 recv, recvlen, &recv_olen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  char *response = (char *)recv;
+  short atsign_with_at_len = (short)strlen(atclient->atsign.atsign);
+
+  // Truncate response: "@" + myatsign + "@"
+  int response_prefix_len = atsign_with_at_len + 2;
+  response_prefix = malloc(response_prefix_len * sizeof(char));
+  snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
+
+  if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
+    response = response + response_prefix_len;
+  }
+
+  if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len)) {
+    response[strlen(response) - response_prefix_len - 1] = '\0';
+  }
+
+  // Truncate response : "data:"
+  if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
+    response = response + 5;
+
+    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+    const cJSON *root = cJSON_Parse(response);
+    if (root == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+      goto exit;
+    }
+
+    cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
+    if (metadata == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    char *metadatastr = cJSON_Print(metadata);
+
+    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+      goto exit;
+    }
+
+    // manage IV
+    if (atclient_atkey_metadata_is_ivnonce_initialized(atkey->metadata)) {
+      size_t ivolen;
+      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
+                                  ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+      if (ret != 0) {
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+        goto exit;
+      }
+
+      if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
+        ret = 1;
+        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+                              ATCHOPS_IV_BUFFER_SIZE);
+        goto exit;
+      }
+    } else {
+      // use legacy IV
+      memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    }
+
+    cJSON *data = cJSON_GetObjectItem(root, "data");
+    if (data == NULL) {
+      ret = 1;
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    // decrypt response data
+    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv,
+                                 (unsigned char *)data->valuestring, strlen(data->valuestring), value, valuelen,
+                                 valueolen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  ret = 0;
+  goto exit;
+exit : {
+  if (enc_key_mem)
+    free(enc_key);
+  return ret;
+}
+}
+
+static int atclient_get_shared_by_other_with_me(atclient *atclient, const atclient_atkey *atkey, char *value,
+                                                const size_t valuelen, size_t *valueolen, char *shared_enc_key) {
+  int ret = 1;
+  char *command = NULL;
+  unsigned char *recv = NULL;
+  char *response_prefix = NULL;
+
+  char *enc_key = shared_enc_key;
+  if (enc_key == NULL) {
+    enc_key = malloc(45);
+    atclient_atsign recipient;
+    ret = atclient_atsign_init(&recipient, atkey->sharedwith.str);
+    if (ret != 0) {
+      goto exit;
+    }
+    ret = atclient_get_encryption_key_shared_by_other(atclient, &recipient, enc_key);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  char *namespace = "";
+  size_t namespace_len = 0;
+  short extra_point_len = 0; // "." before namespace
+
+  if (atkey->namespacestr.str != NULL && atkey->namespacestr.str[0] != '\0') {
+    namespace = atkey->namespacestr.str;
+    namespace_len = atkey->namespacestr.olen;
+    extra_point_len = 1;
+  }
+
+  // build command
+  // command_prefix = "lookup:"
+  const short command_prefix_len = 11;
+  const size_t command_len =
+      command_prefix_len + atkey->name.olen + extra_point_len + namespace_len + atkey->sharedby.olen + 3;
+  command = calloc(command_len, sizeof(char));
+  snprintf(command, command_len, "lookup:all:%s%s%s%s\r\n", atkey->name.str, extra_point_len ? "." : "", namespace,
+           atkey->sharedby.str);
+
+  // send command and recv response
+  const size_t recvlen = 4096;
+  recv = calloc(recvlen, sizeof(unsigned char));
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t recv_olen = 0;
 
@@ -663,146 +813,9 @@ static int atclient_get_shared_by_me_with_other(const atclient *atclient, const 
     }
 
     // decrypt response data
-    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv, response, recvlen, value,
-                                 valuelen, &valueolen);
-    if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
-      goto exit;
-    }
-  }
-
-  ret = 0;
-  goto exit;
-exit : {
-  if (enc_key_mem)
-    free(enc_key);
-  return ret;
-}
-}
-
-static int atclient_get_shared_by_other_with_me(const atclient *atclient, const atclient_atkey *atkey, char *value,
-                                                const size_t valuelen, size_t *valueolen, const char *shared_enc_key) {
-  int ret = 1;
-  char *command = NULL;
-  unsigned char *recv = NULL;
-  char *response_prefix = NULL;
-
-  char *enc_key = shared_enc_key;
-  if (enc_key == NULL) {
-    enc_key = malloc(45);
-    ret = atclient_get_encryption_key_shared_by_other(atclient, atkey->sharedwith.str, enc_key);
-    if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
-      goto exit;
-    }
-  }
-
-  char *namespace = "";
-  size_t namespace_len = 0;
-  short extra_point_len = 0; // "." before namespace
-
-  if (atkey->namespacestr.str != NULL && atkey->namespacestr.str[0] != '\0') {
-    namespace = atkey->namespacestr.str;
-    namespace_len = atkey->namespacestr.olen;
-    extra_point_len = 1;
-  }
-
-  // build command
-  // command_prefix = "lookup:"
-  const short command_prefix_len = 11;
-  const size_t command_len =
-      command_prefix_len + atkey->name.olen + extra_point_len + namespace_len + atkey->sharedby.olen + 3;
-  command = malloc(command_len * sizeof(char));
-  snprintf(command, command_len, "lookup:all:%s%s%s%s\r\n", atkey->name.str, extra_point_len ? "." : "", namespace,
-           atkey->sharedby.str);
-
-  // send command and recv response
-  const size_t recvlen = 4096;
-  recv = malloc(recvlen * sizeof(unsigned char));
-  memset(recv, 0, sizeof(unsigned char) * recvlen);
-  size_t recv_olen = 0;
-
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
-                                 recvlen, &recv_olen);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
-    goto exit;
-  }
-
-  char *response = (char *)recv;
-  short atsign_with_at_len = (short)strlen(atclient->atsign.atsign);
-
-  // Truncate response: "@" + myatsign + "@"
-  int response_prefix_len = atsign_with_at_len + 2;
-  response_prefix = (response_prefix_len * sizeof(char));
-  snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
-
-  if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
-    response = response + response_prefix_len;
-  }
-
-  if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len)) {
-    response[strlen(response) - response_prefix_len - 1] = '\0';
-  }
-
-  // Truncate response : "data:"
-  if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
-    response = response + 5;
-
-    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
-    const *root = cJSON_Parse(response);
-    if (root == NULL) {
-      ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
-      goto exit;
-    }
-
-    cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
-    if (metadata == NULL) {
-      ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
-      goto exit;
-    }
-
-    char *metadatastr = cJSON_Print(metadata);
-
-    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
-    if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
-      goto exit;
-    }
-
-    // manage IV
-    if (atclient_atkey_metadata_is_ivnonce_initialized(atkey->metadata)) {
-      size_t ivolen;
-      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
-                                  ATCHOPS_IV_BUFFER_SIZE, &ivolen);
-      if (ret != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
-        goto exit;
-      }
-
-      if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
-        ret = 1;
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
-                              ATCHOPS_IV_BUFFER_SIZE);
-        goto exit;
-      }
-    } else {
-      // use legacy IV
-      memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-    }
-
-    cJSON *data = cJSON_GetObjectItem(root, "data");
-    if (data == NULL) {
-      ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
-      goto exit;
-    }
-
-    // decrypt response data
-    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv, response, recvlen, value,
-                                 valuelen, &valueolen);
+    ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv,
+                                 (unsigned char *)data->valuestring, strlen(data->valuestring), value, valuelen,
+                                 &valueolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
@@ -916,7 +929,6 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
       return ret;
     }
-
     memcpy(enc_key_shared_by_me, plaintext, plaintextlen);
   }
 
@@ -939,8 +951,8 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
   return 0;
 }
 
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, atclient_connection *root_conn,
-                                                const atclient_atsign *recipient, char *enc_key_shared_by_other) {
+int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
+                                                char *enc_key_shared_by_other) {
   int ret = 1;
 
   // llookup:cached:@myatsign:shared_key@recipient_atsign

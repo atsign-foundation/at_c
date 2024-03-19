@@ -16,6 +16,10 @@
 
 int main()
 {
+    // Disable buffering
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+
     int ret = 1;
 
     atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
@@ -50,10 +54,11 @@ int main()
     } else {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
     }
+    
     atclient.atkeys = atkeys;
     atclient.atsign = atsign;
-
-    if((ret = atclient_atkey_create_sharedkey(&atkey, "test", strlen("test"), atsign.atsign, strlen(atsign.atsign), "dart_playground", strlen("dart_playground"))) != 0) {
+    
+    if((ret = atclient_atkey_create_sharedkey(&atkey, "test_sharedkey_001", strlen("test_sharedkey_001"), atsign.atsign, strlen(atsign.atsign), "@secondaryjackal", strlen("@secondaryjackal"), "dart_playground", strlen("dart_playground"))) != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
         goto exit;
     } else {
@@ -68,13 +73,13 @@ int main()
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen, (int) atkeystr.olen, atkeystr.str);
 
 
-    ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.len, &(value.olen), NULL, false);
+    ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.len, &value.olen, NULL, false);
     if(ret != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
         goto exit;
     }
-
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value.str (%lu): \"%.*s\"\n", value.olen, (int) value.olen, value.str);
+    
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.olen, (int) value.olen, value.str);
 
 
     ret = 0;
