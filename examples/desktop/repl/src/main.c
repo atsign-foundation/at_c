@@ -21,13 +21,19 @@ int main(int argc, char *argv[]) {
   int ret = 1;
   atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const unsigned long cmdlen = 32768;
+  const unsigned long cmdlen = 4096;
   atclient_atbytes cmd;
   atclient_atbytes_init(&cmd, cmdlen);
 
-  const unsigned long recvlen = 32768;
+  const unsigned long recvlen = 4096;
   atclient_atbytes recv;
   atclient_atbytes_init(&recv, recvlen);
+
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
+
+  atclient atclient;
+  atclient_init(&atclient);
 
   if (argc < 2 || argc > 3) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Usage: ./repl <atsign> [rootUrl]");
@@ -61,6 +67,7 @@ int main(int argc, char *argv[]) {
     ret = 1;
     goto exit;
   }
+
   char atkeysfilepath[1024];
   sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
   if (atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath) != 0) {
@@ -70,16 +77,14 @@ int main(int argc, char *argv[]) {
   }
   atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Read atKeys file at path %s\n", atkeysfilepath);
 
-  atclient atclient;
-  atclient_init(&atclient);
-  ret = atclient_start_root_connection(&atclient, roothost, rootport);
+  ret = atclient_connection_connect(&root_conn, roothost, rootport);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_start_root_connection: %d | failed to connect to root\n", ret);
+                          "atclient_connection_connect: %d | failed to connect to root\n", ret);
     goto exit;
   }
 
-  ret = atclient_pkam_authenticate(&atclient, atkeys, atsign, strlen(atsign));
+  ret = atclient_pkam_authenticate(&atclient, &root_conn, atkeys, atsign, strlen(atsign));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
@@ -102,7 +107,7 @@ int main(int argc, char *argv[]) {
                             "atclient_atbytes_convert: %d | failed to convert command\n", ret);
       goto exit;
     }
-    if (strncmp(cmd.bytes, "/exit", strlen("/exit")) == 0) {
+    if (strncmp((char *) cmd.bytes, "/exit", strlen("/exit")) == 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Exiting REPL...\n");
       loop = 0;
       continue;
@@ -116,15 +121,16 @@ int main(int argc, char *argv[]) {
     }
     atclient_atbytes_reset(&cmd);
     atclient_atbytes_reset(&recv);
-
   } while (loop == 1);
 
   ret = 0;
   goto exit;
 
 exit: {
-  atclient_atstr_free(&cmd);
-  atclient_atstr_free(&recv);
+  atclient_atbytes_free(&cmd);
+  atclient_atbytes_free(&recv);
+  atclient_connection_free(&root_conn);
+  atclient_free(&atclient);
   return ret;
 }
 }
