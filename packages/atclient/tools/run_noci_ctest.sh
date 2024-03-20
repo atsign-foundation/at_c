@@ -7,5 +7,9 @@ cd ..
 cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON -DRUN_NOCI_TESTS=ON 
 cmake --build build --target all
 cd build/tests
-ctest --verbose --output-on-failure
+set +e
+ctest --verbose
+set -e
+cd ../..
+cmake -S . -B build -D RUN_NOCI_TESTS:BOOL=OFF >/dev/null 2>&1
 

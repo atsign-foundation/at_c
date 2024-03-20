@@ -795,7 +795,7 @@ static int atclient_get_shared_by_other_with_me(atclient *atclient, const atclie
   if (enc_key == NULL) {
     enc_key = malloc(45);
     atclient_atsign recipient;
-    ret = atclient_atsign_init(&recipient, atkey->sharedwith.str);
+    ret = atclient_atsign_init(&recipient, atkey->sharedby.str);
     if (ret != 0) {
       goto exit;
     }
@@ -912,7 +912,7 @@ static int atclient_get_shared_by_other_with_me(atclient *atclient, const atclie
     // decrypt response data
     ret = atchops_aesctr_decrypt(enc_key, (size_t)strlen(enc_key), ATCHOPS_AES_256, iv,
                                  (unsigned char *)data->valuestring, strlen(data->valuestring), value, valuelen,
-                                 &valueolen);
+                                 valueolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
