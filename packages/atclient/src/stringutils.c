@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
-int atclient_stringutils_trim_whitespace(const char *string, const unsigned long stringlen, char *out,
-                                         const unsigned long outlen, unsigned long *outolen) {
+int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out,
+                                         const size_t outlen, size_t *outolen) {
   int ret = 1;
 
   if (string == NULL) {
@@ -43,8 +44,8 @@ int atclient_stringutils_trim_whitespace(const char *string, const unsigned long
 exit: { return ret; }
 }
 
-int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix,
-                                     const unsigned long prefixlen) {
+int atclient_stringutils_starts_with(const char *string, const size_t stringlen, const char *prefix,
+                                     const size_t prefixlen) {
   int ret = -1;
   if (string == NULL || prefix == NULL) {
     ret = -1;
@@ -72,8 +73,8 @@ int atclient_stringutils_starts_with(const char *string, const unsigned long str
 exit: { return ret; }
 }
 
-int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix,
-                                   const unsigned long suffixlen) {
+int atclient_stringutils_ends_with(const char *string, const size_t stringlen, const char *suffix,
+                                   const size_t suffixlen) {
   int ret = -1;
   if (string == NULL || suffix == NULL) {
     ret = -1;

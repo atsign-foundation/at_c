@@ -6,6 +6,7 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
+#include <stddef.h>
 
 #define ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE 128 // the size of the buffer for the host name
 //
@@ -50,8 +51,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  * @param olen the length of the data received
  * @return int 0 on success, otherwise error
  */
-int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const unsigned long srclen,
-                             unsigned char *recv, const unsigned long recvlen, unsigned long *olen);
+int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
+                             unsigned char *recv, const size_t recvlen, size_t *olen);
 
 /**
  * @brief disconnect a connection

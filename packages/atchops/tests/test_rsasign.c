@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PRIVATE_KEY_BASE64                                                                                             \
   "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCy64Pzy9ZDdm6e96z3DmjektD7sKUo40Ax+"                              \
@@ -42,7 +43,7 @@ int main() {
   int ret = 1;
 
   const char *privatekeybase64 = PRIVATE_KEY_BASE64;
-  const unsigned long privatekeybase64len = strlen(privatekeybase64);
+  const size_t privatekeybase64len = strlen(privatekeybase64);
 
   atchops_rsakey_privatekey privatekey;
   atchops_rsakey_privatekey_init(&privatekey);
@@ -55,10 +56,10 @@ int main() {
 
   unsigned char *signature = malloc(sizeof(unsigned char) * SIGNATURE_BUFFER_LEN);
   memset(signature, 0, SIGNATURE_BUFFER_LEN);
-  unsigned long signatureolen = 0;
+  size_t signatureolen = 0;
 
   const char *message = MESSAGE;
-  const unsigned long messagelen = strlen(message);
+  const size_t messagelen = strlen(message);
 
   ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature,
                          SIGNATURE_BUFFER_LEN, &signatureolen);

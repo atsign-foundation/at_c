@@ -3,6 +3,7 @@
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "test_atkey_to_string"
 
@@ -43,7 +44,7 @@ static int test1a() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_1A;
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.metadata.iscached = true;
   atkey.metadata.ispublic = true;
@@ -94,7 +95,7 @@ static int test1b() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.metadata.ispublic = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
@@ -140,7 +141,7 @@ static int test1c() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_1C; // "public:name.wavi@jeremy"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.metadata.ispublic = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
@@ -192,7 +193,7 @@ static int test1d() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.metadata.iscached = true;
   atkey.metadata.ispublic = true;
@@ -245,7 +246,7 @@ static int test2a() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_2A; // "@alice:name.wavi@bob"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
@@ -294,7 +295,7 @@ static int test2b() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_2B; // "cached:@bob:name@alice"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.metadata.iscached = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
@@ -346,7 +347,7 @@ static int test2c() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_2C; // "@bob:name@alice"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
@@ -404,7 +405,7 @@ static int test2d() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_2D; // "cached:@bob:name.wavi@alice"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.metadata.iscached = true;
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
@@ -462,7 +463,7 @@ static int test3a() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_3A; // "_lastnotificationid@alice123_4😘"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
 
@@ -514,7 +515,7 @@ static int test4a() {
   atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = TEST_ATKEY_TO_STRING_4A; // "name@alice"
-  const unsigned long expectedlen = strlen(expected);
+  const size_t expectedlen = strlen(expected);
 
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
 

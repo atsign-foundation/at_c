@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "connection"
 
@@ -148,7 +149,7 @@ exit: {
 }
 }
 
-static void fix_stdout_buffer(char *str, const unsigned long strlen) {
+static void fix_stdout_buffer(char *str, const size_t strlen) {
   // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
   // if str == 'Jeremy\n', i want it to be 'Jeremy'
   // if str == 'Jeremy\r', i want it to be 'Jeremy'
@@ -197,8 +198,8 @@ static void fix_stdout_buffer(char *str, const unsigned long strlen) {
 exit: { return; }
 }
 
-int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const unsigned long srclen,
-                             unsigned char *recv, const unsigned long recvlen, unsigned long *olen) {
+int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
+                             unsigned char *recv, const size_t recvlen, size_t *olen) {
   int ret = 1;
 
   atclient_atstr stdoutbuffer;
@@ -222,7 +223,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   memset(recv, 0, recvlen);
   int found = 0;
-  unsigned long l = 0;
+  size_t l = 0;
   do {
     ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvlen - l);
     if (ret < 0) {
@@ -282,11 +283,11 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
 int atclient_connection_is_connected(atclient_connection *ctx) {
   int ret = 0; // false by default
   const char *cmd = "\r\n";
-  const unsigned long cmdlen = strlen(cmd);
-  const unsigned long recvlen = 128;
+  const size_t cmdlen = strlen(cmd);
+  const size_t recvlen = 128;
   unsigned char *recv = malloc(sizeof(unsigned char) * recvlen);
   memset(recv, 0, recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvlen, &olen);
   if (ret != 0) {

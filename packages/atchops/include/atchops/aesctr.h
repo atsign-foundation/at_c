@@ -2,6 +2,7 @@
 #define ATCHOPS_AESCTR_H
 
 #include "atchops/aes.h"
+#include <stddef.h>
 
 /**
  * @brief AES CTR encrypt plaintext to ciphertextbase64 (base64 encoded string)
@@ -17,11 +18,11 @@
  * @param ciphertextbase64olen the written length of the ciphertext buffer
  * @return int 0 on success
  */
-int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64len, const enum atchops_aes_size keybits,
+int atchops_aesctr_encrypt(const char *keybase64, const size_t keybase64len, const enum atchops_aes_size keybits,
                            unsigned char *iv, // always 16 bytes long
-                           const unsigned char *plaintext, const unsigned long plaintextlen,
-                           unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len,
-                           unsigned long *ciphertextbase64olen);
+                           const unsigned char *plaintext, const size_t plaintextlen,
+                           unsigned char *ciphertextbase64, const size_t ciphertextbase64len,
+                           size_t *ciphertextbase64olen);
 
 /**
  * @brief AES CTR decrypt ciphertextbase64 to plaintext
@@ -37,9 +38,9 @@ int atchops_aesctr_encrypt(const char *keybase64, const unsigned long keybase64l
  * @param plaintextolen the written length of the plaintext buffer
  * @return int 0 on success
  */
-int atchops_aesctr_decrypt(const char *keybase64, const unsigned long keybase64len, const enum atchops_aes_size keybits,
+int atchops_aesctr_decrypt(const char *keybase64, const size_t keybase64len, const enum atchops_aes_size keybits,
                            unsigned char *iv, // always 16 bytes long
-                           const unsigned char *ciphertextbase64, const unsigned long ciphertextbase64len,
-                           unsigned char *plaintext, const unsigned long plaintextlen, unsigned long *plaintextolen);
+                           const unsigned char *ciphertextbase64, const size_t ciphertextbase64len,
+                           unsigned char *plaintext, const size_t plaintextlen, size_t *plaintextolen);
 
 #endif

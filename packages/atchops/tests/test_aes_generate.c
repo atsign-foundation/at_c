@@ -3,6 +3,7 @@
 #include "atchops/iv.h"
 #include <stdio.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PLAINTEXT "Hello World!\n"
 
@@ -10,22 +11,22 @@ int main() {
 
   int ret = 1;
 
-  const unsigned long keybase64len = 4096;
+  const size_t keybase64len = 4096;
   unsigned char keybase64[keybase64len];
   memset(keybase64, 0, keybase64len);
-  unsigned long keybase64olen = 0;
+  size_t keybase64olen = 0;
 
-  const unsigned long ciphertextlen = 4096;
+  const size_t ciphertextlen = 4096;
   unsigned char ciphertext[ciphertextlen];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextlen);
-  unsigned long ciphertextolen = 0;
+  size_t ciphertextolen = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
-  const unsigned long plaintext2len = 4096;
+  const size_t plaintext2len = 4096;
   unsigned char plaintext2[plaintext2len];
   memset(plaintext2, 0, sizeof(unsigned char) * plaintext2len);
-  unsigned long plaintext2olen = 0;
+  size_t plaintext2olen = 0;
 
   ret = atchops_aes_generate_keybase64(keybase64, keybase64len, &keybase64olen, ATCHOPS_AES_256);
   if (ret != 0) {

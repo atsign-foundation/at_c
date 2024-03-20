@@ -4,6 +4,7 @@
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
 #include <stddef.h>
+#include <stddef.h>
 
 typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
@@ -50,7 +51,7 @@ void atclient_atkey_free(atclient_atkey *atkey);
  * @return int 0 on success, that a struct was able to be created from the string. (the string followed proper key
  * nomenclature)
  */
-int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const unsigned long atkeylen);
+int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen);
 
 size_t atclient_atkey_strlen(const atclient_atkey *atkey);
 /**
@@ -72,8 +73,8 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey);
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const unsigned long atkeystrlen,
-                             unsigned long *atkeystrolen);
+int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const size_t atkeystrlen,
+                             size_t *atkeystrolen);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public

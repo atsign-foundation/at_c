@@ -4,6 +4,7 @@
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
 #include <string.h>
+#include <stddef.h>
 
 int atchops_iv_generate(unsigned char *iv) {
   int ret = 1;
@@ -32,7 +33,7 @@ exit: {
 }
 }
 
-int atchops_iv_generate_base64(unsigned char *ivbase64, const unsigned long ivbase64len, unsigned long *ivbase64olen) {
+int atchops_iv_generate_base64(unsigned char *ivbase64, const size_t ivbase64len, size_t *ivbase64olen) {
   int ret = 1;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];

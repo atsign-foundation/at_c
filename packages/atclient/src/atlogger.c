@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PREFIX_BUFFER_LEN 64
 #define INFO_PREFIX "\e[0;32m[INFO]\e[0m"
@@ -18,7 +19,7 @@ typedef struct atlogger_ctx {
 } atlogger_ctx;
 
 static void atlogger_get_prefix(enum atclient_atlogger_logging_level logging_level, char *prefix,
-                                unsigned long prefixlen) {
+                                size_t prefixlen) {
   memset(prefix, 0, prefixlen);
   switch (logging_level) {
   case ATLOGGER_LOGGING_LEVEL_INFO: {

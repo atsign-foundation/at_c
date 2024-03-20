@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "metadata"
 
@@ -366,7 +367,7 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
 }
 
 int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
-                                         const unsigned long metadatastrlen) {
+                                         const size_t metadatastrlen) {
   int ret = 1;
 
   cJSON *root = cJSON_Parse(metadatastr);
@@ -533,8 +534,8 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
   }
 }
 
-int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                       const unsigned long metadatastrlen, unsigned long *metadatastrolen) {
+int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata metadata, char *metadatastr,
+                                       const size_t metadatastrlen, size_t *metadatastrolen) {
   int ret = 1;
 
   cJSON *root = cJSON_CreateObject();
@@ -1056,6 +1057,8 @@ void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const lo
 
 void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr) { set_ttr(metadata, ttr); }
 
+void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd) { set_ccd(metadata, ccd); }
+
 void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
   set_isbinary(metadata, isbinary);
 }
@@ -1214,4 +1217,3 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
     atclient_atstr_free(&metadata->skeencalgo);
     metadata->initializedfields[3] &= ~ATKEY_METADATA_SKEENCALGO_INITIALIZED;
   }
-}

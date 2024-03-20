@@ -2,6 +2,7 @@
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "test_atkey_create"
 
@@ -112,8 +113,8 @@ static int test_create_selfkey() {
     goto exit;
   }
 
-  unsigned long atkeystrolen = 0;
-  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
+  size_t atkeystrolen = 0;
+  ret = atclient_atkey_to_string(atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
@@ -192,8 +193,8 @@ static int test_create_sharedkey() {
     goto exit;
   }
 
-  unsigned long atkeystrolen = 0;
-  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
+  size_t atkeystrolen = 0;
+  ret = atclient_atkey_to_string(atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
