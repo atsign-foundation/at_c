@@ -16,10 +16,10 @@
 #include <cJSON/cJSON.h>
 #include <mbedtls/md.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
 
@@ -319,8 +319,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
     goto exit;
   }
 
-  size_t cmdbufferlen =
-      strlen(" update:\r\n") + atkeystrolen + ciphertextolen + 1; // + 1 for null terminator
+  size_t cmdbufferlen = strlen(" update:\r\n") + atkeystrolen + ciphertextolen + 1; // + 1 for null terminator
 
   if (metadataprotocolstrolen > 0) {
     cmdbufferlen += metadataprotocolstrolen;
@@ -328,7 +327,8 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, sizeof(char) * cmdbufferlen);
 
-  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int) metadataprotocolstrolen, metadataprotocolstr, (int)atkeystrolen, atkeystr, (int)ciphertextolen, ciphertext);
+  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int)metadataprotocolstrolen, metadataprotocolstr,
+           (int)atkeystrolen, atkeystr, (int)ciphertextolen, ciphertext);
 
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
                                  recvlen, &recvolen);
@@ -351,7 +351,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
 
   ret = 0;
   goto exit;
-exit: {
+exit : {
 
   free(cmdbuffer);
   return ret;
@@ -780,6 +780,14 @@ static int atclient_get_shared_by_me_with_other(atclient *atclient, const atclie
 exit : {
   if (enc_key_mem)
     free(enc_key);
+  if (atkey_str_buff)
+    free(atkey_str_buff);
+  if (command)
+    free(command);
+  if (recv)
+    free(recv);
+  if (response_prefix)
+    free(response_prefix);
   return ret;
 }
 }
@@ -921,7 +929,15 @@ static int atclient_get_shared_by_other_with_me(atclient *atclient, const atclie
 
   ret = 0;
   goto exit;
-exit : { return ret; }
+exit : {
+  if (command)
+    free(command);
+  if (recv)
+    free(recv);
+  if (response_prefix)
+    free(response_prefix);
+  return ret;
+}
 }
 
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
