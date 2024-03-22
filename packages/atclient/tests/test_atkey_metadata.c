@@ -270,8 +270,6 @@ static int test_atkey_metadata_to_protocolstr() {
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "protocolfragment: \"%s\"\n", protocolfragment);
-
   if (strlen(protocolfragment) != protocolfragmentolen) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "strlen(protocolfragment) != protocolfragmentolen: %lu != %lu", strlen(protocolfragment),
