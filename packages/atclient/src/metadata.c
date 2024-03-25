@@ -4,10 +4,10 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include "cJSON/cJSON.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "metadata"
 
@@ -534,7 +534,7 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
   }
 }
 
-int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata metadata, char *metadatastr,
+int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
                                        const size_t metadatastrlen, size_t *metadatastrolen) {
   int ret = 1;
 
@@ -1217,3 +1217,4 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
     atclient_atstr_free(&metadata->skeencalgo);
     metadata->initializedfields[3] &= ~ATKEY_METADATA_SKEENCALGO_INITIALIZED;
   }
+}

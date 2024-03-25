@@ -4,7 +4,6 @@
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
 #include <stddef.h>
-#include <stddef.h>
 
 typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
@@ -73,7 +72,7 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey);
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const size_t atkeystrlen,
+int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const size_t atkeystrlen,
                              size_t *atkeystrolen);
 
 /**

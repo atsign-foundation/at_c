@@ -6,10 +6,10 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "atkey"
 
@@ -215,7 +215,7 @@ exit: {
 }
 }
 
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const size_t atkeystrlen,
+int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const size_t atkeystrlen,
                              size_t *atkeystrolen) {
   int ret = 1;
 
@@ -376,26 +376,26 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
 
   atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
 
-  ret = atclient_atstr_set_literal(&(atkey->name), "%.*s", (int) namelen, name);
+  ret = atclient_atstr_set_literal(&(atkey->name), "%.*s", (int)namelen, name);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
     goto exit;
   }
 
   if (namespacestr != NULL) {
-    if(namespacestrlen == 0) {
+    if (namespacestrlen == 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestrlen is 0. This is a required argument.\n");
       ret = 1;
       goto exit;
     }
-    ret = atclient_atstr_set_literal(&(atkey->namespacestr), "%.*s", (int) namespacestrlen, namespacestr);
+    ret = atclient_atstr_set_literal(&(atkey->namespacestr), "%.*s", (int)namespacestrlen, namespacestr);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
       goto exit;
     }
   }
 
-  ret = atclient_atstr_set_literal(&(atkey->sharedby), "%.*s", (int) sharedbylen, sharedby);
+  ret = atclient_atstr_set_literal(&(atkey->sharedby), "%.*s", (int)sharedbylen, sharedby);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
     goto exit;
