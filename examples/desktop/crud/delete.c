@@ -3,8 +3,6 @@
 #include <atclient/atsign.h>
 #include <atclient/metadata.h>
 #include <atlogger/atlogger.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define TAG "Debug"
