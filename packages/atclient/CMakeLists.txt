@@ -69,6 +69,7 @@ project(
  LANGUAGES C
 )
 
+set (CMAKE_C_STANDARD 99)
 # 2b. Build for Desktop
 if(NOT ESP_PLATFORM)
   # # ########################################################
