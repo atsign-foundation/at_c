@@ -856,8 +856,6 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
     return 1;
   }
 
-  printf("len: %lu\n", len);
-
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ttl:%ld", metadata->ttl);
   }
@@ -925,9 +923,6 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
     sprintf(metadatastr + pos, ":skeEncAlgo:%s", metadata->skeencalgo.str);
   }
-
-  printf("metadatastr: %s\n", metadatastr);
-  printf("metadatastrlen: %lu\n", metadatastrlen);
 
   if (strlen(metadatastr) != len) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n",
