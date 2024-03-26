@@ -52,7 +52,6 @@ void atclient_atkey_free(atclient_atkey *atkey);
  */
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen);
 
-size_t atclient_atkey_strlen(const atclient_atkey *atkey);
 /**
  * @brief get the length of the atkey string
  *
