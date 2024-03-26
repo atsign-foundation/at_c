@@ -292,8 +292,8 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
     goto exit;
   }
 
-  ret = atclient_atkey_metadata_to_protocolstr(&atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
-                                               &metadataprotocolstrolen);
+  ret = atclient_atkey_metadata_to_protocol_str(&atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
+                                                &metadataprotocolstrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;

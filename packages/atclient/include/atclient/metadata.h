@@ -280,8 +280,8 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
  * @param metadatastrolen the length of the metadata string written to metadatastr once the operation is complete
  * @return int 0 on success
  */
-int atclient_atkey_metadata_to_protocolstr(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                           const size_t metadatastrlen, size_t *metadatastrolen);
+int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
+                                            const size_t metadatastrlen, size_t *metadatastrolen);
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata *metadata);
