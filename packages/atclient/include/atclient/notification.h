@@ -68,9 +68,6 @@ typedef struct atclient_monitor_params {
   atclient_monitor_handler *handler;
 } atclient_monitor_params;
 
-int atclient_notification_params_for_update_init(atclient_notify_params *params);
-int atclient_notification_params_free(atclient_notify_params *params);
-
 int atclient_notify(atclient *ctx, atclient_notify_params *notification);
 int atclient_monitor(atclient *ctx, const atclient_monitor_params *params);
 
