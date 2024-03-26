@@ -215,6 +215,22 @@ exit: {
 }
 }
 
+size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
+
+  // TODO: I created this function to optimize the notify memory usage
+  // obviously, I am creating an unnecessary buffer here just to get the length
+  // which means there is a lot of memory being wasted here
+  // later on we need to refactor this and atclient_atkey_to_string away from
+  // using atclient_atstr to see real memory savings
+  // however, the priority is a working notify, and this is the best way to
+  // solve it immediately
+
+  char atkeystr[4096];
+  size_t atkeystrolen = 0;
+  atclient_atkey_to_string(atkey, atkeystr, 4096, &atkeystrolen);
+  return atkeystrolen;
+}
+
 int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const size_t atkeystrlen,
                              size_t *atkeystrolen) {
   int ret = 1;

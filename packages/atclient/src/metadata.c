@@ -695,16 +695,16 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
     len += atclient_atkey_metadata_ttr_strlen(metadata);
   }
 
-  if (atclient_atkey_metadata_is_ccd_initialized(metadata) && metadata->ccd) {
-    len += atclient_atkey_metadata_ccd_strlen(metadata) && metadata->ccd;
+  if (atclient_atkey_metadata_is_ccd_initialized(metadata) && metadata->ccd == 1) {
+    len += atclient_atkey_metadata_ccd_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_isbinary_initialized(metadata) && metadata->isbinary) {
-    len += atclient_atkey_metadata_isbinary_strlen(metadata) && metadata->isbinary;
+    len += atclient_atkey_metadata_isbinary_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_isencrypted_initialized(metadata) && metadata->isencrypted) {
-    len += atclient_atkey_metadata_isencrypted_strlen(metadata) && metadata->isencrypted;
+    len += atclient_atkey_metadata_isencrypted_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
@@ -840,14 +840,23 @@ size_t atclient_atkey_metadata_skeenckeyname_strlen(const atclient_atkey_metadat
          + metadata->skeenckeyname.olen;
 }
 
-size_t atclient_atkey_metadata_skeencalog_strlen(const atclient_atkey_metadata *metadata) {
+size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *metadata) {
   return 12 // :skeEncAlgo:
          + metadata->skeencalgo.olen;
 }
 
-int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr) {
+int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
+                                            const size_t metadatastrlen, size_t *metadatastrolen) {
   int ret = 1;
   size_t pos = 0;
+  size_t len = atclient_atkey_metadata_protocol_strlen(metadata);
+  if (len > metadatastrlen) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr buffer too small: %lu > %lu\n", len,
+                          metadatastrlen);
+    return 1;
+  }
+
+  printf("len: %lu\n", len);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ttl:%ld", metadata->ttl);
@@ -916,6 +925,17 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
     sprintf(metadatastr + pos, ":skeEncAlgo:%s", metadata->skeencalgo.str);
   }
+
+  printf("metadatastr: %s\n", metadatastr);
+  printf("metadatastrlen: %lu\n", metadatastrlen);
+
+  if (strlen(metadatastr) != len) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n",
+                          strlen(metadatastr), len);
+    return 1;
+  }
+
+  *metadatastrolen = len;
 
   ret = 0;
   goto exit;
