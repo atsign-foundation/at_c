@@ -858,70 +858,87 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ttl:%ld", metadata->ttl);
+    pos += 5 + long_strlen(metadata->ttl);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ttb:%ld", metadata->ttb);
+    pos += 5 + long_strlen(metadata->ttb);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ttr:%ld", metadata->ttr);
+    pos += 5 + long_strlen(metadata->ttr);
   }
 
   if (atclient_atkey_metadata_is_ccd_initialized(metadata) && metadata->ccd) {
     sprintf(metadatastr + pos, ":ccd:true");
+    pos += 9;
   }
 
   if (atclient_atkey_metadata_is_isbinary_initialized(metadata) && metadata->isbinary) {
     sprintf(metadatastr + pos, ":isBinary:true");
+    pos += 14;
   }
 
   if (atclient_atkey_metadata_is_isencrypted_initialized(metadata) && metadata->isencrypted) {
     sprintf(metadatastr + pos, ":isEncrypted:true");
+    pos += 17;
   }
 
   if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
     sprintf(metadatastr + pos, ":dataSignature:%s", metadata->datasignature.str);
+    pos += 15 + metadata->datasignature.olen;
   }
 
   if (atclient_atkey_metadata_is_sharedkeystatus_initialized(metadata)) {
     sprintf(metadatastr + pos, ":sharedKeyStatus:%s", metadata->sharedkeystatus.str);
+    pos += 17 + metadata->sharedkeystatus.olen;
   }
 
   if (atclient_atkey_metadata_is_sharedkeyenc_initialized(metadata)) {
     sprintf(metadatastr + pos, ":sharedKeyEnc:%s", metadata->sharedkeyenc.str);
+    pos += 14 + metadata->sharedkeyenc.olen;
   }
 
   if (atclient_atkey_metadata_is_pubkeyhash_initialized(metadata)) {
     sprintf(metadatastr + pos, ":hash:%s", metadata->pubkeyhash.str);
+    pos += 6 + metadata->pubkeyhash.olen;
   }
 
   if (atclient_atkey_metadata_is_pubkeyalgo_initialized(metadata)) {
     sprintf(metadatastr + pos, ":algo:%s", metadata->pubkeyalgo.str);
+    pos += 6 + metadata->pubkeyalgo.olen;
   }
 
   if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
     sprintf(metadatastr + pos, ":encoding:%s", metadata->encoding.str);
+    pos += 10 + metadata->encoding.olen;
   }
 
   if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
     sprintf(metadatastr + pos, ":encKeyName:%s", metadata->enckeyname.str);
+    pos += 12 + metadata->enckeyname.olen;
   }
 
   if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
     sprintf(metadatastr + pos, ":encAlgo:%s", metadata->encalgo.str);
+    pos += 9 + metadata->encalgo.olen;
   }
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ivNonce:%s", metadata->ivnonce.str);
+    pos += 9 + metadata->ivnonce.olen;
   }
 
   if (atclient_atkey_metadata_is_skeenckeyname_initialized(metadata)) {
     sprintf(metadatastr + pos, ":skeEncKeyName:%s", metadata->skeenckeyname.str);
+    pos += 15 + metadata->skeenckeyname.olen;
   }
 
   if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
     sprintf(metadatastr + pos, ":skeEncAlgo:%s", metadata->skeencalgo.str);
+    pos += 12 + metadata->skeencalgo.olen;
   }
 
   if (strlen(metadatastr) != len) {
