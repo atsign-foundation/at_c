@@ -43,11 +43,6 @@ int main() {
     ret = 1;
     goto exit;
   }
-  printf("n:\t");
-  for (int i = 0; i < privatekey.n.len; i++) {
-    printf("%02x ", privatekey.n.value[i]);
-  }
-  printf("\n");
 
   if (privatekey.e.len <= 0) {
     ret = 1;
