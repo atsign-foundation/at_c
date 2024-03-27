@@ -123,6 +123,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
                           "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
     goto exit;
   }
+
   goto exit;
 
 exit: {

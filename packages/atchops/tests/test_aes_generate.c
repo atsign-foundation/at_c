@@ -11,19 +11,19 @@ int main() {
 
   int ret = 1;
 
-  const size_t keybase64len = 4096;
+  const size_t keybase64len = 128;
   unsigned char keybase64[keybase64len];
   memset(keybase64, 0, keybase64len);
   size_t keybase64olen = 0;
 
-  const size_t ciphertextlen = 4096;
+  const size_t ciphertextlen = 1024;
   unsigned char ciphertext[ciphertextlen];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextlen);
   size_t ciphertextolen = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
-  const size_t plaintext2len = 4096;
+  const size_t plaintext2len = 1024;
   unsigned char plaintext2[plaintext2len];
   memset(plaintext2, 0, sizeof(unsigned char) * plaintext2len);
   size_t plaintext2olen = 0;

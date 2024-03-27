@@ -27,30 +27,14 @@
 
 #define TAG "atclient"
 
-void atclient_init(atclient *ctx) { memset(ctx, 0, sizeof(atclient)); }
-
-int atclient_start_root_connection(atclient_connection *root_conn, const char *roothost, const int rootport) {
-  int ret = 1; // error by default
-
-  atclient_connection_init(root_conn);
-
-  ret = atclient_connection_connect(root_conn, roothost, rootport);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
-    goto exit;
-  }
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                        "atclient_connection_connect: %d. Successfully connected to root\n", ret);
-
-  goto exit;
-
-exit : { return ret; }
+void atclient_init(atclient *ctx) {
+  memset(ctx, 0, sizeof(atclient));
+  atclient_connection_init(&(ctx->secondary_connection));
 }
 
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
-  atclient_connection_init(&(ctx->secondary_connection));
   ret = atclient_connection_connect(&(ctx->secondary_connection), secondaryhost, secondaryport);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
@@ -61,7 +45,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 
   goto exit;
 
-exit : { return ret; }
+exit: { return ret; }
 }
 
 int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
@@ -235,10 +219,20 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
+  // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign
+  ret = atclient_atsign_init(&(ctx->atsign), atsign);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
+    goto exit;
+  }
+
+  // set atkeys
+  ctx->atkeys = atkeys;
+
   ret = 0;
 
   goto exit;
-exit : {
+exit: {
   atclient_atbytes_free(&src);
   atclient_atbytes_free(&recv);
   atclient_atstr_free(&withoutat);
@@ -254,9 +248,15 @@ exit : {
 }
 }
 
-int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
+int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, const char *value,
                  const size_t valuelen, int *commitid) {
   int ret = 1;
+
+  // make sure shared by is atclient->atsign.atsign
+  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.olen) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
+    return ret;
+  }
 
   // 1. initialize variables
   const size_t atkeystrlen = ATCLIENT_ATKEY_FULL_LEN;
@@ -283,19 +283,16 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextlen);
   size_t ciphertextolen = 0;
 
+  const size_t sharedenckeybase64size = 45;
+  char sharedenckeybase64[sharedenckeybase64size];
+  memset(sharedenckeybase64, 0, sizeof(char) * sharedenckeybase64size);
+
   char *cmdbuffer = NULL;
 
   // 2. build update: command
   ret = atclient_atkey_to_string(*atkey, atkeystr, atkeystrlen, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_atkey_metadata_to_protocolstr(atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
-                                               &metadataprotocolstrolen);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;
   }
 
@@ -313,13 +310,93 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
       goto exit;
     }
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    // TODO: implement, encrypt with some shared AES symmetric encryption key
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ATCLIENT_ATKEY_TYPE_SHAREDKEY not implemented in put\n");
-    ret = 1;
-    goto exit;
+    // encrypt with shared encryption key
+
+    // get our AES shared key
+    // if it doesn't exist, create one for us and create one for the other person
+    // create one for us -> encrypted with our self encryption key
+    // create one for the other person -> encrypted with their public encryption key
+    atclient_atsign recipient;
+    atclient_atsign_init(&recipient, atkey->sharedwith.str);
+    ret = atclient_get_encryption_key_shared_by_me(atclient, &recipient, sharedenckeybase64, true);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
+      goto exit;
+    }
+
+    // print the shared encryption key
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sharedenckeybase64: %s\n", sharedenckeybase64);
+
+    // next, let's store their shared encryption key in the shared key we are creating
+
+    // encrypt it with their public encryption key
+    const size_t publickeybase64size = 1024;
+    char publickeybase64[publickeybase64size];
+    memset(publickeybase64, 0, sizeof(char) * publickeybase64size);
+
+
+    ret = atclient_get_public_encryption_key(atclient, root_conn, &recipient, publickeybase64);
+    if(ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
+    }
+
+    atchops_rsakey_publickey publickeystruct;
+    atchops_rsakey_publickey_init(&publickeystruct);
+    ret = atchops_rsakey_populate_publickey(&publickeystruct, publickeybase64, strlen(publickeybase64));
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d\n", ret);
+      goto exit;
+    }
+
+    const size_t sharedenckeybase64encryptedformthemsize = 1024;
+    char sharedenckeybase64encryptedforthem[sharedenckeybase64encryptedformthemsize];
+    memset(sharedenckeybase64encryptedforthem, 0, sizeof(char) * sharedenckeybase64encryptedformthemsize);
+    size_t sharedenckeybase64encryptedforthemlen = 0;
+
+    ret = atchops_rsa_encrypt(publickeystruct, sharedenckeybase64, strlen(sharedenckeybase64), sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedformthemsize, &sharedenckeybase64encryptedforthemlen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atclient_atkey_metadata_set_sharedkeyenc(&(atkey->metadata), sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemlen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                            "atclient_atkey_metadata_set_shared_encryption_key: %d\n", ret);
+      goto exit;
+    }
+
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sharedenckeybase64encryptedforthem: %s\n", sharedenckeybase64encryptedforthem);
+
+    // pubKeyCS
+    // TODO: set pubKeyCS metadata to the CheckSum of the sharedWith's public encryption key
+
+    // encrypt with shared encryption key
+    ret = atchops_iv_generate(iv);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atchops_aesctr_encrypt(sharedenckeybase64, strlen(sharedenckeybase64), ATCHOPS_AES_256, iv, (unsigned char *)value,
+                                 valuelen, ciphertext, ciphertextlen, &ciphertextolen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
+      goto exit;
+    }
+
+    // print
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Generated cipher text: %s\n", ciphertext);
   }
 
   size_t cmdbufferlen = strlen(" update:\r\n") + atkeystrolen + ciphertextolen + 1; // + 1 for null terminator
+
+  ret = atclient_atkey_metadata_to_protocolstr(atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
+                                               &metadataprotocolstrolen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
+    goto exit;
+  }
 
   if (metadataprotocolstrolen > 0) {
     cmdbufferlen += metadataprotocolstrolen;
@@ -351,7 +428,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
 
   free(cmdbuffer);
   return ret;
@@ -395,8 +472,6 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   memset(cmdbuffer, 0, cmdbufferlen);
 
   snprintf(cmdbuffer, cmdbufferlen, "llookup:all:%.*s\r\n", (int)atkeystrolen, atkeystr);
-
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdbuffer: %.*s\n", (int)cmdbufferlen, cmdbuffer);
 
   // 3. send llookup: command
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
@@ -475,7 +550,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   ret = 0;
   goto exit;
-exit : { return ret; }
+exit: { return ret; }
 }
 
 int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
@@ -587,7 +662,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, c
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   if (root != NULL) {
     cJSON_Delete(root);
   }
@@ -630,7 +705,7 @@ int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char
   }
 
   goto exit;
-exit : { return ret; }
+exit: { return ret; }
 }
 
 static int atclient_get_shared_by_me_with_other(atclient *atclient, const atclient_atkey *atkey, char *value,
@@ -777,7 +852,7 @@ static int atclient_get_shared_by_me_with_other(atclient *atclient, const atclie
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   if (enc_key_mem)
     free(enc_key);
   if (atkey_str_buff)
@@ -929,7 +1004,7 @@ static int atclient_get_shared_by_other_with_me(atclient *atclient, const atclie
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   if (command)
     free(command);
   if (recv)
@@ -981,10 +1056,139 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   atclient_atstr_free(&cmdbuffer);
   return ret;
 }
+}
+
+static int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient,
+                                                                       atclient_connection *root_conn,
+                                                                       const atclient_atsign *sharedby,
+                                                                       const atclient_atsign *sharedwith, char *sharedenckeybyme) {
+  int ret = 1;
+
+  // 1. variables
+  // holds unencrypted shared encryption key in base 64 format
+  const size_t sharedenckeybase64size = 2048;
+  unsigned char sharedenckeybase64[sharedenckeybase64size];
+  size_t sharedenckeybase64len = 0;
+
+  // encrypted for us
+  const size_t sharedenckeybase64encryptedforussize = 2048;
+  unsigned char sharedenckeybase64encryptedforus[sharedenckeybase64encryptedforussize];
+  size_t sharedenckeybase64encryptedforuslen = 0;
+
+  // encrypted for them
+  const size_t sharedenckeybase64encryptedforthemsize = 2048;
+  unsigned char sharedenckeybase64encryptedforthem[sharedenckeybase64encryptedforthemsize];
+  size_t sharedenckeybase64encryptedforthemlen = 0;
+
+  // their public encyrption key
+  const size_t publickeybase64size = 4096;
+  unsigned char publickeybase64[publickeybase64size];
+  size_t publickeybase64len = 0;
+
+  // 2. generate shared encryption key
+  ret = atchops_aes_generate_keybase64(sharedenckeybase64, sharedenckeybase64size, &sharedenckeybase64len,
+                                       ATCHOPS_AES_256);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_generate_keybase64: %d\n", ret);
+    return ret;
+  }
+
+  // 3. encrypt for us (with self encryption key)
+  ret = atchops_rsa_encrypt(atclient->atkeys.encryptpublickey, (unsigned char *) sharedenckeybase64, sharedenckeybase64len, sharedenckeybase64encryptedforus,
+                            sharedenckeybase64encryptedforussize, &sharedenckeybase64encryptedforuslen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to encrypt shared enc key for us | atchops_rsa_encrypt: %d\n", ret);
+    return ret;
+  }
+
+  // 4. encrypt for them (with their rsa public encryption key)
+  ret = atclient_get_public_encryption_key(atclient, root_conn, sharedwith, publickeybase64);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
+    return ret;
+  }
+
+  // create a rsakey public (atchops)
+  atchops_rsakey_publickey publickeystruct;
+  atchops_rsakey_publickey_init(&publickeystruct);
+  ret = atchops_rsakey_populate_publickey(&publickeystruct, publickeybase64, strlen(publickeybase64));
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d\n", ret);
+    return ret;
+  }
+
+  // encrypt the symmetric key with their rsa public key
+  // print publickeystruc n and e
+  for(size_t i = 0; i < publickeystruct.n.len; i++) {
+    printf("%02x ", publickeystruct.n.value[i]);
+  }
+  printf("\n");
+
+  for(size_t i = 0; i < publickeystruct.e.len; i++) {
+    printf("%02x ", publickeystruct.e.value[i]);
+  }
+  printf("\n");
+
+  printf("atchops_rsa_encrypt(a, %s, %lu, %s, %lu, %lu)\n",
+         sharedenckeybase64, sharedenckeybase64len, sharedenckeybase64encryptedforthem,
+         sharedenckeybase64encryptedforthemsize, sharedenckeybase64encryptedforthemlen);
+
+  ret = atchops_rsa_encrypt(publickeystruct, (unsigned char *) sharedenckeybase64, sharedenckeybase64len,
+                            sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
+                            &sharedenckeybase64encryptedforthemlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
+    return ret;
+  }
+
+  // 5. prep protocol commands
+
+  // 5a. for us (update:shared_key.sharedby@sharedwith <encrypted for us>\r\n)
+  const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith->without_prefix_str) +
+                                       strlen(sharedby->atsign) + 1 + sharedenckeybase64encryptedforuslen;
+  char cmdbuffer1[cmdbuffersize1];
+  memset(cmdbuffer1, 0, sizeof(char) * cmdbuffersize1);
+  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
+           sharedby->atsign, sharedenckeybase64encryptedforus);
+
+  // 5b. for them (update:shared_key.sharedwith@sharedby <encrypted for them>\r\n)
+  const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
+                                strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
+  char cmdbuffer2[cmdbuffersize2];
+  memset(cmdbuffer2, 0, sizeof(char) * cmdbuffersize2);
+  snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith->atsign, sharedby->atsign,
+           sharedenckeybase64encryptedforthem);
+
+  // 5c. receive buffer
+  const size_t recvsize = 2048;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
+
+  // 5. put "encrypted for us" into key store
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
+                                 recv, recvsize, &recvlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    return ret;
+  }
+
+  // 6. put "encrypted for them" into key store
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer2, cmdbuffersize2 - 1,
+                                 recv, recvsize, &recvlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    return ret;
+  }
+
+  // 7. return shared encryption key by me
+  memcpy(sharedenckeybyme, sharedenckeybase64, sharedenckeybase64len);
+
+  return 0;
 }
 
 int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
@@ -1050,7 +1254,7 @@ int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsig
     // or do I need to create, store and share a new shared key?
     if (create_new_if_not_found) {
       // TODO: instead return a specific signal indiciating key not found and let the developer create their own key
-      // ret = atclient_create_shared_encryption_key(ctx, root_conn, recipient, enc_key_shared_by_me);
+      ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, NULL, &(ctx->atsign), recipient, enc_key_shared_by_me);
       if (ret != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
         return ret;

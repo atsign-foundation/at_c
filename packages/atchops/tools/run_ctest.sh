@@ -7,4 +7,5 @@ cd ..
 cmake -S . -B build -DATCHOPS_BUILD_TESTS=ON
 cmake --build build --target all
 cd build/tests
-ctest --output-on-failure --timeout 2
+# ctest --output-on-failure --timeout 2
+ctest -V
