@@ -348,12 +348,12 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
       goto exit;
     }
 
-    const size_t sharedenckeybase64encryptedformthemsize = 1024;
-    char sharedenckeybase64encryptedforthem[sharedenckeybase64encryptedformthemsize];
-    memset(sharedenckeybase64encryptedforthem, 0, sizeof(char) * sharedenckeybase64encryptedformthemsize);
+    const size_t sharedenckeybase64encryptedforthemsize = 1024;
+    char sharedenckeybase64encryptedforthem[sharedenckeybase64encryptedforthemsize];
+    memset(sharedenckeybase64encryptedforthem, 0, sizeof(char) * sharedenckeybase64encryptedforthemsize);
     size_t sharedenckeybase64encryptedforthemlen = 0;
 
-    ret = atchops_rsa_encrypt(publickeystruct, sharedenckeybase64, strlen(sharedenckeybase64), sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedformthemsize, &sharedenckeybase64encryptedforthemlen);
+    ret = atchops_rsa_encrypt(publickeystruct, sharedenckeybase64, strlen(sharedenckeybase64), sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize, &sharedenckeybase64encryptedforthemlen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
       goto exit;
@@ -1122,21 +1122,6 @@ static int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient 
   }
 
   // encrypt the symmetric key with their rsa public key
-  // print publickeystruc n and e
-  for(size_t i = 0; i < publickeystruct.n.len; i++) {
-    printf("%02x ", publickeystruct.n.value[i]);
-  }
-  printf("\n");
-
-  for(size_t i = 0; i < publickeystruct.e.len; i++) {
-    printf("%02x ", publickeystruct.e.value[i]);
-  }
-  printf("\n");
-
-  printf("atchops_rsa_encrypt(a, %s, %lu, %s, %lu, %lu)\n",
-         sharedenckeybase64, sharedenckeybase64len, sharedenckeybase64encryptedforthem,
-         sharedenckeybase64encryptedforthemsize, sharedenckeybase64encryptedforthemlen);
-
   ret = atchops_rsa_encrypt(publickeystruct, (unsigned char *) sharedenckeybase64, sharedenckeybase64len,
                             sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
                             &sharedenckeybase64encryptedforthemlen);
@@ -1177,11 +1162,29 @@ static int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient 
     return ret;
   }
 
+  // check if the key was successfully stored
+  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                          (int)recvlen, recv);
+    return ret;
+  }
+
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+
   // 6. put "encrypted for them" into key store
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer2, cmdbuffersize2 - 1,
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    return ret;
+  }
+
+  // check if the key was successfully stored
+  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+    ret = 1;
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                          (int)recvlen, recv);
     return ret;
   }
 
