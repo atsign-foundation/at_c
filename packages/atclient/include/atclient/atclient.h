@@ -79,7 +79,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  * @return int 0 on success
  */
 int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
-                const size_t valuelen, int *commitid);
+                 const size_t valuelen, int *commitid);
 
 // TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 
@@ -125,7 +125,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, char *value,
+int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
                            const size_t valuelen, size_t *valueolen, bool bypasscache);
 
 /**
@@ -153,7 +153,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, c
  * should be created (if it hasn’t already been) or not.
  * @return int 0 on success
  */
-int atclient_get_sharedkey(atclient *atclient, const atclient_atkey *atkey, char *value, const size_t valuelen,
+int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
                            size_t *valueolen, char *shared_enc_key,
                            const bool create_new_encryption_key_shared_by_me_if_not_found);
 

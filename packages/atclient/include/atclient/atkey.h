@@ -4,7 +4,6 @@
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
 #include <stddef.h>
-#include <stddef.h>
 
 typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
@@ -14,8 +13,10 @@ typedef enum atclient_atkey_type {
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
+  // TODO: remove atkey_type and replace it with a policy function that infers atkeytype given atclient_atkey & atclient
   atclient_atkey_type atkeytype;
 
+  // TODO: this should be called atkey.key to be consistent with dart
   atclient_atstr name;
   atclient_atstr namespacestr;
   atclient_atstr sharedby;
@@ -52,6 +53,16 @@ void atclient_atkey_free(atclient_atkey *atkey);
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen);
 
 /**
+ * @brief get the length of the atkey string
+ *
+ * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
+ * @return size_t the length of the atkey string
+ *
+ * @note this excludes the null terminator and metadata string fragement
+ */
+size_t atclient_atkey_strlen(const atclient_atkey *atkey);
+
+/**
  * @brief convert an atkey struct to its string format
  *
  * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
@@ -60,7 +71,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
  * @param atkeystrolen the written (output) length of the atkeystr
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey atkey, char *atkeystr, const size_t atkeystrlen,
+int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const size_t atkeystrlen,
                              size_t *atkeystrolen);
 
 /**

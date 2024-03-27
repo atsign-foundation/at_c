@@ -1,8 +1,8 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
-#include <stdlib.h>
-#include <string.h>
 #include <stddef.h>
+#include <stdlib.h> // IWYU pragma: keep
+#include <string.h>
 
 #define TAG "test_stringutils"
 

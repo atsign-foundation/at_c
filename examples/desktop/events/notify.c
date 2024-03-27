@@ -3,9 +3,8 @@
 #include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
+#include <atclient/notification.h>
 #include <atlogger/atlogger.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 // publickey
@@ -14,24 +13,21 @@
 
 // #define ATSIGN "@jeremy_0"
 #define ATSIGN "@qt_thermostat"
-#define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@qt_thermostat_key.atKeys"
+#define OATSIGN "@qt_app_2"
+#define ATKEYS_FILE_PATH "/Users/chant/.atsign/keys/@qt_thermostat_key.atKeys"
 
-#define ATCLIENT_LOGGING_LEVEL ATLOGGER_LOGGING_LEVEL_DEBUG
-
-#define ROOT_HOST "root.atsign.org"
-#define ROOT_PORT 64
-
-#define ATKEY_NAME "publickey"
-#define ATKEY_SHAREDBY "@colin"
+#define ATKEY_KEY "test"
+#define ATKEY_NAMESPACE "dart_playground"
+#define ATKEY_VALUE "test value"
 
 int main() {
   int ret = 1;
 
-  atclient_atlogger_set_logging_level(ATCLIENT_LOGGING_LEVEL);
+  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const size_t valuelen = 4096;
+  const size_t valuelen = 1024;
   char value[valuelen];
-  memset(value, 0, valuelen);
+  memset(value, 0, sizeof(char) * valuelen);
   size_t valueolen = 0;
 
   atclient atclient;
@@ -39,7 +35,7 @@ int main() {
 
   atclient_connection root_connection;
   atclient_connection_init(&root_connection);
-  atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
+  atclient_connection_connect(&root_connection, "root.atsign.org", 64);
 
   atclient_atsign atsign;
   atclient_atsign_init(&atsign, ATSIGN);
@@ -60,11 +56,13 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), NULL, 0)) != 0) {
+  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATSIGN, strlen(ATSIGN), OATSIGN,
+                                             strlen(OATSIGN), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
     goto exit;
   }
+
+  atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
   if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
@@ -74,26 +72,19 @@ int main() {
   atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
                         (int)atkeystr.olen, atkeystr.str);
 
-  ret = atclient_get_publickey(&atclient, &root_connection, &atkey, value, valuelen, &valueolen, true);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
+  atclient_notify_params notify_params;
+  atclient_notify_params_init(&notify_params);
+
+  notify_params.key = atkey;
+  notify_params.value = ATKEY_VALUE;
+  notify_params.operation = NO_update;
+
+  if ((ret = atclient_notify(&atclient, &notify_params)) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify");
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Data: \"%.*s\"\n", (int)valueolen, value);
-
-  char metadatajsonstr[4096];
-  memset(metadatajsonstr, 0, 4096);
-  size_t metadatstrolen = 0;
-
-  ret = atclient_atkey_metadata_to_jsonstr(&atkey.metadata, metadatajsonstr, 4096, &metadatstrolen);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert metadata to json string");
-    goto exit;
-  }
-
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Metadata: \"%.*s\"\n", (int)metadatstrolen,
-                        metadatajsonstr);
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent notification");
 
   ret = 0;
   goto exit;
