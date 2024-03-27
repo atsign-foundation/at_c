@@ -11,6 +11,13 @@ find_package(MbedTLS QUIET)
 message(STATUS "Found atclient!")
 
 
-add_executable(exec ${CMAKE_CURRENT_LIST_DIR}/${TARGET_SRC})
+set(examples
+  notify
+  monitor
+)
 
-target_link_libraries(exec PRIVATE atclient::atclient)
+foreach(example ${examples})
+  add_executable(${example} ${CMAKE_CURRENT_LIST_DIR}/${example}.c)
+  target_link_libraries(${example} PRIVATE atclient::atclient)
+endforeach()
+
