@@ -598,11 +598,11 @@ exit: {
 }
 }
 
-static int atclient_get_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, char *shared_enc_key,
                                                 const bool create_new_encryption_key_shared_by_me_if_not_found);
 
-static int atclient_get_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, char *shared_enc_key);
 
 int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
@@ -617,15 +617,15 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
 
   if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.olen) != 0) {
     //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
-    ret = atclient_get_shared_by_other_with_me(atclient, atkey, value, valuelen, valueolen, shared_enc_key);
+    ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuelen, valueolen, shared_enc_key);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_by_other_with_me: %d\n", ret);
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
-    ret = atclient_get_shared_by_me_with_other(atclient, atkey, value, valuelen, valueolen, shared_enc_key, false);
+    ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuelen, valueolen, shared_enc_key, false);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_by_me_with_other: %d\n", ret);
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n", ret);
       goto exit;
     }
   }
@@ -634,7 +634,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
 exit: { return ret; }
 }
 
-static int atclient_get_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, char *shared_enc_key,
                                                 const bool create_new_encryption_key_shared_by_me_if_not_found) {
   int ret = 1;
@@ -793,7 +793,7 @@ exit: {
 }
 }
 
-static int atclient_get_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
                                                 const size_t valuelen, size_t *valueolen, char *shared_enc_key) {
   int ret = 1;
   char *command = NULL;
