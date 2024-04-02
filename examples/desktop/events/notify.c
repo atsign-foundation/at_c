@@ -7,8 +7,6 @@
 #include <atlogger/atlogger.h>
 #include <string.h>
 
-// publickey
-
 #define TAG "Debug"
 
 // #define ATSIGN "@jeremy_0"
@@ -35,7 +33,7 @@ int main() {
 
   atclient_connection root_connection;
   atclient_connection_init(&root_connection);
-  atclient_connection_connect(&root_connection, "root.atsign.org", 64);
+  atclient_connection_connect(&root_connection, "root.atsign.org", 64, NULL);
 
   atclient_atsign atsign;
   atclient_atsign_init(&atsign, ATSIGN);
@@ -50,8 +48,8 @@ int main() {
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, atkeys, atsign.atsign, strlen(atsign.atsign))) !=
-      0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, atkeys, atsign.atsign, strlen(atsign.atsign),
+                                        NULL)) != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }

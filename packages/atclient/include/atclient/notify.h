@@ -1,6 +1,3 @@
-#ifndef NOTIFICATION_H
-#define NOTIFICATION_H
-
 #include "atclient.h"
 #include "atkey.h"
 
@@ -48,27 +45,3 @@ void atclient_notify_params_init(atclient_notify_params *params);
 void atclient_notify_params_free(atclient_notify_params *params);
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params);
-// Receiving notifications
-typedef struct atclient_atnotification {
-  char *id;
-  atclient_atsign from;
-  atclient_atsign to;
-  atclient_atkey key;
-  char *value;
-  char operation[7]; // update | delete
-  size_t epochMillis;
-  char messageType[5]; // key | text (deprecated)
-  bool isEncrypted;
-  size_t expiresAt;
-} atclient_atnotification;
-
-typedef void(atclient_monitor_handler)(const atclient_atnotification *notification);
-typedef struct atclient_monitor_params {
-  char *regex;
-  atclient_monitor_handler *handler;
-} atclient_monitor_params;
-
-int atclient_notify(atclient *ctx, atclient_notify_params *notification);
-int atclient_monitor(atclient *ctx, const atclient_monitor_params *params);
-
-#endif
