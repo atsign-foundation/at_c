@@ -3,7 +3,7 @@
 #include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
-#include <atclient/notification.h>
+#include <atclient/monitor.h>
 #include <atlogger/atlogger.h>
 #include <string.h>
 
@@ -33,7 +33,7 @@ int main() {
 
   atclient_connection root_connection;
   atclient_connection_init(&root_connection);
-  atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT, NULL);
+  atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
 
   atclient_atsign atsign;
   atclient_atsign_init(&atsign, ATSIGN);
@@ -42,23 +42,22 @@ int main() {
   atclient_atkeys_init(&atkeys);
   atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, atkeys, atsign.atsign, strlen(atsign.atsign),
-                                        NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, atkeys, atsign.atsign, strlen(atsign.atsign))) !=
+      0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
 
-  atclient_monitor_params params = {
-      .regex = ".*",
-      .handler = monitor_handler,
-  };
-
+  // atclient_monitor_params params = {
+  //     .regex = ".*",
+  //     .handler = monitor_handler,
+  // };
   printf("Starting monitor\n");
-  if ((ret = atclient_monitor(ROOT_HOST, ROOT_PORT, atsign, atkeys, &params))) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed");
-    goto exit;
-  }
-
+  // if ((ret = atclient_monitor(ROOT_HOST, ROOT_PORT, atsign, atkeys, &params))) {
+  //   atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed");
+  //   goto exit;
+  // }
+  //
   ret = 0;
   goto exit;
 exit: {
