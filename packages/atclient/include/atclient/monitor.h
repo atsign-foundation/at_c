@@ -39,7 +39,7 @@ typedef struct atclient_monitor_message {
  * @return 0 on success, non-zero on error
  */
 int atclient_start_monitor(atclient *monitor_connection, const char *root_host, const int root_port,
-                           const atclient_atsign *atsign, const atclient_atkeys *atkeys, const char *regex);
+                           const atclient_atsign atsign, const atclient_atkeys atkeys, const char *regex);
 
 /* @brief Send a heartbeat on the monitor connection
  * @param ctx the atclient context for the monitor connection
