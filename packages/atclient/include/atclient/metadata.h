@@ -4,7 +4,7 @@
 
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h> // IWYU pragma: keep (for uint8_t)

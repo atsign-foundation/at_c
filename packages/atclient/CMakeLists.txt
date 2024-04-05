@@ -30,7 +30,7 @@ set(ATCLIENT_INCLUDE_DIR
 set(ATCHOPS_DIR ${CMAKE_CURRENT_LIST_DIR}/../atchops)
 
 # 1d. cJSON package directory
-set(CJSON_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cJSON)
+# set(CJSON_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cJSON)
 
 # 1d. Set compile definitions
 # you may set any of these flags in the CMake configuration step via: `-DATCLIENT_BUILD_TESTS=ON` (example: `cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF)
@@ -69,7 +69,7 @@ project(
  LANGUAGES C
 )
 
-set (CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 99)
 # 2b. Build for Desktop
 if(NOT ESP_PLATFORM)
   # # ########################################################
@@ -139,18 +139,46 @@ if(NOT ESP_PLATFORM)
   else()
     message(STATUS "[ATCLIENT] MbedTLS found package..")
   endif()
-
-  if(ATCLIENT_MAKE_AVAILABLE)
-    FetchContent_MakeAvailable(${ATCLIENT_MAKE_AVAILABLE})
-  endif()
-
+  
   # # ########################################################
   # 5C. cJSON
   # # ########################################################
-  add_subdirectory(${CJSON_DIR})
-  list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson-static)
-
-  # # ########################################################
+  # add_subdirectory(${CJSON_DIR})
+  # list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson-static)
+  
+  # find_package(cJSON QUIET)
+  
+  if(NOT cjson_FOUND)
+    message(STATUS "[ATCLIENT] cJSON not found, fetching from GitHub..")
+    FetchContent_Declare(
+      cjson
+      URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.17.zip
+      URL_HASH SHA256=51f3b07aece8d1786e74b951fd92556506586cb36670741b6bfb79bf5d484216 # hash for v1.7.17 .zip release source code
+    )
+    # FetchContent_GetProperties(cJSON)
+    # if(NOT cJSON_POPULATED)
+    #   FetchContent_Populate(cJSON)
+    #   message(STATUS "cjson_SOURCE_DIR: ${cjson_SOURCE_DIR}")
+    #   message(STATUS "cjson_BINARY_DIR: ${cjson_BINARY_DIR}")
+    #   set(ENABLE_CJSON_TEST OFF "cJSON: Build with unit testing" FORCE)
+    #   add_subdirectory(${cjson_SOURCE_DIR} ${cjson_BINARY_DIR})
+    # endif()
+    list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson) # since we've fetched it, we have to install it
+    set(CJSON_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(CJSON_OVERRIDE_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+    set(ENABLE_CJSON_TEST OFF CACHE BOOL "" FORCE)
+    add_compile_options(-fPIC)
+    FetchContent_MakeAvailable(cJSON)
+    # list(APPEND ATCLIENT_MAKE_AVAILABLE cjson) # we have to make it available later on with FetchContent_MakeAvailable
+    else()
+    message(STATUS "[ATCHOPS] cJSON found package..")
+  endif()
+    
+    if(ATCLIENT_MAKE_AVAILABLE)
+      FetchContent_MakeAvailable(${ATCLIENT_MAKE_AVAILABLE})
+    endif()
+    
+    # # ########################################################
   # 5D. Create atlogger library
   # - atlogger header files are installed to `/usr/local/include/atlogger`
   # - atlogger library is automatically linked as part of atclient library (when you install atclient, it already includes atlogger)
@@ -176,18 +204,27 @@ if(NOT ESP_PLATFORM)
   add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
+  message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+  message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_BINARY_DIR}")
+  configure_file(${cjson_SOURCE_DIR}/cJSON.h ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h)
+  
+  # Set include directories for atclient target
+  target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+  $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
+  # target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include)
+
+  add_dependencies(atclient cjson)
+  
   # Link libraries to atclient target
+  # target_link_libraries(${PROJECT_NAME} PUBLIC cjson)
   target_link_libraries(${PROJECT_NAME} PUBLIC
     atchops::atchops
     MbedTLS::mbedtls
     MbedTLS::mbedx509
-    cJSON::cjson-static
-  )
-
-  # Set include directories for atclient target
-  target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    cjson
   )
 
   install(
