@@ -191,6 +191,9 @@ if(NOT ESP_PLATFORM)
   add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
+  message(STATUS "cjson_SOURCE_DIR: ${cjson_SOURCE_DIR}")
+  message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+
   # Manually add header file
   configure_file(${cjson_SOURCE_DIR}/cJSON.h ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h)
   
