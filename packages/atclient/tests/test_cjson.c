@@ -1,4 +1,4 @@
-#include <cJSON/cJSON.h>
+#include <cjson/cJSON.h>
 #include <stddef.h> // IWYU pragma: keep
 #include <stdio.h>
 
