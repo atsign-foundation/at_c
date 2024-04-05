@@ -31,9 +31,9 @@ int main()
 
     atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-    const size_t valuelen = 1024;
-    char value[valuelen];
-    memset(value, 0, sizeof(char) * valuelen);
+    const size_t valuesize = 2048;
+    char value[valuesize];
+    memset(value, 0, sizeof(char) * valuesize);
     size_t valueolen = 0;
 
     atclient atclient;
@@ -80,8 +80,8 @@ int main()
         goto exit;
     }
 
-
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Done put.\n");
+
     ret = 0;
     goto exit;
 exit: {
