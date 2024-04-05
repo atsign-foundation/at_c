@@ -14,10 +14,10 @@ fi
 
 FILE="$1"
 
-"$SCRIPT_DIRECTORY/../../../packages/atclient/tools/clean_install.sh"
+"$SCRIPT_DIRECTORY/../../../packages/atclient/tools/install.sh"
 cd "$SCRIPT_DIRECTORY"
 
 rm -f build/exec
-cmake -S . -B build -DTARGET_SRC="$FILE" --log-level=DEBUG
+cmake -S . -B build -DTARGET_SRC="$FILE"
 cmake --build build
 ./build/exec
