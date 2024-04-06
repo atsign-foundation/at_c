@@ -36,8 +36,6 @@ int main(int argc, char *argv[]) {
   // print both atsign
   printf("atsign_input: %s\n", atsign_input);
   printf("other_atsign_input: %s\n", other_atsign_input);
-  atsign_input = "@xavierchanth";
-  other_atsign_input = "@xchan";
   if (atsign_input == NULL || other_atsign_input == NULL) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Please provide both atsigns with -a and -o flags\n");
     return 1;
