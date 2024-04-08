@@ -38,4 +38,11 @@ int atclient_stringutils_starts_with(const char *string, const size_t stringlen,
 int atclient_stringutils_ends_with(const char *string, const size_t stringlen, const char *suffix,
                                    const size_t suffixlen);
 
+/**
+ * @brief get the length of a long if it were converted to a string
+ *
+ * @param n the long to check the length of
+ * @return int the string length
+ */
+int long_strlen(long n);
 #endif

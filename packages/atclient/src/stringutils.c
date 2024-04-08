@@ -1,11 +1,11 @@
 #include "atclient/stringutils.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
-int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out,
-                                         const size_t outlen, size_t *outolen) {
+int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outlen,
+                                         size_t *outolen) {
   int ret = 1;
 
   if (string == NULL) {
@@ -97,4 +97,24 @@ int atclient_stringutils_ends_with(const char *string, const size_t stringlen, c
 
   goto exit;
 exit: { return ret; }
+}
+
+int long_strlen(long n) {
+  // could use log10 for this, but it's probably slower...
+  size_t len = 0;
+
+  if (n == 0) {
+    return 1;
+  }
+
+  if (n < 0) {
+    n *= -1;
+    len++; // for the minus sign
+  }
+
+  for (long i = 1; i <= n; i *= 10) {
+    len++;
+  }
+
+  return len;
 }

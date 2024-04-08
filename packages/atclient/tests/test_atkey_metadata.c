@@ -263,7 +263,8 @@ static int test_atkey_metadata_to_protocolstr() {
   memset(protocolfragment, 0, sizeof(char) * protocolfragmentlen);
   size_t protocolfragmentolen = 0;
 
-  ret = atclient_atkey_metadata_to_protocolstr(metadata, protocolfragment, protocolfragmentlen, &protocolfragmentolen);
+  ret =
+      atclient_atkey_metadata_to_protocol_str(&metadata, protocolfragment, protocolfragmentlen, &protocolfragmentolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr failed");
     goto exit;
@@ -318,7 +319,7 @@ static int test_atkey_metadata_to_jsonstr() {
     goto exit;
   }
 
-  ret = atclient_atkey_metadata_to_jsonstr(metadata, jsonstr, jsonstrlen, &jsonstrlenout);
+  ret = atclient_atkey_metadata_to_jsonstr(&metadata, jsonstr, jsonstrlen, &jsonstrlenout);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_jsonstr failed");
     goto exit;

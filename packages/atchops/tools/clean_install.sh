@@ -5,5 +5,6 @@ SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 cd "$SCRIPT_DIRECTORY"
 cd ..
 rm -rf build
-cmake -S . -B build -DATCHOPS_BUILD_TESTS=OFF
+cmake -S . -B build -DATCHOPS_BUILD_TESTS=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 sudo cmake --build build --target install
+

@@ -82,7 +82,7 @@ int main() {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared key\n");
   }
 
-  if ((ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
@@ -118,7 +118,7 @@ int main() {
 
   atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sha256(value) : %s\n", hex_value_hash);
 
-  if (ret = memcmp(hex_value_hash, EXPECTED_DECRYPTED_VALUE_SHA_256, 64)) {
+  if ((ret = memcmp(hex_value_hash, EXPECTED_DECRYPTED_VALUE_SHA_256, 64))) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
                           "sha256(value) NOT equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
   } else {
@@ -128,7 +128,7 @@ int main() {
   free(value_hash);
   free(hex_value_hash);
   goto exit;
-exit : {
+exit: {
   atclient_atstr_free(&value);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);

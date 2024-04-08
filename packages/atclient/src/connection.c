@@ -51,8 +51,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   char portstr[6];
   sprintf(portstr, "%d", ctx->port);
 
-  ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy), ATCHOPS_RNG_PERSONALIZATION,
-                              strlen(ATCHOPS_RNG_PERSONALIZATION));
+  ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy),
+                              (unsigned char *)ATCHOPS_RNG_PERSONALIZATION, strlen(ATCHOPS_RNG_PERSONALIZATION));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ctr_drbg_seed failed with exit code: %d\n", ret);
     goto exit;
