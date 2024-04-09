@@ -155,7 +155,7 @@ if(NOT ESP_PLATFORM)
     set(CJSON_OVERRIDE_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(ENABLE_CJSON_TEST OFF CACHE BOOL "" FORCE)
     add_compile_options(-fPIC)
-    FetchContent_MakeAvailable(cJSON)
+    FetchContent_MakeAvailable(cjson)
 
   else()
     message(STATUS "[ATCHOPS] cJSON found package..")
