@@ -7,6 +7,7 @@ option (TARGET_SRC "Specify the target" REQUIRED)
 find_package(atclient REQUIRED CONFIG)
 find_package(atchops QUIET)
 find_package(MbedTLS QUIET)
+find_package(cjson QUIET)
 
 message(STATUS "Found atclient!")
 

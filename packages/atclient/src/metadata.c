@@ -3,7 +3,7 @@
 #include "atclient/atstr.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
