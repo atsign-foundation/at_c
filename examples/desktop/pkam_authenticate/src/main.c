@@ -6,8 +6,8 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define ATKEYSFILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@smoothalligator_key.atKeys"
-#define ATSIGN "@smoothalligator"
+#define ATKEYSFILE_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
+#define ATSIGN "@expensiveferret"
 
 #define TAG "pkam_authenticate"
 
@@ -41,16 +41,19 @@ int main(int argc, char **argv) {
   // 2. pkam auth
   atclient atclient;
   atclient_init(&atclient);
-  ret = atclient_init_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
-  // printf("atclient_init_root_connection_code: %d\n", ret);
-  if (ret != 0) {
-    goto exit;
-  }
+  
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
+  atclient_connection_connect(&root_conn, "root.atsign.org", 64);
 
-  ret = atclient_pkam_authenticate(&atclient, atkeys, ATSIGN, strlen(ATSIGN));
-  // printf("atclient_pkam_authenticate_code: %d\n", ret);
-  if (ret != 0) {
+  atclient_atsign atsign;
+  atclient_atsign_init(&atsign, ATSIGN);
+
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, atkeys, atsign.atsign, strlen(atsign.atsign))) != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
+  } else {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
   goto exit;
