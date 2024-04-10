@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  ret = atclient_pkam_authenticate(&atclient, &root_conn, atkeys, atsign, strlen(atsign));
+  ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, &atsign);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
