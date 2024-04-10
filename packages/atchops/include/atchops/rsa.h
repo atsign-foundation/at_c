@@ -32,13 +32,14 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
  *
  * @param publickey the public key to use for verification, see atchops_rsakey_populate_publickey
  * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
+ * @param message the original message to hash
+ * @param messagelen the length of the original message, most people use strlen() to find this length
  * @param signature the signature to verify
  * @param signaturelen the length of the signature, most people use strlen() to find this length
- * @param result 1 if the signature is valid, 0 if the signature is invalid
  * @return int 0 on success
  */
-int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_md_type_t mdtype,
-                       const unsigned char *signature, const size_t signaturelen, int *result);
+int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const char *message,
+                       const size_t messagelen, const unsigned char *signature, const unsigned long signaturelen);
 
 /**
  * @brief Encrypt bytes with an RSA public key
@@ -52,8 +53,8 @@ int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_m
  * @return int 0 on success
  */
 int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned char *plaintext,
-                        const size_t plaintextlen, unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, size_t *ciphertextbase64olen);
+                        const size_t plaintextlen, unsigned char *ciphertextbase64, const size_t ciphertextbase64len,
+                        size_t *ciphertextbase64olen);
 
 /**
  * @brief Decrypt bytes with an RSA private key
@@ -67,8 +68,8 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
  * @return int 0 on success
  */
 int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekeystruct, const unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, unsigned char *plaintext,
-                        const size_t plaintextlen, size_t *plaintextolen);
+                        const size_t ciphertextbase64len, unsigned char *plaintext, const size_t plaintextlen,
+                        size_t *plaintextolen);
 
 /**
  * @brief generate an RSA keypair
