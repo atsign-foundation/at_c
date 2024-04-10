@@ -150,6 +150,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
 
   // 3. send pkam auth
+
   // build command, ie "from:atsign"
   const short from_command_len = 5 + root_command_len; // "from:" has a length of 5
   from_command = calloc(from_command_len, sizeof(char));
@@ -161,6 +162,11 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
+
+  free(root_command);
+  root_command = NULL;
+  free(from_command);
+  from_command = NULL;
 
   ret = atclient_atstr_set_literal(&challenge, "%.*s", (int)recv.olen, recv.bytes);
   if (ret != 0) {
@@ -190,27 +196,23 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
-  ret = atclient_atstr_set_literal(&pkamcmd, "pkam:%.*s\r\n", (int)recv.olen, recv.bytes);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
-    goto exit;
-  }
-
+  const short pkam_command_len = 5 + (int)recv.olen + 3;
+  pkam_command = calloc(pkam_command_len, sizeof(char));
+  snprintf(pkam_command, pkam_command_len, "pkam:%s\r\n", recv.bytes);
   atclient_atbytes_reset(&recv);
-  ret = atclient_atbytes_convert_atstr(&src, pkamcmd);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
-    goto exit;
-  }
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &recv.olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), pkam_command, pkam_command_len - 1, recv.bytes, recv.len,
+                                 &recv.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
+  free(pkam_command);
+  pkam_command = NULL;
+
   // check for data:success
-  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", strlen("data:success"))) {
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", 12)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "recv was \"%.*s\" and did not have prefix \"data:success\"\n", (int)recv.olen, recv.bytes);
@@ -221,6 +223,9 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
 
   goto exit;
 exit : {
+  free(root_command);
+  free(from_command);
+  free(pkam_command);
   atclient_atbytes_free(&src);
   atclient_atbytes_free(&recv);
   atclient_atstr_free(&url);
