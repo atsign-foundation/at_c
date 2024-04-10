@@ -2,16 +2,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 int main() {
   int ret = 1;
 
   const char *src = "Hello!";
 
-  const unsigned long dstlen = 32;
+  const size_t dstlen = 32;
   unsigned char *dst = calloc(dstlen, sizeof(unsigned char));
   memset(dst, 0, dstlen);
-  unsigned long dstolen = 0;
+  size_t dstolen = 0;
 
   ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)src, strlen(src), dst, dstlen, &dstolen);
   if (ret != 0) {

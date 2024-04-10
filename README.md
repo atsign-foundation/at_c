@@ -1,6 +1,6 @@
-<img width=250px src="https://atsign.dev/assets/img/atPlatform_logo_gray.svg?sanitize=true">
+<a href="https://atsign.com#gh-light-mode-only"><img width=250px src="https://atsign.com/wp-content/uploads/2022/05/atsign-logo-horizontal-color2022.svg#gh-light-mode-only" alt="The Atsign Foundation"></a><a href="https://atsign.com#gh-dark-mode-only"><img width=250px src="https://atsign.com/wp-content/uploads/2023/08/atsign-logo-horizontal-reverse2022-Color.svg#gh-dark-mode-only" alt="The Atsign Foundation"></a>
 
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_c/badge)](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_c)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_c/badge)](https://securityscorecards.dev/viewer/?uri=github.com/atsign-foundation/at_c&sort_by=check-score&sort_direction=desc)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8138/badge)](https://www.bestpractices.dev/projects/8138)
 
 # at_c
@@ -10,15 +10,12 @@
 ## Packages
 
 - [atchops](./packages/atchops/README.md) stands for cryptographic and hashing operations catered for the atProtocol, uses [MbedTLS crypto](https://github.com/Mbed-TLS/mbedtls) as a dependency.
-- [atclient](./packages/atclient/README.md) is the core dependency for anything Atsign technology related. atclient depends on [atchops](./packages/atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls)
-- [atclient_espidf](./packages/atclient_espidf/README.md) build atclient for ESP-IDF
+- [atclient](./packages/atclient/README.md) implements the atProtocol and will be the core dependency for most applications. atclient depends on [atchops](./packages/atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls).
+- [atclient_espidf](./packages/atclient_espidf/README.md) is a package for helping you build atclient for ESP-IDF (Espressif IoT Development Framework) based projects.
 
 ## Examples
 
-- [atclient_esp32_source](./examples/atclient_esp32_source/README.md) is an example of how to use atclient in your ESP-IDF with the source code.
-- [atclient_esp32_static_components](./examples/atclient_esp32_static_components/README.md) is an example of how to use atclient in your ESP-IDF project with static libraries in separated components built from [atclient_espidf](./packages/atclient_espidf/README.md).
-- [atclient_esp32_static_no_components](./examples/atclient_esp32_static_no_components/) is an example of how to use atclient in your ESP-IDF project with static libraries without components built from [atclient_espidf](./packages/atclient_espidf/README.md).
-- [repl](./examples/repl/README.md) is a command line interface for interacting with the atProtocol. Works on Desktop Linux/MacOS.
+Check out the [examples](./examples/README.md) directory for examples on how to implement and use the C SDK.
 
 ## Contributing
 

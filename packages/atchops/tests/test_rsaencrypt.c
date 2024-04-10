@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define PUBLICKEYBASE64                                                                                                \
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg3P7mefqZg2GNQPiEHYinmTYUcbbW2Ar9Wi5LCD/"                               \
@@ -16,11 +17,11 @@
 int main() {
   int ret = 1;
 
-  const unsigned long publickeybase64len = strlen(PUBLICKEYBASE64);
+  const size_t publickeybase64len = strlen(PUBLICKEYBASE64);
   const char *publickeybase64 = PUBLICKEYBASE64;
 
   const char *plaintext = PLAINTEXT;
-  const unsigned long plaintextlen = strlen(plaintext);
+  const size_t plaintextlen = strlen(plaintext);
 
   atchops_rsakey_publickey publickey;
   atchops_rsakey_publickey_init(&publickey);
@@ -32,10 +33,10 @@ int main() {
   }
   printf("atchops_rsakey_populate_publickey (success): %d\n", ret);
 
-  const unsigned long ciphertextlen = 1024;
+  const size_t ciphertextlen = 1024;
   unsigned char *ciphertext = calloc(ciphertextlen, sizeof(unsigned char));
   memset(ciphertext, 0, ciphertextlen);
-  unsigned long ciphertextolen = 0;
+  size_t ciphertextolen = 0;
 
   // printf("encrypting...\n");
   ret = atchops_rsa_encrypt(publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext, ciphertextlen,

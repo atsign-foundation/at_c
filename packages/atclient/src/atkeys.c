@@ -1,48 +1,49 @@
 #include "atclient/atkeys.h"
 #include "atclient/atstr.h"
-#include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aesctr.h>
 #include <atchops/iv.h>
+#include <atchops/rsa.h>
 #include <atchops/rsakey.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "atkeys"
 
 void atclient_atkeys_init(atclient_atkeys *atkeys) {
   memset(atkeys, 0, sizeof(atclient_atkeys));
 
-  atclient_atstr_init(&(atkeys->pkampublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->pkampublickeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_publickey_init(&(atkeys->pkampublickey));
 
-  atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_privatekey_init(&(atkeys->pkamprivatekey));
 
-  atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_publickey_init(&(atkeys->encryptpublickey));
 
-  atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCHOPS_RSA_4096);
   atchops_rsakey_privatekey_init(&(atkeys->encryptprivatekey));
 
-  atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCLIENT_CONSTANTS_DECRYPTED_BASE64_RSA_KEY_BUFFER_SIZE);
+  atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCHOPS_RSA_4096);
 }
 
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
-                                          const unsigned long aespkampublickeylen, const char *aespkamprivatekeystr,
-                                          const unsigned long aespkamprivatekeylen, const char *aesencryptpublickeystr,
-                                          const unsigned long aesencryptpublickeylen,
+                                          const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
+                                          const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
+                                          const size_t aesencryptpublickeylen,
                                           const char *aesencryptprivatekeystr,
-                                          const unsigned long aesencryptprivatekeylen, const char *selfencryptionkeystr,
-                                          const unsigned long selfencryptionkeylen) {
+                                          const size_t aesencryptprivatekeylen, const char *selfencryptionkeystr,
+                                          const size_t selfencryptionkeylen) {
   int ret = 1;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
-  const unsigned long recvlen = 32768;
+  const size_t recvlen = 32768;
   unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
-  unsigned long olen = 0;
+  size_t olen = 0;
 
   // 1. decrypt *.atKeys and populate atkeys struct
 
@@ -144,7 +145,7 @@ exit: {
 }
 }
 
-int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, atclient_atkeysfile atkeysfile) {
+int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atclient_atkeysfile atkeysfile) {
   int ret = 1;
 
   ret = atclient_atkeys_populate_from_strings(
@@ -189,23 +190,6 @@ exit: {
   atclient_atkeysfile_free(&atkeysfile);
   return ret;
 }
-}
-
-int atclient_atkeys_populate_from_atstrs(atclient_atkeys *atkeys, const atclient_atstr aespkampublickeystr,
-                                         const atclient_atstr aespkamprivatekeystr,
-                                         const atclient_atstr aesencryptpublickeystr,
-                                         const atclient_atstr aesencryptprivatekeystr,
-                                         const atclient_atstr selfencryptionkeystr) {
-  int ret = 1;
-
-  ret = atclient_atkeys_populate_from_strings(
-      atkeys, aespkampublickeystr.str, aespkampublickeystr.olen, aespkamprivatekeystr.str, aespkamprivatekeystr.olen,
-      aesencryptpublickeystr.str, aesencryptpublickeystr.olen, aesencryptprivatekeystr.str,
-      aesencryptprivatekeystr.olen, selfencryptionkeystr.str, selfencryptionkeystr.olen);
-
-  goto exit;
-
-exit: { return ret; }
 }
 
 void atclient_atkeys_free(atclient_atkeys *atkeys) {

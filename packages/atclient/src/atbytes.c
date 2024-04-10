@@ -3,10 +3,11 @@
 #include "atlogger/atlogger.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "atbytes"
 
-void atclient_atbytes_init(atclient_atbytes *atbytes, const unsigned long atbyteslen) {
+void atclient_atbytes_init(atclient_atbytes *atbytes, const size_t atbyteslen) {
   memset(atbytes, 0, sizeof(atclient_atbytes));
   atbytes->len = atbyteslen;
   atbytes->bytes = malloc(sizeof(unsigned char) * atbytes->len);
@@ -18,7 +19,7 @@ void atclient_atbytes_reset(atclient_atbytes *atbytes) {
   atbytes->olen = 0;
 }
 
-int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, const unsigned long byteslen) {
+int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, const size_t byteslen) {
   int ret = 1;
   if (byteslen > atbytes->len) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -34,7 +35,7 @@ int atclient_atbytes_set(atclient_atbytes *atbytes, const unsigned char *bytes, 
 exit: { return ret; }
 }
 
-int atclient_atbytes_convert(atclient_atbytes *atbytes, const char *str, const unsigned long strlen) {
+int atclient_atbytes_convert(atclient_atbytes *atbytes, const char *str, const size_t strlen) {
   int ret = 1;
   if (strlen > atbytes->len) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

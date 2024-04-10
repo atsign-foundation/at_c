@@ -1,5 +1,7 @@
 #include "atclient/atkey.h"
+#include "atclient/constants.h"
 #include "atlogger/atlogger.h"
+#include <stddef.h>
 #include <string.h>
 
 #define TAG "test_atkey_create"
@@ -10,8 +12,8 @@ static int test_create_publickey() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  char atkeystr[ATKEY_GENERAL_BUFFER_SIZE];
-  memset(atkeystr, 0, ATKEY_GENERAL_BUFFER_SIZE);
+  char atkeystr[ATCLIENT_ATKEY_FULL_LEN + 1];
+  memset(atkeystr, 0, ATCLIENT_ATKEY_FULL_LEN + 1);
 
   const char *expected = "public:test@alice";
   const size_t expectedlen = strlen(expected);
@@ -44,7 +46,7 @@ static int test_create_publickey() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATKEY_GENERAL_BUFFER_SIZE, &expectedolen);
+  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &expectedolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
@@ -78,8 +80,8 @@ static int test_create_selfkey() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  char atkeystr[ATKEY_GENERAL_BUFFER_SIZE];
-  memset(atkeystr, 0, ATKEY_GENERAL_BUFFER_SIZE);
+  char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
+  memset(atkeystr, 0, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = "name@jeremy";
   const size_t expectedlen = strlen(expected);
@@ -111,8 +113,8 @@ static int test_create_selfkey() {
     goto exit;
   }
 
-  unsigned long atkeystrolen = 0;
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATKEY_GENERAL_BUFFER_SIZE, &atkeystrolen);
+  size_t atkeystrolen = 0;
+  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
@@ -143,8 +145,8 @@ static int test_create_sharedkey() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  char atkeystr[ATKEY_GENERAL_BUFFER_SIZE];
-  memset(atkeystr, 0, ATKEY_GENERAL_BUFFER_SIZE);
+  char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
+  memset(atkeystr, 0, ATCLIENT_ATKEY_FULL_LEN);
 
   const char *expected = "@jeremy:name.wavi@chess69lovely";
   const size_t expectedlen = strlen(expected);
@@ -191,8 +193,8 @@ static int test_create_sharedkey() {
     goto exit;
   }
 
-  unsigned long atkeystrolen = 0;
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATKEY_GENERAL_BUFFER_SIZE, &atkeystrolen);
+  size_t atkeystrolen = 0;
+  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;

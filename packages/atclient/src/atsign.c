@@ -1,16 +1,19 @@
 #include "atclient/atsign.h"
+#include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #define TAG "atsign"
 
 int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   int ret = 0;
 
+  const size_t maxatlen = ATCLIENT_ATSIGN_FULL_LEN + 1;
   // atsign_str is longer than expected or null/empty
-  if ((strlen(atsign_str) > MAX_ATSIGN_STR_BUFFER) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
+  if ((strlen(atsign_str) > maxatlen) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     return ret;
@@ -19,8 +22,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   memset(atsign, 0, sizeof(atclient_atsign));
   atsign->atsign = malloc(strlen(atsign_str) + 1);
 
-  const unsigned long maxatlen = MAX_ATSIGN_STR_BUFFER;
-  unsigned long atolen = 0;
+  size_t atolen = 0;
   ret = atclient_atsign_with_at_symbol(atsign->atsign, maxatlen, &(atolen), atsign_str, strlen(atsign_str));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
@@ -33,8 +35,8 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
 
 void atclient_atsign_free(atclient_atsign *atsign) { free(atsign->atsign); }
 
-int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen,
-                                      const char *originalatsign, const unsigned long originalatsignlen) {
+int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
+                                      const char *originalatsign, const size_t originalatsignlen) {
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -64,8 +66,8 @@ int atclient_atsign_without_at_symbol(char *atsign, const unsigned long atsignle
 exit: { return ret; }
 }
 
-int atclient_atsign_with_at_symbol(char *atsign, const unsigned long atsignlen, unsigned long *atsignolen,
-                                   const char *originalatsign, const unsigned long originalatsignlen) {
+int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
+                                   const char *originalatsign, const size_t originalatsignlen) {
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

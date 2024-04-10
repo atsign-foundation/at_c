@@ -11,16 +11,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdtype, const unsigned char *message,
-                     const unsigned long messagelen, unsigned char *signaturebase64,
-                     const unsigned long signaturebase64len, unsigned long *signaturebase64olen) {
+                     const size_t messagelen, unsigned char *signaturebase64,
+                     const size_t signaturebase64len, size_t *signaturebase64olen) {
   int ret = 1; // error, until successful.
 
-  const unsigned long hashlen = 32;
+  const size_t hashlen = 32;
   unsigned char *hash = malloc(sizeof(unsigned char) * hashlen);
   memset(hash, 0, hashlen);
-  unsigned long hasholen = 0;
+  size_t hasholen = 0;
 
   mbedtls_rsa_context rsa;
   mbedtls_rsa_init(&rsa);
@@ -31,7 +32,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
   mbedtls_ctr_drbg_context ctr_drbg_ctx;
   mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
 
-  const unsigned long signaturelen = 256; // result of signature always 256 bytes
+  const size_t signaturelen = 256; // result of signature always 256 bytes
   unsigned char *signature = malloc(sizeof(unsigned char) * signaturelen);
   memset(signature, 0, signaturelen);
 
@@ -137,8 +138,8 @@ exit: {
 }
 
 int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext,
-                        const unsigned long plaintextlen, unsigned char *ciphertextbase64,
-                        const unsigned long ciphertextbase64len, unsigned long *ciphertextbase64olen) {
+                        const size_t plaintextlen, unsigned char *ciphertextbase64,
+                        const size_t ciphertextbase64len, size_t *ciphertextbase64olen) {
   int ret = 1;
 
   mbedtls_rsa_context rsa;
@@ -150,7 +151,7 @@ int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char 
   mbedtls_ctr_drbg_context ctr_drbg_ctx;
   mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
 
-  const unsigned long outputlen = 256; // 256 bytes is the result of an RSA
+  const size_t outputlen = 256; // 256 bytes is the result of an RSA
   unsigned char *output = malloc(sizeof(unsigned char) * outputlen);
   memset(output, 0, outputlen);
 
@@ -198,16 +199,14 @@ exit: {
 }
 
 int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned char *ciphertextbase64,
-                        const unsigned long ciphertextbase64len, unsigned char *plaintext,
-                        const unsigned long plaintextlen, unsigned long *plaintextolen) {
+                        const size_t ciphertextbase64len, unsigned char *plaintext,
+                        const size_t plaintextlen, size_t *plaintextolen) {
   int ret = 1;
 
-  const unsigned long ciphertextlen =
-      ciphertextbase64len; // the result of the base64 decode of the cipher text should be of sufficient length for
-                           // the plaintext length they are expecting
-  unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
-  memset(ciphertext, 0, ciphertextlen);
-  unsigned long ciphertextolen = 0;
+    const unsigned long ciphertextlen = ciphertextbase64len; // the result of the base64 decode of the cipher text should be of sufficient length for the plaintext length they are expecting
+    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+    memset(ciphertext, 0, ciphertextlen);
+    unsigned long ciphertextolen = 0;
 
   mbedtls_entropy_context entropy_ctx;
   mbedtls_entropy_init(&entropy_ctx);

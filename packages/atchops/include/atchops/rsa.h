@@ -3,6 +3,13 @@
 
 #include "atchops/rsakey.h"
 #include <mbedtls/md.h>
+#include <stddef.h>
+
+enum atchops_rsa_size {
+  ATCHOPS_RSA_NONE = 0,
+  ATCHOPS_RSA_2048 = 2048,
+  ATCHOPS_RSA_4096 = 4096,
+};
 
 /**
  * @brief Sign a message with an RSA private key
@@ -16,9 +23,9 @@
  * @param signatureolen the length of the signature buffer after signing
  * @return int 0 on success
  */
-int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdtype, const unsigned char *message,
-                     const unsigned long messagelen, unsigned char *signaturebase64,
-                     const unsigned long signaturebase64len, unsigned long *signaturebase64olen);
+int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_md_type_t mdtype,
+                     const unsigned char *message, const size_t messagelen, unsigned char *signaturebase64,
+                     const size_t signaturebase64len, size_t *signaturebase64olen);
 
 /**
  * @brief Verify a signature with an RSA public key
@@ -45,9 +52,9 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
  * @param ciphertextolen the length of the ciphertext buffer after encryption
  * @return int 0 on success
  */
-int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext,
-                        const unsigned long plaintextlen, unsigned char *ciphertextbase64,
-                        const unsigned long ciphertextbase64len, unsigned long *ciphertextbase64olen);
+int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned char *plaintext,
+                        const size_t plaintextlen, unsigned char *ciphertextbase64,
+                        const size_t ciphertextbase64len, size_t *ciphertextbase64olen);
 
 /**
  * @brief Decrypt bytes with an RSA private key
@@ -60,9 +67,9 @@ int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char 
  * @param plaintextolen the length of the plaintext buffer after decryption
  * @return int 0 on success
  */
-int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekeystruct, const unsigned char *ciphertextbase64,
-                        const unsigned long ciphertextbase64len, unsigned char *plaintext,
-                        const unsigned long plaintextlen, unsigned long *plaintextolen);
+int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekeystruct, const unsigned char *ciphertextbase64,
+                        const size_t ciphertextbase64len, unsigned char *plaintext,
+                        const size_t plaintextlen, size_t *plaintextolen);
 
 /**
  * @brief generate an RSA keypair
@@ -72,6 +79,6 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekeystruct, const unsign
  * @param keysize the size of the key to generate, e.g. 2048
  */
 int atchops_rsa_generate(atchops_rsakey_publickey *publickey, atchops_rsakey_privatekey *privatekey,
-                         const unsigned int keysize);
+                         const enum atchops_rsa_size keysize);
 
 #endif

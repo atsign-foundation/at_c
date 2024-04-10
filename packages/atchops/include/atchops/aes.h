@@ -1,11 +1,13 @@
-
 #ifndef ATCHOPS_AES_H
 #define ATCHOPS_AES_H
 
-typedef enum atchops_aes_keysize {
+#include <stddef.h>
+
+enum atchops_aes_size {
+  ATCHOPS_AES_NONE = 0,
   ATCHOPS_AES_128 = 128, // not tested
   ATCHOPS_AES_256 = 256,
-} atchops_aes_keysize;
+};
 
 /**
  * @brief Generate an AES key of size keylen bits
@@ -14,7 +16,7 @@ typedef enum atchops_aes_keysize {
  * @param keysize key length in bits (e.g. AES-256 = 256 => ATCHOPS_AES_256)
  * @return int 0 on success
  */
-int atchops_aes_generate_key(unsigned char *key, const atchops_aes_keysize keysize);
+int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size keysize);
 
 /**
  * @brief Generate an AES key of size keylen bits encoded in base 64
@@ -25,7 +27,7 @@ int atchops_aes_generate_key(unsigned char *key, const atchops_aes_keysize keysi
  * @param keysize the AES key length in bits (e.g. AES-256 = 256 => ATCHOPS_AES_256)
  * @return int 0 on success
  */
-int atchops_aes_generate_keybase64(unsigned char *keybase64, const unsigned long keybase64len,
-                                   unsigned long *keybase64olen, atchops_aes_keysize keysize);
+int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybase64len,
+                                   size_t *keybase64olen, const enum atchops_aes_size keysize);
 
 #endif

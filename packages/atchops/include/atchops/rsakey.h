@@ -1,8 +1,10 @@
 #ifndef ATCHOPS_RSAKEY_H
 #define ATCHOPS_RSAKEY_H
 
+#include <stddef.h>
+
 typedef struct atchops_rsakey_param {
-  unsigned long len;    // length of the number in bytes
+  size_t len;    // length of the number in bytes
   unsigned char *value; // hex byte array of the number
 } atchops_rsakey_param;
 
@@ -34,7 +36,7 @@ void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey);
  * @return int 0 on success
  */
 int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickeystruct, const char *publickeybase64,
-                                      const unsigned long publickeybase64len);
+                                      const size_t publickeybase64len);
 
 /**
  * @brief Populate a private key struct from a base64 string
@@ -45,6 +47,6 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickeystruct,
  * @return int 0 on success
  */
 int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekeystruct, const char *privatekeybase64,
-                                       const unsigned long privatekeybase64len);
+                                       const size_t privatekeybase64len);
 
 #endif

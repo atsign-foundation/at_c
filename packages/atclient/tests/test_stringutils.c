@@ -1,6 +1,7 @@
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
-#include <stdlib.h>
+#include <stddef.h>
+#include <stdlib.h> // IWYU pragma: keep
 #include <string.h>
 
 #define TAG "test_stringutils"
@@ -10,20 +11,20 @@ int main() {
 
   atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
-  const unsigned long outlen = 4096;
+  const size_t outlen = 4096;
   char *out = (char *)malloc(sizeof(char) * outlen);
   memset(out, 0, sizeof(char) * outlen);
-  unsigned long outolen = 0;
+  size_t outolen = 0;
 
-  const unsigned long stringlen = 4096;
+  const size_t stringlen = 4096;
   char *string = (char *)malloc(sizeof(char) * stringlen);
   memset(string, 0, sizeof(char) * stringlen);
   strcpy(string, "@bob");
 
-  const unsigned long tokenslen = 64;
+  const size_t tokenslen = 64;
   char *tokens[tokenslen];
   memset(tokens, 0, sizeof(char *) * tokenslen); // set all pointers to NULL (0
-  unsigned long tokensolen = 0;
+  size_t tokensolen = 0;
 
   int startswith;
 

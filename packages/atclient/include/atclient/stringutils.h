@@ -1,6 +1,8 @@
 #ifndef ATCLIENT_STRINGUTILS_H
 #define ATCLIENT_STRINGUTILS_H
 
+#include <stddef.h>
+
 /**
  * @brief trims leading/trailing whitespace/newline
  *
@@ -11,8 +13,8 @@
  * @param outolen the output length of the output buffer that is actually used
  * @return int 0 on success, non-zero on failure
  */
-int atclient_stringutils_trim_whitespace(const char *string, const unsigned long stringlen, char *out,
-                                         const unsigned long outlen, unsigned long *outolen);
+int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out,
+                                         const size_t outlen, size_t *outolen);
 
 /**
  * @brief returns 1 (true) if the string starts with the prefix, 0 (false) otherwise
@@ -22,8 +24,8 @@ int atclient_stringutils_trim_whitespace(const char *string, const unsigned long
  * @param prefix the prefix to check for
  * @return int 1 (true) if the string starts with the prefix, 0 (false) otherwise
  */
-int atclient_stringutils_starts_with(const char *string, const unsigned long stringlen, const char *prefix,
-                                     const unsigned long prefixlen);
+int atclient_stringutils_starts_with(const char *string, const size_t stringlen, const char *prefix,
+                                     const size_t prefixlen);
 
 /**
  * @brief returns 1 (true) if the string ends with the suffix, 0 (false) otherwise
@@ -33,7 +35,14 @@ int atclient_stringutils_starts_with(const char *string, const unsigned long str
  * @param suffix the suffix to check for
  * @return int 1 (true) if the string ends with the suffix, 0 (false) otherwise
  */
-int atclient_stringutils_ends_with(const char *string, const unsigned long stringlen, const char *suffix,
-                                   const unsigned long suffixlen);
+int atclient_stringutils_ends_with(const char *string, const size_t stringlen, const char *suffix,
+                                   const size_t suffixlen);
 
+/**
+ * @brief get the length of a long if it were converted to a string
+ *
+ * @param n the long to check the length of
+ * @return int the string length
+ */
+int long_strlen(long n);
 #endif
