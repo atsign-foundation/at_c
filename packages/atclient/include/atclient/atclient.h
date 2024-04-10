@@ -55,7 +55,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * @param atsign the atsign the atkeys belong to
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
                                const atclient_atsign *atsign);
 
 /**

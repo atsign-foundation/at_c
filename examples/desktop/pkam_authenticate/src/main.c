@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   atclient_atsign atsign;
   atclient_atsign_init(&atsign, ATSIGN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, atkeys, &atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, &atsign)) != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {

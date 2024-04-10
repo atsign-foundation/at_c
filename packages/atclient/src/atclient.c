@@ -64,7 +64,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 exit : { return ret; }
 }
 
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
                                const atclient_atsign *atsign) {
   int ret = 1; // error by default
 
@@ -189,7 +189,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
     goto exit;
   }
-  ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen,
+  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen,
                          recv.bytes, recv.len, &recv.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
@@ -218,6 +218,9 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
                           "recv was \"%.*s\" and did not have prefix \"data:success\"\n", (int)recv.olen, recv.bytes);
     goto exit;
   }
+
+  ctx->atkeys = *atkeys;
+  ctx->atsign = *atsign;
 
   ret = 0;
 
