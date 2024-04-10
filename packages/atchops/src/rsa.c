@@ -130,7 +130,7 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
 
   printf("sig_len: %lu - %lu\n", decoded_sig_len, decoded_sig_olen);
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, MBEDTLS_MD_SHA256, hashlen - 1, hash, decoded_sig)) != 0) {
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, MBEDTLS_MD_SHA256, hashlen, hash, decoded_sig)) != 0) {
 
     printf("VERIFY: -0x%04X\n", -ret);
     goto exit;
