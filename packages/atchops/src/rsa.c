@@ -110,7 +110,6 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
   }
 
   if (mbedtls_rsa_complete(&rsa) != 0 || mbedtls_rsa_check_pubkey(&rsa) != 0) {
-    printf("mbedtls_rsa_complete or mbedtls_rsa_check_pubkey threw an error");
     goto exit;
   }
 
@@ -119,20 +118,14 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
     goto exit;
   }
 
-  printf("Hash: %s\n", hash);
-  printf("hashlen: %lu - %lu\n", hashlen, strlen(hash));
-
   // decode the signature
   ret = atchops_base64_decode(signature, signaturelen, decoded_sig, decoded_sig_len, &decoded_sig_olen);
   if (ret != 0) {
     goto exit;
   }
 
-  printf("sig_len: %lu - %lu\n", decoded_sig_len, decoded_sig_olen);
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, MBEDTLS_MD_SHA256, hashlen, hash, decoded_sig)) != 0) {
-
-    printf("VERIFY: -0x%04X\n", -ret);
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, hashlen, hash, decoded_sig)) != 0) {
     goto exit;
   }
 

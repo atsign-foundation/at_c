@@ -53,8 +53,8 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
  * @return int 0 on success
  */
 int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned char *plaintext,
-                        const size_t plaintextlen, unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, size_t *ciphertextbase64olen);
+                        const size_t plaintextlen, unsigned char *ciphertextbase64, const size_t ciphertextbase64len,
+                        size_t *ciphertextbase64olen);
 
 /**
  * @brief Decrypt bytes with an RSA private key
@@ -68,8 +68,8 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
  * @return int 0 on success
  */
 int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekeystruct, const unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, unsigned char *plaintext,
-                        const size_t plaintextlen, size_t *plaintextolen);
+                        const size_t ciphertextbase64len, unsigned char *plaintext, const size_t plaintextlen,
+                        size_t *plaintextolen);
 
 /**
  * @brief generate an RSA keypair

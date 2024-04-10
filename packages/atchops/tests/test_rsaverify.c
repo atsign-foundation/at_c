@@ -43,13 +43,6 @@
   "hnIppWX5yXScbbZgcaTZjp57z5H959nc424ScItxOqM1+hVX64pXHHKHjOFQknHsgw9e6"                                              \
   "qh7LeuVvActKJwlFF0yUbiSX4v1Urm50Lk9IqMEqLrbo49BW2eYblEjMsMBlcJag=="
 
-// #define EXPECTED_SIGNATURE                                                                                             \
-//   "WVexAvo14a1bYRYxuB7OYDi0TKJDlgIxGfKf7WHAUojcmTx9VPnTCLiGDek37PDAyIWpZI"                                             \
-//   "oD+EhYQz+RJSbDsJnEBYZls0VuntlORXvSpppNy7SPE3BeZLc5PueRoeXOrLuz73UIlF/x"                                             \
-//   "6KPsxATI+cxa0/+X13kBQ16j0jZlxiSnOdYBSNreYnnMdDRitBw/6uu3C90jw8O2G4HbRW"                                             \
-//   "lil+G7YwBBvhDctAShyS2CuIevBBTbMo68u1quZzHgsITJ0M2mtzpWt+KgZKg0+FfYg+rc"                                             \
-//   "TlAWaaBgYYm0Nc1zvpgrcLNlPsi7Gan298NPQbOOzUwqT23RyvEx0kV+Xazs7Q=="
-
 #define PUBLIC_KEY_BASE64                                                                                              \
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuA7KmWrIPcKTH3hSzsDZ"                                                   \
   "ys60kxaqKgHeTuGCwgzHSi2SkMV9iYBCd2//KagWVoUKWyuI2KOQo2WFslqFOjOs"                                                   \
@@ -60,9 +53,6 @@
   "awIDAQAB"
 
 int main() {
-
-  setbuf(stdout, NULL);
-  setbuf(stderr, NULL);
 
   int ret = 1;
 
@@ -91,13 +81,6 @@ int main() {
     goto exit;
   }
 
-  // ret = memcmp(signature, (const unsigned char *)EXPECTED_SIGNATURE, signatureolen);
-  // if (ret != 0) {
-  //   printf("memcmp (failed): %d\n", ret);
-  //   printf("got: \"%s\" | expected: \"%s\"\n", signature, EXPECTED_SIGNATURE);
-  //   goto exit;
-  // }
-  //
   atchops_rsakey_publickey publickey;
   atchops_rsakey_publickey_init(&publickey);
 
