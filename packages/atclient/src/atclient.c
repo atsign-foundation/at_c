@@ -73,9 +73,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   char *pkam_command = NULL;
 
   // 1. init root connection
-  const size_t srclen = 1024;
-  atclient_atbytes src;
-  atclient_atbytes_init(&src, srclen);
 
   const size_t recvlen = 1024;
   atclient_atbytes recv;
@@ -89,14 +86,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atstr_init(&host, 256);
   int port = 0;
 
-  const size_t atsigncmdlen = 1024;
-  atclient_atstr atsigncmd;
-  atclient_atstr_init(&atsigncmd, atsigncmdlen);
-
-  const size_t fromcmdlen = 1024;
-  atclient_atstr fromcmd;
-  atclient_atstr_init(&fromcmd, fromcmdlen);
-
   const size_t challengelen = 1024;
   atclient_atstr challenge;
   atclient_atstr_init(&challenge, challengelen);
@@ -108,10 +97,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   const size_t challengebyteslen = 1024;
   atclient_atbytes challengebytes;
   atclient_atbytes_init(&challengebytes, challengebyteslen);
-
-  const size_t pkamcmdlen = 1024;
-  atclient_atstr pkamcmd;
-  atclient_atstr_init(&pkamcmd, pkamcmdlen);
 
   // build command, ie atsign without "@"
   const short root_command_len = strlen(atsign->without_prefix_str) + 3;
@@ -229,16 +214,12 @@ exit : {
   free(root_command);
   free(from_command);
   free(pkam_command);
-  atclient_atbytes_free(&src);
   atclient_atbytes_free(&recv);
   atclient_atstr_free(&url);
   atclient_atstr_free(&host);
-  atclient_atstr_free(&atsigncmd);
-  atclient_atstr_free(&fromcmd);
   atclient_atstr_free(&challenge);
   atclient_atstr_free(&challengewithoutdata);
   atclient_atbytes_free(&challengebytes);
-  atclient_atstr_free(&pkamcmd);
   return ret;
 }
 }
