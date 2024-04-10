@@ -8,14 +8,14 @@
 #include <mbedtls/md.h>
 #include <mbedtls/md5.h>
 #include <mbedtls/rsa.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdtype, const unsigned char *message,
-                     const size_t messagelen, unsigned char *signaturebase64,
-                     const size_t signaturebase64len, size_t *signaturebase64olen) {
+                     const size_t messagelen, unsigned char *signaturebase64, const size_t signaturebase64len,
+                     size_t *signaturebase64olen) {
   int ret = 1; // error, until successful.
 
   const size_t hashlen = 32;
@@ -80,7 +80,7 @@ int atchops_rsa_sign(atchops_rsakey_privatekey privatekey, mbedtls_md_type_t mdt
 
   goto ret;
 
-ret: {
+ret : {
   free(hash);
   free(signature);
   mbedtls_rsa_free(&rsa);
@@ -92,20 +92,25 @@ ret: {
 
 int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const char *message,
                        const size_t messagelen, const unsigned char *signature, const unsigned long signaturelen) {
-  int ret;
+  int ret = 1;
   mbedtls_rsa_context rsa;
 
   size_t hashlen = 32;
   size_t hasholen;
   unsigned char hash[hashlen];
 
-  size_t decoded_sig_len = 512;
+  size_t decoded_sig_len = 256;
   size_t decoded_sig_olen;
   unsigned char decoded_sig[decoded_sig_len];
 
   mbedtls_rsa_init(&rsa);
-  if ((ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1,
+  if ((ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, 0, NULL, 0, NULL, 0,
                                     publickey.e.value, publickey.e.len)) != 0) {
+    goto exit;
+  }
+
+  if (mbedtls_rsa_complete(&rsa) != 0 || mbedtls_rsa_check_pubkey(&rsa) != 0) {
+    printf("mbedtls_rsa_complete or mbedtls_rsa_check_pubkey threw an error");
     goto exit;
   }
 
@@ -113,7 +118,9 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
   if ((ret = atchops_sha_hash(mdtype, (unsigned char *)message, messagelen, hash, hashlen, &hasholen)) != 0) {
     goto exit;
   }
-  printf("hashlen: %lu - %lu\n", hashlen, hasholen);
+
+  printf("Hash: %s\n", hash);
+  printf("hashlen: %lu - %lu\n", hashlen, strlen(hash));
 
   // decode the signature
   ret = atchops_base64_decode(signature, signaturelen, decoded_sig, decoded_sig_len, &decoded_sig_olen);
@@ -123,7 +130,7 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
 
   printf("sig_len: %lu - %lu\n", decoded_sig_len, decoded_sig_olen);
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, MBEDTLS_MD_SHA256, hasholen, hash, decoded_sig)) != 0) {
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, MBEDTLS_MD_SHA256, hashlen - 1, hash, decoded_sig)) != 0) {
 
     printf("VERIFY: -0x%04X\n", -ret);
     goto exit;
@@ -131,15 +138,15 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
 
   goto exit;
 
-exit: {
+exit : {
   mbedtls_rsa_free(&rsa);
   return ret;
 }
 }
 
-int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext,
-                        const size_t plaintextlen, unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, size_t *ciphertextbase64olen) {
+int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char *plaintext, const size_t plaintextlen,
+                        unsigned char *ciphertextbase64, const size_t ciphertextbase64len,
+                        size_t *ciphertextbase64olen) {
   int ret = 1;
 
   mbedtls_rsa_context rsa;
@@ -189,7 +196,7 @@ int atchops_rsa_encrypt(atchops_rsakey_publickey publickey, const unsigned char 
 
   goto exit;
 
-exit: {
+exit : {
   mbedtls_rsa_free(&rsa);
   mbedtls_ctr_drbg_free(&ctr_drbg_ctx);
   mbedtls_entropy_free(&entropy_ctx);
@@ -199,14 +206,16 @@ exit: {
 }
 
 int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, unsigned char *plaintext,
-                        const size_t plaintextlen, size_t *plaintextolen) {
+                        const size_t ciphertextbase64len, unsigned char *plaintext, const size_t plaintextlen,
+                        size_t *plaintextolen) {
   int ret = 1;
 
-    const unsigned long ciphertextlen = ciphertextbase64len; // the result of the base64 decode of the cipher text should be of sufficient length for the plaintext length they are expecting
-    unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
-    memset(ciphertext, 0, ciphertextlen);
-    unsigned long ciphertextolen = 0;
+  const unsigned long ciphertextlen =
+      ciphertextbase64len; // the result of the base64 decode of the cipher text should be of sufficient length for the
+                           // plaintext length they are expecting
+  unsigned char *ciphertext = malloc(sizeof(unsigned char) * ciphertextlen);
+  memset(ciphertext, 0, ciphertextlen);
+  unsigned long ciphertextolen = 0;
 
   mbedtls_entropy_context entropy_ctx;
   mbedtls_entropy_init(&entropy_ctx);
@@ -254,7 +263,7 @@ int atchops_rsa_decrypt(atchops_rsakey_privatekey privatekey, const unsigned cha
 
   goto exit;
 
-exit: {
+exit : {
   free(ciphertext);
   return ret;
 }

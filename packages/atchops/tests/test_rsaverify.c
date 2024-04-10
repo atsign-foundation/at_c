@@ -60,6 +60,10 @@
   "awIDAQAB"
 
 int main() {
+
+  setbuf(stdout, NULL);
+  setbuf(stderr, NULL);
+
   int ret = 1;
 
   const char *privatekeybase64 = PRIVATE_KEY_BASE64;
@@ -73,7 +77,7 @@ int main() {
     goto exit;
   }
 
-  unsigned char *signature = malloc(sizeof(unsigned char) * SIGNATURE_BUFFER_LEN);
+  unsigned char *signature = calloc(SIGNATURE_BUFFER_LEN, sizeof(unsigned char));
   memset(signature, 0, SIGNATURE_BUFFER_LEN);
   unsigned long signatureolen = 0;
 
@@ -102,6 +106,7 @@ int main() {
     printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
     goto exit;
   }
+  
   ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, signature, signatureolen);
   if (ret != 0) {
     printf("atchops_rsakey_verify (failed): %d\n", ret);
