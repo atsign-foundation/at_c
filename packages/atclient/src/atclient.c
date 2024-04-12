@@ -316,7 +316,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
     goto exit;
   }
 
-  ret = atclient_atkey_metadata_to_protocolstr(atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
+  ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), metadataprotocolstr, metadataprotocolstrlen,
                                                &metadataprotocolstrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
@@ -383,7 +383,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
 
   size_t cmdbufferlen = strlen(" update:\r\n") + atkeystrolen + ciphertextbase64len + 1; // + 1 for null terminator
 
-  ret = atclient_atkey_metadata_to_protocolstr(atkey->metadata, metadataprotocolstr, metadataprotocolstrlen,
+  ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), metadataprotocolstr, metadataprotocolstrlen,
                                                &metadataprotocolstrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
@@ -1065,21 +1065,25 @@ static int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient 
   // holds unencrypted shared encryption key in base 64 format
   const size_t sharedenckeybase64size = 2048;
   unsigned char sharedenckeybase64[sharedenckeybase64size];
+  memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
   size_t sharedenckeybase64len = 0;
 
   // encrypted for us
   const size_t sharedenckeybase64encryptedforussize = 2048;
-  unsigned char sharedenckeybase64encryptedforus[sharedenckeybase64encryptedforussize];
+  char sharedenckeybase64encryptedforus[sharedenckeybase64encryptedforussize];
+  memset(sharedenckeybase64encryptedforus, 0, sizeof(char) * sharedenckeybase64encryptedforussize);
   size_t sharedenckeybase64encryptedforuslen = 0;
 
   // encrypted for them
   const size_t sharedenckeybase64encryptedforthemsize = 2048;
-  unsigned char sharedenckeybase64encryptedforthem[sharedenckeybase64encryptedforthemsize];
+  char sharedenckeybase64encryptedforthem[sharedenckeybase64encryptedforthemsize];
+  memset(sharedenckeybase64encryptedforthem, 0, sizeof(char) * sharedenckeybase64encryptedforthemsize);
   size_t sharedenckeybase64encryptedforthemlen = 0;
 
   // their public encyrption key
   const size_t publickeybase64size = 4096;
-  unsigned char publickeybase64[publickeybase64size];
+  char publickeybase64[publickeybase64size];
+  memset(publickeybase64, 0, sizeof(char) * publickeybase64size);
   size_t publickeybase64len = 0;
 
   // 2. generate shared encryption key
