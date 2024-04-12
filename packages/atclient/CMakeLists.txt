@@ -29,9 +29,6 @@ set(ATCLIENT_INCLUDE_DIR
 # 1c. atchops package directory
 set(ATCHOPS_DIR ${CMAKE_CURRENT_LIST_DIR}/../atchops)
 
-# 1d. cJSON package directory
-set(CJSON_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cJSON)
-
 # 1d. Set compile definitions
 # you may set any of these flags in the CMake configuration step via: `-DATCLIENT_BUILD_TESTS=ON` (example: `cmake -S . -B build -DATCLIENT_BUILD_TESTS=OFF)
 # or you may edit the defaults here
@@ -69,7 +66,7 @@ project(
  LANGUAGES C
 )
 
-set (CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 99)
 # 2b. Build for Desktop
 if(NOT ESP_PLATFORM)
   # # ########################################################
@@ -139,18 +136,36 @@ if(NOT ESP_PLATFORM)
   else()
     message(STATUS "[ATCLIENT] MbedTLS found package..")
   endif()
-
-  if(ATCLIENT_MAKE_AVAILABLE)
-    FetchContent_MakeAvailable(${ATCLIENT_MAKE_AVAILABLE})
-  endif()
-
+  
   # # ########################################################
   # 5C. cJSON
   # # ########################################################
-  add_subdirectory(${CJSON_DIR})
-  list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson-static)
+  find_package(cjson QUIET)
+  
+  if(NOT cjson_FOUND)
+    message(STATUS "[ATCLIENT] cJSON not found, fetching from GitHub..")
+    FetchContent_Declare(
+      cjson
+      URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.17.zip
+      URL_HASH SHA256=51f3b07aece8d1786e74b951fd92556506586cb36670741b6bfb79bf5d484216 # hash for v1.7.17 .zip release source code
+    )
 
-  # # ########################################################
+    list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson) # since we've fetched it, we have to install it
+    set(CJSON_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(CJSON_OVERRIDE_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+    set(ENABLE_CJSON_TEST OFF CACHE BOOL "" FORCE)
+    add_compile_options(-fPIC)
+    FetchContent_MakeAvailable(cjson)
+
+  else()
+    message(STATUS "[ATCHOPS] cJSON found package..")
+  endif()
+    
+  if(ATCLIENT_MAKE_AVAILABLE)
+    FetchContent_MakeAvailable(${ATCLIENT_MAKE_AVAILABLE})
+  endif()
+    
+    # # ########################################################
   # 5D. Create atlogger library
   # - atlogger header files are installed to `/usr/local/include/atlogger`
   # - atlogger library is automatically linked as part of atclient library (when you install atclient, it already includes atlogger)
@@ -176,18 +191,25 @@ if(NOT ESP_PLATFORM)
   add_library(${PROJECT_NAME} STATIC ${atclient_srcs})
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
+  # Manually add header file
+  configure_file(${cjson_SOURCE_DIR}/cJSON.h ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h)
+  
+  # Set include directories for atclient target
+  target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
+
+  # atclient depends on cjson, so the latter must be built first
+  add_dependencies(atclient cjson)
+  
   # Link libraries to atclient target
   target_link_libraries(${PROJECT_NAME} PUBLIC
     atchops::atchops
     MbedTLS::mbedtls
     MbedTLS::mbedx509
-    cJSON::cjson-static
-  )
-
-  # Set include directories for atclient target
-  target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    cjson
   )
 
   install(
