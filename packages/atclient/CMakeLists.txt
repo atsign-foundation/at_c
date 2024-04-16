@@ -22,8 +22,9 @@ set(atclient_srcs
 )
 
 # 1b. Manually add your include directories here
-set(ATCLIENT_INCLUDE_DIR
- ${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like ` #include "atclient/xyz.h"
+set(
+  ATCLIENT_INCLUDE_DIR
+  ${CMAKE_CURRENT_LIST_DIR}/include # we do not include nested folder here because we want client to include them like ` #include "atclient/xyz.h"
 )
 
 # 1c. atchops package directory
@@ -46,24 +47,28 @@ if(ESP_PLATFORM)
   SRCS ${atclient_srcs}
   INCLUDE_DIRS ${ATCLIENT_INCLUDE_DIR}
   REQUIRES mbedtls atchops
- )
+  )
 
   # Copy header files to include directory and libraries to lib directory
   add_custom_command(
     TARGET ${COMPONENT_LIB}
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/include
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}> ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
+    COMMAND
+      ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR}
+      ${CMAKE_SOURCE_DIR}/include
+    COMMAND
+      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}>
+      ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
     COMMENT "Copying built archive file and header to lib directory..."
   )
 endif()
 
 project(
- atclient
- VERSION 0.0.1
- DESCRIPTION "Atsign technology client library"
- HOMEPAGE_URL https://atsign.com
- LANGUAGES C
+  atclient
+  VERSION 0.0.1
+  DESCRIPTION "Atsign technology client library"
+  HOMEPAGE_URL https://atsign.com
+  LANGUAGES C
 )
 
 set(CMAKE_C_STANDARD 99)
@@ -108,11 +113,11 @@ if(NOT ESP_PLATFORM)
   find_package(atchops QUIET)
 
   if(NOT atchops_FOUND)
-    message(STATUS "[ATCLIENT] atchops not found, fetching from local repository..")
-    FetchContent_Declare(
-      atchops
-      SOURCE_DIR ${ATCHOPS_DIR}
+    message(
+      STATUS
+      "[ATCLIENT] atchops not found, fetching from local repository.."
     )
+    fetchcontent_declare(atchops SOURCE_DIR ${ATCHOPS_DIR})
     list(APPEND ATCLIENT_TARGETS_TO_INSTALL atchops uuid4-static) # since we've fetched it, we have to install the targets
     list(APPEND ATCLIENT_MAKE_AVAILABLE atchops) # we have to make it available later on with FetchContent_MakeAvailable
   else()
@@ -126,28 +131,46 @@ if(NOT ESP_PLATFORM)
 
   if(NOT MbedTLS_FOUND)
     message(STATUS "[ATCLIENT] MbedTLS not found, fetching from GitHub..")
-    FetchContent_Declare(
+    fetchcontent_declare(
       MbedTLS
       URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
-      URL_HASH SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
+      URL_HASH
+        SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
     )
-    list(APPEND ATCLIENT_TARGETS_TO_INSTALL mbedtls mbedx509 mbedcrypto p256m everest) # since we've fetched it, we have to install the targets
+    list(
+      APPEND
+      ATCLIENT_TARGETS_TO_INSTALL
+      mbedtls
+      mbedx509
+      mbedcrypto
+      p256m
+      everest
+    ) # since we've fetched it, we have to install the targets
     list(APPEND ATCLIENT_MAKE_AVAILABLE MbedTLS) # we have to make it available later on with FetchContent_MakeAvailable
   else()
     message(STATUS "[ATCLIENT] MbedTLS found package..")
   endif()
-  
+
+  if(ATCLIENT_BUILD_TESTS)
+    message(STATUS "[MbedTLS] enabling tests" ])
+    set(ENABLE_TESTING ON)
+  else()
+    message(STATUS "[MbedTLS] disabling tests" ])
+    set(ENABLE_TESTING OFF)
+  endif()
+
   # # ########################################################
   # 5C. cJSON
   # # ########################################################
   find_package(cjson QUIET)
-  
+
   if(NOT cjson_FOUND)
     message(STATUS "[ATCLIENT] cJSON not found, fetching from GitHub..")
-    FetchContent_Declare(
+    fetchcontent_declare(
       cjson
       URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.17.zip
-      URL_HASH SHA256=51f3b07aece8d1786e74b951fd92556506586cb36670741b6bfb79bf5d484216 # hash for v1.7.17 .zip release source code
+      URL_HASH
+        SHA256=51f3b07aece8d1786e74b951fd92556506586cb36670741b6bfb79bf5d484216 # hash for v1.7.17 .zip release source code
     )
 
     list(APPEND ATCLIENT_TARGETS_TO_INSTALL cjson) # since we've fetched it, we have to install it
@@ -155,17 +178,16 @@ if(NOT ESP_PLATFORM)
     set(CJSON_OVERRIDE_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(ENABLE_CJSON_TEST OFF CACHE BOOL "" FORCE)
     add_compile_options(-fPIC)
-    FetchContent_MakeAvailable(cjson)
-
+    fetchcontent_makeavailable(cjson)
   else()
     message(STATUS "[ATCHOPS] cJSON found package..")
   endif()
-    
+
   if(ATCLIENT_MAKE_AVAILABLE)
-    FetchContent_MakeAvailable(${ATCLIENT_MAKE_AVAILABLE})
+    fetchcontent_makeavailable(${ATCLIENT_MAKE_AVAILABLE})
   endif()
-    
-    # # ########################################################
+
+  # # ########################################################
   # 5D. Create atlogger library
   # - atlogger header files are installed to `/usr/local/include/atlogger`
   # - atlogger library is automatically linked as part of atclient library (when you install atclient, it already includes atlogger)
@@ -175,9 +197,11 @@ if(NOT ESP_PLATFORM)
     add_library(atlogger STATIC ${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c)
     add_library(${PROJECT_NAME}::atlogger ALIAS atlogger)
 
-    target_include_directories(atlogger PUBLIC
-      $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/atlogger>
+    target_include_directories(
+      atlogger
+      PUBLIC
+        $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/atlogger>
     )
 
     list(APPEND ATCLIENT_TARGETS_TO_INSTALL atlogger) # install atlogger
@@ -192,24 +216,27 @@ if(NOT ESP_PLATFORM)
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
   # Manually add header file
-  configure_file(${cjson_SOURCE_DIR}/cJSON.h ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h)
-  
+  configure_file(
+    ${cjson_SOURCE_DIR}/cJSON.h
+    ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h
+  )
+
   # Set include directories for atclient target
-  target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-    $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  target_include_directories(
+    ${PROJECT_NAME}
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+      $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 
   # atclient depends on cjson, so the latter must be built first
   add_dependencies(atclient cjson)
-  
+
   # Link libraries to atclient target
-  target_link_libraries(${PROJECT_NAME} PUBLIC
-    atchops::atchops
-    MbedTLS::mbedtls
-    MbedTLS::mbedx509
-    cjson
+  target_link_libraries(
+    ${PROJECT_NAME}
+    PUBLIC atchops::atchops MbedTLS::mbedtls MbedTLS::mbedx509 cjson
   )
 
   install(
@@ -238,9 +265,9 @@ if(NOT ESP_PLATFORM)
 
   # Copy all headerfiles from `include/atclient` into `/usr/local/include/atclient`
   install(
-  DIRECTORY ${ATCLIENT_INCLUDE_DIR}/${PROJECT_NAME}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
- )
+    DIRECTORY ${ATCLIENT_INCLUDE_DIR}/${PROJECT_NAME}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
 
   # # ########################################################
   # 9. Export in case people use us in a subdirectory
@@ -261,9 +288,7 @@ if(NOT ESP_PLATFORM)
       FILE ${PROJECT_NAME}-config.cmake
     )
 
-    export(
-      PACKAGE ${PROJECT_NAME}
-    )
+    export(PACKAGE ${PROJECT_NAME})
   endif()
 
   # # ########################################################
