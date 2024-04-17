@@ -6,20 +6,21 @@ cmake_minimum_required(VERSION 3.19)
 
 # 1a. Manually add your src files here
 # globs are known as bad practice, so we do not use them here
-set(atclient_srcs
- ${CMAKE_CURRENT_LIST_DIR}/src/atbytes.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
- ${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
- ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
- ${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
- ${CMAKE_CURRENT_LIST_DIR}/src/monitor.c
- ${CMAKE_CURRENT_LIST_DIR}/src/notify.c
- ${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
+set(
+  atclient_srcs
+  ${CMAKE_CURRENT_LIST_DIR}/src/atbytes.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atlogger.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/monitor.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/notify.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
 )
 
 # 1b. Manually add your include directories here

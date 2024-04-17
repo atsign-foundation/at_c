@@ -5,6 +5,7 @@
 #include <atclient/metadata.h>
 #include <atclient/notify.h>
 #include <atlogger/atlogger.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -14,6 +15,9 @@
 #define ATKEY_NAMESPACE "dart_playground"
 #define ATKEY_VALUE "test value"
 
+#define ROOT_HOST "vip.ve.atsign.zone"
+#define ROOT_PORT 64
+
 int main(int argc, char *argv[]) {
   int ret = 1;
   atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
@@ -22,7 +26,7 @@ int main(int argc, char *argv[]) {
   char *other_atsign_input = NULL;
   // allow input of -a and -o flags with get opts
 
-  char c;
+  int c;
   while ((c = getopt(argc, argv, "a:o:")) != -1)
     switch (c) {
     case 'a':
@@ -51,7 +55,7 @@ int main(int argc, char *argv[]) {
 
   atclient_connection root_connection;
   atclient_connection_init(&root_connection);
-  ret = atclient_connection_connect(&root_connection, "root.atsign.org", 64);
+  ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root\n");
     atclient_connection_free(&root_connection);

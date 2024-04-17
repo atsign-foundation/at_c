@@ -5,9 +5,10 @@
 #include <atchops/iv.h>
 #include <atchops/rsa.h>
 #include <atchops/rsakey.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "atkeys"
 
@@ -32,8 +33,7 @@ void atclient_atkeys_init(atclient_atkeys *atkeys) {
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
                                           const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
                                           const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
-                                          const size_t aesencryptpublickeylen,
-                                          const char *aesencryptprivatekeystr,
+                                          const size_t aesencryptpublickeylen, const char *aesencryptprivatekeystr,
                                           const size_t aesencryptprivatekeylen, const char *selfencryptionkeystr,
                                           const size_t selfencryptionkeylen) {
   int ret = 1;

@@ -29,6 +29,10 @@ typedef struct atclient_monitor_message {
   };
 } atclient_monitor_message;
 
+void atclient_monitor_message_free(atclient_monitor_message *message);
+
+void atclient_init_monitor(atclient *monitor_ctx, const char *atsign, const atclient_atkeys atkeys);
+
 /* @brief Create a new atServer connection and send the monitor verb
  * @param ctx the atclient context for the monitor connection
  * @param root_host the hostname of the root server
@@ -38,14 +42,14 @@ typedef struct atclient_monitor_message {
  * @param regex the regex to match the keys
  * @return 0 on success, non-zero on error
  */
-int atclient_start_monitor(atclient *monitor_connection, const char *root_host, const int root_port,
-                           const atclient_atsign atsign, const atclient_atkeys atkeys, const char *regex);
+int atclient_start_monitor(atclient *monitor_connection, const char *root_host, const int root_port, const char *regex);
 
 /* @brief Send a heartbeat on the monitor connection
  * @param ctx the atclient context for the monitor connection
  * @return 0 on success, non-zero on error
  *
  * @note Ideally this is scheduled to be sent every 30 seconds
+ * @note this is different than a normal noop command, since we don't listen for the response from the server
  */
 int atclient_send_heartbeat(atclient *ctx);
 

@@ -2,10 +2,10 @@
 #include "atclient/atstr.h"
 #include "atlogger/atlogger.h"
 #include <cjson/cJSON.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 // represents the buffer size of an encrypted RSA key in base64 format
 #define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
