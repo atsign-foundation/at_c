@@ -31,7 +31,8 @@ typedef struct atclient_monitor_message {
 
 void atclient_monitor_message_free(atclient_monitor_message *message);
 
-void atclient_init_monitor(atclient *monitor_ctx, const char *atsign, const atclient_atkeys atkeys);
+void atclient_monitor_init(atclient *monitor_ctx, const atclient_atsign atsign, const atclient_atkeys atkeys);
+void atclient_monitor_free(atclient *monitor_ctx);
 
 /* @brief Create a new atServer connection and send the monitor verb
  * @param ctx the atclient context for the monitor connection

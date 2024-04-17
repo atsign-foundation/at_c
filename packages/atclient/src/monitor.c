@@ -19,14 +19,13 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   free(message->notification.value);
 }
 
-void atclient_init_monitor(atclient *monitor_ctx, const char *atsign, const atclient_atkeys atkeys) {
-  printf("A\n");
+void atclient_monitor_init(atclient *monitor_ctx, const atclient_atsign atsign, const atclient_atkeys atkeys) {
   atclient_init(monitor_ctx);
-  printf("B\n");
-  strcpy(monitor_ctx->atsign.atsign, atsign);
-  printf("C\n");
+  // TODO: these structs are copied over, but the underlying memory addresses are the same
+  // we should migrate atsign in the atclient struct to be char, since .withoutat is simply just (atsign + 1)
+  // atkeys we need to copy each bit of memory one by one
+  monitor_ctx->atsign = atsign;
   monitor_ctx->atkeys = atkeys;
-  printf("D\n");
 }
 
 int atclient_start_monitor(atclient *monitor_ctx, const char *root_host, const int root_port, const char *regex) {

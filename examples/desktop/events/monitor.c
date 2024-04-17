@@ -69,9 +69,9 @@ int main(int argc, char *argv[]) {
   atclient_atkeys_populate_from_path(&atkeys, atkeys_path);
 
   printf("Starting monitor\n");
-  struct atclient *monitor_ctx;
-  atclient_init_monitor(monitor_ctx, atsign.atsign, atkeys);
-  ret = atclient_start_monitor(monitor_ctx, ROOT_HOST, ROOT_PORT, "");
+  struct atclient monitor_ctx;
+  atclient_monitor_init(&monitor_ctx, atsign, atkeys);
+  ret = atclient_start_monitor(&monitor_ctx, ROOT_HOST, ROOT_PORT, "");
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   printf("Starting main monitor loop\n");
   while (true) {
     atclient_monitor_message message;
-    int mon_ret = atclient_read_monitor(monitor_ctx, &message);
+    int mon_ret = atclient_read_monitor(&monitor_ctx, &message);
     if (mon_ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message\n");
       continue;
