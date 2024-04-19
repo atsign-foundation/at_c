@@ -219,7 +219,7 @@ if(NOT ESP_PLATFORM)
 
   # Manually add header file
   configure_file(
-    ${cjson_SOURCE_DIR}/cJSON.h
+    ${CMAKE_INSTALL_FULL_INCLUDEDIR}/cjson/cJSON.h
     ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h
   )
 
