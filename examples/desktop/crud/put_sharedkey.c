@@ -68,7 +68,7 @@ int main()
 
     atclient_atkey_metadata_set_ttl(&atkey.metadata, 60*1000*10); // 10 minutes
 
-    if((ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
+    if((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
         atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
         goto exit;
     }
