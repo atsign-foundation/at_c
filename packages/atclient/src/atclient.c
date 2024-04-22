@@ -1343,7 +1343,9 @@ int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *ro
   // get client and recipient public encryption keys
   const size_t bufferlen = 1024;
   char client_public_encryption_key[bufferlen];
+  memset(client_public_encryption_key, 0, sizeof(char) * bufferlen);
   char recipient_public_encryption_key[bufferlen];
+  memset(recipient_public_encryption_key, 0, sizeof(char) * bufferlen);
   ret = atclient_get_public_encryption_key(ctx, root_conn, NULL, client_public_encryption_key);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
@@ -1358,7 +1360,7 @@ int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *ro
   // generate a new aes key
   const size_t keybase64len = 45;
   unsigned char new_shared_encryption_key_b64[keybase64len];
-  memset(new_shared_encryption_key_b64, 0, keybase64len);
+  memset(new_shared_encryption_key_b64, 0, sizeof(unsigned char) * keybase64len);
   size_t keybase64olen = 0;
   ret = atchops_aes_generate_keybase64(new_shared_encryption_key_b64, keybase64len, &keybase64olen, ATCHOPS_AES_256);
   if (ret != 0) {
