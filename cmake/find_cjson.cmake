@@ -17,9 +17,3 @@ fetchcontent_declare(
 
 fetchcontent_makeavailable(cjson)
 install(TARGETS cjson)
-
-# hack for cjson's header being missing
-configure_file(
-  ${cjson_SOURCE_DIR}/cJSON.h
-  ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h
-)
