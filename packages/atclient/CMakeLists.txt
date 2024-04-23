@@ -1,5 +1,5 @@
 # Configurable options
-option(ATCLIENT_BUILD_TESTS "Build atclient tests" OFF) # ON=>builds tests by running the tests/CMakeLists.txt file and generates a `tests/` folder in the build directory where `ctest` can be ran in that directory, OFF=>does not build `tests/`
+option(ATCLIENT_BUILD_TESTS "Build tests for atclient" OFF)
 
 # Set include directory and file sources
 set(ATCLIENT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
