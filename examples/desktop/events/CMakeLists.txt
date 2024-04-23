@@ -4,22 +4,9 @@ project(sample_cmake_project)
 
 find_package(atsdk REQUIRED CONFIG)
 
-find_package(atclient REQUIRED CONFIG)
-message(STATUS "Found atclient!")
-
-find_package(atchops QUIET)
-find_package(MbedTLS QUIET)
-find_package(cjson QUIET)
-
-
-
-set(examples
-  notify
-  monitor
-)
+set(examples notify monitor)
 
 foreach(example ${examples})
   add_executable(${example} ${CMAKE_CURRENT_LIST_DIR}/${example}.c)
-  target_link_libraries(${example} PRIVATE atclient::atclient)
+  target_link_libraries(${example} PRIVATE atsdk::atclient atsdk::cjson)
 endforeach()
-

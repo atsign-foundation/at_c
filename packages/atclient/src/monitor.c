@@ -2,7 +2,7 @@
 #include "atclient/atclient.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
-#include "cjson/cJSON.h"
+#include "cJSON.h"
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
 #include <mbedtls/threading.h>
