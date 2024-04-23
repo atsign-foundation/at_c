@@ -12,6 +12,7 @@ if(cjson_FOUND AND TARGET cjson)
 else()
   message(STATUS "[cjson] package not found, fetching from GitHub..")
   include(FetchContent)
+  set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE OFF) # Never call find_package as part of the resolution strategy
   fetchcontent_declare(
     cjson
     URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.17.zip
