@@ -19,6 +19,7 @@ jobs:
         working-directory: packages/atclient
         run: |
           cmake -S . -B build
+          sudo cmake --build build
           sudo cmake --build build --target install
 
       - name: Build sample_cmake_project
