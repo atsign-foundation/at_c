@@ -1,7 +1,7 @@
 # This installs the targets mbedtls mbedx509 mbedcrypto everest p256m
 
 # Configurable variables
-set(ENABLE_TESTING OFF CACHE BOOL "Enable MbedTLS tests")
+option(ENABLE_TESTING "Enable MbedTLS tests" OFF)
 set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE OPT_IN) # only try find_package if FIND_PACKAGE_ARGS is set
 
 message(STATUS "[MbedTLS] fetching package...")

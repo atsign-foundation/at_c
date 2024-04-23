@@ -1,5 +1,5 @@
 # Configurable options
-set(ATCHOPS_BUILD_TESTS "Build tests" OFF CACHE BOOL "Build tests with atchops")
+option(ATCHOPS_BUILD_TESTS "Build tests for atchops" OFF)
 
 # Set include directory and file sources
 set(ATCHOPS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)

@@ -1,6 +1,7 @@
 # This installs the target uuid4-static
 
 # Configuration options
+# No test option, tests for uuid4 are part of atchops package
 set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE OPT_IN) # only try find_package if FIND_PACKAGE_ARGS is set
 
 message(STATUS "[uuid4] fetching package...")

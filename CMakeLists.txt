@@ -1,5 +1,6 @@
 # Configurable options
 set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
+option(ATSDK_BUILD_TESTS "Build tests for atsdk" OFF)
 
 # Basic project setup
 cmake_minimum_required(VERSION 3.19)
@@ -26,12 +27,14 @@ message(STATUS "[ATSDK] ATSDK_AS_SUBPROJECT: ${ATSDK_AS_SUBPROJECT}")
 
 # install each package
 message(STATUS "Building atchops")
+set(ATCHOPS_BUILD_TESTS ${ATSDK_BUILD_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atchops)
 
 message(STATUS "Building atlogger")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atlogger)
 
 message(STATUS "Building atclient")
+set(ATCLIENT_BUILD_TESTS ${ATSDK_BUILD_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atclient)
 
 # install dependencies
