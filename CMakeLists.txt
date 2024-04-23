@@ -37,43 +37,45 @@ message(STATUS "Building atclient")
 set(ATCLIENT_BUILD_TESTS ${ATSDK_BUILD_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atclient)
 
-# install dependencies
-set(
-  ATSDK_TARGETS
-  mbedtls
-  mbedx509
-  mbedcrypto
-  everest
-  p256m
-  uuid4-static
-  atchops
-  cjson
-  atlogger
-  atclient
-)
+if(NOT ESP_PLATFORM)
+  # install dependencies
+  set(
+    ATSDK_TARGETS
+    mbedtls
+    mbedx509
+    mbedcrypto
+    everest
+    p256m
+    uuid4-static
+    atchops
+    cjson
+    atlogger
+    atclient
+  )
 
-install(
-  TARGETS ${ATSDK_TARGETS}
-  EXPORT ${PROJECT_NAME}-config
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-
-# export dependencies
-if(NOT ATSDK_AS_SUBPROJECT)
-  export(PACKAGE ${PROJECT_NAME})
-
-  # install as a config.cmake
   install(
+    TARGETS ${ATSDK_TARGETS}
     EXPORT ${PROJECT_NAME}-config
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-    FILE ${PROJECT_NAME}-config.cmake
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 
-  # export the config.cmake
-  export(
-    EXPORT ${PROJECT_NAME}-config
-    NAMESPACE ${PROJECT_NAME}::
-    FILE "cmake/${PROJECT_NAME}-config.cmake"
-  )
+  # export dependencies
+  if(NOT ATSDK_AS_SUBPROJECT)
+    export(PACKAGE ${PROJECT_NAME})
+
+    # install as a config.cmake
+    install(
+      EXPORT ${PROJECT_NAME}-config
+      NAMESPACE ${PROJECT_NAME}::
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+      FILE ${PROJECT_NAME}-config.cmake
+    )
+
+    # export the config.cmake
+    export(
+      EXPORT ${PROJECT_NAME}-config
+      NAMESPACE ${PROJECT_NAME}::
+      FILE "cmake/${PROJECT_NAME}-config.cmake"
+    )
+  endif()
 endif()
