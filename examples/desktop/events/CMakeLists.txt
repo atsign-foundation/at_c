@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(sample_cmake_project)
 
-option (TARGET_SRC "Specify the target" REQUIRED)
+find_package(atsdk REQUIRED CONFIG)
 
 find_package(atclient REQUIRED CONFIG)
 message(STATUS "Found atclient!")

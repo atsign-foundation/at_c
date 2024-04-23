@@ -13,7 +13,7 @@
 #include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
-#include <cjson/cJSON.h>
+#include <cJSON.h>
 #include <mbedtls/md.h>
 #include <stdbool.h>
 #include <stddef.h>
