@@ -8,7 +8,7 @@ cmake_policy(SET CMP0135 NEW)
 include(GNUInstallDirs)
 
 project(
-  atSDK
+  atsdk
   VERSION 0.0.1
   DESCRIPTION "Atsign's atSDK library"
   HOMEPAGE_URL https://atsign.com

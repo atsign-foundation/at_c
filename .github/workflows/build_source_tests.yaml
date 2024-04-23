@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
-      - name: Install atSDK
+      - name: Install atsdk
         run: |
           cmake -S . -B build
           sudo cmake --build build --target install
@@ -23,7 +23,7 @@ jobs:
       - name: Build sample_cmake_project
         working-directory: examples/desktop/sample_cmake_project
         run: |
-          cmake -S . -B build -DatSDK_DIR="/usr/local/bin/cmake/atSDK"
+          cmake -S . -B build -Datsdk="/usr/local/bin/cmake/atsdk"
           cmake --build build
 
       - name: Run sample_cmake_project executable
