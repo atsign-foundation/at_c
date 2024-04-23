@@ -21,5 +21,4 @@ else()
 
   fetchcontent_makeavailable(cjson)
   install(TARGETS cjson)
-  set(cjson_INSTALL_TARGETS cjson)
 endif()

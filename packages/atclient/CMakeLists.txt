@@ -79,12 +79,14 @@ if(NOT ESP_PLATFORM)
 
   # Import atlogger
   if(NOT TARGET atlogger)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../atlogger)
+    set(atlogger_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atlogger)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atlogger.cmake)
   endif()
 
   # Import atchops
   if(NOT TARGET atchops)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../atchops)
+    set(atchops_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atchops)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atchops.cmake)
   endif()
 
   # Create library targets
@@ -107,6 +109,10 @@ if(NOT ESP_PLATFORM)
     atchops
     mbedtls
     mbedx509
+    mbedcrypto
+    everest
+    p256m
+    uuid4-static
     cjson
   )
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCLIENT_INSTALL_TARGETS})

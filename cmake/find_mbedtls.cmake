@@ -29,12 +29,4 @@ else()
   install(
     TARGETS mbedtls mbedx509 mbedcrypto everest p256m
   )
-  set(
-    mbedtls_INSTALL_TARGETS
-    mbedtls
-    mbedx509
-    mbedcrypto
-    everest
-    p256m
-  )
 endif()
