@@ -64,8 +64,7 @@ jobs:
         # queries: security-extended,security-and-quality
 
     # Manual build steps from build_source_tests
-    - name: Install atclient
-      working-directory: packages/atclient
+    - name: Install atsdk
       run: |
         cmake -S . -B build
         sudo cmake --build build --target install
