@@ -100,6 +100,7 @@ if(NOT ESP_PLATFORM)
     PUBLIC
       $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+      ${CMAKE_BINARY_DIR}/include # hack for cjson's header being missing
   )
 
   # Link dependencies to library targets 
