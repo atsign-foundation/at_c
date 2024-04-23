@@ -15,9 +15,7 @@ fi
 FILE="$1"
 
 # Install atsdk
-cd "$SCRIPT_DIRECTORY/../../../"
-cmake -S . -B build
-sudo cmake --build build --target install
+"$SCRIPT_DIRECTORY/../../../tools/install.sh"
 
 # Build and run the example
 cd "$SCRIPT_DIRECTORY"
