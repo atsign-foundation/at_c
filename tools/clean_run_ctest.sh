@@ -5,7 +5,7 @@ SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 cd "$SCRIPT_DIRECTORY"
 cd ..
 rm -rf build
-cmake -S . -B build -DATSDK_BUILD_TESTS=ON
+cmake -S . -B build -DATSDK_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
 cmake --build build --target all
 
 run_test() {
