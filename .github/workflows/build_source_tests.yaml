@@ -23,7 +23,7 @@ jobs:
       - name: Build sample_cmake_project
         working-directory: examples/desktop/sample_cmake_project
         run: |
-          cmake -S . -B build -DCMAKE_PREFIX_PATH="/usr/local/bin/cmake/atSDK"
+          cmake -S . -B build -DCMAKE_INSTALL_PREFIX="/usr/local/bin/cmake"
           cmake --build build
 
       - name: Run sample_cmake_project executable
