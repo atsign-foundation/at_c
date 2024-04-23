@@ -17,3 +17,7 @@ fetchcontent_declare(
 
 fetchcontent_makeavailable(cjson)
 install(TARGETS cjson)
+configure_file(
+  ${cjson_SOURCE_DIR}/cJSON.h
+  ${CMAKE_BINARY_DIR}/include/cjson/cJSON.h
+)
