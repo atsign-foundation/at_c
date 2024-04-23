@@ -7,7 +7,7 @@ CMakeScripts
 cmake_install.cmake
 .cache/
 
-build/
+/*build*/
 install/
 bin/
 

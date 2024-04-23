@@ -2,16 +2,12 @@ cmake_minimum_required(VERSION 3.19)
 
 project(sample_cmake_project)
 
-option (TARGET_SRC "Specify the target" REQUIRED)
+option(TARGET_SRC "Specify the target" REQUIRED)
 
-find_package(atclient REQUIRED CONFIG)
-find_package(atchops QUIET)
-find_package(MbedTLS QUIET)
-find_package(cjson QUIET)
+find_package(atsdk REQUIRED CONFIG)
 
-message(STATUS "Found atclient!")
-
+message(STATUS "Found atsdk!")
 
 add_executable(exec ${CMAKE_CURRENT_LIST_DIR}/${TARGET_SRC})
 
-target_link_libraries(exec PRIVATE atclient::atclient)
+target_link_libraries(exec PRIVATE atsdk::atclient)
