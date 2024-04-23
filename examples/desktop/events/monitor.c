@@ -39,11 +39,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  const size_t valuelen = 1024;
-  char value[valuelen];
-  memset(value, 0, sizeof(char) * valuelen);
-  size_t valueolen = 0;
-
   atclient atclient;
   atclient_init(&atclient);
 

@@ -52,19 +52,12 @@ int atclient_start_monitor(atclient *monitor_ctx, const char *root_host, const i
     cmd_len += regex_len + 1;
   }
 
-  char cmd[cmd_len];
+  char cmd[cmd_len + 1]; // +1 for '\0' :facepalm:
   if (regex_len > 0) {
-    snprintf(cmd, cmd_len, "monitor %s\r\n", regex);
+    sprintf(cmd, "monitor %s\r\n", regex);
   } else {
-    snprintf(cmd, cmd_len, "monitor\r\n");
+    sprintf(cmd, "monitor\r\n");
   }
-
-  unsigned char recv[1024];
-  size_t olen;
-  // res = atclient_connection_send(&monitor_connection->secondary_connection, (unsigned char *)cmd, cmd_len, recv,
-  // 1024,
-  //                                &olen);
-  // printf("res: %d\n", res);
 
   res = mbedtls_ssl_write(&(monitor_ctx->secondary_connection.ssl), (unsigned char *)cmd, cmd_len);
   if (res < 0 || res != cmd_len) {
@@ -109,10 +102,7 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     }
     size_t off = chunk_size * chunks++;
     for (int i = 0; i < chunk_size; i++) {
-      atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading char\n");
       ret = mbedtls_ssl_read(&monitor_connection->secondary_connection.ssl, (unsigned char *)buffer + off + i, 1);
-
-      atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Read char\n");
       if (ret < 0 || buffer[off + i] == '\n') {
         done_reading = 1;
         break;
