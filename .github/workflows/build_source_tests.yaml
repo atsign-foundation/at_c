@@ -10,6 +10,26 @@ permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
+  atsdk:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+
+      - name: Install atSDK
+        run: |
+          cmake -S . -B build
+          sudo cmake --build build --target install
+
+      - name: Build sample_cmake_project
+        working-directory: examples/desktop/sample_cmake_project
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      - name: Run sample_cmake_project executable
+        working-directory: examples/desktop/sample_cmake_project
+        run: |
+          ./build/exec
   atclient:
     runs-on: "ubuntu-latest"
     steps:
@@ -19,7 +39,7 @@ jobs:
         working-directory: packages/atclient
         run: |
           cmake -S . -B build
-          cmake --build build --target install
+          sudo cmake --build build --target install
 
       - name: Build sample_cmake_project
         working-directory: examples/desktop/sample_cmake_project
