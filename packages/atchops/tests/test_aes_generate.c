@@ -13,7 +13,7 @@ int main() {
 
   const size_t keybase64len = 128;
   unsigned char keybase64[keybase64len];
-  memset(keybase64, 0, keybase64len);
+  memset(keybase64, 0, sizeof(unsigned char) * keybase64len);
   size_t keybase64olen = 0;
 
   const size_t ciphertextlen = 1024;
