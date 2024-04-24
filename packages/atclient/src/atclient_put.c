@@ -3,7 +3,6 @@
 #include "atclient/atstr.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
-#include <atchops/aes.h>
 #include <atchops/aesctr.h>
 #include <atchops/rsa.h>
 #include <atchops/iv.h>
@@ -81,9 +80,8 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
     memcpy(ciphertextbase64, value, valuelen);
     ciphertextbase64len = valuelen;
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SELFKEY) {
-    // encrypt with self encryption key
     ret = atchops_aesctr_encrypt(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
-                                 ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertextbase64, ciphertextbase64len,
+                                 ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertextbase64, ciphertextbase64size,
                                  &ciphertextbase64len);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
