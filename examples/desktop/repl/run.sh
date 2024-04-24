@@ -8,14 +8,18 @@ sudo rm -f bin/repl
 # install dependencies
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
-"$SCRIPT_DIRECTORY/../../../packages/atclient/tools/install.sh"
+
+# 1. Install atsdk
+"$SCRIPT_DIRECTORY/../../../tools/install.sh"
+
+# 2. Build REPL
 cd "$SCRIPT_DIRECTORY"
 
-# configure
+## 2a. CMake configure
 cmake -S . -B build
 
-# build & install
+## 2b. CMake build
 sudo cmake --build build --target install
 
-# run
+# 3. Run REPL
 ./bin/repl $@
