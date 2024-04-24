@@ -18,7 +18,7 @@
 
 #define ATKEY_KEY "test"
 #define ATKEY_NAMESPACE "dart_playground"
-#define ATKEY_VALUE "test value 123"
+#define ATKEY_VALUE "test value"
 
 int main() {
   int ret = 1;
