@@ -27,7 +27,7 @@
 
 void atclient_init(atclient *ctx) { memset(ctx, 0, sizeof(atclient)); }
 
-int atclient_start_client_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
+int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
   atclient_connection_init(&(ctx->secondary_connection));
@@ -136,7 +136,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
-  ret = atclient_start_client_connection(ctx, host.str, port);
+  ret = atclient_start_secondary_connection(ctx, host.str, port);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_secondary_connection: %d\n", ret);
     goto exit;
