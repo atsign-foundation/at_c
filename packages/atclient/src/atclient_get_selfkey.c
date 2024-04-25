@@ -14,8 +14,8 @@
 
 #define TAG "atclient_get_selfkey"
 
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
-                         size_t *valueolen) {
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                         size_t *valuelen) {
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_SELF\n");
     return 1;
@@ -34,10 +34,16 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t recvolen = 0;
 
+  const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
+  unsigned char selfencryptionkey[selfencryptionkeysize];
+  memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
+  size_t selfencryptionkeylen = 0;
+
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
   cJSON *root = NULL;
   char *cmdbuffer = NULL;
+  char *valueraw = NULL;
 
   // 2. build llookup: command
   ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrlen, &atkeystrolen);
@@ -47,14 +53,14 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  const size_t cmdbufferlen = strlen("llookup:all:\r\n") + atkeystrolen + 1;
-  cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
-  memset(cmdbuffer, 0, cmdbufferlen);
+  const size_t cmdbuffersize = strlen("llookup:all:\r\n") + atkeystrolen + 1;
+  cmdbuffer = (char *) malloc(sizeof(char) * cmdbuffersize);
+  memset(cmdbuffer, 0, sizeof(char) * cmdbuffersize);
 
-  snprintf(cmdbuffer, cmdbufferlen, "llookup:all:%.*s\r\n", (int)atkeystrolen, atkeystr);
+  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int)atkeystrolen, atkeystr);
 
   // 3. send llookup: command
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
                                  recvlen, &recvolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -120,16 +126,26 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
-  unsigned char selfencryptionkey[selfencryptionkeysize];
-  memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
-  size_t selfencryptionkeylen = 0;
-
   ret = atchops_base64_decode(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
                               selfencryptionkey, selfencryptionkeysize, &selfencryptionkeylen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+    goto exit;
+  }
 
-  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)data->valuestring,
-                               strlen(data->valuestring), (unsigned char *)value, valuelen, valueolen);
+  const size_t valuerawsize = strlen(data->valuestring)*8;
+  valueraw = (char *) malloc(sizeof(char) * valuerawsize);
+  memset(valueraw, 0, sizeof(char) * valuerawsize);
+  size_t valuerawlen = 0;
+
+  ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), valueraw, valuerawsize,
+                              &valuerawlen);
+  if(ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuesize, valuelen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;
@@ -137,5 +153,13 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+
+exit: {
+  if (root != NULL) {
+    cJSON_Delete(root);
+  }
+  free(valueraw);
+  free(cmdbuffer);
+  return ret;
+}
 }
