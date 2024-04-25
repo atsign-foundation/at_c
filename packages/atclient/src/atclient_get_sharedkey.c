@@ -1,14 +1,14 @@
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
 #include "atclient/atclient.h"
-#include "atclient/stringutils.h"
 #include "atclient/encryption_key_helpers.h"
-#include <atlogger/atlogger.h>
-#include <atchops/iv.h>
+#include "atclient/stringutils.h"
 #include <atchops/aes.h>
 #include <atchops/aesctr.h>
 #include <atchops/base64.h>
+#include <atchops/iv.h>
+#include <atlogger/atlogger.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TAG "atclient_get_sharedkey"
 
@@ -65,6 +65,13 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   char *response_prefix = NULL;
   unsigned char *recv = NULL;
 
+  const size_t enckeysize = ATCHOPS_AES_256 / 8;
+  unsigned char enckey[enckeysize];
+  memset(enckey, 0, sizeof(unsigned char) * enckeysize);
+  size_t enckeylen = 0;
+
+  char *valueraw = NULL;
+
   // check shared key
   char *enc_key = shared_enc_key;
   if (enc_key == NULL) {
@@ -76,11 +83,17 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
       goto exit;
     }
     ret = atclient_get_shared_encryption_key_shared_by_me(atclient, &recipient, enc_key,
-                                                   create_new_encryption_key_shared_by_me_if_not_found);
+                                                          create_new_encryption_key_shared_by_me_if_not_found);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
+  }
+
+  ret = atchops_base64_decode(enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+    goto exit;
   }
 
   // atclient_atkey_to_string buffer
@@ -186,15 +199,20 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
       goto exit;
     }
 
-    // decrypt response data
-    const size_t enckeysize = ATCHOPS_AES_256/8;
-    unsigned char enckey[enckeysize];
-    memset(enckey, 0, sizeof(unsigned char) * enckeysize);
-    size_t enckeylen = 0;
+    const size_t valuerawsize = strlen(data->valuestring) * 4; // most likely enough space after base64 decode
+    valueraw = malloc(sizeof(char) * valuerawsize);
+    memset(valueraw, 0, sizeof(char) * valuerawsize);
+    size_t valuerawlen = 0;
 
-    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv,
-                                 (unsigned char *)data->valuestring, strlen(data->valuestring), value, valuelen,
-                                 valueolen);
+    ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), (unsigned char *)valueraw,
+                                valuerawsize, &valuerawlen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      goto exit;
+    }
+
+    // decrypt response data
+    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuelen, valueolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
@@ -345,20 +363,19 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     }
 
     // decrypt response data
-    const size_t enckeysize = ATCHOPS_AES_256/8;
+    const size_t enckeysize = ATCHOPS_AES_256 / 8;
     unsigned char enckey[enckeysize];
     memset(enckey, 0, sizeof(unsigned char) * enckeysize);
     size_t enckeylen = 0;
 
     ret = atchops_base64_decode(enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
-    if(ret != 0) {
+    if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
-    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv,
-                                 (unsigned char *)data->valuestring, strlen(data->valuestring), (unsigned char *)value,
-                                 valuelen, valueolen);
+    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *)data->valuestring,
+                                 strlen(data->valuestring), (unsigned char *)value, valuelen, valueolen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;

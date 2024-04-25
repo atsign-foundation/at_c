@@ -11,8 +11,8 @@
 
 #define TAG "Debug"
 
-#define ATCLIENT_ATSIGN "@expensiveferret"
-#define ATSIGN_ATKEYS_FILE_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
+#define ATCLIENT_ATSIGN "@soccer0"
+#define ATSIGN_ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@soccer0_key.atKeys"
 
 /**
  * To test get_sharedkey_shared_by_me_with_other:
@@ -22,10 +22,10 @@
  *      [ SENDER_ATSIGN = other atsign, ie "@alice" ] and [ RECIPIENT_ATSIGN = ATCLIENT_ATSIGN ]
  */
 
-#define SENDER_ATSIGN "@expensiveferret"    // aka "sharedby"
-#define RECIPIENT_ATSIGN "@secondaryjackal" // aka "sharedwith"
+#define SENDER_ATSIGN "@soccer0"    // aka "sharedby"
+#define RECIPIENT_ATSIGN "@soccer99" // aka "sharedwith"
 
-#define ATKEY_NAME "test_sharedkey_001"
+#define ATKEY_NAME "test"
 #define ATKEY_NAMESPACE "dart_playground"
 
 #define EXPECTED_DECRYPTED_VALUE_SHA_256 "d38c816073fad5249b0143fe4588013a64a4f9d50090d9a8d4c97ad0534b2592"
