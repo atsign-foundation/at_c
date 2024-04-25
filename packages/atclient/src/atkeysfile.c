@@ -1,11 +1,11 @@
 #include "atclient/atkeysfile.h"
 #include "atclient/atstr.h"
 #include "atlogger/atlogger.h"
-#include <cjson/cJSON.h>
+#include <cJSON.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 // represents the buffer size of an encrypted RSA key in base64 format
 #define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
@@ -123,6 +123,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
                           "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
     goto exit;
   }
+
   goto exit;
 
 exit: {

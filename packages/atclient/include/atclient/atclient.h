@@ -78,8 +78,8 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  * @param commitid (optional) the output commitid of the put operation that the atServer returns
  * @return int 0 on success
  */
-int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
-                 const size_t valuelen, int *commitid);
+int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, const char *value,
+                const size_t valuelen, int *commitid);
 
 // TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 

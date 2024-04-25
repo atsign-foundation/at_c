@@ -87,7 +87,7 @@ int main() {
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   atclient_atstr_free(&atkeystr);
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);

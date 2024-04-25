@@ -5,7 +5,7 @@
 
 # at_c
 
-`at_c` is the client C implementation of the atProtocol
+`at_c` is the alpha C implementation of the atSDK
 
 ## Packages
 
