@@ -215,7 +215,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
 
   // set atkeys
-  ctx->atkeys = atkeys;
+  ctx->atkeys = *atkeys;
 
   ret = 0;
 
