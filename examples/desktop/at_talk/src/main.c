@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   atclient_connection_init(&root_conn);
   atclient_connection_connect(&root_conn, "root.atsign.org", 64);
 
-  ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, &myatsign);
+  ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATSIGN);
   if (ret != 0) {
     goto exit2;
   }
