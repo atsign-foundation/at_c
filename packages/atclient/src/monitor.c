@@ -88,10 +88,12 @@ int atclient_send_heartbeat(atclient *ctx) {
 static int parse_notification(atclient_monitor_message *message, char *message_body);
 int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message) {
   int ret = -1;
-
-  size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN;
+  // printf("Before malloc");
+  // size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN;
+  size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN * 5;
   int chunks = 0;
   char *buffer = malloc(chunk_size * 1 * sizeof(char));
+  // printf("After malloc");
 
   bool done_reading = 0;
 
@@ -102,7 +104,7 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     }
     size_t off = chunk_size * chunks++;
     for (int i = 0; i < chunk_size; i++) {
-      ret = mbedtls_ssl_read(&monitor_connection->secondary_connection.ssl, (unsigned char *)buffer + off + i, 1);
+      ret = mbedtls_ssl_read(&(monitor_connection->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
       if (ret < 0 || buffer[off + i] == '\n') {
         done_reading = 1;
         break;
@@ -130,7 +132,7 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     message->type = MMT_notification;
     ret = parse_notification(message, message_body);
     if (ret != 0) {
-      atclient_atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification");
+      atclient_atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
     }
   } else if (strcmp(message_type, "error") == 0) {
     message->type = MMT_error_response;
@@ -172,7 +174,7 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
 
   cJSON *metadata = cJSON_GetObjectItem(root, "metadata");
   if (metadata != NULL) {
-    atclient_atkey_metadata_from_cjson_node(&message->notification.key.metadata, metadata);
+    atclient_atkey_metadata_from_cjson_node(&(message->notification.key.metadata), metadata);
   }
 
   cJSON *from = cJSON_GetObjectItem(root, "from");
@@ -198,8 +200,9 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   strncpy(message->notification.operation, operation->valuestring, 7);
 
   cJSON *expiresAt = cJSON_GetObjectItem(root, "expiresAt");
-  message->notification.expiresAt = expiresAt->valueint;
+  if (expiresAt != NULL) message->notification.expiresAt = expiresAt->valueint;
 
   cJSON_Delete(root);
+  ret = 0;
   return ret;
 }

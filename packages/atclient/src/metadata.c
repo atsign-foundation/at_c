@@ -20,7 +20,7 @@ static int set_createdby(atclient_atkey_metadata *metadata, const char *createdb
   metadata->initializedfields[0] |= ATKEY_METADATA_CREATEDBY_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_updatedby(atclient_atkey_metadata *metadata, const char *updatedby, const size_t updatedbylen) {
@@ -32,7 +32,7 @@ static int set_updatedby(atclient_atkey_metadata *metadata, const char *updatedb
   metadata->initializedfields[0] |= ATKEY_METADATA_UPDATEDBY_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_status(atclient_atkey_metadata *metadata, const char *status, const size_t statuslen) {
@@ -48,7 +48,7 @@ static int set_status(atclient_atkey_metadata *metadata, const char *status, con
   metadata->initializedfields[0] |= ATKEY_METADATA_STATUS_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static void set_version(atclient_atkey_metadata *metadata, int version) {
@@ -69,7 +69,7 @@ static int set_expiresat(atclient_atkey_metadata *metadata, const char *expiresa
   metadata->initializedfields[0] |= ATKEY_METADATA_EXPIRESAT_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_availableat(atclient_atkey_metadata *metadata, const char *availableat, const size_t availableatlen) {
@@ -85,7 +85,7 @@ static int set_availableat(atclient_atkey_metadata *metadata, const char *availa
   metadata->initializedfields[0] |= ATKEY_METADATA_AVAILABLEAT_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_refreshat(atclient_atkey_metadata *metadata, const char *refreshat, const size_t refreshatlen) {
@@ -101,7 +101,7 @@ static int set_refreshat(atclient_atkey_metadata *metadata, const char *refresha
   metadata->initializedfields[0] |= ATKEY_METADATA_REFRESHAT_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_createdat(atclient_atkey_metadata *metadata, const char *createdat, const size_t createdatlen) {
@@ -117,7 +117,7 @@ static int set_createdat(atclient_atkey_metadata *metadata, const char *createda
   metadata->initializedfields[0] |= ATKEY_METADATA_CREATEDAT_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_updatedat(atclient_atkey_metadata *metadata, const char *updatedat, const size_t updatedatlen) {
@@ -133,7 +133,7 @@ static int set_updatedat(atclient_atkey_metadata *metadata, const char *updateda
   metadata->initializedfields[1] |= ATKEY_METADATA_UPDATEDAT_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
@@ -195,7 +195,7 @@ static int set_datasignature(atclient_atkey_metadata *metadata, const char *data
   metadata->initializedfields[2] |= ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,
@@ -213,7 +213,7 @@ static int set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sh
   metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc, const size_t sharedkeyenclen) {
@@ -230,7 +230,7 @@ static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *share
   metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash, const size_t pubkeyhashlen) {
@@ -246,7 +246,7 @@ static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyh
   metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo, const size_t pubkeyalgolen) {
@@ -262,7 +262,7 @@ static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeya
   metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding, const size_t encodinglen) {
@@ -278,7 +278,7 @@ static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding,
   metadata->initializedfields[2] |= ATKEY_METADATA_ENCODING_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname, const size_t enckeynamelen) {
@@ -294,7 +294,7 @@ static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyn
   metadata->initializedfields[3] |= ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, const size_t encalgolen) {
@@ -310,7 +310,7 @@ static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, c
   metadata->initializedfields[3] |= ATKEY_METADATA_ENCALGO_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, const size_t ivnoncelen) {
@@ -326,7 +326,7 @@ static int set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, c
   metadata->initializedfields[3] |= ATKEY_METADATA_IVNONCE_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname,
@@ -343,7 +343,7 @@ static int set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skee
   metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo, const size_t skeencalgolen) {
@@ -359,7 +359,7 @@ static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeenca
   metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCALGO_INITIALIZED;
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit : { return ret; }
 }
 
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
@@ -381,53 +381,89 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
   ret = 0;
   goto exit;
 
-exit: { return ret; }
+exit : { return ret; }
 }
 
 void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json) {
   cJSON *createdby = cJSON_GetObjectItem(json, "createdBy");
   if (createdby != NULL) {
-    set_createdby(metadata, createdby->valuestring, strlen(createdby->valuestring));
+    if (createdby->type != cJSON_NULL) {
+      set_createdby(metadata, createdby->valuestring, strlen(createdby->valuestring));
+    } else {
+      set_createdby(metadata, "null", 4);
+    }
   }
 
   cJSON *updatedby = cJSON_GetObjectItem(json, "updatedBy");
   if (updatedby != NULL) {
-    set_updatedby(metadata, updatedby->valuestring, strlen(updatedby->valuestring));
+    if (updatedby->type != cJSON_NULL) {
+      set_updatedby(metadata, updatedby->valuestring, strlen(updatedby->valuestring));
+    } else {
+      set_updatedby(metadata, "null", 4);
+    }
   }
 
   cJSON *status = cJSON_GetObjectItem(json, "status");
   if (status != NULL) {
-    set_status(metadata, status->valuestring, strlen(status->valuestring));
+    if (status->type != cJSON_NULL) {
+      set_status(metadata, status->valuestring, strlen(status->valuestring));
+    } else {
+      set_status(metadata, "null", 4);
+    }
   }
 
   cJSON *version = cJSON_GetObjectItem(json, "version");
   if (version != NULL) {
-    set_version(metadata, version->valueint);
+    if (version->type != cJSON_NULL) {
+      set_version(metadata, version->valueint);
+    } else {
+      set_version(metadata, 0);
+    }
   }
 
   cJSON *expiresat = cJSON_GetObjectItem(json, "expiresAt");
   if (expiresat != NULL) {
-    set_expiresat(metadata, expiresat->valuestring, strlen(expiresat->valuestring));
+    if (expiresat->type != cJSON_NULL) {
+      set_expiresat(metadata, expiresat->valuestring, strlen(expiresat->valuestring));
+    } else {
+      set_expiresat(metadata, "null", 4);
+    }
   }
 
   cJSON *availableat = cJSON_GetObjectItem(json, "availableAt");
   if (availableat != NULL) {
-    set_availableat(metadata, availableat->valuestring, strlen(availableat->valuestring));
+    if (availableat->type != cJSON_NULL) {
+      set_availableat(metadata, availableat->valuestring, strlen(availableat->valuestring));
+    } else {
+      set_availableat(metadata, "null", 4);
+    }
   }
 
   cJSON *refreshat = cJSON_GetObjectItem(json, "refreshAt");
   if (refreshat != NULL) {
-    set_refreshat(metadata, refreshat->valuestring, strlen(refreshat->valuestring));
+    if (refreshat->type != cJSON_NULL) {
+      set_refreshat(metadata, refreshat->valuestring, strlen(refreshat->valuestring));
+    } else {
+      set_refreshat(metadata, "null", 4);
+    }
   }
 
   cJSON *createdat = cJSON_GetObjectItem(json, "createdAt");
   if (createdat != NULL) {
-    set_createdat(metadata, createdat->valuestring, strlen(createdat->valuestring));
+    if (createdat->type != cJSON_NULL) {
+      set_createdat(metadata, createdat->valuestring, strlen(createdat->valuestring));
+    } else {
+      set_createdat(metadata, "null", 4);
+    }
   }
 
   cJSON *updatedat = cJSON_GetObjectItem(json, "updatedAt");
   if (updatedat != NULL) {
-    set_updatedat(metadata, updatedat->valuestring, strlen(updatedat->valuestring));
+    if (updatedat->type != cJSON_NULL) {
+      set_updatedat(metadata, updatedat->valuestring, strlen(updatedat->valuestring));
+    } else {
+      set_updatedat(metadata, "null", 4);
+    }
   }
 
   // I don't think this field exists when reading metadata from atServer
@@ -450,87 +486,155 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
 
   cJSON *ttl = cJSON_GetObjectItem(json, "ttl");
   if (ttl != NULL) {
-    set_ttl(metadata, ttl->valueint);
+    if (ttl->type != cJSON_NULL) {
+      set_ttl(metadata, ttl->valueint);
+    } else {
+      set_ttl(metadata, 0);
+    }
   }
 
   cJSON *ttb = cJSON_GetObjectItem(json, "ttb");
   if (ttb != NULL) {
-    set_ttb(metadata, ttb->valueint);
+    if (ttb->type != cJSON_NULL) {
+      set_ttb(metadata, ttb->valueint);
+    } else {
+      set_ttb(metadata, 0);
+    }
   }
 
   cJSON *ttr = cJSON_GetObjectItem(json, "ttr");
   if (ttr != NULL) {
-    set_ttr(metadata, ttr->valueint);
+    if (ttr->type != cJSON_NULL) {
+      set_ttr(metadata, ttr->valueint);
+    } else {
+      set_ttr(metadata, 0);
+    }
   }
 
   cJSON *ccd = cJSON_GetObjectItem(json, "ccd");
   if (ccd != NULL) {
-    set_ccd(metadata, ccd->valueint);
+    if (ccd->type != cJSON_NULL) {
+      set_ccd(metadata, ccd->valueint);
+    } else {
+      set_ccd(metadata, 0);
+    }
   }
 
   cJSON *isbinary = cJSON_GetObjectItem(json, "isBinary");
   if (isbinary != NULL) {
-    set_isbinary(metadata, isbinary->valueint);
+    if (isbinary->type != cJSON_NULL) {
+      set_isbinary(metadata, isbinary->valueint);
+    } else {
+      set_isbinary(metadata, 0);
+    }
   }
 
   cJSON *isencrypted = cJSON_GetObjectItem(json, "isEncrypted");
   if (isencrypted != NULL) {
-    set_isencrypted(metadata, isencrypted->valueint);
+    if (isencrypted->type != cJSON_NULL) {
+      set_isencrypted(metadata, isencrypted->valueint);
+    } else {
+      set_isencrypted(metadata, 0);
+    }
   }
 
   cJSON *datasignature = cJSON_GetObjectItem(json, "dataSignature");
   if (datasignature != NULL) {
-    set_datasignature(metadata, datasignature->valuestring, strlen(datasignature->valuestring));
+    if (datasignature->type != cJSON_NULL) {
+      set_datasignature(metadata, datasignature->valuestring, strlen(datasignature->valuestring));
+    } else {
+      set_datasignature(metadata, "null", 4);
+    }
   }
 
   cJSON *sharedkeystatus = cJSON_GetObjectItem(json, "sharedKeyStatus");
   if (sharedkeystatus != NULL) {
-    set_sharedkeystatus(metadata, sharedkeystatus->valuestring, strlen(sharedkeystatus->valuestring));
+    if (sharedkeystatus->type != cJSON_NULL) {
+      set_sharedkeystatus(metadata, sharedkeystatus->valuestring, strlen(sharedkeystatus->valuestring));
+    } else {
+      set_sharedkeystatus(metadata, "null", 4);
+    }
   }
 
   cJSON *sharedkeyenc = cJSON_GetObjectItem(json, "sharedKeyEnc");
   if (sharedkeyenc != NULL) {
-    set_sharedkeyenc(metadata, sharedkeyenc->valuestring, strlen(sharedkeyenc->valuestring));
+    if (sharedkeyenc->type != cJSON_NULL) {
+      set_sharedkeyenc(metadata, sharedkeyenc->valuestring, strlen(sharedkeyenc->valuestring));
+    } else {
+      set_sharedkeyenc(metadata, "null", 4);
+    }
   }
 
   cJSON *pubkeyhash = cJSON_GetObjectItem(json, "pubKeyHash");
   if (pubkeyhash != NULL) {
-    set_pubkeyhash(metadata, pubkeyhash->valuestring, strlen(pubkeyhash->valuestring));
+    if (pubkeyhash->type != cJSON_NULL) {
+      set_pubkeyhash(metadata, pubkeyhash->valuestring, strlen(pubkeyhash->valuestring));
+    } else {
+      set_pubkeyhash(metadata, "null", 4);
+    }
   }
 
   cJSON *pubkeyalgo = cJSON_GetObjectItem(json, "pubKeyAlgo");
   if (pubkeyalgo != NULL) {
-    set_pubkeyalgo(metadata, pubkeyalgo->valuestring, strlen(pubkeyalgo->valuestring));
+    if (pubkeyalgo->type != cJSON_NULL) {
+      set_pubkeyalgo(metadata, pubkeyalgo->valuestring, strlen(pubkeyalgo->valuestring));
+    } else {
+      set_pubkeyalgo(metadata, "null", 4);
+    }
   }
 
   cJSON *encoding = cJSON_GetObjectItem(json, "encoding");
   if (encoding != NULL) {
-    set_encoding(metadata, encoding->valuestring, strlen(encoding->valuestring));
+    if (encoding->type != cJSON_NULL) {
+      set_encoding(metadata, encoding->valuestring, strlen(encoding->valuestring));
+    } else {
+      set_encoding(metadata, "null", 4);
+    }
   }
 
   cJSON *enckeyname = cJSON_GetObjectItem(json, "encKeyName");
   if (enckeyname != NULL) {
-    set_enckeyname(metadata, enckeyname->valuestring, strlen(enckeyname->valuestring));
+    if (enckeyname->type != cJSON_NULL) {
+      set_enckeyname(metadata, enckeyname->valuestring, strlen(enckeyname->valuestring));
+    } else {
+      set_enckeyname(metadata, "null", 4);
+    }
   }
 
   cJSON *encalgo = cJSON_GetObjectItem(json, "encAlgo");
   if (encalgo != NULL) {
-    set_encalgo(metadata, encalgo->valuestring, strlen(encalgo->valuestring));
+    if (encalgo->type != cJSON_NULL) {
+      set_encalgo(metadata, encalgo->valuestring, strlen(encalgo->valuestring));
+    } else {
+      set_encalgo(metadata, "null", 4);
+    }
   }
 
   cJSON *ivnonce = cJSON_GetObjectItem(json, "ivNonce");
   if (ivnonce != NULL) {
-    set_ivnonce(metadata, ivnonce->valuestring, strlen(ivnonce->valuestring));
+    if (ivnonce->type != cJSON_NULL) {
+      set_ivnonce(metadata, ivnonce->valuestring, strlen(ivnonce->valuestring));
+    } else {
+      set_ivnonce(metadata, "null", 4);
+    }
   }
 
   cJSON *skeenckeyname = cJSON_GetObjectItem(json, "skeEncKeyName");
   if (skeenckeyname != NULL) {
-    set_skeenckeyname(metadata, skeenckeyname->valuestring, strlen(skeenckeyname->valuestring));
+    if (skeenckeyname->type != cJSON_NULL) {
+      set_skeenckeyname(metadata, skeenckeyname->valuestring, strlen(skeenckeyname->valuestring));
+    } else {
+      set_skeenckeyname(metadata, "null", 4);
+    }
   }
 
   cJSON *skeencalgo = cJSON_GetObjectItem(json, "skeEncAlgo");
   if (skeencalgo != NULL) {
-    set_skeencalgo(metadata, skeencalgo->valuestring, strlen(skeencalgo->valuestring));
+    if (skeencalgo->type != cJSON_NULL) {
+      set_skeencalgo(metadata, skeencalgo->valuestring, strlen(skeencalgo->valuestring));
+    } else {
+      set_skeencalgo(metadata, "null", 4);
+    }
   }
 }
 
@@ -675,7 +779,7 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, 
 
   ret = 0;
   goto exit;
-exit: {
+exit : {
   cJSON_Delete(root);
   return ret;
 }
@@ -952,7 +1056,7 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   ret = 0;
   goto exit;
 
-exit: { return ret; }
+exit : { return ret; }
 }
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata) {

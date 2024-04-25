@@ -147,7 +147,8 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   char nameandnamespacestr[ATCLIENT_ATKEY_COMPOSITE_LEN + 1];
   memset(nameandnamespacestr, 0, sizeof(char) * ATCLIENT_ATKEY_COMPOSITE_LEN + 1);
   memcpy(nameandnamespacestr, token, tokenlen);
-  if (strchr(nameandnamespacestr, '.') != NULL) {
+  char *check = strchr(nameandnamespacestr, '.');
+  if (check != NULL && *(check + 1) != '\0') {
     // there is a namespace
     char *saveptr2;
     char *name = strtok_r(nameandnamespacestr, ".", &saveptr2);

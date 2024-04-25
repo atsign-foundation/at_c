@@ -12,7 +12,7 @@
 
 #define TAG "Debug"
 
-#define ROOT_HOST "vip.ve.atsign.zone"
+#define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
 static void *heartbeat_handler(void *monitor_connection);
@@ -94,9 +94,11 @@ int main(int argc, char *argv[]) {
   printf("Starting main monitor loop\n");
   while (true) {
     atclient_monitor_message message;
+    atclient_atkey_init(&(message.notification.key));
+
     int mon_ret = atclient_read_monitor(&monitor_ctx, &message);
     if (mon_ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message\n");
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", mon_ret);
       continue;
     }
 
