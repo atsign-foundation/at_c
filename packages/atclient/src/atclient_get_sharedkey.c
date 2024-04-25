@@ -244,6 +244,11 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   unsigned char *recv = NULL;
   char *response_prefix = NULL;
 
+  const size_t enckeysize = ATCHOPS_AES_256 / 8;
+  unsigned char enckey[enckeysize];
+  memset(enckey, 0, sizeof(unsigned char) * enckeysize);
+  size_t enckeylen = 0;
+
   char *enc_key = shared_enc_key;
   if (enc_key == NULL) {
     enc_key = malloc(45);
