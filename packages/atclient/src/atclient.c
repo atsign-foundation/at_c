@@ -65,8 +65,10 @@ exit : { return ret; }
 }
 
 int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
-                               const atclient_atsign *atsign) {
+                               const char *atsign) {
   int ret = 1; // error by default
+
+  char *atsign_without_prefix_str = atsign + 1;
 
   char *root_command = NULL;
   char *from_command = NULL;
@@ -99,9 +101,9 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atbytes_init(&challengebytes, challengebyteslen);
 
   // build command, ie atsign without "@"
-  const short root_command_len = strlen(atsign->without_prefix_str) + 3;
+  const short root_command_len = strlen(atsign_without_prefix_str) + 3;
   root_command = calloc(root_command_len, sizeof(char));
-  snprintf(root_command, root_command_len, "%s\r\n", atsign->without_prefix_str);
+  snprintf(root_command, root_command_len, "%s\r\n", atsign_without_prefix_str);
 
   ret = atclient_connection_send(root_conn, (unsigned char *)root_command, root_command_len - 1, recv.bytes, recv.len,
                                  &(recv.olen));
@@ -205,7 +207,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
 
   ctx->atkeys = *atkeys;
-  ctx->atsign = *atsign;
 
   ret = 0;
 
