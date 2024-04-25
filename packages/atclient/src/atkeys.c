@@ -122,8 +122,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)aesencryptpublickeystr,
-                               aesencryptpublickeylen, atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen, atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
                                &(atkeys->encryptpublickeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -162,6 +161,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
+  // 2b. pkam private key
   ret = atchops_rsakey_populate_privatekey(&(atkeys->pkamprivatekey), atkeys->pkamprivatekeystr.str,
                                            atkeys->pkamprivatekeystr.olen);
   if (ret != 0) {
@@ -170,6 +170,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
+  // 2c. encrypt public key
   ret = atchops_rsakey_populate_privatekey(&(atkeys->encryptprivatekey), atkeys->encryptprivatekeystr.str,
                                            atkeys->encryptprivatekeystr.olen);
   if (ret != 0) {
@@ -178,6 +179,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
+  // 2d. encrypt private key
   ret = atchops_rsakey_populate_publickey(&(atkeys->encryptpublickey), atkeys->encryptpublickeystr.str,
                                           atkeys->encryptpublickeystr.olen);
   if (ret != 0) {
@@ -199,10 +201,11 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atcl
 
   ret = atclient_atkeys_populate_from_strings(
       atkeys, atkeysfile.aespkampublickeystr.str, atkeysfile.aespkampublickeystr.olen,
-      atkeysfile.aespkamprivatekeystr.str, atkeysfile.aespkamprivatekeystr.olen, atkeysfile.aesencryptpublickeystr.str,
-      atkeysfile.aesencryptpublickeystr.olen, atkeysfile.aesencryptprivatekeystr.str,
-      atkeysfile.aesencryptprivatekeystr.olen, atkeysfile.selfencryptionkeystr.str,
-      atkeysfile.selfencryptionkeystr.olen);
+      atkeysfile.aespkamprivatekeystr.str, atkeysfile.aespkamprivatekeystr.olen,
+      atkeysfile.aesencryptpublickeystr.str, atkeysfile.aesencryptpublickeystr.olen,
+      atkeysfile.aesencryptprivatekeystr.str, atkeysfile.aesencryptprivatekeystr.olen,
+      atkeysfile.selfencryptionkeystr.str, atkeysfile.selfencryptionkeystr.olen)
+    ;
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
