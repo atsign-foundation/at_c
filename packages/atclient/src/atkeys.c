@@ -2,12 +2,15 @@
 #include "atclient/atstr.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aesctr.h>
+#include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/rsa.h>
 #include <atchops/rsakey.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
+
+#include <stdio.h> // TODO Remove
 
 #define TAG "atkeys"
 
@@ -32,10 +35,9 @@ void atclient_atkeys_init(atclient_atkeys *atkeys) {
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
                                           const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
                                           const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
-                                          const size_t aesencryptpublickeylen,
-                                          const char *aesencryptprivatekeystr,
+                                          const size_t aesencryptpublickeylen, const char *aesencryptprivatekeystr,
                                           const size_t aesencryptprivatekeylen, const char *selfencryptionkeystr,
-                                          const size_t selfencryptionkeylen) {
+                                          const size_t selfencryptionkeystrlen) {
   int ret = 1;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
@@ -45,56 +47,103 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
+  const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
+  unsigned char selfencryptionkey[selfencryptionkeysize];
+  memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
+  size_t selfencryptionkeylen = 0;
+
+  const size_t rsakeyencryptedsize = 2048;
+  unsigned char rsakeyencrypted[rsakeyencryptedsize];
+  memset(rsakeyencrypted, 0, sizeof(unsigned char) * rsakeyencryptedsize);
+  size_t rsakeyencryptedlen = 0;;
+
   // 1. decrypt *.atKeys and populate atkeys struct
 
   // 1a. self encryption key
-  ret = atclient_atstr_set(&(atkeys->selfencryptionkeystr), selfencryptionkeystr, selfencryptionkeylen);
+  ret = atclient_atstr_set(&(atkeys->selfencryptionkeystr), selfencryptionkeystr, selfencryptionkeystrlen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
     goto exit;
   }
 
+  ret = atchops_base64_decode(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, selfencryptionkey,
+                              selfencryptionkeysize, &selfencryptionkeylen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding selfencryption key: %d\n", ret);
+    goto exit;
+  }
+
   // 1b. pkam public key
-  ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               (unsigned char *)aespkampublickeystr, aespkampublickeylen,
-                               (unsigned char *)atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.len,
+  ret = atchops_base64_decode((unsigned char *)aespkampublickeystr, aespkampublickeylen, rsakeyencrypted,
+                              rsakeyencryptedsize, &rsakeyencryptedlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam public key: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen,
+                               atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.len,
                                &(atkeys->pkampublickeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
     goto exit;
   }
+
+  memset(rsakeyencrypted, 0, sizeof(unsigned char) * rsakeyencryptedsize);
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
   // 1c. pkam private key
-  ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               (unsigned char *)aespkamprivatekeystr, aespkamprivatekeylen,
-                               (unsigned char *)atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.len,
+  ret = atchops_base64_decode((unsigned char *)aespkamprivatekeystr, aespkamprivatekeylen, rsakeyencrypted,
+                              rsakeyencryptedsize, &rsakeyencryptedlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam private key: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen,
+                               atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.len,
                                &(atkeys->pkamprivatekeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
     goto exit;
   }
+
+  memset(rsakeyencrypted, 0, sizeof(unsigned char) * rsakeyencryptedsize);
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
   // 1d. encrypt public key
-  ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               (unsigned char *)aesencryptpublickeystr, aesencryptpublickeylen,
-                               (unsigned char *)atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
+  ret = atchops_base64_decode((unsigned char *)aesencryptpublickeystr, aesencryptpublickeylen, rsakeyencrypted,
+                              rsakeyencryptedsize, &rsakeyencryptedlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt public key: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)aesencryptpublickeystr,
+                               aesencryptpublickeylen, atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
                                &(atkeys->encryptpublickeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
     goto exit;
   }
+
+  memset(rsakeyencrypted, 0, sizeof(unsigned char) * rsakeyencryptedsize);
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
   // 1e. encrypt private key
-  ret = atchops_aesctr_decrypt(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, ATCHOPS_AES_256, iv,
-                               (unsigned char *)aesencryptprivatekeystr, aesencryptprivatekeylen,
-                               (unsigned char *)atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.len,
+  ret = atchops_base64_decode((unsigned char *)aesencryptprivatekeystr, aesencryptprivatekeylen, rsakeyencrypted,
+                              rsakeyencryptedsize, &rsakeyencryptedlen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt private key: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen,
+                               atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.len,
                                &(atkeys->encryptprivatekeystr.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

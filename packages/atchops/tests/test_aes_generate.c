@@ -11,74 +11,61 @@ int main() {
 
   int ret = 1;
 
-  const size_t keybase64len = 128;
-  unsigned char keybase64[keybase64len];
-  memset(keybase64, 0, sizeof(unsigned char) * keybase64len);
-  size_t keybase64olen = 0;
+  const size_t keysize = 32;
+  unsigned char key[keysize];
+  memset(key, 0, sizeof(unsigned char) * keysize);
 
-  const size_t ciphertextlen = 1024;
-  unsigned char ciphertext[ciphertextlen];
-  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextlen);
-  size_t ciphertextolen = 0;
+  const size_t ciphertextsize = 2048;
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
-  const size_t plaintext2len = 1024;
-  unsigned char plaintext2[plaintext2len];
-  memset(plaintext2, 0, sizeof(unsigned char) * plaintext2len);
-  size_t plaintext2olen = 0;
+  const size_t plaintext2size = 2048;
+  unsigned char plaintext2[plaintext2size];
+  memset(plaintext2, 0, sizeof(unsigned char) * plaintext2size);
+  size_t plaintext2len = 0;
 
-  ret = atchops_aes_generate_keybase64(keybase64, keybase64len, &keybase64olen, ATCHOPS_AES_256);
+  ret = atchops_aes_generate_key(key, ATCHOPS_AES_256);
   if (ret != 0) {
     printf("Error generating key\n");
-    printf("keybase64: %.*s\n", (int)keybase64olen, keybase64);
     goto exit;
   }
-
-  if (keybase64olen == 0) {
-    printf("keybase64olen is %lu\n", keybase64olen);
-    ret = 1;
-    goto exit;
-  }
-
-  if (strlen((char *)keybase64) != keybase64olen) {
-    printf("keybase64olen is %lu when it should be %lu\n", keybase64olen, strlen((char *)keybase64));
-    ret = 1;
-    goto exit;
-  }
-
-  printf("key %lu: %s\n", strlen((char *)keybase64), keybase64);
 
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  ret = atchops_aesctr_encrypt((char *)keybase64, keybase64olen, ATCHOPS_AES_256, iv, (const unsigned char *)PLAINTEXT,
-                               strlen(PLAINTEXT), ciphertext, ciphertextlen, &ciphertextolen);
+  ret = atchops_aesctr_encrypt(key, ATCHOPS_AES_256, iv, (const unsigned char *)PLAINTEXT,
+                               strlen(PLAINTEXT), ciphertext, ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     printf("Error encrypting\n");
-    printf("ciphertext: %.*s\n", (int)ciphertextolen, ciphertext);
     goto exit;
   }
 
-  if (ciphertextolen == 0) {
-    printf("ciphertextolen is %lu\n", ciphertextolen);
+  if (ciphertextlen == 0) {
+    printf("ciphertextolen is %lu\n", ciphertextlen);
     ret = 1;
     goto exit;
   }
 
-  if (strlen((char *)ciphertext) != ciphertextolen) {
-    printf("ciphertextolen is %lu when it should be %lu\n", ciphertextolen, strlen((char *)ciphertext));
+  if (strlen((char *)ciphertext) != ciphertextlen) {
+    printf("ciphertextolen is %lu when it should be %lu\n", ciphertextlen, strlen((char *)ciphertext));
     ret = 1;
     goto exit;
   }
 
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  ret = atchops_aesctr_decrypt((char *)keybase64, keybase64olen, ATCHOPS_AES_256, iv, ciphertext, ciphertextolen,
-                               plaintext2, plaintext2len, &plaintext2olen);
+  ret = atchops_aesctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen,
+                               plaintext2, plaintext2size, &plaintext2len);
   if (ret != 0) {
     printf("Error decrypting\n");
     goto exit;
   }
 
-  printf("plaintext2: %s\n", plaintext2);
+  if(strcmp(PLAINTEXT, (char *)plaintext2) != 0) {
+    printf("plaintext2 is \"%.*s\" when it should be \"%s\"\n", (int)plaintext2len, plaintext2, PLAINTEXT);
+    ret = 1;
+    goto exit;
+  }
 
   ret = 0;
   goto exit;

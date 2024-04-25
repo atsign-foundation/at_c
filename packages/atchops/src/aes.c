@@ -6,11 +6,11 @@
 #include <string.h>
 #include <stddef.h>
 
-int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size keysize) {
+int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size keybits) {
   int ret = 1;
 
   const char *pers = ATCHOPS_RNG_PERSONALIZATION;
-  const size_t keybytes = keysize / 8;
+  const size_t keybytes = keybits / 8;
 
   // note: To use the AES generator, you need to have the modules enabled in the mbedtls/config.h files
   // (MBEDTLS_CTR_DRBG_C and MBEDTLS_ENTROPY_C), see How do I configure Mbed TLS.
@@ -41,19 +41,19 @@ exit: {
 }
 
 int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybase64len,
-                                   size_t *keybase64olen, const enum atchops_aes_size keysize) {
+                                   size_t *keybase64olen, const enum atchops_aes_size keybits) {
   int ret = 1;
 
-  const size_t keylen = keysize / 8;
-  unsigned char key[keylen];
-  memset(key, 0, keylen);
+  const size_t keysize = keybits / 8;
+  unsigned char key[keysize];
+  memset(key, 0, keysize);
 
   ret = atchops_aes_generate_key(key, keysize);
   if (ret != 0) {
     goto exit;
   }
 
-  ret = atchops_base64_encode(key, keylen, keybase64, keybase64len, keybase64olen);
+  ret = atchops_base64_encode(key, keysize, keybase64, keybase64len, keybase64olen);
   if (ret != 0) {
     goto exit;
   }

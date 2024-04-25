@@ -1,16 +1,16 @@
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <atlogger/atlogger.h>
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
 #include "atclient/stringutils.h"
-#include <atchops/iv.h>
 #include <atchops/aes.h>
 #include <atchops/aesctr.h>
-#include <atchops/rsa.h>
 #include <atchops/base64.h>
+#include <atchops/iv.h>
+#include <atchops/rsa.h>
+#include <atlogger/atlogger.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TAG "atclient_get_selfkey"
 
@@ -120,9 +120,16 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
-                               ATCHOPS_AES_256, iv, (unsigned char *)data->valuestring, strlen(data->valuestring),
-                               (unsigned char *)value, valuelen, valueolen);
+  const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
+  unsigned char selfencryptionkey[selfencryptionkeysize];
+  memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
+  size_t selfencryptionkeylen = 0;
+
+  ret = atchops_base64_decode(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
+                              selfencryptionkey, selfencryptionkeysize, &selfencryptionkeylen);
+
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)data->valuestring,
+                               strlen(data->valuestring), (unsigned char *)value, valuelen, valueolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;

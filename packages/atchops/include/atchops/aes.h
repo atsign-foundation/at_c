@@ -16,7 +16,7 @@ enum atchops_aes_size {
  * @param keysize key length in bits (e.g. AES-256 = 256 => ATCHOPS_AES_256)
  * @return int 0 on success
  */
-int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size keysize);
+int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size keybits);
 
 /**
  * @brief Generate an AES key of size keylen bits encoded in base 64
@@ -28,6 +28,6 @@ int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size key
  * @return int 0 on success
  */
 int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybase64len,
-                                   size_t *keybase64olen, const enum atchops_aes_size keysize);
+                                   size_t *keybase64olen, const enum atchops_aes_size keybits);
 
 #endif
