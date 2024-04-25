@@ -363,11 +363,6 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     }
 
     // decrypt response data
-    const size_t enckeysize = ATCHOPS_AES_256 / 8;
-    unsigned char enckey[enckeysize];
-    memset(enckey, 0, sizeof(unsigned char) * enckeysize);
-    size_t enckeylen = 0;
-
     ret = atchops_base64_decode(enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);

@@ -207,7 +207,6 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
   ret = 0;
   goto exit;
 exit: {
-
   free(cmdbuffer);
   return ret;
 }
