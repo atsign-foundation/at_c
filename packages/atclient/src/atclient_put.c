@@ -50,6 +50,11 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
   memset(metadataprotocolstr, 0, sizeof(char) * metadataprotocolstrlen);
   size_t metadataprotocolstrolen = 0;
 
+  const size_t ciphertextsize = 4096;
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
+
   const size_t ciphertextbase64size = 4096;
   char ciphertextbase64[ciphertextbase64size];
   memset(ciphertextbase64, 0, sizeof(char) * ciphertextbase64size);
@@ -92,9 +97,15 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
     }
 
     ret = atchops_aesctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen,
-                                 ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+                                 ciphertext, ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
     }
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
@@ -142,10 +153,16 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
       goto exit;
     }
 
-    ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertextbase64,
-                                 ciphertextbase64size, &ciphertextbase64len);
+    ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertext,
+                                 ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
     }
   }
