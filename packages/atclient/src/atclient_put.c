@@ -2,16 +2,16 @@
 #include "atclient/atkey.h"
 #include "atclient/atstr.h"
 #include "atclient/constants.h"
+#include "atclient/encryption_key_helpers.h"
+#include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aesctr.h>
-#include <atchops/rsa.h>
-#include <atchops/iv.h>
 #include <atchops/base64.h>
+#include <atchops/iv.h>
+#include <atchops/rsa.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include "atclient/stringutils.h"
-#include "atclient/encryption_key_helpers.h"
 
 #define TAG "atclient_put"
 
@@ -50,6 +50,11 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
   memset(metadataprotocolstr, 0, sizeof(char) * metadataprotocolstrlen);
   size_t metadataprotocolstrolen = 0;
 
+  const size_t ciphertextsize = 4096;
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
+
   const size_t ciphertextbase64size = 4096;
   char ciphertextbase64[ciphertextbase64size];
   memset(ciphertextbase64, 0, sizeof(char) * ciphertextbase64size);
@@ -69,7 +74,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
   }
 
   ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), metadataprotocolstr, metadataprotocolstrlen,
-                                               &metadataprotocolstrolen);
+                                                &metadataprotocolstrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;
@@ -80,11 +85,27 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
     memcpy(ciphertextbase64, value, valuelen);
     ciphertextbase64len = valuelen;
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SELFKEY) {
-    ret = atchops_aesctr_encrypt(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
-                                 ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertextbase64, ciphertextbase64size,
-                                 &ciphertextbase64len);
+    const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
+    unsigned char selfencryptionkey[selfencryptionkeysize];
+    memset(selfencryptionkey, 0, sizeof(unsigned char) * (ATCHOPS_AES_256 / 8));
+    size_t selfencryptionkeylen = 0;
+    ret = atchops_base64_decode(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
+                                selfencryptionkey, selfencryptionkeysize, &selfencryptionkeylen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atchops_aesctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen,
+                                 ciphertext, ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
     }
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
@@ -101,7 +122,6 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
-
     }
 
     // encrypt with shared encryption key
@@ -118,24 +138,39 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
     }
 
     ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64, ivbase64len);
-    if(ret != 0) {
+    if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce: %d\n", ret);
       goto exit;
     }
 
-    ret = atchops_aesctr_encrypt(sharedenckeybase64, strlen(sharedenckeybase64), ATCHOPS_AES_256, iv, (unsigned char *)value,
-                                 valuelen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    unsigned char sharedenckey[ATCHOPS_AES_256 / 8];
+    memset(sharedenckey, 0, sizeof(unsigned char) * (ATCHOPS_AES_256 / 8));
+    size_t sharedenckeylen = 0;
+    ret = atchops_base64_decode(sharedenckeybase64, strlen(sharedenckeybase64), sharedenckey, sizeof(sharedenckey),
+                                &sharedenckeylen);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      goto exit;
+    }
+
+    ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertext,
+                                 ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
       goto exit;
     }
 
+    ret = atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    if (ret != 0) {
+      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
+      goto exit;
+    }
   }
 
   size_t cmdbufferlen = strlen(" update:\r\n") + atkeystrolen + ciphertextbase64len + 1; // + 1 for null terminator
 
   ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), metadataprotocolstr, metadataprotocolstrlen,
-                                               &metadataprotocolstrolen);
+                                                &metadataprotocolstrolen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;
@@ -171,8 +206,7 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
 
   ret = 0;
   goto exit;
-exit : {
-
+exit: {
   free(cmdbuffer);
   return ret;
 }

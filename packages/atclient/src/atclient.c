@@ -1,6 +1,5 @@
 #include "atclient/atclient.h"
 #include "atchops/aes.h"
-#include "atchops/aesctr.h"
 #include "atchops/base64.h"
 #include "atchops/iv.h"
 #include "atchops/rsa.h"

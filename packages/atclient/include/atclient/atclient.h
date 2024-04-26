@@ -101,8 +101,8 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
-                         size_t *valueolen);
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                         size_t *valuelen);
 
 /**
  * @brief Get a publickey from your atServer or another atServer
