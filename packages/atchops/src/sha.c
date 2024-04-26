@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 int atchops_sha_hash(mbedtls_md_type_t md_type, const unsigned char *input, const size_t inputlen,
-                     unsigned char *output, size_t outputlen, size_t *outputolen) {
+                     unsigned char *output, size_t outputsize, size_t *outputlen) {
   int ret = 1;
 
   mbedtls_md_context_t md_ctx;
@@ -23,20 +23,20 @@ int atchops_sha_hash(mbedtls_md_type_t md_type, const unsigned char *input, cons
   if (ret != 0)
     goto ret;
 
-  unsigned char *hash = malloc(sizeof(unsigned char) * outputlen);
-  memset(hash, 0, outputlen);
+  unsigned char *hash = malloc(sizeof(unsigned char) * outputsize);
+  memset(hash, 0, outputsize);
 
   ret = mbedtls_md_finish(&md_ctx, hash);
   if (ret != 0)
     goto ret;
 
-  memcpy(output, hash, outputlen);
+  memcpy(output, hash, outputsize);
 
   int i = 0;
-  while (i < outputlen && *(hash + i++) != '\0') {
-    *outputolen += 1;
+  while (i < outputsize && *(hash + i++) != '\0') {
+    *outputlen += 1;
   }
-  --(*outputolen); // remove the '\0' at the end of the string
+  --(*outputlen); // remove the '\0' at the end of the string
 
   goto ret;
 ret: {
