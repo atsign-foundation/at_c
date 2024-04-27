@@ -1,4 +1,5 @@
 #include "atchops/rsa.h"
+#include "atchops/base64.h"
 #include "atchops/rsakey.h"
 #include "atchops/sha.h"
 #include <mbedtls/asn1.h>
@@ -26,7 +27,6 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
 
   unsigned char hash[hashsize];
   memset(hash, 0, sizeof(unsigned char) * hashsize);
-  size_t hashlen = 0;
 
   mbedtls_rsa_context rsa;
   mbedtls_rsa_init(&rsa);
@@ -38,7 +38,7 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
   mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
 
   // 1. hash the message
-  ret = atchops_sha_hash(mdtype, message, messagelen, hash, hashsize, &hashlen);
+  ret = atchops_sha_hash(mdtype, message, messagelen, hash);
   // printf("atchops_sha_hash: %d\n", ret);
   if (ret != 0) {
     goto ret;
@@ -82,18 +82,14 @@ ret: {
 }
 }
 
-int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const char *message,
-                       const size_t messagelen, const unsigned char *signature, const unsigned long signaturelen) {
+int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_md_type_t mdtype, const unsigned char *message,
+                       const size_t messagelen, unsigned char *signature) {
   int ret = 1;
   mbedtls_rsa_context rsa;
 
-  size_t hashlen = 32;
-  size_t hasholen;
-  unsigned char hash[hashlen];
-
-  size_t decoded_sig_len = 256;
-  size_t decoded_sig_olen;
-  unsigned char decoded_sig[decoded_sig_len];
+  const size_t hashsize = 32;
+  unsigned char hash[hashsize];
+  memset(hash, 0, sizeof(unsigned char) * hashsize);
 
   mbedtls_rsa_init(&rsa);
   if ((ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, 0, NULL, 0, NULL, 0,
@@ -106,18 +102,12 @@ int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdt
   }
 
   // compute the hash of the input message
-  if ((ret = atchops_sha_hash(mdtype, (unsigned char *)message, messagelen, hash, hashlen, &hasholen)) != 0) {
-    goto exit;
-  }
-
-  // decode the signature
-  ret = atchops_base64_decode(signature, signaturelen, decoded_sig, decoded_sig_len, &decoded_sig_olen);
-  if (ret != 0) {
+  if ((ret = atchops_sha_hash(mdtype, message, messagelen, hash) != 0)) {
     goto exit;
   }
 
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, hashlen, hash, decoded_sig)) != 0) {
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, hashsize, hash, signature)) != 0) {
     goto exit;
   }
 

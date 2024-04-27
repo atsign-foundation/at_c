@@ -17,19 +17,19 @@
 void atclient_atkeys_init(atclient_atkeys *atkeys) {
   memset(atkeys, 0, sizeof(atclient_atkeys));
 
-  atclient_atstr_init(&(atkeys->pkampublickeystr), ATCHOPS_RSA_4096);
+  atclient_atstr_init(&(atkeys->pkampublickeystr), 4096);
   atchops_rsakey_publickey_init(&(atkeys->pkampublickey));
 
-  atclient_atstr_init(&(atkeys->pkamprivatekeystr), ATCHOPS_RSA_4096);
+  atclient_atstr_init(&(atkeys->pkamprivatekeystr), 4096);
   atchops_rsakey_privatekey_init(&(atkeys->pkamprivatekey));
 
-  atclient_atstr_init(&(atkeys->encryptpublickeystr), ATCHOPS_RSA_4096);
+  atclient_atstr_init(&(atkeys->encryptpublickeystr), 4096);
   atchops_rsakey_publickey_init(&(atkeys->encryptpublickey));
 
-  atclient_atstr_init(&(atkeys->encryptprivatekeystr), ATCHOPS_RSA_4096);
+  atclient_atstr_init(&(atkeys->encryptprivatekeystr), 4096);
   atchops_rsakey_privatekey_init(&(atkeys->encryptprivatekey));
 
-  atclient_atstr_init(&(atkeys->selfencryptionkeystr), ATCHOPS_RSA_4096);
+  atclient_atstr_init(&(atkeys->selfencryptionkeystr), 4096);
 }
 
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
