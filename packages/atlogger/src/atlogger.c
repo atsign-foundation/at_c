@@ -15,10 +15,10 @@
 static char *prefix;
 
 typedef struct atlogger_ctx {
-  enum atclient_atlogger_logging_level level;
+  enum atlogger_logging_level level;
 } atlogger_ctx;
 
-static void atlogger_get_prefix(enum atclient_atlogger_logging_level logging_level, char *prefix,
+static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix,
                                 size_t prefixlen) {
   memset(prefix, 0, prefixlen);
   switch (logging_level) {
@@ -56,17 +56,17 @@ static atlogger_ctx *atlogger_get_instance() {
   return ctx;
 }
 
-enum atclient_atlogger_logging_level atlogger_get_logging_level() {
+enum atlogger_logging_level atlogger_get_logging_level() {
   atlogger_ctx *ctx = atlogger_get_instance();
   return ctx->level;
 }
 
-void atlogger_set_logging_level(const enum atclient_atlogger_logging_level level) {
+void atlogger_set_logging_level(const enum atlogger_logging_level level) {
   atlogger_ctx *ctx = atlogger_get_instance();
   ctx->level = level;
 }
 
-void atlogger_log(const char *tag, const enum atclient_atlogger_logging_level level, const char *format, ...) {
+void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...) {
   atlogger_ctx *ctx = atlogger_get_instance();
 
   if (level > ctx->level) {
