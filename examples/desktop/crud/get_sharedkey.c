@@ -104,8 +104,7 @@ int main() {
   memset(value_hash, 0, value_hash_len);
   size_t value_hash_olen = 0;
 
-  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.olen, value_hash, value_hash_len,
-                         &value_hash_olen);
+  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.olen, value_hash);
   if (ret != 0) {
     printf("atchops_sha_hash (failed): %d\n", ret);
     goto exit;

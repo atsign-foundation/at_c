@@ -81,17 +81,23 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atstr challenge;
   atclient_atstr_init(&challenge, challengelen);
 
-  const size_t challengewithoutdatalen = 1024;
-  atclient_atstr challengewithoutdata;
-  atclient_atstr_init(&challengewithoutdata, challengewithoutdatalen);
 
   const size_t challengebyteslen = 1024;
   atclient_atbytes challengebytes;
   atclient_atbytes_init(&challengebytes, challengebyteslen);
 
+  const size_t challengewithoutdatalen = 1024;
+  atclient_atstr challengewithoutdata;
+  atclient_atstr_init(&challengewithoutdata, challengewithoutdatalen);
+
   const size_t pkamcmdlen = 1024;
   atclient_atstr pkamcmd;
   atclient_atstr_init(&pkamcmd, pkamcmdlen);
+
+  const size_t signaturebase64size = 1024;
+  unsigned char signaturebase64[signaturebase64size];
+  memset(signaturebase64, 0, sizeof(unsigned char) * signaturebase64size);
+  size_t signaturebase64len = 0;
 
   ret = atclient_atsign_without_at_symbol(withoutat.str, withoutat.len, &(withoutat.olen), atsign, atsignlen);
   if (ret != 0) {
@@ -175,12 +181,13 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
 
   // sign
-  atclient_atbytes_reset(&recv);
   ret = atclient_atbytes_convert_atstr(&challengebytes, challengewithoutdata);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
     goto exit;
   }
+
+  atclient_atbytes_reset(&recv);
   ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen,
                          recv.bytes);
   if (ret != 0) {
@@ -188,7 +195,14 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
-  ret = atclient_atstr_set_literal(&pkamcmd, "pkam:%.*s\r\n", (int)recv.olen, recv.bytes);
+  // base64 encode
+  ret = atchops_base64_encode(recv.bytes, 256, signaturebase64, signaturebase64size, &signaturebase64len);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
+    goto exit;
+  }
+
+  ret = atclient_atstr_set_literal(&pkamcmd, "pkam:%.*s\r\n", signaturebase64len, signaturebase64);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
     goto exit;
