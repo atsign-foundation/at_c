@@ -11,7 +11,7 @@ enum atclient_atlogger_logging_level {
 };
 
 enum atclient_atlogger_logging_level atlogger_get_logging_level();
-void atclient_atlogger_set_logging_level(const enum atclient_atlogger_logging_level level);
-void atclient_atlogger_log(const char *tag, const enum atclient_atlogger_logging_level level, const char *format, ...);
+void atlogger_set_logging_level(const enum atclient_atlogger_logging_level level);
+void atlogger_log(const char *tag, const enum atclient_atlogger_logging_level level, const char *format, ...);
 
 #endif

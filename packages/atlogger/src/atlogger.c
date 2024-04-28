@@ -61,12 +61,12 @@ enum atclient_atlogger_logging_level atlogger_get_logging_level() {
   return ctx->level;
 }
 
-void atclient_atlogger_set_logging_level(const enum atclient_atlogger_logging_level level) {
+void atlogger_set_logging_level(const enum atclient_atlogger_logging_level level) {
   atlogger_ctx *ctx = atlogger_get_instance();
   ctx->level = level;
 }
 
-void atclient_atlogger_log(const char *tag, const enum atclient_atlogger_logging_level level, const char *format, ...) {
+void atlogger_log(const char *tag, const enum atclient_atlogger_logging_level level, const char *format, ...) {
   atlogger_ctx *ctx = atlogger_get_instance();
 
   if (level > ctx->level) {

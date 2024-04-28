@@ -19,7 +19,7 @@
 int main() {
   int ret = 1;
 
-  atclient_atlogger_set_logging_level(ATCLIENT_LOGGING_LEVEL);
+  atlogger_set_logging_level(ATCLIENT_LOGGING_LEVEL);
 
   atclient atclient;
   atclient_connection root_conn;
@@ -34,28 +34,28 @@ int main() {
   atclient_atkeys_init(&atkeys);
 
   if ((ret = atclient_connection_connect(&root_conn, "root.atsign.org", 64)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect");
     goto exit;
   }
 
   if ((ret = atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys");
     goto exit;
   }
 
   if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), atsign.atsign, strlen(atsign.atsign),
                                            ATKEY_NAME, strlen(ATKEY_NAME))) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create selfkey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create selfkey");
     goto exit;
   }
 
   if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, atkeys, atsign.atsign, strlen(atsign.atsign))) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
 
   if ((ret = atclient_delete(&atclient, &atkey)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to delete");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to delete");
     goto exit;
   }
 

@@ -67,14 +67,14 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
 
     ret = atchops_base64_decode(response, strlen(response), responseraw, responserawsize, &responserawlen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
     }
 
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextlen,
                               &plaintextolen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
       return ret;
     }
     memcpy(enc_key_shared_by_me, plaintext, plaintextlen);
@@ -84,12 +84,12 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
                                             strlen("error:AT0015-key not found"))) {
     // or do I need to create, store and share a new shared key?
     if (create_new_if_not_found) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Creating new shared encryption key for %s\n",
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Creating new shared encryption key for %s\n",
                             recipient->atsign);
       ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, NULL, &(ctx->atsign), recipient,
                                                                         enc_key_shared_by_me);
       if (ret != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
         return ret;
       }
     } else {
@@ -158,14 +158,14 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
 
     ret = atchops_base64_decode(response, strlen(response), responseraw, responserawsize, &responserawlen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
     }
 
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextlen,
                               &plaintextolen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
       return ret;
     }
     memcpy(enc_key_shared_by_other, plaintext, plaintextlen);
@@ -212,7 +212,7 @@ int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_
     memcpy(public_encryption_key, response, 1024);
   } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
                                               strlen("error:AT0015-key not found"))) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n",
                           ret);
     ret = 1;
     return ret;
@@ -266,7 +266,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   ret = atchops_aes_generate_keybase64(sharedenckeybase64, sharedenckeybase64size, &sharedenckeybase64len,
                                        ATCHOPS_AES_256);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_generate_keybase64: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_generate_keybase64: %d\n", ret);
     return ret;
   }
 
@@ -275,7 +275,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
                             sharedenckeybase64len, sharedenckeyencryptedforus,
                             sharedenckeyencryptedforussize, &sharedenckeyencryptedforuslen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "failed to encrypt shared enc key for us | atchops_rsa_encrypt: %d\n", ret);
     return ret;
   }
@@ -284,14 +284,14 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
                               sharedenckeybase64encryptedforus, sharedenckeybase64encryptedforussize,
                               &sharedenckeybase64encryptedforuslen);
   if(ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to base64 encode shared enc key for us | atchops_base64_encode: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to base64 encode shared enc key for us | atchops_base64_encode: %d\n", ret);
     return ret;
   }
 
   // 4. encrypt for them (with their rsa public encryption key)
   ret = atclient_get_public_encryption_key(atclient, root_conn, sharedwith, publickeybase64);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
     return ret;
   }
 
@@ -300,7 +300,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   atchops_rsakey_publickey_init(&publickeystruct);
   ret = atchops_rsakey_populate_publickey(&publickeystruct, publickeybase64, strlen(publickeybase64));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d\n", ret);
     return ret;
   }
 
@@ -311,7 +311,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
                             // sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
                             // &sharedenckeybase64encryptedforthemlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
     return ret;
   }
 
@@ -319,7 +319,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
                               sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
                               &sharedenckeybase64encryptedforthemlen);
   if(ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to base64 encode shared enc key for them | atchops_base64_encode: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to base64 encode shared enc key for them | atchops_base64_encode: %d\n", ret);
     return ret;
   }
   
@@ -351,14 +351,14 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     return ret;
   }
 
   // check if the key was successfully stored
   if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                           (int)recvlen, recv);
     return ret;
   }
@@ -369,14 +369,14 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer2, cmdbuffersize2 - 1,
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     return ret;
   }
 
   // check if the key was successfully stored
   if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                           (int)recvlen, recv);
     return ret;
   }

@@ -27,7 +27,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY\n");
     return ret;
   }
 
@@ -35,7 +35,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
     //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
     ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuelen, valueolen, shared_enc_key);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n",
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n",
                             ret);
       goto exit;
     }
@@ -43,7 +43,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
     ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuelen, valueolen, shared_enc_key,
                                                          false);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n",
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n",
                             ret);
       goto exit;
     }
@@ -85,14 +85,14 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     ret = atclient_get_shared_encryption_key_shared_by_me(atclient, &recipient, enc_key,
                                                           create_new_encryption_key_shared_by_me_if_not_found);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
   }
 
   ret = atchops_base64_decode(enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
 
@@ -103,7 +103,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
 
   ret = atclient_atkey_to_string(atkey, atkey_str_buff, atkey_str_buf_len, &atkey_out_len);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
 
@@ -124,7 +124,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command),
                                  recv, recvlen, &recv_olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
@@ -152,14 +152,14 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     const cJSON *root = cJSON_Parse(response);
     if (root == NULL) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
       goto exit;
     }
 
     cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
     if (metadata == NULL) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
       goto exit;
     }
 
@@ -167,7 +167,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
 
     ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
       goto exit;
     }
 
@@ -177,13 +177,13 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
       ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
                                   ATCHOPS_IV_BUFFER_SIZE, &ivolen);
       if (ret != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
         goto exit;
       }
 
       if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
         ret = 1;
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
                               ATCHOPS_IV_BUFFER_SIZE);
         goto exit;
       }
@@ -195,7 +195,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     cJSON *data = cJSON_GetObjectItem(root, "data");
     if (data == NULL) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
       goto exit;
     }
 
@@ -207,14 +207,14 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), (unsigned char *)valueraw,
                                 valuerawsize, &valuerawlen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
     // decrypt response data
     ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuelen, valueolen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
     }
   }
@@ -259,7 +259,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     }
     ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &recipient, enc_key);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
   }
@@ -292,7 +292,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command),
                                  recv, recvlen, &recv_olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
@@ -320,14 +320,14 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     const cJSON *root = cJSON_Parse(response);
     if (root == NULL) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
       goto exit;
     }
 
     cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
     if (metadata == NULL) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
       goto exit;
     }
 
@@ -335,7 +335,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 
     ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
       goto exit;
     }
 
@@ -345,13 +345,13 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
       ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
                                   ATCHOPS_IV_BUFFER_SIZE, &ivolen);
       if (ret != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
         goto exit;
       }
 
       if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
         ret = 1;
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
                               ATCHOPS_IV_BUFFER_SIZE);
         goto exit;
       }
@@ -363,21 +363,21 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     cJSON *data = cJSON_GetObjectItem(root, "data");
     if (data == NULL) {
       ret = 1;
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
       goto exit;
     }
 
     // decrypt response data
     ret = atchops_base64_decode(enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
     ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *)data->valuestring,
                                  strlen(data->valuestring), (unsigned char *)value, valuelen, valueolen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
     }
   }

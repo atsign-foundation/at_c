@@ -18,7 +18,7 @@
 int main(int argc, char **argv) {
   int ret = 0;
 
-  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
   // Init atclient
   atclient atclient;
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   atclient_atkeysfile_init(&atkeysfile);
   ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_read: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_read: %d\n", ret);
     atclient_free(&atclient);
     atclient_atkeysfile_free(&atkeysfile);
     return ret;
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
   atclient_atkeys_init(&atkeys);
   ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
     goto exit1;
   }
   atclient.atkeys = atkeys;
@@ -90,8 +90,8 @@ int main(int argc, char **argv) {
     goto exit2;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enc_key_shared_by_me: %s\n", enc_key_shared_by_me);
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enc_key_shared_by_other: %s\n", enc_key_shared_by_other);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enc_key_shared_by_me: %s\n", enc_key_shared_by_me);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enc_key_shared_by_other: %s\n", enc_key_shared_by_other);
 
   return ret;
 
