@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "config.h"
+#include "functional_tests/config.h"
 
 int get_atkeys_path(char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen) {
   struct passwd *pw = getpwuid(getuid());

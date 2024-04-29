@@ -6,11 +6,11 @@ else()
 endif()
 
 set(FUNCTIONAL_TESTS_LIB_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/config.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/config.c
 )
 
 set(FUNCTIONAL_TESTS_LIB_INCLUDE_DIRS
-    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 add_library(functional_tests_lib STATIC
