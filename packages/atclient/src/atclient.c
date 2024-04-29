@@ -72,10 +72,18 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atstr challenge;
   atclient_atstr_init(&challenge, challengelen);
 
-
   const size_t challengebyteslen = 1024;
   atclient_atbytes challengebytes;
   atclient_atbytes_init(&challengebytes, challengebyteslen);
+
+  const size_t challengewithoutdatalen = 1024;
+  atclient_atstr challengewithoutdata;
+  atclient_atstr_init(&challengewithoutdata, challengewithoutdatalen);
+
+  const size_t signaturebase64size = 1024; // encoded signature should surely be less than 256 bytes
+  unsigned char signaturebase64[signaturebase64size];
+  memset(signaturebase64, 0, sizeof(unsigned char) * signaturebase64size);
+  size_t signaturebase64len = 0;
 
   // build command, ie atsign without "@"
   const short root_command_len = strlen(atsign_without_prefix_str) + 3;
@@ -138,17 +146,48 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
-  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen,
+  // remove "data:" prefix
+  ret = atclient_atstr_substring(&challengewithoutdata, challenge, 5, challenge.olen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atstr_substring: %d\n | failed to remove \'data:\' prefix", ret);
+    goto exit;
+  }
+
+  // sign
+  ret = atclient_atbytes_convert(&challengebytes, challengewithoutdata.str, challengewithoutdata.olen);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_to_atbytes: %d\n", ret);
+    goto exit;
+  }
+
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengebytes: %.*s\n", (int)challengebytes.olen, challengebytes.bytes);
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengebytes.olen: %d\n", challengebytes.olen);
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengewithoutdata.str: %.*s\n", (int)challengewithoutdata.olen, challengewithoutdata.str);
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengewithoutdata.olen: %d\n", challengewithoutdata.olen);
+
+  atclient_atbytes_reset(&recv);
+  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, strlen(challengebytes.bytes),
                          recv.bytes);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;
   }
+  // log recv.bytes
   recv.olen = 256;
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv.bytes: %.*s\n", (int)recv.olen, recv.bytes);
+  // log recv.olen
+  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv.olen: %d\n", recv.olen);
 
-  const short pkam_command_len = 5 + (int)recv.olen + 3;
+  ret = atchops_base64_encode(recv.bytes, recv.olen, signaturebase64, signaturebase64size, &signaturebase64len);
+  if (ret != 0) {
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
+    goto exit;
+  }
+
+  const short pkam_command_len = 5 + (int) signaturebase64len + 3;
   pkam_command = calloc(pkam_command_len, sizeof(char));
-  snprintf(pkam_command, pkam_command_len, "pkam:%s\r\n", recv.bytes);
+  snprintf(pkam_command, pkam_command_len, "pkam:%s\r\n", signaturebase64);
   atclient_atbytes_reset(&recv);
 
   ret = atclient_connection_send(&(ctx->secondary_connection), pkam_command, pkam_command_len - 1, recv.bytes, recv.len,
