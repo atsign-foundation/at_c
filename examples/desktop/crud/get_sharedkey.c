@@ -64,7 +64,7 @@ int main() {
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
   if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATCLIENT_ATSIGN)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");

@@ -93,7 +93,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   ret = atclient_connection_send(root_conn, (unsigned char *)root_command, root_command_len - 1, recv.bytes, recv.len,
                                  &(recv.olen));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n",
                           ret, root_command_len, root_command);
     goto exit;
   }
@@ -157,7 +157,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   // sign
   ret = atclient_atbytes_convert(&challengebytes, challengewithoutdata.str, challengewithoutdata.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_to_atbytes: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_to_atbytes: %d\n", ret);
     goto exit;
   }
 

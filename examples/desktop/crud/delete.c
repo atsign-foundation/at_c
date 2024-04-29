@@ -50,7 +50,7 @@ int main() {
   }
 
   if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATSIGN)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
 

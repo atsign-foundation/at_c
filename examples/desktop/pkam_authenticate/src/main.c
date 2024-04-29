@@ -50,10 +50,10 @@ int main(int argc, char **argv) {
   atclient_atsign_init(&atsign, ATSIGN);
 
   if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATSIGN)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
   goto exit;
