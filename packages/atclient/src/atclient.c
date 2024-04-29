@@ -161,11 +161,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengebytes: %.*s\n", (int)challengebytes.olen, challengebytes.bytes);
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengebytes.olen: %d\n", challengebytes.olen);
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengewithoutdata.str: %.*s\n", (int)challengewithoutdata.olen, challengewithoutdata.str);
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "challengewithoutdata.olen: %d\n", challengewithoutdata.olen);
-
   atclient_atbytes_reset(&recv);
   ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, strlen(challengebytes.bytes),
                          recv.bytes);
@@ -175,9 +170,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
   // log recv.bytes
   recv.olen = 256;
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv.bytes: %.*s\n", (int)recv.olen, recv.bytes);
-  // log recv.olen
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv.olen: %d\n", recv.olen);
 
   ret = atchops_base64_encode(recv.bytes, recv.olen, signaturebase64, signaturebase64size, &signaturebase64len);
   if (ret != 0) {
