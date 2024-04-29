@@ -48,7 +48,7 @@ int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybas
   unsigned char key[keysize];
   memset(key, 0, keysize);
 
-  ret = atchops_aes_generate_key(key, keysize);
+  ret = atchops_aes_generate_key(key, keybits);
   if (ret != 0) {
     goto exit;
   }

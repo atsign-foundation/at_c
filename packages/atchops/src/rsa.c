@@ -133,7 +133,7 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
   mbedtls_ctr_drbg_context ctr_drbg_ctx;
   mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
 
-  const size_t outputsize = 256; // 256 bytes is the result of a 2048-RSA modulus
+  const size_t outputsize = ciphertextsize;
   unsigned char output[outputsize];
   memset(output, 0, sizeof(unsigned char) * outputsize);
 
@@ -163,6 +163,12 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
   if (ret != 0) {
     goto exit;
   }
+
+  while(output[*ciphertextlen] != 0) {
+    *ciphertextlen += 1;
+  }
+
+  memcpy(ciphertext, output, ciphertextlen);
 
   goto exit;
 
