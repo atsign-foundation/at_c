@@ -41,25 +41,24 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 
   goto exit;
 
-exit: { return ret; }
+exit : { return ret; }
 }
 
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
-                               const char *atsign, const size_t atsignlen) {
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+                               const char *atsign) {
   int ret = 1; // error by default
 
+  char *atsign_without_prefix_str = atsign + 1;
+
+  char *root_command = NULL;
+  char *from_command = NULL;
+  char *pkam_command = NULL;
+
   // 1. init root connection
-  const size_t srclen = 1024;
-  atclient_atbytes src;
-  atclient_atbytes_init(&src, srclen);
 
   const size_t recvlen = 1024;
   atclient_atbytes recv;
   atclient_atbytes_init(&recv, recvlen);
-
-  const size_t withoutatlen = 1024;
-  atclient_atstr withoutat;
-  atclient_atstr_init(&withoutat, withoutatlen);
 
   const size_t urllen = 256;
   atclient_atstr url;
@@ -68,14 +67,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atstr host;
   atclient_atstr_init(&host, 256);
   int port = 0;
-
-  const size_t atsigncmdlen = 1024;
-  atclient_atstr atsigncmd;
-  atclient_atstr_init(&atsigncmd, atsigncmdlen);
-
-  const size_t fromcmdlen = 1024;
-  atclient_atstr fromcmd;
-  atclient_atstr_init(&fromcmd, fromcmdlen);
 
   const size_t challengelen = 1024;
   atclient_atstr challenge;
@@ -89,32 +80,16 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   atclient_atbytes challengebytes;
   atclient_atbytes_init(&challengebytes, challengebyteslen);
 
-  const size_t pkamcmdlen = 1024;
-  atclient_atstr pkamcmd;
-  atclient_atstr_init(&pkamcmd, pkamcmdlen);
+  // build command, ie atsign without "@"
+  const short root_command_len = strlen(atsign_without_prefix_str) + 3;
+  root_command = calloc(root_command_len, sizeof(char));
+  snprintf(root_command, root_command_len, "%s\r\n", atsign_without_prefix_str);
 
-  ret = atclient_atsign_without_at_symbol(withoutat.str, withoutat.len, &(withoutat.olen), atsign, atsignlen);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_without_at_symbol: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_atstr_set_literal(&atsigncmd, "%.*s\r\n", (int)withoutat.olen, withoutat.str);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_atbytes_convert_atstr(&src, atsigncmd);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_connection_send(root_conn, src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
+  ret = atclient_connection_send(root_conn, (unsigned char *)root_command, root_command_len - 1, recv.bytes, recv.len,
+                                 &(recv.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n",
-                          ret, withoutat.olen, withoutat);
+                          ret, root_command_len, root_command);
     goto exit;
   }
 
@@ -142,23 +117,23 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
 
   // 3. send pkam auth
-  ret = atclient_atstr_set_literal(&fromcmd, "from:%.*s\r\n", (int)withoutat.olen, withoutat.str);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
-    goto exit;
-  }
 
-  ret = atclient_atbytes_convert(&src, fromcmd.str, fromcmd.olen);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert: %d\n", ret);
-    goto exit;
-  }
+  // build command, ie "from:atsign"
+  const short from_command_len = 5 + root_command_len; // "from:" has a length of 5
+  from_command = calloc(from_command_len, sizeof(char));
+  snprintf(from_command, from_command_len, "from:%s", root_command);
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &(recv.olen));
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)from_command, from_command_len - 1,
+                                 recv.bytes, recv.len, &(recv.olen));
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
+
+  free(root_command);
+  root_command = NULL;
+  free(from_command);
+  from_command = NULL;
 
   ret = atclient_atstr_set_literal(&challenge, "%.*s", (int)recv.olen, recv.bytes);
   if (ret != 0) {
@@ -181,34 +156,30 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
     goto exit;
   }
-  ret = atchops_rsa_sign(atkeys.pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen,
+  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challengebytes.bytes, challengebytes.olen,
                          recv.bytes, recv.len, &recv.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;
   }
 
-  ret = atclient_atstr_set_literal(&pkamcmd, "pkam:%.*s\r\n", (int)recv.olen, recv.bytes);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
-    goto exit;
-  }
-
+  const short pkam_command_len = 5 + (int)recv.olen + 3;
+  pkam_command = calloc(pkam_command_len, sizeof(char));
+  snprintf(pkam_command, pkam_command_len, "pkam:%s\r\n", recv.bytes);
   atclient_atbytes_reset(&recv);
-  ret = atclient_atbytes_convert_atstr(&src, pkamcmd);
-  if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atbytes_convert_atstr: %d\n", ret);
-    goto exit;
-  }
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), src.bytes, src.olen, recv.bytes, recv.len, &recv.olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), pkam_command, pkam_command_len - 1, recv.bytes, recv.len,
+                                 &recv.olen);
   if (ret != 0) {
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
+  free(pkam_command);
+  pkam_command = NULL;
+
   // check for data:success
-  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", strlen("data:success"))) {
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", 12)) {
     ret = 1;
     atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "recv was \"%.*s\" and did not have prefix \"data:success\"\n", (int)recv.olen, recv.bytes);
@@ -223,23 +194,21 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   }
 
   // set atkeys
-  ctx->atkeys = atkeys;
+  ctx->atkeys = *atkeys;
 
   ret = 0;
 
   goto exit;
-exit: {
-  atclient_atbytes_free(&src);
+exit : {
+  free(root_command);
+  free(from_command);
+  free(pkam_command);
   atclient_atbytes_free(&recv);
-  atclient_atstr_free(&withoutat);
   atclient_atstr_free(&url);
   atclient_atstr_free(&host);
-  atclient_atstr_free(&atsigncmd);
-  atclient_atstr_free(&fromcmd);
   atclient_atstr_free(&challenge);
   atclient_atstr_free(&challengewithoutdata);
   atclient_atbytes_free(&challengebytes);
-  atclient_atstr_free(&pkamcmd);
   return ret;
 }
 }
