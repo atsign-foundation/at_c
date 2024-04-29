@@ -8,7 +8,7 @@
 int get_atkeys_path(char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen) {
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;
-  const size_t kpathlen = strlen(homedir) + strlen("/.atsign/keys/") + strlen(atsign) + strlen("_key.atkeys") + 1;
+  const size_t kpathlen = strlen(homedir) + strlen("/.atsign/keys/") + atsignlen + strlen("_key.atkeys") + 1;
   if (kpathlen > pathsize) {
     return 1;
   }
