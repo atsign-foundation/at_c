@@ -53,15 +53,13 @@ int main(int argc, char **argv) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
     goto exit1;
   }
-  atclient.atkeys = atkeys;
 
   // Root connection and pkam auth
-  ret = atclient_start_root_connection(&atclient, ROOT_HOST, ROOT_PORT);
-  if (ret != 0) {
-    goto exit2;
-  }
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
+  atclient_connection_connect(&root_conn, "root.atsign.org", 64);
 
-  ret = atclient_pkam_authenticate(&atclient, atclient.atkeys, ATSIGN, strlen(ATSIGN));
+  ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATSIGN);
   if (ret != 0) {
     goto exit2;
   }
@@ -105,8 +103,8 @@ exit2 : {
   atclient_free(&atclient);
   atclient_atkeysfile_free(&atkeysfile);
   atclient_atkeys_free(&atkeys);
-  atclient_connection_disconnect(&(atclient.root_connection));
-  atclient_connection_free(&(atclient.root_connection));
+  atclient_connection_disconnect(&(atclient.secondary_connection));
+  atclient_connection_free(&root_conn);
   return ret;
 }
 }

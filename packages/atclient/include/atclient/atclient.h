@@ -55,8 +55,8 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * @param atsign the atsign the atkeys belong to
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
-                               const char *atsign, const size_t atsignlen);
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+                               const char *atsign);
 
 /**
  * @brief Put a string value into your atServer.
@@ -66,15 +66,15 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
- * associated with your value.
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want
+ * to be associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param root_conn initialized root connection
  * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
  * @param value the value to put into atServer
- * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for this
- * value)
+ * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for
+ * this value)
  * @param commitid (optional) the output commitid of the put operation that the atServer returns
  * @return int 0 on success
  */
