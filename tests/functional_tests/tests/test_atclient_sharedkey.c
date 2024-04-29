@@ -11,6 +11,7 @@
 #define ATKEY_NAMESPACE "functional_tests"
 #define ATKEY_SHAREDBY FIRST_ATSIGN
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
+#define ATKEY_VALUE "test 123"
 
 static int set_up(atclient *atclient_ctx, char *atsign, const size_t atsignlen);
 static int test_1_put(atclient *atclient_ctx);
@@ -42,28 +43,6 @@ int main()
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
         goto exit;
     }
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    const size_t atkeystrsize = ATCLIENT_ATKEY_FULL_LEN;
-    char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
-    memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-    size_t atkeystrlen = 0;
-
-    if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) 
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey created for deletion\n");
-
-    if((ret = atclient_delete(&atclient, &atkey)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey deleted\n");
 
 exit: {
     atclient_free(&atclient);
@@ -129,6 +108,27 @@ exit: {
 static int test_1_put(atclient *atclient_ctx)
 {
     int ret = 1;
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) 
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey created for deletion\n");
+
+    atclient_atkey_metadata_set_ttl(&atkey.metadata, 60*1000*1); // 1 minute
+
+    if((ret = atclient_put(atclient_ctx, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
+        goto exit;
+    }
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey deleted\n");
+
     ret = 0;
     goto exit;
 exit: {

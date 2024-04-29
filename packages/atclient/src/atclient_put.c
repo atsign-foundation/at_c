@@ -15,7 +15,7 @@
 
 #define TAG "atclient_put"
 
-int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, const char *value,
+int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
                  const size_t valuelen, int *commitid) {
   int ret = 1;
 
