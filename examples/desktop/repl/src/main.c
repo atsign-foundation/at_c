@@ -69,9 +69,10 @@ int main(int argc, char *argv[]) {
   }
 
   char atkeysfilepath[1024];
+  memset(atkeysfilepath, 0, sizeof(char) * 1024); // Clear the buffer (for safety)
   sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
   if (atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path %s\n", atkeysfilepath);
+    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeysfilepath);
     ret = 1;
     goto exit;
   }

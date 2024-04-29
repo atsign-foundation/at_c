@@ -101,8 +101,8 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, atclient_at
  * @param valueolen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
-                         size_t *valueolen);
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                         size_t *valuelen);
 
 /**
  * @brief Get a publickey from your atServer or another atServer
@@ -173,63 +173,6 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  * @return int 0 on success
  */
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
-
-/**
- * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.
- * If no key is found and create_new_if_not_found is true, it will create, store and share a new one with the
- * recipient's atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param recipient An atclient_atsign struct corresponding to the atsign with whom the key was shared (required)
- * @param enc_key_shared_by_me The output shared key in b64 format (required)
- * @param create_new_if_not_found true if in case the symmetric shared key does not exist, you would like it to be
- * created / false if not (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
-                                             char *enc_key_shared_by_me, bool create_new_if_not_found);
-
-/**
- * @brief Looks up the symmetric shared key which the recipient's atsign shared with atclient's atsign.
- * If no key is found, the function will return an error.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
- * (required)
- * @param enc_key_shared_by_other the output shared key in b64 format (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
-                                                char *enc_key_shared_by_other);
-
-/**
- * @brief Creates a symmetric shared key, which the atclient atsign shares with the recipient atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign with which you want to create the shared key
- * (required)
- * @param enc_key_shared_by_me The output new shared key (which was already stored in the server) in b64 format
- * (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *root_conn,
-                                          const atclient_atsign *recipient, char *enc_key_shared_by_me);
-
-/**
- * @brief Retreives the public encryption key of a given atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign which public encryption key you would like to
- * obtain. It may receive a NULL value, in which case, the atclient_atsign contained in the ctx parameter will be used
- * (required)
- * @param public_encryption_key The output public key in b64 format (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_conn, const atclient_atsign *atsign,
-                                       char *public_encryption_key);
 
 void atclient_free(atclient *ctx);
 

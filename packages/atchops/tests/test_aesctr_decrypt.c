@@ -1,5 +1,6 @@
 #include "atchops/aesctr.h"
 #include "atchops/iv.h"
+#include "atchops/base64.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,31 +41,52 @@ int main() {
 
   int ret = 1;
 
-  const size_t plaintextlen = 8192;
-  unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
-  memset(plaintext, 0, plaintextlen);
-  size_t plaintextolen = 0;
+  const size_t plaintextsize = 8192;
+  unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextsize);
+  memset(plaintext, 0, plaintextsize);
+  size_t plaintextlen = 0;
 
   unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
   memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
-  ret = atchops_aesctr_decrypt(AESKEYBASE64, strlen(AESKEYBASE64), ATCHOPS_AES_256, iv,
-                               (const unsigned char *)CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), plaintext,
-                               plaintextlen, &plaintextolen);
+  const size_t ciphertextsize = 8192;
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
+
+  unsigned char key[32];
+  memset(key, 0, sizeof(unsigned char) * 32);
+  size_t keylen = 0;
+
+  ret = atchops_base64_decode(CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize, &ciphertextlen);
+  if(ret != 0) {
+    printf("atchops_base64_decode (failed): %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_base64_decode(AESKEYBASE64, strlen(AESKEYBASE64), key, 32, &keylen);
+  if(ret != 0) {
+    printf("atchops_base64_decode (failed): %d\n", ret);
+    goto exit;
+  }
+
+  ret = atchops_aesctr_decrypt(key, ATCHOPS_AES_256, iv,
+                              ciphertext, ciphertextlen,
+                              plaintext, plaintextsize, &plaintextlen);
   if (ret != 0) {
     printf("atchops_aesctr_decrypt (failed): %d\n", ret);
     goto exit;
   }
   printf("atchops_aesctr_decrypt (success): %d\n", ret);
 
-  if (plaintextolen <= 0) {
+  if (plaintextlen <= 0) {
     printf("atchops_aesctr_decrypt (failed): %d\n", ret);
     goto exit;
   }
-  printf("decrypted text: %.*s\n", (int)plaintextolen, plaintext);
+  printf("decrypted text: %.*s\n", (int)plaintextlen, plaintext);
 
   printf("decrypted bytes:\n");
-  for (int i = 0; i < plaintextolen && i < plaintextlen; i++) {
+  for (int i = 0; i < plaintextlen && i < plaintextsize; i++) {
     printf("%02x ", *(plaintext + i));
   }
   printf("\n");
