@@ -42,13 +42,13 @@ int main() {
   }
 
   if (ciphertextlen == 0) {
-    printf("ciphertextolen is %lu\n", ciphertextlen);
+    printf("ciphertextlen is %lu\n", ciphertextlen);
     ret = 1;
     goto exit;
   }
 
   if (strlen((char *)ciphertext) != ciphertextlen) {
-    printf("ciphertextolen is %lu when it should be %lu\n", ciphertextlen, strlen((char *)ciphertext));
+    printf("ciphertextlen is %lu when it should be %lu\n", ciphertextlen, strlen((char *)ciphertext));
     ret = 1;
     goto exit;
   }

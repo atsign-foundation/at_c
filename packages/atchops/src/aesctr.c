@@ -52,7 +52,10 @@ int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size
     goto exit;
   }
 
-  *ciphertextlen = strlen(ciphertext); // strlen will stop at the first null terminator (if any
+  *ciphertextlen = 0;
+  while (*(ciphertext + *ciphertextlen) != '\0' && *ciphertextlen < ciphertextsize) {
+    *ciphertextlen += 1;
+  }
 
   goto exit;
 

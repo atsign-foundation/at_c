@@ -13,8 +13,8 @@
 #define TAG "Debug"
 
 // #define ATSIGN "@jeremy_0"
-#define ATSIGN "@qt_thermostat"
-#define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@qt_thermostat_key.atKeys"
+#define ATSIGN "@soccer0"
+#define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@soccer0_key.atKeys"
 
 #define ATKEY_KEY "test"
 #define ATKEY_NAMESPACE "dart_playground"

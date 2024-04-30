@@ -5,71 +5,62 @@
 #include <mbedtls/md.h>
 #include <stddef.h>
 
-enum atchops_rsa_size {
-  ATCHOPS_RSA_NONE = 0,
-  ATCHOPS_RSA_2048 = 2048,
-  ATCHOPS_RSA_4096 = 4096,
-};
-
 /**
- * @brief Sign a message with an RSA private key
+ * @brief Sign a hashed message with an RSA private key
  *
  * @param privatekey the private key struct to use for signing, see atchops_rsakey_populate_privatekey
- * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
+ * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256. The message will be hashed with this algorithm before signing
  * @param message the message to sign
  * @param messagelen the length of the message, most people use strlen() to find this length
- * @param signature the signature buffer to populate
- * @param signaturelen the length of the signature buffer
- * @param signatureolen the length of the signature buffer after signing
+ * @param signature the signature buffer to populate, must be pre-allocated. Signature size will correspond to the
+ * specified hashing algorithm (e.g., this function expects `signature` to be a buffer of 256 bytes allocated because a RSA-2048 key is used, which corresponds to a 2048-bit signature)
  * @return int 0 on success
  */
 int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_md_type_t mdtype,
-                     const unsigned char *message, const size_t messagelen, unsigned char *signaturebase64,
-                     const size_t signaturebase64len, size_t *signaturebase64olen);
+                     const unsigned char *message, const size_t messagelen, unsigned char *signature);
 
 /**
  * @brief Verify a signature with an RSA public key
  *
  * @param publickey the public key to use for verification, see atchops_rsakey_populate_publickey
  * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
- * @param message the original message to hash
+ * @param message the original message to hash, in bytes
  * @param messagelen the length of the original message, most people use strlen() to find this length
- * @param signature the signature to verify
- * @param signaturelen the length of the signature, most people use strlen() to find this length
+ * @param signature the signature to verify, expected to be the same length as the key size (e.g. 256 bytes for 2048 RSA modulus)
  * @return int 0 on success
  */
-int atchops_rsa_verify(atchops_rsakey_publickey publickey, mbedtls_md_type_t mdtype, const char *message,
-                       const size_t messagelen, const unsigned char *signature, const unsigned long signaturelen);
+int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_md_type_t mdtype, const unsigned char *message,
+                       const size_t messagelen, unsigned char *signature);
 
 /**
  * @brief Encrypt bytes with an RSA public key
  *
  * @param publickeystruct the public key struct to use for encryption, see atchops_rsakey_populate_publickey
- * @param plaintext the plaintext to encrypt
+ * @param plaintext the plaintext to encrypt, in bytes
  * @param plaintextlen the length of the plaintext, most people use strlen() to find this length
  * @param ciphertext the ciphertext buffer to populate
- * @param ciphertextlen the length of the ciphertext buffer
- * @param ciphertextolen the length of the ciphertext buffer after encryption
+ * @param ciphertextsize the length of the ciphertext buffer
+ * @param ciphertextlen the written length of the ciphertext buffer after encryption operation has completed, should be the same as the key size (e.g. 256 bytes for 2048 RSA modulus)
  * @return int 0 on success
  */
 int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned char *plaintext,
-                        const size_t plaintextlen, unsigned char *ciphertextbase64, const size_t ciphertextbase64len,
-                        size_t *ciphertextbase64olen);
+                        const size_t plaintextlen, unsigned char *ciphertext, const size_t ciphertextsize,
+                        size_t *ciphertextlen);
 
 /**
  * @brief Decrypt bytes with an RSA private key
  *
- * @param privatekeystruct the private key struct to use for decryption, see atchops_rsakey_populate_privatekey
- * @param ciphertextbase64 the ciphertext to decrypt, base64 encoded
- * @param ciphertextbase64len the length of the ciphertext, most people use strlen() to find this length
+ * @param privatekey the private key struct to use for decryption, see atchops_rsakey_populate_privatekey
+ * @param ciphertext the ciphertext to decrypt, in bytes
+ * @param ciphertextlen the length of the ciphertext, should be the same as the key size (e.g. 256 bytes for 2048 RSA modulus)
  * @param plaintext the plaintext buffer to populate
- * @param plaintextlen the length of the plaintext buffer
- * @param plaintextolen the length of the plaintext buffer after decryption
+ * @param plaintextsize the size of the plaintext buffer (allocated size)
+ * @param plaintextlen the written length of the plaintext buffer after decryption operation has completed
  * @return int 0 on success
  */
-int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekeystruct, const unsigned char *ciphertextbase64,
-                        const size_t ciphertextbase64len, unsigned char *plaintext, const size_t plaintextlen,
-                        size_t *plaintextolen);
+int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsigned char *ciphertext,
+                        const size_t ciphertextlen, unsigned char *plaintext, const size_t plaintextsize,
+                        size_t *plaintextlen);
 
 /**
  * @brief generate an RSA keypair
@@ -79,6 +70,6 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekeystruct, const 
  * @param keysize the size of the key to generate, e.g. 2048
  */
 int atchops_rsa_generate(atchops_rsakey_publickey *publickey, atchops_rsakey_privatekey *privatekey,
-                         const enum atchops_rsa_size keysize);
+                         const mbedtls_md_type_t mdtype);
 
 #endif

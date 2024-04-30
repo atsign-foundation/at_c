@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PUBLIC_KEY_BASE64                                                                                              \
+  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuA7KmWrIPcKTH3hSzsDZ"                                                   \
+  "ys60kxaqKgHeTuGCwgzHSi2SkMV9iYBCd2//KagWVoUKWyuI2KOQo2WFslqFOjOs"                                                   \
+  "j4NqlhM3EamBqZqVFI5IUHtTNbXcea3igp4nVWoHwPHyJNiMf0I0rHSUeiuAbeR5"                                                   \
+  "6lYGE8b64fXzKkRyQ7YRVyrp7HtYRrmA27xGDtAKT9mr+0T+5lzsHR1YLT3capll"                                                   \
+  "nlUf5w8p6l8DJ4qGnODpG4/gOggEr6H5/aAVjGn8WGuRY9d7SZLJfeYG+vJ1/o/P"                                                   \
+  "37L5/7sc2D6kYS1Qh45EN0jUF8ILRUJRNFKZpqWDn64LKHKCwKz00NT6OANUHNdF"                                                   \
+  "awIDAQAB"
+
 #define PRIVATE_KEY_BASE64                                                                                             \
   "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC4DsqZasg9wpMf"                                                   \
   "eFLOwNnKzrSTFqoqAd5O4YLCDMdKLZKQxX2JgEJ3b/8pqBZWhQpbK4jYo5CjZYWy"                                                   \
@@ -32,7 +41,8 @@
   "sDFCwDRQsGFXNkdnSFZovMfmNQp+p6fuOgrnuSfLR1gI8nV3JQy8U/eZT5ABh06j"                                                   \
   "3A6sUy0M7TXTd6ljRS3MRBatOA=="
 
-#define SIGNATURE_BUFFER_LEN 5000
+#define SIGNATURE_SIZE 256
+#define SIGNATURE_BASE64_SIZE 2048
 
 #define MESSAGE "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182"
 
@@ -43,64 +53,58 @@
   "hnIppWX5yXScbbZgcaTZjp57z5H959nc424ScItxOqM1+hVX64pXHHKHjOFQknHsgw9e6"                                              \
   "qh7LeuVvActKJwlFF0yUbiSX4v1Urm50Lk9IqMEqLrbo49BW2eYblEjMsMBlcJag=="
 
-#define PUBLIC_KEY_BASE64                                                                                              \
-  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuA7KmWrIPcKTH3hSzsDZ"                                                   \
-  "ys60kxaqKgHeTuGCwgzHSi2SkMV9iYBCd2//KagWVoUKWyuI2KOQo2WFslqFOjOs"                                                   \
-  "j4NqlhM3EamBqZqVFI5IUHtTNbXcea3igp4nVWoHwPHyJNiMf0I0rHSUeiuAbeR5"                                                   \
-  "6lYGE8b64fXzKkRyQ7YRVyrp7HtYRrmA27xGDtAKT9mr+0T+5lzsHR1YLT3capll"                                                   \
-  "nlUf5w8p6l8DJ4qGnODpG4/gOggEr6H5/aAVjGn8WGuRY9d7SZLJfeYG+vJ1/o/P"                                                   \
-  "37L5/7sc2D6kYS1Qh45EN0jUF8ILRUJRNFKZpqWDn64LKHKCwKz00NT6OANUHNdF"                                                   \
-  "awIDAQAB"
-
 int main() {
 
   int ret = 1;
 
-  const char *privatekeybase64 = PRIVATE_KEY_BASE64;
-  const unsigned long privatekeybase64len = strlen(privatekeybase64);
+  atchops_rsakey_publickey publickey;
+  atchops_rsakey_publickey_init(&publickey);
 
   atchops_rsakey_privatekey privatekey;
   atchops_rsakey_privatekey_init(&privatekey);
-  ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
+
+  const char *message = MESSAGE;
+  const size_t messagelen = strlen(message);
+
+  unsigned char signature[SIGNATURE_SIZE];
+  memset(signature, 0, sizeof(unsigned char) * SIGNATURE_SIZE);
+
+  unsigned char verifiedsignature[SIGNATURE_SIZE];
+  memset(verifiedsignature, 0, sizeof(unsigned char) * SIGNATURE_SIZE);
+
+  char signaturebase64[SIGNATURE_BASE64_SIZE];
+  memset(signaturebase64, 0, sizeof(char) * SIGNATURE_BASE64_SIZE);
+  size_t signaturebase64len = 0;
+
+  ret = atchops_rsakey_populate_privatekey(&privatekey, PRIVATE_KEY_BASE64, strlen(PRIVATE_KEY_BASE64));
   if (ret != 0) {
     printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
     goto exit;
   }
 
-  unsigned char *signature = calloc(SIGNATURE_BUFFER_LEN, sizeof(unsigned char));
-  memset(signature, 0, SIGNATURE_BUFFER_LEN);
-  unsigned long signatureolen = 0;
-
-  const char *message = MESSAGE;
-  const unsigned long messagelen = strlen(message);
-
-  ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature,
-                         SIGNATURE_BUFFER_LEN, &signatureolen);
+  ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
   if (ret != 0) {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;
   }
-
-  atchops_rsakey_publickey publickey;
-  atchops_rsakey_publickey_init(&publickey);
 
   ret = atchops_rsakey_populate_publickey(&publickey, PUBLIC_KEY_BASE64, strlen(PUBLIC_KEY_BASE64));
   if (ret != 0) {
     printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
     goto exit;
   }
-  
-  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, signature, signatureolen);
+
+  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, signature);
   if (ret != 0) {
-    printf("atchops_rsakey_verify (failed): %d\n", ret);
+    printf("atchops_rsa_verify (failed): %d\n", ret);
     goto exit;
   }
 
   printf("atchops_rsa_verify (success): %d\n", ret);
+
   goto exit;
 
 exit: {
-  free(signature);
   return ret;
 }
 }
