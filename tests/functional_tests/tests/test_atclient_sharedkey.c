@@ -14,10 +14,10 @@
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
 #define ATKEY_VALUE "test 123"
 
-static int set_up(atclient *atclient_ctx, char *atsign);
-static int test_1_put(atclient *atclient_ctx);
-static int test_1_get(atclient *atclient_ctx);
-static int test_1_delete(atclient *atclient_ctx);
+static int set_up(atclient *atclient, char *atsign);
+static int test_1_put(atclient *atclient);
+static int test_1_get(atclient *atclient);
+static int test_1_delete(atclient *atclient);
 static int tear_down(atclient *atclient);
 
 int main()
@@ -41,11 +41,11 @@ int main()
         goto exit;
     }
 
-    // if((ret = test_1_put(&atclient)) != 0)
-    // {
-    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_put: %d\n", ret);
-    //     goto exit;
-    // }
+    if((ret = test_1_put(&atclient)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_put: %d\n", ret);
+        goto exit;
+    }
 
     if((ret = tear_down(&atclient)) != 0)
     {
@@ -59,7 +59,7 @@ exit: {
 }
 }
 
-static int set_up(atclient *atclient_ctx, char *sharedby_atsign)
+static int set_up(atclient *atclient, char *atsign)
 {
     int ret = 1;
 
@@ -74,7 +74,7 @@ static int set_up(atclient *atclient_ctx, char *sharedby_atsign)
     atclient_atkeys atkeys;
     atclient_atkeys_init(&atkeys);
 
-    if((ret = get_atkeys_path(sharedby_atsign, strlen(sharedby_atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)))
+    if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)))
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "get_atkeys_path: %d\n", ret);
         goto exit;
@@ -95,7 +95,7 @@ static int set_up(atclient *atclient_ctx, char *sharedby_atsign)
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "root connection established\n");
 
-    if ((ret = atclient_pkam_authenticate(atclient_ctx, &root_connection, &atkeys, sharedby_atsign)) != 0)
+    if ((ret = atclient_pkam_authenticate(atclient, &root_connection, &atkeys, atsign)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
         goto exit;
@@ -111,7 +111,7 @@ exit: {
 }
 }
 
-static int test_1_put(atclient *atclient_ctx)
+static int test_1_put(atclient *atclient)
 {
     int ret = 1;
 
@@ -127,22 +127,21 @@ static int test_1_put(atclient *atclient_ctx)
 
     atclient_atkey_metadata_set_ttl(&atkey.metadata, 60*1000*1); // 1 minute
 
-    if((ret = atclient_put(atclient_ctx, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0)
+    if((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
         goto exit;
     }
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey deleted\n");
-
     ret = 0;
     goto exit;
 exit: {
+    atclient_atkey_free(&atkey);
     return ret;
 }
 }
 
-static int test_1_get(atclient *atclient_ctx)
+static int test_1_get(atclient *atclient)
 {
     int ret = 1;
     ret = 0;
@@ -152,7 +151,7 @@ exit: {
 }
 }
 
-static int test_1_delete(atclient *atclient_ctx)
+static int test_1_delete(atclient *atclient)
 {
     int ret = 1;
     ret = 0;
