@@ -6,15 +6,14 @@
 #include <stddef.h>
 
 /**
- * @brief Sign a message with an RSA private key
+ * @brief Sign a hashed message with an RSA private key
  *
  * @param privatekey the private key struct to use for signing, see atchops_rsakey_populate_privatekey
- * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
+ * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256. The message will be hashed with this algorithm before signing
  * @param message the message to sign
  * @param messagelen the length of the message, most people use strlen() to find this length
  * @param signature the signature buffer to populate, must be pre-allocated. Signature size will correspond to the
- * specified hashing algorithm (e.g., this function expects `signature` to be a buffer of 32 bytes allocated, if using
- * ATCHOPS_MD_SHA256 (256 bits = 32 bytes)) .
+ * specified hashing algorithm (e.g., this function expects `signature` to be a buffer of 256 bytes allocated because a RSA-2048 key is used, which corresponds to a 2048-bit signature)
  * @return int 0 on success
  */
 int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_md_type_t mdtype,
