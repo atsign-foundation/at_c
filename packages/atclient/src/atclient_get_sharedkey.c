@@ -14,15 +14,15 @@
 
 static int
 atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
-                                               const size_t valuelen, size_t *valueolen, char *shared_enc_key,
+                                               const size_t valuesize, size_t *valuelen, char *shared_enc_key,
                                                const bool create_new_encryption_key_shared_by_me_if_not_found);
 
 static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
-                                                          const size_t valuelen, size_t *valueolen,
+                                                          const size_t valuesize, size_t *valuelen,
                                                           char *shared_enc_key);
 
-int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen, char *shared_enc_key,
+int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                           size_t *valuelen, char *shared_enc_key,
                            const bool create_new_encryption_key_shared_by_me_if_not_found) {
   int ret = 1;
 
@@ -33,14 +33,14 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
 
   if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.olen) != 0) {
     //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
-    ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuelen, valueolen, shared_enc_key);
+    ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n",
                             ret);
       goto exit;
     }
   } else {
-    ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuelen, valueolen, shared_enc_key,
+    ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, shared_enc_key,
                                                          false);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n",
@@ -55,7 +55,7 @@ exit: { return ret; }
 
 static int
 atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
-                                               const size_t valuelen, size_t *valueolen, char *shared_enc_key,
+                                               const size_t valuesize, size_t *valuelen, char *shared_enc_key,
                                                const bool create_new_encryption_key_shared_by_me_if_not_found) {
   int ret = 1;
   short enc_key_mem = 0;
@@ -212,7 +212,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     }
 
     // decrypt response data
-    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuelen, valueolen);
+    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuesize, valuelen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
@@ -237,7 +237,7 @@ exit: {
 }
 
 static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
-                                                          const size_t valuelen, size_t *valueolen,
+                                                          const size_t valuesize, size_t *valuelen,
                                                           char *shared_enc_key) {
   int ret = 1;
   char *command = NULL;
@@ -375,7 +375,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     }
 
     ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *)data->valuestring,
-                                 strlen(data->valuestring), (unsigned char *)value, valuelen, valueolen);
+                                 strlen(data->valuestring), (unsigned char *)value, valuesize, valuelen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;

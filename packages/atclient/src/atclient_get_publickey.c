@@ -10,7 +10,7 @@
 #define TAG "atclient_get_publickey"
 
 int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
-                           const size_t valuelen, size_t *valueolen, bool bypasscache) {
+                           const size_t valuesize, size_t *valueolen, bool bypasscache) {
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
@@ -96,7 +96,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
     goto exit;
   }
 
-  memset(value, 0, valuelen);
+  memset(value, 0, valuesize);
   memcpy(value, data->valuestring, strlen(data->valuestring));
   *valueolen = strlen(value);
 
