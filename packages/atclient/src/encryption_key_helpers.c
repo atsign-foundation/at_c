@@ -165,7 +165,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
 
     ret = atchops_base64_decode(response, strlen(response), responseraw, responserawsize, &responserawlen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
     }
 

@@ -71,7 +71,7 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
                         (int)atkeystr.olen, atkeystr.str);
 
-  if ((ret = atclient_put(&atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL) != 0)) {
+  if ((ret = atclient_put(&atclient, &root_connection, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL) != 0)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put public key");
     goto exit;
   }
