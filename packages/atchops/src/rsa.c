@@ -133,9 +133,10 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
   mbedtls_ctr_drbg_context ctr_drbg_ctx;
   mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
 
-  const size_t outputsize = 256; // 256 bytes is the result of a 2048-RSA modulus
+  const size_t outputsize = ciphertextsize;
   unsigned char output[outputsize];
   memset(output, 0, sizeof(unsigned char) * outputsize);
+  size_t outputlen = 0;
 
   // 1. rsa encrypt the plain text
   ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1,
@@ -164,6 +165,13 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
     goto exit;
   }
 
+  *ciphertextlen = 0;
+  while(*ciphertextlen < outputsize && output[*ciphertextlen] != '\0') {
+    *ciphertextlen += 1;
+  }
+
+  memcpy(ciphertext, output, *ciphertextlen);
+
   goto exit;
 
 exit: {
@@ -188,6 +196,11 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsign
   mbedtls_rsa_context rsa;
   mbedtls_rsa_init(&rsa);
 
+  const size_t outputsize = plaintextsize;
+  unsigned char output[outputsize];
+  memset(output, 0, sizeof(unsigned char) * outputsize);
+  size_t outputlen = 0;
+
   // 1. rsa decrypt the base64 decoded ciphertext
   ret = mbedtls_rsa_import_raw(&rsa, privatekey.n.value, privatekey.n.len, privatekey.p.value, privatekey.p.len,
                                privatekey.q.value, privatekey.q.len, privatekey.d.value, privatekey.d.len,
@@ -211,11 +224,18 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsign
     goto exit;
   }
 
-  ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, ciphertext, plaintext,
-                                  plaintextsize);
+  ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, ciphertext, output,
+                                  outputsize);
   if (ret != 0) {
     goto exit;
   }
+
+  *plaintextlen = 0;
+  while(*plaintextlen < outputsize && output[*plaintextlen] != '\0') {
+    *plaintextlen += 1;
+  }
+
+  memcpy(plaintext, output, *plaintextlen);
 
   goto exit;
 
