@@ -16,8 +16,9 @@
 
 static int set_up(atclient *atclient, char *atsign);
 static int test_1_put(atclient *atclient);
-static int test_1_get(atclient *atclient);
-static int test_1_delete(atclient *atclient);
+static int test_2_get_as_sharedby(atclient *atclient);
+static int test_3_get_as_sharedwith(atclient *atclient);
+static int test_4_delete(atclient *atclient);
 static int tear_down(atclient *atclient);
 
 int main()
@@ -46,6 +47,24 @@ int main()
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_put: %d\n", ret);
         goto exit;
     }
+
+    if((ret = test_2_get_as_sharedby(&atclient)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_get_as_sharedby: %d\n", ret);
+        goto exit;
+    }
+
+    // if((ret = test_3_get_as_sharedwith(&atclient)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_get_as_sharedwith: %d\n", ret);
+    //     goto exit;
+    // }
+
+    // if((ret = test_4_delete(&atclient)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_delete: %d\n", ret);
+    //     goto exit;
+    // }
 
     if((ret = tear_down(&atclient)) != 0)
     {
@@ -133,7 +152,6 @@ static int test_1_put(atclient *atclient)
         goto exit;
     }
 
-    ret = 0;
     goto exit;
 exit: {
     atclient_atkey_free(&atkey);
@@ -141,17 +159,46 @@ exit: {
 }
 }
 
-static int test_1_get(atclient *atclient)
+static int test_2_get_as_sharedby(atclient *atclient)
 {
     int ret = 1;
-    ret = 0;
+    
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    const size_t valuesize = 1024;
+    char value[valuesize];
+    memset(value, 0, sizeof(char) * valuesize);
+    size_t valuelen = 0;
+
+
+    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
+        goto exit;
+    }
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
+
+    if((ret = strcmp(value, ATKEY_VALUE)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value mismatch\n");
+        goto exit;
+    }
+
     goto exit;
 exit: {
     return ret;
 }
 }
 
-static int test_1_delete(atclient *atclient)
+static int test_4_delete(atclient *atclient)
 {
     int ret = 1;
     ret = 0;
