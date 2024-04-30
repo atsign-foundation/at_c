@@ -74,6 +74,13 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
     ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextlen,
                               &plaintextolen);
     if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      return ret;
+    }
+
+    ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextlen,
+                              &plaintextolen);
+    if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
       return ret;
     }
@@ -156,6 +163,13 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     size_t responserawlen = 0;
 
     ret = atchops_base64_decode(response, strlen(response), responseraw, responserawsize, &responserawlen);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+      return ret;
+    }
+
+    ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextlen,
+                              &plaintextolen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;

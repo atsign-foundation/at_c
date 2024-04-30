@@ -136,6 +136,7 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
   const size_t outputsize = ciphertextsize;
   unsigned char output[outputsize];
   memset(output, 0, sizeof(unsigned char) * outputsize);
+  size_t outputlen = 0;
 
   // 1. rsa encrypt the plain text
   ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1,

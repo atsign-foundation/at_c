@@ -139,8 +139,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   challengelen = recv.olen - 5;  
 
   // sign
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Signing %.*s\n", (int) challengelen, challenge);
-
   atclient_atbytes_reset(&recv);
   ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challenge, challengelen, recv.bytes);
   if (ret != 0) {
