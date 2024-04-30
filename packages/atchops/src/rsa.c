@@ -195,6 +195,10 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsign
   mbedtls_rsa_context rsa;
   mbedtls_rsa_init(&rsa);
 
+  const size_t outputsize = plaintextsize;
+  unsigned char output[outputsize];
+  memset(output, 0, sizeof(unsigned char) * outputsize);
+
   // 1. rsa decrypt the base64 decoded ciphertext
   ret = mbedtls_rsa_import_raw(&rsa, privatekey.n.value, privatekey.n.len, privatekey.p.value, privatekey.p.len,
                                privatekey.q.value, privatekey.q.len, privatekey.d.value, privatekey.d.len,
@@ -218,11 +222,18 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsign
     goto exit;
   }
 
-  ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, ciphertext, plaintext,
-                                  plaintextsize);
+  ret = mbedtls_rsa_pkcs1_decrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, ciphertext, output,
+                                  outputsize);
   if (ret != 0) {
     goto exit;
   }
+
+  *plaintextlen = 0;
+  while (*plaintextlen < outputsize && output[*plaintextlen] != '\0') {
+    *plaintextlen += 1;
+  }
+
+  memcpy(plaintext, output, *plaintextlen);
 
   goto exit;
 
