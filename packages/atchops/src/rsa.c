@@ -164,11 +164,12 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
     goto exit;
   }
 
-  while(output[*ciphertextlen] != 0) {
+  *ciphertextlen = 0;
+  while (*ciphertextlen < outputsize && output[*ciphertextlen] != '\0') {
     *ciphertextlen += 1;
   }
 
-  memcpy(ciphertext, output, ciphertextlen);
+  memcpy(ciphertext, output, *ciphertextlen);
 
   goto exit;
 
