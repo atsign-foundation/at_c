@@ -39,4 +39,4 @@ jobs:
       - name: atsdk Functional CTest
         working-directory: tests/functional_tests
         run: |
-          sudo sh tools/run_ctest.sh
+          sudo bash tools/run_ctest.sh
