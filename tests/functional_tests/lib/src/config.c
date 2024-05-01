@@ -14,7 +14,7 @@ int get_atkeys_path(char *atsign, const size_t atsignlen, char *path, const size
     return 1;
   }
   memset(path, 0, sizeof(char) * pathsize);
-  snprintf(path, pathsize, "%s/.atsign/keys/%s_key.atkeys", homedir, atsign);
+  snprintf(path, pathsize, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
   *pathlen = kpathlen;
 
   // get present working directory
