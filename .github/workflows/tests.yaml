@@ -37,17 +37,7 @@ jobs:
           echo "First 5 characters of @12alpaca_key.atKeys: $(head -c 5 ~/.atsign/keys/@12alpaca_key.atKeys)"
           echo "First 5 characters of @12snowboating_key.atKeys: $(head -c 5 ~/.atsign/keys/@12snowboating_key.atKeys)"
 
-      - name: Install atSDK
-        run: |
-          tools/install.sh
-
-      - name: Build Functional Tests
+      - name: Build and Run Functional Tests
         working-directory: tests/functional_tests
         run: |
-          cmake -S . -B build
-          cmake --build build
-
-      - name: CTest
-        working-directory: tests/functional_tests
-        run: |
-          ctest -VV --test-dir build --build-run-dir ./
+          tools/run_ctest.sh
