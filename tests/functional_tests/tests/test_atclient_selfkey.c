@@ -16,5 +16,5 @@ int main()
     get_atkeys_path(FIRST_ATSIGN, strlen(FIRST_ATSIGN), path, pathsize, &pathlen);
 
     printf("Path: %s\n", path); // Path: keys/@12alpaca_key.atKeys
-    return 0;
+    return 1;
 }
