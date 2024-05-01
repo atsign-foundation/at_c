@@ -22,8 +22,8 @@ int get_atkeys_path(char *atsign, const size_t atsignlen, char *path, const size
   if (getcwd(cwd, 256) == NULL) {
     return 1;
   }
-  // append /../keys
   snprintf(path, pathsize, "keys/%.*s_key.atKeys", (int) atsignlen, atsign);
+  // snprintf(path, pathsize, "%s/keys/%.*s_key.atKeys", cwd, (int) atsignlen, atsign);
   *pathlen = strlen(path);
 
   return 0;

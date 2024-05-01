@@ -39,4 +39,4 @@ jobs:
         working-directory: tests/functional_tests
         run: |
           # ../../tools/install.sh && cmake -S . -B build && cmake --build build --target all && build/test_atclient_sharedkey
-          tools/run_ctest.sh
+          sudo sh tools/run_ctest.sh
