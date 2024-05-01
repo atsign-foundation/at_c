@@ -344,6 +344,7 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
         ret = 1;
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_get: %d\n", ret);
 
     ret = 0;
     goto exit;

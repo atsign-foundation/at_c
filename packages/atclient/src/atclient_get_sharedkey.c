@@ -218,8 +218,8 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
       goto exit;
     }
   } else {
-    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
+    ret = 1;
     goto exit;
   }
 
@@ -396,10 +396,9 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
       goto exit;
     }
   } else {
-    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
+    ret = 1;
     goto exit;
-  
   }
 
   ret = 0;
