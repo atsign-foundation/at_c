@@ -83,6 +83,8 @@ int main()
     //     goto exit;
     // }
 
+    goto exit;
+
 exit: {
     if(tear_down_sharedenckeys(&atclient1) != 0)
     {
