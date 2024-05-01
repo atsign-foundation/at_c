@@ -8,17 +8,19 @@
 
 #define TAG "test_atclient_sharedkey"
 
-#define ATKEY_KEY "test"
+#define ATKEY_KEY "test_atclient_sharedkey"
 #define ATKEY_NAMESPACE "functional_tests"
 #define ATKEY_SHAREDBY FIRST_ATSIGN
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
 #define ATKEY_VALUE "Hello World! :D"
+#define ATKEY_TTL 60*1000*5 // 5 minutes
 
 static int pkam_auth(atclient *atclient, char *atsign);
 static int test_1_put(atclient *atclient);
 static int test_2_get_as_sharedby(atclient *atclient);
 static int test_3_get_as_sharedwith(atclient *atclient);
 static int test_4_delete(atclient *atclient);
+static int test_5_should_not_exist_as_sharedby(atclient *atclient);
 static int tear_down_sharedenckeys(atclient *atclient);
 
 int main()
@@ -72,6 +74,12 @@ int main()
     if((ret = test_4_delete(&atclient1)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_delete: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = test_5_should_not_exist_as_sharedby(&atclient1)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_should_not_exist: %d\n", ret);
         goto exit;
     }
 
@@ -157,7 +165,7 @@ static int test_1_put(atclient *atclient)
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey created for deletion\n");
 
-    atclient_atkey_metadata_set_ttl(&atkey.metadata, 60*1000*1); // 1 minute
+    atclient_atkey_metadata_set_ttl(&atkey.metadata, ATKEY_TTL);
 
     if((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0)
     {
@@ -207,6 +215,15 @@ static int test_2_get_as_sharedby(atclient *atclient)
         goto exit;
     }
 
+    // check ttl, should be 5 minutes
+    if(atkey.metadata.ttl != ATKEY_TTL)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %d\n", ATKEY_TTL, atkey.metadata.ttl);
+        ret = 1;
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
+
     goto exit;
 exit: {
     atclient_atkey_free(&atkey);
@@ -248,6 +265,15 @@ static int test_3_get_as_sharedwith(atclient *atclient2)
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value mismatch\n");
         goto exit;
     }
+
+    if(atkey.metadata.ttl != ATKEY_TTL)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %d\n", ATKEY_TTL, atkey.metadata.ttl);
+        ret = 1;
+        goto exit;
+    }
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
 
     goto exit;
 exit: {
@@ -337,6 +363,40 @@ exit: {
     atclient_atkey_free(&atkeyforme);
     atclient_atkey_free(&atkeyforthem);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
+    return ret;
+}
+}
+
+static int test_5_should_not_exist_as_sharedby(atclient *atclient)
+{
+    int ret = 1;
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    const size_t valuesize = 1024;
+    char value[valuesize];
+    memset(value, 0, sizeof(char) * valuesize);
+    size_t valuelen = 0;
+
+    if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) == 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
+        goto exit;
+    }
+
+
+    goto exit;
+exit : {
+    atclient_atkey_free(&atkey);
     return ret;
 }
 }
