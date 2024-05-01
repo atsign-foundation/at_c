@@ -51,10 +51,9 @@ jobs:
         run: |
           build/test_atclient_sharedkey
 
-      # - name: Try CTest
-      #   working-directory: tests/functional_tests
-      #   run: |
-      #     mkdir -p build/keys/
-      #     cp -r keys/ build/keys/
-      #     cd build
-      #     ctest --output-on-failure
+      - name: Try CTest
+        working-directory: tests/functional_tests
+        run: |
+          mkdir -p build/keys/
+          cp -r keys/ build/keys/
+          ctest --output-on-failure --test-dir build --build-run-dir ./
