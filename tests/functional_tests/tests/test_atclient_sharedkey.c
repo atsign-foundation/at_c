@@ -122,12 +122,12 @@ static int pkam_auth(atclient *atclient, char *atsign)
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeysfilepath: \"%s\"\n", atkeysfilepath);
 
-    // if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0)
-    // {
-    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
-    //     goto exit;
-    // }
-    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeys populated\n");
+    if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeys populated\n");
 
     // if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0)
     // {
