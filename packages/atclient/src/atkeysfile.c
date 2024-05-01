@@ -40,7 +40,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
     goto exit;
   }
 
-  size_t bytesread = fread(readbuf.str, sizeof(char), readbuf.len, file);
+  const size_t bytesread = fread(readbuf.str, 1, FILE_READ_BUFFER_SIZE, file);
   if (bytesread == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fread failed\n");
     ret = 1;
