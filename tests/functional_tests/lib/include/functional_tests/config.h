@@ -19,6 +19,6 @@
  * @param pathlen the output length of the path
  * @return int, 0 on success
  */
-int get_atkeys_path(char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen);
+int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen);
 
 #endif

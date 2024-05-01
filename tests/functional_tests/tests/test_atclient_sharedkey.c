@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "functional_tests/config.h"
+#include "functional_tests/helpers.h"
 
 #define TAG "test_atclient_sharedkey"
 
@@ -15,7 +16,6 @@
 #define ATKEY_VALUE "Hello World! :D\n"
 #define ATKEY_TTL 60*1000*5 // 5 minutes
 
-static int pkam_auth(atclient *atclient, const char *atsign);
 static int test_1_put(atclient *atclient);
 static int test_2_get_as_sharedby(atclient *atclient);
 static int test_3_get_as_sharedwith(atclient *atclient);
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     atclient atclient2;
     atclient_init(&atclient2);
 
-    if((ret = pkam_auth(&atclient1, atsign1)) != 0)
+    if((ret = functional_tests_pkam_auth(&atclient1, atsign1)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
         goto exit;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         goto exit;
     }
 
-    if((ret = pkam_auth(&atclient2, atsign2)) != 0)
+    if((ret = functional_tests_pkam_auth(&atclient2, atsign2)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
         goto exit;
@@ -93,62 +93,6 @@ exit: {
     }
     atclient_free(&atclient1);
     atclient_free(&atclient2);
-    return ret;
-}
-}
-
-static int pkam_auth(atclient *atclient, const char *atsign)
-{
-    int ret = 1;
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam_auth Begin\n");
-
-    const size_t atkeysfilepathsize = 1024;
-    char atkeysfilepath[atkeysfilepathsize];
-    memset(atkeysfilepath, 0, sizeof(char) * atkeysfilepathsize);
-    size_t atkeysfilepathlen = 0;
-
-    atclient_connection root_connection;
-    atclient_connection_init(&root_connection);
-
-    atclient_atkeys atkeys;
-    atclient_atkeys_init(&atkeys);
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign: \"%s\"\n", atsign);
-
-    if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "get_atkeys_path: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeysfilepath: \"%s\"\n", atkeysfilepath);
-
-    if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeys populated\n");
-
-    if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "root connection established\n");
-
-    if ((ret = atclient_pkam_authenticate(atclient, &root_connection, &atkeys, atsign)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
-
-    goto exit;
-
-exit: {
-    atclient_connection_free(&root_connection);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam_auth End (%d)\n", ret);
     return ret;
 }
 }
@@ -323,33 +267,15 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
 
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    const size_t valuesize = 1024;
-    char value[valuesize];
-    memset(value, 0, sizeof(char) * valuesize);
-    size_t valuelen = 0;
-
-    if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0)
+    if((ret = functional_tests_atkey_should_not_exist(atclient, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
         goto exit;
     }
-
-    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) == 0)
-    {
-        // it exists when it should not
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d, should be 1\n", ret);
-        ret = 1;
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_get: %d\n", ret);
 
     ret = 0;
     goto exit;
 exit : {
-    atclient_atkey_free(&atkey);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist End (%d)\n", ret);
     return ret;
 }
