@@ -4,7 +4,7 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define FIRST_ATSIGN "@12alpaca"
+#define FIRST_ATSIGN "@12alpaca1"
 #define SECOND_ATSIGN "@12snowboating"
 
 /**
