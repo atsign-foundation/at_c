@@ -8,9 +8,8 @@ cd "$SCRIPT_DIRECTORY/.."
 ../../tools/install.sh
 
 # 2. Run tests
-cmake -S . -B build
-cmake --build build
 mkdir -p build/keys
 cp -r keys/ build/keys/
-cd build
-ctest -V
+cmake -S . -B build
+cmake --build build
+ctest --output-on-failure --test-dir build
