@@ -34,11 +34,11 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
   atclient_atstr readbuf;
   atclient_atstr_init(&readbuf, FILE_READ_BUFFER_SIZE);
 
-  // if (file == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fopen failed\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  if (file == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fopen failed\n");
+    ret = 1;
+    goto exit;
+  }
 
   // const size_t bytesread = fread(readbuf.str, 1, FILE_READ_BUFFER_SIZE, file);
   // if (bytesread == 0) {
