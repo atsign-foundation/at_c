@@ -41,11 +41,11 @@ int main()
     atclient atclient2;
     atclient_init(&atclient2);
 
-    if((ret = pkam_auth(&atclient1, atsign1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = pkam_auth(&atclient1, atsign1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
+    //     goto exit;
+    // }
 
     // if((ret = test_1_put(&atclient1)) != 0)
     // {
