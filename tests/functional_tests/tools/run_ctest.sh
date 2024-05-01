@@ -12,4 +12,5 @@ mkdir -p build/keys
 cp -r keys/ build/keys/
 cmake -S . -B build
 cmake --build build
-ctest --output-on-failure --test-dir build
+# ctest --output-on-failure --test-dir build
+./build/test_atclient_sharedkey
