@@ -11,7 +11,7 @@
 #define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
 
 // represents buffer size of reading the entire atKeys file
-#define FILE_READ_BUFFER_SIZE 32768
+#define FILE_READ_BUFFER_SIZE 8192
 
 #define TAG "atkeysfile"
 
