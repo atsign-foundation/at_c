@@ -25,12 +25,12 @@ jobs:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
 
       - name: Load secrets
+        working-directory: tests/functional_tests
         run: |
-          mkdir -p ~/.atsign/keys
-          echo "${{ secrets.ATKEYS_12ALPACA }}" > /home/runner/.atsign/keys/@12alpaca_key.atKeys
-          echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > /home/runner/.atsign/keys/@12snowboating_key.atKeys
-          test -e ~/.atsign/keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
-          test -e ~/.atsign/keys/@12snowboating_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
+          echo "${{ secrets.ATKEYS_12ALPACA }}" > keys/@12alpaca_key.atKeys
+          echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > keys/@12snowboating_key.atKeys
+          test -e ./keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
+          test -e ./keys/@12snowboating_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
 
       - name: atsdk Functional CTest
         working-directory: tests/functional_tests
