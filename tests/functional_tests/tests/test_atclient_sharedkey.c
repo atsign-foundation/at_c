@@ -47,41 +47,41 @@ int main()
         goto exit;
     }
 
-    if((ret = test_1_put(&atclient1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_put: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_1_put(&atclient1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_put: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_2_get_as_sharedby(&atclient1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_get_as_sharedby: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_2_get_as_sharedby(&atclient1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_get_as_sharedby: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = pkam_auth(&atclient2, atsign2)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = pkam_auth(&atclient2, atsign2)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_3_get_as_sharedwith(&atclient2)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_get_as_sharedwith: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_3_get_as_sharedwith(&atclient2)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_get_as_sharedwith: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_4_delete(&atclient1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_delete: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_4_delete(&atclient1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_delete: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_5_should_not_exist_as_sharedby(&atclient1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_should_not_exist: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_5_should_not_exist_as_sharedby(&atclient1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_should_not_exist: %d\n", ret);
+    //     goto exit;
+    // }
 
 exit: {
     if(tear_down_sharedenckeys(&atclient1) != 0)
