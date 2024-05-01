@@ -1,6 +1,8 @@
 #ifndef FUNCTIONAL_TESTS_CONFIG_H
 #define FUNCTIONAL_TESTS_CONFIG_H
 
+#include <stddef.h>
+
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
