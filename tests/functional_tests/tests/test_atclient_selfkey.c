@@ -16,5 +16,12 @@ int main()
     get_atkeys_path(FIRST_ATSIGN, strlen(FIRST_ATSIGN), path, pathsize, &pathlen);
 
     printf("Path: %s\n", path); // Path: keys/@12alpaca_key.atKeys
+
+    FILE *file = fopen(path, "r");
+    if (file == NULL)
+    {
+        printf("File not found\n");
+        return 1;
+    }
     return 1;
 }
