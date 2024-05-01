@@ -1,5 +1,5 @@
 name: Unit and Functional Tests
-          ../../tools/install.sh && cmake -S . -B build && cmake --build build --target test && build/test_atclient_sharedkey
+
 on:
   workflow_dispatch:
   push:
