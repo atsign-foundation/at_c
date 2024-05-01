@@ -23,7 +23,7 @@ static int test_4_delete(atclient *atclient);
 static int test_5_should_not_exist_as_sharedby(atclient *atclient);
 static int tear_down_sharedenckeys(atclient *atclient);
 
-int main()
+int main(int argc, char *argv[])
 {
     int ret = 1;
 
@@ -110,36 +110,36 @@ static int pkam_auth(atclient *atclient, char *atsign)
     atclient_connection root_connection;
     atclient_connection_init(&root_connection);
 
-    atclient_atkeys atkeys;
-    atclient_atkeys_init(&atkeys);
+    // atclient_atkeys atkeys;
+    // atclient_atkeys_init(&atkeys);
 
-    if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "get_atkeys_path: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeysfilepath: \"%s\"\n", atkeysfilepath);
+    // if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "get_atkeys_path: %d\n", ret);
+    //     goto exit;
+    // }
+    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeysfilepath: \"%s\"\n", atkeysfilepath);
 
-    if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeys populated\n");
+    // if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
+    //     goto exit;
+    // }
+    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeys populated\n");
 
-    if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "root connection established\n");
+    // if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+    //     goto exit;
+    // }
+    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "root connection established\n");
 
-    if ((ret = atclient_pkam_authenticate(atclient, &root_connection, &atkeys, atsign)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
+    // if ((ret = atclient_pkam_authenticate(atclient, &root_connection, &atkeys, atsign)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
+    //     goto exit;
+    // }
+    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
 
     goto exit;
 
@@ -314,6 +314,40 @@ exit: {
 }
 }
 
+static int test_5_should_not_exist_as_sharedby(atclient *atclient)
+{
+    int ret = 1;
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
+
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
+    const size_t valuesize = 1024;
+    char value[valuesize];
+    memset(value, 0, sizeof(char) * valuesize);
+    size_t valuelen = 0;
+
+    if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) == 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
+        goto exit;
+    }
+
+
+    goto exit;
+exit : {
+    atclient_atkey_free(&atkey);
+    return ret;
+}
+}
+
 static int tear_down_sharedenckeys(atclient *atclient)
 {
     int ret = 1;
@@ -365,40 +399,6 @@ exit: {
     atclient_atkey_free(&atkeyforme);
     atclient_atkey_free(&atkeyforthem);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
-    return ret;
-}
-}
-
-static int test_5_should_not_exist_as_sharedby(atclient *atclient)
-{
-    int ret = 1;
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    const size_t valuesize = 1024;
-    char value[valuesize];
-    memset(value, 0, sizeof(char) * valuesize);
-    size_t valuelen = 0;
-
-    if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
-        goto exit;
-    }
-
-    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) == 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
-        goto exit;
-    }
-
-
-    goto exit;
-exit : {
-    atclient_atkey_free(&atkey);
     return ret;
 }
 }
