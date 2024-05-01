@@ -345,7 +345,7 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
         goto exit;
     }
 
-
+    ret = 0;
     goto exit;
 exit : {
     atclient_atkey_free(&atkey);

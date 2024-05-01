@@ -8,4 +8,5 @@ cd "$SCRIPT_DIRECTORY"
 ../../../tools/install.sh
 
 # 2. Run tests
-cmake -S .. -B ../build && cmake --build ../build && cd ../build && ctest --output-on-failure
+cd ..
+cmake -S . -B build && cmake --build build && cd ctest --output-on-failure --test-dir=build
