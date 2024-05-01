@@ -220,8 +220,8 @@ exit: { return ret; }
 int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path) {
   int ret = 1;
 
-  atclient_atkeysfile atkeysfile;
-  atclient_atkeysfile_init(&atkeysfile);
+  // atclient_atkeysfile atkeysfile;
+  // atclient_atkeysfile_init(&atkeysfile);
 
   // ret = atclient_atkeysfile_read(&atkeysfile, path);
   // if (ret != 0) {
