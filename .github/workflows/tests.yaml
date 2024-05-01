@@ -27,6 +27,7 @@ jobs:
       - name: Load secrets
         working-directory: tests/functional_tests
         run: |
+          mkdir -p keys
           echo "${{ secrets.ATKEYS_12ALPACA }}" > keys/@12alpaca_key.atKeys
           echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > keys/@12snowboating_key.atKeys
           test -e keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
