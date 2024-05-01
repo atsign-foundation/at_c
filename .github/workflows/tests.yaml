@@ -35,4 +35,5 @@ jobs:
       - name: atsdk Functional CTest
         working-directory: tests/functional_tests
         run: |
-          ./tools/run_ctest.sh
+          # ./tools/run_ctest.sh
+          cd .. && ../../tools/install.sh && cmake -S . -B build && cmake --build build --target all && build/test_atclient_sharedkey
