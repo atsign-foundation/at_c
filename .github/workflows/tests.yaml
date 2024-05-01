@@ -28,7 +28,7 @@ jobs:
       - name: Load secrets
         working-directory: tests/functional_tests
         run: |
-          mkdir -p keys build/keys
+          mkdir -p keys/ build/keys/
           echo "${{ secrets.ATKEYS_12ALPACA }}" > keys/@12alpaca_key.atKeys
           echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > keys/@12snowboating_key.atKeys
           test -e keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
@@ -36,7 +36,7 @@ jobs:
           echo "First 5 characters of @12alpaca_key.atKeys: $(head -c 5 keys/@12alpaca_key.atKeys)"
           echo "First 5 characters of @12snowboating_key.atKeys: $(head -c 5 keys/@12snowboating_key.atKeys)"
           cp -r keys/ ~/.atKeys
-          cp -r keys/ build/keys
+          cp -r keys/ build/keys/
 
       - name: Install atSDK
         run: |
