@@ -31,6 +31,8 @@ jobs:
           echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > keys/@12snowboating_key.atKeys
           test -e ./keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
           test -e ./keys/@12snowboating_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
+          echo "First 5 characters of @12alpaca_key.atKeys: $(head -c 5 ./keys/@12alpaca_key.atKeys)"
+          echo "First 5 characters of @12snowboating_key.atKeys: $(head -c 5 ./keys/@12snowboating_key.atKeys)"
 
       - name: atsdk Functional CTest
         working-directory: tests/functional_tests
