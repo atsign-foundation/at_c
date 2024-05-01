@@ -27,7 +27,6 @@ jobs:
       - name: Load secrets
         working-directory: tests/functional_tests
         run: |
-          # mkdir -p ~/.atsign/keys
           echo "${{ secrets.ATKEYS_12ALPACA }}" > keys/@12alpaca_key.atKeys
           echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > keys/@12snowboating_key.atKeys
           test -e keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
@@ -38,5 +37,5 @@ jobs:
       - name: atsdk Functional CTest
         working-directory: tests/functional_tests
         run: |
-          ../../tools/install.sh && cmake -S . -B build && cmake --build build --target all && build/test_atclient_sharedkey
-          # tools/run_ctest.sh
+          # ../../tools/install.sh && cmake -S . -B build && cmake --build build --target all && build/test_atclient_sharedkey
+          tools/run_ctest.sh
