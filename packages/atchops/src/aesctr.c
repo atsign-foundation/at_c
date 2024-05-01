@@ -52,10 +52,7 @@ int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size
     goto exit;
   }
 
-  *ciphertextlen = 0;
-  while (*(ciphertext + *ciphertextlen) != '\0' && *ciphertextlen < ciphertextsize) {
-    *ciphertextlen += 1;
-  }
+  *ciphertextlen = plaintextpaddedlen; // ciphertextlen is the same as plaintextpaddedlen, the plaintext (with padding) could be something like 16 bytes long, so the ciphertext will also be 16 bytes long.
 
   goto exit;
 
