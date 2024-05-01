@@ -12,7 +12,7 @@
 #define ATKEY_NAMESPACE "functional_tests"
 #define ATKEY_SHAREDBY FIRST_ATSIGN
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
-#define ATKEY_VALUE "Hello World! :D"
+#define ATKEY_VALUE "Hello World! :D\n"
 #define ATKEY_TTL 60*1000*5 // 5 minutes
 
 static int pkam_auth(atclient *atclient, char *atsign);
