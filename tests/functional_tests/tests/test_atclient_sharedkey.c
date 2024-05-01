@@ -337,9 +337,9 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
         goto exit;
     }
 
-    // should fail (ret should be 1 as key should not exist)
     if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) == 0)
     {
+        // it exists when it should not
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d, should be 1\n", ret);
         ret = 1;
         goto exit;
