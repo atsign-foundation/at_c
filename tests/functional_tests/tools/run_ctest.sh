@@ -12,4 +12,5 @@ cmake -S . -B build
 cmake --build build
 mkdir -p build/keys
 cp -r keys/ build/keys/
-ctest --output-on-failure --test-dir build
+cd build
+ctest -V
