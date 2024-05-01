@@ -239,7 +239,7 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
 
   goto exit;
 exit: {
-  atclient_atkeysfile_free(&atkeysfile);
+  // atclient_atkeysfile_free(&atkeysfile);
   return ret;
 }
 }
