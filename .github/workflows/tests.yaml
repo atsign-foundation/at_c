@@ -31,11 +31,6 @@ jobs:
           mkdir -p ~/.atsign/keys/
           echo "${{ secrets.ATKEYS_12ALPACA }}" > ~/.atsign/keys/@12alpaca_key.atKeys
           echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > ~/.atsign/keys/@12snowboating_key.atKeys
-          ls -l ~/.atsign/keys/
-          test -e ~/.atsign/keys/@12alpaca_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
-          test -e ~/.atsign/keys/@12snowboating_key.atKeys && echo "Key file exists" || echo "Key file does not exist"
-          echo "First 5 characters of @12alpaca_key.atKeys: $(head -c 5 ~/.atsign/keys/@12alpaca_key.atKeys)"
-          echo "First 5 characters of @12snowboating_key.atKeys: $(head -c 5 ~/.atsign/keys/@12snowboating_key.atKeys)"
 
       - name: Build and Run Functional Tests
         working-directory: tests/functional_tests

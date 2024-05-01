@@ -10,4 +10,4 @@ cd "$SCRIPT_DIRECTORY/.."
 # 2. Run tests
 cmake -S . -B build
 cmake --build build
-ctest --output-on-failure --test-dir build
+ctest --test-dir build -VV

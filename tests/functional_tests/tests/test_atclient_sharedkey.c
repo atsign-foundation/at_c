@@ -15,7 +15,7 @@
 #define ATKEY_VALUE "Hello World! :D\n"
 #define ATKEY_TTL 60*1000*5 // 5 minutes
 
-static int pkam_auth(atclient *atclient, char *atsign);
+static int pkam_auth(atclient *atclient, const char *atsign);
 static int test_1_put(atclient *atclient);
 static int test_2_get_as_sharedby(atclient *atclient);
 static int test_3_get_as_sharedwith(atclient *atclient);
@@ -97,7 +97,7 @@ exit: {
 }
 }
 
-static int pkam_auth(atclient *atclient, char *atsign)
+static int pkam_auth(atclient *atclient, const char *atsign)
 {
     int ret = 1;
 
