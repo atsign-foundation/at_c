@@ -40,98 +40,98 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
     goto exit;
   }
 
-  // const size_t bytesread = fread(readbuf.str, 1, FILE_READ_BUFFER_SIZE, file);
-  // if (bytesread == 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fread failed\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  const size_t bytesread = fread(readbuf.str, 1, FILE_READ_BUFFER_SIZE, file);
+  if (bytesread == 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fread failed\n");
+    ret = 1;
+    goto exit;
+  }
 
-  // root = cJSON_Parse(readbuf.str);
-  // cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
-  // cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
-  // cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
-  // cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
-  // cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
+  root = cJSON_Parse(readbuf.str);
+  cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
+  cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
+  cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
+  cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
+  cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
 
-  // if (aespkamprivatekey == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPrivateKey!\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  if (aespkamprivatekey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPrivateKey!\n");
+    ret = 1;
+    goto exit;
+  }
 
-  // if (aespkampublickey == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPublicKey!\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  if (aespkampublickey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPublicKey!\n");
+    ret = 1;
+    goto exit;
+  }
 
-  // if (aesencryptprivatekey == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPrivateKey!\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  if (aesencryptprivatekey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPrivateKey!\n");
+    ret = 1;
+    goto exit;
+  }
 
-  // if (aesencryptpublickey == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPublicKey!\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  if (aesencryptpublickey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPublicKey!\n");
+    ret = 1;
+    goto exit;
+  }
 
-  // if (selfencryptionkey == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading selfEncryptionKey!\n");
-  //   ret = 1;
-  //   goto exit;
-  // }
+  if (selfencryptionkey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading selfEncryptionKey!\n");
+    ret = 1;
+    goto exit;
+  }
 
-  // ret = atclient_atstr_set(&(atkeysfile->aespkampublickeystr), aespkampublickey->valuestring,
-  //                          strlen(aespkampublickey->valuestring));
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-  //                         "atclient_atstr_set: %d | failed to set aespkampublickeystr\n", ret);
-  //   goto exit;
-  // }
+  ret = atclient_atstr_set(&(atkeysfile->aespkampublickeystr), aespkampublickey->valuestring,
+                           strlen(aespkampublickey->valuestring));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atstr_set: %d | failed to set aespkampublickeystr\n", ret);
+    goto exit;
+  }
 
-  // ret = atclient_atstr_set(&(atkeysfile->aespkamprivatekeystr), aespkamprivatekey->valuestring,
-  //                          strlen(aespkamprivatekey->valuestring));
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-  //                         "atclient_atstr_set: %d | failed to set aespkamprivatekeystr\n", ret);
-  //   goto exit;
-  // }
+  ret = atclient_atstr_set(&(atkeysfile->aespkamprivatekeystr), aespkamprivatekey->valuestring,
+                           strlen(aespkamprivatekey->valuestring));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atstr_set: %d | failed to set aespkamprivatekeystr\n", ret);
+    goto exit;
+  }
 
-  // ret = atclient_atstr_set(&(atkeysfile->aesencryptprivatekeystr), aesencryptprivatekey->valuestring,
-  //                          strlen(aesencryptprivatekey->valuestring));
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-  //                         "atclient_atstr_set: %d | failed to set aesencryptprivatekeystr\n", ret);
-  //   goto exit;
-  // }
+  ret = atclient_atstr_set(&(atkeysfile->aesencryptprivatekeystr), aesencryptprivatekey->valuestring,
+                           strlen(aesencryptprivatekey->valuestring));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atstr_set: %d | failed to set aesencryptprivatekeystr\n", ret);
+    goto exit;
+  }
 
-  // ret = atclient_atstr_set(&(atkeysfile->aesencryptpublickeystr), aesencryptpublickey->valuestring,
-  //                          strlen(aesencryptpublickey->valuestring));
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-  //                         "atclient_atstr_set: %d | failed to set aesencryptpublickeystr\n", ret);
-  //   goto exit;
-  // }
+  ret = atclient_atstr_set(&(atkeysfile->aesencryptpublickeystr), aesencryptpublickey->valuestring,
+                           strlen(aesencryptpublickey->valuestring));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atstr_set: %d | failed to set aesencryptpublickeystr\n", ret);
+    goto exit;
+  }
 
-  // ret = atclient_atstr_set(&(atkeysfile->selfencryptionkeystr), selfencryptionkey->valuestring,
-  //                          strlen(selfencryptionkey->valuestring));
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-  //                         "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
-  //   goto exit;
-  // }
+  ret = atclient_atstr_set(&(atkeysfile->selfencryptionkeystr), selfencryptionkey->valuestring,
+                           strlen(selfencryptionkey->valuestring));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
+    goto exit;
+  }
 
   goto exit;
 
 exit: {
-  // if (root != NULL) {
-  //   cJSON_Delete(root);
-  // }
-  // fclose(file);
-  // atclient_atstr_free(&readbuf);
+  if (root != NULL) {
+    cJSON_Delete(root);
+  }
+  fclose(file);
+  atclient_atstr_free(&readbuf);
   return ret;
 }
 }
