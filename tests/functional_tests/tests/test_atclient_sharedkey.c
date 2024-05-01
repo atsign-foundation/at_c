@@ -350,6 +350,7 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
     goto exit;
 exit : {
     atclient_atkey_free(&atkey);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist End (%d)\n", ret);
     return ret;
 }
 }
