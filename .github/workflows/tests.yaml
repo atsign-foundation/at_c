@@ -49,6 +49,6 @@ jobs:
           cmake --build build
 
       - name: Run Functional Tests
-        working-directory: tests/functional_tests/build
+        working-directory: tests/functional_tests
         run: |
-          ./test_atclient_sharedkey
+          build/test_atclient_sharedkey
