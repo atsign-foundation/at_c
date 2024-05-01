@@ -103,7 +103,7 @@ static int pkam_auth(atclient *atclient, char *atsign)
 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam_auth Begin\n");
 
-    const size_t atkeysfilepathsize = 512;
+    const size_t atkeysfilepathsize = 1024;
     char atkeysfilepath[atkeysfilepathsize];
     memset(atkeysfilepath, 0, sizeof(char) * atkeysfilepathsize);
     size_t atkeysfilepathlen = 0;
