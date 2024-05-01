@@ -102,7 +102,7 @@ static int pkam_auth(atclient *atclient, char *atsign)
 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam_auth Begin\n");
 
-    const size_t atkeysfilepathsize = 256;
+    const size_t atkeysfilepathsize = 512;
     char atkeysfilepath[atkeysfilepathsize];
     memset(atkeysfilepath, 0, sizeof(char) * atkeysfilepathsize);
     size_t atkeysfilepathlen = 0;
@@ -113,14 +113,14 @@ static int pkam_auth(atclient *atclient, char *atsign)
     atclient_atkeys atkeys;
     atclient_atkeys_init(&atkeys);
 
-    if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)))
+    if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "get_atkeys_path: %d\n", ret);
         goto exit;
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeysfilepath: \"%s\"\n", atkeysfilepath);
 
-    if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)))
+    if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
         goto exit;
@@ -141,7 +141,6 @@ static int pkam_auth(atclient *atclient, char *atsign)
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
 
-    ret = 0;
     goto exit;
 
 exit: {

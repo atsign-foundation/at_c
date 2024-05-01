@@ -9,7 +9,7 @@
 
 /**
  * @brief Get the atkeys file path for the given atSign. Expected to be in the home directory of the user. Example: /Users/bob/.atsign/keys/@jeremy_0_key.atKeys
- * 
+ *
  * @param atsign the atSign string, must begin with @ (Example: "@bob")
  * @param atsignlen the length of the atsign string
  * @param path the output path string. Example output would be "/Users/bob/.atsign/keys/@bob_key.atKeys"
