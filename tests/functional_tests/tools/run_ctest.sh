@@ -9,4 +9,4 @@ cd "$SCRIPT_DIRECTORY"
 
 # 2. Run tests
 cd ..
-cmake -S . -B build && cmake --build build && ctest --output-on-failure --test-dir=build
+cmake -S . -B build && cmake --build build && ctest --output-on-failure --test-dir build
