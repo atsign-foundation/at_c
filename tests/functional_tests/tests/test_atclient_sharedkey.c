@@ -238,6 +238,11 @@ static int test_3_get_as_sharedwith(atclient *atclient2)
 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_get_as_sharedwith Begin\n");
 
+    const size_t valuesize = 1024;
+    char value[valuesize];
+    memset(value, 0, sizeof(char) * valuesize);
+    size_t valuelen = 0;
+    
     atclient_atkey atkey;
     atclient_atkey_init(&atkey);
 
@@ -247,10 +252,6 @@ static int test_3_get_as_sharedwith(atclient *atclient2)
         goto exit;
     }
 
-    const size_t valuesize = 1024;
-    char value[valuesize];
-    memset(value, 0, sizeof(char) * valuesize);
-    size_t valuelen = 0;
 
     if((ret = atclient_get_sharedkey(atclient2, &atkey, value, valuesize, &valuelen, NULL, false)) != 0)
     {
