@@ -22,6 +22,6 @@ int main()
     {
         printf("File not found\n");
         return 1;
-    }ci:
+    }
     return 1;
 }
