@@ -1,5 +1,5 @@
 name: Unit and Functional Tests
-#           ../../tools/install.sh && cmake -S . -B build && cmake --build build --target all && build/test_atclient_sharedkey
+          ../../tools/install.sh && cmake -S . -B build && cmake --build build --target test && build/test_atclient_sharedkey
 on:
   workflow_dispatch:
   push:
@@ -36,7 +36,7 @@ jobs:
           echo "First 5 characters of @12alpaca_key.atKeys: $(head -c 5 keys/@12alpaca_key.atKeys)"
           echo "First 5 characters of @12snowboating_key.atKeys: $(head -c 5 keys/@12snowboating_key.atKeys)"
 
-      - name: atsdk Functional CTest
+      - name: CTest
         working-directory: tests/functional_tests
         run: |
-          sudo bash tools/run_ctest.sh
+          ../../tools/install.sh && cmake -S . -B build && cmake --build build --target test
