@@ -223,12 +223,12 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
   atclient_atkeysfile atkeysfile;
   atclient_atkeysfile_init(&atkeysfile);
 
-  // ret = atclient_atkeysfile_read(&atkeysfile, path);
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-  //                         "atclient_atkeysfile_read: %d | failed to read file at path: %s\n", ret, path);
-  //   goto exit;
-  // }
+  ret = atclient_atkeysfile_read(&atkeysfile, path);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                          "atclient_atkeysfile_read: %d | failed to read file at path: %s\n", ret, path);
+    goto exit;
+  }
 
   // ret = atclient_atkeys_populate_from_atkeysfile(atkeys, atkeysfile);
   // if (ret != 0) {
