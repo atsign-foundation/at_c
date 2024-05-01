@@ -110,8 +110,8 @@ static int pkam_auth(atclient *atclient, char *atsign)
     atclient_connection root_connection;
     atclient_connection_init(&root_connection);
 
-    // atclient_atkeys atkeys;
-    // atclient_atkeys_init(&atkeys);
+    atclient_atkeys atkeys;
+    atclient_atkeys_init(&atkeys);
 
     // if((ret = get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize, &atkeysfilepathlen)) != 0)
     // {
