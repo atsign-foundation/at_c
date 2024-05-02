@@ -13,7 +13,8 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
   ${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/notification.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/monitor.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/notify.c
   ${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_delete.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_publickey.c

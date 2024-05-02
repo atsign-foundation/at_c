@@ -20,7 +20,7 @@
 
 int main(int argc, char *argv[]) {
   int ret = 1;
-  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   char *atsign_input = NULL;
   char *other_atsign_input = NULL;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   printf("atsign_input: %s\n", atsign_input);
   printf("other_atsign_input: %s\n", other_atsign_input);
   if (atsign_input == NULL || other_atsign_input == NULL) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Please provide both atsigns with -a and -o flags\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Please provide both atsigns with -a and -o flags\n");
     return 1;
   }
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   atclient_connection_init(&root_connection);
   ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root\n");
     atclient_connection_free(&root_connection);
     goto exit;
   }
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, atkeys, atsign.atsign, strlen(atsign.atsign))) !=
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) !=
       0) {
     atclient_connection_free(&root_connection);
     atclient_atsign_free(&atsign);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     atclient_atkeys_free(&atkeys);
     atclient_atstr_free(&atkeystr);
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
     atclient_atkey_free(&atkey);
     atclient_atkeys_free(&atkeys);
     atclient_atstr_free(&atkeystr);
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
     goto exit;
   }
 
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     atclient_atkeys_free(&atkeys);
     atclient_atstr_free(&atkeystr);
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
     goto exit;
   }
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
     atclient_atstr_free(&atkeystr);
     atclient_notify_params_free(&notify_params);
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify");
     goto exit;
   }
 

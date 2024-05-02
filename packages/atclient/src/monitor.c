@@ -37,12 +37,11 @@ int atclient_start_monitor(atclient *monitor_ctx, const char *root_host, const i
   atclient_connection_init(&root_connection);
   atclient_connection_connect(&root_connection, root_host, root_port);
 
-  res = atclient_pkam_authenticate(monitor_ctx, &root_connection, monitor_ctx->atkeys, monitor_ctx->atsign.atsign,
-                                   strlen(monitor_ctx->atsign.atsign));
+  res = atclient_pkam_authenticate(monitor_ctx, &root_connection, &(monitor_ctx->atkeys), monitor_ctx->atsign.atsign);
   atclient_connection_free(&root_connection);
 
   if (res != 0) {
-    atclient_atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to pkam authenticate");
+    atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to pkam authenticate");
     atclient_free(monitor_ctx);
     return res;
   }
@@ -63,7 +62,7 @@ int atclient_start_monitor(atclient *monitor_ctx, const char *root_host, const i
 
   res = mbedtls_ssl_write(&(monitor_ctx->secondary_connection.ssl), (unsigned char *)cmd, cmd_len);
   if (res < 0 || res != cmd_len) {
-    atclient_atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command");
+    atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command");
     atclient_free(monitor_ctx);
   } else {
     printf("Sent command\n");
@@ -79,7 +78,7 @@ int atclient_send_heartbeat(atclient *ctx) {
 
   ret = mbedtls_ssl_write(&(ctx->secondary_connection.ssl), command, 9);
   if (ret < 0 || ret != 9) {
-    atclient_atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command");
+    atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command");
   } else {
     ret = 0;
   }
@@ -100,7 +99,7 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
   bool done_reading = 0;
 
   while (done_reading == 0) {
-    atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk\n");
+    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk\n");
     if (chunks > 0) {
       tmp_buffer = realloc(buffer, chunk_size + (chunk_size * chunks) * sizeof(char));
       buffer = tmp_buffer;
@@ -140,14 +139,14 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     message->type = MMT_notification;
     ret = parse_notification(message, message_body);
     if (ret != 0) {
-      atclient_atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
+      atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
     }
   } else if (strcmp(message_type, "error") == 0) {
     message->type = MMT_error_response;
     message->error_response = message_body;
   } else {
     message->type = MMT_none;
-    atclient_atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type");
+    atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type");
     ret = -1;
   }
 
@@ -162,7 +161,7 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   root = cJSON_Parse(message_body);
   if (root == NULL) {
     cJSON_Delete(root);
-    atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body");
+    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body");
     ret = -1;
     return ret;
   }
@@ -172,7 +171,7 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   atclient_atkey_from_string(&(message->notification.key), key->valuestring, strlen(key->valuestring));
 
   if (false) { // TODO: if regex doesnt match // do we even need this now?
-    atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Regex failed to match");
+    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Regex failed to match");
     cJSON_Delete(root);
     atclient_monitor_message_free(message);
     ret = -1;
