@@ -9,9 +9,47 @@
 
 ## Packages
 
-- [atchops](./packages/atchops/README.md) stands for cryptographic and hashing operations catered for the atProtocol, uses [MbedTLS crypto](https://github.com/Mbed-TLS/mbedtls) as a dependency.
+- [atchops](./packages/atchops/README.md) stands for "Cryptographic and Hashing Operations" catered for the atProtocol. atchops uses [MbedTLS crypto](https://github.com/Mbed-TLS/mbedtls) and other MbedTLS crypto libraries as a dependency.
 - [atclient](./packages/atclient/README.md) implements the atProtocol and will be the core dependency for most applications. atclient depends on [atchops](./packages/atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls).
 - [atclient_espidf](./packages/atclient_espidf/README.md) is a package for helping you build atclient for ESP-IDF (Espressif IoT Development Framework) based projects.
+- [atlogger](./packages/atlogger/README.md) is a tiny logging package.
+
+## Building Source
+
+Learn how to build atsdk from source code to be used as a library in your projects.
+
+### Installing on Linux/MacOS
+
+1. Get ahold of the source code either via git clone or from downloading the source from our releases:
+
+```sh
+git clone https://github.com/atsign-foundation/at_c.git
+cd at_c
+```
+
+2. CMake configure
+
+```sh
+cmake -S . -B build
+```
+
+3. Install
+
+This will run the install step and install the static libraries and include headers on your system. You may need to use `sudo`.
+
+```sh
+cmake --build build --target install
+```
+
+4. Building the source code will allow you to use the `atclient` library in your own CMake projects:
+
+```cmake
+# myproj is a target in your CMake project that depends on atsdk
+find_package(atsdk REQUIRED CONFIG)
+target_link_libraries(myproj PRIVATE atsdk::atclient)
+```
+
+The target `atsdk::atclient` is the atclient library that you can link to your project. It includes `atchops` and `atlogger` as dependencies already with it.
 
 ## Examples
 

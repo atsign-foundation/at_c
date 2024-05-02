@@ -25,6 +25,11 @@ int main() {
   const char *plaintext = PLAINTEXT;
   const size_t plaintextlen = strlen(plaintext);
 
+  const size_t ciphertextsize = 1024;
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
+
   atchops_rsakey_publickey publickey;
   atchops_rsakey_publickey_init(&publickey);
 
@@ -35,14 +40,8 @@ int main() {
   }
   printf("atchops_rsakey_populate_publickey (success): %d\n", ret);
 
-  const size_t ciphertextlen = 1024;
-  unsigned char *ciphertext = calloc(ciphertextlen, sizeof(unsigned char));
-  memset(ciphertext, 0, ciphertextlen);
-  size_t ciphertextolen = 0;
-
-  // printf("encrypting...\n");
-  ret = atchops_rsa_encrypt(publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext, ciphertextlen,
-                            &ciphertextolen);
+  ret = atchops_rsa_encrypt(publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext, ciphertextsize,
+                            &ciphertextlen);
   if (ret != 0) {
     printf("atchops_rsa_encrypt (failed): %d\n", ret);
     goto ret;
@@ -53,7 +52,6 @@ int main() {
   goto ret;
 
 ret: {
-  free(ciphertext);
   return ret;
 }
 }

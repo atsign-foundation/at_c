@@ -46,7 +46,11 @@ int main() {
   atchops_rsakey_privatekey privatekey;
   atchops_rsakey_privatekey_init(&privatekey);
 
-  // printf("1\n");
+  const size_t plaintextsize = 4096;
+  unsigned char plaintext[plaintextsize];
+  memset(plaintext, 0, sizeof(unsigned char) * plaintextsize);
+  size_t plaintextlen = 0;
+
   ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
   if (ret != 0) {
     printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
@@ -54,13 +58,8 @@ int main() {
   }
   printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
 
-  size_t plaintextlen = 8192;
-  unsigned char *plaintext = malloc(sizeof(unsigned char) * plaintextlen);
-  memset(plaintext, 0, plaintextlen);
-  size_t plaintextolen = 0;
-
-  ret = atchops_rsa_decrypt(privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextlen,
-                            &plaintextolen);
+  ret = atchops_rsa_decrypt(privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextsize,
+                            &plaintextlen);
   if (ret != 0) {
     printf("atchops_rsa_decrypt (failed): %d\n", ret);
     goto ret;
@@ -71,7 +70,6 @@ int main() {
   goto ret;
 
 ret: {
-  free(plaintext);
   return ret;
 }
 }

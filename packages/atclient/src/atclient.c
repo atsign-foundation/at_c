@@ -83,8 +83,8 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   root_command = calloc(root_command_len, sizeof(char));
   snprintf(root_command, root_command_len, "%s\r\n", atsign_without_prefix_str);
 
-  ret = atclient_connection_send(root_conn, (unsigned char *)root_command, root_command_len - 1, recv.bytes, recv.len,
-                                 &(recv.olen));
+  ret = atclient_connection_send(root_conn, (unsigned char *)root_command, root_command_len - 1, recv.bytes, recv.size,
+                                 &(recv.len));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n",
                           ret, root_command_len, root_command);
@@ -94,7 +94,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   // 2. init secondary connection
   // recv is something like 3b419d7a-2fee-5080-9289-f0e1853abb47.swarm0002.atsign.zone:5770
   // store host and port in separate vars
-  ret = atclient_atstr_set_literal(&url, "%.*s", (int)recv.olen, recv.bytes);
+  ret = atclient_atstr_set_literal(&url, "%.*s", (int)recv.len, recv.bytes);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal: %d\n", ret);
     goto exit;
@@ -103,7 +103,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   ret = atclient_connection_get_host_and_port(&host, &port, url);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.olen,
+                          "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.len,
                           recv.bytes);
     goto exit;
   }
@@ -122,7 +122,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   snprintf(from_command, from_command_len, "from:%s", root_command);
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)from_command, from_command_len - 1,
-                                 recv.bytes, recv.len, &(recv.olen));
+                                 recv.bytes, recv.size, &(recv.len));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -133,21 +133,21 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   free(from_command);
   from_command = NULL;
 
-  memcpy(challenge, recv.bytes, recv.olen);
+  memcpy(challenge, recv.bytes, recv.len);
   // remove data:
-  memmove(challenge, challenge + 5, recv.olen - 5);
-  challengelen = recv.olen - 5;  
+  memmove(challenge, challenge + 5, recv.len - 5);
+  challengelen = recv.len - 5;  
 
   // sign
   atclient_atbytes_reset(&recv);
-  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, challenge, challengelen, recv.bytes);
+  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, (unsigned char *) challenge, challengelen, recv.bytes);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;
   }
-  recv.olen = 256;
+  recv.len = 256;
 
-  ret = atchops_base64_encode(recv.bytes, recv.olen, signaturebase64, signaturebase64size, &signaturebase64len);
+  ret = atchops_base64_encode(recv.bytes, recv.len, signaturebase64, signaturebase64size, &signaturebase64len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
@@ -157,8 +157,8 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   pkam_command = calloc(pkam_command_len, sizeof(char));
   snprintf(pkam_command, pkam_command_len, "pkam:%s\r\n", signaturebase64);
   atclient_atbytes_reset(&recv);
-  ret = atclient_connection_send(&(ctx->secondary_connection), pkam_command, pkam_command_len - 1, recv.bytes, recv.len,
-                                 &recv.olen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *) pkam_command, pkam_command_len - 1, recv.bytes, recv.size,
+                                 &recv.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -168,10 +168,10 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   pkam_command = NULL;
 
   // check for data:success
-  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:success", 12)) {
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.len, "data:success", 12)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "recv was \"%.*s\" and did not have prefix \"data:success\"\n", (int)recv.olen, recv.bytes);
+                          "recv was \"%.*s\" and did not have prefix \"data:success\"\n", (int)recv.len, recv.bytes);
     goto exit;
   }
 

@@ -33,7 +33,7 @@ exit: {
 }
 }
 
-int atchops_iv_generate_base64(unsigned char *ivbase64, const size_t ivbase64len, size_t *ivbase64olen) {
+int atchops_iv_generate_base64(unsigned char *ivbase64, const size_t ivbase64size, size_t *ivbase64len) {
   int ret = 1;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
@@ -43,7 +43,7 @@ int atchops_iv_generate_base64(unsigned char *ivbase64, const size_t ivbase64len
     goto exit;
   }
 
-  ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64len, ivbase64olen);
+  ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, ivbase64len);
   if (ret != 0) {
     goto exit;
   }

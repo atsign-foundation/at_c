@@ -66,13 +66,13 @@ static int test1a() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "publickey", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "publickey", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not publickey, it is \"%s\"\n",
                           atkey.name.str);
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n",
                           atkey.sharedby.str);
     goto exit;
@@ -120,30 +120,30 @@ static int test1b() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "publickey", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "publickey", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not publickey, it is \"%s\"\n",
                           atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.namespacestr.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
-                          atkey.namespacestr.olen);
+  if (atkey.namespacestr.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.len is not 0, it is %lu\n",
+                          atkey.namespacestr.len);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.sharedwith.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
-                          atkey.sharedwith.olen);
+  if (atkey.sharedwith.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
+                          atkey.sharedwith.len);
     ret = 1;
     goto exit;
   }
@@ -192,27 +192,27 @@ static int test1c() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.sharedwith.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
-                          atkey.sharedwith.olen);
+  if (atkey.sharedwith.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
+                          atkey.sharedwith.len);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
                           atkey.namespacestr.str);
     ret = 1;
@@ -262,29 +262,29 @@ static int test1d() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@jeremy", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
-                          atkey.sharedwith.olen);
+  if (atkey.sharedwith.len != 0 && strlen(atkey.sharedwith.str) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
+                          atkey.sharedwith.len);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
                           atkey.namespacestr.str);
     ret = 1;
@@ -335,28 +335,28 @@ static int test2a() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name.wavi", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name.wavi", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name.wavi, it is \"%s\"\n",
                           atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@bob", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @bob, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedwith.str, "@alice", atkey.sharedwith.olen) != 0) {
+  if (strncmp(atkey.sharedwith.str, "@alice", atkey.sharedwith.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @alice, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
                           atkey.namespacestr.str);
     ret = 1;
@@ -406,29 +406,29 @@ static int test2b() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0) {
+  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.namespacestr.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
-                          atkey.namespacestr.olen);
+  if (atkey.namespacestr.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.len is not 0, it is %lu\n",
+                          atkey.namespacestr.len);
     ret = 1;
     goto exit;
   }
@@ -473,29 +473,29 @@ static int test2c() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0) {
+  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.namespacestr.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
-                          atkey.namespacestr.olen);
+  if (atkey.namespacestr.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.len is not 0, it is %lu\n",
+                          atkey.namespacestr.len);
     ret = 1;
     goto exit;
   }
@@ -543,27 +543,27 @@ static int test2d() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.olen) != 0) {
+  if (strncmp(atkey.sharedwith.str, "@bob", atkey.sharedwith.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
                           atkey.namespacestr.str);
     ret = 1;
@@ -613,30 +613,30 @@ static int test3a() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "_lastnotificationid", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "_lastnotificationid", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not _lastnotificationid, it is \"%s\"\n",
                           atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@alice123_4😘", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@alice123_4😘", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice123_4😘, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.sharedwith.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
-                          atkey.sharedwith.olen);
+  if (atkey.sharedwith.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
+                          atkey.sharedwith.len);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.namespacestr.olen != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
-                          atkey.namespacestr.olen);
+  if (atkey.namespacestr.len != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.len is not 0, it is %lu\n",
+                          atkey.namespacestr.len);
     ret = 1;
     goto exit;
   }
@@ -685,31 +685,31 @@ static int test4a() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@alice", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
-                          atkey.sharedwith.olen);
+  if (atkey.sharedwith.len != 0 && strlen(atkey.sharedwith.str) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
+                          atkey.sharedwith.len);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.namespacestr.olen != 0 && strlen(atkey.namespacestr.str) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.olen is not 0, it is %lu\n",
-                          atkey.namespacestr.olen);
+  if (atkey.namespacestr.len != 0 && strlen(atkey.namespacestr.str) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.len is not 0, it is %lu\n",
+                          atkey.namespacestr.len);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr.str is not empty, it is \"%s\"\n",
                           atkey.namespacestr.str);
     ret = 1;
@@ -759,29 +759,29 @@ static int test4b() {
     goto exit;
   }
 
-  if (strncmp(atkey.name.str, "name", atkey.name.olen) != 0) {
+  if (strncmp(atkey.name.str, "name", atkey.name.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.sharedby.str, "@jeremy_0", atkey.sharedby.olen) != 0) {
+  if (strncmp(atkey.sharedby.str, "@jeremy_0", atkey.sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy_0, it is \"%s\"\n",
                           atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  if (atkey.sharedwith.olen != 0 && strlen(atkey.sharedwith.str) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.olen is not 0, it is %lu\n",
-                          atkey.sharedwith.olen);
+  if (atkey.sharedwith.len != 0 && strlen(atkey.sharedwith.str) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
+                          atkey.sharedwith.len);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
                           atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.olen) != 0) {
+  if (strncmp(atkey.namespacestr.str, "wavi", atkey.namespacestr.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
                           atkey.namespacestr.str);
     ret = 1;

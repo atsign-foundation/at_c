@@ -116,7 +116,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // ===============
 
   // read anything that was already sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.len);
+  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.size);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -130,7 +130,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   // read anything that was sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.len);
+  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.size);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -199,7 +199,7 @@ exit: { return; }
 }
 
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
-                             unsigned char *recv, const size_t recvlen, size_t *olen) {
+                             unsigned char *recv, const size_t recvsize, size_t *recvlen) {
   int ret = 1;
 
   atclient_atstr stdoutbuffer;
@@ -216,16 +216,16 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
-  fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
+  fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
-                        (int)stdoutbuffer.olen, stdoutbuffer.str);
+                        (int)stdoutbuffer.len, stdoutbuffer.str);
 
-  memset(recv, 0, recvlen);
+  memset(recv, 0, recvsize);
   int found = 0;
   size_t l = 0;
   do {
-    ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvlen - l);
+    ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvsize - l);
     if (ret < 0) {
       goto exit;
     }
@@ -234,7 +234,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     for (int i = l; i >= l - ret && i >= 0; i--) {
       // printf("i: %d c: %.2x\n", i, (unsigned char) *(recv + i));
       if (*(recv + i) == '\n') {
-        *olen = i;
+        *recvlen = i;
         found = 1;
         break;
       }
@@ -250,17 +250,17 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
 
   atclient_atstr_reset(&stdoutbuffer);
-  ret = atclient_atstr_set_literal(&stdoutbuffer, "%.*s", (int)*olen, recv);
+  ret = atclient_atstr_set_literal(&stdoutbuffer, "%.*s", (int)*recvlen, recv);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
     goto exit;
   }
-  fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.olen);
+  fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
-                        (int)stdoutbuffer.olen, stdoutbuffer.str);
-  memset(recv, 0, sizeof(unsigned char) * recvlen); // clear the buffer
-  memcpy(recv, stdoutbuffer.str, stdoutbuffer.olen);
+                        (int)stdoutbuffer.len, stdoutbuffer.str);
+  memset(recv, 0, sizeof(unsigned char) * recvsize); // clear the buffer
+  memcpy(recv, stdoutbuffer.str, stdoutbuffer.len);
   goto exit;
 
 exit: {
@@ -284,17 +284,17 @@ int atclient_connection_is_connected(atclient_connection *ctx) {
   int ret = 0; // false by default
   const char *cmd = "\r\n";
   const size_t cmdlen = strlen(cmd);
-  const size_t recvlen = 128;
-  unsigned char *recv = malloc(sizeof(unsigned char) * recvlen);
-  memset(recv, 0, recvlen);
-  size_t olen = 0;
+  const size_t recvsize = 128;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
 
-  ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvlen, &olen);
+  ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
   if (ret != 0) {
     goto exit;
   }
 
-  if (olen > 0) {
+  if (recvlen > 0) {
     ret = 1; // true
   } else {
     ret = 0; // false
@@ -335,7 +335,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
   }
 
   strncpy(host->str, url.str, hostlen);
-  host->len = hostlen;
+  host->size = hostlen;
   host->str[hostlen] = '\0';
   *port = atoi(colon + 1);
   if (*port == 0) {

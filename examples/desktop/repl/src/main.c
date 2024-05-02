@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
     ret =
-        atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.len, recv.bytes, recv.len, &recv.len);
+        atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.len, recv.bytes, recv.size, &recv.len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                             "atclient_connection_send: %d | failed to send command\n", ret);

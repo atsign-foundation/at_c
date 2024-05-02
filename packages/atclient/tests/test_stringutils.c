@@ -11,20 +11,20 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
-  const size_t outlen = 4096;
-  char *out = (char *)malloc(sizeof(char) * outlen);
-  memset(out, 0, sizeof(char) * outlen);
-  size_t outolen = 0;
+  const size_t outsize = 4096;
+  char *out = (char *)malloc(sizeof(char) * outsize);
+  memset(out, 0, sizeof(char) * outsize);
+  size_t outlen = 0;
 
-  const size_t stringlen = 4096;
-  char *string = (char *)malloc(sizeof(char) * stringlen);
-  memset(string, 0, sizeof(char) * stringlen);
+  const size_t stringsize = 4096;
+  char *string = (char *)malloc(sizeof(char) * stringsize);
+  memset(string, 0, sizeof(char) * stringsize);
   strcpy(string, "@bob");
 
-  const size_t tokenslen = 64;
-  char *tokens[tokenslen];
-  memset(tokens, 0, sizeof(char *) * tokenslen); // set all pointers to NULL (0
-  size_t tokensolen = 0;
+  const size_t tokenssize = 64;
+  char *tokens[tokenssize];
+  memset(tokens, 0, sizeof(char *) * tokenssize); // set all pointers to NULL (0
+  size_t tokenslen = 0;
 
   int startswith;
 
@@ -69,7 +69,7 @@ int main() {
   // 3. trim whitespace and newline
   strcpy(string, "   scan jeremy_0\n ");
   const char *expectedresult = "scan jeremy_0";
-  ret = atclient_stringutils_trim_whitespace(string, strlen(string), out, outlen, &outolen);
+  ret = atclient_stringutils_trim_whitespace(string, strlen(string), out, outsize, &outlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: %d | %s\n", ret,
                           string);

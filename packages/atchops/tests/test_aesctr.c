@@ -45,10 +45,9 @@ int main() {
     goto exit;
   }
 
-  memset(iv, 0, 16);
+  memset(iv, 0, sizeof(unsigned char) * 16);
   ret = atchops_aesctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, plaintext2,
                                plaintext2size, &plaintext2len);
-  // printf("decrypted (%lu) %.*s\n", olen, (int) olen, plaintext2);
   if (ret != 0) {
     printf("atchops_aesctr_decrypt (failed): %d\n", ret);
     goto exit;

@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outlen,
-                                         size_t *outolen) {
+int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outsize,
+                                         size_t *outlen) {
   int ret = 1;
 
   if (string == NULL) {
@@ -29,15 +29,15 @@ int atclient_stringutils_trim_whitespace(const char *string, const size_t string
     end--;
   }
 
-  *outolen = end - start + 1;
+  *outlen = end - start + 1;
 
-  if (*outolen >= outlen) {
+  if (*outlen >= outsize) {
     ret = 1;
     goto exit;
   }
 
-  strncpy(out, start, *outolen);
-  out[*outolen] = '\0';
+  strncpy(out, start, *outlen);
+  out[*outlen] = '\0';
 
   ret = 0;
   goto exit;
