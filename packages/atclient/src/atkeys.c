@@ -62,7 +62,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   // 1a. self encryption key
   ret = atclient_atstr_set(&(atkeys->selfencryptionkeystr), selfencryptionkeystr, selfencryptionkeystrlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
     goto exit;
   }
@@ -70,7 +70,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_base64_decode(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, selfencryptionkey,
                               selfencryptionkeysize, &selfencryptionkeylen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding selfencryption key: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding selfencryption key: %d\n", ret);
     goto exit;
   }
 
@@ -78,7 +78,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_base64_decode((unsigned char *)aespkampublickeystr, aespkampublickeylen, rsakeyencrypted,
                               rsakeyencryptedsize, &rsakeyencryptedlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam public key: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam public key: %d\n", ret);
     goto exit;
   }
 
@@ -86,7 +86,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.len,
                                &(atkeys->pkampublickeystr.olen));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
     goto exit;
   }
@@ -98,7 +98,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_base64_decode((unsigned char *)aespkamprivatekeystr, aespkamprivatekeylen, rsakeyencrypted,
                               rsakeyencryptedsize, &rsakeyencryptedlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam private key: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam private key: %d\n", ret);
     goto exit;
   }
 
@@ -106,7 +106,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.len,
                                &(atkeys->pkamprivatekeystr.olen));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
     goto exit;
   }
@@ -118,14 +118,14 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_base64_decode((unsigned char *)aesencryptpublickeystr, aesencryptpublickeylen, rsakeyencrypted,
                               rsakeyencryptedsize, &rsakeyencryptedlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt public key: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt public key: %d\n", ret);
     goto exit;
   }
 
   ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen, atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
                                &(atkeys->encryptpublickeystr.olen));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
     goto exit;
   }
@@ -137,7 +137,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_base64_decode((unsigned char *)aesencryptprivatekeystr, aesencryptprivatekeylen, rsakeyencrypted,
                               rsakeyencryptedsize, &rsakeyencryptedlen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt private key: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt private key: %d\n", ret);
     goto exit;
   }
 
@@ -145,7 +145,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.len,
                                &(atkeys->encryptprivatekeystr.olen));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt encrypt private key\n", ret);
     goto exit;
   }
@@ -156,7 +156,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_rsakey_populate_publickey(&(atkeys->pkampublickey), atkeys->pkampublickeystr.str,
                                           atkeys->pkampublickeystr.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_publickey: %d | failed to populate pkam public key\n", ret);
     goto exit;
   }
@@ -165,7 +165,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_rsakey_populate_privatekey(&(atkeys->pkamprivatekey), atkeys->pkamprivatekeystr.str,
                                            atkeys->pkamprivatekeystr.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_privatekey: %d | failed to populate pkam private key\n", ret);
     goto exit;
   }
@@ -174,7 +174,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_rsakey_populate_privatekey(&(atkeys->encryptprivatekey), atkeys->encryptprivatekeystr.str,
                                            atkeys->encryptprivatekeystr.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_privatekey: %d | failed to populate encrypt private key\n", ret);
     goto exit;
   }
@@ -183,7 +183,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   ret = atchops_rsakey_populate_publickey(&(atkeys->encryptpublickey), atkeys->encryptpublickeystr.str,
                                           atkeys->encryptpublickeystr.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_publickey: %d | failed to populate encrypt public key\n", ret);
     goto exit;
   }
@@ -207,7 +207,7 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atcl
       atkeysfile.selfencryptionkeystr.str, atkeysfile.selfencryptionkeystr.olen)
     ;
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
     goto exit;
   }
@@ -225,14 +225,14 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
 
   ret = atclient_atkeysfile_read(&atkeysfile, path);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atkeysfile_read: %d | failed to read file at path: %s\n", ret, path);
     goto exit;
   }
 
   ret = atclient_atkeys_populate_from_atkeysfile(atkeys, atkeysfile);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atkeys_populate_from_atkeysfile: %d | failed to decrypt & populate struct \n", ret);
     goto exit;
   }

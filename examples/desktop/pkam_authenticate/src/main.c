@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
   int ret = 1;
 
-  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
   // 1. init atkeys
 
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   if (ret != 0) {
     goto exit;
   }
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
 
   // 1b. populate `atkeys` struct
   atclient_atkeys atkeys;
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   if (ret != 0) {
     goto exit;
   }
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
 
   // 2. pkam auth
   atclient atclient;
@@ -50,10 +50,10 @@ int main(int argc, char **argv) {
   atclient_atsign_init(&atsign, ATSIGN);
 
   if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATSIGN)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
   goto exit;

@@ -9,12 +9,12 @@
 
 #define TAG "atclient_get_publickey"
 
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
-                           const size_t valuelen, size_t *valueolen, bool bypasscache) {
+int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value,
+                           const size_t valuesize, size_t *valueolen, bool bypasscache) {
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
     return 1;
   }
 
@@ -34,7 +34,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   // 2. build plookup: command
   ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.len, &atkeystr.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
 
@@ -48,7 +48,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   if (ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n",
                           atkeystr.str);
     goto exit;
   }
@@ -65,7 +65,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferolen,
                                  recv.bytes, recv.len, &recv.olen);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
@@ -74,7 +74,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   // 4a. if recv does not start with "data:", we probably got an error
   if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:", 5)) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                           (int)recv.olen, recv.bytes);
     goto exit;
   }
@@ -84,7 +84,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   root = cJSON_Parse(recvwithoutdata);
   if (root == NULL) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
   }
 
@@ -92,11 +92,11 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   cJSON *data = cJSON_GetObjectItem(root, "data");
   if (data == NULL) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
     goto exit;
   }
 
-  memset(value, 0, valuelen);
+  memset(value, 0, valuesize);
   memcpy(value, data->valuestring, strlen(data->valuestring));
   *valueolen = strlen(value);
 
@@ -104,7 +104,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
   cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
   if (metadata == NULL) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
     goto exit;
   }
 
@@ -112,7 +112,7 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
 
   ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
     goto exit;
   }
 

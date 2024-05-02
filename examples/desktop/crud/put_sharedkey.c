@@ -29,7 +29,7 @@ int main()
 {
     int ret = 1;
 
-    atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
     const size_t valuesize = 2048;
     char value[valuesize];
@@ -57,30 +57,30 @@ int main()
     atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
     if((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
         goto exit;
     }
 
     if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATSIGN, strlen(ATSIGN), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
         goto exit;
     }
 
     atclient_atkey_metadata_set_ttl(&atkey.metadata, 60*1000*10); // 10 minutes
 
     if((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
         goto exit;
     }
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Putting atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen, (int) atkeystr.olen, atkeystr.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Putting atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen, (int) atkeystr.olen, atkeystr.str);
 
-    if((ret = atclient_put(&atclient, &root_connection, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL) != 0)) {
-        atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put public key");
+    if((ret = atclient_put(&atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL) != 0)) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put public key");
         goto exit;
     }
 
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Done put.\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Done put.\n");
 
     ret = 0;
     goto exit;

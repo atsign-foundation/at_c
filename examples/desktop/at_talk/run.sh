@@ -8,7 +8,7 @@ sudo rm -f bin/at_talk
 # install dependencies
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
-"$SCRIPT_DIRECTORY/../../../packages/atclient/tools/install.sh"
+"$SCRIPT_DIRECTORY/../../../tools/install.sh"
 cd "$SCRIPT_DIRECTORY"
 
 # configure

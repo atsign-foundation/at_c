@@ -15,7 +15,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   // atsign_str is longer than expected or null/empty
   if ((strlen(atsign_str) > maxatlen) || (atsign_str == NULL) || (strlen(atsign_str) == 0)) {
     ret = 1;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     return ret;
   }
 
@@ -25,7 +25,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   size_t atolen = 0;
   ret = atclient_atsign_with_at_symbol(atsign->atsign, maxatlen, &(atolen), atsign_str, strlen(atsign_str));
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
     return ret;
   }
 
@@ -39,7 +39,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size
                                       const char *originalatsign, const size_t originalatsignlen) {
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n",
                           atsignlen);
     ret = 1;
@@ -48,7 +48,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size
 
   if (originalatsignlen <= 0) {
     ret = 2;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
     goto exit;
   }
 
@@ -70,7 +70,7 @@ int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t 
                                    const char *originalatsign, const size_t originalatsignlen) {
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n",
                           atsignlen);
     ret = 1;
@@ -79,7 +79,7 @@ int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t 
 
   if (originalatsignlen <= 0) {
     ret = 2;
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
     goto exit;
   }
 

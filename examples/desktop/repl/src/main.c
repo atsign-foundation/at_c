@@ -19,7 +19,7 @@ static char *get_home_dir() {
 
 int main(int argc, char *argv[]) {
   int ret = 1;
-  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   const unsigned long cmdlen = 4096;
   atclient_atbytes cmd;
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   atclient_init(&atclient);
 
   if (argc < 2 || argc > 3) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Usage: ./repl <atsign> [rootUrl]");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Usage: ./repl <atsign> [rootUrl]");
     ret = 1;
     goto exit;
   }
@@ -56,14 +56,14 @@ int main(int argc, char *argv[]) {
     strcat(temp, atsign);
     atsign = temp;
   }
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using atSign \"%s\" and rootUrl \"%s:%d\"\n", atsign,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using atSign \"%s\" and rootUrl \"%s:%d\"\n", atsign,
                         roothost, rootport);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
   char *homedir = get_home_dir();
   if (homedir == NULL || strlen(homedir) == 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get home directory\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get home directory\n");
     ret = 1;
     goto exit;
   }
@@ -72,26 +72,26 @@ int main(int argc, char *argv[]) {
   memset(atkeysfilepath, 0, sizeof(char) * 1024); // Clear the buffer (for safety)
   sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
   if (atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeysfilepath);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeysfilepath);
     ret = 1;
     goto exit;
   }
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Read atKeys file at path %s\n", atkeysfilepath);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Read atKeys file at path %s\n", atkeysfilepath);
 
   ret = atclient_connection_connect(&root_conn, roothost, rootport);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_connection_connect: %d | failed to connect to root\n", ret);
     goto exit;
   }
 
   ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, atsign);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
     goto exit;
   }
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n",
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n",
                         atsign);
 
   const unsigned long bufferlen = 1024;
@@ -104,19 +104,19 @@ int main(int argc, char *argv[]) {
     fgets(buffer, bufferlen, stdin);
     ret = atclient_atbytes_convert(&cmd, buffer, strlen(buffer));
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                             "atclient_atbytes_convert: %d | failed to convert command\n", ret);
       goto exit;
     }
     if (strncmp((char *) cmd.bytes, "/exit", strlen("/exit")) == 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Exiting REPL...\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Exiting REPL...\n");
       loop = 0;
       continue;
     }
     ret =
         atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.olen, recv.bytes, recv.len, &recv.olen);
     if (ret != 0) {
-      atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                             "atclient_connection_send: %d | failed to send command\n", ret);
       goto exit;
     }

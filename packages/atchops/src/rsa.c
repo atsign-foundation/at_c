@@ -15,14 +15,14 @@
 
 int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_md_type_t mdtype,
                      const unsigned char *message, const size_t messagelen, unsigned char *signature) {
-  int ret = 1; // error, until successful.
+  int ret = 1;
 
   size_t hashsize;
   if (mdtype == MBEDTLS_MD_SHA256) {
     hashsize = 32;
   } else {
-    // TODO: log error
-    return 1; // unsupported hash type
+    // TODO: log error unsupported hash type, untested
+    return 1;
   }
 
   unsigned char hash[hashsize];
@@ -39,7 +39,6 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
 
   // 1. hash the message
   ret = atchops_sha_hash(mdtype, message, messagelen, hash);
-  // printf("atchops_sha_hash: %d\n", ret);
   if (ret != 0) {
     goto ret;
   }
@@ -85,13 +84,25 @@ ret: {
 int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_md_type_t mdtype, const unsigned char *message,
                        const size_t messagelen, unsigned char *signature) {
   int ret = 1;
-  mbedtls_rsa_context rsa;
 
-  const size_t hashsize = 32;
+  size_t hashsize;
+
+  if(mdtype == MBEDTLS_MD_SHA256)
+  {
+    hashsize = 32;
+  }
+  else
+  {
+    // TODO log error, not supported hash type cause untested
+    return 1;
+  }
+
   unsigned char hash[hashsize];
   memset(hash, 0, sizeof(unsigned char) * hashsize);
 
+  mbedtls_rsa_context rsa;
   mbedtls_rsa_init(&rsa);
+
   if ((ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, 0, NULL, 0, NULL, 0,
                                     publickey.e.value, publickey.e.len)) != 0) {
     goto exit;
@@ -133,10 +144,6 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
   mbedtls_ctr_drbg_context ctr_drbg_ctx;
   mbedtls_ctr_drbg_init(&ctr_drbg_ctx);
 
-  const size_t outputsize = 256; // 256 bytes is the result of a 2048-RSA modulus
-  unsigned char output[outputsize];
-  memset(output, 0, sizeof(unsigned char) * outputsize);
-
   // 1. rsa encrypt the plain text
   ret = mbedtls_rsa_import_raw(&rsa, publickey.n.value, publickey.n.len, NULL, -1, NULL, -1, NULL, -1,
                                publickey.e.value, publickey.e.len);
@@ -159,10 +166,12 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
     goto exit;
   }
 
-  ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, plaintext, output);
+  ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, plaintextlen, plaintext, ciphertext);
   if (ret != 0) {
     goto exit;
   }
+
+  *ciphertextlen = 256;
 
   goto exit;
 
@@ -187,6 +196,10 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsign
 
   mbedtls_rsa_context rsa;
   mbedtls_rsa_init(&rsa);
+
+  // const size_t outputsize = plaintextsize;
+  // unsigned char output[outputsize];
+  // memset(output, 0, sizeof(unsigned char) * outputsize);
 
   // 1. rsa decrypt the base64 decoded ciphertext
   ret = mbedtls_rsa_import_raw(&rsa, privatekey.n.value, privatekey.n.len, privatekey.p.value, privatekey.p.len,

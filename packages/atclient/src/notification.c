@@ -70,7 +70,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   // Step 2 generate / retrieve values which could potentially fail
   res = atchops_uuid_init();
   if (res != 0) {
-    atclient_atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
+    atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
                           "atchops_uuid_init failed with code %d\n", res);
     return res;
   }
@@ -78,7 +78,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   // careful about when this is called, since it will write a null terminator to the 37th char
   res = atchops_uuid_generate(params->id, 37);
   if (res != 0) {
-    atclient_atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
+    atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
                           "atchops_uuid_generate failed with code %d\n", res);
     return res;
   }
@@ -86,7 +86,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   struct timeval tv;
   res = gettimeofday(&tv, NULL);
   if (res != 0) {
-    atclient_atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
+    atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
                           // TODO: get errno
                           "gettimeofday failed with code stored in errno %d\n", res);
     return res;
@@ -168,7 +168,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
 
   res = atclient_connection_send(&ctx->secondary_connection, (const unsigned char *)cmd, off, recv, recvlen, &recvolen);
   if (res != 0) {
-    atclient_atlogger_log("atclient | notify", ATLOGGER_LOGGING_LEVEL_WARN,
+    atlogger_log("atclient | notify", ATLOGGER_LOGGING_LEVEL_WARN,
                           "atclient_connection_send failed with code %d\n", res);
     return res;
   }
@@ -237,7 +237,7 @@ int atclient_monitor(atclient *ctx, const atclient_monitor_params *params) {
 
     // Check if we got a non-notification
     if (strncmp(buffer, "notification:", 13) != 0) {
-      atclient_atlogger_log(
+      atlogger_log(
           "monitor", ATLOGGER_LOGGING_LEVEL_WARN,
           "Parsed a non-notification, avoid potential race conditions by using a separate atclient for monitor");
       goto reset_buffer;

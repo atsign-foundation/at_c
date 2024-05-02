@@ -1,0 +1,38 @@
+name: Unit and Functional Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: atsdk Unit CTest
+        run: |
+          ./tools/run_ctest.sh
+
+  functional-tests:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: Load secrets
+        working-directory: tests/functional_tests
+        run: |
+          mkdir -p ~/.atsign/keys/
+          echo "${{ secrets.ATKEYS_12ALPACA }}" > ~/.atsign/keys/@12alpaca_key.atKeys
+          echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > ~/.atsign/keys/@12snowboating_key.atKeys
+
+      - name: Build and Run Functional Tests
+        working-directory: tests/functional_tests
+        run: |
+          tools/run_ctest.sh

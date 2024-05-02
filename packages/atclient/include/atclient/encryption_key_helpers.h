@@ -50,14 +50,13 @@ int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *ro
  * @brief Retreives the public encryption key of a given atsign.
  *
  * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
  * @param recipient An atclient_atsign struct corresponding to the atsign which public encryption key you would like to
  * obtain. It may receive a NULL value, in which case, the atclient_atsign contained in the ctx parameter will be used
  * (required)
  * @param public_encryption_key The output public key in b64 format (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_conn, const atclient_atsign *atsign,
+int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
                                        char *public_encryption_key);
 
 /**
@@ -66,13 +65,11 @@ int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_
  * (shared_key.other@me and @other:shared_key@me)
  *
  * @param atclient the atclient context (must be initialized and pkam_authenticated)
- * @param root_conn the root connection (must be initialized)
- * @param sharedby 
+ * @param sharedby
  * @param sharedwith
  * @param sharedenckeybyme
  * @return int
  */
-int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, atclient_connection *root_conn,
-                                                                const atclient_atsign *sharedby,
+int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, const atclient_atsign *sharedby,
                                                                 const atclient_atsign *sharedwith,
                                                                 char *sharedenckeybyme);
