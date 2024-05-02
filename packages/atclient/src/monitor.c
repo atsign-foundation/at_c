@@ -89,8 +89,6 @@ int atclient_send_heartbeat(atclient *ctx) {
 
 static int parse_notification(atclient_monitor_message *message, char *message_body);
 
-
-
 int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message) {
   int ret = -1;
   
@@ -104,53 +102,37 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
   while (done_reading == 0) {
     atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk\n");
     if (chunks > 0) {
-      atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_INFO, "Reallocating memory to %ld\n", chunk_size + (chunk_size * chunks) * sizeof(char));
       tmp_buffer = realloc(buffer, chunk_size + (chunk_size * chunks) * sizeof(char));
       buffer = tmp_buffer;
       tmp_buffer = NULL;
     }
 
-    printf("Buffer mem addr (ptr): %p\n", (void *)(buffer));
     size_t off = chunk_size * chunks;
     for (int i = 0; i < chunk_size; i++) {
       ret = mbedtls_ssl_read(&(monitor_connection->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
-      // printf("%02x", buffer[off + i]);
-      printf("Index: %d", off + i);
       if (ret < 0 || buffer[off + i] == '\n') {
-        // printf("Direccion de memoria (ptr): %p\n", (void *)(buffer + off + i));
-        // printf("Direccion de memoria (array): %p\n", (void *)&buffer[off + i]);
         buffer[off + i] = '\0';
-        // printf("FULL BUFFER WITH ZERO INSTEAD: '%s'\n", buffer);
         done_reading = 1;
         break;
       }
     }
     chunks = chunks + 1;
   }
-  printf("Here we are 1\n");
-
-  printf("This is r: '\r'");
  
   if (ret < 0) {
     free(buffer);
     return ret;
   }
-  printf("Here we are 2\n");
 
   int i = 0;
   while (buffer[i] != ':') {
     i++;
   }
 
-  // printf("FULL BUFFER: '%s'\n", buffer);
-
   const char *message_type = strtok(buffer, ":"); // everything up to first ':'
   char *message_body = strtok(NULL, "\n");
   message_body = message_body + 1;
-  printf("message_type: '%s'\n", message_type);
-  printf("message_body: '%s'\n", message_body);
 
-  printf("Here we are 3\n");
   if (strcmp(message_type, "data") == 0) {
     message->type = MMT_data_response;
     message->data_response = message_body;
@@ -169,7 +151,6 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     ret = -1;
   }
 
-  // free(message_type);
   free(buffer);
   return ret;
 }
