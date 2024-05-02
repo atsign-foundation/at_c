@@ -63,7 +63,7 @@ jobs:
           cmake -S . -B build -DTARGET_SRC=put_sharedkey.c && cmake --build build
       
       - name: Build events
-        working-directory: examples/desktopevents
+        working-directory: examples/desktop/events
         run: |
           cmake -S . -B build
           cmake --build build
