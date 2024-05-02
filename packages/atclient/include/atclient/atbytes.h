@@ -8,9 +8,9 @@
  * @brief Represents a buffer of bytes. Similar to atclient_atstr
  */
 typedef struct atclient_atbytes {
-  size_t len;    // the allocated length of the buffer
+  size_t size;    // the allocated length of the buffer
   unsigned char *bytes; // the buffer of bytes (pointer to the first byte in the buffer on the heap)
-  size_t olen;   // the output length of the buffer
+  size_t len;   // the output length of the buffer
 } atclient_atbytes;
 
 /**

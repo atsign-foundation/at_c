@@ -7,19 +7,19 @@
  * @brief Represents a string that is allocated on the heap
  */
 typedef struct atclient_atstr {
-  size_t len;  // buffer length
+  size_t size;  // buffer length
   char *str;          // string
-  size_t olen; // output length (length of string)
+  size_t len; // output length (length of string)
 } atclient_atstr;
 
 /**
  * @brief Initialize an atstr
  *
  * @param atstr pointer to atstr to initialize
- * @param bufferlen length of buffer to allocate in bytes (recommended to use a number that is a power of 2). the
- * bufferlen is the length of the buffer generated. we do not add 1 for null terminator.
+ * @param buffersize length of buffer to allocate in bytes (recommended to use a number that is a power of 2). the
+ * buffersize is the length of the buffer generated. we do not add 1 for null terminator.
  */
-void atclient_atstr_init(atclient_atstr *atstr, const size_t bufferlen);
+void atclient_atstr_init(atclient_atstr *atstr, const size_t buffersize);
 
 /**
  * @brief initialize an atstr with a literal string
@@ -27,7 +27,7 @@ void atclient_atstr_init(atclient_atstr *atstr, const size_t bufferlen);
  * @param atstr the atstr struct to populate
  * @param str the string to set atstr to. best to use string literals here. (or a null-terminated string)
  */
-int atclient_atstr_init_literal(atclient_atstr *atstr, const size_t bufferlen, const char *format, ...);
+int atclient_atstr_init_literal(atclient_atstr *atstr, const size_t buffersize, const char *format, ...);
 
 /**
  * @brief set an atstr to an empty string
@@ -41,9 +41,9 @@ void atclient_atstr_reset(atclient_atstr *atstr);
  *
  * @param atstr the atstr struct to populate
  * @param str the string to set atstr to
- * @param len the length of the string
+ * @param size the length of the string
  */
-int atclient_atstr_set(atclient_atstr *atstr, const char *str, const size_t len);
+int atclient_atstr_set(atclient_atstr *atstr, const char *str, const size_t size);
 
 /**
  * @brief Set an atstr to a literal string, assumed to be null-terminated

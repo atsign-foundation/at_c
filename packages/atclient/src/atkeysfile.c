@@ -141,19 +141,19 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
 
   // guarantee that all values are null terminated and are of correct length
   atclient_atstr aespkampublickey;
-  atclient_atstr_init(&aespkampublickey, atkeysfile->aespkampublickeystr.olen + 1);
+  atclient_atstr_init(&aespkampublickey, atkeysfile->aespkampublickeystr.len + 1);
 
   atclient_atstr aespkamprivatekey;
-  atclient_atstr_init(&aespkamprivatekey, atkeysfile->aespkamprivatekeystr.olen + 1);
+  atclient_atstr_init(&aespkamprivatekey, atkeysfile->aespkamprivatekeystr.len + 1);
 
   atclient_atstr aesencryptprivatekey;
-  atclient_atstr_init(&aesencryptprivatekey, atkeysfile->aesencryptprivatekeystr.olen + 1);
+  atclient_atstr_init(&aesencryptprivatekey, atkeysfile->aesencryptprivatekeystr.len + 1);
 
   atclient_atstr aesencryptpublickey;
-  atclient_atstr_init(&aesencryptpublickey, atkeysfile->aesencryptpublickeystr.olen + 1);
+  atclient_atstr_init(&aesencryptpublickey, atkeysfile->aesencryptpublickeystr.len + 1);
 
   atclient_atstr selfencryptionkey;
-  atclient_atstr_init(&selfencryptionkey, atkeysfile->selfencryptionkeystr.olen + 1);
+  atclient_atstr_init(&selfencryptionkey, atkeysfile->selfencryptionkeystr.len + 1);
 
   // create cJSON object
   cJSON *root = cJSON_CreateObject();
@@ -164,7 +164,7 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
   cJSON_AddStringToObject(root, "selfEncryptionKey", selfencryptionkey.str);
 
   ret =
-      atclient_atstr_set(&aespkampublickey, atkeysfile->aespkampublickeystr.str, atkeysfile->aespkampublickeystr.olen);
+      atclient_atstr_set(&aespkampublickey, atkeysfile->aespkampublickeystr.str, atkeysfile->aespkampublickeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set aespkampublickeystr\n", ret);
@@ -172,7 +172,7 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
   }
 
   ret = atclient_atstr_set(&aespkamprivatekey, atkeysfile->aespkamprivatekeystr.str,
-                           atkeysfile->aespkamprivatekeystr.olen);
+                           atkeysfile->aespkamprivatekeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set aespkamprivatekeystr\n", ret);
@@ -180,7 +180,7 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
   }
 
   ret = atclient_atstr_set(&aesencryptprivatekey, atkeysfile->aesencryptprivatekeystr.str,
-                           atkeysfile->aesencryptprivatekeystr.olen);
+                           atkeysfile->aesencryptprivatekeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set aesencryptprivatekeystr\n", ret);
@@ -188,7 +188,7 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
   }
 
   ret = atclient_atstr_set(&aesencryptpublickey, atkeysfile->aesencryptpublickeystr.str,
-                           atkeysfile->aesencryptpublickeystr.olen);
+                           atkeysfile->aesencryptpublickeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set aesencryptpublickeystr\n", ret);
@@ -196,7 +196,7 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
   }
 
   ret = atclient_atstr_set(&selfencryptionkey, atkeysfile->selfencryptionkeystr.str,
-                           atkeysfile->selfencryptionkeystr.olen);
+                           atkeysfile->selfencryptionkeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n", ret);
@@ -204,9 +204,9 @@ int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char 
   }
 
   // check that atkeysfile has populated values
-  if (atkeysfile->aespkamprivatekeystr.olen == 0 || atkeysfile->aespkampublickeystr.olen == 0 ||
-      atkeysfile->aesencryptprivatekeystr.olen == 0 || atkeysfile->aesencryptpublickeystr.olen == 0 ||
-      atkeysfile->selfencryptionkeystr.olen == 0) {
+  if (atkeysfile->aespkamprivatekeystr.len == 0 || atkeysfile->aespkampublickeystr.len == 0 ||
+      atkeysfile->aesencryptprivatekeystr.len == 0 || atkeysfile->aesencryptpublickeystr.len == 0 ||
+      atkeysfile->selfencryptionkeystr.len == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeysfile has not been populated with values\n");
     ret = 1;
     goto exit;
