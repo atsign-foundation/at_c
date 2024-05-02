@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 #include <unistd.h>
 
 #define TAG "REPL"
@@ -21,11 +22,18 @@ int main(int argc, char *argv[]) {
   int ret = 1;
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const unsigned long cmdlen = 4096;
+  char atkeysfilepath[1024];
+  memset(atkeysfilepath, 0, sizeof(char) * 1024); // Clear the buffer (for safety)
+
+  const size_t bufferlen = 1024;
+  char buffer[bufferlen];
+  memset(buffer, 0, sizeof(char) * bufferlen); // Clear the buffer (for safety
+
+  const size_t cmdlen = 4096;
   atclient_atbytes cmd;
   atclient_atbytes_init(&cmd, cmdlen);
 
-  const unsigned long recvlen = 4096;
+  const size_t recvlen = 4096;
   atclient_atbytes recv;
   atclient_atbytes_init(&recv, recvlen);
 
@@ -68,8 +76,6 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  char atkeysfilepath[1024];
-  memset(atkeysfilepath, 0, sizeof(char) * 1024); // Clear the buffer (for safety)
   sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
   if (atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeysfilepath);
@@ -94,9 +100,6 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n",
                         atsign);
 
-  const unsigned long bufferlen = 1024;
-  char buffer[bufferlen];
-
   int loop = 1;
   do {
     memset(buffer, 0, sizeof(char) * bufferlen);
@@ -114,7 +117,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
     ret =
-        atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.olen, recv.bytes, recv.len, &recv.olen);
+        atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.len, recv.bytes, recv.len, &recv.len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                             "atclient_connection_send: %d | failed to send command\n", ret);
