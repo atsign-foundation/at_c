@@ -1,4 +1,5 @@
 #include <atclient/atclient.h>
+#include <atclient/encryption_key_helpers.h>
 #include <atclient/atkeysfile.h>
 #include <atclient/atsign.h>
 #include <atlogger/atlogger.h>
