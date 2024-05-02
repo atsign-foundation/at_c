@@ -53,7 +53,7 @@ int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybas
     goto exit;
   }
 
-  ret = atchops_base64_encode(key, keysize, keybase64, keybase64size, keybase64size);
+  ret = atchops_base64_encode(key, keysize, keybase64, keybase64size, keybase64len);
   if (ret != 0) {
     goto exit;
   }
