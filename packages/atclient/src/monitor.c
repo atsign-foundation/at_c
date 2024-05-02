@@ -19,6 +19,8 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   free(message->notification.value);
 }
 
+void atclient_monitor_message_init(atclient_monitor_message *message) { memset(message, 0, sizeof(atclient_monitor_message)); }
+
 void atclient_monitor_init(atclient *monitor_ctx, const atclient_atsign atsign, const atclient_atkeys atkeys) {
   atclient_init(monitor_ctx);
   // TODO: these structs are copied over, but the underlying memory addresses are the same
@@ -86,30 +88,32 @@ int atclient_send_heartbeat(atclient *ctx) {
 }
 
 static int parse_notification(atclient_monitor_message *message, char *message_body);
+
 int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message) {
   int ret = -1;
-  // printf("Before malloc");
-  // size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN;
-  size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN * 5;
+  size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN;
   int chunks = 0;
-  char *buffer = malloc(chunk_size * 1 * sizeof(char));
-  // printf("After malloc");
+  char *buffer = malloc(chunk_size * sizeof(char));
 
   bool done_reading = 0;
 
   while (done_reading == 0) {
     atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk\n");
     if (chunks > 0) {
+      atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_INFO, "Reallocating memory\n");
       buffer = realloc(buffer, chunk_size * chunks * sizeof(char));
     }
-    size_t off = chunk_size * chunks++;
+
+    size_t off = chunk_size * chunks;
     for (int i = 0; i < chunk_size; i++) {
       ret = mbedtls_ssl_read(&(monitor_connection->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
       if (ret < 0 || buffer[off + i] == '\n') {
+        // buffer[off + i] = '\0';
         done_reading = 1;
         break;
       }
     }
+    chunks = chunks + 1;
   }
 
   if (ret < 0) {
@@ -123,7 +127,8 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
   }
 
   const char *message_type = strtok(buffer, ":"); // everything up to first ':'
-  char *message_body = strtok(NULL, "");
+  char *message_body = strtok(NULL, "\n");
+  message_body = message_body + 1;
 
   if (strcmp(message_type, "data") == 0) {
     message->type = MMT_data_response;
@@ -146,10 +151,12 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
   free(buffer);
   return ret;
 }
+
 static int parse_notification(atclient_monitor_message *message, char *message_body) {
   int ret = -1;
 
-  cJSON *root = cJSON_Parse(message_body);
+  cJSON *root = NULL;
+  root = cJSON_Parse(message_body);
   if (root == NULL) {
     cJSON_Delete(root);
     atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body");
@@ -158,7 +165,8 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   }
 
   cJSON *key = cJSON_GetObjectItem(root, "key");
-  atclient_atkey_from_string(&message->notification.key, key->valuestring, strlen(key->valuestring));
+  atclient_atkey_init(&(message->notification.key));
+  atclient_atkey_from_string(&(message->notification.key), key->valuestring, strlen(key->valuestring));
 
   if (false) { // TODO: if regex doesnt match // do we even need this now?
     atclient_atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Regex failed to match");
@@ -184,23 +192,60 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   atclient_atsign_init(&message->notification.to, to->valuestring);
 
   cJSON *epochMillis = cJSON_GetObjectItem(root, "epochMillis");
-  message->notification.epochMillis = epochMillis->valueint;
+  if (epochMillis != NULL) {
+    if (epochMillis->type != cJSON_NULL) {
+      message->notification.epochMillis = epochMillis->valueint;
+    } else {
+      message->notification.epochMillis = 0;
+    }
+  }
 
   cJSON *messageType = cJSON_GetObjectItem(root, "messageType");
-  strncpy(message->notification.messageType, messageType->valuestring, 5);
+  if (messageType != NULL) {
+    if (messageType->type != cJSON_NULL) {
+      strncpy(message->notification.messageType, messageType->valuestring, 5);
+    } else {
+      strncpy(message->notification.messageType, "null", 4);
+    }
+  }
 
   cJSON *isEncrypted = cJSON_GetObjectItem(root, "isEncrypted");
-  message->notification.isEncrypted = isEncrypted->valueint != 0;
+  if (isEncrypted != NULL) {
+    if (isEncrypted->type != cJSON_NULL) {
+      message->notification.isEncrypted = isEncrypted->valueint != 0;
+    } else {
+      message->notification.isEncrypted = false;
+    }
+  }
 
   cJSON *value = cJSON_GetObjectItem(root, "value");
-  message->notification.value = malloc(strlen(value->valuestring));
-  strcpy(message->notification.value, value->valuestring);
+  if (value != NULL) {
+    if (value->type != cJSON_NULL) {
+      message->notification.value = malloc(strlen(value->valuestring));
+      strcpy(message->notification.value, value->valuestring);
+    } else {
+      message->notification.value = malloc(strlen("null"));
+      strcpy(message->notification.value, "null");
+    }
+  }
 
   cJSON *operation = cJSON_GetObjectItem(root, "operation");
-  strncpy(message->notification.operation, operation->valuestring, 7);
+  if (operation != NULL) {
+    if (operation->type != cJSON_NULL) {
+      strncpy(message->notification.operation, operation->valuestring, 7);
+    } else {
+      strncpy(message->notification.operation, "null", 4);
+    }
+  }
 
   cJSON *expiresAt = cJSON_GetObjectItem(root, "expiresAt");
-  if (expiresAt != NULL) message->notification.expiresAt = expiresAt->valueint;
+  if (expiresAt != NULL) {
+    if (expiresAt->type != cJSON_NULL) {
+      message->notification.expiresAt = expiresAt->valueint;
+    } else {
+      message->notification.expiresAt = 0;
+    }
+  }
 
   cJSON_Delete(root);
   ret = 0;

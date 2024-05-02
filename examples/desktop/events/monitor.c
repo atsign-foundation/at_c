@@ -92,9 +92,9 @@ int main(int argc, char *argv[]) {
   }
 
   printf("Starting main monitor loop\n");
+  atclient_monitor_message message;
+  atclient_monitor_message_init(&message);
   while (true) {
-    atclient_monitor_message message;
-    atclient_atkey_init(&(message.notification.key));
 
     int mon_ret = atclient_read_monitor(&monitor_ctx, &message);
     if (mon_ret != 0) {
@@ -119,6 +119,7 @@ int main(int argc, char *argv[]) {
       atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.error_response);
       break;
     }
+    atclient_monitor_message_free(&message);
   }
   printf("Main monitor loop complete!\n");
 

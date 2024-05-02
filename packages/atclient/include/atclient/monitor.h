@@ -31,6 +31,8 @@ typedef struct atclient_monitor_message {
 
 void atclient_monitor_message_free(atclient_monitor_message *message);
 
+void atclient_monitor_message_init(atclient_monitor_message *message);
+
 void atclient_monitor_init(atclient *monitor_ctx, const atclient_atsign atsign, const atclient_atkeys atkeys);
 void atclient_monitor_free(atclient *monitor_ctx);
 
