@@ -1,4 +1,5 @@
 #include "atchops/rsa.h"
+#include "atchops/base64.h"
 #include <mbedtls/md.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,8 +27,6 @@
   "5ptTvsCgYA5d5L3hO3+1Na4C6xj8luQXFhkSLNe0rwoe16OLjcyzcnhlb2KKA8rORGP28s1JcCL4Htasf0YzCkOJ/jR28GzX/"                  \
   "0qvWu0hBSilV2mCAqwQ1fvZx0L4quJznkAhJPMZ+oag8o1LlQiJGgnhsIMbDLZApKh3NuYlTmdqo20FfkZkg=="
 
-#define SIGNATURE_BUFFER_LEN 5000
-
 #define MESSAGE "_4a160d33-0c63-4800-bee0-ee254752f8c8@jeremy_0:6c987cc1-0dde-4ba1-af56-a9677086182"
 
 // #define EXPECTED_SIGNATURE
@@ -38,11 +37,24 @@
   "yAkuYJcz+VmCH+1AJtCdeKfhjfmlk0bP72fwsait6pA3TW0iEll9ptZmlLjNtCTi982h1yNprh+XtrjMz7ClbJChQf3LLHiJMZ+"                \
   "7r4yKTrehdBVfxQoNNw9r2D7TBRaY8bXYwMombMHRuu0oVbqNU1jEs60NGQ=="
 
+#define SIGNATURE_SIZE 256
+#define SIGNATURE_BASE64_SIZE 2048
+
 int main() {
   int ret = 1;
 
   const char *privatekeybase64 = PRIVATE_KEY_BASE64;
   const size_t privatekeybase64len = strlen(privatekeybase64);
+
+  const char *message = MESSAGE;
+  const size_t messagelen = strlen(message);
+
+  unsigned char signature[SIGNATURE_SIZE];
+  memset(signature, 0, sizeof(unsigned char) * SIGNATURE_SIZE);
+
+  char signaturebase64[SIGNATURE_BASE64_SIZE];
+  memset(signaturebase64, 0, sizeof(char) * SIGNATURE_BASE64_SIZE);
+  size_t signaturebase64len = 0;
 
   atchops_rsakey_privatekey privatekey;
   atchops_rsakey_privatekey_init(&privatekey);
@@ -53,15 +65,7 @@ int main() {
   }
   printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
 
-  unsigned char *signature = malloc(sizeof(unsigned char) * SIGNATURE_BUFFER_LEN);
-  memset(signature, 0, SIGNATURE_BUFFER_LEN);
-  size_t signatureolen = 0;
-
-  const char *message = MESSAGE;
-  const size_t messagelen = strlen(message);
-
-  ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature,
-                         SIGNATURE_BUFFER_LEN, &signatureolen);
+  ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
   if (ret != 0) {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;
@@ -69,7 +73,15 @@ int main() {
   printf("atchops_rsa_sign (success): %d\n", ret);
   printf("signature: \"%s\"\n", signature);
 
-  ret = memcmp(signature, (const unsigned char *)EXPECTED_SIGNATURE, signatureolen);
+  ret = atchops_base64_encode(signature, SIGNATURE_SIZE, signaturebase64, SIGNATURE_BASE64_SIZE, &signaturebase64len);
+  if (ret != 0) {
+    printf("atchops_base64_encode (failed): %d\n", ret);
+    goto exit;
+  }
+  printf("atchops_base64_encode (success): %d\n", ret);
+  printf("signature (len=%lu) (base64): \"%s\"\n", signaturebase64len, signaturebase64);
+
+  ret = memcmp(signaturebase64, EXPECTED_SIGNATURE, SIGNATURE_SIZE);
   if (ret != 0) {
     printf("memcmp (failed): %d\n", ret);
     printf("got: \"%s\" | expected: \"%s\"\n", signature, EXPECTED_SIGNATURE);
@@ -81,7 +93,6 @@ int main() {
   goto exit;
 
 exit: {
-  free(signature);
   return ret;
 }
 }

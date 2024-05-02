@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
                         (int)atkeystr.olen, atkeystr.str);
 
   atclient_notify_params notify_params;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent notification");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent notification");
 
   ret = 0;
   goto exit;

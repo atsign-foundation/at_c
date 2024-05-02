@@ -11,8 +11,8 @@
 
 #define TAG "Debug"
 
-#define ATCLIENT_ATSIGN "@expensiveferret"
-#define ATSIGN_ATKEYS_FILE_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
+#define ATCLIENT_ATSIGN "@soccer0"
+#define ATSIGN_ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@soccer0_key.atKeys"
 
 /**
  * To test get_sharedkey_shared_by_me_with_other:
@@ -22,10 +22,10 @@
  *      [ SENDER_ATSIGN = other atsign, ie "@alice" ] and [ RECIPIENT_ATSIGN = ATCLIENT_ATSIGN ]
  */
 
-#define SENDER_ATSIGN "@expensiveferret"    // aka "sharedby"
-#define RECIPIENT_ATSIGN "@secondaryjackal" // aka "sharedwith"
+#define SENDER_ATSIGN "@soccer0"    // aka "sharedby"
+#define RECIPIENT_ATSIGN "@soccer99" // aka "sharedwith"
 
-#define ATKEY_NAME "test_sharedkey_001"
+#define ATKEY_NAME "test"
 #define ATKEY_NAMESPACE "dart_playground"
 
 #define EXPECTED_DECRYPTED_VALUE_SHA_256 "d38c816073fad5249b0143fe4588013a64a4f9d50090d9a8d4c97ad0534b2592"
@@ -37,7 +37,7 @@ int main() {
 
   int ret = 1;
 
-  atclient_atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   const size_t valuelen = 1024;
   atclient_atstr value;
@@ -63,11 +63,11 @@ int main() {
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, atkeys, atsign.atsign, strlen(atsign.atsign))) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATCLIENT_ATSIGN)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
   atclient.atkeys = atkeys;
@@ -76,27 +76,27 @@ int main() {
   if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), SENDER_ATSIGN,
                                              strlen(SENDER_ATSIGN), RECIPIENT_ATSIGN, strlen(RECIPIENT_ATSIGN),
                                              ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
     goto exit;
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared key\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared key\n");
   }
 
   if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
                         (int)atkeystr.olen, atkeystr.str);
 
   ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.len, &value.olen, NULL, false);
   if (ret != 0) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
     goto exit;
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.olen, (int)value.olen,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.olen, (int)value.olen,
                         value.str);
 
   const size_t value_hash_len = 32;
@@ -104,8 +104,7 @@ int main() {
   memset(value_hash, 0, value_hash_len);
   size_t value_hash_olen = 0;
 
-  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.olen, value_hash, value_hash_len,
-                         &value_hash_olen);
+  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.olen, value_hash);
   if (ret != 0) {
     printf("atchops_sha_hash (failed): %d\n", ret);
     goto exit;
@@ -116,19 +115,19 @@ int main() {
     sprintf(hex_value_hash + i * 2, "%02x", value_hash[i]);
   }
 
-  atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sha256(value) : %s\n", hex_value_hash);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sha256(value) : %s\n", hex_value_hash);
 
   if ((ret = memcmp(hex_value_hash, EXPECTED_DECRYPTED_VALUE_SHA_256, 64))) {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
                           "sha256(value) NOT equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
   } else {
-    atclient_atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
                           "sha256(value) equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
   }
   free(value_hash);
   free(hex_value_hash);
   goto exit;
-exit: {
+exit : {
   atclient_atstr_free(&value);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);

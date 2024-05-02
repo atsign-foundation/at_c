@@ -55,8 +55,8 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * @param atsign the atsign the atkeys belong to
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys atkeys,
-                               const char *atsign, const size_t atsignlen);
+int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+                               const char *atsign);
 
 /**
  * @brief Put a string value into your atServer.
@@ -66,20 +66,19 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
- * associated with your value.
+ * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want
+ * to be associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
- * @param root_conn initialized root connection
  * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
  * @param value the value to put into atServer
- * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for this
- * value)
+ * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for
+ * this value)
  * @param commitid (optional) the output commitid of the put operation that the atServer returns
  * @return int 0 on success
  */
-int atclient_put(atclient *atclient, atclient_connection *root_conn, const atclient_atkey *atkey, const char *value,
-                 const size_t valuelen, int *commitid);
+int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
+                const size_t valuelen, int *commitid);
 
 // TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 
@@ -97,12 +96,12 @@ int atclient_put(atclient *atclient, atclient_connection *root_conn, const atcli
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
- * @param valuelen the buffer length allocated for the value
- * @param valueolen the output length of the value gotten from atServer
+ * @param valuesize the buffer length allocated for the value
+ * @param valuelen the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
-                         size_t *valueolen);
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                         size_t *valuelen);
 
 /**
  * @brief Get a publickey from your atServer or another atServer
@@ -116,17 +115,16 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
- * @param root_conn initialized root connection
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
- * @param valuelen the buffer length allocated for the value
- * @param valueolen the output length of the value gotten from atServer
+ * @param valuesize the buffer length allocated for the value
+ * @param valuelen the output length of the value gotten from atServer
  * @param bypasscache true if you want to bypass the cached publickey, that might be on your atServer, and get the most
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
-                           const size_t valuelen, size_t *valueolen, bool bypasscache);
+int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value,
+                           const size_t valuesize, size_t *valuelen, bool bypasscache);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
@@ -143,8 +141,8 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
  * @param root_conn initialized root connection
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value The buffer to hold value gotten from atServer
- * @param valuelen The buffer length allocated for the value
- * @param valueolen The output length of the value gotten from atServer
+ * @param valuesize The buffer length allocated for the value
+ * @param valuelen The output length of the value gotten from atServer
  * @param shared_enc_key The correct shared encryption key (get_encryption_key_shared_by_me or
  * get_encryption_key_shared_by_other, depending on the case). If NULL is provided, the method will check
  * create_new_encryption_key_shared_by_me_if_not_found parameter.
@@ -153,8 +151,8 @@ int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, a
  * should be created (if it hasn’t already been) or not.
  * @return int 0 on success
  */
-int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuelen,
-                           size_t *valueolen, char *shared_enc_key,
+int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                           size_t *valuelen, char *shared_enc_key,
                            const bool create_new_encryption_key_shared_by_me_if_not_found);
 
 /**
@@ -173,63 +171,6 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  * @return int 0 on success
  */
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
-
-/**
- * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.
- * If no key is found and create_new_if_not_found is true, it will create, store and share a new one with the
- * recipient's atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param recipient An atclient_atsign struct corresponding to the atsign with whom the key was shared (required)
- * @param enc_key_shared_by_me The output shared key in b64 format (required)
- * @param create_new_if_not_found true if in case the symmetric shared key does not exist, you would like it to be
- * created / false if not (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_get_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
-                                             char *enc_key_shared_by_me, bool create_new_if_not_found);
-
-/**
- * @brief Looks up the symmetric shared key which the recipient's atsign shared with atclient's atsign.
- * If no key is found, the function will return an error.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
- * (required)
- * @param enc_key_shared_by_other the output shared key in b64 format (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_get_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
-                                                char *enc_key_shared_by_other);
-
-/**
- * @brief Creates a symmetric shared key, which the atclient atsign shares with the recipient atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign with which you want to create the shared key
- * (required)
- * @param enc_key_shared_by_me The output new shared key (which was already stored in the server) in b64 format
- * (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *root_conn,
-                                          const atclient_atsign *recipient, char *enc_key_shared_by_me);
-
-/**
- * @brief Retreives the public encryption key of a given atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign which public encryption key you would like to
- * obtain. It may receive a NULL value, in which case, the atclient_atsign contained in the ctx parameter will be used
- * (required)
- * @param public_encryption_key The output public key in b64 format (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_get_public_encryption_key(atclient *ctx, atclient_connection *root_conn, const atclient_atsign *atsign,
-                                       char *public_encryption_key);
 
 void atclient_free(atclient *ctx);
 
