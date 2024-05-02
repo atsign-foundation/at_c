@@ -1,6 +1,7 @@
 # Configurable options
 set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
 option(ATSDK_BUILD_TESTS "Build tests for atsdk" OFF)
+option(ENABLE_SANITIZER "Enable AddressSanitizer" ON)
 
 # Basic project setup
 cmake_minimum_required(VERSION 3.19)
@@ -15,6 +16,11 @@ project(
   HOMEPAGE_URL https://atsign.com
   LANGUAGES C
 )
+
+if (ENABLE_SANITIZER)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+endif()
 
 # Determine if atchops is being built as a subproject using add_subdirectory()
 if(NOT DEFINED ATSDK_AS_SUBPROJECT)

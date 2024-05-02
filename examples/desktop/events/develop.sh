@@ -10,7 +10,7 @@ SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 sudo bash "$SCRIPT_DIRECTORY/../../../tools/clean_install.sh"
 
 cd $SCRIPT_DIRECTORY
-cmake -S . -B build -DTARGET_SRC="$FILE.c"
+cmake -S . -B build -DTARGET_SRC="$FILE.c" -DCMAKE_BUILD_TYPE=Debug -DENABLE_SANITIZER=ON
 cmake --build build
 echo "Running main:"
 echo ""
