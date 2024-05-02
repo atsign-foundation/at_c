@@ -288,17 +288,17 @@ static int test_7_get_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
+  const size_t valuesize = 1024;
+  char value[valuesize];
+  memset(value, 0, sizeof(char) * valuesize);
+  size_t valuelen = 0;
+
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
     goto exit;
   }
-
-  const size_t valuesize = 1024;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
 
   if ((ret = atclient_get_publickey(atclient, &atkey, value, valuesize, &valuelen, true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey");
@@ -348,7 +348,6 @@ static int test_7_get_with_metadata(atclient *atclient) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.isbinary: %d\n", atkey.metadata.isbinary);
 
   goto exit;
-
 exit: {
   atclient_atkey_free(&atkey);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_get_with_metadata End (%d)\n", ret);
