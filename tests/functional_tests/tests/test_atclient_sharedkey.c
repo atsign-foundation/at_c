@@ -16,6 +16,7 @@
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
 #define ATKEY_VALUE "Hello World! :D\n"
 #define ATKEY_TTL 60*1000*5 // 5 minutes
+#define ATKEY_TTR -1 // DO NOT CACHE
 
 static int test_1_put(atclient *atclient);
 static int test_2_get_as_sharedby(atclient *atclient);
@@ -112,15 +113,16 @@ static int test_1_put(atclient *atclient)
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
         goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey created for deletion\n");
 
     atclient_atkey_metadata_set_ttl(&atkey.metadata, ATKEY_TTL);
+    atclient_atkey_metadata_set_ttr(&atkey.metadata, ATKEY_TTR);
 
     if((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "put done\n");
 
     goto exit;
 exit: {
@@ -173,6 +175,14 @@ static int test_2_get_as_sharedby(atclient *atclient)
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
 
+    if(atkey.metadata.ttr != ATKEY_TTR)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %d\n", ATKEY_TTR, atkey.metadata.ttr);
+        ret = 1;
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttr matched: %d\n", atkey.metadata.ttr);
+
     goto exit;
 exit: {
     atclient_atkey_free(&atkey);
@@ -215,6 +225,7 @@ static int test_3_get_as_sharedwith(atclient *atclient2)
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value mismatch\n");
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value matched: %s == %s\n", value, ATKEY_VALUE);
 
     if(atkey.metadata.ttl != ATKEY_TTL)
     {
@@ -222,8 +233,15 @@ static int test_3_get_as_sharedwith(atclient *atclient2)
         ret = 1;
         goto exit;
     }
-
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
+
+    if(atkey.metadata.ttr != ATKEY_TTR)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %d\n", ATKEY_TTR, atkey.metadata.ttr);
+        ret = 1;
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttr matched: %d\n", atkey.metadata.ttr);
 
     goto exit;
 exit: {
@@ -282,7 +300,7 @@ exit : {
 }
 }
 
-static int tear_down_sharedenckeys(atclient *atclient)
+static int tear_down_sharedenckeys(atclient *atclient1)
 {
     int ret = 1;
 
@@ -290,11 +308,27 @@ static int tear_down_sharedenckeys(atclient *atclient)
 
     char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
 
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+
     atclient_atkey atkeyforme;
     atclient_atkey_init(&atkeyforme);
 
     atclient_atkey atkeyforthem;
     atclient_atkey_init(&atkeyforthem);
+
+    if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = atclient_delete(atclient1, &atkey)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted main shared atkey\n");
 
     memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
     snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", ATKEY_SHAREDWITH+1, ATKEY_SHAREDBY);
@@ -314,22 +348,25 @@ static int tear_down_sharedenckeys(atclient *atclient)
         goto exit;
     }
 
-    if((ret = atclient_delete(atclient, &atkeyforme)) != 0)
+    if((ret = atclient_delete(atclient1, &atkeyforme)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for me\n");
 
-    if((ret = atclient_delete(atclient, &atkeyforthem)) != 0)
+    if((ret = atclient_delete(atclient1, &atkeyforthem)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
         goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for them\n");
 
     ret = 0;
     goto exit;
 
 exit: {
+    atclient_atkey_free(&atkey);
     atclient_atkey_free(&atkeyforme);
     atclient_atkey_free(&atkeyforthem);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
