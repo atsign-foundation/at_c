@@ -135,6 +135,8 @@ static int test_2_put(atclient *atclient) {
     goto exit;
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Done put.\n");
+
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
@@ -174,6 +176,8 @@ static int test_3_get(atclient *atclient) {
     goto exit;
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.value: \"%s\" == \"%s\"\n", value, ATKEY_VALUE);
+
   ret = 0;
   goto exit;
 exit: {
@@ -203,6 +207,8 @@ static int test_4_delete(atclient *atclient) {
     goto exit;
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Done delete.\n");
+
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
@@ -220,6 +226,8 @@ static int test_5_should_not_exist(atclient *atclient) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
     goto exit;
   }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey does not exist, which is expected.\n");
 
   goto exit;
 exit: {
@@ -250,6 +258,8 @@ static int test_6_put_with_metadata(atclient *atclient) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
     goto exit;
   }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Done put.\n");
 
   goto exit;
 exit: {
@@ -282,18 +292,21 @@ static int test_7_get_with_metadata(atclient *atclient) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%.*s\"\n", (int)valuelen, value);
 
   if (memcmp(value, ATKEY_VALUE, strlen(ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.value: \"%s\" != \"%s\"\n", value, ATKEY_VALUE);
     ret = 1;
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.value: \"%s\" == \"%s\"\n", value, ATKEY_VALUE);
 
   if (atkey.metadata.ttl != ATKEY_TTL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ttl: %d != %d\n", atkey.metadata.ttl, ATKEY_TTL);
     ret = 1;
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
 
   if (atkey.metadata.isencrypted != ATKEY_ISENCRYPTED) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.isencrypted: %d != %d\n",
@@ -301,6 +314,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
     ret = 1;
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.isencrypted: %d\n", atkey.metadata.isencrypted);
 
   if (atkey.metadata.isbinary != ATKEY_ISBINARY) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.isbinary: %d != %d\n", atkey.metadata.isbinary,
@@ -308,6 +322,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
     ret = 1;
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.isbinary: %d\n", atkey.metadata.isbinary);
 
   ret = 0;
   goto exit;
@@ -338,6 +353,8 @@ static int test_8_delete(atclient *atclient) {
     goto exit;
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Done delete.\n");
+
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
@@ -355,6 +372,8 @@ static int test_9_should_not_exist(atclient *atclient) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
     goto exit;
   }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey does not exist, which is expected.\n");
 
   goto exit;
 exit: {
