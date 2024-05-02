@@ -160,6 +160,11 @@ static int test_3_get(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
+  const size_t valuesize = 1024;
+  char value[valuesize];
+  memset(value, 0, sizeof(char) * valuesize);
+  size_t valuelen = 0;
+
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
@@ -167,22 +172,18 @@ static int test_3_get(atclient *atclient) {
     goto exit;
   }
 
-  const size_t valuesize = 1024;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
-
   if ((ret = atclient_get_publickey(atclient, &atkey, value, valuesize, &valuelen, false)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey");
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   if (strcmp(value, ATKEY_VALUE) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed value comparison");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\" == \"%s\"\n", value, ATKEY_VALUE);
 
   goto exit;
 exit: {
