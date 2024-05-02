@@ -33,7 +33,7 @@
   "1PmBPlOW3v8Dwr1BGuu9a7fruisMrl88LuPVXgxBpjANa4aq3nVmcZ2WMduDEgH1bWWqaciT3IkYm/"                                     \
   "97QMIQRyFTfQ5tWY9ZcsP9DKluqM222whKBsLz3sL4F9gL5L2HECz3y5EGX4J5QSrU4y4Y8HE5KNz9SqwlTdYSj87dm/"                       \
   "e5l8mVNVR8gMFtzbd9MqNaCoNPm8GfWvx+QIctKNR3zEjxqWrMkiyezZU0PxC98eeHIkef0s1OPcDLMRiwIl"
-#define DST_BYTES_ALLOCATED 4096
+#define DST_SIZE 4096
 
 int main() {
   int retval;
@@ -42,41 +42,37 @@ int main() {
   const size_t srclen = strlen(src);
   printf("src (%lu): %s\n", srclen, src);
 
-  size_t dstlen = DST_BYTES_ALLOCATED;
-  unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-  memset(dst, 0, dstlen);
+  const size_t dstsize = DST_SIZE;
+  unsigned char dst[dstsize];
+  memset(dst, 0, sizeof(unsigned char) * dstsize);
+  size_t dstlen = 0;
 
-  size_t dstlen2 = DST_BYTES_ALLOCATED;
-  unsigned char *dst2 = malloc(sizeof(unsigned char) * dstlen);
-  memset(dst2, 0, dstlen2);
+  const size_t dst2size = DST_SIZE;
+  unsigned char dst2[dst2size];
+  memset(dst2, 0, sizeof(unsigned char) * dst2size);
+  size_t dst2len = 0;
 
-  size_t *olen = malloc(sizeof(size_t));
-  *olen = 0;
-
-  retval = atchops_base64_decode((unsigned char *)src, srclen, dst, dstlen, olen);
+  retval = atchops_base64_decode((unsigned char *) src, srclen, dst, dstsize, &dstlen);
   if (retval) {
     printf("atchops_base64_decode (failed): %d\n", retval);
     goto ret;
   }
-  printf("base64 decoded (%lu):", *olen);
-  for (int i = 0; i < *olen; i++) {
+  printf("base64 decoded (%lu):", dstlen);
+  for (int i = 0; i < dstlen; i++) {
     printf("%02x ", dst[i]);
   }
   printf("\n");
 
-  retval = atchops_base64_encode(dst, *olen, dst2, dstlen2, olen);
+  retval = atchops_base64_encode(dst, dstlen, dst2, dst2size, &dst2len);
   if (retval) {
     printf("atchops_base64_encode (failed): %d\n", retval);
     goto ret;
   }
-  printf("base64 encoded (%lu): %s\n", (*olen), dst2);
+  printf("base64 encoded (%lu): %s\n", (dst2len), dst2);
 
   goto ret;
 
 ret: {
-  free(dst);
-  free(dst2);
-  free(olen);
   return retval;
 }
 }

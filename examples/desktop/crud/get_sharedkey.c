@@ -82,21 +82,21 @@ int main() {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared key\n");
   }
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
-                        (int)atkeystr.olen, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
+                        (int)atkeystr.len, atkeystr.str);
 
-  ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.len, &value.olen, NULL, false);
+  ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.size, &value.len, NULL, false);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.olen, (int)value.olen,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.len, (int)value.len,
                         value.str);
 
   const size_t value_hash_len = 32;
@@ -104,7 +104,7 @@ int main() {
   memset(value_hash, 0, value_hash_len);
   size_t value_hash_olen = 0;
 
-  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.olen, value_hash);
+  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.len, value_hash);
   if (ret != 0) {
     printf("atchops_sha_hash (failed): %d\n", ret);
     goto exit;

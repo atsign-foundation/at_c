@@ -62,7 +62,7 @@ static int test1a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -112,7 +112,7 @@ static int test1b() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -164,7 +164,7 @@ static int test1c() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -217,7 +217,7 @@ static int test1d() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -274,7 +274,7 @@ static int test2a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -318,7 +318,7 @@ static int test2b() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -369,15 +369,15 @@ static int test2c() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
   // namespace should be empty
-  if (atkey.namespacestr.olen > 0 || strlen(atkey.namespacestr.str) > 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.olen > 0: %d\n", atkey.namespacestr.olen);
+  if (atkey.namespacestr.len > 0 || strlen(atkey.namespacestr.str) > 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.len > 0: %d\n", atkey.namespacestr.len);
     ret = 1;
     goto exit;
   }
@@ -434,7 +434,7 @@ static int test2d() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -479,15 +479,15 @@ static int test3a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  if (atkey.namespacestr.olen > 0 || strlen(atkey.namespacestr.str) > 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.olen > 0: %d or strlen(%s) > 0\n",
-                          atkey.namespacestr.olen, atkey.namespacestr.str);
+  if (atkey.namespacestr.len > 0 || strlen(atkey.namespacestr.str) > 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.len > 0: %d or strlen(%s) > 0\n",
+                          atkey.namespacestr.len, atkey.namespacestr.str);
     ret = 1;
     goto exit;
   }
@@ -531,15 +531,15 @@ static int test4a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.len, &string.olen);
+  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  if (atkey.namespacestr.olen > 0 || strlen(atkey.namespacestr.str) > 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.olen > 0: %d or strlen(%s) > 0\n",
-                          atkey.namespacestr.olen, atkey.namespacestr.str);
+  if (atkey.namespacestr.len > 0 || strlen(atkey.namespacestr.str) > 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.len > 0: %d or strlen(%s) > 0\n",
+                          atkey.namespacestr.len, atkey.namespacestr.str);
     ret = 1;
     goto exit;
   }

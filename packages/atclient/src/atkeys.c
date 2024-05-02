@@ -43,10 +43,6 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
-  const size_t recvlen = 32768;
-  unsigned char *recv = (unsigned char *)malloc(sizeof(unsigned char) * recvlen);
-  size_t olen = 0;
-
   const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
   unsigned char selfencryptionkey[selfencryptionkeysize];
   memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
@@ -67,7 +63,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  ret = atchops_base64_decode(atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.olen, selfencryptionkey,
+  ret = atchops_base64_decode((unsigned char *) atkeys->selfencryptionkeystr.str, atkeys->selfencryptionkeystr.len, selfencryptionkey,
                               selfencryptionkeysize, &selfencryptionkeylen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding selfencryption key: %d\n", ret);
@@ -83,8 +79,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen,
-                               atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.len,
-                               &(atkeys->pkampublickeystr.olen));
+                               (unsigned char *) atkeys->pkampublickeystr.str, atkeys->pkampublickeystr.size,
+                               &(atkeys->pkampublickeystr.len));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n", ret);
@@ -103,8 +99,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen,
-                               atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.len,
-                               &(atkeys->pkamprivatekeystr.olen));
+                               (unsigned char *) atkeys->pkamprivatekeystr.str, atkeys->pkamprivatekeystr.size,
+                               &(atkeys->pkamprivatekeystr.len));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n", ret);
@@ -122,8 +118,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen, atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.len,
-                               &(atkeys->encryptpublickeystr.olen));
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen, (unsigned char *) atkeys->encryptpublickeystr.str, atkeys->encryptpublickeystr.size,
+                               &(atkeys->encryptpublickeystr.len));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
@@ -142,8 +138,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, rsakeyencrypted, rsakeyencryptedlen,
-                               atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.len,
-                               &(atkeys->encryptprivatekeystr.olen));
+                               (unsigned char *) atkeys->encryptprivatekeystr.str, atkeys->encryptprivatekeystr.size,
+                               &(atkeys->encryptprivatekeystr.len));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_aesctr_decrypt: %d | failed to decrypt encrypt private key\n", ret);
@@ -154,7 +150,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 2a. pkam public key
   ret = atchops_rsakey_populate_publickey(&(atkeys->pkampublickey), atkeys->pkampublickeystr.str,
-                                          atkeys->pkampublickeystr.olen);
+                                          atkeys->pkampublickeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_publickey: %d | failed to populate pkam public key\n", ret);
@@ -163,7 +159,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 2b. pkam private key
   ret = atchops_rsakey_populate_privatekey(&(atkeys->pkamprivatekey), atkeys->pkamprivatekeystr.str,
-                                           atkeys->pkamprivatekeystr.olen);
+                                           atkeys->pkamprivatekeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_privatekey: %d | failed to populate pkam private key\n", ret);
@@ -172,7 +168,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 2c. encrypt public key
   ret = atchops_rsakey_populate_privatekey(&(atkeys->encryptprivatekey), atkeys->encryptprivatekeystr.str,
-                                           atkeys->encryptprivatekeystr.olen);
+                                           atkeys->encryptprivatekeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_privatekey: %d | failed to populate encrypt private key\n", ret);
@@ -181,7 +177,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 2d. encrypt private key
   ret = atchops_rsakey_populate_publickey(&(atkeys->encryptpublickey), atkeys->encryptpublickeystr.str,
-                                          atkeys->encryptpublickeystr.olen);
+                                          atkeys->encryptpublickeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                           "atchops_rsakey_populate_publickey: %d | failed to populate encrypt public key\n", ret);
@@ -191,7 +187,6 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   goto exit;
 
 exit: {
-  free(recv);
   return ret;
 }
 }
@@ -200,11 +195,11 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atcl
   int ret = 1;
 
   ret = atclient_atkeys_populate_from_strings(
-      atkeys, atkeysfile.aespkampublickeystr.str, atkeysfile.aespkampublickeystr.olen,
-      atkeysfile.aespkamprivatekeystr.str, atkeysfile.aespkamprivatekeystr.olen,
-      atkeysfile.aesencryptpublickeystr.str, atkeysfile.aesencryptpublickeystr.olen,
-      atkeysfile.aesencryptprivatekeystr.str, atkeysfile.aesencryptprivatekeystr.olen,
-      atkeysfile.selfencryptionkeystr.str, atkeysfile.selfencryptionkeystr.olen)
+      atkeys, atkeysfile.aespkampublickeystr.str, atkeysfile.aespkampublickeystr.len,
+      atkeysfile.aespkamprivatekeystr.str, atkeysfile.aespkamprivatekeystr.len,
+      atkeysfile.aesencryptpublickeystr.str, atkeysfile.aesencryptpublickeystr.len,
+      atkeysfile.aesencryptprivatekeystr.str, atkeysfile.aesencryptprivatekeystr.len,
+      atkeysfile.selfencryptionkeystr.str, atkeysfile.selfencryptionkeystr.len)
     ;
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
