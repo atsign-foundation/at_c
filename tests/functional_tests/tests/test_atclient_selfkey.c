@@ -1,11 +1,12 @@
+#include "functional_tests/config.h"
+#include "functional_tests/helpers.h"
 #include <atclient/atclient.h>
+#include <atclient/stringutils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "functional_tests/config.h"
-#include "functional_tests/helpers.h"
 
 #define TAG "test_atclient_selfkey"
 
@@ -26,6 +27,7 @@ static int test_6_put_with_metadata(atclient *atclient);
 static int test_7_get_with_metadata(atclient *atclient);
 static int test_8_delete(atclient *atclient);
 static int test_9_should_not_exist(atclient *atclient);
+static int tear_down(atclient *atclient);
 
 int main() {
   int ret = 1;
@@ -88,7 +90,11 @@ int main() {
   ret = 0;
 
   goto exit;
-exit: { return ret; }
+exit: {
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down: %d\n", tear_down(&atclient));
+  atclient_free(&atclient);
+  return ret;
+}
 }
 
 static int test_1_should_not_exist(atclient *atclient) {
@@ -96,11 +102,13 @@ static int test_1_should_not_exist(atclient *atclient) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_should_not_exist Begin\n");
 
-  if ((ret = functional_tests_atkey_should_not_exist(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
+  if ((ret = functional_tests_selfkey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) == true) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_selfkey_exists: %d\n", ret);
+    ret = 1;
     goto exit;
   }
-
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey does not exist, which is expected.\n");
+  ret = 0;
   goto exit;
 exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_should_not_exist End (%d)\n", ret);
@@ -180,13 +188,24 @@ static int test_4_delete(atclient *atclient) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_delete Begin\n");
 
-  if ((ret = functional_tests_delete_atkey(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "delete: %d\n", ret);
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
+                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
+                                           ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_delete(atclient, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }
 
   goto exit;
 exit: {
+  atclient_atkey_free(&atkey);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_delete End (%d)\n", ret);
   return ret;
 }
@@ -197,7 +216,7 @@ static int test_5_should_not_exist(atclient *atclient) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
 
-  if ((ret = functional_tests_atkey_should_not_exist(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
+  if ((ret = functional_tests_selfkey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
     goto exit;
   }
@@ -302,16 +321,27 @@ exit: {
 static int test_8_delete(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_delete Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_delete Begin\n");
 
-  if ((ret = functional_tests_delete_atkey(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "delete: %d\n", ret);
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
+                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
+                                           ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_delete(atclient, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }
 
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_delete End (%d)\n", ret);
+  atclient_atkey_free(&atkey);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_delete End (%d)\n", ret);
   return ret;
 }
 }
@@ -321,7 +351,7 @@ static int test_9_should_not_exist(atclient *atclient) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_9_should_not_exist Begin\n");
 
-  if ((ret = functional_tests_atkey_should_not_exist(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
+  if ((ret = functional_tests_selfkey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != false) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
     goto exit;
   }
@@ -331,4 +361,52 @@ exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_9_should_not_exist End (%d)\n", ret);
   return ret;
 }
+}
+
+static int tear_down(atclient *atclient) {
+  int ret = 1;
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  const size_t atkeystrsize = 128;
+  char atkeystr[atkeystrsize];
+  memset(atkeystr, 0, sizeof(char) * atkeystrsize);
+  size_t atkeystrlen = 0;
+
+  const size_t commandsize = 256;
+  char command[commandsize];
+  memset(command, 0, sizeof(char) * commandsize);
+  size_t commandlen = 0;
+
+  const size_t recvsize = 256;
+  char recv[recvsize];
+  memset(recv, 0, sizeof(char) * recvsize);
+  size_t recvlen = 0;
+
+  if (ATKEY_NAMESPACE == NULL) {
+    snprintf(atkeystr, atkeystrsize, "%s%s", ATKEY_NAME, ATKEY_SHAREDBY);
+  } else {
+    snprintf(atkeystr, atkeystrsize, "%s.%s%s", ATKEY_NAME, ATKEY_NAMESPACE, ATKEY_SHAREDBY);
+  }
+
+  snprintf(command, commandsize, "delete:%s\r\n", atkeystr);
+  commandlen = strlen(command);
+
+  if ((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
+                                      (unsigned char *)recv, recvsize, &recvlen)) != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }

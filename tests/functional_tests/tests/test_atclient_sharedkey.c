@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "functional_tests/config.h"
 #include "functional_tests/helpers.h"
 
@@ -267,9 +268,9 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
 
-    if((ret = functional_tests_atkey_should_not_exist(atclient, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0)
+    if((ret = functional_tests_selfkey_exists(atclient, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != false)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_atkey_should_not_exist: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_selfkey_exists is 0 but should be 1: %d\n", ret);
         goto exit;
     }
 

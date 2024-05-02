@@ -9,7 +9,7 @@
 
 #define TAG "atclient_get_publickey"
 
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
+int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value,
                            const size_t valuesize, size_t *valueolen, bool bypasscache) {
   int ret = 1;
 

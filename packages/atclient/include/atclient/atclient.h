@@ -115,7 +115,6 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
- * @param root_conn initialized root connection
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
  * @param valuesize the buffer length allocated for the value
@@ -124,7 +123,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_connection *root_conn, atclient_atkey *atkey, char *value,
+int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value,
                            const size_t valuesize, size_t *valuelen, bool bypasscache);
 
 /**
