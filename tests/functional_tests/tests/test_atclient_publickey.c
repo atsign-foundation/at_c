@@ -93,7 +93,7 @@ int main() {
 
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", tear_down(&atclient));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down: %d\n", tear_down(&atclient));
   atclient_free(&atclient);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "End (%d)\n", ret);
   return ret;
