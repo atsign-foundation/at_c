@@ -36,3 +36,46 @@ jobs:
         working-directory: tests/functional_tests
         run: |
           tools/run_ctest.sh
+  build-examples:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: Install atSDK
+        run: |
+          tools/install.sh
+
+      - name: Build at_talk
+        working-directory: examples/desktop/at_talk
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      - name: Build all CRUD examples
+        working-directory: examples/desktop/crud
+        run: |
+          cmake -S . -B build -DTARGET_SRC=delete.c && cmake --build build
+          cmake -S . -B build -DTARGET_SRC=get_publickey.c && cmake --build build
+          cmake -S . -B build -DTARGET_SRC=get_selfkey.c && cmake --build build
+          cmake -S . -B build -DTARGET_SRC=get_sharedkey.c && cmake --build build
+          cmake -S . -B build -DTARGET_SRC=put_publickey.c && cmake --build build
+          cmake -S . -B build -DTARGET_SRC=put_selfkey.c && cmake --build build
+          cmake -S . -B build -DTARGET_SRC=put_sharedkey.c && cmake --build build
+      
+      - name: Build events
+        working-directory: examples/desktop/events
+        run: |
+          cmake -S . -B build
+          cmake --build build
+      
+      - name: Build pkam_authenticate
+        working-directory: examples/desktop/pkam_authenticate
+        run: |
+          cmake -S . -B build
+          cmake --build build
+      
+      - name: Build REPL
+        working-directory: examples/desktop/repl
+        run: |
+          cmake -S . -B build
+          cmake --build build --target install

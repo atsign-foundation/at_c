@@ -19,7 +19,7 @@ cd "$SCRIPT_DIRECTORY"
 cmake -S . -B build
 
 ## 2b. CMake build
-sudo cmake --build build --target install
+cmake --build build --target install
 
 # 3. Run REPL
 ./bin/repl $@
