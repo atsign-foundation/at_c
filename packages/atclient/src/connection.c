@@ -8,10 +8,10 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "connection"
 
@@ -73,8 +73,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   ret = mbedtls_ssl_config_defaults(&(ctx->ssl_config), MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM,
                                     MBEDTLS_SSL_PRESET_DEFAULT);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_config_defaults failed with exit code: %d\n",
-                          ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_config_defaults failed with exit code: %d\n", ret);
     goto exit;
   }
 
@@ -91,8 +90,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   ret = mbedtls_ssl_set_hostname(&(ctx->ssl), host);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_set_hostname failed with exit code: %d\n",
-                          ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_set_hostname failed with exit code: %d\n", ret);
     goto exit;
   }
 
@@ -106,8 +104,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   ret = mbedtls_ssl_get_verify_result(&(ctx->ssl));
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
     goto exit;
   }
 
@@ -219,7 +216,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
-                        (int)stdoutbuffer.len, stdoutbuffer.str);
+               (int)stdoutbuffer.len, stdoutbuffer.str);
 
   memset(recv, 0, recvsize);
   int found = 0;
@@ -258,7 +255,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
-                        (int)stdoutbuffer.len, stdoutbuffer.str);
+               (int)stdoutbuffer.len, stdoutbuffer.str);
   memset(recv, 0, sizeof(unsigned char) * recvsize); // clear the buffer
   memcpy(recv, stdoutbuffer.str, stdoutbuffer.len);
   goto exit;
@@ -302,10 +299,7 @@ int atclient_connection_is_connected(atclient_connection *ctx) {
 
   goto exit;
 
-exit: {
-  free(recv);
-  return ret;
-}
+exit: { return ret; }
 }
 
 void atclient_connection_free(atclient_connection *ctx) {
