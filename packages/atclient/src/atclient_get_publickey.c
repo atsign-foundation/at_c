@@ -10,7 +10,7 @@
 #define TAG "atclient_get_publickey"
 
 int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value,
-                           const size_t valuesize, size_t *valueolen, bool bypasscache) {
+                           const size_t valuesize, size_t *valuelen, bool bypasscache) {
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
@@ -32,7 +32,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   char *metadatastr = NULL;
 
   // 2. build plookup: command
-  ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.len, &atkeystr.olen);
+  ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.size, &atkeystr.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
@@ -53,17 +53,17 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
     goto exit;
   }
 
-  const size_t cmdbufferlen = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) +
+  const size_t cmdbuffersize = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) +
                               strlen(atkeystrwithoutpublic) + 1;
-  cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
-  memset(cmdbuffer, 0, cmdbufferlen);
-  snprintf(cmdbuffer, cmdbufferlen, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "",
+  cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
+  memset(cmdbuffer, 0, cmdbuffersize);
+  snprintf(cmdbuffer, cmdbuffersize, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "",
            atkeystrwithoutpublic);
-  const size_t cmdbufferolen = strlen(cmdbuffer);
+  const size_t cmdbufferlen = strlen(cmdbuffer);
 
   // 3. send plookup: command
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferolen,
-                                 recv.bytes, recv.len, &recv.olen);
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen,
+                                 recv.bytes, recv.size, &recv.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -72,10 +72,10 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   // 4. parse response
 
   // 4a. if recv does not start with "data:", we probably got an error
-  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.olen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.len, "data:", 5)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                          (int)recv.olen, recv.bytes);
+                          (int)recv.len, recv.bytes);
     goto exit;
   }
 
@@ -88,7 +88,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
     goto exit;
   }
 
-  // 4b. set *value and *valueolen
+  // 4b. set *value and *valuelen
   cJSON *data = cJSON_GetObjectItem(root, "data");
   if (data == NULL) {
     ret = 1;
@@ -98,7 +98,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
 
   memset(value, 0, valuesize);
   memcpy(value, data->valuestring, strlen(data->valuestring));
-  *valueolen = strlen(value);
+  *valuelen = strlen(value);
 
   // 4c. write to atkey->metadata
   cJSON *metadata = cJSON_GetObjectItem(root, "metaData");

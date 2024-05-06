@@ -26,9 +26,9 @@ To build the source code you will need to have [CMake](https://cmake.org/) insta
 
 ### Installing on Linux/MacOS
 
-Check out the [run_ctest.sh](./tools/run_ctest.sh) as an example.
-
 1. Get ahold of the source code either via git clone or from downloading the source from our releases:
+
+Git clone sample:
 
 ```sh
 git clone https://github.com/atsign-foundation/at_c.git
@@ -37,17 +37,15 @@ cd at_c/packages/atclient
 
 2. CMake configure
 
+This is the configure step. -S specifies the source directory and -B specifies the build directory. The `.` specifies the current directory.
+
 ```sh
 cmake -S . -B build
 ```
 
-Alternatively, if you would not like the static libraries and include header files to be installed on your system directly, you can specify a custom install directory with `-DCMAKE_INSTALL_PREFIX=/path/to/install`:
+Alternatively, if you would not like the static libraries and include header files to be installed on your system directly, you can specify a custom install directory with `-DCMAKE_INSTALL_PREFIX=/path/to/install`.
 
-Example:
-
-```sh
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX=./install
-```
+For example: `cmake -S . -B build -DCMAKE_INSTALL_PREFIX=./install`.
 
 The command above will install the static libraries and include header files in the `install` directory in the root of the project. Installing without the `-DCMAKE_INSTALL_PREFIX=./install` flag in the configure step will install the static libraries, include headers, and any binaries in your system directories, such as `/usr/local/lib` and `/usr/local/include`.
 
@@ -87,6 +85,8 @@ This is the same as doing `cd build && make install` if you are using something 
 
 You may need to use `sudo` depending on your system.
 
+This step will install the static libraries and include headers in your system directories, such as `/usr/local/lib` and `/usr/local/include`. But if you specified `-DCMAKE_INSTALL_PREFIX=./install`, it will install the static libraries and include headers in the `install` directory in the root of the project.
+
 4. Building the source code will allow you to use the `atclient` library in your own CMake projects:
 
 ```cmake
@@ -111,8 +111,6 @@ You may also specify a generator in the configure step with something like: `-G 
 
 ### Running Tests on Linux/MacOS
 
-Check out the [run_ctest.sh](./tools/run_ctest.sh) as an example.
-
 1. Get ahold of the source code either via git clone or from downloading the source from our releases:
 
 ```sh
@@ -126,7 +124,7 @@ cd at_c/packages/atclient
 cmake -S . -B build -DATCLIENT_BUILD_TESTS=ON
 ```
 
-3. Build (target is all by default)
+3. Build (target is all by default, so the following command will build all targets)
 
 ```sh
 cmake --build build
@@ -144,15 +142,11 @@ cd build/tests && ctest -V --timeout 10
 
 `-V` will output any stdout lines from the tests.
 
+You may also do something like `ctest --output-on-failure --test-dir build`, where `--output-on-failure` will output any stdout lines from the tests if they fail and `--test-dir build` specifies the directory where the tests are located (to avoid having to do `cd` beforehand).
+
 ## Contributing
 
 When creating source files, header files, or tests to certain packages, please follow the documentation in their according README files.
-
-### Creating Tests
-
-If you want to add a test in atclient, simply add a `test_*.c` file in the `tests` directory. CMake will automatically detect it and add it to the test suite. Ensure that the test file is named `test_*.c` or else it will not be detected.
-
-Ensure the file has a `int main(int argc, char **argv)` function and returns 0 on success and not 0 on failure.
 
 ### Adding New Source Files
 
@@ -175,3 +169,9 @@ target_sources(atclient PRIVATE
 Simply add the header inside of the `include/` directory. CMake will automatically detect it and add it to the include path.
 
 If it is added in a subdirectory (like `include/atclient/`), then the include path will be `atclient/` (e.g. `#include <atclient/new_header.h>`). Putting your header file in a subdirectory is recommended to help keep our header files consistent and avoid any naming conflicts.
+
+### Adding New Tests
+
+If you want to add a test in atclient, simply add a `test_*.c` file in the `tests` directory. CMake will automatically detect it and add it to the test suite. Ensure that the test file is named `test_*.c` or else it will not be detected.
+
+Ensure the file has a `int main(int argc, char **argv)` function and returns 0 on success and not 0 on failure.

@@ -24,15 +24,15 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   int ret = 1;
 
   // 1. initialize variables
-  const size_t atkeystrlen = ATCLIENT_ATKEY_FULL_LEN;
-  char atkeystr[atkeystrlen];
-  memset(atkeystr, 0, sizeof(char) * atkeystrlen);
-  size_t atkeystrolen = 0;
+  const size_t atkeystrsize = ATCLIENT_ATKEY_FULL_LEN;
+  char atkeystr[atkeystrsize];
+  memset(atkeystr, 0, sizeof(char) * atkeystrsize);
+  size_t atkeystrlen = 0;
 
-  const size_t recvlen = 4096;
-  unsigned char recv[recvlen];
-  memset(recv, 0, sizeof(unsigned char) * recvlen);
-  size_t recvolen = 0;
+  const size_t recvsize = 4096;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
 
   const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
   unsigned char selfencryptionkey[selfencryptionkeysize];
@@ -46,32 +46,32 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   char *valueraw = NULL;
 
   // 2. build llookup: command
-  ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrlen, &atkeystrolen);
+  ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrsize, &atkeystrlen);
 
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
 
-  const size_t cmdbuffersize = strlen("llookup:all:\r\n") + atkeystrolen + 1;
+  const size_t cmdbuffersize = strlen("llookup:all:\r\n") + atkeystrlen + 1;
   cmdbuffer = (char *) malloc(sizeof(char) * cmdbuffersize);
   memset(cmdbuffer, 0, sizeof(char) * cmdbuffersize);
 
-  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int)atkeystrolen, atkeystr);
+  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
   // 3. send llookup: command
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
-                                 recvlen, &recvolen);
+                                 recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
   // 4. parse response
-  if (!atclient_stringutils_starts_with((char *)recv, recvolen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                          (int)recvolen, recv);
+                          (int)recvlen, recv);
     goto exit;
   }
 
@@ -100,17 +100,17 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   }
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(&atkey->metadata)) {
-    size_t ivolen;
-    ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.olen, iv,
-                                ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+    size_t ivlen;
+    ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.len, iv,
+                                ATCHOPS_IV_BUFFER_SIZE, &ivlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
-    if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
+    if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
       ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen,
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivlen != ATCHOPS_IV_BUFFER_SIZE (%d != %d)\n", ivlen,
                             ATCHOPS_IV_BUFFER_SIZE);
       goto exit;
     }
@@ -126,7 +126,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  ret = atchops_base64_decode(atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.olen,
+  ret = atchops_base64_decode((unsigned char *) atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.len,
                               selfencryptionkey, selfencryptionkeysize, &selfencryptionkeylen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
@@ -138,14 +138,14 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   memset(valueraw, 0, sizeof(char) * valuerawsize);
   size_t valuerawlen = 0;
 
-  ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), valueraw, valuerawsize,
+  ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), (unsigned char *) valueraw, valuerawsize,
                               &valuerawlen);
   if(ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuesize, valuelen);
+  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *) valueraw, valuerawlen, (unsigned char *) value, valuesize, valuelen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;
@@ -159,7 +159,7 @@ exit: {
     cJSON_Delete(root);
   }
   free(valueraw);
-  free(cmdbuffer);
+  free(cmdbuffer);  
   return ret;
 }
 }

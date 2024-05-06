@@ -58,30 +58,30 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
     responselen = (short) strlen(response);
 
     // 44 + 1
-    const size_t plaintextlen = 45;
-    unsigned char plaintext[plaintextlen];
-    memset(plaintext, 0, plaintextlen);
-    size_t plaintextolen = 0;
+    const size_t plaintextsize = 45;
+    unsigned char plaintext[plaintextsize];
+    memset(plaintext, 0, sizeof(unsigned char) * plaintextsize);
+    size_t plaintextlen = 0;
 
     const size_t responserawsize = 512;
     unsigned char responseraw[responserawsize];
     memset(responseraw, 0, sizeof(unsigned char) * responserawsize);
     size_t responserawlen = 0;
 
-    ret = atchops_base64_decode(response, responselen, responseraw, responserawsize, &responserawlen);
+    ret = atchops_base64_decode((unsigned char *) response, responselen, responseraw, responserawsize, &responserawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
     }
 
-    ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextlen,
-                              &plaintextolen);
+    ret = atchops_rsa_decrypt(ctx->atkeys.encryptprivatekey, responseraw, responserawlen, plaintext, plaintextsize,
+                              &plaintextlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
       return ret;
     }
 
-    memcpy(enc_key_shared_by_me, plaintext, plaintextlen);
+    memcpy(enc_key_shared_by_me, plaintext, plaintextsize);
   }
 
   else if (atclient_stringutils_starts_with((char *)recv, recvsize, "error:AT0015-key not found",
@@ -113,17 +113,17 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
   char *command_prefix = "lookup:shared_key@";
   const short command_prefix_len = 18;
 
-  short command_len = command_prefix_len + strlen(recipient->without_prefix_str) + 3;
-  char command[command_len];
-  snprintf(command, command_len, "lookup:shared_key@%s\r\n", recipient->without_prefix_str);
+  short commandsize = command_prefix_len + strlen(recipient->without_prefix_str) + 3;
+  char command[commandsize];
+  snprintf(command, commandsize, "lookup:shared_key@%s\r\n", recipient->without_prefix_str);
 
-  const size_t recvlen = 1024;
-  unsigned char recv[recvlen];
-  memset(recv, 0, sizeof(unsigned char) * recvlen);
-  size_t olen = 0;
+  const size_t recvsize = 1024;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
 
   ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
-                                 recvlen, &olen);
+                                 recvsize, &recvlen);
   if (ret != 0) {
     return ret;
   }
@@ -135,16 +135,16 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
   char response_prefix[response_prefix_len];
   snprintf(response_prefix, response_prefix_len, "@%s@", ctx->atsign.without_prefix_str);
 
-  if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {
+  if (atclient_stringutils_starts_with(response, recvsize, response_prefix, response_prefix_len)) {
     response = response + response_prefix_len;
   }
 
-  if (atclient_stringutils_ends_with(response, recvlen, response_prefix, response_prefix_len)) {
+  if (atclient_stringutils_ends_with(response, recvsize, response_prefix, response_prefix_len)) {
     response[strlen(response) - response_prefix_len - 1] = '\0';
   }
 
   // does my atSign already have the recipient's shared key?
-  if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
+  if (atclient_stringutils_starts_with(response, recvsize, "data:", 5)) {
 
     response = response + 5;
 
@@ -159,7 +159,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     memset(responseraw, 0, sizeof(unsigned char) * responserawsize);
     size_t responserawlen = 0;
 
-    ret = atchops_base64_decode(response, strlen(response), responseraw, responserawsize, &responserawlen);
+    ret = atchops_base64_decode((unsigned char *) response, strlen(response), responseraw, responserawsize, &responserawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
@@ -173,7 +173,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     }
 
     memcpy(enc_key_shared_by_other, plaintext, plaintextlen);
-  } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
+  } else if (atclient_stringutils_starts_with((char *)recv, recvsize, "error:AT0015-key not found",
                                               strlen("error:AT0015-key not found"))) {
     // There is nothing we can do, except wait for the recipient to share a new key
     // We want to mark this situation with a easily distinguishable return value
@@ -282,7 +282,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   }
 
   ret =
-      atchops_base64_encode(sharedenckeyencryptedforus, sharedenckeyencryptedforuslen, sharedenckeybase64encryptedforus,
+      atchops_base64_encode(sharedenckeyencryptedforus, sharedenckeyencryptedforuslen, (unsigned char *) sharedenckeybase64encryptedforus,
                             sharedenckeybase64encryptedforussize, &sharedenckeybase64encryptedforuslen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -316,7 +316,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   }
 
   ret = atchops_base64_encode(sharedenckeyencryptedforthem, sharedenckeyencryptedforthemlen,
-                              sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
+                              (unsigned char *) sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
                               &sharedenckeybase64encryptedforthemlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

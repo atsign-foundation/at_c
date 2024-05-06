@@ -163,12 +163,12 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   off += 2;
 
   // Step 4 send the command
-  const size_t recvlen = 4096;
-  unsigned char recv[recvlen];
-  memset(recv, 0, sizeof(unsigned char) * recvlen);
-  size_t recvolen = 0;
+  const size_t recvsize = 4096;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
 
-  res = atclient_connection_send(&ctx->secondary_connection, (const unsigned char *)cmd, off, recv, recvlen, &recvolen);
+  res = atclient_connection_send(&ctx->secondary_connection, (const unsigned char *)cmd, off, recv, recvsize, &recvlen);
   if (res != 0) {
     atlogger_log("atclient | notify", ATLOGGER_LOGGING_LEVEL_WARN,
                           "atclient_connection_send failed with code %d\n", res);

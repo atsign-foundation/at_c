@@ -40,8 +40,8 @@ exit: {
 }
 }
 
-int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybase64len,
-                                   size_t *keybase64olen, const enum atchops_aes_size keybits) {
+int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybase64size,
+                                   size_t *keybase64len, const enum atchops_aes_size keybits) {
   int ret = 1;
 
   const size_t keysize = keybits / 8;
@@ -53,7 +53,7 @@ int atchops_aes_generate_keybase64(unsigned char *keybase64, const size_t keybas
     goto exit;
   }
 
-  ret = atchops_base64_encode(key, keysize, keybase64, keybase64len, keybase64olen);
+  ret = atchops_base64_encode(key, keysize, keybase64, keybase64size, keybase64len);
   if (ret != 0) {
     goto exit;
   }

@@ -110,19 +110,13 @@ int main(int argc, char *argv[]) {
 
   atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
-    atclient_connection_free(&root_connection);
-    atclient_atsign_free(&atsign);
-    atclient_atkey_free(&atkey);
-    atclient_atkeys_free(&atkeys);
-    atclient_atstr_free(&atkeystr);
-
+  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen,
-                        (int)atkeystr.olen, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
+                        (int)atkeystr.len, atkeystr.str);
 
   atclient_notify_params notify_params;
   atclient_notify_params_init(&notify_params);

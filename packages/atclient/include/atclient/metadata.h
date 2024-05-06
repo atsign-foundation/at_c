@@ -243,12 +243,12 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
  * @param metadata the metadata struct to populate
  * @param metadatastr the metadata string (usually taken from meta commands such as llookup:meta:<atkey> or
  * plookup:meta:<atkey<)
- * @param metadatastrlen the string length of the metadata string. Can be obtained from something like
+ * @param metadatastrsize the string length of the metadata string. Can be obtained from something like
  * strlen(metadatastr)
  * @return int 0 on success
  */
 int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
-                                         const size_t metadatastrlen);
+                                         const size_t metadatastrsize);
 /**
  * @brief Populates the metadata struct from a cJSON pointer. This function is good for debugging.
  *
@@ -262,12 +262,12 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
  *
  * @param metadata the metadata struct to convert to a string
  * @param metadatastr the buffer to write the metadata to
- * @param metadatastrlen the allocated length of the metadatastr buffer
- * @param metadatastrolen the length of the metadata string written to metadatastr once the operation is complete
+ * @param metadatastrsize the allocated length of the metadatastr buffer
+ * @param metadatastrlen the length of the metadata string written to metadatastr once the operation is complete
  * @return int 0 on success
  */
 int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                       const size_t metadatastrlen, size_t *metadatastrolen);
+                                       const size_t metadatastrsize, size_t *metadatastrlen);
 
 size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *metadata);
 /**
@@ -276,12 +276,12 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
  *
  * @param metadata the metadata struct to read from
  * @param metadatastr the buffer to write the metadata to
- * @param metadatastrlen the allocated length of the metadatastr buffer
- * @param metadatastrolen the length of the metadata string written to metadatastr once the operation is complete
+ * @param metadatastrsize the allocated length of the metadatastr buffer
+ * @param metadatastrlen the length of the metadata string written to metadatastr once the operation is complete
  * @return int 0 on success
  */
 int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                            const size_t metadatastrlen, size_t *metadatastrolen);
+                                            const size_t metadatastrsize, size_t *metadatastrlen);
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata *metadata);
