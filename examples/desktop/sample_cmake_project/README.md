@@ -2,34 +2,48 @@
 
 This is an example desktop CMake project consuming the atclient library.
 
-First step is to build the static libraries and headers. See [atclient](../../packages/atclient/README.md) for instructions on building the source.
+First step is to build the static libraries and headers. See [atclient](../../../README.md) for instructions on building the source.
 
-Next, add the following to your CMakeLists.txt:
+Secondly, add the following to your CMakeLists.txt:
 
 ```cmake
-find_package(atclient REQUIRED CONFIG)
+find_package(atsdk REQUIRED CONFIG)
 ```
 
-find_package looks for atclient-config.cmake which should be in your `/usr/local/lib/atclient-config.cmake` (if you're on Mac) or similar location. This file helps CMake find the atclient library and headers.
+find_package looks for atsdk-config.cmake which should be in your `/usr/local/lib/atsdk-config.cmake` (if you're on Mac) or similar location. This file helps CMake find the atclient library and headers.
 
-Then you can link against the atclient library:
+This `.cmake` file is generated when you build the atsdk library, which should have been done in the previous step.
+
+Thirdly, you may link against the atsdk library:
 
 ```cmake
-target_link_libraries(my_lib PRIVATE atclient::atclient)
+target_link_libraries(my_lib PRIVATE atsdk::atclient)
 ```
 
 Here is a full CMakeLists.txt example:
 
 ```cmake
 cmake_minimum_required(VERSION 3.19)
-
 project(sample_cmake_project)
 
-find_package(atclient REQUIRED CONFIG)
-
-message(STATUS "Found atclient!")
+find_package(atsdk REQUIRED CONFIG)
+message(STATUS "[atsdk] Found package!")
 
 add_executable(exec ${CMAKE_CURRENT_LIST_DIR}/main.c)
+target_link_libraries(exec PRIVATE atsdk::atclient)
+```
 
-target_link_libraries(exec PRIVATE atclient::atclient)
+Next, you can build your project:
+
+```bash
+cmake -S . -B build
+cmake --build build
+```
+
+This will build your project with the atclient library.
+
+To run the project:
+
+```bash
+./build/exec
 ```
