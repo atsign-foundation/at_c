@@ -958,7 +958,7 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   size_t pos = 0;
   size_t len = atclient_atkey_metadata_protocol_strlen(metadata);
   if (len > metadatastrsize) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr buffer too small: %lu > %lu\n", len, metadatastrsize);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr buffer too small. Expected at least %d bytes but got %d\n", len, metadatastrsize);
     return 1;
   }
 

@@ -2,6 +2,7 @@
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/stringutils.h"
+#include "atclient/encryption_key_helpers.h"
 #include "cJSON.h"
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
@@ -10,6 +11,8 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+
+#define TAG "notify"
 
 void atclient_notify_params_init(atclient_notify_params *params) {
   params->message_type = NMT_key;
@@ -21,20 +24,24 @@ void atclient_notify_params_init(atclient_notify_params *params) {
 }
 
 void atclient_notify_params_free(atclient_notify_params *params) {
-  atclient_atkey_free(&params->key);
-  free(params->value);
-  free(params->notifier);
+  // atclient_atkey_free(&params->key);
+  // free(params->value);
+  // free(params->notifier);
+  return;
 }
 
-int atclient_notify(atclient *ctx, atclient_notify_params *params) {
-  int res = 1;
-  // Step 1 calculate the buffer size needed for the protocol command
-  size_t bufsize = 6 + 1 + 2 + 1 + 36 + 3 +              // "notify:id:" + $uuid + trailing '\r\n\0'
-                   1 + 8 + 1 + strlen(params->notifier); // ":notifier:$notifier"
+int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id) {
+  int ret = 1;
 
-  // minimum viable: notify:update:key:value -> id
-  // TODO: check for bad input in params struct since we don't provide the best helper functions
-  // and add valid ones to bufsize
+  // Step 1: calculate the buffer size needed for the protocol command
+  size_t bufsize = 6                          // notify
+                   + 1                        // :
+                   + 8                        // notifier
+                   + 1                        // :
+                   + strlen(params->notifier) // $notifier
+                   + 2                        // \r\n
+                   + 1                        // \0
+      ;
 
   if (params->operation != NO_none) {
     bufsize += 1 + 6; // ":update" | ":delete"
@@ -62,118 +69,120 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   }
 
   // add metadata fragment length
-  size_t metadatalen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
-  bufsize += metadatalen;
+  const size_t metadatalen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
+  bufsize += metadatalen; // :$metadata
 
   // atkey parts length
-  size_t atkeylen = atclient_atkey_strlen(&params->key);
-  bufsize += 1 + atkeylen; // :$atkey
+  const size_t atkeylen = atclient_atkey_strlen(&params->key);
+  bufsize += atkeylen; // :$atkey
 
-  // Step 2 generate / retrieve values which could potentially fail
-  res = atchops_uuid_init();
-  if (res != 0) {
-    atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
-                          "atchops_uuid_init failed with code %d\n", res);
-    return res;
-  }
+  bufsize += 1; // null terminator
 
-  // careful about when this is called, since it will write a null terminator to the 37th char
-  res = atchops_uuid_generate(params->id, 37);
-  if (res != 0) {
-    atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
-                          "atchops_uuid_generate failed with code %d\n", res);
-    return res;
-  }
-
+  // Step 2: calculate the ttln
   struct timeval tv;
-  res = gettimeofday(&tv, NULL);
-  if (res != 0) {
-    atlogger_log("atclient | notification", ATLOGGER_LOGGING_LEVEL_WARN,
-                          // TODO: get errno
-                          "gettimeofday failed with code stored in errno %d\n", res);
-    return res;
+  ret = gettimeofday(&tv, NULL);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 // TODO: get errno
+                 "gettimeofday failed with code stored in errno %d\n", ret);
+    return ret;
   }
 
-  unsigned long long ttln =
+  const unsigned long long ttln =
       (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000 + params->notification_expiry;
 
-  // Step 3 allocate the buffer and populate the full command
+  // Step 3: allocate buffer and populate the full command
   char cmd[bufsize];
-  snprintf(cmd, bufsize, "notify:id:%s", params->id);
-  // now overwrite the '\0' at the tail of params->id
+  snprintf(cmd, bufsize, "notify");
 
-  const char *part;
-  size_t off = 46;
+  char *part;
+  size_t offset = strlen(cmd);
   if (params->operation != NO_none) {
     part = atclient_notify_operation_str[params->operation];
-    snprintf(cmd + off, bufsize - off, ":%s", part);
-    off += 1 + strlen(part);
+    snprintf(cmd + offset, bufsize - offset, ":operation:%s", part);
+    offset += strlen(":operation:") + strlen(part);
   }
 
   if (params->message_type != NMT_none) {
     part = atclient_notify_message_type_str[params->message_type];
-    snprintf(cmd + off, bufsize - off, ":messageType:%s", part);
-    off += 13 + strlen(part);
+    snprintf(cmd + offset, bufsize - offset, ":messageType:%s", part);
+    offset += strlen(":messageType:") + strlen(part);
   }
 
   if (params->priority != NP_none) {
     part = atclient_notify_priority_str[params->priority];
-    snprintf(cmd + off, bufsize - off, ":priority:%s", part);
-    off += 10 + strlen(part);
+    snprintf(cmd + offset, bufsize - offset, ":priority:%s", part);
+    offset += strlen(":priority:") + strlen(part);
   }
 
   if (params->strategy != NS_none) {
     part = atclient_notify_strategy_str[params->strategy];
-    snprintf(cmd + off, bufsize - off, ":strategy:%s", part);
-    off += 10 + strlen(part);
+    snprintf(cmd + offset, bufsize - offset, ":strategy:%s", part);
+    offset += strlen(":strategy:") + strlen(part);
   }
 
   if (params->notification_expiry > 0) {
     int ttln_len = long_strlen(ttln);
-    snprintf(cmd + off, bufsize - off, ":ttln:%llu", ttln);
-    off += 6 + ttln_len;
+    snprintf(cmd + offset, bufsize - offset, ":ttln:%llu", ttln);
+    offset += strlen(":ttln:") + ttln_len;
   }
 
   size_t metadataolen;
-  atclient_atkey_metadata_to_protocol_str(&params->key.metadata, cmd + off, metadatalen, &metadataolen);
+  atclient_atkey_metadata_to_protocol_str(&(params->key.metadata), cmd + offset, metadatalen, &metadataolen);
   if (metadatalen != metadataolen) {
-    // TODO: error
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "calculated metadata length %d but got %d\n", metadatalen, metadataolen);
     return 1;
   }
-  off += metadatalen;
+  offset += metadatalen;
 
   // ':' before the atkey
-  cmd[off] = ':';
-  off += 1;
+  cmd[offset] = ':';
+  offset += 1;
 
   size_t atkeyolen;
-  atclient_atkey_to_string(&params->key, cmd + off, atkeylen, &atkeyolen);
+  atclient_atkey_to_string(&params->key, cmd + offset, atkeylen, &atkeyolen);
   if (atkeylen != atkeyolen) {
-    // TODO: error
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "calculated atkey length %d but got %d\n", atkeylen, atkeyolen);
     return 1;
   }
-  off += atkeylen;
+  offset += atkeylen;
 
-  if (params->value != NULL) {
-    snprintf(cmd + off, bufsize - off, ":%s", params->value);
-    off += 1 + strlen(params->value);
+  if(params->value != NULL)
+  {
+    // add final :
+    cmd[offset] = ':';
+    offset += 1;
+
+    // atclient_get_shared_encryption_key_shared_by_me(ctx, &(params->key.sharedwith.str), params->key.)
   }
 
-  snprintf(cmd + off, bufsize - off, "\r\n");
-  off += 2;
+  // log cmd
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "notify command: %s\n", cmd);
+
+  // if (params->value != NULL) {
+  //   snprintf(cmd + offset, bufsize - offset, ":%s", params->value);
+  //   offset += strlen(":") + strlen(params->value);
+  // }
+
+  // snprintf(cmd + offset, bufsize - offset, "\r\n");
+  // offset += strlen("\r\n");
 
   // Step 4 send the command
-  const size_t recvsize = 4096;
-  unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
-  size_t recvlen = 0;
+  // const size_t recvsize = 1024;
+  // unsigned char recv[recvsize];
+  // memset(recv, 0, sizeof(unsigned char) * recvsize);
+  // size_t recvlen = 0;
 
-  res = atclient_connection_send(&ctx->secondary_connection, (const unsigned char *)cmd, off, recv, recvsize, &recvlen);
-  if (res != 0) {
-    atlogger_log("atclient | notify", ATLOGGER_LOGGING_LEVEL_WARN,
-                          "atclient_connection_send failed with code %d\n", res);
-    return res;
-  }
-  // TODO  handle the recv
+  // ret = atclient_connection_send(&ctx->secondary_connection, (const unsigned char *)cmd, offset, recv, recvsize, &recvlen);
+  // if (ret != 0) {
+  //   atlogger_log("atclient | notify", ATLOGGER_LOGGING_LEVEL_WARN, "atclient_connection_send failed with code %d\n",
+  //                ret);
+  //   return ret;
+  // }
+  // // TODO  handle the recv
+
+
   return 0;
 }

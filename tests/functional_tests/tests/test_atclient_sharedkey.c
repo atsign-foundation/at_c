@@ -31,10 +31,10 @@ int main(int argc, char *argv[])
 
     atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-    char *atsign1 = FIRST_ATSIGN;
+    const char *atsign1 = FIRST_ATSIGN;
     const size_t atsign1len = strlen(atsign1);
 
-    char *atsign2 = SECOND_ATSIGN;
+    const char *atsign2 = SECOND_ATSIGN;
     const size_t atsign2len = strlen(atsign2);
 
     atclient atclient1;
@@ -152,7 +152,7 @@ static int test_2_get_as_sharedby(atclient *atclient)
         goto exit;
     }
 
-    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) != 0)
+    if((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
         goto exit;
@@ -212,7 +212,7 @@ static int test_3_get_as_sharedwith(atclient *atclient2)
     }
 
 
-    if((ret = atclient_get_sharedkey(atclient2, &atkey, value, valuesize, &valuelen, NULL, false)) != 0)
+    if((ret = atclient_get_sharedkey(atclient2, &atkey, value, valuesize, &valuelen, NULL)) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
         goto exit;

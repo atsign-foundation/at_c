@@ -19,18 +19,18 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define ATKEYSFILE_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
-#define ATSIGN "@expensiveferret"
-#define RECIPIENT "@secondaryjackal"
-#define ATKEY_NAME "attalk"
-#define ATKEY_NAMESPACE "ai6bh"
+#define ATKEYSFILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@soccer0_key.atKeys"
+#define ATSIGN "@soccer0"
+#define RECIPIENT "@soccer99"
+#define ATKEY_NAME "talk"
+#define ATKEY_NAMESPACE "at_talk"
 
 #define TAG "at_talk"
 
-static int attalk_get_both_shared_encryption_keys(atclient *ctx, const atclient_atsign *recipient,
+static int attalk_get_both_shared_encryption_keys(atclient *ctx, const char *recipient,
                                                   char *enc_key_shared_by_me, char *enc_key_shared_by_other);
 
-static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me,
+static int attalk_send_message(atclient *ctx, const char *recipient, char *enc_key_shared_by_me,
                                const char *message);
 
 static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_shared_by_other);
@@ -47,16 +47,6 @@ int main(int argc, char **argv) {
   // Init atclient
   atclient atclient;
   atclient_init(&atclient);
-
-  // Init myatsign: the atsign that you'd like to use as a client
-  // and assign it to the atclient "atsign" parameter
-  atclient_atsign myatsign;
-  ret = atclient_atsign_init(&myatsign, ATSIGN);
-  if (ret != 0) {
-    atclient_free(&atclient);
-    return ret;
-  }
-  atclient.atsign = myatsign;
 
   // Init atkeysfile and read keys
   atclient_atkeysfile atkeysfile;
@@ -145,7 +135,7 @@ exit2 : {
 }
 }
 
-static int attalk_get_both_shared_encryption_keys(atclient *ctx, const atclient_atsign *recipient,
+static int attalk_get_both_shared_encryption_keys(atclient *ctx, const char *recipient,
                                                   char *enc_key_shared_by_me, char *enc_key_shared_by_other) {
   int ret = -1;
 
@@ -290,7 +280,7 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
 }
 
 static void *heartbeat_handler(void *monitor_connection) {
-  atclient *connection = (atclient *)monitor_connection;
+  atclient *connection = (atclient *) monitor_connection;
   atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat_handler\n");
   while (true) {
     sleep(30);
@@ -299,7 +289,7 @@ static void *heartbeat_handler(void *monitor_connection) {
   };
 }
 
-static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, char *enc_key_shared_by_me,
+static int attalk_send_message(atclient *ctx, const char *recipient, char *enc_key_shared_by_me,
                                const char *message) {
   int ret = -1;
   atclient_atkey atkey;
@@ -309,7 +299,7 @@ static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, 
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
   if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ctx->atsign.atsign,
-                                             strlen(ctx->atsign.atsign), recipient->atsign, strlen(recipient->atsign),
+                                             strlen(ctx->atsign.atsign), recipient, strlen(recipient),
                                              ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
     atclient_atkey_free(&atkey);
     atclient_atstr_free(&atkeystr);

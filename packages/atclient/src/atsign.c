@@ -1,10 +1,10 @@
 #include "atclient/atsign.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "atsign"
 
@@ -40,8 +40,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n",
-                          atsignlen);
+                 "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n", atsignlen);
     ret = 1;
     goto exit;
   }
@@ -66,36 +65,27 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size
 exit: { return ret; }
 }
 
-int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
+int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignsize, size_t *atsignolen,
                                    const char *originalatsign, const size_t originalatsignlen) {
-  int ret = 1;
-  if (atsignlen + 1 < originalatsignlen) {
+  if (atsignsize + 1 < originalatsignlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n",
-                          atsignlen);
-    ret = 1;
-    goto exit;
+                 "atsignsize might be too low. consider allocating more buffer space. atsignsize: %d\n", atsignsize);
+    return 1;
   }
 
   if (originalatsignlen <= 0) {
-    ret = 2;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "originalatsignlen is <= 0: %lu\n", originalatsignlen);
-    goto exit;
+    return 2;
   }
 
-  if (originalatsign[0] == '@') {
-    // it already began with an x@x
-    strncpy(atsign, originalatsign, originalatsignlen + 1);
-    atsign[originalatsignlen] = '\0';
-    ret = 0;
-    goto exit;
+  memset(atsign, 0, atsignsize);
+  if(originalatsign[0] != '@') {
+    atsign[0] = '@';
+    strncpy(atsign + 1, originalatsign, originalatsignlen);
+    *atsignolen = originalatsignlen + 1;
+  } else {
+    strncpy(atsign, originalatsign, originalatsignlen);
+    *atsignolen = originalatsignlen;
   }
-
-  atsign[0] = '@';
-  strncpy(atsign + 1, originalatsign, originalatsignlen + 1);
-  atsign[originalatsignlen + 1] = '\0';
-  *atsignolen = originalatsignlen + 1;
-  ret = 0;
-  goto exit;
-exit: { return ret; }
+  return 0;
 }

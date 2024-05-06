@@ -7,17 +7,17 @@
 #include <atchops/aes.h>
 #include <atchops/base64.h>
 #include <atlogger/atlogger.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define TAG "encryption_key_helpers"
-#define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
 
 int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *sharedwith, const size_t sharedwithlen,
                                                     unsigned char *sharedenckey) {
   int ret = 1;
 
   const size_t sharedwith_withatsize = sharedwithlen + 1;
-  char *sharedwith_withat[sharedwith_withatsize];
+  char sharedwith_withat[sharedwith_withatsize];
   memset(sharedwith_withat, 0, sizeof(char) * sharedwith_withatsize);
   size_t sharedwith_withatlen = 0;
 
@@ -28,11 +28,12 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
   }
 
   // llookup:shared_key.recipient_atsign@myatsign
-  const short commandsize =
+  const size_t commandsize =
       strlen("llookup:shared_key.") + (sharedwith_withatlen - 1) + strlen(ctx->atsign.atsign) + strlen("\r\n") + 1;
   char command[commandsize];
   memset(command, 0, sizeof(char) * commandsize);
-  snprintf(command, commandsize, "llookup:shared_key.%s%s\r\n", (sharedwith_withat + 1), ctx->atsign.atsign);
+  snprintf(command, commandsize, "llookup:shared_key.%.*s%s\r\n", (int)sharedwith_withatlen, sharedwith_withat + 1,
+           ctx->atsign.atsign);
 
   const size_t recvsize = 1024;
   unsigned char recv[recvsize];
@@ -46,8 +47,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
   }
 
   if (atclient_stringutils_starts_with((const char *)recv, recvlen, "data:", strlen("data:"))) {
-    char *response = recv;
-    response = response + 5;
+    const char *response = recv + 5;
     const short responselen = (short)strlen(response);
 
     const size_t responserawsize = 512;
@@ -196,37 +196,43 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, const 
 
   if (publicenckeybase64 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybyme is NULL\n");
-    return 1;
+    return ret;
   }
 
-  const size_t atsignwithatlen = strlen(atsign) + 1;
-  char atsignwithat[atsignwithatlen];
-  memset(atsignwithat, 0, sizeof(char) * atsignwithatlen);
-  size_t atsignwithatlen = 0;
+  const size_t atsign_withatsize = strlen(atsign) + 1;
+  char atsign_withat[atsign_withatsize];
+  memset(atsign_withat, 0, sizeof(char) * atsign_withatsize);
+  size_t atsign_withatlen = 0;
 
-  if ((ret = atclient_atsign_with_at_symbol(atsignwithat, atsignwithatlen, &atsignwithatlen, atsign, strlen(atsign))) !=
-      0) {
+  if ((ret = atclient_atsign_with_at_symbol(atsign_withat, atsign_withatsize, &atsign_withatlen, atsign,
+                                            strlen(atsign))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol: %d\n", ret);
     return ret;
   }
 
-  const short commandsize = "plookup:publickey" + atsignwithatlen + strlen("\r\n") + 1;
+  const short commandsize = strlen("plookup:publickey") + atsign_withatlen + strlen("\r\n") + 1;
   char command[commandsize];
   memset(command, 0, sizeof(char) * commandsize);
-  snprintf(command, commandsize, "plookup:publickey%.*s\r\n", (int)atsignwithat, atsignwithat);
+  snprintf(command, commandsize, "plookup:publickey%.*s\r\n", (int)atsign_withatlen, atsign_withat);
 
   const size_t recvsize = 1024;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  if ((ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command),
+  if ((ret = atclient_connection_send(&(ctx->secondary_connection), (const unsigned char *)command, strlen(command),
                                       recv, recvsize, &recvlen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     return ret;
   }
 
-  if (atclient_stringutils_starts_with((const unsigned char)*recv, recvlen, "data:", strlen("data:"))) {
-    char *response = recv + strlen("data:");
+  if (recvlen == 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is 0\n");
+    return 1;
+  }
+
+  if (atclient_stringutils_starts_with((const char *)recv, recvlen, "data:", strlen("data:"))) {
+    const char *response = recv + strlen("data:");
     const size_t responselen = recvlen - strlen("data:");
 
     if (responselen > publicenckeybase64size) {
@@ -244,28 +250,36 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, const 
     if (publicenckeybase64len != NULL) {
       *publicenckeybase64len = responselen;
     }
-  } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
+    ret = 0;
+  } else if (atclient_stringutils_starts_with((const char *)recv, recvlen, "error:AT0015-key not found",
                                               strlen("error:AT0015-key not found"))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv began with error:AT0015-key not found\n");
     ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
     return ret;
   }
 
-  return 1;
+  return ret;
 }
 
 int atclient_create_shared_encryption_keypair_for_me_and_other(atclient *atclient, const char *sharedwith,
                                                                const size_t sharedwithlen,
-                                                               unsigned char *sharedenckeybyme) {
+                                                               unsigned char *sharedenckey) {
   int ret = 1;
 
-  if(sharedenckeybyme == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybyme is NULL, this should be a pointer to a buffer with 32 bytes of allocated size\n");
+  if (sharedenckey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "sharedenckeybyme is NULL, this should be a pointer to a buffer with 32 bytes of allocated size\n");
     return ret;
   }
 
   // 1. variables
-  // holds unencrypted shared encryption key in base 64 format
+
+  // unencrypted shared encryption key
+  const size_t sharedenckeytempsize = ATCHOPS_AES_256 / 8;
+  unsigned char sharedenckeytemp[sharedenckeytempsize];
+  memset(sharedenckeytemp, 0, sizeof(unsigned char) * sharedenckeytempsize);
+  size_t sharedenckeytemplen = 0;
+
   const size_t sharedenckeybase64size = 64;
   unsigned char sharedenckeybase64[sharedenckeybase64size];
   memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
@@ -294,37 +308,46 @@ int atclient_create_shared_encryption_keypair_for_me_and_other(atclient *atclien
   size_t sharedenckeybase64encryptedforthemlen = 0;
 
   // their public encyrption key
-  const size_t publickeybase64size = 1024;
+  const size_t publickeybase64size = 512;
   char publickeybase64[publickeybase64size];
   memset(publickeybase64, 0, sizeof(char) * publickeybase64size);
   size_t publickeybase64len = 0;
 
-  const size_t sharedwithwithatsize = sharedwithlen + 1;
-  char sharedwithwithat[sharedwithwithatsize];
-  memset(sharedwithwithat, 0, sizeof(char) * sharedwithwithatsize);
-  size_t sharedwithwithatlen = 0;
+  const size_t sharedwith_withatsize = sharedwithlen + 1;
+  char sharedwith_withat[sharedwith_withatsize];
+  memset(sharedwith_withat, 0, sizeof(char) * sharedwith_withatsize);
+  size_t sharedwith_withatlen = 0;
 
   const size_t recvsize = 2048;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  char *cmdbuffer1 = NULL;
-  char *cmdbuffer2 = NULL;
-
   atchops_rsakey_publickey publickeystruct;
   atchops_rsakey_publickey_init(&publickeystruct);
 
-  if((ret = atclient_atsign_with_at_symbol(sharedwithwithat, sharedwithwithatsize, &sharedwithwithatlen, sharedwith, sharedwithlen)) != 0) {
+  char *cmdbuffer1 = NULL;
+  char *cmdbuffer2 = NULL;
+
+  if ((ret = atclient_atsign_with_at_symbol(sharedwith_withat, sharedwith_withatsize, &sharedwith_withatlen, sharedwith,
+                                            sharedwithlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol: %d\n", ret);
     goto exit;
   }
 
   // 2. generate shared encryption key
-  ret = atchops_aes_generate_keybase64(sharedenckeybase64, sharedenckeybase64size, &sharedenckeybase64len,
-                                       ATCHOPS_AES_256);
+  ret = atchops_aes_generate_key(sharedenckeytemp, ATCHOPS_AES_256);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_generate_keybase64: %d\n", ret);
+    goto exit;
+  }
+  sharedenckeytemplen = 32;
+
+  ret = atchops_base64_encode(sharedenckeytemp, sharedenckeytemplen, sharedenckeybase64, sharedenckeybase64size,
+                              &sharedenckeybase64len);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "failed to base64 encode shared enc key | atchops_base64_encode: %d\n", ret);
     goto exit;
   }
 
@@ -348,7 +371,8 @@ int atclient_create_shared_encryption_keypair_for_me_and_other(atclient *atclien
   }
 
   // 4. encrypt for them (with their rsa public encryption key)
-  ret = atclient_get_public_encryption_key(atclient, sharedwith, sharedwithlen, publickeybase64, publickeybase64size, &publickeybase64len);
+  ret = atclient_get_public_encryption_key(atclient, sharedwith_withat, sharedwith_withatlen, publickeybase64,
+                                           publickeybase64size, &publickeybase64len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_encryption_key: %d\n", ret);
     goto exit;
@@ -383,19 +407,19 @@ int atclient_create_shared_encryption_keypair_for_me_and_other(atclient *atclien
   // 5. prep protocol commands
 
   // 5a. for us (update:shared_key.sharedwith@sharedby <encrypted for us>\r\n)
-  const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + (sharedwithwithatlen - 1) +
+  const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + (sharedwith_withatlen - 1) +
                                 strlen(atclient->atsign.atsign) + sharedenckeybase64encryptedforuslen + 1;
   cmdbuffer1 = malloc(sizeof(char) * cmdbuffersize1);
   memset(cmdbuffer1, 0, sizeof(char) * cmdbuffersize1);
-  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", (sharedwithwithat + 1),
+  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", (sharedwith_withat + 1),
            atclient->atsign.atsign, sharedenckeybase64encryptedforus);
 
   // 5b. for them (update:@sharedwith:shared_key@sharedby <encrypted for them>\r\n)
-  const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + sharedwithwithatlen +
+  const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + sharedwith_withatlen +
                                 strlen(atclient->atsign.atsign) + sharedenckeybase64encryptedforthemlen + 1;
   cmdbuffer2 = malloc(sizeof(char) * cmdbuffersize2);
   memset(cmdbuffer2, 0, sizeof(char) * cmdbuffersize2);
-  snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwithwithat, atclient->atsign.atsign,
+  snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith_withat, atclient->atsign.atsign,
            sharedenckeybase64encryptedforthem);
 
   // 6. execute protocol commands
@@ -435,15 +459,15 @@ int atclient_create_shared_encryption_keypair_for_me_and_other(atclient *atclien
   }
 
   // 7. return shared encryption key by me
-  memcpy(sharedenckeybyme, sharedenckeybase64, sharedenckeybase64len);
+  memcpy(sharedenckey, sharedenckeybase64, sharedenckeybase64len);
 
   ret = 0;
   goto exit;
 
 exit: {
-  atchops_rsakey_publickey_free(&publickeystruct);
   free(cmdbuffer1);
   free(cmdbuffer2);
+  atchops_rsakey_publickey_free(&publickeystruct);
   return ret;
 }
 }

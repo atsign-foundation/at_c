@@ -15,7 +15,7 @@
 #define ATKEY_NAMESPACE "dart_playground"
 #define ATKEY_VALUE "test value"
 
-#define ROOT_HOST "vip.ve.atsign.zone"
+#define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
 int main(int argc, char *argv[]) {
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
   notify_params.value = ATKEY_VALUE;
   notify_params.operation = NO_update;
 
-  if ((ret = atclient_notify(&atclient, &notify_params)) != 0) {
+  if ((ret = atclient_notify(&atclient, &notify_params, NULL)) != 0) {
     atclient_connection_free(&root_connection);
     atclient_atsign_free(&atsign);
     atclient_atkey_free(&atkey);
