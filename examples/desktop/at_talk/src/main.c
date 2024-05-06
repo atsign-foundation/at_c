@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
@@ -318,7 +319,7 @@ static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, 
 
   atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.len, &atkeystr.olen)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
     atclient_atkey_free(&atkey);
     atclient_atstr_free(&atkeystr);
 
@@ -326,7 +327,7 @@ static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, 
     return ret;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.olen, (int)atkeystr.olen,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
                atkeystr.str);
 
   atclient_notify_params notify_params;
@@ -439,7 +440,7 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
   if (atclient_atkey_metadata_is_ivnonce_initialized(&message->notification.key.metadata)) {
     size_t ivolen = 0;
     ret = atchops_base64_decode((unsigned char *)message->notification.key.metadata.ivnonce.str,
-                                message->notification.key.metadata.ivnonce.olen, iv, ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+                                message->notification.key.metadata.ivnonce.len, iv, ATCHOPS_IV_BUFFER_SIZE, &ivolen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
@@ -469,7 +470,7 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
 
   // decrypt response data
   ret = atchops_aesctr_decrypt(encryptionkey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, (unsigned char *)value.str,
-                               value.len, &value.olen);
+                               value.size, &value.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     return ret;
