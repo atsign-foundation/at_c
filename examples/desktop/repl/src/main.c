@@ -5,10 +5,10 @@
 #include <atclient/connection.h>
 #include <atlogger/atlogger.h>
 #include <pwd.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 #include <unistd.h>
 
 #define TAG "REPL"
@@ -20,28 +20,30 @@ static char *get_home_dir() {
 
 int main(int argc, char *argv[]) {
   int ret = 1;
+
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  char atkeysfilepath[1024];
-  memset(atkeysfilepath, 0, sizeof(char) * 1024); // Clear the buffer (for safety)
+  const short atkeysfilepathsize = 256;
+  char atkeysfilepath[atkeysfilepathsize];
+  memset(atkeysfilepath, 0, sizeof(char) * atkeysfilepathsize); // Clear the buffer (for safety)
 
-  const size_t bufferlen = 1024;
-  char buffer[bufferlen];
-  memset(buffer, 0, sizeof(char) * bufferlen); // Clear the buffer (for safety
+  const size_t buffersize = 2048;
+  char buffer[buffersize];
+  memset(buffer, 0, sizeof(char) * buffersize); // Clear the buffer (for safety
+  size_t bufferlen = 0;
 
-  const size_t cmdlen = 4096;
-  atclient_atbytes cmd;
-  atclient_atbytes_init(&cmd, cmdlen);
-
-  const size_t recvlen = 4096;
-  atclient_atbytes recv;
-  atclient_atbytes_init(&recv, recvlen);
+  const size_t recvsize = 2048;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize); // Clear the buffer (for safety
+  size_t recvlen = 0;
 
   atclient_connection root_conn;
   atclient_connection_init(&root_conn);
 
   atclient atclient;
   atclient_init(&atclient);
+
+  char *temp = NULL;
 
   if (argc < 2 || argc > 3) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Usage: ./repl <atsign> [rootUrl]");
@@ -59,13 +61,14 @@ int main(int argc, char *argv[]) {
 
   // if atSign doesn't start with `@`, then add it
   if (atsign[0] != '@') {
-    char *temp = malloc(strlen(atsign) + 2);
-    strcpy(temp, "@");
-    strcat(temp, atsign);
+    const short tempsize = strlen(atsign) + 2;
+    temp = (char *)malloc(sizeof(char) * tempsize);
+    memset(temp, 0, sizeof(char) * tempsize); // Clear the buffer (for safety
+    snprintf(temp, tempsize, "@%s", atsign);  // Add 1 for the `@` and 1 for the null terminator
     atsign = temp;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using atSign \"%s\" and rootUrl \"%s:%d\"\n", atsign,
-                        roothost, rootport);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using atSign \"%s\" and rootUrl \"%s:%d\"\n", atsign, roothost,
+               rootport);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
@@ -77,63 +80,52 @@ int main(int argc, char *argv[]) {
   }
 
   sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
-  if (atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath) != 0) {
+  if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeysfilepath);
-    ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Read atKeys file at path %s\n", atkeysfilepath);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeysfilepath);
 
   ret = atclient_connection_connect(&root_conn, roothost, rootport);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_connection_connect: %d | failed to connect to root\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d | failed to connect to root\n",
+                 ret);
     goto exit;
   }
 
   ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, atsign);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n",
-                        atsign);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully PKAM Authenticated with atSign \"%s\"\n", atsign);
 
-  int loop = 1;
+  bool loop = true;
   do {
-    memset(buffer, 0, sizeof(char) * bufferlen);
     printf("Enter command: \n");
-    fgets(buffer, bufferlen, stdin);
-    ret = atclient_atbytes_convert(&cmd, buffer, strlen(buffer));
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                            "atclient_atbytes_convert: %d | failed to convert command\n", ret);
-      goto exit;
-    }
-    if (strncmp((char *) cmd.bytes, "/exit", strlen("/exit")) == 0) {
+    fgets(buffer, buffersize, stdin);
+    bufferlen = strlen(buffer);
+    if (strncmp(buffer, "/exit", strlen("/exit")) == 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Exiting REPL...\n");
-      loop = 0;
+      loop = false;
       continue;
     }
-    ret =
-        atclient_connection_send(&atclient.secondary_connection, cmd.bytes, cmd.len, recv.bytes, recv.size, &recv.len);
+    ret = atclient_connection_send(&atclient.secondary_connection, (const unsigned char *)buffer, bufferlen, recv,
+                                   recvsize, &recvlen);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                            "atclient_connection_send: %d | failed to send command\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d | failed to send command\n", ret);
       goto exit;
     }
-    atclient_atbytes_reset(&cmd);
-    atclient_atbytes_reset(&recv);
-  } while (loop == 1);
+    memset(buffer, 0, sizeof(char) * buffersize);
+    memset(recv, 0, sizeof(unsigned char) * recvsize);
+  } while (loop);
 
   ret = 0;
   goto exit;
 
 exit: {
-  atclient_atbytes_free(&cmd);
-  atclient_atbytes_free(&recv);
   atclient_connection_free(&root_conn);
+  free(temp);
   atclient_free(&atclient);
   return ret;
 }
