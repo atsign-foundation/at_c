@@ -147,7 +147,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
  * @return int 0 on success
  */
 int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
-                           size_t *valuelen, char *shared_enc_key);
+                           size_t *valuelen, unsigned char *shared_enc_key);
 
 /**
  * @brief Delete an atkey from your atserver

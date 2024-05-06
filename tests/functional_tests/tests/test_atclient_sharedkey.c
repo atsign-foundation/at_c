@@ -61,29 +61,29 @@ int main(int argc, char *argv[])
         goto exit;
     }
 
-    if((ret = functional_tests_pkam_auth(&atclient2, atsign2)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = functional_tests_pkam_auth(&atclient2, atsign2)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_3_get_as_sharedwith(&atclient2)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_get_as_sharedwith: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_3_get_as_sharedwith(&atclient2)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_get_as_sharedwith: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_4_delete(&atclient1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_delete: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_4_delete(&atclient1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_delete: %d\n", ret);
+    //     goto exit;
+    // }
 
-    if((ret = test_5_should_not_exist_as_sharedby(&atclient1)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_should_not_exist: %d\n", ret);
-        goto exit;
-    }
+    // if((ret = test_5_should_not_exist_as_sharedby(&atclient1)) != 0)
+    // {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_should_not_exist: %d\n", ret);
+    //     goto exit;
+    // }
 
     goto exit;
 

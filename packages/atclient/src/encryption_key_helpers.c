@@ -91,6 +91,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
     }
 
     memcpy(sharedenckey, sharedenckeytemp, sharedenckeylen);
+    ret = 0;
   }
 
   else if (atclient_stringutils_starts_with((const char *)recv, recvlen, "error:AT0015-key not found",
@@ -98,7 +99,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
     return ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
   }
 
-  return -1;
+  return ret;
 }
 
 int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char *sharedby, const size_t sharedbylen,

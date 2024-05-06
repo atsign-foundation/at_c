@@ -21,7 +21,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
                                                           unsigned char *sharedenckey);
 
 int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
-                           size_t *valuelen, char *shared_enc_key) {
+                           size_t *valuelen, unsigned char *sharedenckey) {
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
@@ -30,14 +30,15 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
   }
 
   if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
-    //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
-    ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
+    // shared by me with other, it's in my atServer
+    ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, sharedenckey);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
-    ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
+    // shared by other with me, it's in the other atServer
+    ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, sharedenckey);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n", ret);
       goto exit;
@@ -80,7 +81,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
     ret =
         atclient_get_shared_encryption_key_shared_by_me(atclient, atkey->sharedwith.str, atkey->sharedwith.len, enckey);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
   } else {
@@ -99,7 +100,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   snprintf(command, commandsize, "llookup:all:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
   // send command and recv response
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen(command), recv,
+  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandsize - 1, recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -107,8 +108,8 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   }
 
   // Truncate response : "data:"
-  if (atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
-    const char *response = recv + 5;
+  if (atclient_stringutils_starts_with((const char *)recv, recvlen, "data:", strlen("data:"))) {
+    const char *response = recv + strlen("data:");
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     const cJSON *root = cJSON_Parse(response);
@@ -161,6 +162,8 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
+    // log what we're abuot to decrypt
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valueraw: %.*s\n", (int)valuerawlen, valueraw);
 
     // decrypt response data
     ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *)valueraw, valuerawlen,
@@ -220,10 +223,12 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     memcpy(enckey, sharedenckey, enckeysize);
   }
 
+  char *namespacestr = "";
   size_t namespacelen = 0;
   short extra_point_len = 0; // "." before namespace
 
   if (atkey->namespacestr.str != NULL && atkey->namespacestr.str[0] != '\0') {
+    namespacestr = atkey->namespacestr.str;
     namespacelen = atkey->namespacestr.len;
     extra_point_len = 1;
   }
@@ -234,12 +239,12 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
                              + atkey->name.len                // <key_name>
                              + extra_point_len + namespacelen // [.namespace]
                              + atkey->sharedby.len            // <@sharedby>
-                             + 2                              // \r\n
+                             + strlen("\r\n")                 // \r\n
                              + 1;                             // \0
   command = malloc(sizeof(char) * commandsize);
   memset(command, 0, sizeof(char) * commandsize);
-  snprintf(command, commandsize, "lookup:all:%.*s%s%.*s%.*s\r\n", atkey->name.len, atkey->name.str,
-           extra_point_len == 1 ? "." : "", (int)namespacelen, namespacelen != 0 ? atkey->namespacestr.str : "",
+  snprintf(command, commandsize, "lookup:all:%.*s%s%.*s%.*s\r\n", (int) atkey->name.len, atkey->name.str,
+           extra_point_len == 1 ? "." : "", (int)namespacelen, namespacestr,
            (int)atkey->sharedby.len, atkey->sharedby.str);
 
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandsize - 1, recv,

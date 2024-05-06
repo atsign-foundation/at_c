@@ -18,6 +18,9 @@
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
   int ret = 1;
 
+  char *cmdbuffer = NULL;
+  char *metadataprotocolstr = NULL;
+
   // make sure shared by is atclient->atsign.atsign
   if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
@@ -58,9 +61,6 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   unsigned char sharedenckey[sharedenckeysize];
   memset(sharedenckey, 0, sizeof(unsigned char) * (sharedenckeysize));
   size_t sharedenckeylen = 0;
-
-  char *cmdbuffer = NULL;
-  char *metadataprotocolstr = NULL;
 
   // 2. build update: command
   ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrsize, &atkeystrlen);
