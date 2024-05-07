@@ -2,29 +2,49 @@
 #include "atkey.h"
 
 // For sending notifications
-enum atclient_notify_operation { NO_none, NO_update, NO_delete };
+enum atclient_notify_operation {
+  ATCLIENT_NOTIFY_OPERATION_NONE,
+  ATCLIENT_NOTIFY_OPERATION_UPDATE,
+  ATCLIENT_NOTIFY_OPERATION_DELETE
+};
+
 static const char *atclient_notify_operation_str[] = {
-    [NO_update] = "update",
-    [NO_delete] = "delete",
+    [ATCLIENT_NOTIFY_OPERATION_UPDATE] = "update",
+    [ATCLIENT_NOTIFY_OPERATION_DELETE] = "delete",
 };
 
-enum atclient_notify_message_type { NMT_none, NMT_key, NMT_text };
+enum atclient_notify_message_type {
+  ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE,
+  ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY,
+  ATCLIENT_NOTIFY_MESSAGE_TYPE_TEXT
+};
+
 static const char *atclient_notify_message_type_str[] = {
-    [NMT_key] = "key",
-    [NMT_text] = "text",
+    [ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY] = "key",
+    [ATCLIENT_NOTIFY_MESSAGE_TYPE_TEXT] = "text", // legacy
 };
 
-enum atclient_notify_priority { NP_none, NP_low, NP_medium, NP_high };
+enum atclient_notify_priority {
+  ATCLIENT_NOTIFY_PRIORITY_NONE,
+  ATCLIENT_NOTIFY_PRIORITY_LOW,
+  ATCLIENT_NOTIFY_PRIORITY_MEDIUM,
+  ATCLIENT_NOTIFY_PRIORITY_HIGH
+};
+
 static const char *atclient_notify_priority_str[] = {
-    [NP_low] = "low",
-    [NP_medium] = "medium",
-    [NP_high] = "high",
+    [ATCLIENT_NOTIFY_PRIORITY_LOW] = "low",
+    [ATCLIENT_NOTIFY_PRIORITY_MEDIUM] = "medium",
+    [ATCLIENT_NOTIFY_PRIORITY_HIGH] = "high",
 };
 
-enum atclient_notify_strategy { NS_none, NS_all, NS_latest };
+enum atclient_notify_strategy {
+  ATCLIENT_NOTIFY_STRATEGY_NONE,
+  ATCLIENT_NOTIFY_STRATEGY_ALL,
+  ATCLIENT_NOTIFY_STRATEGY_LATEST
+};
 static const char *atclient_notify_strategy_str[] = {
-    [NS_all] = "all",
-    [NS_latest] = "latest",
+    [ATCLIENT_NOTIFY_STRATEGY_ALL] = "all",
+    [ATCLIENT_NOTIFY_STRATEGY_LATEST] = "latest",
 };
 
 typedef struct atclient_notify_params {
@@ -38,10 +58,12 @@ typedef struct atclient_notify_params {
   int latest_n;
   char *notifier;
   unsigned long notification_expiry;
+  char *sharedenckeybase64;
 } atclient_notify_params;
-// TODO: add shared with encryption key
 
 void atclient_notify_params_init(atclient_notify_params *params);
+void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
+                                   atclient_atkey *atkey, char *value);
 void atclient_notify_params_free(atclient_notify_params *params);
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params);
