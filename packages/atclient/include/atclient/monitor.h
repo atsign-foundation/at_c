@@ -51,7 +51,7 @@ void atclient_monitor_free(atclient *monitor_ctx);
  * @param regex the regex to match the keys
  * @return 0 on success, non-zero on error
  */
-int atclient_monitor_start_connection(atclient *monitor, const char *root_host, int root_port, const char *atsign, const atclient_atkeys *atkeys, const char *regex);
+int atclient_monitor_start_connection(atclient *monitor, const char *root_host, const int root_port, const char *atsign, const atclient_atkeys *atkeys, const char *regex);
 
 /* @brief Send a heartbeat on the monitor connection
  * @param ctx the atclient context for the monitor connection
