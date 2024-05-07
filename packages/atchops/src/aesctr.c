@@ -20,8 +20,12 @@ int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size
   mbedtls_aes_context aes;
   mbedtls_aes_init(&aes);
 
+  size_t nc_off = 0;
+  unsigned char stream_block[16];
+  memset(stream_block, 0, sizeof(unsigned char) * 16);
+
   // 1. pad the plaintext
-  unsigned char *plaintextpadded; // will contain the plaintext with padded trialing bytes
+  unsigned char *plaintextpadded = NULL; // will contain the plaintext with padded trialing bytes
   size_t plaintextpaddedlen;      // the length of the plain text + padding (no null terminator)
 
   const int numpadbytestoadd = 16 - (plaintextlen % 16);
@@ -43,9 +47,6 @@ int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size
   }
 
   // 3. AES CTR Encrypt
-  size_t nc_off = 0;
-  unsigned char stream_block[16];
-  memset(stream_block, 0, sizeof(unsigned char) * 16);
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize); // clear the buffer
   ret = mbedtls_aes_crypt_ctr(&aes, plaintextpaddedlen, &nc_off, iv, stream_block, plaintextpadded, ciphertext);
   if (ret != 0) {
@@ -72,12 +73,12 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
   mbedtls_aes_init(&aes);
 
   size_t nc_off = 0;
-  unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
+  unsigned char stream_block[16];
   memset(stream_block, 0, sizeof(unsigned char) * 16);
 
   size_t plaintextpaddedsize = plaintextsize + 16;
-  unsigned char *plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedsize);
-  memset(plaintextpadded, 0, plaintextpaddedsize);
+  unsigned char plaintextpadded[plaintextpaddedsize];
+  memset(plaintextpadded, 0, sizeof(unsigned char) * plaintextpaddedsize);
   size_t plaintextpaddedlen = 0;
 
   // 3. AES decrypt
@@ -110,12 +111,7 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
   goto exit;
 
 exit: {
-
-  // free everything
-  free(stream_block);
-  free(plaintextpadded);
   mbedtls_aes_free(&aes);
-
   return ret;
 }
 }

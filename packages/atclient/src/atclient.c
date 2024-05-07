@@ -136,7 +136,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   memcpy(challenge, recv.bytes, recv.len);
   // remove data:
   memmove(challenge, challenge + 5, recv.len - 5);
-  challengelen = recv.len - 5;  
+  challengelen = recv.len - 5;
 
   // sign
   atclient_atbytes_reset(&recv);
@@ -199,4 +199,7 @@ exit : {
 }
 }
 
-void atclient_free(atclient *ctx) { atclient_connection_free(&(ctx->secondary_connection)); }
+void atclient_free(atclient *ctx) { 
+  // TODO add ic check to see if the connection is already closed
+  // atclient_connection_free(&(ctx->secondary_connection)); 
+}

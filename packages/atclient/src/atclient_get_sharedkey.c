@@ -29,15 +29,15 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
     return ret;
   }
 
-  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
-    // shared by me with other, it's in my atServer
+  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, strlen(atclient->atsign.atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Getting shared AtKey shared by other with me\n");
     ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, sharedenckey);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
-    // shared by other with me, it's in the other atServer
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Getting shared AtKey shared by me with other\n");
     ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, sharedenckey);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n", ret);
@@ -67,10 +67,15 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  const size_t atkeystrsize = atclient_atkey_strlen((const atclient_atkey *)atkey);
+  const size_t atkeystrsize = atclient_atkey_strlen(atkey) + 1;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
   size_t atkeystrlen = 0;
+
+  unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+
+  // log atkeystrsize
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystrsize: %lu\n", atkeystrsize);
 
   const size_t valuerawsize = valuesize * 4; // most likely enough space after base64 decode
   unsigned char valueraw[valuerawsize];
@@ -88,14 +93,21 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
     memcpy(enckey, sharedenckey, enckeysize);
   }
 
-  if ((ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrsize, &atkeystrlen)) != 0) {
+  // log successfully got shared encryption key shared by me
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "successfully got shared encryption key shared by me\n");
+  for (int i = 0; i < 32; i++) {
+    printf("%02x ", enckey[i]);
+  }
+  printf("\n");
+
+  if ((ret = atclient_atkey_to_string((const atclient_atkey *)atkey, atkeystr, atkeystrsize, &atkeystrlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
 
   // build command
   const size_t commandsize = strlen("llookup:all:") + atkeystrlen + strlen("\r\n") + 1;
-  command = malloc(sizeof(char) * commandsize);
+  command = (char *) malloc(sizeof(char) * commandsize);
   memset(command, 0, sizeof(char) * commandsize);
   snprintf(command, commandsize, "llookup:all:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
@@ -107,12 +119,15 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
     goto exit;
   }
 
-  // Truncate response : "data:"
-  if (atclient_stringutils_starts_with((const char *)recv, recvlen, "data:", strlen("data:"))) {
-    const char *response = recv + strlen("data:");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv (%lu): \'%s\'\n", recvlen, recv);
 
-    unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
-    const cJSON *root = cJSON_Parse(response);
+  if (atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "response starts with 'data:'\n");
+    unsigned char *response = recv + strlen("data:");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "response: %s\n", response);
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "response: %s\n", response);
+    root = cJSON_Parse(response);
     if (root == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
@@ -139,9 +154,9 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
       }
 
       if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
-        ret = 1;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivlen != ATCHOPS_IV_BUFFER_SIZE (%d != %d)\n", ivlen,
                      ATCHOPS_IV_BUFFER_SIZE);
+        ret = 1;
         goto exit;
       }
     } else {
@@ -156,22 +171,54 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
       goto exit;
     }
 
+    // log data->valuestring
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "data->valuestring: %s\n", data->valuestring);
+
     ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), valueraw, valuerawsize,
                                 &valuerawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
-    // log what we're abuot to decrypt
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valueraw: %.*s\n", (int)valuerawlen, valueraw);
+
+    // log enckey
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enckey (%lu): ", enckeysize);
+    for (int i = 0; i < 32; i++) {
+      printf("%02x ", enckey[i]);
+    }
+    printf("\n");
+
+    // log iv
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "iv (%lu):", 16UL);
+    for (int i = 0; i < 16; i++) {
+      printf("%02x ", iv[i]);
+    }
+    printf("\n");
+
+    // log valueraw and valuerawlen
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valueraw (%lu): %.*s\n", valuerawlen, (int)valuerawlen, valueraw);
+    for(int i = 0; i < valuerawlen; i++) {
+      printf("%02x ", valueraw[i]);
+    }
+    printf("\n");
+
+    // log valuesize
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valuesize: %lu\n", valuesize);
+
+    // log if value == NULL
+    if (value == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value == NULL\n");
+    }
 
     // decrypt response data
-    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *)valueraw, valuerawlen,
-                                 (unsigned char *)value, valuesize, valuelen);
+    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuesize, valuelen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
     }
+
+    // log decrypted value
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value (%lu): %.*s\n", *valuelen, (int)*valuelen, value);
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
     ret = 1;
@@ -181,10 +228,10 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   ret = 0;
   goto exit;
 exit: {
+  free(command);
   if (root != NULL) {
     cJSON_Delete(root);
   }
-  free(command);
   return ret;
 }
 }
@@ -243,9 +290,9 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
                              + 1;                             // \0
   command = malloc(sizeof(char) * commandsize);
   memset(command, 0, sizeof(char) * commandsize);
-  snprintf(command, commandsize, "lookup:all:%.*s%s%.*s%.*s\r\n", (int) atkey->name.len, atkey->name.str,
-           extra_point_len == 1 ? "." : "", (int)namespacelen, namespacestr,
-           (int)atkey->sharedby.len, atkey->sharedby.str);
+  snprintf(command, commandsize, "lookup:all:%.*s%s%.*s%.*s\r\n", (int)atkey->name.len, atkey->name.str,
+           extra_point_len == 1 ? "." : "", (int)namespacelen, namespacestr, (int)atkey->sharedby.len,
+           atkey->sharedby.str);
 
   ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandsize - 1, recv,
                                  recvsize, &recvlen);
@@ -324,10 +371,10 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   ret = 0;
   goto exit;
 exit: {
+  free(command);
   if (root != NULL) {
     cJSON_Delete(root);
   }
-  free(command);
   return ret;
 }
 }

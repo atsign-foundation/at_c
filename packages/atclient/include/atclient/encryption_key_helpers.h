@@ -3,7 +3,7 @@
 #include "atclient/atkeys.h"
 #include "atlogger/atlogger.h"
 
-#define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
+#define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980 // -6528
 
 /**
  * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.
