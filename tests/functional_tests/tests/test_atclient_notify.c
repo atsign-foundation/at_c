@@ -72,7 +72,7 @@ static int test_1_notify(atclient *atclient, char *notification_id) {
     goto exit;
   }
 
-  atclient_notify_params_create(&params, ATNOTIFICATION_OPERATION, &atkey, ATKEY_VALUE);
+  atclient_notify_params_create(&params, ATNOTIFICATION_OPERATION, &atkey, ATKEY_VALUE, true);
 
   if ((ret = atclient_notify(atclient, &params, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify: %d\n", ret);
