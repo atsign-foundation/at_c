@@ -6,6 +6,7 @@
 #include <atclient/monitor.h>
 #include <atlogger/atlogger.h>
 #include <pthread.h>
+#include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -15,113 +16,91 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-static void *heartbeat_handler(void *monitor_connection);
+static int get_atsign_input(int argc, char *argv[], char **atsign_input);
+static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
+static void *heartbeat_handler(void *monitor_conn);
 
 int main(int argc, char *argv[]) {
   int ret = 1;
+
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  char *atsign_input = NULL;
-  // allow input of -a and -o flags with get opts
-
-  int c;
-  while ((c = getopt(argc, argv, "a:")) != -1)
-    switch (c) {
-    case 'a':
-      atsign_input = optarg;
-      break;
-    }
-
-  // print atsign
-  printf("atsign_input: %s\n", atsign_input);
-  if (atsign_input == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Please provide both atsigns with -a and -o flags\n");
-    return 1;
-  }
-
-  atclient atclient;
-  atclient_init(&atclient);
-
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection);
-  atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
-
-  atclient_atsign atsign;
-  atclient_atsign_init(&atsign, atsign_input);
+  char *atsign = NULL;
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
-  const char *homedir;
 
-  if ((homedir = getenv("HOME")) == NULL) {
-    printf("HOME not set\n");
-    return 1;
+  atclient_connection root_connection;
+  atclient_connection_init(&root_connection);
+
+  atclient monitor_conn;
+  atclient_monitor_init(&monitor_conn);
+
+  pthread_t tid;
+
+  atclient_monitor_message message;
+  atclient_monitor_message_init(&message);
+
+  if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");
+    goto exit;
   }
-  char atkeys_path[1024];
-  snprintf(atkeys_path, 1024, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign_input);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Reading atkeys file: %s\n", atkeys_path);
-  atclient_atkeys_populate_from_path(&atkeys, atkeys_path);
+  if ((ret = set_up_atkeys(&atkeys, atsign, strlen(atsign))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
+    goto exit;
+  }
 
-  printf("Starting monitor\n");
-  struct atclient monitor_ctx;
-  atclient_monitor_init(&monitor_ctx, atsign, atkeys);
-  ret = atclient_start_monitor(&monitor_ctx, ROOT_HOST, ROOT_PORT, "");
+  if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server\n");
+    goto exit;
+  }
+
+  ret = atclient_start_monitor(&monitor_conn, &root_connection, atsign, &atkeys, ".*", strlen(".*"));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
-  printf("Monitor started!\n");
 
-  printf("Starting heartbeat\n");
-  pthread_t tid;
-  ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_ctx);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat thread\n");
+  ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_conn);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create heartbeat_handler\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler\n");
     goto exit;
   }
-  printf("Heartbeat started!\n");
-  if (ret < 0) {
-    goto exit;
-  }
-
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) !=
-      0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
-    goto exit;
-  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Heartbeat thread started!\n");
 
   printf("Starting main monitor loop\n");
-  atclient_monitor_message message;
-  atclient_monitor_message_init(&message);
   while (true) {
 
-    int mon_ret = atclient_read_monitor(&monitor_ctx, &message);
-    if (mon_ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", mon_ret);
+    ret = atclient_read_monitor(&monitor_conn, &message);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       continue;
     }
 
     switch (message.type) {
-    case MMT_none:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: none\n");
       break;
-    case MMT_notification:
+    }
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: notification\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message.notification.id);
       break;
-    case MMT_data_response:
+    }
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: data\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.data_response);
       break;
-    case MMT_error_response:
+    }
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE: {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: error\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.error_response);
       break;
     }
-    atclient_monitor_message_free(&message);
+    }
   }
-  printf("Main monitor loop complete!\n");
 
   ret = 0;
   goto exit;
@@ -130,19 +109,59 @@ exit: {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to cancel heartbeat_handler\n");
   }
   atclient_atkeys_free(&atkeys);
-  atclient_atsign_free(&atsign);
-  atclient_free(&atclient);
   atclient_connection_free(&root_connection);
+  atclient_monitor_free(&monitor_conn);
+  atclient_monitor_message_free(&message);
   return ret;
 }
 }
 
-static void *heartbeat_handler(void *monitor_connection) {
-  atclient *connection = (atclient *)monitor_connection;
-  atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat_handler\n");
+static int get_atsign_input(int argc, char *argv[], char **atsign_input) {
+  int c;
+  while ((c = getopt(argc, argv, "a:")) != -1) {
+    switch (c) {
+    case 'a':
+      *atsign_input = optarg;
+      break;
+    }
+  }
+
+  if (*atsign_input == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Please provide both atsigns with -a and -o flags\n");
+    return 1;
+  }
+
+  return 0;
+}
+
+static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
+  int ret = 1;
+
+  const size_t atkeyspathsize = 1024;
+  char atkeyspath[atkeyspathsize];
+  memset(atkeyspath, 0, atkeyspathsize);
+  size_t atkeyspathlen;
+
+  struct passwd *pw = getpwuid(getuid());
+  const char *homedir = pw->pw_dir;
+  snprintf(atkeyspath, atkeyspathsize, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
+
+  if ((ret = atclient_atkeys_populate_from_path(atkeys, atkeyspath)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys from path: %d\n", ret);
+    goto exit;
+  }
+
+  goto exit;
+
+exit: { return ret; }
+}
+
+static void *heartbeat_handler(void *monitor_conn) {
+  atclient *client = (atclient *)monitor_conn;
+  atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat_handler.\n");
   while (true) {
-    sleep(30);
-    atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat\n");
-    atclient_send_heartbeat(connection);
-  };
+    // atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat...\n");
+    atclient_send_heartbeat(client);
+    sleep(5);
+  }
 }

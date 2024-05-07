@@ -43,7 +43,7 @@ int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_con
   int ret = 1;
 
   size_t cmdsize = 0;
-  char* cmd = NULL;
+  char *cmd = NULL;
 
   // 1. initialize monitor_conn
   ret = atclient_pkam_authenticate(monitor_conn, root_conn, atkeys, atsign);
@@ -65,14 +65,14 @@ int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_con
   memset(cmd, 0, sizeof(char) * cmdsize);
 
   if (regexlen > 0) {
-    snprintf(cmd, cmdsize, "monitor %.*s\r\n", (int) regexlen, regex);
+    snprintf(cmd, cmdsize, "monitor %.*s\r\n", (int)regexlen, regex);
   } else {
     snprintf(cmd, cmdsize, "monitor\r\n");
   }
 
   // 3. send monitor cmd
-  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (unsigned char *)cmd, cmdsize-1);
-  if (ret < 0 || ret != cmdsize-1) {
+  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (unsigned char *)cmd, cmdsize - 1);
+  if (ret < 0 || ret != cmdsize - 1) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
   }
@@ -87,41 +87,43 @@ exit: {
 }
 }
 
-int atclient_send_heartbeat(atclient *ctx) {
+int atclient_send_heartbeat(atclient *monitor_conn) {
   int ret = -1;
-  unsigned char command[9] = "noop:0\r\n\0";
+  const char *command = "noop:0\r\n";
 
-  ret = mbedtls_ssl_write(&(ctx->secondary_connection.ssl), command, 9);
-  if (ret < 0 || ret != 9) {
-    atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command");
-  } else {
-    ret = 0;
+  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (const unsigned char *) command, strlen(command));
+  if (ret < 0 || ret != 8) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
+    goto exit;
   }
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent heartbeat (%d bytes sent)\n", ret);
+  ret = 0;
+  goto exit;
 
-  return ret;
+exit: { return ret; }
 }
 
 static int parse_notification(atclient_monitor_message *message, char *message_body);
 
 int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message) {
   int ret = -1;
-  size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN;
+
+  size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
   int chunks = 0;
-  char *buffer = calloc(chunk_size, sizeof(char));
+  char *buffer = malloc(sizeof(char) * chunksize);
   char *tmp_buffer = NULL;
 
-  bool done_reading = 0;
-
-  while (done_reading == 0) {
-    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk\n");
+  bool done_reading = false;
+  while (!done_reading) {
+    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk...\n");
     if (chunks > 0) {
-      tmp_buffer = realloc(buffer, chunk_size + (chunk_size * chunks) * sizeof(char));
+      tmp_buffer = realloc(buffer, chunksize + (chunksize * chunks) * sizeof(char));
       buffer = tmp_buffer;
       tmp_buffer = NULL;
     }
 
-    size_t off = chunk_size * chunks;
-    for (int i = 0; i < chunk_size; i++) {
+    size_t off = chunksize * chunks;
+    for (int i = 0; i < chunksize; i++) {
       ret = mbedtls_ssl_read(&(monitor_connection->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
       if (ret < 0 || buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
@@ -146,25 +148,31 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
   message_body = message_body + 1;
 
   if (strcmp(message_type, "data") == 0) {
-    message->type = MMT_data_response;
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
     message->data_response = message_body;
   } else if (strcmp(message_type, "notification") == 0) {
-    message->type = MMT_notification;
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
     ret = parse_notification(message, message_body);
     if (ret != 0) {
       atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
     }
   } else if (strcmp(message_type, "error") == 0) {
-    message->type = MMT_error_response;
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
     message->error_response = message_body;
   } else {
-    message->type = MMT_none;
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
     atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type\n");
     ret = -1;
+    goto exit;
   }
 
+  ret = 0;
+  goto exit;
+
+exit: {
   free(buffer);
   return ret;
+}
 }
 
 static int parse_notification(atclient_monitor_message *message, char *message_body) {

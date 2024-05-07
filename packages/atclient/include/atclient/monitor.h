@@ -18,7 +18,12 @@ typedef struct atclient_atnotification {
   size_t expiresAt;
 } atclient_atnotification;
 
-enum atclient_monitor_message_type { MMT_none, MMT_notification, MMT_data_response, MMT_error_response };
+enum atclient_monitor_message_type {
+  ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
+  ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
+  ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
+  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE
+};
 
 typedef struct atclient_monitor_message {
   enum atclient_monitor_message_type type;
