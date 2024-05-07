@@ -199,4 +199,4 @@ exit : {
 }
 }
 
-void atclient_free(atclient *ctx) { atclient_connection_free(&(ctx->secondary_connection)); }
+void atclient_free(atclient *ctx) {
