@@ -93,7 +93,7 @@ exit: {
 static int test_1_start_monitor(atclient *monitor, const atclient_atkeys *atkeys) {
   int ret = 1;
 
-  ret = atclient_monitor_start_connection(&monitor, ROOT_HOST, ROOT_PORT, ATKEY_SHAREDBY, atkeys, ATKEY_NAMESPACE);
+  ret = atclient_monitor_start_connection(monitor, ROOT_HOST, ROOT_PORT, ATKEY_SHAREDBY, atkeys, ATKEY_NAMESPACE);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
@@ -111,7 +111,9 @@ static int test_2_send_notification(atclient *atclient) {
   atclient_notify_params params;
   atclient_notify_params_init(&params);
 
-  ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE));
+  ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY),
+                                        ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE,
+                                        strlen(ATKEY_NAMESPACE));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
     goto exit;
@@ -131,8 +133,7 @@ exit: {
 }
 }
 
-static int test_3_read_monitor(atclient *monitor)
-{
+static int test_3_read_monitor(atclient *monitor) {
   int ret = 1;
 
   atclient_monitor_message message;

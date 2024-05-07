@@ -37,11 +37,11 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                        "atclient_connection_connect: %d. Successfully connected to secondary\n", ret);
+               "atclient_connection_connect: %d. Successfully connected to secondary\n", ret);
 
   goto exit;
 
-exit : { return ret; }
+exit: { return ret; }
 }
 
 int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
@@ -86,8 +86,8 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   ret = atclient_connection_send(root_conn, (unsigned char *)root_command, root_command_len - 1, recv.bytes, recv.size,
                                  &(recv.len));
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n",
-                          ret, root_command_len, root_command);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n | failed to send: %.*s\n", ret,
+                 root_command_len, root_command);
     goto exit;
   }
 
@@ -103,8 +103,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   ret = atclient_connection_get_host_and_port(&host, &port, url);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.len,
-                          recv.bytes);
+                 "atclient_connection_get_host_and_port: %d | failed to parse url %.*s\n", ret, recv.len, recv.bytes);
     goto exit;
   }
 
@@ -136,11 +135,12 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   memcpy(challenge, recv.bytes, recv.len);
   // remove data:
   memmove(challenge, challenge + 5, recv.len - 5);
-  challengelen = recv.len - 5;  
+  challengelen = recv.len - 5;
 
   // sign
   atclient_atbytes_reset(&recv);
-  ret = atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, (unsigned char *) challenge, challengelen, recv.bytes);
+  ret =
+      atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, (unsigned char *)challenge, challengelen, recv.bytes);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;
@@ -153,12 +153,12 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
     goto exit;
   }
 
-  const short pkam_command_len = 5 + (int) signaturebase64len + 3;
+  const short pkam_command_len = 5 + (int)signaturebase64len + 3;
   pkam_command = calloc(pkam_command_len, sizeof(char));
   snprintf(pkam_command, pkam_command_len, "pkam:%s\r\n", signaturebase64);
   atclient_atbytes_reset(&recv);
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *) pkam_command, pkam_command_len - 1, recv.bytes, recv.size,
-                                 &recv.len);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)pkam_command, pkam_command_len - 1,
+                                 recv.bytes, recv.size, &recv.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -170,8 +170,8 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   // check for data:success
   if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.len, "data:success", 12)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "recv was \"%.*s\" and did not have prefix \"data:success\"\n", (int)recv.len, recv.bytes);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
+                 (int)recv.len, recv.bytes);
     goto exit;
   }
 
@@ -188,7 +188,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   ret = 0;
 
   goto exit;
-exit : {
+exit: {
   free(root_command);
   free(from_command);
   free(pkam_command);
@@ -200,3 +200,6 @@ exit : {
 }
 
 void atclient_free(atclient *ctx) {
+  // TODO: do check if the connection is initialized before freeing
+  // atclient_connection_free(&(ctx->secondary_connection));
+}

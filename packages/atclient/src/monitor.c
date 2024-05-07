@@ -38,7 +38,7 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   return;
 }
 
-static int auth(atclient *monitor, const char *root_host, int root_port, const char *atsign,
+static int auth(atclient *monitor, const char *root_host,const  int root_port, const char *atsign,
                 const atclient_atkeys atkeys) {
   int ret = 1;
 
@@ -72,7 +72,7 @@ exit: {
 }
 }
 
-int atclient_monitor_start_connection(atclient *monitor, const char *root_host, int root_port, const char *atsign,
+int atclient_monitor_start_connection(atclient *monitor, const char *root_host, const int root_port, const char *atsign,
                                       const atclient_atkeys *atkeys, const char *regex) {
   int ret = 1;
 
