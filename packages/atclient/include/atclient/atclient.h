@@ -26,16 +26,6 @@ typedef struct atclient {
 void atclient_init(atclient *ctx);
 
 /**
- * @brief initalize the atclient's root connection to the specified host and port
- *
- * @param root_conn initialized root connection
- * @param roothost host of root (e.g. root.atsign.org)
- * @param rootport  port of the root (e.g. 64)
- * @return int 0 on success, error otherwise
- */
-int atclient_start_root_connection(atclient_connection *root_conn, const char *roothost, const int rootport);
-
-/**
  * @brief initialize the atclient's secondary connection to the specified host and port
  *
  * @param ctx initialized atclient context
