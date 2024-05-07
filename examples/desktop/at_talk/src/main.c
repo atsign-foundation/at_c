@@ -223,8 +223,8 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
 
   printf("Starting monitor\n");
   struct atclient monitor_ctx;
-  atclient_monitor_init(&monitor_ctx, myatsign, atkeys);
-  ret = atclient_start_monitor(&monitor_ctx, ROOT_HOST, ROOT_PORT, "");
+  atclient_monitor_init(&monitor_ctx);
+  ret = atclient_monitor_start(&monitor_ctx, ROOT_HOST, ROOT_PORT, "");
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     return ret;
@@ -253,17 +253,17 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
   atclient_monitor_message_init(&message);
   while (true) {
 
-    int mon_ret = atclient_read_monitor(&monitor_ctx, &message);
+    int mon_ret = atclient_monitor_read(&monitor_ctx, &message);
     if (mon_ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", mon_ret);
       continue;
     }
 
     switch (message.type) {
-    case MMT_none:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: none\n");
       break;
-    case MMT_notification:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: notification\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message.notification.id);
 
@@ -272,11 +272,11 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
       }
 
       break;
-    case MMT_data_response:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: data\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.data_response);
       break;
-    case MMT_error_response:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: error\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.error_response);
       break;
@@ -295,7 +295,7 @@ static void *heartbeat_handler(void *monitor_connection) {
   while (true) {
     sleep(30);
     atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat\n");
-    atclient_send_heartbeat(connection);
+    atclient_monitor_send_heartbeat(connection);
   };
 }
 
