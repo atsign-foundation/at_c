@@ -56,50 +56,48 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  ret = atclient_start_monitor(&monitor_conn, &root_connection, atsign, &atkeys, ".*", strlen(".*"));
-  if (ret != 0) {
+  if ((ret = atclient_start_monitor(&monitor_conn, &root_connection, atsign, &atkeys, ".*", strlen(".*"))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat thread\n");
-  ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_conn);
-  if (ret != 0) {
+  if ((ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler\n");
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Heartbeat thread started!\n");
 
-  printf("Starting main monitor loop\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Starting main monitor loop...\n");
   while (true) {
 
-    ret = atclient_read_monitor(&monitor_conn, &message);
+    ret = atclient_monitor_read(&monitor_conn, &message);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       continue;
     }
 
-    switch (message.type) {
-    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: none\n");
-      break;
-    }
-    case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: notification\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message.notification.id);
-      break;
-    }
-    case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: data\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.data_response);
-      break;
-    }
-    case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: error\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.error_response);
-      break;
-    }
-    }
+    // switch (message.type) {
+    // case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
+    //   break;
+    // }
+    // case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message.notification.id);
+    //   break;
+    // }
+    // case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE\n");
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message.data_response);
+    //   break;
+    // }
+    // case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE: {
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE\n");
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message.error_response);
+    //   break;
+    // }
+    // }
   }
 
   ret = 0;

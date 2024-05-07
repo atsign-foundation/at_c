@@ -91,7 +91,7 @@ int atclient_send_heartbeat(atclient *monitor_conn) {
   int ret = -1;
   const char *command = "noop:0\r\n";
 
-  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (const unsigned char *) command, strlen(command));
+  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (const unsigned char *)command, strlen(command));
   if (ret < 0 || ret != 8) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
@@ -105,21 +105,22 @@ exit: { return ret; }
 
 static int parse_notification(atclient_monitor_message *message, char *message_body);
 
-int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message) {
+int atclient_monitor_read(atclient *monitor_connection, atclient_monitor_message *message) {
   int ret = -1;
 
-  size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
-  int chunks = 0;
+  const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
+
+  size_t chunks = 0;
   char *buffer = malloc(sizeof(char) * chunksize);
-  char *tmp_buffer = NULL;
+  char *buffertemp = NULL;
 
   bool done_reading = false;
   while (!done_reading) {
-    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk...\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk...\n");
     if (chunks > 0) {
-      tmp_buffer = realloc(buffer, chunksize + (chunksize * chunks) * sizeof(char));
-      buffer = tmp_buffer;
-      tmp_buffer = NULL;
+      buffertemp = realloc(buffer, sizeof(char) * (chunksize + (chunksize * chunks)));
+      buffer = buffertemp;
+      buffertemp = NULL;
     }
 
     size_t off = chunksize * chunks;
@@ -134,8 +135,7 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     chunks = chunks + 1;
   }
   if (ret < 0) {
-    free(buffer);
-    return ret;
+    goto exit;
   }
 
   int i = 0;
@@ -143,34 +143,38 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     i++;
   }
 
-  const char *message_type = strtok(buffer, ":"); // everything up to first ':'
-  char *message_body = strtok(NULL, "\n");
-  message_body = message_body + 1;
+  // print buffer
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Buffer: %s\n", buffer);
 
-  if (strcmp(message_type, "data") == 0) {
-    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
-    message->data_response = message_body;
-  } else if (strcmp(message_type, "notification") == 0) {
-    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
-    ret = parse_notification(message, message_body);
-    if (ret != 0) {
-      atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
-    }
-  } else if (strcmp(message_type, "error") == 0) {
-    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
-    message->error_response = message_body;
-  } else {
-    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
-    atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type\n");
-    ret = -1;
-    goto exit;
-  }
+  // const char *message_type = strtok(buffer, ":"); // everything up to first ':'
+  // char *message_body = strtok(NULL, "\n");
+  // message_body = message_body + 1;
+
+  // if (strcmp(message_type, "data") == 0) {
+  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
+  //   message->data_response = message_body;
+  // } else if (strcmp(message_type, "notification") == 0) {
+  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
+  //   ret = parse_notification(message, message_body);
+  //   if (ret != 0) {
+  //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
+  //   }
+  // } else if (strcmp(message_type, "error") == 0) {
+  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
+  //   message->error_response = message_body;
+  // } else {
+  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
+  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type\n");
+  //   ret = -1;
+  //   goto exit;
+  // }
 
   ret = 0;
   goto exit;
 
 exit: {
   free(buffer);
+  free(buffertemp);
   return ret;
 }
 }
