@@ -40,11 +40,19 @@ static int set_status(atclient_atkey_metadata *metadata, const char *status, con
   if (atclient_atkey_metadata_is_status_initialized(metadata)) {
     atclient_atstr_free(&metadata->status);
   }
-  if ((ret = atclient_atstr_init_literal(&metadata->status, statuslen + 1, status)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+  atclient_atstr_init(&metadata->status, statuslen+1);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Calling atclient_atstr_set(&metadata->status, \"%s\", %d)\n", status, statuslen);
+  if((ret = atclient_atstr_set(&metadata->status, status, statuslen)) != 0)
+  {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set failed with string \"%.*s\"\n",
                  statuslen, status);
     goto exit;
   }
+  // if ((ret = atclient_atstr_init_literal(&metadata->status, statuslen + 1, status)) != 0) {
+  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+  //                statuslen, status);
+  //   goto exit;
+  // }
   metadata->initializedfields[0] = (metadata->initializedfields[0] | ATKEY_METADATA_STATUS_INITIALIZED);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "status: %s\n", metadata->status.str);
   // log intialized fields[0] as a bitfield
@@ -141,47 +149,47 @@ exit: { return ret; }
 
 static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
   metadata->ispublic = ispublic;
-  metadata->initializedfields[1] |= ATKEY_METADATA_ISPUBLIC_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_ISPUBLIC_INITIALIZED);
 }
 
 static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
   metadata->ishidden = ishidden;
-  metadata->initializedfields[1] |= ATKEY_METADATA_ISHIDDEN_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_ISHIDDEN_INITIALIZED);
 }
 
 static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
   metadata->iscached = iscached;
-  metadata->initializedfields[1] |= ATKEY_METADATA_ISCACHED_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_ISCACHED_INITIALIZED);
 }
 
 static void set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
   metadata->ttl = ttl;
-  metadata->initializedfields[1] |= ATKEY_METADATA_TTL_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_TTL_INITIALIZED);
 }
 
 static void set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
   metadata->ttb = ttb;
-  metadata->initializedfields[1] |= ATKEY_METADATA_TTB_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_TTB_INITIALIZED);
 }
 
 static void set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
   metadata->ttr = ttr;
-  metadata->initializedfields[1] |= ATKEY_METADATA_TTR_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_TTR_INITIALIZED);
 }
 
 static void set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
   metadata->ccd = ccd;
-  metadata->initializedfields[1] |= ATKEY_METADATA_CCD_INITIALIZED;
+  metadata->initializedfields[1] = (metadata->initializedfields[1] | ATKEY_METADATA_CCD_INITIALIZED);
 }
 
 static void set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
   metadata->isbinary = isbinary;
-  metadata->initializedfields[2] |= ATKEY_METADATA_ISBINARY_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_ISBINARY_INITIALIZED);
 }
 
 static void set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
   metadata->isencrypted = isencrypted;
-  metadata->initializedfields[2] |= ATKEY_METADATA_ISENCRYPTED_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_ISENCRYPTED_INITIALIZED);
 }
 
 static int set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
@@ -195,7 +203,7 @@ static int set_datasignature(atclient_atkey_metadata *metadata, const char *data
                  datasignaturelen, datasignature);
     goto exit;
   }
-  metadata->initializedfields[2] |= ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
+  metadata->initializedfields[2] = ( metadata->initializedfields[2] | ATKEY_METADATA_DATASIGNATURE_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -212,7 +220,7 @@ static int set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sh
                  sharedkeystatuslen, sharedkeystatus);
     goto exit;
   }
-  metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -228,7 +236,7 @@ static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *share
                  sharedkeyenclen + 1, sharedkeyenc);
     goto exit;
   }
-  metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_SHAREDKEYENC_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -244,7 +252,7 @@ static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyh
                  pubkeyhashlen, pubkeyhash);
     goto exit;
   }
-  metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_PUBKEYHASH_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -260,7 +268,7 @@ static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeya
                  pubkeyalgolen, pubkeyalgo);
     goto exit;
   }
-  metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_PUBKEYALGO_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -276,7 +284,7 @@ static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding,
                  encodinglen, encoding);
     goto exit;
   }
-  metadata->initializedfields[2] |= ATKEY_METADATA_ENCODING_INITIALIZED;
+  metadata->initializedfields[2] = (metadata->initializedfields[2] | ATKEY_METADATA_ENCODING_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -292,7 +300,7 @@ static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyn
                  enckeynamelen, enckeyname);
     goto exit;
   }
-  metadata->initializedfields[3] |= ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
+  metadata->initializedfields[3] = (metadata->initializedfields[3] | ATKEY_METADATA_ENCKEYNAME_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -308,7 +316,7 @@ static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, c
                  encalgolen, encalgo);
     goto exit;
   }
-  metadata->initializedfields[3] |= ATKEY_METADATA_ENCALGO_INITIALIZED;
+  metadata->initializedfields[3] = (metadata->initializedfields[3] | ATKEY_METADATA_ENCALGO_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -341,7 +349,7 @@ static int set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skee
                  skeenckeynamelen, skeenckeyname);
     goto exit;
   }
-  metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
+  metadata->initializedfields[3] = (metadata->initializedfields[3] | ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -357,7 +365,7 @@ static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeenca
                  skeencalgolen, skeencalgo);
     goto exit;
   }
-  metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCALGO_INITIALIZED;
+  metadata->initializedfields[3] = (metadata->initializedfields[3] | ATKEY_METADATA_SKEENCALGO_INITIALIZED);
   ret = 0;
   goto exit;
 exit: { return ret; }

@@ -112,7 +112,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   snprintf(command, commandsize, "llookup:all:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
   // send command and recv response
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandsize - 1, recv,
+  ret = atclient_connection_send(&(atclient->secondary_connection), (const unsigned char *) command, commandsize - 1, recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -205,11 +205,6 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
     // log valuesize
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valuesize: %lu\n", valuesize);
 
-    // log if value == NULL
-    if (value == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value == NULL\n");
-    }
-
     // decrypt response data
     ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuesize, valuelen);
     if (ret != 0) {
@@ -288,7 +283,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
                              + atkey->sharedby.len            // <@sharedby>
                              + strlen("\r\n")                 // \r\n
                              + 1;                             // \0
-  command = malloc(sizeof(char) * commandsize);
+  command = (char *) malloc(sizeof(char) * commandsize);
   memset(command, 0, sizeof(char) * commandsize);
   snprintf(command, commandsize, "lookup:all:%.*s%s%.*s%.*s\r\n", (int)atkey->name.len, atkey->name.str,
            extra_point_len == 1 ? "." : "", (int)namespacelen, namespacestr, (int)atkey->sharedby.len,

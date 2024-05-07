@@ -59,7 +59,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
     unsigned char *response = recv + strlen("data:");
     size_t responselen = recvlen - strlen("data:");
 
-    const size_t responserawsize = 512;
+    const size_t responserawsize = 1024;
     unsigned char responseraw[responserawsize];
     memset(responseraw, 0, sizeof(unsigned char) * responserawsize);
     size_t responserawlen = 0;

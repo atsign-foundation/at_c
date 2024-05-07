@@ -24,12 +24,11 @@ void atclient_atkey_init(atclient_atkey *atkey) {
 }
 
 void atclient_atkey_free(atclient_atkey *atkey) {
-  free(atkey->name.str);
-  free(atkey->namespacestr.str);
-  free(atkey->sharedwith.str);
-  free(atkey->sharedby.str);
-
-  atclient_atkey_metadata_free(&atkey->metadata);
+  atclient_atstr_free(&(atkey->name));
+  atclient_atstr_free(&(atkey->namespacestr));
+  atclient_atstr_free(&(atkey->sharedby));
+  atclient_atstr_free(&(atkey->sharedwith));
+  atclient_atkey_metadata_free(&(atkey->metadata));
 }
 
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen) {

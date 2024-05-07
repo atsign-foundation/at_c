@@ -1,10 +1,10 @@
 #include "atclient/atstr.h"
 #include "atlogger/atlogger.h"
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "atstr"
 
@@ -120,4 +120,20 @@ int atclient_atstr_append(atclient_atstr *atstr, const char *format, ...) {
 exit: { return ret; }
 }
 
-void atclient_atstr_free(atclient_atstr *atstr) { free(atstr->str); }
+void atclient_atstr_free(atclient_atstr *atstr) {
+  if(atstr == NULL) {
+    return;
+  }
+  // log attempting to free "str"
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting to free atstr->str\n");
+  if (atstr->str == NULL) {
+    // log "str" is already NULL
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atstr->str is already NULL\n");
+    return;
+  }
+  // free "str"
+  // log whta is in str
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Freeing atstr->str: %s\n", atstr->str);
+  free(atstr->str);
+  atstr->str = NULL;
+}
