@@ -13,17 +13,20 @@
 
 #define TAG "atclient_monitor"
 
+static int parse_message(char *original, char **message_type, char **message_body);
+static int parse_notification(atclient_monitor_message *message, const char *messagebody);
+
 void atclient_monitor_message_init(atclient_monitor_message *message) {
   memset(message, 0, sizeof(atclient_monitor_message));
 }
 
 void atclient_monitor_message_free(atclient_monitor_message *message) {
   memset(message, 0, sizeof(atclient_monitor_message));
-  // free(message->notification.id);
-  // atclient_atkey_free(&message->notification.key);
-  // atclient_atsign_free(&message->notification.from);
-  // atclient_atsign_free(&message->notification.to);
-  // free(message->notification.value);
+  free(message->notification.id);
+  atclient_atkey_free(&message->notification.key);
+  atclient_atsign_free(&message->notification.from);
+  atclient_atsign_free(&message->notification.to);
+  free(message->notification.value);
 }
 
 void atclient_monitor_init(atclient *monitor_conn) {
@@ -103,20 +106,19 @@ int atclient_send_heartbeat(atclient *monitor_conn) {
 exit: { return ret; }
 }
 
-static int parse_notification(atclient_monitor_message *message, char *message_body);
-
-int atclient_monitor_read(atclient *monitor_connection, atclient_monitor_message *message) {
+int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message) {
   int ret = -1;
 
   const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
 
   size_t chunks = 0;
   char *buffer = malloc(sizeof(char) * chunksize);
+  memset(buffer, 0, sizeof(char) * chunksize);
   char *buffertemp = NULL;
 
   bool done_reading = false;
   while (!done_reading) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk...\n");
+    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk...\n");
     if (chunks > 0) {
       buffertemp = realloc(buffer, sizeof(char) * (chunksize + (chunksize * chunks)));
       buffer = buffertemp;
@@ -125,10 +127,10 @@ int atclient_monitor_read(atclient *monitor_connection, atclient_monitor_message
 
     size_t off = chunksize * chunks;
     for (int i = 0; i < chunksize; i++) {
-      ret = mbedtls_ssl_read(&(monitor_connection->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
+      ret = mbedtls_ssl_read(&(monitor_conn->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
       if (ret < 0 || buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
-        done_reading = 1;
+        done_reading = true;
         break;
       }
     }
@@ -144,34 +146,46 @@ int atclient_monitor_read(atclient *monitor_connection, atclient_monitor_message
   }
 
   // print buffer
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Buffer: %s\n", buffer);
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Buffer: %s\n", buffer);
 
-  // const char *message_type = strtok(buffer, ":"); // everything up to first ':'
-  // char *message_body = strtok(NULL, "\n");
-  // message_body = message_body + 1;
+  char *messagetype = NULL;
+  char *messagebody = NULL;
+  ret = parse_message(buffer, &messagetype, &messagebody);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find message type and message body from: %s\n", buffer);
+    goto exit;
+  }
 
-  // if (strcmp(message_type, "data") == 0) {
-  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
-  //   message->data_response = message_body;
-  // } else if (strcmp(message_type, "notification") == 0) {
-  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
-  //   ret = parse_notification(message, message_body);
-  //   if (ret != 0) {
-  //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification: %d\n", ret);
-  //   }
-  // } else if (strcmp(message_type, "error") == 0) {
-  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
-  //   message->error_response = message_body;
-  // } else {
-  //   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type\n");
-  //   ret = -1;
-  //   goto exit;
-  // }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Type: %s\n", messagetype);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", messagebody);
+
+  *message = malloc(sizeof(atclient_monitor_message));
+  atclient_monitor_message_init(*message);
+
+  if (strcmp(messagetype, "notification") == 0) {
+    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
+    if((ret = parse_notification(*message, messagebody)) != 0)
+    {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification\n");
+      goto exit;
+    }
+  } else if (strcmp(messagetype, "data") == 0) {
+    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
+    (*message)->data_response = malloc(strlen(messagebody) + 1);
+    strcpy((*message)->data_response, messagebody);
+  } else if (strcmp(messagetype, "error") == 0) {
+    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
+    (*message)->error_response = malloc(strlen(messagebody) + 1);
+    strcpy((*message)->error_response, messagebody);
+  } else {
+    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type from \"%s\"\n", buffer);
+    ret = -1;
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
-
 exit: {
   free(buffer);
   free(buffertemp);
@@ -179,44 +193,102 @@ exit: {
 }
 }
 
-static int parse_notification(atclient_monitor_message *message, char *message_body) {
+static int parse_message(char *original, char **message_type, char **message_body) {
+  int ret = -1;
+
+  char *temp = NULL;
+  char *saveptr;
+
+  temp = strtok_r(original, ":", &saveptr);
+  if (temp == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
+    goto exit;
+  }
+  *message_type = temp;
+
+  temp = strtok_r(NULL, "\n", &saveptr);
+  if (temp == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message body\n");
+    goto exit;
+  }
+  *message_body = temp;
+
+  // if message_type starts with `@`, then it will follow this format: `@<atsign>@<message_type>`
+  // extract message_type from message_type
+  if ((*message_type)[0] == '@') {
+    char *temp = strtok_r(*message_type, "@", &saveptr);
+    if (temp == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
+      goto exit;
+    }
+    *message_type = strtok_r(NULL, "@", &saveptr);
+    if (*message_type == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
+      goto exit;
+    }
+  }
+
+  // if message_body has any leading or trailing white space or new line characters, remove it
+  while ((*message_body)[0] == ' ' || (*message_body)[0] == '\n') {
+    *message_body = *message_body + 1;
+  }
+  size_t trail;
+  do {
+    trail = strlen(*message_body) - 1;
+    if ((*message_body)[trail] == ' ' || (*message_body)[trail] == '\n') {
+      (*message_body)[trail] = '\0';
+    }
+  } while ((*message_body)[trail] == ' ' || (*message_body)[trail] == '\n');
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int parse_notification(atclient_monitor_message *message, const char *messagebody) {
   int ret = -1;
 
   cJSON *root = NULL;
-  root = cJSON_Parse(message_body);
+  root = cJSON_Parse(messagebody);
   if (root == NULL) {
     cJSON_Delete(root);
-    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body\n");
-    ret = -1;
-    return ret;
-  }
-
-  cJSON *key = cJSON_GetObjectItem(root, "key");
-  atclient_atkey_init(&(message->notification.key));
-  atclient_atkey_from_string(&(message->notification.key), key->valuestring, strlen(key->valuestring));
-
-  if (false) { // TODO: if regex doesnt match // do we even need this now?
-    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Regex failed to match\n");
-    cJSON_Delete(root);
-    atclient_monitor_message_free(message);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body using cJSON: \"%s\"\n", messagebody);
     ret = -1;
     return ret;
   }
 
   cJSON *id = cJSON_GetObjectItem(root, "id");
-  message->notification.id = malloc((strlen(id->valuestring) + 1) * sizeof(char));
-  strcpy(message->notification.id, id->valuestring);
-
-  cJSON *metadata = cJSON_GetObjectItem(root, "metadata");
-  if (metadata != NULL) {
-    atclient_atkey_metadata_from_cjson_node(&(message->notification.key.metadata), metadata);
-  }
+  
 
   cJSON *from = cJSON_GetObjectItem(root, "from");
-  atclient_atsign_init(&message->notification.from, from->valuestring);
+  
 
   cJSON *to = cJSON_GetObjectItem(root, "to");
-  atclient_atsign_init(&message->notification.to, to->valuestring);
+  
+
+  cJSON *key = cJSON_GetObjectItem(root, "key");
+  atclient_atkey_init(&(message->notification.key));
+  atclient_atkey_from_string(&(message->notification.key), key->valuestring, strlen(key->valuestring));
+
+  cJSON *value = cJSON_GetObjectItem(root, "value");
+  if (value != NULL) {
+    if (value->type != cJSON_NULL) {
+      message->notification.value = malloc(strlen(value->valuestring) + 1);
+      strcpy(message->notification.value, value->valuestring);
+    } else {
+      message->notification.value = malloc(strlen("null") + 1);
+      strcpy(message->notification.value, "null");
+    }
+  }
+
+  cJSON *operation = cJSON_GetObjectItem(root, "operation");
+  if (operation != NULL) {
+    if (operation->type != cJSON_NULL) {
+      strcpy(message->notification.operation, operation->valuestring);
+    } else {
+      strcpy(message->notification.operation, "null");
+    }
+  }
 
   cJSON *epochMillis = cJSON_GetObjectItem(root, "epochMillis");
   if (epochMillis != NULL) {
@@ -245,24 +317,9 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
     }
   }
 
-  cJSON *value = cJSON_GetObjectItem(root, "value");
-  if (value != NULL) {
-    if (value->type != cJSON_NULL) {
-      message->notification.value = malloc(strlen(value->valuestring) + 1);
-      strcpy(message->notification.value, value->valuestring);
-    } else {
-      message->notification.value = malloc(strlen("null") + 1);
-      strcpy(message->notification.value, "null");
-    }
-  }
-
-  cJSON *operation = cJSON_GetObjectItem(root, "operation");
-  if (operation != NULL) {
-    if (operation->type != cJSON_NULL) {
-      strcpy(message->notification.operation, operation->valuestring);
-    } else {
-      strcpy(message->notification.operation, "null");
-    }
+  cJSON *metadata = cJSON_GetObjectItem(root, "metadata");
+  if (metadata != NULL) {
+    atclient_atkey_metadata_from_cjson_node(&(message->notification.key.metadata), metadata);
   }
 
   cJSON *expiresAt = cJSON_GetObjectItem(root, "expiresAt");

@@ -4,18 +4,18 @@
 #include "atclient.h"
 #include "atkey.h"
 
-// Receiving notifications
 typedef struct atclient_atnotification {
   char *id;
   atclient_atsign from;
   atclient_atsign to;
   atclient_atkey key;
   char *value;
-  char operation[7]; // update | delete
+  char *operation;
   size_t epochMillis;
-  char messageType[5]; // key | text (deprecated)
-  bool isEncrypted;
+  char *messageType;
+  bool isEncrypted: 1;
   size_t expiresAt;
+  uint8_t initalizedfields[2];
 } atclient_atnotification;
 
 enum atclient_monitor_message_type {
@@ -67,11 +67,12 @@ int atclient_send_heartbeat(atclient *monitor_conn);
 /**
  * @brief Read a notification from the monitor connection into message
  * @param monitor_conn the atclient context for the monitor connection
- * @param message the notification to be read
+ * @param message pass in a double pointer to the message, it will be allocated and filled in by this function.
  * @return 0 on success, non-zero on error
  *
  * @note Message may be a notification or a data response, check message.is_notification to know which one it is
+ * @note The caller is responsible for freeing the message, using atclient_monitor_message_free
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message *message);
+int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message);
 
 #endif

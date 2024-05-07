@@ -38,8 +38,7 @@ int main(int argc, char *argv[]) {
 
   pthread_t tid;
 
-  atclient_monitor_message message;
-  atclient_monitor_message_init(&message);
+  atclient_monitor_message *message = NULL;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");
@@ -109,7 +108,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   atclient_connection_free(&root_connection);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_message_free(&message);
+  atclient_monitor_message_free(message);
   return ret;
 }
 }
