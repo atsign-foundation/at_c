@@ -6,8 +6,8 @@
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
 #include <atclient/encryption_key_helpers.h>
-#include <atclient/notify.h>
 #include <atclient/monitor.h>
+#include <atclient/notify.h>
 #include <atclient/stringutils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
@@ -88,7 +88,6 @@ exit: {
 }
 }
 
-
 // static int test_2_receive_notification(atclient *atclient, char *notification_id) {
 //   int ret = 1;
 
@@ -97,7 +96,8 @@ exit: {
 //   memset(recv, 0, recvsize);
 //   size_t recvlen = 0;
 
-//   if ((ret = atclient_connection_send(&atclient->secondary_connection, "notify:list\r\n", strlen("notify:list\r\n"), recv,
+//   if ((ret = atclient_connection_send(&atclient->secondary_connection, "notify:list\r\n", strlen("notify:list\r\n"),
+//   recv,
 //                                       recvsize, &recvlen)) != 0) {
 //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
 //     return ret;

@@ -37,7 +37,7 @@ void atclient_notify_params_create(atclient_notify_params *params, enum atclient
 
 void atclient_notify_params_free(atclient_notify_params *params) { memset(params, 0, sizeof(atclient_notify_params)); }
 
-int atclient_notify(atclient *ctx, atclient_notify_params *params) {
+int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id) {
   int res = 1;
   // Step 1 calculate the buffer size needed for the protocol command
   // size_t cmdsize = 6 + 3 +                               // "notify" (6) + "\r\n\0" (3)
@@ -269,10 +269,22 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  res = atclient_connection_send(&ctx->secondary_connection, cmd, strlen(cmd), recv, recvsize, &recvlen);
-  if (res != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
-    return res;
+  // if starts with data:
+  if (atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
+    if (notification_id != NULL) { // if not null, then they care about the notification id
+      // parse the notification id
+      char *data = recv + strlen("data:");
+      size_t datalen = recvlen - strlen("data:");
+      if (datalen > 36) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification id too long\n");
+        return 1;
+      }
+      strncpy(notification_id, data, datalen);
+      notification_id[datalen] = '\0';
+    }
+  } else {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unexpected response: %.*s\n", (int)recvlen, recv);
+    return 1;
   }
 
   return res;
