@@ -5,6 +5,7 @@
 #include "atkey.h"
 
 typedef struct atclient_atnotification {
+  // initializedfields[0]
   char *id;
   char *from;
   char *to;
@@ -13,19 +14,18 @@ typedef struct atclient_atnotification {
   char *operation;
   size_t epochMillis;
   char *messageType;
-  bool isEncrypted: 1;
 
-  // metadata
-  char *encKeyName;
-  char *encAlgo;
-  char *ivNonce;
-  char *skeEncKeyName;
-  char *skeEncAlgo;
+  // initalizedfields[1]
+  bool isEncrypted : 1;
+  char *encKeyName;    // in metadata
+  char *encAlgo;       // in metadata
+  char *ivNonce;       // in metadata
+  char *skeEncKeyName; // in metadata
+  char *skeEncAlgo;    // in metadata
+  unsigned char *decryptedvalue; // if isEncrypted, this will be the decrypted value
+  size_t decryptedvaluelen;      // represents the length of the decrypted value
 
   uint8_t initalizedfields[2];
-
-  unsigned char *decryptedvalue;
-  size_t decryptedvaluelen;
 } atclient_atnotification;
 
 #define ATCLIENT_ATNOTIFICATION_INITIALIZED 0b00000001
@@ -47,6 +47,8 @@ typedef struct atclient_atnotification {
 #define ATCLIENT_ATNOTIFICATION_IVNONCE_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 3)
 #define ATCLIENT_ATNOTIFICATION_SKEENCKEYNAME_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 4)
 #define ATCLIENT_ATNOTIFICATION_SKEENCALGO_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 5)
+#define ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 6)
+#define ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 7)
 
 void atclient_atnotification_init(atclient_atnotification *notification);
 void atclient_atnotification_free(atclient_atnotification *notification);
@@ -65,6 +67,8 @@ bool atclient_atnotification_encAlgo_is_initialized(const atclient_atnotificatio
 bool atclient_atnotification_ivNonce_is_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_skeEncKeyName_is_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_skeEncAlgo_is_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_decryptedvalue_is_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_decryptedvaluelen_is_initialized(const atclient_atnotification *notification);
 
 void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, bool initialized);
 void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, bool initialized);
@@ -80,6 +84,8 @@ void atclient_atnotification_encAlgo_set_initialized(atclient_atnotification *no
 void atclient_atnotification_ivNonce_set_initialized(atclient_atnotification *notification, bool initialized);
 void atclient_atnotification_skeEncKeyName_set_initialized(atclient_atnotification *notification, bool initialized);
 void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification *notification, bool initialized);
+void atclient_atnotification_decryptedvalue_set_initialized(atclient_atnotification *notification, bool initialized);
+void atclient_atnotification_decryptedvaluelen_set_initialized(atclient_atnotification *notification, bool initialized);
 
 void atclient_atnotification_free_id(atclient_atnotification *notification);
 void atclient_atnotification_free_from(atclient_atnotification *notification);
@@ -95,21 +101,33 @@ void atclient_atnotification_free_encAlgo(atclient_atnotification *notification)
 void atclient_atnotification_free_ivNonce(atclient_atnotification *notification);
 void atclient_atnotification_free_skeEncKeyName(atclient_atnotification *notification);
 void atclient_atnotification_free_skeEncAlgo(atclient_atnotification *notification);
+void atclient_atnotification_free_decryptedvalue(atclient_atnotification *notification);
+void atclient_atnotification_free_decryptedvaluelen(atclient_atnotification *notification);
 
 void atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen);
 void atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen);
 void atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen);
 void atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen);
 void atclient_atnotification_set_value(atclient_atnotification *notification, const char *value, const size_t valuelen);
-void atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation, const size_t operationlen);
+void atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
+                                           const size_t operationlen);
 void atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis);
-void atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType, const size_t messageTypelen);
+void atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
+                                             const size_t messageTypelen);
 void atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted);
-void atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName, const size_t encKeyNamelen);
-void atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo, const size_t encAlgolen);
-void atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce, const size_t ivNoncelen);
-void atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName, const size_t skeEncKeyNamelen);
-void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo, const size_t skeEncAlgolen);
+void atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
+                                            const size_t encKeyNamelen);
+void atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
+                                         const size_t encAlgolen);
+void atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
+                                         const size_t ivNoncelen);
+void atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
+                                               const size_t skeEncKeyNamelen);
+void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
+                                            const size_t skeEncAlgolen);
+void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification, const unsigned char *decryptedvalue,
+                                                const size_t decryptedvaluelen);
+void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification, const size_t decryptedvaluelen);
 
 enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
@@ -160,11 +178,11 @@ int atclient_send_heartbeat(atclient *monitor_conn);
 /**
  * @brief Read a notification from the monitor connection into message
  * @param monitor_conn the atclient context for the monitor connection
- * @param message pass in a double pointer to the message, it will be allocated and filled in by this function.
+ * @param message pass in a double pointer to the message, it will be allocated and filled in by this function. The
+ * caller is responsible for freeing the message, using atclient_monitor_message_free
  * @return 0 on success, non-zero on error
  *
- * @note Message may be a notification or a data response, check message.is_notification to know which one it is
- * @note The caller is responsible for freeing the message, using atclient_monitor_message_free
+ * @note Message may be a notification, a data response, or an error response, check the type field to determine which data field to use
  */
 int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message);
 

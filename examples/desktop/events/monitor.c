@@ -76,27 +76,28 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    // switch (message.type) {
-    // case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
-    //   break;
-    // }
-    // case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message.notification.id);
-    //   break;
-    // }
-    // case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE\n");
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message.data_response);
-    //   break;
-    // }
-    // case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE: {
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE\n");
-    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message.error_response);
-    //   break;
-    // }
-    // }
+    switch (message->type) {
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
+      break;
+    }
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
+      break;
+    }
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->data_response);
+      break;
+    }
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->error_response);
+      break;
+    }
+    }
   }
 
   ret = 0;

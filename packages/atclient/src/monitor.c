@@ -2,7 +2,12 @@
 #include "atclient/atclient.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
+#include "atclient/encryption_key_helpers.h"
 #include "cJSON.h"
+#include <atchops/aes.h>
+#include <atchops/aesctr.h>
+#include <atchops/base64.h>
+#include <atchops/iv.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
 #include <mbedtls/threading.h>
@@ -15,6 +20,7 @@
 
 static int parse_message(char *original, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
+static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
 void atclient_atnotification_init(atclient_atnotification *notification) {
   memset(notification, 0, sizeof(atclient_atnotification));
@@ -47,6 +53,27 @@ void atclient_atnotification_free(atclient_atnotification *notification) {
   }
   if (atclient_atnotification_isEncrypted_is_initialized(notification)) {
     atclient_atnotification_free_isEncrypted(notification);
+  }
+  if (atclient_atnotification_encKeyName_is_initialized(notification)) {
+    atclient_atnotification_free_encKeyName(notification);
+  }
+  if (atclient_atnotification_encAlgo_is_initialized(notification)) {
+    atclient_atnotification_free_encAlgo(notification);
+  }
+  if (atclient_atnotification_ivNonce_is_initialized(notification)) {
+    atclient_atnotification_free_ivNonce(notification);
+  }
+  if (atclient_atnotification_skeEncKeyName_is_initialized(notification)) {
+    atclient_atnotification_free_skeEncKeyName(notification);
+  }
+  if (atclient_atnotification_skeEncAlgo_is_initialized(notification)) {
+    atclient_atnotification_free_skeEncAlgo(notification);
+  }
+  if (atclient_atnotification_decryptedvalue_is_initialized(notification)) {
+    atclient_atnotification_free_decryptedvalue(notification);
+  }
+  if (atclient_atnotification_decryptedvaluelen_is_initialized(notification)) {
+    atclient_atnotification_free_decryptedvaluelen(notification);
   }
 }
 
@@ -86,31 +113,33 @@ bool atclient_atnotification_isEncrypted_is_initialized(const atclient_atnotific
   return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_ISENCRYPTED_INITIALIZED);
 }
 
-bool atclient_atnotification_encKeyName_is_initialized(const atclient_atnotification *notification)
-{
+bool atclient_atnotification_encKeyName_is_initialized(const atclient_atnotification *notification) {
   return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_ENCKEYNAME_INITIALIZED);
 }
 
-bool atclient_atnotification_encAlgo_is_initialized(const atclient_atnotification *notification)
-{
+bool atclient_atnotification_encAlgo_is_initialized(const atclient_atnotification *notification) {
   return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_ENCALGO_INITIALIZED);
 }
 
-bool atclient_atnotification_ivNonce_is_initialized(const atclient_atnotification *notification)
-{
+bool atclient_atnotification_ivNonce_is_initialized(const atclient_atnotification *notification) {
   return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_IVNONCE_INITIALIZED);
 }
 
-bool atclient_atnotification_skeEncKeyName_is_initialized(const atclient_atnotification *notification)
-{
+bool atclient_atnotification_skeEncKeyName_is_initialized(const atclient_atnotification *notification) {
   return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_SKEENCKEYNAME_INITIALIZED);
 }
 
-bool atclient_atnotification_skeEncAlgo_is_initialized(const atclient_atnotification *notification)
-{
+bool atclient_atnotification_skeEncAlgo_is_initialized(const atclient_atnotification *notification) {
   return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_SKEENCALGO_INITIALIZED);
 }
 
+bool atclient_atnotification_decryptedvalue_is_initialized(const atclient_atnotification *notification) {
+  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED);
+}
+
+bool atclient_atnotification_decryptedvaluelen_is_initialized(const atclient_atnotification *notification) {
+  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED);
+}
 
 void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, bool initialized) {
   if (initialized) {
@@ -184,8 +213,7 @@ void atclient_atnotification_isEncrypted_set_initialized(atclient_atnotification
   }
 }
 
-void atclient_atnotification_encKeyName_set_initialized(atclient_atnotification *notification, bool initialized)
-{
+void atclient_atnotification_encKeyName_set_initialized(atclient_atnotification *notification, bool initialized) {
   if (initialized) {
     notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_ENCKEYNAME_INITIALIZED;
   } else {
@@ -193,8 +221,7 @@ void atclient_atnotification_encKeyName_set_initialized(atclient_atnotification 
   }
 }
 
-void atclient_atnotification_encAlgo_set_initialized(atclient_atnotification *notification, bool initialized)
-{
+void atclient_atnotification_encAlgo_set_initialized(atclient_atnotification *notification, bool initialized) {
   if (initialized) {
     notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_ENCALGO_INITIALIZED;
   } else {
@@ -202,8 +229,7 @@ void atclient_atnotification_encAlgo_set_initialized(atclient_atnotification *no
   }
 }
 
-void atclient_atnotification_ivNonce_set_initialized(atclient_atnotification *notification, bool initialized)
-{
+void atclient_atnotification_ivNonce_set_initialized(atclient_atnotification *notification, bool initialized) {
   if (initialized) {
     notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_IVNONCE_INITIALIZED;
   } else {
@@ -211,8 +237,7 @@ void atclient_atnotification_ivNonce_set_initialized(atclient_atnotification *no
   }
 }
 
-void atclient_atnotification_skeEncKeyName_set_initialized(atclient_atnotification *notification, bool initialized)
-{
+void atclient_atnotification_skeEncKeyName_set_initialized(atclient_atnotification *notification, bool initialized) {
   if (initialized) {
     notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_SKEENCKEYNAME_INITIALIZED;
   } else {
@@ -220,8 +245,7 @@ void atclient_atnotification_skeEncKeyName_set_initialized(atclient_atnotificati
   }
 }
 
-void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification *notification, bool initialized)
-{
+void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification *notification, bool initialized) {
   if (initialized) {
     notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_SKEENCALGO_INITIALIZED;
   } else {
@@ -229,6 +253,22 @@ void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification 
   }
 }
 
+void atclient_atnotification_decryptedvalue_set_initialized(atclient_atnotification *notification, bool initialized) {
+  if (initialized) {
+    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED;
+  } else {
+    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED;
+  }
+}
+
+void atclient_atnotification_decryptedvaluelen_set_initialized(atclient_atnotification *notification,
+                                                               bool initialized) {
+  if (initialized) {
+    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED;
+  } else {
+    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED;
+  }
+}
 
 void atclient_atnotification_free_id(atclient_atnotification *notification) {
   free(notification->id);
@@ -280,41 +320,46 @@ void atclient_atnotification_free_isEncrypted(atclient_atnotification *notificat
   atclient_atnotification_isEncrypted_set_initialized(notification, false);
 }
 
-void atclient_atnotification_free_encKeyName(atclient_atnotification *notification)
-{
+void atclient_atnotification_free_encKeyName(atclient_atnotification *notification) {
   free(notification->encKeyName);
   notification->encKeyName = NULL;
   atclient_atnotification_encKeyName_set_initialized(notification, false);
 }
 
-void atclient_atnotification_free_encAlgo(atclient_atnotification *notification)
-{
+void atclient_atnotification_free_encAlgo(atclient_atnotification *notification) {
   free(notification->encAlgo);
   notification->encAlgo = NULL;
   atclient_atnotification_encAlgo_set_initialized(notification, false);
 }
 
-void atclient_atnotification_free_ivNonce(atclient_atnotification *notification)
-{
+void atclient_atnotification_free_ivNonce(atclient_atnotification *notification) {
   free(notification->ivNonce);
   notification->ivNonce = NULL;
   atclient_atnotification_ivNonce_set_initialized(notification, false);
 }
 
-void atclient_atnotification_free_skeEncKeyName(atclient_atnotification *notification)
-{
+void atclient_atnotification_free_skeEncKeyName(atclient_atnotification *notification) {
   free(notification->skeEncKeyName);
   notification->skeEncKeyName = NULL;
   atclient_atnotification_skeEncKeyName_set_initialized(notification, false);
 }
 
-void atclient_atnotification_free_skeEncAlgo(atclient_atnotification *notification)
-{
+void atclient_atnotification_free_skeEncAlgo(atclient_atnotification *notification) {
   free(notification->skeEncAlgo);
   notification->skeEncAlgo = NULL;
   atclient_atnotification_skeEncAlgo_set_initialized(notification, false);
 }
 
+void atclient_atnotification_free_decryptedvalue(atclient_atnotification *notification) {
+  free(notification->decryptedvalue);
+  notification->decryptedvalue = NULL;
+  atclient_atnotification_decryptedvalue_set_initialized(notification, false);
+}
+
+void atclient_atnotification_free_decryptedvaluelen(atclient_atnotification *notification) {
+  notification->decryptedvaluelen = 0;
+  atclient_atnotification_decryptedvaluelen_set_initialized(notification, false);
+}
 
 void atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen) {
   if (atclient_atnotification_id_is_initialized(notification)) {
@@ -460,6 +505,23 @@ void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notificatio
   atclient_atnotification_skeEncAlgo_set_initialized(notification, true);
 }
 
+void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
+                                                const unsigned char *decryptedvalue, const size_t decryptedvaluelen) {
+  if (atclient_atnotification_decryptedvalue_is_initialized(notification)) {
+    atclient_atnotification_free_decryptedvalue(notification);
+  }
+  notification->decryptedvalue = malloc(sizeof(unsigned char) * (decryptedvaluelen + 1));
+  memcpy(notification->decryptedvalue, decryptedvalue, decryptedvaluelen);
+  notification->decryptedvalue[decryptedvaluelen] = '\0';
+}
+
+void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
+                                                   const size_t decryptedvaluelen) {
+  if (atclient_atnotification_decryptedvaluelen_is_initialized(notification)) {
+    atclient_atnotification_free_decryptedvaluelen(notification);
+  }
+  notification->decryptedvaluelen = decryptedvaluelen;
+}
 
 void atclient_monitor_message_init(atclient_monitor_message *message) {
   memset(message, 0, sizeof(atclient_monitor_message));
@@ -605,6 +667,13 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
     if ((ret = parse_notification(&((*message)->notification), messagebody)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification\n");
       goto exit;
+    }
+    if (atclient_atnotification_isEncrypted_is_initialized(&((*message)->notification)) &&
+        (*message)->notification.isEncrypted) {
+      if ((ret = decrypt_notification(monitor_conn, &((*message)->notification))) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
+        goto exit;
+      }
     }
   } else if (strcmp(messagetype, "data") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
@@ -825,7 +894,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
 
     // get ivNonce
     cJSON *ivNonce = cJSON_GetObjectItem(metadata, "ivNonce");
-    if(ivNonce != NULL) {
+    if (ivNonce != NULL) {
       if (ivNonce->type != cJSON_NULL) {
         val = ivNonce->valuestring;
         vallen = strlen(ivNonce->valuestring);
@@ -868,6 +937,114 @@ static int parse_notification(atclient_atnotification *notification, const char 
 
 exit: {
   cJSON_Delete(root);
+  return ret;
+}
+}
+
+static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification) {
+  int ret = 1;
+
+  atclient_atsign atsignfrom;
+  atclient_atsign_init(&atsignfrom, notification->from);
+
+  // holds encrypted value but in raw bytes (after base64 decode operation)
+  const size_t valuerawsize = strlen(notification->value) * 4;
+  unsigned char valueraw[valuerawsize];
+  memset(valueraw, 0, sizeof(unsigned char) * valuerawsize);
+  size_t valuerawlen = 0;
+
+  const size_t decryptedvaluetempsize = valuerawsize;
+  unsigned char decryptedvaluetemp[decryptedvaluetempsize];
+  memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
+  size_t decryptedvaluetemplen = 0;
+
+  // temporarily holds the shared encryption key in base64
+  const size_t sharedenckeybase64size = 64;
+  unsigned char sharedenckeybase64[sharedenckeybase64size];
+  memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
+  size_t sharedenckeybase64len = 0;
+
+  // holds shared encryption key in raw bytes (after base64 decode operation)
+  const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
+  unsigned char sharedenckey[sharedenckeysize];
+  size_t sharedenckeylen;
+
+  unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+
+  // 1. make sure everything we need is there
+
+  // 1a. check if value is initialized
+  if (!atclient_atnotification_value_is_initialized(notification)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Value is not initialized. Nothing was found to decrypt.\n");
+    goto exit;
+  }
+
+  // 1b. some warnings
+  if (!atclient_atnotification_isEncrypted_is_initialized(notification)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+                 "isEncrypted field was found to be uninitialized, we don't know for sure if we're decrypting "
+                 "something that's even encrypted.\n");
+  } else {
+    if (!notification->isEncrypted) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+                   "isEncrypted is false, we may be trying to decrypt some unencrypted plain text.\n");
+    }
+  }
+
+  // 2. get iv
+  if (atclient_atnotification_ivNonce_is_initialized(notification)) {
+    size_t ivlen;
+    ret =
+        atchops_base64_decode(notification->ivNonce, strlen(notification->ivNonce), iv, ATCHOPS_IV_BUFFER_SIZE, &ivlen);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode iv\n");
+      goto exit;
+    }
+    if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded.\n");
+      goto exit;
+    }
+  } else {
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE); // legacy IV
+  }
+
+  // 3. get shared encryption key to decrypt
+  ret = atclient_get_shared_encryption_key_shared_by_other(monitor_conn, &atsignfrom, sharedenckeybase64);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
+    goto exit;
+  }
+  sharedenckeybase64len = strlen(sharedenckeybase64);
+
+  ret = atchops_base64_decode(sharedenckeybase64, sharedenckeybase64len, sharedenckey, sharedenckeysize,
+                              &sharedenckeylen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode shared encryption key\n");
+    goto exit;
+  }
+
+  if (sharedenckeylen != sharedenckeysize) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid shared encryption key length was decoded.\n");
+    goto exit;
+  }
+
+  // 4. decrypt value
+  ret = atchops_aesctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, decryptedvaluetemp,
+                               decryptedvaluetempsize, &decryptedvaluetemplen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt value\n");
+    goto exit;
+  }
+
+  // 5. set decrypted value
+  atclient_atnotification_set_decryptedvalue(notification, decryptedvaluetemp, decryptedvaluetemplen);
+  atclient_atnotification_set_decryptedvaluelen(notification, decryptedvaluetemplen);
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atsign_free(&atsignfrom);
   return ret;
 }
 }
