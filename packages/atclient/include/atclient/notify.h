@@ -1,5 +1,8 @@
-#include "atclient.h"
-#include "atkey.h"
+#ifndef ATCLIENT_NOTIFY_H
+#define ATCLIENT_NOTIFY_H
+
+#include "atclient/atclient.h"
+#include "atclient/atkey.h"
 
 // For sending notifications
 enum atclient_notify_operation {
@@ -66,4 +69,14 @@ void atclient_notify_params_create(atclient_notify_params *params, enum atclient
                                    atclient_atkey *atkey, char *value);
 void atclient_notify_params_free(atclient_notify_params *params);
 
-int atclient_notify(atclient *ctx, atclient_notify_params *params);
+/**
+ * @brief 
+ * 
+ * @param ctx 
+ * @param params 
+ * @param notification_id assumed at least 37 bytes allocated
+ * @return int 
+ */
+int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id);
+
+#endif // ATCLIENT_NOTIFY_H
