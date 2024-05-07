@@ -115,7 +115,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
         goto exit;
       }
     } else if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
 

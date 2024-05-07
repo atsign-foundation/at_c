@@ -28,6 +28,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
   }
 
   // log sharedwith_withat
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sharedwith_withat (%lu): %.*s\n", sharedwith_withatlen, (int)sharedwith_withatlen, sharedwith_withat);
 
   // llookup:shared_key.recipient_atsign@myatsign
   const size_t commandsize =
@@ -38,7 +39,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *s
            ctx->atsign.atsign);
 
   // log command
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "command (%lu) (%lu): %s %.*s\n", strlen(command), commandsize,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "command (strlen=%lu) (commandsize=%lu): withnil=%s %.*s\n", strlen(command), commandsize,
                command, (int)strlen(command), command);
 
   const size_t recvsize = 2048;

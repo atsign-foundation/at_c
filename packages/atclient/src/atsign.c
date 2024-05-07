@@ -20,7 +20,7 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   }
 
   memset(atsign, 0, sizeof(atclient_atsign));
-  atsign->atsign = malloc(strlen(atsign_str) + 1);
+  atsign->atsign = malloc(sizeof(char) * strlen(atsign_str) + 1);
 
   size_t atolen = 0;
   ret = atclient_atsign_with_at_symbol(atsign->atsign, maxatlen, &(atolen), atsign_str, strlen(atsign_str));
@@ -65,7 +65,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size
 exit: { return ret; }
 }
 
-int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignsize, size_t *atsignolen,
+int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignsize, size_t *atsignlen,
                                    const char *originalatsign, const size_t originalatsignlen) {
   if (atsignsize + 1 < originalatsignlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -82,10 +82,10 @@ int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignsize, size_t
   if(originalatsign[0] != '@') {
     atsign[0] = '@';
     strncpy(atsign + 1, originalatsign, originalatsignlen);
-    *atsignolen = originalatsignlen + 1;
+    *atsignlen = originalatsignlen + 1;
   } else {
     strncpy(atsign, originalatsign, originalatsignlen);
-    *atsignolen = originalatsignlen;
+    *atsignlen = originalatsignlen;
   }
   return 0;
 }

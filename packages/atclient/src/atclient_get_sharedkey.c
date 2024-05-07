@@ -74,13 +74,13 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
-  // log atkeystrsize
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystrsize: %lu\n", atkeystrsize);
-
-  const size_t valuerawsize = valuesize * 4; // most likely enough space after base64 decode
+  const size_t valuerawsize = valuesize * 8; // most likely enough space after base64 decode
   unsigned char valueraw[valuerawsize];
   memset(valueraw, 0, sizeof(unsigned char) * valuerawsize);
   size_t valuerawlen = 0;
+
+  // log atkeystrsize
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystrsize: %lu\n", atkeystrsize);
 
   if (sharedenckey == NULL) {
     ret =
@@ -123,16 +123,17 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
 
   if (atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "response starts with 'data:'\n");
-    unsigned char *response = recv + strlen("data:");
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "response: %s\n", response);
+    unsigned char *response = (recv + strlen("data:"));
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "response: %s\n", response);
+    // starting parse
     root = cJSON_Parse(response);
     if (root == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
       goto exit;
     }
+    // log done parse
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "done parse\n");
 
     cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
     if (metadata == NULL) {
@@ -140,13 +141,17 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
       goto exit;
     }
+    // log done metadata
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "done metadata\n");
 
     atclient_atkey_metadata_from_cjson_node(&(atkey->metadata), metadata);
+    // log done reading cjson node
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "done reading cjson node\n");
 
     // manage IV
     if (atclient_atkey_metadata_is_ivnonce_initialized(&atkey->metadata)) {
-      size_t ivlen;
-      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.len, iv,
+      size_t ivlen = 0;
+      ret = atchops_base64_decode(atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.len, iv,
                                   ATCHOPS_IV_BUFFER_SIZE, &ivlen);
       if (ret != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
@@ -174,36 +179,29 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
     // log data->valuestring
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "data->valuestring: %s\n", data->valuestring);
 
-    ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), valueraw, valuerawsize,
+    // log valuerawsize
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valuerawsize: %lu\n", valuerawsize);
+    // log poitner valueraw
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valueraw: %p\n", valueraw);
+    // log valuerawlen value
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valuerawlen: %lu\n", valuerawlen);
+
+    ret = atchops_base64_decode(data->valuestring, strlen(data->valuestring), valueraw, valuerawsize,
                                 &valuerawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
-    // log enckey
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enckey (%lu): ", enckeysize);
-    for (int i = 0; i < 32; i++) {
-      printf("%02x ", enckey[i]);
-    }
-    printf("\n");
+    // log done decode
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "done decode\n");
 
-    // log iv
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "iv (%lu):", 16UL);
-    for (int i = 0; i < 16; i++) {
-      printf("%02x ", iv[i]);
-    }
-    printf("\n");
-
-    // log valueraw and valuerawlen
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valueraw (%lu): %.*s\n", valuerawlen, (int)valuerawlen, valueraw);
+    // log valuerawlen value
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valuerawlen: %lu\n", valuerawlen);
     for(int i = 0; i < valuerawlen; i++) {
       printf("%02x ", valueraw[i]);
     }
     printf("\n");
-
-    // log valuesize
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "valuesize: %lu\n", valuesize);
 
     // decrypt response data
     ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, value, valuesize, valuelen);
@@ -212,8 +210,6 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
       goto exit;
     }
 
-    // log decrypted value
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value (%lu): %.*s\n", *valuelen, (int)*valuelen, value);
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
     ret = 1;

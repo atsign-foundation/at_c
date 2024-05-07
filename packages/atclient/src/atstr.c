@@ -11,7 +11,7 @@
 void atclient_atstr_init(atclient_atstr *atstr, const size_t bufferlen) {
   memset(atstr, 0, sizeof(atclient_atstr));
   atstr->size = bufferlen;
-  atstr->str = (char *)malloc(sizeof(char) * atstr->size);
+  atstr->str = (char *) malloc(sizeof(char) * atstr->size);
   memset(atstr->str, 0, sizeof(char) * atstr->size);
   atstr->len = 0;
 }
@@ -121,19 +121,19 @@ exit: { return ret; }
 }
 
 void atclient_atstr_free(atclient_atstr *atstr) {
-  if(atstr == NULL) {
-    return;
-  }
+  // if(atstr == NULL) {
+  //   return;
+  // }
   // log attempting to free "str"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting to free atstr->str\n");
-  if (atstr->str == NULL) {
-    // log "str" is already NULL
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atstr->str is already NULL\n");
-    return;
-  }
-  // free "str"
-  // log whta is in str
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Freeing atstr->str: %s\n", atstr->str);
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting to free atstr->str\n");
+  // if (atstr->str == NULL) {
+  //   // log "str" is already NULL
+  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atstr->str is already NULL\n");
+  //   return;
+  // }
+  // // free "str"
+  // // log whta is in str
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Freeing atstr->str: %s\n", atstr->str);
   free(atstr->str);
   atstr->str = NULL;
 }
