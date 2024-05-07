@@ -10,10 +10,12 @@
 #include <atclient/notify.h>
 #include <atclient/stringutils.h>
 #include <atlogger/atlogger.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define TAG "test_atclient_monitor"
 
@@ -26,7 +28,10 @@
 #define MONITOR_REGEX "functional_tests"
 
 static int set_up_atkeys(atclient_atkeys *atkeys);
+static void *heartbeat_handler(void *monitor_conn);
 static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *atkeys);
+static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid);
+static int test_3_stop_heartbeat(pthread_t *tid);
 
 int main() {
   int ret = 1;
@@ -39,6 +44,8 @@ int main() {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
+  pthread_t tid;
+
   if ((ret = set_up_atkeys(&atkeys)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
     goto exit;
@@ -46,6 +53,16 @@ int main() {
 
   if ((ret = test_1_start_monitor(&monitor_conn, &atkeys)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_start_monitor: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test_2_start_heartbeat(&monitor_conn, &tid)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_start_heartbeat: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test_3_stop_heartbeat(&tid)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_stop_heartbeat: %d\n", ret);
     goto exit;
   }
 
@@ -82,6 +99,15 @@ static int set_up_atkeys(atclient_atkeys *atkeys) {
 exit: { return ret; }
 }
 
+static void *heartbeat_handler(void *monitor_conn)
+{
+  while(true)
+  {
+    atclient_send_heartbeat((atclient *)monitor_conn);
+    sleep(30);
+  }
+}
+
 static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *atkeys) {
   int ret = 1;
 
@@ -97,8 +123,8 @@ static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *a
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected to root server\n");
 
-  ret = atclient_start_monitor(monitor_conn, &root_conn, ATKEY_SHAREDWITH, atkeys, MONITOR_REGEX,
-                               strlen(MONITOR_REGEX));
+  ret =
+      atclient_start_monitor(monitor_conn, &root_conn, ATKEY_SHAREDWITH, atkeys, MONITOR_REGEX, strlen(MONITOR_REGEX));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
@@ -110,6 +136,44 @@ static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *a
 exit: {
   atclient_connection_free(&root_conn);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor End: %d\n", ret);
+  return ret;
+}
+}
+
+static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid) {
+  int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_start_heartbeat Start\n");
+
+  ret = pthread_create(tid, NULL, heartbeat_handler, monitor_conn);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_start_heartbeat End: %d\n", ret);
+  return ret;
+}
+}
+
+static int test_3_stop_heartbeat(pthread_t *tid) {
+  int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_stop_heartbeat Start\n");
+
+  ret = pthread_cancel(*tid);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to stop heartbeat handler: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_stop_heartbeat End: %d\n", ret);
   return ret;
 }
 }
