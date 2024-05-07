@@ -40,45 +40,45 @@ void atclient_notify_params_free(atclient_notify_params *params) { memset(params
 int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   int res = 1;
   // Step 1 calculate the buffer size needed for the protocol command
-  size_t cmdsize = 6 + 3 +                               // "notify" (6) + "\r\n\0" (3)
-                   1 + 8 + 1 + strlen(params->notifier); // ":" (1) + "notifier" (8) + ":" (1) + "$notifier" (strlen)
+  // size_t cmdsize = 6 + 3 +                               // "notify" (6) + "\r\n\0" (3)
+  //                  1 + 8 + 1 + strlen(params->notifier); // ":" (1) + "notifier" (8) + ":" (1) + "$notifier" (strlen)
 
-  if (params->id != NULL) {
-    cmdsize += 1 + 2 + 1 + strlen(params->id); // ":id:" + 36 char uuid
-  }
+  // if (params->id != NULL) {
+  //   cmdsize += 1 + 2 + 1 + strlen(params->id); // ":id:" + 36 char uuid
+  // }
 
-  if (params->operation != ATCLIENT_NOTIFY_OPERATION_UPDATE) {
-    cmdsize += 1 + 6; // ":update" | ":delete"
-  }
+  // if (params->operation != ATCLIENT_NOTIFY_OPERATION_UPDATE) {
+  //   cmdsize += 1 + 6; // ":update" | ":delete"
+  // }
 
-  if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
-    cmdsize += 1 + 11 + 1 + 4; // ":messageType" + ":text" | ":key"
-  }
+  // if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
+  //   cmdsize += 1 + 11 + 1 + 4; // ":messageType" + ":text" | ":key"
+  // }
 
-  if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
-    cmdsize += 1 + 8 + 1 + 6; // ":priority" + ":low" | ":medium" | ":high"
-  }
+  // if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
+  //   cmdsize += 1 + 8 + 1 + 6; // ":priority" + ":low" | ":medium" | ":high"
+  // }
 
-  if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
-    cmdsize += 1 + 8 + 1 + 6; // ":strategy" + ":all" | ":latest"
-  }
+  // if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
+  //   cmdsize += 1 + 8 + 1 + 6; // ":strategy" + ":all" | ":latest"
+  // }
 
-  if (params->notification_expiry > 0) {
-    cmdsize += 1 + 4 + 1 + // ":ttln:"
-               20;         // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
-  }
+  // if (params->notification_expiry > 0) {
+  //   cmdsize += 1 + 4 + 1 + // ":ttln:"
+  //              20;         // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
+  // }
 
-  if (params->value != NULL) {
-    cmdsize += 1 + strlen(params->value); // :$value
-  }
+  // if (params->value != NULL) {
+  //   cmdsize += 1 + strlen(params->value); // :$value
+  // }
 
-  // add metadata fragment length
-  size_t metadatalen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
-  cmdsize += metadatalen;
+  // // add metadata fragment length
+  // size_t metadatalen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
+  // cmdsize += metadatalen;
 
   // atkey parts length
   size_t atkeylen = atclient_atkey_strlen(&params->key);
-  cmdsize += 1 + atkeylen; // :$atkey
+  // cmdsize += 1 + atkeylen; // :$atkey
 
   struct timeval tv;
   res = gettimeofday(&tv, NULL);
@@ -96,6 +96,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
   const char *part;
   size_t off = 0;
 
+  size_t cmdsize = 4096;
   char cmd[cmdsize];
   memset(cmd, 0, sizeof(char) * cmdsize);
 
@@ -137,28 +138,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
     off += 6 + ttln_len;
   }
 
-  size_t metadataolen;
-  atclient_atkey_metadata_to_protocol_str(&params->key.metadata, cmd + off, metadatalen, &metadataolen);
-  if (metadatalen != metadataolen) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_atkey_metadata_to_protocol_str mismatch. Expected %lu but got %lu\n", metadatalen,
-                 metadataolen);
-    return 1;
-  }
-  off += metadatalen;
-
-  // ':' before the atkey
-  cmd[off] = ':';
-  off += 1;
-
-  size_t atkeyolen;
-  atclient_atkey_to_string(&params->key, cmd + off, atkeylen, &atkeyolen);
-  if (atkeylen != atkeyolen) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string mismatch. Expected %lu but got %lu\n",
-                 atkeylen, atkeyolen);
-    return 1;
-  }
-  off += atkeylen;
+  const size_t ciphertextbase64size = strlen(params->value) * 4; // TODO optimize
+  unsigned char ciphertextbase64[ciphertextbase64size];
+  memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
+  size_t ciphertextbase64len = 0;
 
   if (params->value != NULL) {
     const size_t sharedenckeysize = 32;
@@ -204,11 +187,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
     memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
     size_t ciphertextlen = 0;
 
-    const size_t ciphertextbase64size = ciphertextsize * 2; // TODO optimize
-    unsigned char ciphertextbase64[ciphertextbase64size];
-    memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
-    size_t ciphertextbase64len = 0;
-
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     res = atchops_iv_generate(iv);
     if (res != 0) {
@@ -229,18 +207,67 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
       return res;
     }
-    snprintf(cmd + off, cmdsize - off, ":%.*s", (int) ciphertextbase64len, ciphertextbase64);
-    off += 1 + ciphertextbase64len;
+
+    const size_t ivbase64size = 32;
+    char ivbase64[ivbase64size];
+    memset(ivbase64, 0, sizeof(char) * ivbase64size);
+    size_t ivbase64len = 0;
+
+    res = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, &ivbase64len);
+    if (res != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
+      return res;
+    }
+
+    res = atclient_atkey_metadata_set_ivnonce(&params->key.metadata, ivbase64, ivbase64len);
+    if (res != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", res);
+      return res;
+    }
   }
+
+  const size_t metadatastrsize = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
+  char metadatastr[metadatastrsize];
+  memset(metadatastr, 0, sizeof(char) * metadatastrsize);
+  size_t metadatastrlen = 0;
+  res = atclient_atkey_metadata_to_protocol_str(&params->key.metadata, metadatastr, metadatastrsize, &metadatastrlen);
+  if (res != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code %d\n",
+                 res);
+    return res;
+  }
+  // log metadatastr
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "metadatastr: %s\n", metadatastr);
+
+  snprintf(cmd + off, cmdsize - off, "%s", metadatastr);
+  off += metadatastrlen;
+  // print cmd
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmd: %s\n", cmd);
+
+  // ':' before the atkey
+  cmd[off] = ':';
+  off += 1;
+
+  size_t atkeyolen;
+  atclient_atkey_to_string(&params->key, cmd + off, atkeylen, &atkeyolen);
+  if (atkeylen != atkeyolen) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string mismatch. Expected %lu but got %lu\n",
+                 atkeylen, atkeyolen);
+    return 1;
+  }
+  off += atkeylen;
+
+  // Step 6 send the encrypted notification
+  snprintf(cmd + off, cmdsize - off, ":%.*s", (int)ciphertextbase64len, ciphertextbase64);
+  off += 1 + ciphertextbase64len;
+
+  snprintf(cmd + off, cmdsize - off, "\r\n");
+  off += 2;
 
   const size_t recvsize = 64;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
-
-  // Step 6 send the encrypted notification
-  snprintf(cmd + off, cmdsize - off, "\r\n");
-  off += 2;
 
   res = atclient_connection_send(&ctx->secondary_connection, cmd, strlen(cmd), recv, recvsize, &recvlen);
   if (res != 0) {
