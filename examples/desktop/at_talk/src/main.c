@@ -398,7 +398,7 @@ static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, 
 
   notify_params.key = atkey;
   notify_params.value = ciphertextbase64;
-  notify_params.operation = NO_update;
+  notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
 
   if ((ret = atclient_notify(ctx, &notify_params)) != 0) {
     atclient_atkey_free(&atkey);
