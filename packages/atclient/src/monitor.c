@@ -513,6 +513,7 @@ void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notific
   notification->decryptedvalue = malloc(sizeof(unsigned char) * (decryptedvaluelen + 1));
   memcpy(notification->decryptedvalue, decryptedvalue, decryptedvaluelen);
   notification->decryptedvalue[decryptedvaluelen] = '\0';
+  atclient_atnotification_decryptedvalue_set_initialized(notification, true);
 }
 
 void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
@@ -521,6 +522,7 @@ void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *noti
     atclient_atnotification_free_decryptedvaluelen(notification);
   }
   notification->decryptedvaluelen = decryptedvaluelen;
+  atclient_atnotification_decryptedvaluelen_set_initialized(notification, true);
 }
 
 void atclient_monitor_message_init(atclient_monitor_message *message) {
@@ -555,7 +557,7 @@ int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_con
   }
 
   // log building command... (Debug)
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
 
   // 2. build cmd
   cmdsize += 7 + 2; // monitor + \r\n
@@ -655,8 +657,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Type: %s\n", messagetype);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", messagebody);
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Type: %s\n", messagetype);
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", messagebody);
 
   *message = malloc(sizeof(atclient_monitor_message));
   atclient_monitor_message_init(*message);
@@ -755,7 +757,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
   int ret = -1;
 
   // log "parsing notification..."
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Parsing notification...\n");
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Parsing notification...\n");
 
   cJSON *root = NULL;
 
@@ -1030,6 +1032,36 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   }
 
   // 4. decrypt value
+  ret = atchops_base64_decode(notification->value, strlen(notification->value), valueraw, valuerawsize, &valuerawlen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");
+    goto exit;
+  }
+
+  // log sharedenckey
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Shared Encryption Key (%lu): ", sharedenckeysize);
+  for (int i = 0; i < sharedenckeysize; i++) {
+    printf("%02x", sharedenckey[i]);
+  }
+  printf("\n");
+
+  // log valueraw
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Value Raw (%lu): ", valuerawlen);
+  for (int i = 0; i < valuerawlen; i++) {
+    printf("%02x", valueraw[i]);
+  }
+  printf("\n");
+
+  // log iv
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "IV (%lu): ", ATCHOPS_IV_BUFFER_SIZE);
+  for (int i = 0; i < ATCHOPS_IV_BUFFER_SIZE; i++) {
+    printf("%02x", iv[i]);
+  }
+  printf("\n");
+
+  // log attempting to edcrypt value...
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting to decrypt value: \"%s\"\n", notification->value);
+
   ret = atchops_aesctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, decryptedvaluetemp,
                                decryptedvaluetempsize, &decryptedvaluetemplen);
   if (ret != 0) {

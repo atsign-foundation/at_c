@@ -83,8 +83,11 @@ int main(int argc, char *argv[]) {
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
+      if(atclient_atnotification_decryptedvalue_is_initialized(&message->notification)){
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
+      }
       break;
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {

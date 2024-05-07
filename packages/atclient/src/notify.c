@@ -159,9 +159,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", res);
         return res;
       }
-      if (sharedenckeylen != 32) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed. Expected 32 but got %lu\n",
-                     sharedenckeylen);
+      if (sharedenckeylen != sharedenckeysize) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed. Expected %lu but got %lu\n",
+                     sharedenckeysize, sharedenckeylen);
         res = 1;
         return res;
       }
@@ -211,7 +211,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return res;
     }
 
-    const size_t ivbase64size = 32;
+    const size_t ivbase64size = 64;
     char ivbase64[ivbase64size];
     memset(ivbase64, 0, sizeof(char) * ivbase64size);
     size_t ivbase64len = 0;
@@ -259,7 +259,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   // Step 6 send the encrypted notification
   if(params->shouldencrypt)
   {
-    snprintf(cmd + off, cmdsize - off, ":%.*s", (int)ciphertextbase64len, ciphertextbase64);
+    snprintf(cmd + off, cmdsize - off, ":%s", ciphertextbase64);
     off += 1 + ciphertextbase64len;
   } else {
     snprintf(cmd + off, cmdsize - off, ":%s", params->value);
