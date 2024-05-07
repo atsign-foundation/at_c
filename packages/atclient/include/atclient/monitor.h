@@ -29,40 +29,45 @@ typedef struct atclient_monitor_message {
   };
 } atclient_monitor_message;
 
+void atclient_monitor_message_init(atclient_monitor_message *message);
 void atclient_monitor_message_free(atclient_monitor_message *message);
 
-void atclient_monitor_message_init(atclient_monitor_message *message);
+void atclient_monitor_init(atclient *monitor_conn);
+void atclient_monitor_free(atclient *monitor_conn);
 
-void atclient_monitor_init(atclient *monitor_ctx, const atclient_atsign atsign, const atclient_atkeys atkeys);
-void atclient_monitor_free(atclient *monitor_ctx);
-
-/* @brief Create a new atServer connection and send the monitor verb
- * @param ctx the atclient context for the monitor connection
- * @param root_host the hostname of the root server
- * @param root_port the port of the root server
- * @param atsign the atsign
- * @param atkeys the atkeys of the atsign
- * @param regex the regex to match the keys
- * @return 0 on success, non-zero on error
+/**
+ * @brief Onboards the monitor_connection and starts the monitoring connection.
+ *
+ * @param monitor_conn ctx the atclient context for the monitor connection
+ * @param root_host root_host the hostname of the root server
+ * @param root_port root_port the port of the root server
+ * @param atsign atsign the atSign (e.g. \"@bob\", )
+ * @param atkeys atkeys the populated atKeys of the atSign
+ * @param regex atsign the atsign
+ * @return int 0 on success
  */
-int atclient_start_monitor(atclient *monitor_connection, const char *root_host, const int root_port, const char *regex);
+int atclient_start_monitor(atclient *monitor_conn, const char *root_host, const int root_port, const char *atsign,
+                           const atclient_atkeys *atkeys, const char *regex, const size_t regexlen);
 
-/* @brief Send a heartbeat on the monitor connection
- * @param ctx the atclient context for the monitor connection
+/**
+ * @brief Send a heartbeat on the monitor connection
+ * @param monitor_conn the atclient context for the monitor connection
  * @return 0 on success, non-zero on error
  *
  * @note Ideally this is scheduled to be sent every 30 seconds
  * @note this is different than a normal noop command, since we don't listen for the response from the server
+ * @note It is the responsibility of the caller to ensure that the monitor connection is still alive
  */
-int atclient_send_heartbeat(atclient *ctx);
+int atclient_send_heartbeat(atclient *monitor_conn);
 
-/* @brief Read a notification from the monitor connection into message
- * @param ctx the atclient context for the monitor connection
- * @param notification the notification to be read
+/**
+ * @brief Read a notification from the monitor connection into message
+ * @param monitor_conn the atclient context for the monitor connection
+ * @param message the notification to be read
  * @return 0 on success, non-zero on error
  *
  * @note Message may be a notification or a data response, check message.is_notification to know which one it is
  */
-int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message);
+int atclient_read_monitor(atclient *monitor_conn, atclient_monitor_message *message);
 
 #endif

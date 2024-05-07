@@ -11,65 +11,87 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#define TAG "atclient_monitor"
+
+void atclient_monitor_message_init(atclient_monitor_message *message) {
+  memset(message, 0, sizeof(atclient_monitor_message));
+}
+
 void atclient_monitor_message_free(atclient_monitor_message *message) {
-  free(message->notification.id);
-  atclient_atkey_free(&message->notification.key);
-  atclient_atsign_free(&message->notification.from);
-  atclient_atsign_free(&message->notification.to);
-  free(message->notification.value);
+  memset(message, 0, sizeof(atclient_monitor_message));
+  // free(message->notification.id);
+  // atclient_atkey_free(&message->notification.key);
+  // atclient_atsign_free(&message->notification.from);
+  // atclient_atsign_free(&message->notification.to);
+  // free(message->notification.value);
 }
 
-void atclient_monitor_message_init(atclient_monitor_message *message) { memset(message, 0, sizeof(atclient_monitor_message)); }
-
-void atclient_monitor_init(atclient *monitor_ctx, const atclient_atsign atsign, const atclient_atkeys atkeys) {
-  atclient_init(monitor_ctx);
-  // TODO: these structs are copied over, but the underlying memory addresses are the same
-  // we should migrate atsign in the atclient struct to be char, since .withoutat is simply just (atsign + 1)
-  // atkeys we need to copy each bit of memory one by one
-  monitor_ctx->atsign = atsign;
-  monitor_ctx->atkeys = atkeys;
+void atclient_monitor_init(atclient *monitor_conn) {
+  memset(monitor_conn, 0, sizeof(atclient));
+  // atclient_init(monitor_ctx);
+  // // TODO: these structs are copied over, but the underlying memory addresses are the same
+  // // we should migrate atsign in the atclient struct to be char, since .withoutat is simply just (atsign + 1)
+  // // atkeys we need to copy each bit of memory one by one
+  // monitor_ctx->atsign = atsign;
+  // monitor_ctx->atkeys = atkeys;
 }
 
-int atclient_start_monitor(atclient *monitor_ctx, const char *root_host, const int root_port, const char *regex) {
-  int res = 1;
+void atclient_monitor_free(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
 
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection);
-  atclient_connection_connect(&root_connection, root_host, root_port);
+int atclient_start_monitor(atclient *monitor_conn, const char *root_host, const int root_port, const char *atsign,
+                           const atclient_atkeys *atkeys, const char *regex, const size_t regexlen) {
+  int ret = 1;
 
-  res = atclient_pkam_authenticate(monitor_ctx, &root_connection, &(monitor_ctx->atkeys), monitor_ctx->atsign.atsign);
-  atclient_connection_free(&root_connection);
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
 
-  if (res != 0) {
-    atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to pkam authenticate");
-    atclient_free(monitor_ctx);
-    return res;
+  size_t cmdsize = 0;
+  char* cmd = NULL;
+
+  // 1. initialize monitor_conn
+  ret = atclient_connection_connect(&root_conn, root_host, root_port);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server\n");
+    goto exit;
   }
 
-  size_t cmd_len = 7 + 2; // "monitor" + '\r\n'
-  size_t regex_len = strlen(regex);
-
-  if (regex_len > 0) {
-    cmd_len += regex_len + 1;
+  ret = atclient_pkam_authenticate(monitor_conn, &root_conn, atkeys, atsign);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
+    goto exit;
   }
 
-  char cmd[cmd_len + 1]; // +1 for '\0' :facepalm:
-  if (regex_len > 0) {
-    sprintf(cmd, "monitor %s\r\n", regex);
+  // 2. build cmd
+  cmdsize += strlen("monitor\r\n");
+  if (regexlen > 0) {
+    cmdsize += regexlen + 1;
+  }
+  cmd += 1; // null terminator
+  cmd = malloc(sizeof(char) * cmdsize);
+  memset(cmd, 0, sizeof(char) * cmdsize);
+
+  if (regexlen > 0) {
+    sprintf(cmd, "monitor %.*s\r\n", (int) regexlen, regex);
   } else {
     sprintf(cmd, "monitor\r\n");
   }
 
-  res = mbedtls_ssl_write(&(monitor_ctx->secondary_connection.ssl), (unsigned char *)cmd, cmd_len);
-  if (res < 0 || res != cmd_len) {
-    atlogger_log("atclient_start_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command");
-    atclient_free(monitor_ctx);
-  } else {
-    printf("Sent command\n");
-    res = 0;
+  // 3. send monitor cmd
+  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (unsigned char *)cmd, cmdsize-1);
+  if (ret < 0 || ret != cmdsize-1) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
+    goto exit;
   }
 
-  return res;
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Sent monitor command\n");
+
+  ret = 0;
+  goto exit;
+exit: {
+  free(cmd);
+  atclient_connection_free(&root_conn);
+  return ret;
+}
 }
 
 int atclient_send_heartbeat(atclient *ctx) {
@@ -90,7 +112,6 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
 
 int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message *message) {
   int ret = -1;
-  
   size_t chunk_size = ATCLIENT_MONITOR_BUFFER_LEN;
   int chunks = 0;
   char *buffer = calloc(chunk_size, sizeof(char));
@@ -117,7 +138,6 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     }
     chunks = chunks + 1;
   }
- 
   if (ret < 0) {
     free(buffer);
     return ret;
@@ -146,7 +166,7 @@ int atclient_read_monitor(atclient *monitor_connection, atclient_monitor_message
     message->error_response = message_body;
   } else {
     message->type = MMT_none;
-    atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type");
+    atlogger_log("atclient_read_monitor", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type\n");
     ret = -1;
   }
 
@@ -161,7 +181,7 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   root = cJSON_Parse(message_body);
   if (root == NULL) {
     cJSON_Delete(root);
-    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body");
+    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification body\n");
     ret = -1;
     return ret;
   }
@@ -171,7 +191,7 @@ static int parse_notification(atclient_monitor_message *message, char *message_b
   atclient_atkey_from_string(&(message->notification.key), key->valuestring, strlen(key->valuestring));
 
   if (false) { // TODO: if regex doesnt match // do we even need this now?
-    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Regex failed to match");
+    atlogger_log("parse_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Regex failed to match\n");
     cJSON_Delete(root);
     atclient_monitor_message_free(message);
     ret = -1;
