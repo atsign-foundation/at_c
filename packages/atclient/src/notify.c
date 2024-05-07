@@ -24,15 +24,18 @@ void atclient_notify_params_init(atclient_notify_params *params) {
   params->priority = ATCLIENT_NOTIFY_PRIORITY_LOW;
   params->strategy = ATCLIENT_NOTIFY_STRATEGY_ALL;
   params->latest_n = 1;
+  params->value = NULL;
+  params->shouldencrypt = true;
   params->notifier = ATCLIENT_DEFAULT_NOTIFIER;
   params->notification_expiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 }
 
 void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
-                                   atclient_atkey *atkey, char *value) {
+                                   atclient_atkey *atkey, char *value, bool shouldencrypt) {
   params->operation = operation;
   params->key = *atkey;
   params->value = value;
+  params->shouldencrypt = shouldencrypt;
 }
 
 void atclient_notify_params_free(atclient_notify_params *params) { memset(params, 0, sizeof(atclient_notify_params)); }
@@ -143,7 +146,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
   size_t ciphertextbase64len = 0;
 
-  if (params->value != NULL) {
+  if (params->value != NULL && params->shouldencrypt) {
     const size_t sharedenckeysize = 32;
     unsigned char sharedenckey[sharedenckeysize];
     memset(sharedenckey, 0, sizeof(unsigned char) * sharedenckeysize);
@@ -254,8 +257,14 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   off += atkeylen;
 
   // Step 6 send the encrypted notification
-  snprintf(cmd + off, cmdsize - off, ":%.*s", (int)ciphertextbase64len, ciphertextbase64);
-  off += 1 + ciphertextbase64len;
+  if(params->shouldencrypt)
+  {
+    snprintf(cmd + off, cmdsize - off, ":%.*s", (int)ciphertextbase64len, ciphertextbase64);
+    off += 1 + ciphertextbase64len;
+  } else {
+    snprintf(cmd + off, cmdsize - off, ":%s", params->value);
+    off += 1 + strlen(params->value);
+  }
 
   snprintf(cmd + off, cmdsize - off, "\r\n");
   off += 2;

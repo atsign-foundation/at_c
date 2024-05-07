@@ -51,6 +51,7 @@ typedef struct atclient_notify_params {
   char id[37]; // uuid v4 + '\0'
   atclient_atkey key;
   char *value;
+  bool shouldencrypt;
   enum atclient_notify_operation operation;
   enum atclient_notify_message_type message_type;
   enum atclient_notify_priority priority;
