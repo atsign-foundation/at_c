@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
   atclient_atsign atsign;
   ret = atclient_atsign_init(&atsign, atsign_input);
-  if(ret != 0) {
+  if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to initialize atsign\n");
     goto exit;
   }
@@ -102,8 +102,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) !=
-      0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
@@ -122,8 +121,8 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
-                        (int)atkeystr.len, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
+               atkeystr.str);
 
   notify_params.key = atkey;
   notify_params.value = ATKEY_VALUE;
@@ -138,5 +137,12 @@ int main(int argc, char *argv[]) {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  atclient_atstr_free(&atkeystr);
+  atclient_atkeys_free(&atkeys);
+  atclient_atkey_free(&atkey);
+  atclient_connection_free(&root_connection);
+  atclient_free(&atclient);
+  return ret;
+}
 }

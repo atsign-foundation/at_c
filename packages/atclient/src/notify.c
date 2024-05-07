@@ -236,13 +236,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
                  res);
     return res;
   }
-  // log metadatastr
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "metadatastr: %s\n", metadatastr);
 
   snprintf(cmd + off, cmdsize - off, "%s", metadatastr);
   off += metadatastrlen;
-  // print cmd
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmd: %s\n", cmd);
 
   // ':' before the atkey
   cmd[off] = ':';
@@ -269,6 +265,12 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
+  res = atclient_connection_send(&(ctx->secondary_connection), cmd, strlen(cmd), recv, recvsize, &recvlen);
+  if (res != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
+    return res;
+  }
+
   // if starts with data:
   if (atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
     if (notification_id != NULL) { // if not null, then they care about the notification id
@@ -282,9 +284,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       strncpy(notification_id, data, datalen);
       notification_id[datalen] = '\0';
     }
+    res = 0;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unexpected response: %.*s\n", (int)recvlen, recv);
-    return 1;
+    res = 1;
   }
 
   return res;
