@@ -38,42 +38,36 @@ void atclient_monitor_init(atclient *monitor_conn) {
 
 void atclient_monitor_free(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
 
-int atclient_start_monitor(atclient *monitor_conn, const char *root_host, const int root_port, const char *atsign,
+int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_conn, const char *atsign,
                            const atclient_atkeys *atkeys, const char *regex, const size_t regexlen) {
   int ret = 1;
-
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn);
 
   size_t cmdsize = 0;
   char* cmd = NULL;
 
   // 1. initialize monitor_conn
-  ret = atclient_connection_connect(&root_conn, root_host, root_port);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server\n");
-    goto exit;
-  }
-
-  ret = atclient_pkam_authenticate(monitor_conn, &root_conn, atkeys, atsign);
+  ret = atclient_pkam_authenticate(monitor_conn, root_conn, atkeys, atsign);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
 
+  // log building command... (Debug)
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
+
   // 2. build cmd
-  cmdsize += strlen("monitor\r\n");
+  cmdsize += 7 + 2; // monitor + \r\n
   if (regexlen > 0) {
-    cmdsize += regexlen + 1;
+    cmdsize += regexlen + 1; // $regex + ' '
   }
-  cmd += 1; // null terminator
+  cmdsize += 1; // null terminator
   cmd = malloc(sizeof(char) * cmdsize);
   memset(cmd, 0, sizeof(char) * cmdsize);
 
   if (regexlen > 0) {
-    sprintf(cmd, "monitor %.*s\r\n", (int) regexlen, regex);
+    snprintf(cmd, cmdsize, "monitor %.*s\r\n", (int) regexlen, regex);
   } else {
-    sprintf(cmd, "monitor\r\n");
+    snprintf(cmd, cmdsize, "monitor\r\n");
   }
 
   // 3. send monitor cmd
@@ -83,13 +77,12 @@ int atclient_start_monitor(atclient *monitor_conn, const char *root_host, const 
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Sent monitor command\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Sent monitor command: \'%s\'\n", cmd);
 
   ret = 0;
   goto exit;
 exit: {
   free(cmd);
-  atclient_connection_free(&root_conn);
   return ret;
 }
 }

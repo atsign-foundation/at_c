@@ -39,14 +39,13 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @brief Onboards the monitor_connection and starts the monitoring connection.
  *
  * @param monitor_conn ctx the atclient context for the monitor connection
- * @param root_host root_host the hostname of the root server
- * @param root_port root_port the port of the root server
+ * @param root_conn the root_connection to the atDirectory, assumed to already be initialized and connected
  * @param atsign atsign the atSign (e.g. \"@bob\", )
  * @param atkeys atkeys the populated atKeys of the atSign
  * @param regex atsign the atsign
  * @return int 0 on success
  */
-int atclient_start_monitor(atclient *monitor_conn, const char *root_host, const int root_port, const char *atsign,
+int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_conn, const char *atsign,
                            const atclient_atkeys *atkeys, const char *regex, const size_t regexlen);
 
 /**

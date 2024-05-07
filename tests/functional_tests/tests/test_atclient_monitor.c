@@ -23,7 +23,7 @@
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
 #define ATKEY_VALUE "Test Value 12345 Meow"
 
-#define MONITOR_REGEX ".*"
+#define MONITOR_REGEX "functional_tests"
 
 static int set_up_atkeys(atclient_atkeys *atkeys);
 static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *atkeys);
@@ -63,7 +63,7 @@ static int set_up_atkeys(atclient_atkeys *atkeys) {
   const size_t atkeyspathsize = 1024;
   char atkeyspath[atkeyspathsize];
   memset(atkeyspath, 0, atkeyspathsize);
-  size_t atkeyspathlen;
+  size_t atkeyspathlen = 0;
 
   ret = functional_tests_get_atkeys_path(ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), atkeyspath, atkeyspathsize,
                                          &atkeyspathlen);
@@ -87,16 +87,28 @@ static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *a
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor Start\n");
 
-  ret = atclient_start_monitor(monitor_conn, ROOT_HOST, ROOT_PORT, ATKEY_SHAREDWITH, atkeys, MONITOR_REGEX,
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
+
+  ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server: %d\n", ret);
+    goto exit;
+  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected to root server\n");
+
+  ret = atclient_start_monitor(monitor_conn, &root_conn, ATKEY_SHAREDWITH, atkeys, MONITOR_REGEX,
                                strlen(MONITOR_REGEX));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Started monitor\n");
 
   goto exit;
 
 exit: {
+  atclient_connection_free(&root_conn);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor End: %d\n", ret);
   return ret;
 }
