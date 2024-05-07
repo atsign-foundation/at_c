@@ -72,6 +72,6 @@ int atclient_send_heartbeat(atclient *monitor_conn);
  *
  * @note Message may be a notification or a data response, check message.is_notification to know which one it is
  */
-int atclient_read_monitor(atclient *monitor_conn, atclient_monitor_message *message);
+int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message *message);
 
 #endif
