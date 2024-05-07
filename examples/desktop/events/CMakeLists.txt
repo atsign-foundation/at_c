@@ -4,6 +4,9 @@ project(sample_cmake_project)
 
 find_package(atsdk REQUIRED CONFIG)
 
-add_executable(exec ${CMAKE_CURRENT_LIST_DIR}/notify.c)
+set(examples notify monitor)
 
-target_link_libraries(exec PRIVATE atsdk::atclient)
+foreach(example ${examples})
+  add_executable(${example} ${CMAKE_CURRENT_LIST_DIR}/${example}.c)
+  target_link_libraries(${example} PRIVATE atsdk::atclient atsdk::cjson)
+endforeach()
