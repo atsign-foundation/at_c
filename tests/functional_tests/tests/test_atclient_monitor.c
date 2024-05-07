@@ -32,11 +32,11 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  atclient monitor;
-  atclient_init(&monitor);
+  atclient atclient_conn; // sharedby
+  atclient_init(&atclient_conn);
 
-  atclient atclient2;
-  atclient_init(&atclient2);
+  atclient monitor_conn; // sharedwith
+  atclient_init(&monitor_conn);
 
   const size_t pathsize = 1024;
   char path[pathsize];
@@ -46,7 +46,13 @@ int main() {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
-  ret = functional_tests_get_atkeys_path(ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), path, pathsize, &pathlen);
+  ret = functional_tests_pkam_auth(&atclient_conn, ATKEY_SHAREDBY);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate.\n");
+    goto exit;
+  }
+
+  ret = functional_tests_get_atkeys_path(ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), path, pathsize, &pathlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys path: %d\n", ret);
     goto exit;
@@ -58,34 +64,28 @@ int main() {
     goto exit;
   }
 
-  ret = functional_tests_pkam_auth(&atclient2, ATKEY_SHAREDWITH);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate.\n");
-    goto exit;
-  }
-
-  ret = test_1_start_monitor(&monitor, &atkeys);
+  ret = test_1_start_monitor(&monitor_conn, &atkeys);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_1.\n");
     goto exit;
   }
 
-  // ret = test_2_send_notification(&atclient2);
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_2.\n");
-  //   goto exit;
-  // }
+  ret = test_2_send_notification(&atclient_conn);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_2.\n");
+    goto exit;
+  }
 
-  // ret = test_3_read_monitor(&atclient2);
-  // if (ret != 0) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_3.\n");
-  //   goto exit;
-  // }
+  ret = test_3_read_monitor(&monitor_conn);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_3.\n");
+    goto exit;
+  }
 
 exit: {
+  atclient_free(&atclient_conn);
   atclient_atkeys_free(&atkeys);
-  atclient_free(&monitor);
-  atclient_free(&atclient2);
+  atclient_free(&monitor_conn);
   return ret;
 }
 }
@@ -93,7 +93,7 @@ exit: {
 static int test_1_start_monitor(atclient *monitor, const atclient_atkeys *atkeys) {
   int ret = 1;
 
-  ret = atclient_monitor_start_connection(monitor, ROOT_HOST, ROOT_PORT, ATKEY_SHAREDBY, atkeys, ATKEY_NAMESPACE);
+  ret = atclient_monitor_start_connection(monitor, ROOT_HOST, ROOT_PORT, ATKEY_SHAREDWITH, atkeys, ATKEY_NAMESPACE);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
