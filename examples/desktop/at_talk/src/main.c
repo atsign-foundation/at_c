@@ -400,7 +400,7 @@ static int attalk_send_message(atclient *ctx, const atclient_atsign *recipient, 
   notify_params.value = ciphertextbase64;
   notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
 
-  if ((ret = atclient_notify(ctx, &notify_params)) != 0) {
+  if ((ret = atclient_notify(ctx, &notify_params, NULL)) != 0) {
     atclient_atkey_free(&atkey);
     atclient_atstr_free(&atkeystr);
     atclient_notify_params_free(&notify_params);
@@ -421,7 +421,7 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
   // Convert b64 enc_key to bytes
   const size_t encryptionkeysize = ATCHOPS_AES_256 / 8;
   unsigned char encryptionkey[encryptionkeysize];
-  memset(encryptionkey, 0, sizeof(unsigned char) * (ATCHOPS_AES_256 / 8));
+  memset(encryptionkey, 0, sizeof(unsigned char) * encryptionkeysize);
   size_t encryptionkeylen = 0;
   ret = atchops_base64_decode(enc_key_shared_by_other, strlen(enc_key_shared_by_other), encryptionkey,
                               encryptionkeysize, &encryptionkeylen);

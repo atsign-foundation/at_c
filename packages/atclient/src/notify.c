@@ -242,8 +242,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   snprintf(cmd + off, cmdsize - off, "%s", metadatastr);
   off += metadatastrlen;
-  // print cmd
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmd: %s\n", cmd);
 
   // ':' before the atkey
   cmd[off] = ':';
@@ -259,16 +257,16 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   off += atkeylen;
 
   // Step 6 send the encrypted notification
-  snprintf(cmd + off, cmdsize - off, ":%.*s", (int)ciphertextbase64len, ciphertextbase64);
-  off += 1 + ciphertextbase64len;
-
-  snprintf(cmd + off, cmdsize - off, "\r\n");
-  off += 2;
+  snprintf(cmd + off, cmdsize - off, ":%s\r\n", ciphertextbase64);
+  off += 1 + ciphertextbase64len + 2;
 
   const size_t recvsize = 64;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
+
+  // print cmd
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmd: %s\n", cmd);
 
   res = atclient_connection_send(&ctx->secondary_connection, cmd, strlen(cmd), recv, recvsize, &recvlen);
   if (res != 0) {
