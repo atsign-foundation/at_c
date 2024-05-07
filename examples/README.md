@@ -5,8 +5,7 @@ This directory contains examples on how to implement and use the C SDK.
 ## desktop examples
 
 - `at_talk` - A simple example of how to use the atclient library to talk to an atserver.
-- `crud` - Example on how to create, read, update, and delete data from your atServer.
-- `pkam_authenticate` - Example on how to do the first step of any Atsign application, which is to authenticate with your atServer using an atSign's pkam keys. This is for already onboarded atSigns (that have already bootstrapped their set of .atKeys).
+- `pkam_authenticate` - Example on how to do the first step of any Atsign application, which is to authenticate with your atServer using an atSign's pkam keys.
 - `repl` - Uses atclient to send raw atProtocol commands to your atServer. REPL = Read-Eval-Print Loop.
 - `sample_cmake_project` - A simple example of how to use the atclient library in a CMake project.
 
