@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   memset(buffer, 0, sizeof(char) * buffersize); // Clear the buffer (for safety
   size_t bufferlen = 0;
 
-  const size_t recvsize = 2048;
+  const size_t recvsize = 8192*4;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize); // Clear the buffer (for safety
   size_t recvlen = 0;
