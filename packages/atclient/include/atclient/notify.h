@@ -66,4 +66,4 @@ void atclient_notify_params_create(atclient_notify_params *params, enum atclient
                                    atclient_atkey *atkey, char *value);
 void atclient_notify_params_free(atclient_notify_params *params);
 
-int atclient_notify(atclient *ctx, atclient_notify_params *params);
+int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id);

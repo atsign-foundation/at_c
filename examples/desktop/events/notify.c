@@ -15,12 +15,40 @@
 #define ATKEY_NAMESPACE "dart_playground"
 #define ATKEY_VALUE "test value"
 
-#define ROOT_HOST "vip.ve.atsign.zone"
+#define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
 int main(int argc, char *argv[]) {
   int ret = 1;
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+
+  const size_t valuelen = 1024;
+  char value[valuelen];
+  memset(value, 0, sizeof(char) * valuelen);
+  size_t valueolen = 0;
+
+  char atkeys_path[1024];
+  memset(atkeys_path, 0, sizeof(char) * 1024);
+
+  atclient atclient;
+  atclient_init(&atclient);
+
+  atclient_connection root_connection;
+  atclient_connection_init(&root_connection);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  atclient_atkeys atkeys;
+  atclient_atkeys_init(&atkeys);
+
+  atclient_atstr atkeystr;
+  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+
+  atclient_notify_params notify_params;
+  atclient_notify_params_init(&notify_params);
+
+  const char *homedir;
 
   char *atsign_input = NULL;
   char *other_atsign_input = NULL;
@@ -38,23 +66,21 @@ int main(int argc, char *argv[]) {
     }
 
   // print both atsign
-  printf("atsign_input: %s\n", atsign_input);
-  printf("other_atsign_input: %s\n", other_atsign_input);
   if (atsign_input == NULL || other_atsign_input == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Please provide both atsigns with -a and -o flags\n");
-    return 1;
+    ret = 1;
+    goto exit;
+  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign_input: %s\n", atsign_input);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "other_atsign_input: %s\n", other_atsign_input);
+
+  atclient_atsign atsign;
+  ret = atclient_atsign_init(&atsign, atsign_input);
+  if(ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to initialize atsign\n");
+    goto exit;
   }
 
-  const size_t valuelen = 1024;
-  char value[valuelen];
-  memset(value, 0, sizeof(char) * valuelen);
-  size_t valueolen = 0;
-
-  atclient atclient;
-  atclient_init(&atclient);
-
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection);
   ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root\n");
@@ -62,82 +88,53 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atclient_atsign atsign;
-  atclient_atsign_init(&atsign, atsign_input);
-
-  atclient_atkey atkey;
-  atclient_atkey_init(&atkey);
-
-  atclient_atkeys atkeys;
-  atclient_atkeys_init(&atkeys);
-  const char *homedir;
-
   if ((homedir = getenv("HOME")) == NULL) {
     printf("HOME not set\n");
-    return 1;
+    ret = 1;
+    goto exit;
   }
 
-  char atkeys_path[1024];
   snprintf(atkeys_path, 1024, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign_input);
-  atclient_atkeys_populate_from_path(&atkeys, atkeys_path);
-
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  ret = atclient_atkeys_populate_from_path(&atkeys, atkeys_path);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys\n");
+    atclient_connection_free(&root_connection);
+    goto exit;
+  }
 
   if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) !=
       0) {
-    atclient_connection_free(&root_connection);
-    atclient_atsign_free(&atsign);
-    atclient_atkey_free(&atkey);
-    atclient_atkeys_free(&atkeys);
-    atclient_atstr_free(&atkeystr);
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
 
   if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), atsign_input, strlen(atsign_input),
                                              other_atsign_input, strlen(other_atsign_input), ATKEY_NAMESPACE,
                                              strlen(ATKEY_NAMESPACE))) != 0) {
-    atclient_connection_free(&root_connection);
-    atclient_atsign_free(&atsign);
-    atclient_atkey_free(&atkey);
-    atclient_atkeys_free(&atkeys);
-    atclient_atstr_free(&atkeystr);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
     goto exit;
   }
 
   atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
   if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
                         (int)atkeystr.len, atkeystr.str);
 
-  atclient_notify_params notify_params;
-  atclient_notify_params_init(&notify_params);
-
   notify_params.key = atkey;
   notify_params.value = ATKEY_VALUE;
-  notify_params.operation = NO_update;
+  notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
 
-  if ((ret = atclient_notify(&atclient, &notify_params)) != 0) {
-    atclient_connection_free(&root_connection);
-    atclient_atsign_free(&atsign);
-    atclient_atkey_free(&atkey);
-    atclient_atkeys_free(&atkeys);
-    atclient_atstr_free(&atkeystr);
-    atclient_notify_params_free(&notify_params);
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify");
+  if ((ret = atclient_notify(&atclient, &notify_params, NULL)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify\n");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent notification");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent notification.\n");
 
   ret = 0;
   goto exit;
