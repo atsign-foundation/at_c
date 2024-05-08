@@ -172,7 +172,7 @@ void atclient_free(atclient *ctx);
  *
  * @note Ideally this is scheduled to be sent every 30 seconds
  * @note this is different than a normal noop command, since we don't listen for the response from the server
- * @note It is the responsibility of the caller to ensure that the monitor connection is still alive
+ * @note It is the responsibility of the caller to ensure that the connection is still alive
  */
 int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack);
 
