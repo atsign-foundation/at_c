@@ -146,7 +146,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
   size_t ciphertextbase64len = 0;
 
-  const size_t ivbase64size = 64;
+  const size_t ivbase64size = 32;
   unsigned char ivbase64[ivbase64size];
   memset(ivbase64, 0, sizeof(unsigned char) * ivbase64size);
   size_t ivbase64len = 0;
@@ -196,25 +196,24 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     size_t ciphertextlen = 0;
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
+    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
     res = atchops_iv_generate(iv);
     if (res != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate failed with code %d\n", res);
       return res;
     }
 
-    // log raw IV
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "IV (raw) (%lu): ", ATCHOPS_IV_BUFFER_SIZE);
-    for (size_t i = 0; i < ATCHOPS_IV_BUFFER_SIZE; i++) {
-      printf("%02x", iv[i]);
+    res = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, &ivbase64len);
+    if (res != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
+      return res;
     }
-    printf("\n");
 
-    // log sharedenckey
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Shared encryption key (raw) (%lu): ", sharedenckeysize);
-    for (size_t i = 0; i < sharedenckeysize; i++) {
-      printf("%02x", sharedenckey[i]);
+    res = atclient_atkey_metadata_set_ivnonce(&params->key.metadata, ivbase64, ivbase64len);
+    if (res != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", res);
+      return res;
     }
-    printf("\n");
 
     res = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, params->value, strlen(params->value), ciphertext,
                                  ciphertextsize, &ciphertextlen);
@@ -223,36 +222,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return res;
     }
 
-    // log ciphertext
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ciphertext (raw) (%lu): ", ciphertextlen);
-    for (size_t i = 0; i < ciphertextlen; i++) {
-      printf("%02x", ciphertext[i]);
-    }
-    printf("\n");
-
     res =
         atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
     if (res != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
-      return res;
-    }
-
-    // log ciphertextbase64
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ciphertext (base64) (%lu): %.*s\n", ciphertextbase64len,
-                 (int)ciphertextbase64len, ciphertextbase64);
-
-    res = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, &ivbase64len);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
-      return res;
-    }
-
-    // log ivbase64
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "IV (base64) (%lu): %.*s\n", ivbase64len, (int)ivbase64len, ivbase64);
-
-    res = atclient_atkey_metadata_set_ivnonce(&params->key.metadata, ivbase64, ivbase64len);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", res);
       return res;
     }
   }

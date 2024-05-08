@@ -994,7 +994,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   if (atclient_atnotification_ivNonce_is_initialized(notification)) {
     size_t ivlen;
     ret =
-        atchops_base64_decode(notification->ivNonce, strlen(notification->ivNonce), iv, ATCHOPS_IV_BUFFER_SIZE, &ivlen);
+        atchops_base64_decode((unsigned char *) notification->ivNonce, strlen(notification->ivNonce), iv, ATCHOPS_IV_BUFFER_SIZE, &ivlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode iv\n");
       goto exit;
@@ -1034,33 +1034,6 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");
     goto exit;
   }
-
-  // log sharedenckey
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Shared Encryption Key (%lu): ", sharedenckeysize);
-  for (int i = 0; i < sharedenckeysize; i++) {
-    printf("%02x", sharedenckey[i]);
-  }
-  printf("\n");
-
-  // log valueraw
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ciphertext (%lu): ", ciphertextlen);
-  for (int i = 0; i < ciphertextlen; i++) {
-    printf("%02x", ciphertext[i]);
-  }
-  printf("\n");
-
-  // log iv
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "IV (%lu): ", ATCHOPS_IV_BUFFER_SIZE);
-  for (int i = 0; i < ATCHOPS_IV_BUFFER_SIZE; i++) {
-    printf("%02x", iv[i]);
-  }
-  printf("\n");
-  
-  // log ivNonce
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "IV Nonce: %s\n", notification->ivNonce);
-
-  // log attempting to edcrypt value...
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting to decrypt value: \"%s\"\n", notification->value);
 
   const size_t decryptedvaluetempsize = 4096;
   decryptedvaluetemp = malloc(sizeof(unsigned char) * decryptedvaluetempsize);
