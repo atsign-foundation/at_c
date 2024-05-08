@@ -18,7 +18,6 @@
 
 static int get_atsign_input(int argc, char *argv[], char **atsign_input);
 static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
-static void *heartbeat_handler(void *monitor_conn);
 
 int main(int argc, char *argv[]) {
   int ret = 1;
@@ -32,6 +31,9 @@ int main(int argc, char *argv[]) {
 
   atclient_connection root_connection;
   atclient_connection_init(&root_connection);
+
+  atclient atclient2;
+  atclient_init(&atclient2);
 
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
@@ -55,6 +57,11 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
+  if((ret = atclient_pkam_authenticate(&atclient2, &root_connection, &atkeys, atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
+    goto exit;
+  }
+
   if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
     goto exit;
@@ -65,17 +72,10 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting heartbeat thread\n");
-  if ((ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_conn)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler\n");
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Heartbeat thread started!\n");
-
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
   while (true) {
 
-    ret = atclient_monitor_read(&monitor_conn, &message);
+    ret = atclient_monitor_read(&monitor_conn, &atclient2, &message);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       continue;
@@ -89,9 +89,15 @@ int main(int argc, char *argv[]) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
+      if(strcmp(message->notification.id, "-1")== 0)
+      {
+        // ignore stats notification
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
+        break;
+      }
       if (atclient_atnotification_decryptedvalue_is_initialized(&message->notification)) {
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n",
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
                      message->notification.decryptedvalue);
       }
       break;
@@ -163,14 +169,4 @@ static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size
   goto exit;
 
 exit: { return ret; }
-}
-
-static void *heartbeat_handler(void *monitor_conn) {
-  atclient *client = (atclient *)monitor_conn;
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting heartbeat_handler.\n");
-  while (true) {
-    // atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat...\n");
-    atclient_send_heartbeat(client, false);
-    sleep(5);
-  }
 }

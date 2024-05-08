@@ -178,6 +178,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 /**
  * @brief Read a notification from the monitor connection into message
  * @param monitor_conn the atclient context for the monitor connection
+ * @param atclient the atclient context for the atclient connection, this is should be separate from the monitor_conn to
+ * avoid colliding with the monitor connection.
  * @param message pass in a double pointer to the message, it will be allocated and filled in by this function. The
  * caller is responsible for freeing the message, using atclient_monitor_message_free
  * @return 0 on success, non-zero on error
@@ -185,6 +187,6 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message);
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message);
 
 #endif

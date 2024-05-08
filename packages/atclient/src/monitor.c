@@ -602,7 +602,7 @@ exit: {
 }
 }
 
-int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message) {
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message) {
   int ret = -1;
 
   const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
@@ -675,13 +675,13 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
         ret = 0;
         goto exit;
       }
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Decrypting notification...\n");
-      if ((ret = decrypt_notification(monitor_conn, &((*message)->notification))) != 0) {
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Decrypting notification...\n");
+      if ((ret = decrypt_notification(atclient, &((*message)->notification))) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
       }
     } else {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Notification is not encrypted\n");
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Notification is not encrypted\n");
       atclient_atnotification_set_decryptedvalue(&((*message)->notification), (*message)->notification.value,
                                                  strlen((*message)->notification.value));
       atclient_atnotification_set_decryptedvaluelen(&((*message)->notification),
@@ -953,7 +953,7 @@ exit: {
 }
 }
 
-static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification) {
+static int decrypt_notification(atclient *atclient, atclient_atnotification *notification) {
   int ret = 1;
 
   atclient_atsign atsignfrom;
@@ -1022,7 +1022,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   }
 
   // 3. get shared encryption key to decrypt
-  ret = atclient_get_shared_encryption_key_shared_by_other(monitor_conn, &atsignfrom, sharedenckeybase64);
+  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, sharedenckeybase64);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
     goto exit;
