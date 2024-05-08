@@ -949,16 +949,13 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   atclient_atsign atsignfrom;
   atclient_atsign_init(&atsignfrom, notification->from);
 
-  // holds encrypted value but in raw bytes (after base64 decode operation)
-  const size_t valuerawsize = strlen(notification->value) * 4;
-  unsigned char valueraw[valuerawsize];
-  memset(valueraw, 0, sizeof(unsigned char) * valuerawsize);
-  size_t valuerawlen = 0;
+  unsigned char *decryptedvaluetemp = NULL;
 
-  const size_t decryptedvaluetempsize = valuerawsize;
-  unsigned char decryptedvaluetemp[decryptedvaluetempsize];
-  memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
-  size_t decryptedvaluetemplen = 0;
+  // holds encrypted value but in raw bytes (after base64 decode operation)
+  const size_t ciphertextsize = strlen(notification->value) * 4;
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
 
   // temporarily holds the shared encryption key in base64
   const size_t sharedenckeybase64size = 64;
@@ -1032,7 +1029,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   }
 
   // 4. decrypt value
-  ret = atchops_base64_decode(notification->value, strlen(notification->value), valueraw, valuerawsize, &valuerawlen);
+  ret = atchops_base64_decode(notification->value, strlen(notification->value), ciphertext, ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");
     goto exit;
@@ -1046,9 +1043,9 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   printf("\n");
 
   // log valueraw
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Value Raw (%lu): ", valuerawlen);
-  for (int i = 0; i < valuerawlen; i++) {
-    printf("%02x", valueraw[i]);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ciphertext (%lu): ", ciphertextlen);
+  for (int i = 0; i < ciphertextlen; i++) {
+    printf("%02x", ciphertext[i]);
   }
   printf("\n");
 
@@ -1058,11 +1055,19 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
     printf("%02x", iv[i]);
   }
   printf("\n");
+  
+  // log ivNonce
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "IV Nonce: %s\n", notification->ivNonce);
 
   // log attempting to edcrypt value...
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting to decrypt value: \"%s\"\n", notification->value);
 
-  ret = atchops_aesctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, decryptedvaluetemp,
+  const size_t decryptedvaluetempsize = 4096;
+  decryptedvaluetemp = malloc(sizeof(unsigned char) * decryptedvaluetempsize);
+  memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
+  size_t decryptedvaluetemplen = 0;
+
+  ret = atchops_aesctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, decryptedvaluetemp,
                                decryptedvaluetempsize, &decryptedvaluetemplen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt value\n");
@@ -1077,6 +1082,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   goto exit;
 exit: {
   atclient_atsign_free(&atsignfrom);
+  free(decryptedvaluetemp);
   return ret;
 }
 }
