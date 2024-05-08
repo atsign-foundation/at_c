@@ -675,10 +675,17 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
         ret = 0;
         goto exit;
       }
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Decrypting notification...\n");
       if ((ret = decrypt_notification(monitor_conn, &((*message)->notification))) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
       }
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Notification is not encrypted\n");
+      atclient_atnotification_set_decryptedvalue(&((*message)->notification), (*message)->notification.value,
+                                                 strlen((*message)->notification.value));
+      atclient_atnotification_set_decryptedvaluelen(&((*message)->notification),
+                                                     strlen((*message)->notification.value));
     }
   } else if (strcmp(messagetype, "data") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
