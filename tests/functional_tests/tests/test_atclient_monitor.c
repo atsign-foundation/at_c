@@ -110,6 +110,10 @@ int main() {
 
   goto exit;
 exit: {
+  if((ret = functional_tests_tear_down_sharedenckeys(&atclient1, ATKEY_SHAREDWITH)) != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to tear down sharedenckeys: %d\n", ret);
+  }
   atclient_atkeys_free(&atkeys_sharedby);
   atclient_atkeys_free(&atkeys_sharedwith);
   atclient_free(&atclient1);
@@ -122,7 +126,7 @@ exit: {
 static void *heartbeat_handler(void *heartbeat_conn) {
   while (true) {
     atclient_send_heartbeat((atclient *)heartbeat_conn, true);
-    sleep(30);
+    sleep(2);
   }
 }
 
@@ -171,12 +175,12 @@ exit: {
 }
 }
 
-static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid) {
+static int test_2_start_heartbeat(atclient *heartbeat_conn, pthread_t *tid) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_start_heartbeat Start\n");
 
-  ret = pthread_create(tid, NULL, heartbeat_handler, monitor_conn);
+  ret = pthread_create(tid, NULL, heartbeat_handler, heartbeat_conn);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler: %d\n", ret);
     goto exit;
@@ -231,39 +235,51 @@ static int test_4_read_notification(atclient *monitor_conn) {
 
   atclient_monitor_message *message = NULL;
 
-  if ((ret = atclient_monitor_read(monitor_conn, &message)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
-    goto exit;
-  }
+  int tries = 5;
+  int i = 0;
 
-  if (message == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "monitor message is NULL, when it is expected to be populated :(\n");
+  while (i < tries) {
+    if ((ret = atclient_monitor_read(monitor_conn, &message)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
+      goto exit;
+    }
+
+    if (message == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "monitor message is NULL, when it is expected to be populated :(\n");
+      i++;
+      continue;
+    }
+
+    if(!atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value is not initialized\n");
+      i++;
+      continue;
+    }
+
+    if(!atclient_atnotification_decryptedvaluelen_is_initialized(&(message->notification))) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value length is not initialized\n");
+      i++;
+      continue;
+    }
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n", (int) message->notification.decryptedvaluelen, message->notification.decryptedvalue);
+
+    // compare the decrypted value with the expected value
+    if (strcmp(message->notification.decryptedvalue, ATKEY_VALUE) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value does not match expected value\n");
+      i++;
+      continue;
+    }
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Tries: %d\n", i);
+
     ret = 0;
     goto exit;
   }
 
-  if(!atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value is not initialized\n");
-    ret = 1;
-    goto exit;
-  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message after %d tries\n", tries);
 
-  if(!atclient_atnotification_decryptedvaluelen_is_initialized(&(message->notification))) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value length is not initialized\n");
-    ret = 1;
-    goto exit;
-  }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n", (int) message->notification.decryptedvaluelen, message->notification.decryptedvalue);
-
-  // compare the decrypted value with the expected value
-  if (strcmp(message->notification.decryptedvalue, ATKEY_VALUE) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value does not match expected value\n");
-    ret = 1;
-    goto exit;
-  }
-
-  ret = 0;
+  ret = 1;
   goto exit;
 exit: {
   atclient_monitor_message_free(message);

@@ -11,5 +11,6 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
 int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *knamespace);
 int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *sharedwith,
                                       const char *knamespace);
+int functional_tests_tear_down_sharedenckeys(atclient *atclient, const char *recipient);                                      
 
 #endif

@@ -2,6 +2,7 @@
 #include "functional_tests/config.h"
 #include <atclient/atclient.h>
 #include <atclient/stringutils.h>
+#include <atclient/constants.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -225,4 +226,61 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
   ret = true;
   goto exit;
 exit: { return ret; }
+}
+
+int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient)
+{
+    int ret = 1;
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
+
+    char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
+
+    atclient_atkey atkeyforme;
+    atclient_atkey_init(&atkeyforme);
+
+    atclient_atkey atkeyforthem;
+    atclient_atkey_init(&atkeyforthem);
+
+    memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
+    snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", (recipient+1), atclient1->atsign.atsign);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
+    if((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp, strlen(atkeystrtemp))) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
+        goto exit;
+    }
+
+    memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
+    snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", recipient, atclient1->atsign.atsign);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
+    if((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp, strlen(atkeystrtemp))) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = atclient_delete(atclient1, &atkeyforme)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for me\n");
+
+    if((ret = atclient_delete(atclient1, &atkeyforthem)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
+        goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for them\n");
+
+    ret = 0;
+    goto exit;
+
+exit: {
+    atclient_atkey_free(&atkeyforme);
+    atclient_atkey_free(&atkeyforthem);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
+    return ret;
+}
 }

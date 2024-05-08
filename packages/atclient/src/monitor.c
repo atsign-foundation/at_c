@@ -638,7 +638,7 @@ int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
   recvlen = ret;
 
   // recv may have format of `<data>\n<excess>` or <excess>\n<data>
-  // i only want <data> 
+  // i only want <data>
   // modify recv to only contain <data>
   for(int i = 0; i < recvlen; i++) {
     if(ptr[i] == '\n') {
@@ -734,6 +734,12 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
     }
     if (atclient_atnotification_isEncrypted_is_initialized(&((*message)->notification)) &&
         (*message)->notification.isEncrypted == true) {
+      // if key contains \"shared_key\", could be in the middle of string, ignore it
+      if(strstr((*message)->notification.key, "shared_key") != NULL) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ignoring shared_key\n");
+        ret = 0;
+        goto exit;
+      }
       if ((ret = decrypt_notification(monitor_conn, &((*message)->notification))) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
@@ -1053,7 +1059,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   }
 
   // 2. get iv
-  if (atclient_atnotification_ivNonce_is_initialized(notification)) {
+  if (atclient_atnotification_ivNonce_is_initialized(notification) && !atclient_stringutils_starts_with(notification->ivNonce, strlen(notification->ivNonce), "null", strlen("null"))) {
     size_t ivlen;
     ret = atchops_base64_decode((unsigned char *)notification->ivNonce, strlen(notification->ivNonce), iv,
                                 ATCHOPS_IV_BUFFER_SIZE, &ivlen);
@@ -1061,6 +1067,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode iv\n");
       goto exit;
     }
+
     if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded. Expected %d but got %d\n",

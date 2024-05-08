@@ -23,7 +23,6 @@ static int test_2_get_as_sharedby(atclient *atclient);
 static int test_3_get_as_sharedwith(atclient *atclient);
 static int test_4_delete(atclient *atclient);
 static int test_5_should_not_exist_as_sharedby(atclient *atclient);
-static int tear_down_sharedenckeys(atclient *atclient);
 
 int main(int argc, char *argv[])
 {
@@ -106,10 +105,15 @@ int main(int argc, char *argv[])
     goto exit;
 
 exit: {
-    if(tear_down_sharedenckeys(&atclient1) != 0)
+    if(functional_tests_tear_down_sharedenckeys(&atclient1, atsign2) != 0)
     {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
         ret = 1;
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
+    }
+    if(functional_tests_tear_down_sharedenckeys(&atclient2, atsign1) != 0)
+    {
+        ret = 1;
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
     }
     atclient_free(&atclient1);
     atclient_atkeys_free(&atkeys1);
@@ -316,80 +320,6 @@ static int test_5_should_not_exist_as_sharedby(atclient *atclient)
     goto exit;
 exit : {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist End (%d)\n", ret);
-    return ret;
-}
-}
-
-static int tear_down_sharedenckeys(atclient *atclient1)
-{
-    int ret = 1;
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
-
-    char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
-
-    atclient_atkey atkey;
-    atclient_atkey_init(&atkey);
-
-    atclient_atkey atkeyforme;
-    atclient_atkey_init(&atkeyforme);
-
-    atclient_atkey atkeyforthem;
-    atclient_atkey_init(&atkeyforthem);
-
-    if((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), ATKEY_NAMESPACE, ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
-        goto exit;
-    }
-
-    if((ret = atclient_delete(atclient1, &atkey)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted main shared atkey\n");
-
-    memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-    snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", ATKEY_SHAREDWITH+1, ATKEY_SHAREDBY);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
-    if((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp, strlen(atkeystrtemp))) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
-        goto exit;
-    }
-
-    memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-    snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", ATKEY_SHAREDWITH, ATKEY_SHAREDBY);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
-    if((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp, strlen(atkeystrtemp))) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
-        goto exit;
-    }
-
-    if((ret = atclient_delete(atclient1, &atkeyforme)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for me\n");
-
-    if((ret = atclient_delete(atclient1, &atkeyforthem)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for them\n");
-
-    ret = 0;
-    goto exit;
-
-exit: {
-    atclient_atkey_free(&atkey);
-    atclient_atkey_free(&atkeyforme);
-    atclient_atkey_free(&atkeyforthem);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
     return ret;
 }
 }
