@@ -60,14 +60,14 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat thread\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting heartbeat thread\n");
   if ((ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler\n");
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Heartbeat thread started!\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Heartbeat thread started!\n");
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Starting main monitor loop...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
   while (true) {
 
     ret = atclient_monitor_read(&monitor_conn, &message);
@@ -78,29 +78,30 @@ int main(int argc, char *argv[]) {
 
     switch (message->type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
       break;
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
       if(atclient_atnotification_decryptedvalue_is_initialized(&message->notification)){
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
+        // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
+        // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
       }
       break;
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->data_response);
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE\n");
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->data_response);
       break;
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE\n");
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->error_response);
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE\n");
+      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->error_response);
       break;
     }
     }
+    // sleep(3);
   }
 
   ret = 0;
@@ -159,7 +160,7 @@ exit: { return ret; }
 
 static void *heartbeat_handler(void *monitor_conn) {
   atclient *client = (atclient *)monitor_conn;
-  atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_INFO, "Starting heartbeat_handler.\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting heartbeat_handler.\n");
   while (true) {
     // atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat...\n");
     atclient_send_heartbeat(client);

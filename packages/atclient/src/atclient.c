@@ -36,8 +36,6 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-               "atclient_connection_connect: %d. Successfully connected to secondary\n", ret);
 
   goto exit;
 
