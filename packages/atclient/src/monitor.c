@@ -692,13 +692,15 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
   } else if (strcmp(messagetype, "data") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
     (*message)->data_response = malloc(strlen(messagebody) + 1);
+    strcpy((*message)->data_response, messagebody);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"data:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
                  messagebody);
-    strcpy((*message)->data_response, messagebody);
   } else if (strcmp(messagetype, "error") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
     (*message)->error_response = malloc(strlen(messagebody) + 1);
     strcpy((*message)->error_response, messagebody);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"data:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
+                 messagebody);
   } else {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type from \"%s\"\n", buffer);
