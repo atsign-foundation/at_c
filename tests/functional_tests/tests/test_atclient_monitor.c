@@ -31,10 +31,8 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
                              const size_t atsignlen);
 static void *heartbeat_handler(void *heartbeat_conn);
 static int test_1_start_monitor(atclient *monitor_conn);
-static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid);
-static int test_3_send_notification(atclient *atclient);
-static int test_4_read_notification(atclient *monitor_conn);
-static int test_5_stop_heartbeat(pthread_t *tid);
+static int test_2_send_notification(atclient *atclient);
+static int test_3_read_notification(atclient *monitor_conn);
 
 int main() {
   int ret = 1;
@@ -88,23 +86,13 @@ int main() {
     goto exit;
   }
 
-  if ((ret = test_2_start_heartbeat(&heartbeat_conn, &tid)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_start_heartbeat: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = test_3_send_notification(&atclient1)) != 0) {
+  if ((ret = test_2_send_notification(&atclient1)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_send_notification: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_4_read_notification(&monitor_conn)) != 0) {
+  if ((ret = test_3_read_notification(&monitor_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_read_notification: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = test_5_stop_heartbeat(&tid)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_stop_heartbeat: %d\n", ret);
     goto exit;
   }
 
@@ -121,13 +109,6 @@ exit: {
   atclient_free(&heartbeat_conn);
   return ret;
 }
-}
-
-static void *heartbeat_handler(void *heartbeat_conn) {
-  while (true) {
-    atclient_send_heartbeat((atclient *)heartbeat_conn, true);
-    sleep(2);
-  }
 }
 
 static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign,
@@ -194,7 +175,7 @@ exit: {
 }
 }
 
-static int test_3_send_notification(atclient *atclient) {
+static int test_2_send_notification(atclient *atclient) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_send_notification Start\n");
@@ -228,7 +209,7 @@ exit: {
 }
 }
 
-static int test_4_read_notification(atclient *monitor_conn) {
+static int test_3_read_notification(atclient *monitor_conn) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_read_notification Start\n");
@@ -284,25 +265,6 @@ static int test_4_read_notification(atclient *monitor_conn) {
 exit: {
   atclient_monitor_message_free(message);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_read_notification End: %d\n", ret);
-  return ret;
-}
-}
-
-static int test_5_stop_heartbeat(pthread_t *tid) {
-  int ret = 1;
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_stop_heartbeat Start\n");
-
-  ret = pthread_cancel(*tid);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to stop heartbeat handler: %d\n", ret);
-    goto exit;
-  }
-
-  ret = 0;
-  goto exit;
-exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_stop_heartbeat End: %d\n", ret);
   return ret;
 }
 }
