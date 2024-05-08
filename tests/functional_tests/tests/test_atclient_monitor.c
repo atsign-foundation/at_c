@@ -101,6 +101,7 @@ exit: {
   atclient_atkeys_free(&atkeys_sharedby);
   atclient_atkeys_free(&atkeys_sharedwith);
   atclient_free(&atclient1);
+  atclient_free(&atclient2);
   atclient_free(&monitor_conn);
   return ret;
 }
