@@ -601,12 +601,12 @@ exit: {
 }
 }
 
-int atclient_send_heartbeat(atclient *monitor_conn) {
+int atclient_send_heartbeat(atclient *heartbeat_conn) {
   int ret = -1;
   const char *command = "noop:0\r\n";
   const size_t commandlen = strlen(command);
 
-  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (const unsigned char *)command, commandlen);
+  ret = mbedtls_ssl_write(&(heartbeat_conn->secondary_connection.ssl), (const unsigned char *)command, commandlen);
   if (ret < 0 || ret != 8) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
@@ -1015,7 +1015,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
     }
     if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
       ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded.\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded. Expected %d but got %d\n", ATCHOPS_IV_BUFFER_SIZE, ivlen);
       goto exit;
     }
   } else {
@@ -1050,7 +1050,7 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
     goto exit;
   }
 
-  const size_t decryptedvaluetempsize = 4096;
+  const size_t decryptedvaluetempsize = ciphertextlen;
   decryptedvaluetemp = malloc(sizeof(unsigned char) * decryptedvaluetempsize);
   memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
   size_t decryptedvaluetemplen = 0;

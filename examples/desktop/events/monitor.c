@@ -36,6 +36,9 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
+  atclient heartbeat_conn;
+  atclient_monitor_init(&heartbeat_conn);
+
   pthread_t tid;
 
   atclient_monitor_message *message = NULL;
@@ -55,13 +58,23 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_monitor_start(&monitor_conn, &root_connection, atsign, &atkeys, ".*", strlen(".*"))) != 0) {
+  if((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
+    goto exit;
+  }
+
+  if((ret = atclient_monitor_pkam_authenticate(&heartbeat_conn, &root_connection, &atkeys, atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate heartbeat with PKAM\n");
+    goto exit;
+  }
+
+  if ((ret = atclient_monitor_start(&monitor_conn, ".*", strlen(".*"))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting heartbeat thread\n");
-  if ((ret = pthread_create(&tid, NULL, heartbeat_handler, &monitor_conn)) != 0) {
+  if ((ret = pthread_create(&tid, NULL, heartbeat_handler, &heartbeat_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start heartbeat handler\n");
     goto exit;
   }
