@@ -121,7 +121,7 @@ exit: {
 
 static void *heartbeat_handler(void *heartbeat_conn) {
   while (true) {
-    atclient_send_heartbeat((atclient *)heartbeat_conn);
+    atclient_send_heartbeat((atclient *)heartbeat_conn, true);
     sleep(30);
   }
 }

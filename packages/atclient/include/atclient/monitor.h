@@ -176,13 +176,14 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 /**
  * @brief Send a heartbeat on the monitor connection
  * @param heartbeat_conn the initialized and pkam authenticated atclient context to send the heartbeat on, see atclient_init and atclient_monitor_pkam_authenticate
+ * @param listen_for_ack if true, the function will wait for an ack from the server, if false, it will not. Set to false if you want a more lightweight heartbeat
  * @return 0 on success, non-zero on error
  *
  * @note Ideally this is scheduled to be sent every 30 seconds
  * @note this is different than a normal noop command, since we don't listen for the response from the server
  * @note It is the responsibility of the caller to ensure that the monitor connection is still alive
  */
-int atclient_send_heartbeat(atclient *heartbeat_conn);
+int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack);
 
 /**
  * @brief Read a notification from the monitor connection into message

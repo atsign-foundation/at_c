@@ -3,6 +3,7 @@
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
+#include "atclient/stringutils.h"
 #include "cJSON.h"
 #include <atchops/aes.h>
 #include <atchops/aesctr.h>
@@ -601,8 +602,11 @@ exit: {
 }
 }
 
-int atclient_send_heartbeat(atclient *heartbeat_conn) {
+int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
   int ret = -1;
+
+  unsigned char *recv = NULL;
+
   const char *command = "noop:0\r\n";
   const size_t commandlen = strlen(command);
 
@@ -614,10 +618,53 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
                (int)commandlen - 2, command);
+
+  if (!listen_for_ack) {
+    ret = 0;
+    goto exit;
+  }
+
+  const size_t recvsize = 64;
+  recv = malloc(sizeof(unsigned char) * recvsize);
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
+  char *ptr = (char *)recv;
+
+  ret = mbedtls_ssl_read(&(heartbeat_conn->secondary_connection.ssl), recv, recvsize);
+  if (ret < 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read heartbeat response: %d\n", ret);
+    goto exit;
+  }
+  recvlen = ret;
+
+  // recv may have format of `<data>\n<excess>` or <excess>\n<data>
+  // i only want <data> 
+  // modify recv to only contain <data>
+  for(int i = 0; i < recvlen; i++) {
+    if(ptr[i] == '\n') {
+      ptr[i] = '\0';
+      recvlen = i;
+      break;
+    }
+  }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m", (int)recvlen,
+               ptr);
+
+  if (!atclient_stringutils_starts_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok")) &&
+      !atclient_stringutils_ends_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok"))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
+    ret = -1;
+    goto exit;
+  }
+
   ret = 0;
   goto exit;
 
-exit: { return ret; }
+exit: {
+  free(recv);
+  return ret;
+}
 }
 
 int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message) {

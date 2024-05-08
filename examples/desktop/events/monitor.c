@@ -176,7 +176,7 @@ static void *heartbeat_handler(void *monitor_conn) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting heartbeat_handler.\n");
   while (true) {
     // atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat...\n");
-    atclient_send_heartbeat(client);
+    atclient_send_heartbeat(client, true);
     sleep(5);
   }
 }
