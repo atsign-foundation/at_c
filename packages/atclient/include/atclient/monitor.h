@@ -17,11 +17,11 @@ typedef struct atclient_atnotification {
 
   // initalizedfields[1]
   bool isEncrypted : 1;
-  char *encKeyName;    // in metadata
-  char *encAlgo;       // in metadata
-  char *ivNonce;       // in metadata
-  char *skeEncKeyName; // in metadata
-  char *skeEncAlgo;    // in metadata
+  char *encKeyName;              // in metadata
+  char *encAlgo;                 // in metadata
+  char *ivNonce;                 // in metadata
+  char *skeEncKeyName;           // in metadata
+  char *skeEncAlgo;              // in metadata
   unsigned char *decryptedvalue; // if isEncrypted, this will be the decrypted value
   size_t decryptedvaluelen;      // represents the length of the decrypted value
 
@@ -125,9 +125,10 @@ void atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notifica
                                                const size_t skeEncKeyNamelen);
 void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
                                             const size_t skeEncAlgolen);
-void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification, const unsigned char *decryptedvalue,
-                                                const size_t decryptedvaluelen);
-void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification, const size_t decryptedvaluelen);
+void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
+                                                const unsigned char *decryptedvalue, const size_t decryptedvaluelen);
+void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
+                                                   const size_t decryptedvaluelen);
 
 enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
@@ -153,15 +154,16 @@ void atclient_monitor_free(atclient *monitor_conn);
 
 /**
  * @brief pkam authenticates the monitor connection
- * 
+ *
  * @param monitor_conn the atclient context for the monitor connection, assumed that it is already initialized
- * @param root_conn the atDirectory root connection, assumed that it is already initialized and connected to the root server
+ * @param root_conn the atDirectory root connection, assumed that it is already initialized and connected to the root
+ * server
  * @param atkeys the atkeys to use for the pkam authentication
  * @param atsign the atsign to use for the pkam authentication
  * @return int 0 on success
  */
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn, const atclient_atkeys *atkeys,
-                               const char *atsign);
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn,
+                                       const atclient_atkeys *atkeys, const char *atsign);
 
 /**
  * @brief Onboards the monitor_connection and starts the monitoring connection.
@@ -171,19 +173,7 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connecti
  * @param regexlen the length of the regex string, most people will typically use strlen(regex)
  * @return int 0 on success
  */
-int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) ;
-
-/**
- * @brief Send a heartbeat on the monitor connection
- * @param heartbeat_conn the initialized and pkam authenticated atclient context to send the heartbeat on, see atclient_init and atclient_monitor_pkam_authenticate
- * @param listen_for_ack if true, the function will wait for an ack from the server, if false, it will not. Set to false if you want a more lightweight heartbeat
- * @return 0 on success, non-zero on error
- *
- * @note Ideally this is scheduled to be sent every 30 seconds
- * @note this is different than a normal noop command, since we don't listen for the response from the server
- * @note It is the responsibility of the caller to ensure that the monitor connection is still alive
- */
-int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack);
+int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen);
 
 /**
  * @brief Read a notification from the monitor connection into message
@@ -192,7 +182,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack);
  * caller is responsible for freeing the message, using atclient_monitor_message_free
  * @return 0 on success, non-zero on error
  *
- * @note Message may be a notification, a data response, or an error response, check the type field to determine which data field to use
+ * @note Message may be a notification, a data response, or an error response, check the type field to determine which
+ * data field to use
  */
 int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **message);
 
