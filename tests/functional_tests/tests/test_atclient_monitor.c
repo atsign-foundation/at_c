@@ -25,13 +25,16 @@
 #define ATKEY_SHAREDWITH SECOND_ATSIGN
 #define ATKEY_VALUE "Test Value 12345 Meow"
 
-#define MONITOR_REGEX "functional_tests"
+#define MONITOR_REGEX ".*"
 
-static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
+static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign,
+                             const size_t atsignlen);
 static void *heartbeat_handler(void *monitor_conn);
 static int test_1_start_monitor(atclient *monitor_conn);
 static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid);
-static int test_3_stop_heartbeat(pthread_t *tid);
+static int test_3_send_notification(atclient *atclient);
+static int test_4_read_notification(atclient *monitor_conn);
+static int test_5_stop_heartbeat(pthread_t *tid);
 
 int main() {
   int ret = 1;
@@ -40,17 +43,22 @@ int main() {
 
   atclient atclient1;
   atclient_init(&atclient1);
+
   atclient_atkeys atkeys_sharedby;
   atclient_atkeys_init(&atkeys_sharedby);
 
   atclient monitor_conn;
   atclient_init(&monitor_conn);
+
   atclient_atkeys atkeys_sharedwith;
   atclient_atkeys_init(&atkeys_sharedwith);
 
+  atclient heartbeat_conn;
+  atclient_init(&heartbeat_conn);
+
   pthread_t tid;
 
-  if((ret = functional_tests_set_up_atkeys(&atkeys_sharedby, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys_sharedby, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys_sharedby: %d\n", ret);
     goto exit;
   }
@@ -60,7 +68,7 @@ int main() {
     goto exit;
   }
 
-  if((ret = functional_tests_set_up_atkeys(&atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys_sharedby: %d\n", ret);
     goto exit;
   }
@@ -70,17 +78,32 @@ int main() {
     goto exit;
   }
 
+  if((ret = monitor_pkam_auth(&heartbeat_conn, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
+    goto exit;
+  }
+
   if ((ret = test_1_start_monitor(&monitor_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_start_monitor: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_2_start_heartbeat(&monitor_conn, &tid)) != 0) {
+  if ((ret = test_2_start_heartbeat(&heartbeat_conn, &tid)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_start_heartbeat: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_3_stop_heartbeat(&tid)) != 0) {
+  if ((ret = test_3_send_notification(&atclient1)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_send_notification: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test_4_read_notification(&monitor_conn)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_read_notification: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test_5_stop_heartbeat(&tid)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_stop_heartbeat: %d\n", ret);
     goto exit;
   }
@@ -91,6 +114,7 @@ exit: {
   atclient_atkeys_free(&atkeys_sharedwith);
   atclient_free(&atclient1);
   atclient_free(&monitor_conn);
+  atclient_free(&heartbeat_conn);
   return ret;
 }
 }
@@ -100,6 +124,31 @@ static void *heartbeat_handler(void *monitor_conn) {
     atclient_send_heartbeat((atclient *)monitor_conn);
     sleep(30);
   }
+}
+
+static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign,
+                             const size_t atsignlen) {
+  int ret = 1;
+
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
+
+  if ((ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, &root_conn, atkeys, atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_pkam_authenticate: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_connection_free(&root_conn);
+  return ret;
+}
 }
 
 static int test_1_start_monitor(atclient *monitor_conn) {
@@ -141,10 +190,92 @@ exit: {
 }
 }
 
-static int test_3_stop_heartbeat(pthread_t *tid) {
+static int test_3_send_notification(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_stop_heartbeat Start\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_send_notification Start\n");
+
+  atclient_notify_params params;
+  atclient_notify_params_init(&params);
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY,
+                                             strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH),
+                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create atkey: %d\n", ret);
+    goto exit;
+  }
+
+  atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, ATKEY_VALUE, true);
+
+  if ((ret = atclient_notify(atclient, &params, NULL)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify: %d\n", ret);
+    goto exit;
+  }
+
+  goto exit;
+exit: {
+  atclient_notify_params_free(&params);
+  atclient_atkey_free(&atkey);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_send_notification End: %d\n", ret);
+  return ret;
+}
+}
+
+static int test_4_read_notification(atclient *monitor_conn) {
+  int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_read_notification Start\n");
+
+  atclient_monitor_message *message = NULL;
+
+  if ((ret = atclient_monitor_read(monitor_conn, &message)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
+    goto exit;
+  }
+
+  if (message == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "monitor message is NULL, when it is expected to be populated :(\n");
+    ret = 0;
+    goto exit;
+  }
+
+  if(!atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value is not initialized\n");
+    ret = 1;
+    goto exit;
+  }
+
+  if(!atclient_atnotification_decryptedvaluelen_is_initialized(&(message->notification))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value length is not initialized\n");
+    ret = 1;
+    goto exit;
+  }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n", (int) message->notification.decryptedvaluelen, message->notification.decryptedvalue);
+
+  // compare the decrypted value with the expected value
+  if (strcmp(message->notification.decryptedvalue, ATKEY_VALUE) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value does not match expected value\n");
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_monitor_message_free(message);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_read_notification End: %d\n", ret);
+  return ret;
+}
+}
+
+static int test_5_stop_heartbeat(pthread_t *tid) {
+  int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_stop_heartbeat Start\n");
 
   ret = pthread_cancel(*tid);
   if (ret != 0) {
@@ -155,31 +286,7 @@ static int test_3_stop_heartbeat(pthread_t *tid) {
   ret = 0;
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_stop_heartbeat End: %d\n", ret);
-  return ret;
-}
-}
-
-static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
-  int ret = 1;
-
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn);
-
-  if ((ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, &root_conn, atkeys, atsign)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_pkam_authenticate: %d\n", ret);
-    goto exit;
-  }
-
-  ret = 0;
-  goto exit;
-exit: {
-  atclient_connection_free(&root_conn);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_stop_heartbeat End: %d\n", ret);
   return ret;
 }
 }
