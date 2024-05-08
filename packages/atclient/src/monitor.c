@@ -583,7 +583,7 @@ int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_con
     goto exit;
   }
   fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;95m",
                (int) strlen(cmd), cmd);
 
   ret = 0;
@@ -605,7 +605,7 @@ int atclient_send_heartbeat(atclient *monitor_conn) {
     goto exit;
   }
   
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
                (int) commandlen - 2, command);
   ret = 0;
   goto exit;

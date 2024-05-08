@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
       if(atclient_atnotification_decryptedvalue_is_initialized(&message->notification)){
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-        // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message decryptedvalue: %s\n", message->notification.decryptedvalue);
       }
       break;
     }
