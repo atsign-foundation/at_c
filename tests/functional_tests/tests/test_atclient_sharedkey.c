@@ -40,10 +40,22 @@ int main(int argc, char *argv[])
     atclient atclient1;
     atclient_init(&atclient1);
 
+    atclient_atkeys atkeys1;
+    atclient_atkeys_init(&atkeys1);
+
     atclient atclient2;
     atclient_init(&atclient2);
 
-    if((ret = functional_tests_pkam_auth(&atclient1, atsign1)) != 0)
+    atclient_atkeys atkeys2;
+    atclient_atkeys_init(&atkeys2);
+
+    if((ret = functional_tests_set_up_atkeys(&atkeys1, atsign1, atsign1len)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = functional_tests_pkam_auth(&atclient1, &atkeys1, atsign1, strlen(atsign1))) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
         goto exit;
@@ -61,7 +73,13 @@ int main(int argc, char *argv[])
         goto exit;
     }
 
-    if((ret = functional_tests_pkam_auth(&atclient2, atsign2)) != 0)
+    if((ret = functional_tests_set_up_atkeys(&atkeys2, atsign2, atsign2len)) != 0)
+    {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
+        goto exit;
+    }
+
+    if((ret = functional_tests_pkam_auth(&atclient2, &atkeys2, atsign2, strlen(atsign2))) != 0)
     {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
         goto exit;
@@ -94,7 +112,9 @@ exit: {
         ret = 1;
     }
     atclient_free(&atclient1);
+    atclient_atkeys_free(&atkeys1);
     atclient_free(&atclient2);
+    atclient_atkeys_free(&atkeys2);
     return ret;
 }
 }

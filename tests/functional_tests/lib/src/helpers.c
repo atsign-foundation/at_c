@@ -10,36 +10,37 @@
 
 #define TAG "functional_tests_helpers"
 
-int functional_tests_pkam_auth(atclient *atclient, const char *atsign) {
+int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
+  int ret = 1;
+
+  const size_t atkeyspathsize = 1024;
+  char atkeyspath[atkeyspathsize];
+  memset(atkeyspath, 0, atkeyspathsize);
+  size_t atkeyspathlen = 0;
+
+  ret = functional_tests_get_atkeys_path(atsign, atsignlen, atkeyspath, atkeyspathsize, &atkeyspathlen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys_sharedwith path: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_populate_from_path(atkeys, atkeyspath)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys_sharedwith from path: %d\n", ret);
+    goto exit;
+  }
+
+  goto exit;
+
+exit: { return ret; }
+}
+
+int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth Begin\n");
 
-  const size_t atkeysfilepathsize = 1024;
-  char atkeysfilepath[atkeysfilepathsize];
-  memset(atkeysfilepath, 0, sizeof(char) * atkeysfilepathsize);
-  size_t atkeysfilepathlen = 0;
-
   atclient_connection root_connection;
   atclient_connection_init(&root_connection);
-
-  atclient_atkeys atkeys;
-  atclient_atkeys_init(&atkeys);
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign: \"%s\"\n", atsign);
-
-  if ((ret = functional_tests_get_atkeys_path(atsign, strlen(atsign), atkeysfilepath, atkeysfilepathsize,
-                                              &atkeysfilepathlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_get_atkeys_path: %d\n", ret);
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeysfilepath: \"%s\"\n", atkeysfilepath);
-
-  if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeys populated\n");
 
   if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
@@ -47,7 +48,7 @@ int functional_tests_pkam_auth(atclient *atclient, const char *atsign) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "root connection established\n");
 
-  if ((ret = atclient_pkam_authenticate(atclient, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(atclient, &root_connection, atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -63,7 +64,7 @@ exit: {
 }
 
 int functional_tests_publickey_exists(atclient *atclient, const char *key, const char *sharedby,
-                                                const char *knamespace) {
+                                      const char *knamespace) {
   int ret = -1;
 
   atclient_atkey atkey;
@@ -99,28 +100,25 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
     goto exit;
   }
 
-  if(!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "publickey does not exist: \"%s\"\n", recv);
     goto exit;
   }
 
-  if(recvlen <= 0)
-  {
+  if (recvlen <= 0) {
     ret = -1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "error occured with recvlen <= 0: %lu. Recv: \"%s\"\n", recvlen, recv);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "error occured with recvlen <= 0: %lu. Recv: \"%s\"\n", recvlen,
+                 recv);
     goto exit;
   }
 
   ret = true;
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
 
-int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *sharedby,
-                                              const char *knamespace) {
+int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *knamespace) {
   int ret = -1;
 
   atclient_atkey atkey;
@@ -157,14 +155,13 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
     goto exit;
   }
 
-  if(!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "selfkey does not exist: \"%s\"\n", recv);
     goto exit;
   }
 
-  if(recvlen <= 0)
-  {
+  if (recvlen <= 0) {
     ret = -1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "selfkey does not exist (%lu): \"%s\"\n", recvlen, recv);
     goto exit;
@@ -172,13 +169,11 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
 
   ret = true;
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
 
-int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *sharedby,
-                                                const char *sharedwith, const char *knamespace) {
+int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *sharedwith,
+                                      const char *knamespace) {
   int ret = -1;
 
   atclient_atkey atkey;
@@ -208,21 +203,20 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
   snprintf(command, commandsize, "lookup:%s\r\n", atkeystr);
   commandlen = strlen(command);
 
-  if((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
+  if ((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
                                       (unsigned char *)recv, recvsize, &recvlen)) != 0) {
     ret = -1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
-  if(!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "sharedkey does not exist: \"%s\"\n", recv);
     goto exit;
   }
 
-  if(recvlen <= 0)
-  {
+  if (recvlen <= 0) {
     ret = -1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "sharedkey does not exist (%lu): \"%s\"\n", recvlen, recv);
     goto exit;
@@ -230,7 +224,5 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
 
   ret = true;
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }

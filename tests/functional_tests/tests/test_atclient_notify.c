@@ -35,10 +35,18 @@ int main() {
   atclient atclient1;
   atclient_init(&atclient1);
 
+  atclient_atkeys atkeys;
+  atclient_atkeys_init(&atkeys);
+
   char notification_id[37];
   memset(notification_id, 0, sizeof(char) * 37);
 
-  if ((ret = functional_tests_pkam_auth(&atclient1, ATKEY_SHAREDBY)) != 0) {
+  if((ret = functional_tests_set_up_atkeys(&atkeys, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
@@ -51,6 +59,7 @@ int main() {
   goto exit;
 exit: {
   atclient_free(&atclient1);
+  atclient_atkeys_free(&atkeys);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "End (%d)\n", ret);
   return ret;
 }

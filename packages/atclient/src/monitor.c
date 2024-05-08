@@ -543,19 +543,26 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
 void atclient_monitor_init(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
 void atclient_monitor_free(atclient *monitor_conn) { return; }
 
-int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_conn, const char *atsign,
-                           const atclient_atkeys *atkeys, const char *regex, const size_t regexlen) {
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+                               const char *atsign) {
   int ret = 1;
 
-  size_t cmdsize = 0;
-  char *cmd = NULL;
-
-  // 1. initialize monitor_conn
   ret = atclient_pkam_authenticate(monitor_conn, root_conn, atkeys, atsign);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) {
+  int ret = 1;
+
+  size_t cmdsize = 0;
+  char *cmd = NULL;
 
   // log building command... (Debug)
   // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
@@ -584,7 +591,7 @@ int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_con
   }
   fix_stdout_buffer(cmd, cmdsize);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;95m",
-               (int) strlen(cmd), cmd);
+               (int)strlen(cmd), cmd);
 
   ret = 0;
   goto exit;
@@ -604,9 +611,9 @@ int atclient_send_heartbeat(atclient *monitor_conn) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
   }
-  
+
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
-               (int) commandlen - 2, command);
+               (int)commandlen - 2, command);
   ret = 0;
   goto exit;
 
@@ -685,7 +692,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
   } else if (strcmp(messagetype, "data") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
     (*message)->data_response = malloc(strlen(messagebody) + 1);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"data:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m", messagebody);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"data:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
+                 messagebody);
     strcpy((*message)->data_response, messagebody);
   } else if (strcmp(messagetype, "error") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
@@ -999,8 +1007,8 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   // 2. get iv
   if (atclient_atnotification_ivNonce_is_initialized(notification)) {
     size_t ivlen;
-    ret =
-        atchops_base64_decode((unsigned char *) notification->ivNonce, strlen(notification->ivNonce), iv, ATCHOPS_IV_BUFFER_SIZE, &ivlen);
+    ret = atchops_base64_decode((unsigned char *)notification->ivNonce, strlen(notification->ivNonce), iv,
+                                ATCHOPS_IV_BUFFER_SIZE, &ivlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode iv\n");
       goto exit;
@@ -1035,7 +1043,8 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
   }
 
   // 4. decrypt value
-  ret = atchops_base64_decode(notification->value, strlen(notification->value), ciphertext, ciphertextsize, &ciphertextlen);
+  ret = atchops_base64_decode(notification->value, strlen(notification->value), ciphertext, ciphertextsize,
+                              &ciphertextlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");
     goto exit;

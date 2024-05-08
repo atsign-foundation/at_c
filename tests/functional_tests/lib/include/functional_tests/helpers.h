@@ -4,7 +4,8 @@
 #include "atclient/atclient.h"
 #include <stddef.h>
 
-int functional_tests_pkam_auth(atclient *atclient, const char *atsign);
+int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
+int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
 int functional_tests_publickey_exists(atclient *atclient, const char *key, const char *sharedby,
                                       const char *knamespace);
 int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *knamespace);

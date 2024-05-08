@@ -27,9 +27,9 @@
 
 #define MONITOR_REGEX "functional_tests"
 
-static int set_up_atkeys(atclient_atkeys *atkeys);
+static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
 static void *heartbeat_handler(void *monitor_conn);
-static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *atkeys);
+static int test_1_start_monitor(atclient *monitor_conn);
 static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid);
 static int test_3_stop_heartbeat(pthread_t *tid);
 
@@ -38,20 +38,39 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
+  atclient atclient1;
+  atclient_init(&atclient1);
+  atclient_atkeys atkeys_sharedby;
+  atclient_atkeys_init(&atkeys_sharedby);
+
   atclient monitor_conn;
   atclient_init(&monitor_conn);
-
-  atclient_atkeys atkeys;
-  atclient_atkeys_init(&atkeys);
+  atclient_atkeys atkeys_sharedwith;
+  atclient_atkeys_init(&atkeys_sharedwith);
 
   pthread_t tid;
 
-  if ((ret = set_up_atkeys(&atkeys)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
+  if((ret = functional_tests_set_up_atkeys(&atkeys_sharedby, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys_sharedby: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_1_start_monitor(&monitor_conn, &atkeys)) != 0) {
+  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys_sharedby, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = functional_tests_set_up_atkeys(&atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys_sharedby: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = monitor_pkam_auth(&monitor_conn, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test_1_start_monitor(&monitor_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_start_monitor: %d\n", ret);
     goto exit;
   }
@@ -68,63 +87,27 @@ int main() {
 
   goto exit;
 exit: {
+  atclient_atkeys_free(&atkeys_sharedby);
+  atclient_atkeys_free(&atkeys_sharedwith);
+  atclient_free(&atclient1);
   atclient_free(&monitor_conn);
-  atclient_atkeys_free(&atkeys);
   return ret;
 }
 }
 
-static int set_up_atkeys(atclient_atkeys *atkeys) {
-  int ret = 1;
-
-  const size_t atkeyspathsize = 1024;
-  char atkeyspath[atkeyspathsize];
-  memset(atkeyspath, 0, atkeyspathsize);
-  size_t atkeyspathlen = 0;
-
-  ret = functional_tests_get_atkeys_path(ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH), atkeyspath, atkeyspathsize,
-                                         &atkeyspathlen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys path: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = atclient_atkeys_populate_from_path(atkeys, atkeyspath)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys from path: %d\n", ret);
-    goto exit;
-  }
-
-  goto exit;
-
-exit: { return ret; }
-}
-
-static void *heartbeat_handler(void *monitor_conn)
-{
-  while(true)
-  {
+static void *heartbeat_handler(void *monitor_conn) {
+  while (true) {
     atclient_send_heartbeat((atclient *)monitor_conn);
     sleep(30);
   }
 }
 
-static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *atkeys) {
+static int test_1_start_monitor(atclient *monitor_conn) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor Start\n");
 
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn);
-
-  ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server: %d\n", ret);
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected to root server\n");
-
-  ret =
-      atclient_start_monitor(monitor_conn, &root_conn, ATKEY_SHAREDWITH, atkeys, MONITOR_REGEX, strlen(MONITOR_REGEX));
+  ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
@@ -134,7 +117,6 @@ static int test_1_start_monitor(atclient *monitor_conn, const atclient_atkeys *a
   goto exit;
 
 exit: {
-  atclient_connection_free(&root_conn);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor End: %d\n", ret);
   return ret;
 }
@@ -174,6 +156,30 @@ static int test_3_stop_heartbeat(pthread_t *tid) {
   goto exit;
 exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_stop_heartbeat End: %d\n", ret);
+  return ret;
+}
+}
+
+static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
+  int ret = 1;
+
+  atclient_connection root_conn;
+  atclient_connection_init(&root_conn);
+
+  if ((ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, &root_conn, atkeys, atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_pkam_authenticate: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_connection_free(&root_conn);
   return ret;
 }
 }

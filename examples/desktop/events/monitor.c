@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_start_monitor(&monitor_conn, &root_connection, atsign, &atkeys, ".*", strlen(".*"))) != 0) {
+  if ((ret = atclient_monitor_start(&monitor_conn, &root_connection, atsign, &atkeys, ".*", strlen(".*"))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }

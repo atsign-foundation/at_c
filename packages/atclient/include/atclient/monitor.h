@@ -152,17 +152,26 @@ void atclient_monitor_init(atclient *monitor_conn);
 void atclient_monitor_free(atclient *monitor_conn);
 
 /**
- * @brief Onboards the monitor_connection and starts the monitoring connection.
- *
- * @param monitor_conn ctx the atclient context for the monitor connection
- * @param root_conn the root_connection to the atDirectory, assumed to already be initialized and connected
- * @param atsign atsign the atSign (e.g. \"@bob\", )
- * @param atkeys atkeys the populated atKeys of the atSign
- * @param regex atsign the atsign
+ * @brief pkam authenticates the monitor connection
+ * 
+ * @param monitor_conn the atclient context for the monitor connection, assumed that it is already initialized
+ * @param root_conn the atDirectory root connection, assumed that it is already initialized and connected to the root server
+ * @param atkeys the atkeys to use for the pkam authentication
+ * @param atsign the atsign to use for the pkam authentication
  * @return int 0 on success
  */
-int atclient_start_monitor(atclient *monitor_conn, atclient_connection *root_conn, const char *atsign,
-                           const atclient_atkeys *atkeys, const char *regex, const size_t regexlen);
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+                               const char *atsign);
+
+/**
+ * @brief Onboards the monitor_connection and starts the monitoring connection.
+ *
+ * @param monitor_conn ctx the atclient context for the monitor connection, must be pkam_authenticated already
+ * @param regex the regex to monitor for
+ * @param regexlen the length of the regex string, most people will typically use strlen(regex)
+ * @return int 0 on success
+ */
+int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) ;
 
 /**
  * @brief Send a heartbeat on the monitor connection
