@@ -29,7 +29,7 @@
 
 static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign,
                              const size_t atsignlen);
-static void *heartbeat_handler(void *monitor_conn);
+static void *heartbeat_handler(void *heartbeat_conn);
 static int test_1_start_monitor(atclient *monitor_conn);
 static int test_2_start_heartbeat(atclient *monitor_conn, pthread_t *tid);
 static int test_3_send_notification(atclient *atclient);
@@ -104,7 +104,7 @@ int main() {
   }
 
   if ((ret = test_5_stop_heartbeat(&tid)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_stop_heartbeat: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_5_stop_heartbeat: %d\n", ret);
     goto exit;
   }
 
@@ -119,9 +119,9 @@ exit: {
 }
 }
 
-static void *heartbeat_handler(void *monitor_conn) {
+static void *heartbeat_handler(void *heartbeat_conn) {
   while (true) {
-    atclient_send_heartbeat((atclient *)monitor_conn);
+    atclient_send_heartbeat((atclient *)heartbeat_conn);
     sleep(30);
   }
 }

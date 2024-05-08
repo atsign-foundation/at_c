@@ -543,8 +543,8 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
 void atclient_monitor_init(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
 void atclient_monitor_free(atclient *monitor_conn) { return; }
 
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn, const atclient_atkeys *atkeys,
-                               const char *atsign) {
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn,
+                                       const atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
   ret = atclient_pkam_authenticate(monitor_conn, root_conn, atkeys, atsign);
@@ -675,6 +675,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
   *message = malloc(sizeof(atclient_monitor_message));
   atclient_monitor_message_init(*message);
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%s:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m", messagetype,
+               messagebody);
+
   if (strcmp(messagetype, "notification") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
     atclient_atnotification_init(&((*message)->notification));
@@ -683,7 +686,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
       goto exit;
     }
     if (atclient_atnotification_isEncrypted_is_initialized(&((*message)->notification)) &&
-        (*message)->notification.isEncrypted) {
+        (*message)->notification.isEncrypted == true) {
       if ((ret = decrypt_notification(monitor_conn, &((*message)->notification))) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
@@ -693,14 +696,10 @@ int atclient_monitor_read(atclient *monitor_conn, atclient_monitor_message **mes
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
     (*message)->data_response = malloc(strlen(messagebody) + 1);
     strcpy((*message)->data_response, messagebody);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"data:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
-                 messagebody);
   } else if (strcmp(messagetype, "error") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
     (*message)->error_response = malloc(strlen(messagebody) + 1);
     strcpy((*message)->error_response, messagebody);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"data:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
-                 messagebody);
   } else {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type from \"%s\"\n", buffer);
@@ -1017,7 +1016,8 @@ static int decrypt_notification(atclient *monitor_conn, atclient_atnotification 
     }
     if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
       ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded. Expected %d but got %d\n", ATCHOPS_IV_BUFFER_SIZE, ivlen);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded. Expected %d but got %d\n",
+                   ATCHOPS_IV_BUFFER_SIZE, ivlen);
       goto exit;
     }
   } else {
