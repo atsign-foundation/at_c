@@ -224,11 +224,11 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
   printf("Starting monitor\n");
   struct atclient monitor_ctx;
   atclient_monitor_init(&monitor_ctx);
-  ret = atclient_monitor_start(&monitor_ctx, &root_conn, myatsign.atsign, &atkeys, ".*", strlen(".*"));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
-    return ret;
-  }
+  // ret = atclient_monitor_start(&monitor_ctx, &root_conn, myatsign.atsign, &atkeys, ".*", strlen(".*"));
+  // if (ret != 0) {
+  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
+  //   return ret;
+  // }
   printf("Monitor started!\n");
 
   printf("Starting heartbeat\n");
