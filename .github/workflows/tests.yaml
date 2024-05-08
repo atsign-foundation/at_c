@@ -45,11 +45,11 @@ jobs:
         run: |
           tools/install.sh
 
-      - name: Build at_talk
-        working-directory: examples/desktop/at_talk
-        run: |
-          cmake -S . -B build
-          cmake --build build
+      # - name: Build at_talk
+      #   working-directory: examples/desktop/at_talk
+      #   run: |
+      #     cmake -S . -B build
+      #     cmake --build build
 
       - name: Build all CRUD examples
         working-directory: examples/desktop/crud

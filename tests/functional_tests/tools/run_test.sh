@@ -2,12 +2,12 @@
 set -eu
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
-cd "$SCRIPT_DIRECTORY/.."
+cd "$SCRIPT_DIRECTORY"
+cd ..
 
-# 1. Install atSDK
-../../tools/install.sh
+"../../tools/install.sh"
 
-# 2. Run tests
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-ctest --test-dir build -VV --timeout 300
+cmake --build build --target $1
+
+./build/$1

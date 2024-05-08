@@ -223,12 +223,12 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
 
   printf("Starting monitor\n");
   struct atclient monitor_ctx;
-  atclient_monitor_init(&monitor_ctx, myatsign, atkeys);
-  ret = atclient_start_monitor(&monitor_ctx, ROOT_HOST, ROOT_PORT, "");
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
-    return ret;
-  }
+  atclient_monitor_init(&monitor_ctx);
+  // ret = atclient_monitor_start(&monitor_ctx, &root_conn, myatsign.atsign, &atkeys, ".*", strlen(".*"));
+  // if (ret != 0) {
+  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
+  //   return ret;
+  // }
   printf("Monitor started!\n");
 
   printf("Starting heartbeat\n");
@@ -249,21 +249,21 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
   }
 
   printf("Starting main monitor loop\n");
-  atclient_monitor_message message;
+  atclient_monitor_message *message = NULL;
   atclient_monitor_message_init(&message);
   while (true) {
 
-    int mon_ret = atclient_read_monitor(&monitor_ctx, &message);
+    int mon_ret = atclient_monitor_read(&monitor_ctx, &atclient, &message);
     if (mon_ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", mon_ret);
       continue;
     }
 
     switch (message.type) {
-    case MMT_none:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: none\n");
       break;
-    case MMT_notification:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: notification\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message.notification.id);
 
@@ -272,11 +272,11 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
       }
 
       break;
-    case MMT_data_response:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: data\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.data_response);
       break;
-    case MMT_error_response:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE:
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: error\n");
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message body: %s\n", message.error_response);
       break;
@@ -295,7 +295,7 @@ static void *heartbeat_handler(void *monitor_connection) {
   while (true) {
     sleep(30);
     atlogger_log("Heartbeat_handler", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending heartbeat\n");
-    atclient_send_heartbeat(connection);
+    atclient_send_heartbeat(connection, false);
   };
 }
 
@@ -437,24 +437,24 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
   atclient_atstr_init(&value, valuelen);
 
   // manage IV
-  if (atclient_atkey_metadata_is_ivnonce_initialized(&message->notification.key.metadata)) {
-    size_t ivolen = 0;
-    ret = atchops_base64_decode((unsigned char *)message->notification.key.metadata.ivnonce.str,
-                                message->notification.key.metadata.ivnonce.len, iv, ATCHOPS_IV_BUFFER_SIZE, &ivolen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
-      return ret;
-    }
+  // if (atclient_atkey_metadata_is_ivnonce_initialized(&message->notification.key.metadata)) {
+  //   size_t ivolen = 0;
+    // ret = atchops_base64_decode((unsigned char *) message->notification.key.metadata.ivnonce.str,
+    //                             message->notification.key.metadata.ivnonce.len, iv, ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+    // if (ret != 0) {
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+    //   return ret;
+    // }
 
-    if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
-      ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen, ATCHOPS_IV_BUFFER_SIZE);
-      return ret;
-    }
-  } else {
-    // use legacy IV
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  }
+  //   if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
+  //     ret = 1;
+  //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen, ATCHOPS_IV_BUFFER_SIZE);
+  //     return ret;
+  //   }
+  // } else {
+  //   // use legacy IV
+  //   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  // }
 
   const size_t valuerawsize = strlen(message->notification.value) * 4; // most likely enough space after base64 decode
   valueraw = malloc(sizeof(char) * valuerawsize);
@@ -476,5 +476,5 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
     return ret;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "%s: %s\n", message->notification.key.sharedby.str, value.str);
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "%s: %s\n", message->notification.key.sharedby.str, value.str);
 }

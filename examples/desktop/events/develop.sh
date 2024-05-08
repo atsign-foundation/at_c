@@ -12,6 +12,6 @@ SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 "$SCRIPT_DIRECTORY/../../../tools/install.sh"
 cd $SCRIPT_DIRECTORY
 
-cmake -S . -B build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/"$FILE" $@
