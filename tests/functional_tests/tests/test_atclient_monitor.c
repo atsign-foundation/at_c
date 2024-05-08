@@ -78,7 +78,7 @@ int main() {
     goto exit;
   }
 
-  if((ret = monitor_pkam_auth(&heartbeat_conn, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+  if ((ret = monitor_pkam_auth(&heartbeat_conn, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
@@ -110,7 +110,7 @@ int main() {
 
   goto exit;
 exit: {
-  if((ret = functional_tests_tear_down_sharedenckeys(&atclient1, ATKEY_SHAREDWITH)) != 0) {
+  if ((ret = functional_tests_tear_down_sharedenckeys(&atclient1, ATKEY_SHAREDWITH)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to tear down sharedenckeys: %d\n", ret);
   }
@@ -125,7 +125,7 @@ exit: {
 
 static void *heartbeat_handler(void *heartbeat_conn) {
   while (true) {
-    atclient_send_heartbeat((atclient *)heartbeat_conn, true);
+    atclient_send_heartbeat((atclient *)heartbeat_conn, false);
     sleep(2);
   }
 }
@@ -245,24 +245,26 @@ static int test_4_read_notification(atclient *monitor_conn) {
     }
 
     if (message == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "monitor message is NULL, when it is expected to be populated :(\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
+                   "monitor message is NULL, when it is expected to be populated :(\n");
       i++;
       continue;
     }
 
-    if(!atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
+    if (!atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value is not initialized\n");
       i++;
       continue;
     }
 
-    if(!atclient_atnotification_decryptedvaluelen_is_initialized(&(message->notification))) {
+    if (!atclient_atnotification_decryptedvaluelen_is_initialized(&(message->notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value length is not initialized\n");
       i++;
       continue;
     }
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n", (int) message->notification.decryptedvaluelen, message->notification.decryptedvalue);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n",
+                 (int)message->notification.decryptedvaluelen, message->notification.decryptedvalue);
 
     // compare the decrypted value with the expected value
     if (strcmp(message->notification.decryptedvalue, ATKEY_VALUE) != 0) {
