@@ -437,24 +437,24 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
   atclient_atstr_init(&value, valuelen);
 
   // manage IV
-  if (atclient_atkey_metadata_is_ivnonce_initialized(&message->notification.key.metadata)) {
-    size_t ivolen = 0;
-    ret = atchops_base64_decode((unsigned char *)message->notification.key.metadata.ivnonce.str,
-                                message->notification.key.metadata.ivnonce.len, iv, ATCHOPS_IV_BUFFER_SIZE, &ivolen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
-      return ret;
-    }
+  // if (atclient_atkey_metadata_is_ivnonce_initialized(&message->notification.key.metadata)) {
+  //   size_t ivolen = 0;
+    // ret = atchops_base64_decode((unsigned char *) message->notification.key.metadata.ivnonce.str,
+    //                             message->notification.key.metadata.ivnonce.len, iv, ATCHOPS_IV_BUFFER_SIZE, &ivolen);
+    // if (ret != 0) {
+    //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
+    //   return ret;
+    // }
 
-    if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
-      ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen, ATCHOPS_IV_BUFFER_SIZE);
-      return ret;
-    }
-  } else {
-    // use legacy IV
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  }
+  //   if (ivolen != ATCHOPS_IV_BUFFER_SIZE) {
+  //     ret = 1;
+  //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivolen != ivlen (%d != %d)\n", ivolen, ATCHOPS_IV_BUFFER_SIZE);
+  //     return ret;
+  //   }
+  // } else {
+  //   // use legacy IV
+  //   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  // }
 
   const size_t valuerawsize = strlen(message->notification.value) * 4; // most likely enough space after base64 decode
   valueraw = malloc(sizeof(char) * valuerawsize);
@@ -476,5 +476,5 @@ static int attalk_recv_message(atclient_monitor_message *message, char* enc_key_
     return ret;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "%s: %s\n", message->notification.key.sharedby.str, value.str);
+  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "%s: %s\n", message->notification.key.sharedby.str, value.str);
 }
