@@ -177,9 +177,9 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 
 /**
  * @brief Read a notification from the monitor connection into message
- * @param monitor_conn the atclient context for the monitor connection
- * @param atclient the atclient context for the atclient connection, this is should be separate from the monitor_conn to
- * avoid colliding with the monitor connection.
+ * @param monitor_conn the atclient context for the monitor connection. it is assumed that this is intialized and pkam authenticated.
+ * @param atclient the atclient context for the atclient connection, it is advised that this connection an entirely
+ * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is initialized and pkam authenticated.
  * @param message pass in a double pointer to the message, it will be allocated and filled in by this function. The
  * caller is responsible for freeing the message, using atclient_monitor_message_free
  * @return 0 on success, non-zero on error

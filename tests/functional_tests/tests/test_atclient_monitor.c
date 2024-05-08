@@ -30,7 +30,7 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
                              const size_t atsignlen);
 static int test_1_start_monitor(atclient *monitor_conn);
 static int test_2_send_notification(atclient *atclient);
-static int test_3_monitor_for_notification(atclient *monitor_conn);
+static int test_3_monitor_for_notification(atclient *monitor_conn, atclient *atclient2);
 
 int main() {
   int ret = 1;
@@ -45,6 +45,9 @@ int main() {
 
   atclient monitor_conn;
   atclient_init(&monitor_conn);
+
+  atclient atclient2;
+  atclient_init(&atclient2);
 
   atclient_atkeys atkeys_sharedwith;
   atclient_atkeys_init(&atkeys_sharedwith);
@@ -69,6 +72,11 @@ int main() {
     goto exit;
   }
 
+  if((ret = functional_tests_pkam_auth(&atclient2, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
+    goto exit;
+  }
+
   if ((ret = test_1_start_monitor(&monitor_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_start_monitor: %d\n", ret);
     goto exit;
@@ -79,7 +87,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = test_3_monitor_for_notification(&monitor_conn)) != 0) {
+  if ((ret = test_3_monitor_for_notification(&monitor_conn, &atclient2)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_read_notification: %d\n", ret);
     goto exit;
   }
@@ -177,7 +185,7 @@ exit: {
 }
 }
 
-static int test_3_monitor_for_notification(atclient *monitor_conn) {
+static int test_3_monitor_for_notification(atclient *monitor_conn, atclient *atclient2) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_read_notification Start\n");
@@ -188,7 +196,7 @@ static int test_3_monitor_for_notification(atclient *monitor_conn) {
   int tries = 1;
 
   while (tries < max_tries) {
-    if ((ret = atclient_monitor_read(monitor_conn, &message)) != 0) {
+    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       goto exit;
     }

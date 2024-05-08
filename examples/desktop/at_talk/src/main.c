@@ -249,11 +249,11 @@ static int *monitor_handler(char *enc_key_shared_by_other) {
   }
 
   printf("Starting main monitor loop\n");
-  atclient_monitor_message message;
+  atclient_monitor_message *message = NULL;
   atclient_monitor_message_init(&message);
   while (true) {
 
-    int mon_ret = atclient_monitor_read(&monitor_ctx, &message);
+    int mon_ret = atclient_monitor_read(&monitor_ctx, &atclient, &message);
     if (mon_ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", mon_ret);
       continue;
