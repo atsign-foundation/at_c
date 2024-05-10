@@ -3,7 +3,6 @@
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
 #include "atclient/stringutils.h"
-#include "cJSON.h"
 #include <atchops/aes.h>
 #include <atchops/aesctr.h>
 #include <atchops/base64.h>

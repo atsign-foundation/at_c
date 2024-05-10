@@ -682,10 +682,11 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
       }
     } else {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Notification is not encrypted\n");
-      atclient_atnotification_set_decryptedvalue(&((*message)->notification), (*message)->notification.value,
+      atclient_atnotification_set_decryptedvalue(&((*message)->notification),
+                                                 (unsigned char *)(*message)->notification.value,
                                                  strlen((*message)->notification.value));
       atclient_atnotification_set_decryptedvaluelen(&((*message)->notification),
-                                                     strlen((*message)->notification.value));
+                                                    strlen((*message)->notification.value));
     }
   } else if (strcmp(messagetype, "data") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
@@ -1022,12 +1023,12 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 3. get shared encryption key to decrypt
-  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, sharedenckeybase64);
+  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, (char *)sharedenckeybase64);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
     goto exit;
   }
-  sharedenckeybase64len = strlen(sharedenckeybase64);
+  sharedenckeybase64len = strlen((char *)sharedenckeybase64);
 
   ret = atchops_base64_decode(sharedenckeybase64, sharedenckeybase64len, sharedenckey, sharedenckeysize,
                               &sharedenckeylen);
@@ -1042,8 +1043,8 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 4. decrypt value
-  ret = atchops_base64_decode(notification->value, strlen(notification->value), ciphertext, ciphertextsize,
-                              &ciphertextlen);
+  ret = atchops_base64_decode((unsigned char *)notification->value, strlen(notification->value), ciphertext,
+                              ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");
     goto exit;
