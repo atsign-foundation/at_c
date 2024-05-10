@@ -31,7 +31,7 @@ void atclient_notify_params_init(atclient_notify_params *params) {
 }
 
 void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
-                                   atclient_atkey *atkey, char *value, bool shouldencrypt) {
+                                   atclient_atkey *atkey, const char *value, bool shouldencrypt) {
   params->operation = operation;
   params->key = *atkey;
   params->value = value;
