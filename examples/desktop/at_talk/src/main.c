@@ -8,6 +8,7 @@
 #include <atclient/constants.h>
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
+#include <atclient/constants.h>
 #include <atclient/notify.h>
 #include <atlogger/atlogger.h>
 #include <pthread.h>
@@ -31,12 +32,13 @@ static int get_atkeys_path(const char *atsign, const size_t atsignlen, char **at
 static void *monitor_handler(atclient *atclient2);
 static int attalk_send_message(atclient *ctx, const char *recipient_atsign, const char *message,
                                const size_t messagelen);
-static void attalk_recv_message(atclient_monitor_message *message);
+static int attalk_recv_message(atclient *monitor, char **messageptr, char **sender_atsign);
 
 int main(int argc, char **argv) {
   int ret = 0;
 
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
   char *atkeyspath1 = NULL;
 
@@ -56,6 +58,8 @@ int main(int argc, char **argv) {
   atclient_init(&monitor);
 
   pthread_t tid;
+
+  printf("Setup (1/3) .. ");
 
   if ((ret = parse_args(argc, argv, &from_atsign, &to_atsign)) != 0) {
     printf("Issue with parsing arguments\n");
@@ -77,6 +81,9 @@ int main(int argc, char **argv) {
     goto exit;
   }
 
+    printf("(2/3) .. ");
+
+
   if ((ret = atclient_pkam_authenticate(&atclient1, &root_conn, &atkeys1, from_atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
@@ -87,16 +94,19 @@ int main(int argc, char **argv) {
     goto exit;
   }
 
-  ret = pthread_create(&tid, NULL, monitor_handler, &monitor);
+  ret = pthread_create(&tid, NULL,  (void *) monitor_handler, &monitor);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create monitor_handler\n");
     return ret;
   }
 
+  printf("(3/3).\n");
+
   char *line = NULL;
   size_t linelen = 0;
   size_t read;
 
+  printf("%s%s%s -> ", HBLU, from_atsign, reset);
   while ((read = getline(&line, &linelen, stdin)) != -1) {
 
     if (line[read - 1] == '\n') {
@@ -104,6 +114,7 @@ int main(int argc, char **argv) {
     }
 
     ret = attalk_send_message(&atclient1, to_atsign, line, linelen);
+    printf("%s%s%s -> ", HBLU, from_atsign, reset);
   }
 
   ret = 0;
@@ -171,8 +182,6 @@ static int get_atkeys_path(const char *atsign, const size_t atsignlen, char **at
 static void *monitor_handler(atclient *atclient2) {
   int ret = 0;
 
-  atclient_monitor_message *message;
-
   if ((ret = atclient_monitor_start(atclient2, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
@@ -181,20 +190,18 @@ static void *monitor_handler(atclient *atclient2) {
   bool loop = true;
 
   while (loop) {
-    ret = atclient_monitor_read(atclient2, atclient2, &message);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_for_notification: %d\n", ret);
-      loop = false;
-      break;
+    char *messageptr = NULL;
+    char *sender_atsign = NULL;
+    attalk_recv_message(atclient2, &messageptr, &sender_atsign);
+    if (messageptr != NULL) {
+      printf("\n%s%s%s: %s\n", HMAG, sender_atsign, reset, messageptr);
+      free(messageptr);
+      free(sender_atsign);
     }
-
-    attalk_recv_message(message);
   }
+  goto exit;
 
-exit: {
-  atclient_monitor_message_free(message);
-  return NULL;
-}
+exit: { return NULL; }
 }
 
 static int attalk_send_message(atclient *ctx, const char *recipient_atsign, const char *message,
@@ -226,8 +233,15 @@ static int attalk_send_message(atclient *ctx, const char *recipient_atsign, cons
 exit: { return ret; }
 }
 
-static void attalk_recv_message(atclient_monitor_message *message) {
+static int attalk_recv_message(atclient *monitor, char **messageptr, char **sender_atsign) {
   int ret = 1;
+
+  atclient_monitor_message *message = NULL;
+
+  if ((ret = atclient_monitor_read(monitor, monitor, &message)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_for_notification: %d\n", ret);
+    goto exit;
+  }
 
   switch (message->type) {
   case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
@@ -242,11 +256,27 @@ static void attalk_recv_message(atclient_monitor_message *message) {
     break;
   }
   case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Received notification: %s\n", message->notification.decryptedvalue);
+    // if key does not contain ATKEY_NAMESPACE, skip
+    atclient_atkey atkey;
+    atclient_atkey_init(&atkey);
+    atclient_atkey_from_string(&atkey, message->notification.key, strlen(message->notification.key));
+
+    if (strcmp(atkey.namespacestr.str, ATKEY_NAMESPACE) == 0 && strcmp(atkey.name.str, ATKEY_NAME) == 0) {
+      // clear stdin
+      *messageptr = strdup(message->notification.decryptedvalue);
+      *sender_atsign = strdup(message->notification.from);
+      ret = 0;
+    }
+    atclient_atkey_free(&atkey);
     break;
   }
   default: {
     break;
   }
   }
+  goto exit;
+exit: {
+  atclient_monitor_message_free(&message);
+  return ret;
+}
 }
