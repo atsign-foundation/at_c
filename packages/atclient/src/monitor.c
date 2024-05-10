@@ -591,8 +591,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
     goto exit;
   }
   fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;95m",
-               (int)strlen(cmd), cmd);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
 
   ret = 0;
   goto exit;
@@ -657,8 +656,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   *message = malloc(sizeof(atclient_monitor_message));
   atclient_monitor_message_init(*message);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%s:%s\"\e[0m\n", "\e[1;35m", "\e[0;95m", messagetype,
-               messagebody);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
+               reset);
 
   if (strcmp(messagetype, "notification") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
@@ -685,7 +684,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
       atclient_atnotification_set_decryptedvalue(&((*message)->notification), (*message)->notification.value,
                                                  strlen((*message)->notification.value));
       atclient_atnotification_set_decryptedvaluelen(&((*message)->notification),
-                                                     strlen((*message)->notification.value));
+                                                    strlen((*message)->notification.value));
     }
   } else if (strcmp(messagetype, "data") == 0) {
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;

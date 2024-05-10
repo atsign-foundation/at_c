@@ -3,6 +3,7 @@
 #include "atchops/constants.h"
 #include "atclient/atstr.h"
 #include "atclient/cacerts.h"
+#include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
@@ -215,8 +216,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
-               (int)stdoutbuffer.len, stdoutbuffer.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)stdoutbuffer.len,
+               stdoutbuffer.str, reset);
 
   memset(recv, 0, recvsize);
   int found = 0;
@@ -254,8 +255,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
   fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m",
-               (int)stdoutbuffer.len, stdoutbuffer.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG,
+               (int)stdoutbuffer.len, stdoutbuffer.str, reset);
   memset(recv, 0, sizeof(unsigned char) * recvsize); // clear the buffer
   memcpy(recv, stdoutbuffer.str, stdoutbuffer.len);
   goto exit;

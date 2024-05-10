@@ -213,8 +213,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
-               (int)commandlen - 2, command);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)commandlen - 2, command,
+               reset);
 
   if (!listen_for_ack) {
     ret = 0;
@@ -245,8 +245,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
     }
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"\e[0m\n", "\e[1;35m", "\e[0;95m", (int)recvlen,
-               ptr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)recvlen,
+               ptr, reset);
 
   if (!atclient_stringutils_starts_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok")) &&
       !atclient_stringutils_ends_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok"))) {
