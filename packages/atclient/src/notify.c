@@ -106,7 +106,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   snprintf(cmd + off, cmdsize - off, "notify");
   off += strlen("notify");
 
-  if (params->id != NULL && strlen(params->id) > 0) {
+  if (strlen(params->id) > 0) {
     snprintf(cmd + off, cmdsize - off, ":id:%s", params->id);
     off += 1 + 2 + 1 + strlen(params->id);
   }
@@ -158,8 +158,8 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     size_t sharedenckeylen;
 
     if (params->sharedenckeybase64 != NULL) {
-      res = atchops_base64_decode(params->sharedenckeybase64, strlen(params->sharedenckeybase64), sharedenckey,
-                                  sharedenckeysize, &sharedenckeylen);
+      res = atchops_base64_decode((unsigned char *)params->sharedenckeybase64, strlen(params->sharedenckeybase64),
+                                  sharedenckey, sharedenckeysize, &sharedenckeylen);
       if (res != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", res);
         return res;
@@ -178,13 +178,14 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", res);
         return res;
       }
-      if ((res = atclient_get_shared_encryption_key_shared_by_me(ctx, &recipient, sharedenckeybase64, true)) != 0) {
+      if ((res = atclient_get_shared_encryption_key_shared_by_me(ctx, &recipient, (char *)sharedenckeybase64, true)) !=
+          0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                      "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", res);
         return res;
       }
-      if ((res = atchops_base64_decode(sharedenckeybase64, strlen(sharedenckeybase64), sharedenckey, sharedenckeysize,
-                                       &sharedenckeylen)) != 0) {
+      if ((res = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
+                                       sharedenckeysize, &sharedenckeylen)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", res);
         return res;
       }
@@ -209,14 +210,14 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return res;
     }
 
-    res = atclient_atkey_metadata_set_ivnonce(&params->key.metadata, ivbase64, ivbase64len);
+    res = atclient_atkey_metadata_set_ivnonce(&params->key.metadata, (char *)ivbase64, ivbase64len);
     if (res != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", res);
       return res;
     }
 
-    res = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, params->value, strlen(params->value), ciphertext,
-                                 ciphertextsize, &ciphertextlen);
+    res = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)params->value,
+                                 strlen(params->value), ciphertext, ciphertextsize, &ciphertextlen);
     if (res != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt failed with code %d\n", res);
       return res;
@@ -258,8 +259,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   off += atkeylen;
 
   // Step 6 send the encrypted notification
-  if(params->shouldencrypt)
-  {
+  if (params->shouldencrypt) {
     snprintf(cmd + off, cmdsize - off, ":%s", ciphertextbase64);
     off += 1 + ciphertextbase64len;
   } else {
@@ -271,21 +271,27 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   off += 2;
 
   const size_t recvsize = 64;
-  unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  unsigned char *recv;
+  if (!ctx->async_read) {
+    recv = malloc(sizeof(unsigned char) * recvsize);
+    memset(recv, 0, sizeof(unsigned char) * recvsize);
+  }
   size_t recvlen = 0;
 
-  res = atclient_connection_send(&(ctx->secondary_connection), cmd, strlen(cmd), recv, recvsize, &recvlen);
+  res = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)cmd, strlen(cmd), recv, recvsize,
+                                 &recvlen);
+
   if (res != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
-    return res;
+    goto exit;
+  } else if (ctx->async_read) {
+    goto exit;
   }
-
   // if starts with data:
-  if (atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
+  if (atclient_stringutils_starts_with((char *)recv, recvlen, "data:", strlen("data:"))) {
     if (notification_id != NULL) { // if not null, then they care about the notification id
       // parse the notification id
-      char *data = recv + strlen("data:");
+      char *data = (char *)recv + strlen("data:");
       size_t datalen = recvlen - strlen("data:");
       if (datalen > 36) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification id too long\n");
@@ -300,5 +306,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     res = 1;
   }
 
+exit: {
+  if (!ctx->async_read) {
+    free(recv);
+  }
   return res;
+}
 }

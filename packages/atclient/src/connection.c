@@ -218,6 +218,10 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;96m",
                (int)stdoutbuffer.len, stdoutbuffer.str);
 
+  if (recv == NULL) {
+    goto exit;
+  }
+
   memset(recv, 0, recvsize);
   int found = 0;
   size_t l = 0;

@@ -16,6 +16,7 @@ typedef struct atclient {
   atclient_connection secondary_connection;
   atclient_atsign atsign;
   atclient_atkeys atkeys;
+  bool async_read;
 } atclient;
 
 /**
@@ -166,14 +167,12 @@ void atclient_free(atclient *ctx);
 /**
  * @brief Send a heartbeat (noop)
  * @param heartbeat_conn the initialized and pkam authenticated atclient context to send the heartbeat
- * @param listen_for_ack if true, the function will wait for an ack from the server, if false, it will not. Set to false
- * if you want a more lightweight heartbeat
  * @return 0 on success, non-zero on error
  *
  * @note Ideally this is scheduled to be sent every 30 seconds
  * @note this is different than a normal noop command, since we don't listen for the response from the server
  * @note It is the responsibility of the caller to ensure that the connection is still alive
  */
-int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack);
+int atclient_send_heartbeat(atclient *heartbeat_conn);
 
 #endif
