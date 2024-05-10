@@ -22,7 +22,6 @@
 static int parse_message(char *original, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
-static void fix_stdout_buffer(char *str, const size_t strlen);
 
 void atclient_atnotification_init(atclient_atnotification *notification) {
   memset(notification, 0, sizeof(atclient_atnotification));
@@ -584,15 +583,14 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
     snprintf(cmd, cmdsize, "monitor\r\n");
   }
 
+  monitor_conn->async_read = true;
+
+  ret = atclient_connection_send(&monitor_conn->secondary_connection, (unsigned char *)cmd, cmdlen, NULL, 0, NULL);
   // 3. send monitor cmd
-  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (unsigned char *)cmd, cmdlen);
-  if (ret < 0 || ret != cmdlen) {
+  if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
   }
-  fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"\e[0m\n", "\e[1;34m", "\e[0;95m",
-               (int)strlen(cmd), cmd);
 
   ret = 0;
   goto exit;
@@ -1073,48 +1071,4 @@ exit: {
   free(decryptedvaluetemp);
   return ret;
 }
-}
-static void fix_stdout_buffer(char *str, const size_t strlen) {
-  // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
-  // if str == 'Jeremy\n', i want it to be 'Jeremy'
-  // if str == 'Jeremy\r', i want it to be 'Jeremy'
-
-  if (strlen == 0) {
-    return;
-  }
-
-  int carriagereturnindex = -1;
-  int newlineindex = -1;
-
-  for (int i = strlen; i >= 0; i--) {
-    if (str[i] == '\r' && carriagereturnindex == -1) {
-      carriagereturnindex = i;
-    }
-    if (carriagereturnindex != -1 && newlineindex != -1) {
-      break;
-    }
-  }
-
-  if (carriagereturnindex != -1) {
-    for (int i = carriagereturnindex; i < strlen - 1; i++) {
-      str[i] = str[i + 1];
-    }
-    str[strlen - 1] = '\0';
-  }
-
-  for (int i = strlen; i >= 0; i--) {
-    if (str[i] == '\n' && newlineindex == -1) {
-      newlineindex = i;
-    }
-    if (carriagereturnindex != -1 && newlineindex != -1) {
-      break;
-    }
-  }
-
-  if (newlineindex != -1) {
-    for (int i = newlineindex; i < strlen - 1; i++) {
-      str[i] = str[i + 1];
-    }
-    str[strlen - 1] = '\0';
-  }
 }

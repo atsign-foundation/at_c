@@ -16,6 +16,8 @@ typedef struct atclient {
   atclient_connection secondary_connection;
   atclient_atsign atsign;
   atclient_atkeys atkeys;
+  // Warning! async_read is an experimental feature and not fully implemented.
+  // You should leave this set to false unless you know what you are doing.
   bool async_read;
 } atclient;
 
