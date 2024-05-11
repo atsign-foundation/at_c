@@ -16,6 +16,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #define TAG "atclient_notify"
 
 void atclient_notify_params_init(atclient_notify_params *params) {
@@ -31,7 +33,7 @@ void atclient_notify_params_init(atclient_notify_params *params) {
 }
 
 void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
-                                   atclient_atkey *atkey, char *value, bool shouldencrypt) {
+                                   atclient_atkey *atkey, const char *value, bool shouldencrypt) {
   params->operation = operation;
   params->key = *atkey;
   params->value = value;
@@ -141,7 +143,12 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     off += 6 + ttln_len;
   }
 
-  const size_t ciphertextbase64size = strlen(params->value) * 4; // TODO optimize
+  const size_t ciphertextsize = MAX(strlen(params->value) * 2, 128); // TODO optimize
+  unsigned char ciphertext[ciphertextsize];
+  memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
+  size_t ciphertextlen = 0;
+
+  const size_t ciphertextbase64size = MAX(ciphertextsize * 2, 128); // TODO optimize
   unsigned char ciphertextbase64[ciphertextbase64size];
   memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
   size_t ciphertextbase64len = 0;
@@ -189,11 +196,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         return res;
       }
     }
-
-    const size_t ciphertextsize = strlen(params->value) * 2; // TODO optimize
-    unsigned char ciphertext[ciphertextsize];
-    memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
-    size_t ciphertextlen = 0;
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
