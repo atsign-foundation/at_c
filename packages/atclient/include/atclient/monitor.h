@@ -4,24 +4,28 @@
 #include "atclient.h"
 #include "atkey.h"
 
+/**
+ * @brief Represents a notification received from the monitor connection
+ */
 typedef struct atclient_atnotification {
   // initializedfields[0]
-  char *id;
-  char *from;
-  char *to;
-  char *key;
-  char *value;
-  char *operation;
-  size_t epochMillis;
-  char *messageType;
+  char *id;           // holds notification id, typically a 36 + 1 null terminated string
+  char *from;         // holds the from atSign (who sent the notification)
+  char *to;           // holds the to atSign (who the notification is for)
+  char *key;          // holds the key of the notification (e.g. "@bob:location.app@alice")
+  char *value;        // holds the value that is read from the notification, this would typically be base64 encoded and
+                      // encrypted, see decryptedvalue for the decrypted value
+  char *operation;    // holds the operation of the notification (e.g. "update", "delete")
+  size_t epochMillis; // holds the epoch time in milliseconds when the notification was sent
+  char *messageType;  // holds the message type of the notification (e.g. "data", "error")
 
   // initalizedfields[1]
   bool isEncrypted : 1;
-  char *encKeyName;              // in metadata
-  char *encAlgo;                 // in metadata
-  char *ivNonce;                 // in metadata
-  char *skeEncKeyName;           // in metadata
-  char *skeEncAlgo;              // in metadata
+  char *encKeyName;              // in metaData
+  char *encAlgo;                 // in metaData
+  char *ivNonce;                 // in metaData
+  char *skeEncKeyName;           // in metaData
+  char *skeEncAlgo;              // in metaData
   unsigned char *decryptedvalue; // if isEncrypted, this will be the decrypted value
   size_t decryptedvaluelen;      // represents the length of the decrypted value
 
@@ -50,9 +54,28 @@ typedef struct atclient_atnotification {
 #define ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 6)
 #define ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED (ATCLIENT_ATNOTIFICATION_INITIALIZED << 7)
 
+/**
+ * @brief Initializes the atnotification to a default state, ready for use in other functions.
+ *
+ * Example use:
+ * atclient_atnotification notification;
+ * atclient_atnotification_init(&notification);
+ *
+ * @param notification pointer to the atnotification to initialize, it is assumed that the memory for this struct has
+ * already been allocated (either statically or dynamically, it is up to the caller to make this decision)
+ */
 void atclient_atnotification_init(atclient_atnotification *notification);
+
+/**
+ * @brief Frees the memory allocated for the atnotification. _init or any subsequent functions may have allocated memory
+ * in this context and it is the caller's responsibility to free this memory.
+ *
+ * @param notification the atnotification to free, assumed to already have been allocated by the caller and initialized
+ * by the caller using _init
+ */
 void atclient_atnotification_free(atclient_atnotification *notification);
 
+// Check if a field is initialized
 bool atclient_atnotification_id_is_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_from_is_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_to_is_initialized(const atclient_atnotification *notification);
@@ -70,6 +93,7 @@ bool atclient_atnotification_skeEncAlgo_is_initialized(const atclient_atnotifica
 bool atclient_atnotification_decryptedvalue_is_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_decryptedvaluelen_is_initialized(const atclient_atnotification *notification);
 
+// Set a field as initialized or not
 void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, bool initialized);
 void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, bool initialized);
 void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, bool initialized);
@@ -87,6 +111,7 @@ void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification 
 void atclient_atnotification_decryptedvalue_set_initialized(atclient_atnotification *notification, bool initialized);
 void atclient_atnotification_decryptedvaluelen_set_initialized(atclient_atnotification *notification, bool initialized);
 
+// Free a field, some fields are dynamically allocated when set
 void atclient_atnotification_free_id(atclient_atnotification *notification);
 void atclient_atnotification_free_from(atclient_atnotification *notification);
 void atclient_atnotification_free_to(atclient_atnotification *notification);
@@ -104,6 +129,8 @@ void atclient_atnotification_free_skeEncAlgo(atclient_atnotification *notificati
 void atclient_atnotification_free_decryptedvalue(atclient_atnotification *notification);
 void atclient_atnotification_free_decryptedvaluelen(atclient_atnotification *notification);
 
+// Setters for the fields, these functions check if the field is initialized before setting the value (and overwrites if
+// it is)
 void atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen);
 void atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen);
 void atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen);
@@ -130,6 +157,11 @@ void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notific
 void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
                                                    const size_t decryptedvaluelen);
 
+/**
+ * @brief Represents a message received from the monitor connection, typically derived from the prefix of the response
+ * (e.g. "data:ok"'s message type would be "data" = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE)
+ *
+ */
 enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
@@ -137,6 +169,13 @@ enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE
 };
 
+/**
+ * @brief Represents a message received from the monitor connection
+ *
+ * @note `type` is the type of message received, it could be a notification, a data response, or an error response and
+ * reading this field will tell you which data field of the union to access. Example, if type is
+ * ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,t then you should access the notification field of the union
+ */
 typedef struct atclient_monitor_message {
   enum atclient_monitor_message_type type;
   union {
@@ -146,10 +185,40 @@ typedef struct atclient_monitor_message {
   };
 } atclient_monitor_message;
 
+/**
+ * @brief Initializes the monitor message to a default state, ready for use in other functions.
+ *
+ * Example:
+ * atclient_monitor_message message;
+ * atclient_monitor_message_init(&message);
+ *
+ * @param message the message to initialize, it is assumed that the memory for this struct has already been allocated
+ */
 void atclient_monitor_message_init(atclient_monitor_message *message);
+
+/**
+ * @brief Initializes the monitor message to a default state, ready for use in other functions.
+ *
+ * @param message the message to free, it is assumed that the memory for this struct has already been allocated and was
+ * previous called with atclient_monitor_message_init
+ */
 void atclient_monitor_message_free(atclient_monitor_message *message);
 
+/**
+ * @brief Initializes the monitor connection. It is recommended that this be called before any other monitor functions.
+ * It is also recommended that this is separate from the atclient connection that it is used for  crud operations and
+ * exclusively used for monitoring to avoid collisions in SSL reading.
+ *
+ * @param monitor_conn the atclient context for the monitor connection, must be allocated by the caller before passing
+ * to this function (either statically or dynamically, it is up to the caller to make this decision)
+ */
 void atclient_monitor_init(atclient *monitor_conn);
+
+/**
+ * @brief Frees the monitor connection and anything that any monitor functions could have allocated in the context.
+ *
+ * @param monitor_conn the allocated atclient context for the monitor connection
+ */
 void atclient_monitor_free(atclient *monitor_conn);
 
 /**
@@ -177,9 +246,11 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 
 /**
  * @brief Read a notification from the monitor connection into message
- * @param monitor_conn the atclient context for the monitor connection. it is assumed that this is intialized and pkam authenticated.
+ * @param monitor_conn the atclient context for the monitor connection. it is assumed that this is intialized and pkam
+ * authenticated.
  * @param atclient the atclient context for the atclient connection, it is advised that this connection an entirely
- * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is initialized and pkam authenticated.
+ * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is
+ * initialized and pkam authenticated.
  * @param message pass in a double pointer to the message, it will be allocated and filled in by this function. The
  * caller is responsible for freeing the message, using atclient_monitor_message_free
  * @return 0 on success, non-zero on error
