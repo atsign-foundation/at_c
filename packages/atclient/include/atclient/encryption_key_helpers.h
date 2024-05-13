@@ -1,3 +1,7 @@
+#ifndef ATCLIENT_ENCRYPTION_KEY_HELPERS_H
+#define ATCLIENT_ENCRYPTION_KEY_HELPERS_H
+
+
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
@@ -59,3 +63,5 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
 int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, const atclient_atsign *sharedby,
                                                                 const atclient_atsign *sharedwith,
                                                                 char *sharedenckeybyme);
+
+#endif // ATCLIENT_ENCRYPTION_KEY_HELPERS_H
