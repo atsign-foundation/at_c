@@ -33,20 +33,6 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
                                                        char *enc_key_shared_by_other);
 
 /**
- * @brief Creates a symmetric shared key, which the atclient atsign shares with the recipient atsign.
- *
- * @param ctx Initialized atclient context (required)
- * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign with which you want to create the shared key
- * (required)
- * @param enc_key_shared_by_me The output new shared key (which was already stored in the server) in b64 format
- * (required)
- * @return int 0 on success, error otherwise
- */
-int atclient_create_shared_encryption_key(atclient *ctx, atclient_connection *root_conn,
-                                          const atclient_atsign *recipient, char *enc_key_shared_by_me);
-
-/**
  * @brief Retreives the public encryption key of a given atsign.
  *
  * @param ctx Initialized atclient context (required)
