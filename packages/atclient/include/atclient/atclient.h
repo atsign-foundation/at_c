@@ -161,8 +161,6 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  */
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
 
-void atclient_free(atclient *ctx);
-
 /**
  * @brief Send a heartbeat (noop)
  * @param heartbeat_conn the initialized and pkam authenticated atclient context to send the heartbeat
@@ -175,5 +173,13 @@ void atclient_free(atclient *ctx);
  * @note It is the responsibility of the caller to ensure that the connection is still alive
  */
 int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack);
+
+/**
+ * @brief Frees memory allocated by atclient's _init function. The caller of _init is responsible for calling this once
+ * it is done with the atclient context.
+ *
+ * @param ctx the atclient context to free
+ */
+void atclient_free(atclient *ctx);
 
 #endif
