@@ -63,8 +63,8 @@ typedef struct atclient_notify_params {
 } atclient_notify_params;
 
 void atclient_notify_params_init(atclient_notify_params *params);
-void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
-                                   atclient_atkey *atkey, char *value, bool shouldencrypt);
+void atclient_notify_params_create(atclient_notify_params *params, const enum atclient_notify_operation operation,
+                                   atclient_atkey *atkey, const char *value, const bool shouldencrypt);
 void atclient_notify_params_free(atclient_notify_params *params);
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id);
