@@ -259,8 +259,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
   fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG,
-               (int)stdoutbuffer.len, stdoutbuffer.str, reset);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)stdoutbuffer.len,
+               stdoutbuffer.str, reset);
   memset(recv, 0, sizeof(unsigned char) * recvsize); // clear the buffer
   memcpy(recv, stdoutbuffer.str, stdoutbuffer.len);
   goto exit;

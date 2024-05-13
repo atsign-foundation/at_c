@@ -35,7 +35,7 @@ void atclient_notify_params_create(atclient_notify_params *params, enum atclient
                                    atclient_atkey *atkey, const char *value, bool shouldencrypt) {
   params->operation = operation;
   params->key = *atkey;
-  params->value = value;
+  params->value = (char *)value;
   params->shouldencrypt = shouldencrypt;
 }
 

@@ -206,20 +206,6 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
   const char *command = "noop:0\r\n";
   const size_t commandlen = strlen(command);
 
-  ret = mbedtls_ssl_write(&(heartbeat_conn->secondary_connection.ssl), (const unsigned char *)command, commandlen);
-  if (ret < 0 || ret != 8) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
-    goto exit;
-  }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)commandlen - 2, command,
-               reset);
-
-  if (!listen_for_ack) {
-    ret = 0;
-    goto exit;
-  }
-
   const size_t recvsize = 64;
   if (!heartbeat_conn->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
@@ -236,21 +222,6 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
   } else if (heartbeat_conn->async_read) {
     goto exit;
   }
-  recvlen = ret;
-
-  // recv may have format of `<data>\n<excess>` or <excess>\n<data>
-  // i only want <data>
-  // modify recv to only contain <data>
-  for (int i = 0; i < recvlen; i++) {
-    if (ptr[i] == '\n') {
-      ptr[i] = '\0';
-      recvlen = i;
-      break;
-    }
-  }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)recvlen,
-               ptr, reset);
 
   if (!atclient_stringutils_starts_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok")) &&
       !atclient_stringutils_ends_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok"))) {
