@@ -45,4 +45,5 @@ int atclient_stringutils_ends_with(const char *string, const size_t stringlen, c
  * @return int the string length
  */
 int long_strlen(long n);
+
 #endif

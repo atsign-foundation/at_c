@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef ATCLIENT_CACERTS_H
+#define ATCLIENT_CACERTS_H
+
 // ISRG Root X1
 // ============
 #define LETS_ENCRYPT_ROOT                                                                                              \
@@ -205,3 +208,5 @@
   "ON51WhJ6W0xNdNJwzYASZYH+tmCWI+N60Gv2NNMGHwMZ7e9bXgzUCZH5FaBFDGR5\r\n"                                               \
   "S9VWqHB73Q+OyIVvIbKYcSc2w/aSuFKGSA==\r\n"                                                                           \
   "-----END CERTIFICATE-----\r\n"
+
+#endif

@@ -615,7 +615,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
   bool done_reading = false;
   while (!done_reading) {
-    // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reading chunk...\n");
     if (chunks > 0) {
       buffertemp = realloc(buffer, sizeof(char) * (chunksize + (chunksize * chunks)));
       buffer = buffertemp;
@@ -642,8 +641,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     i++;
   }
 
-  // print buffer
-
   char *messagetype = NULL;
   char *messagebody = NULL;
   ret = parse_message(buffer, &messagetype, &messagebody);
@@ -651,9 +648,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
-
-  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Type: %s\n", messagetype);
-  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", messagebody);
 
   *message = malloc(sizeof(atclient_monitor_message));
   atclient_monitor_message_init(*message);
@@ -676,13 +670,11 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         ret = 0;
         goto exit;
       }
-      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Decrypting notification...\n");
       if ((ret = decrypt_notification(atclient, &((*message)->notification))) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
       }
     } else {
-      // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Notification is not encrypted\n");
       atclient_atnotification_set_decryptedvalue(&((*message)->notification),
                                                  (unsigned char *)(*message)->notification.value,
                                                  strlen((*message)->notification.value));
@@ -713,6 +705,9 @@ exit: {
 }
 }
 
+// given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
+// error, notification) and return the message body which is everything after the prefix (data:, error:, notification:).
+// This function will modify *message_type and *message_body to point to the respective values in *original.
 static int parse_message(char *original, char **message_type, char **message_body) {
   int ret = -1;
 
@@ -765,11 +760,9 @@ static int parse_message(char *original, char **message_type, char **message_bod
 exit: { return ret; }
 }
 
+// populates *notification given a notification "*messagebody" which has been received from atServer
 static int parse_notification(atclient_atnotification *notification, const char *messagebody) {
   int ret = -1;
-
-  // log "parsing notification..."
-  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Parsing notification...\n");
 
   cJSON *root = NULL;
 
@@ -955,6 +948,8 @@ exit: {
 }
 }
 
+// after calling `parse_notification`, the *notification struct will be partially filled, all that is left to do is
+// decrypt notification->value and put the result in notification->decryptedvalue
 static int decrypt_notification(atclient *atclient, atclient_atnotification *notification) {
   int ret = 1;
 
@@ -1075,6 +1070,8 @@ exit: {
   return ret;
 }
 }
+
+// fixes stdout buffer by removing '\r' and '\n' characters for printing nicely
 static void fix_stdout_buffer(char *str, const size_t strlen) {
   // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
   // if str == 'Jeremy\n', i want it to be 'Jeremy'
