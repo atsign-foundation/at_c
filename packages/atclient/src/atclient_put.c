@@ -16,6 +16,11 @@
 #define TAG "atclient_put"
 
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
+  if (atclient->async_read) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
+    return 1;
+  }
   int ret = 1;
 
   // make sure shared by is atclient->atsign.atsign

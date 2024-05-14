@@ -42,6 +42,11 @@ void atclient_notify_params_create(atclient_notify_params *params, enum atclient
 void atclient_notify_params_free(atclient_notify_params *params) { memset(params, 0, sizeof(atclient_notify_params)); }
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id) {
+  if (ctx->async_read) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_notify cannot be called from an async_read atclient, it will cause a race condition\n");
+    return 1;
+  }
   int res = 1;
   // Step 1 calculate the buffer size needed for the protocol command
   // size_t cmdsize = 6 + 3 +                               // "notify" (6) + "\r\n\0" (3)
