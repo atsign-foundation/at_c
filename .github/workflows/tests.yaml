@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [trunk]
 
-permissions:  # added using https://github.com/step-security/secure-repo
+permissions: # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
@@ -21,6 +21,8 @@ jobs:
           ./tools/run_ctest.sh
 
   functional-tests:
+    # Don't run on PRs from a fork or Dependabot as the secrets aren't available
+    if: ${{ github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'}}
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
@@ -61,19 +63,19 @@ jobs:
           cmake -S . -B build -DTARGET_SRC=put_publickey.c && cmake --build build
           cmake -S . -B build -DTARGET_SRC=put_selfkey.c && cmake --build build
           cmake -S . -B build -DTARGET_SRC=put_sharedkey.c && cmake --build build
-      
+
       - name: Build events
         working-directory: examples/desktop/events
         run: |
           cmake -S . -B build
           cmake --build build
-      
+
       - name: Build pkam_authenticate
         working-directory: examples/desktop/pkam_authenticate
         run: |
           cmake -S . -B build
           cmake --build build
-      
+
       - name: Build REPL
         working-directory: examples/desktop/repl
         run: |
