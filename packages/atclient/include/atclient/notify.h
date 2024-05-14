@@ -1,3 +1,6 @@
+#ifndef ATCLIENT_NOTIFY_H
+#define ATCLIENT_NOTIFY_H
+
 #include "atclient.h"
 #include "atkey.h"
 
@@ -68,3 +71,5 @@ void atclient_notify_params_create(atclient_notify_params *params, const enum at
 void atclient_notify_params_free(atclient_notify_params *params);
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id);
+
+#endif // ATCLIENT_NOTIFY_H
