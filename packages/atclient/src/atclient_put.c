@@ -15,8 +15,12 @@
 
 #define TAG "atclient_put"
 
-int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
-                 const size_t valuelen, int *commitid) {
+int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
+  if (atclient->async_read) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
+    return 1;
+  }
   int ret = 1;
 
   // make sure shared by is atclient->atsign.atsign
@@ -32,8 +36,11 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
   size_t atkeystrlen = 0;
 
   const size_t recvsize = 4096;
-  unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  unsigned char *recv;
+  if (!atclient->async_read) {
+    recv = malloc(sizeof(unsigned char) * recvsize);
+    memset(recv, 0, sizeof(unsigned char) * recvsize);
+  }
   size_t recvlen = 0;
 
   const short ivsize = ATCHOPS_IV_BUFFER_SIZE;
@@ -89,21 +96,23 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
     unsigned char selfencryptionkey[selfencryptionkeysize];
     memset(selfencryptionkey, 0, sizeof(unsigned char) * (ATCHOPS_AES_256 / 8));
     size_t selfencryptionkeylen = 0;
-    ret = atchops_base64_decode((const unsigned char *) atclient->atkeys.selfencryptionkeystr.str, atclient->atkeys.selfencryptionkeystr.len,
-                                selfencryptionkey, selfencryptionkeysize, &selfencryptionkeylen);
+    ret = atchops_base64_decode((const unsigned char *)atclient->atkeys.selfencryptionkeystr.str,
+                                atclient->atkeys.selfencryptionkeystr.len, selfencryptionkey, selfencryptionkeysize,
+                                &selfencryptionkeylen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
-    ret = atchops_aesctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen,
-                                 ciphertext, ciphertextsize, &ciphertextlen);
+    ret = atchops_aesctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertext,
+                                 ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
       goto exit;
     }
 
-    ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *) ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *)ciphertextbase64, ciphertextbase64size,
+                                &ciphertextbase64len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
@@ -131,7 +140,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
       goto exit;
     }
 
-    ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, (unsigned char *) ivbase64, ivbase64size, &ivbase64len);
+    ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, (unsigned char *)ivbase64, ivbase64size, &ivbase64len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
@@ -146,8 +155,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
     unsigned char sharedenckey[ATCHOPS_AES_256 / 8];
     memset(sharedenckey, 0, sizeof(unsigned char) * (ATCHOPS_AES_256 / 8));
     size_t sharedenckeylen = 0;
-    ret = atchops_base64_decode((unsigned char *) sharedenckeybase64, strlen(sharedenckeybase64), sharedenckey, sizeof(sharedenckey),
-                                &sharedenckeylen);
+    ret = atchops_base64_decode((unsigned char *)sharedenckeybase64, strlen(sharedenckeybase64), sharedenckey,
+                                sizeof(sharedenckey), &sharedenckeylen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
@@ -160,7 +169,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
       goto exit;
     }
 
-    ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *) ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
+    ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *)ciphertextbase64, ciphertextbase64size,
+                                &ciphertextbase64len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
@@ -190,12 +200,14 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
+  } else if (atclient->async_read) {
+    goto exit;
   }
 
   if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                          (int)recvlen, recv);
+                 (int)recvlen, recv);
     goto exit;
   }
 
@@ -207,6 +219,9 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value,
   ret = 0;
   goto exit;
 exit: {
+  if (!atclient->async_read) {
+    free(recv);
+  }
   free(cmdbuffer);
   return ret;
 }
