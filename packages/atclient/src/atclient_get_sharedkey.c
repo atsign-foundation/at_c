@@ -24,6 +24,12 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
                            size_t *valuelen, char *shared_enc_key,
                            const bool create_new_encryption_key_shared_by_me_if_not_found) {
+  if (atclient->async_read) {
+    atlogger_log(
+        TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+        "atclient_get_sharedkey cannot be called from an async_read atclient, it will cause a race condition\n");
+    return 1;
+  }
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
@@ -35,16 +41,14 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
     //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
     ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n",
-                            ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
     ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, shared_enc_key,
                                                          false);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n",
-                            ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n", ret);
       goto exit;
     }
   }
@@ -90,7 +94,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     }
   }
 
-  ret = atchops_base64_decode((unsigned char *) enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
+  ret = atchops_base64_decode((unsigned char *)enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
@@ -184,7 +188,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
       if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
         ret = 1;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivlen != ATCHOPS_IV_BUFFER_SIZE (%d != %d)\n", ivlen,
-                              ATCHOPS_IV_BUFFER_SIZE);
+                     ATCHOPS_IV_BUFFER_SIZE);
         goto exit;
       }
     } else {
@@ -204,15 +208,16 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     memset(valueraw, 0, sizeof(char) * valuerawsize);
     size_t valuerawlen = 0;
 
-    ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), (unsigned char *)valueraw,
-                                valuerawsize, &valuerawlen);
+    ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring),
+                                (unsigned char *)valueraw, valuerawsize, &valuerawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 
     // decrypt response data
-    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *) valueraw, valuerawlen, (unsigned char *) value, valuesize, valuelen);
+    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, (unsigned char *)valueraw, valuerawlen,
+                                 (unsigned char *)value, valuesize, valuelen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;
@@ -253,7 +258,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   memset(enckey, 0, sizeof(unsigned char) * enckeysize);
   size_t enckeylen = 0;
 
-  const size_t valuerawsize = valuesize*4;
+  const size_t valuerawsize = valuesize * 4;
   unsigned char valueraw[valuerawsize];
   memset(valueraw, 0, sizeof(unsigned char) * valuerawsize);
   size_t valuerawlen = 0;
@@ -360,8 +365,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 
       if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
         ret = 1;
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivlen != ivlen (%d != %d)\n", ivlen,
-                              ATCHOPS_IV_BUFFER_SIZE);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivlen != ivlen (%d != %d)\n", ivlen, ATCHOPS_IV_BUFFER_SIZE);
         goto exit;
       }
     } else {
@@ -375,9 +379,9 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
       goto exit;
     }
-    
+
     // decrypt response data
-    ret = atchops_base64_decode((unsigned char *) enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
+    ret = atchops_base64_decode((unsigned char *)enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
@@ -385,12 +389,14 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 
     ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), valueraw, valuerawsize,
                                 &valuerawlen);
-    if((ret != 0) || (valuerawlen == 0)) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d | or valuerawlen: %d\n", ret, valuerawlen);
+    if ((ret != 0) || (valuerawlen == 0)) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d | or valuerawlen: %d\n", ret,
+                   valuerawlen);
       goto exit;
     }
 
-    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, (unsigned char *)value, valuesize, valuelen);
+    ret = atchops_aesctr_decrypt(enckey, ATCHOPS_AES_256, iv, valueraw, valuerawlen, (unsigned char *)value, valuesize,
+                                 valuelen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
       goto exit;

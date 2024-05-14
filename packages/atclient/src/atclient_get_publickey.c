@@ -1,16 +1,22 @@
-#include <atlogger/atlogger.h>
+#include "atclient/atbytes.h"
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
-#include "atclient/atbytes.h"
 #include "atclient/constants.h"
 #include "atclient/stringutils.h"
+#include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define TAG "atclient_get_publickey"
 
-int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value,
-                           const size_t valuesize, size_t *valuelen, bool bypasscache) {
+int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
+                           size_t *valuelen, bool bypasscache) {
+  if (atclient->async_read) {
+    atlogger_log(
+        TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+        "atclient_get_publickey cannot be called from an async_read atclient, it will cause a race condition\n");
+    return 1;
+  }
   int ret = 1;
 
   if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
@@ -48,13 +54,12 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   if (ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n",
-                          atkeystr.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n", atkeystr.str);
     goto exit;
   }
 
   const size_t cmdbuffersize = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) +
-                              strlen(atkeystrwithoutpublic) + 1;
+                               strlen(atkeystrwithoutpublic) + 1;
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
   memset(cmdbuffer, 0, cmdbuffersize);
   snprintf(cmdbuffer, cmdbuffersize, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "",
@@ -75,7 +80,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.len, "data:", 5)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                          (int)recv.len, recv.bytes);
+                 (int)recv.len, recv.bytes);
     goto exit;
   }
 

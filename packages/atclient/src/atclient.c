@@ -1,15 +1,11 @@
 #include "atclient/atclient.h"
-#include "atchops/aes.h"
 #include "atchops/base64.h"
-#include "atchops/iv.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
-#include "atclient/atkey.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
-#include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
@@ -24,7 +20,10 @@
 
 #define TAG "atclient"
 
-void atclient_init(atclient *ctx) { memset(ctx, 0, sizeof(atclient)); }
+void atclient_init(atclient *ctx) {
+  memset(ctx, 0, sizeof(atclient));
+  ctx->async_read = false;
+}
 
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
@@ -199,7 +198,7 @@ exit: {
 
 void atclient_free(atclient *ctx) { atclient_connection_free(&(ctx->secondary_connection)); }
 
-int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
+int atclient_send_heartbeat(atclient *heartbeat_conn) {
   int ret = -1;
 
   unsigned char *recv = NULL;
@@ -207,46 +206,22 @@ int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
   const char *command = "noop:0\r\n";
   const size_t commandlen = strlen(command);
 
-  ret = mbedtls_ssl_write(&(heartbeat_conn->secondary_connection.ssl), (const unsigned char *)command, commandlen);
-  if (ret < 0 || ret != 8) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
-    goto exit;
-  }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)commandlen - 2, command,
-               reset);
-
-  if (!listen_for_ack) {
-    ret = 0;
-    goto exit;
-  }
-
   const size_t recvsize = 64;
-  recv = malloc(sizeof(unsigned char) * recvsize);
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  if (!heartbeat_conn->async_read) {
+    recv = malloc(sizeof(unsigned char) * recvsize);
+    memset(recv, 0, sizeof(unsigned char) * recvsize);
+  }
   size_t recvlen = 0;
   char *ptr = (char *)recv;
 
-  ret = mbedtls_ssl_read(&(heartbeat_conn->secondary_connection.ssl), recv, recvsize);
-  if (ret < 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read heartbeat response: %d\n", ret);
+  ret = atclient_connection_send(&heartbeat_conn->secondary_connection, (unsigned char *)command, commandlen, recv,
+                                 recvsize, &recvlen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send noop command: %d\n", ret);
+    goto exit;
+  } else if (heartbeat_conn->async_read) {
     goto exit;
   }
-  recvlen = ret;
-
-  // recv may have format of `<data>\n<excess>` or <excess>\n<data>
-  // i only want <data>
-  // modify recv to only contain <data>
-  for (int i = 0; i < recvlen; i++) {
-    if (ptr[i] == '\n') {
-      ptr[i] = '\0';
-      recvlen = i;
-      break;
-    }
-  }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)recvlen,
-               ptr, reset);
 
   if (!atclient_stringutils_starts_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok")) &&
       !atclient_stringutils_ends_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok"))) {
@@ -259,7 +234,9 @@ int atclient_send_heartbeat(atclient *heartbeat_conn, bool listen_for_ack) {
   goto exit;
 
 exit: {
-  free(recv);
+  if (!heartbeat_conn->async_read) {
+    free(recv);
+  }
   return ret;
 }
 }
