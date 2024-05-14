@@ -2,7 +2,6 @@
 #include "atchops/aes.h"
 #include "atchops/base64.h"
 #include "atclient/atclient.h"
-#include "atclient/atkey.h"
 #include "atclient/atkeys.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
@@ -17,7 +16,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
 
   // llookup:shared_key.recipient_atsign@myatsign
   const short commandsize = strlen("llookup:shared_key.") + strlen(recipient->without_prefix_str) +
-                           strlen(ctx->atsign.atsign) + strlen("\r\n") + 1;
+                            strlen(ctx->atsign.atsign) + strlen("\r\n") + 1;
   char command[commandsize];
   memset(command, 0, sizeof(char) * commandsize);
   snprintf(command, commandsize, "llookup:shared_key.%s%s\r\n", recipient->without_prefix_str, ctx->atsign.atsign);
@@ -27,8 +26,8 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, commandsize - 1, recv, recvsize,
-                                 &recvlen);
+  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, commandsize - 1, recv,
+                                 recvsize, &recvlen);
   if (ret != 0) {
     return ret;
   }
@@ -40,13 +39,12 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   char responseprefix[responseprefixsize];
   memset(responseprefix, 0, sizeof(char) * responseprefixsize);
   snprintf(responseprefix, responseprefixsize, "@%s@", ctx->atsign.without_prefix_str);
-  const short responseprefixlen = (short) strlen(response);
+  const short responseprefixlen = (short)strlen(response);
 
   if (atclient_stringutils_starts_with(response, responseprefixlen, responseprefix, responseprefixlen)) {
     response = response + responseprefixlen;
   }
-  short responselen = (short) strlen(response);
-
+  short responselen = (short)strlen(response);
 
   if (atclient_stringutils_ends_with(response, responselen, responseprefix, responseprefixlen)) {
     response[responselen - responseprefixlen - 1] = '\0';
@@ -55,7 +53,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   // does my atSign already have the recipient's shared key?
   if (atclient_stringutils_starts_with(response, responselen, "data:", 5)) {
     response = response + 5;
-    responselen = (short) strlen(response);
+    responselen = (short)strlen(response);
 
     // 44 + 1
     const size_t plaintextsize = 45;
@@ -68,7 +66,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
     memset(responseraw, 0, sizeof(unsigned char) * responserawsize);
     size_t responserawlen = 0;
 
-    ret = atchops_base64_decode((unsigned char *) response, responselen, responseraw, responserawsize, &responserawlen);
+    ret = atchops_base64_decode((unsigned char *)response, responselen, responseraw, responserawsize, &responserawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
@@ -159,7 +157,8 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     memset(responseraw, 0, sizeof(unsigned char) * responserawsize);
     size_t responserawlen = 0;
 
-    ret = atchops_base64_decode((unsigned char *) response, strlen(response), responseraw, responserawsize, &responserawlen);
+    ret = atchops_base64_decode((unsigned char *)response, strlen(response), responseraw, responserawsize,
+                                &responserawlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       return ret;
@@ -281,9 +280,9 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
     return ret;
   }
 
-  ret =
-      atchops_base64_encode(sharedenckeyencryptedforus, sharedenckeyencryptedforuslen, (unsigned char *) sharedenckeybase64encryptedforus,
-                            sharedenckeybase64encryptedforussize, &sharedenckeybase64encryptedforuslen);
+  ret = atchops_base64_encode(sharedenckeyencryptedforus, sharedenckeyencryptedforuslen,
+                              (unsigned char *)sharedenckeybase64encryptedforus, sharedenckeybase64encryptedforussize,
+                              &sharedenckeybase64encryptedforuslen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "failed to base64 encode shared enc key for us | atchops_base64_encode: %d\n", ret);
@@ -316,8 +315,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   }
 
   ret = atchops_base64_encode(sharedenckeyencryptedforthem, sharedenckeyencryptedforthemlen,
-                              (unsigned char *) sharedenckeybase64encryptedforthem, sharedenckeybase64encryptedforthemsize,
-                              &sharedenckeybase64encryptedforthemlen);
+                              (unsigned char *)sharedenckeybase64encryptedforthem,
+                              sharedenckeybase64encryptedforthemsize, &sharedenckeybase64encryptedforthemlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "failed to base64 encode shared enc key for them | atchops_base64_encode: %d\n", ret);

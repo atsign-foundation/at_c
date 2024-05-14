@@ -49,6 +49,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  * @param recvsize the length of the buffer to receive data
  * @param recvlen the length of the data received (output)
  * @return int 0 on success, otherwise error
+ *
+ * @note if recv is NULL, then this function will skip reading the response
  */
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
                              unsigned char *recv, const size_t recvsize, size_t *recvlen);

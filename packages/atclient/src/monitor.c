@@ -584,9 +584,11 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
     snprintf(cmd, cmdsize, "monitor\r\n");
   }
 
+  monitor_conn->async_read = true;
+
+  ret = atclient_connection_send(&monitor_conn->secondary_connection, (unsigned char *)cmd, cmdlen, NULL, 0, NULL);
   // 3. send monitor cmd
-  ret = mbedtls_ssl_write(&(monitor_conn->secondary_connection.ssl), (unsigned char *)cmd, cmdlen);
-  if (ret < 0 || ret != cmdlen) {
+  if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
   }
@@ -681,7 +683,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
       }
     } else {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Notification is not encrypted\n");
-      atclient_atnotification_set_decryptedvalue(&((*message)->notification), (*message)->notification.value,
+      atclient_atnotification_set_decryptedvalue(&((*message)->notification),
+                                                 (unsigned char *)(*message)->notification.value,
                                                  strlen((*message)->notification.value));
       atclient_atnotification_set_decryptedvaluelen(&((*message)->notification),
                                                     strlen((*message)->notification.value));
@@ -1021,12 +1024,12 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 3. get shared encryption key to decrypt
-  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, sharedenckeybase64);
+  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, (char *)sharedenckeybase64);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
     goto exit;
   }
-  sharedenckeybase64len = strlen(sharedenckeybase64);
+  sharedenckeybase64len = strlen((char *)sharedenckeybase64);
 
   ret = atchops_base64_decode(sharedenckeybase64, sharedenckeybase64len, sharedenckey, sharedenckeysize,
                               &sharedenckeylen);
@@ -1041,8 +1044,8 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 4. decrypt value
-  ret = atchops_base64_decode(notification->value, strlen(notification->value), ciphertext, ciphertextsize,
-                              &ciphertextlen);
+  ret = atchops_base64_decode((unsigned char *)notification->value, strlen(notification->value), ciphertext,
+                              ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");
     goto exit;
@@ -1078,7 +1081,7 @@ static void fix_stdout_buffer(char *str, const size_t strlen) {
   // if str == 'Jeremy\r', i want it to be 'Jeremy'
 
   if (strlen == 0) {
-    return;
+    goto exit;
   }
 
   int carriagereturnindex = -1;
@@ -1115,4 +1118,8 @@ static void fix_stdout_buffer(char *str, const size_t strlen) {
     }
     str[strlen - 1] = '\0';
   }
+
+  goto exit;
+
+exit: { return; }
 }
