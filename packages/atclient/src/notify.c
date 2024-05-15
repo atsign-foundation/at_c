@@ -17,6 +17,8 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeylen, unsigned long long *ttln, char **metadatastr, size_t *medatastrlen);
+
 #define TAG "atclient_notify"
 
 void atclient_notify_params_init(atclient_notify_params *params) {
@@ -49,7 +51,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   if (ctx->async_read) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_notify cannot be called from an async_read atclient, it will cause a race condition\n");
+                 "atclient_notify cannot be called from an async_read=true atclient, it will cause a race condition.\n");
     return res;
   }
 
@@ -59,68 +61,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   char *cmdvalue = NULL; // holds the value to be added to the cmd, could be plaintext or ciphertext
   size_t cmdvaluelen = 0;
 
-  // Step 1 calculate the buffer size needed for the protocol command.
-  // notify command will look something like this:
-  // "notify[:messageType:<type>][:priority:<priority>][:strategy:<strategy>][:ttln:<ttln>]<:atkey_metadata>:<atkey>[:<value>]\r\n"
+  char *metadatastr = NULL;
 
-  cmdsize += strlen("notify");
-
-  if (params->id != NULL && strlen(params->id) > 0) {
-    cmdsize += strlen(":id:") + strlen(params->id); // ":id:" + 36 char uuid
-  }
-
-  if (params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
-    cmdsize += strlen(":") + strlen(atclient_notify_operation_str[params->operation]); // ":update" | ":delete"
-  }
-
-  if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
-    cmdsize += strlen(":messageType:") +
-               strlen(atclient_notify_message_type_str[params->message_type]); // ":messageType" + ":text" | ":key"
-  }
-
-  if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
-    cmdsize += strlen(":priority:") +
-               strlen(atclient_notify_priority_str[params->priority]); // ":priority" + ":low" | ":medium" | ":high"
-  }
-
-  if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
-    cmdsize += strlen(":strategy:") +
-               strlen(atclient_notify_strategy_str[params->strategy]); // ":strategy" + ":all" | ":latest"
-  }
-
-  // *calculate ttln length later
-
-  // *calculate atkey metadata length later
-
-  const size_t atkeylen = atclient_atkey_strlen(&params->key);
-  cmdsize += strlen(":") + atkeylen; // :$atkey
-
-  // *calculate value length later
-
-  cmdsize += strlen("\r\n");
-
-  cmdsize += 1; // null terminator
-
-  struct timeval tv;
-  res = gettimeofday(&tv, NULL);
-  if (res != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 // TODO: get errno
-                 "gettimeofday failed with code stored in errno %d\n", res);
-    return res;
-  }
-
-  unsigned long long ttln =
-      (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000 + params->notification_expiry;
-
-  if (params->notification_expiry > 0) {
-    cmdsize +=
-        strlen(":ttln:") + // ":ttln:"
-        long_strlen(ttln); // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
-  }
-
-  // Step 2 encrypt the value if needed
-
+  // Step 1 encrypt the value if needed
   if (params->value != NULL && params->shouldencrypt) {
     const size_t ciphertextsize = MAX(strlen(params->value) * 2, 256); // TODO optimize
     unsigned char ciphertext[ciphertextsize];
@@ -141,9 +84,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     unsigned char sharedenckey[sharedenckeysize];
     memset(sharedenckey, 0, sizeof(unsigned char) * sharedenckeysize);
     size_t sharedenckeylen;
-
-    // log "10"
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "10\n");
 
     if (params->sharedenckeybase64 != NULL) {
       res = atchops_base64_decode((unsigned char *)params->sharedenckeybase64, strlen(params->sharedenckeybase64),
@@ -224,28 +164,17 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     cmdvalue[cmdvaluelen] = '\0';
   }
 
-  if (cmdvaluelen > 0) {
-    cmdsize += strlen(":") + cmdvaluelen; // :$value
-  }
-
-  const size_t metadatastrsize = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
-  char metadatastr[metadatastrsize];
-  memset(metadatastr, 0, sizeof(char) * metadatastrsize);
+  size_t atkeylen = 0;
+  unsigned long long ttln = 0;
   size_t metadatastrlen = 0;
-  res = atclient_atkey_metadata_to_protocol_str(&params->key.metadata, metadatastr, metadatastrsize, &metadatastrlen);
-  if (res != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code %d\n",
-                 res);
-    return res;
-  }
 
-  cmdsize += strlen(":") + metadatastrlen; // :$metadata
+  cmdsize = calculate_cmd_size(params, cmdvaluelen, &atkeylen, &ttln, &metadatastr, &metadatastrlen);
 
   // Step 3 allocate the buffer
   cmd = malloc(sizeof(char) * cmdsize);
   if (cmd == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
-    return 1;
+    goto exit;
   }
   memset(cmd, 0, sizeof(char) * cmdsize);
 
@@ -301,7 +230,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   if (atkeylen != atkeyolen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string mismatch. Expected %lu but got %lu\n",
                  atkeylen, atkeyolen);
-    return res;
+    goto exit;
   }
   off += atkeylen;
 
@@ -327,9 +256,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   size_t recvlen = 0;
 
   // if cmdsize != off, then WARN that cmd size is not what was expected
-  if (cmdsize != off + 1) {
+  if (cmdsize != (off + 1)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "cmdsize was %lu when it was expected to be %lu\n", cmdsize,
-                 off + 1);
+                 (off + 1));
   }
 
   res = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)cmd, off - 1, recv, recvsize, &recvlen);
@@ -363,6 +292,88 @@ exit: {
     free(recv);
   }
   free(cmdvalue);
+  free(metadatastr);
   return res;
 }
+}
+
+static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen, unsigned long long *ottln, char **metadataostr, size_t *medatastrlen)
+{
+  // notify command will look something like this:
+  // "notify[:messageType:<type>][:priority:<priority>][:strategy:<strategy>][:ttln:<ttln>]<:atkey_metadata>:<atkey>[:<value>]\r\n"
+  size_t cmdsize = 0;
+
+  cmdsize += strlen("notify");
+
+  if (params->id != NULL && strlen(params->id) > 0) {
+    cmdsize += strlen(":id:") + strlen(params->id); // ":id:" + 36 char uuid
+  }
+
+  if (params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
+    cmdsize += strlen(":") + strlen(atclient_notify_operation_str[params->operation]); // ":update" | ":delete"
+  }
+
+  if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
+    cmdsize += strlen(":messageType:") +
+               strlen(atclient_notify_message_type_str[params->message_type]); // ":messageType" + ":text" | ":key"
+  }
+
+  if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
+    cmdsize += strlen(":priority:") +
+               strlen(atclient_notify_priority_str[params->priority]); // ":priority" + ":low" | ":medium" | ":high"
+  }
+
+  if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
+    cmdsize += strlen(":strategy:") +
+               strlen(atclient_notify_strategy_str[params->strategy]); // ":strategy" + ":all" | ":latest"
+  }
+
+  int res;
+  struct timeval tv;
+  res = gettimeofday(&tv, NULL);
+  if (res != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 // TODO: get errno
+                 "gettimeofday failed with code stored in errno %d\n", res);
+    return -1;
+  }
+
+  unsigned long long ttln =
+      (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000 + params->notification_expiry;
+
+  if (params->notification_expiry > 0) {
+    cmdsize +=
+        strlen(":ttln:") + // ":ttln:"
+        long_strlen(ttln); // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
+  }
+
+  const size_t metadatastrsize = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
+  char *metadatastr = malloc(sizeof(char) * metadatastrsize);
+  memset(metadatastr, 0, sizeof(char) * metadatastrsize);
+  size_t metadatastrlen = 0;
+  res = atclient_atkey_metadata_to_protocol_str(&params->key.metadata, metadatastr, metadatastrsize, &metadatastrlen);
+  if (res != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code %d\n",
+                 res);
+    return -1;
+  }
+  cmdsize += strlen(":") + metadatastrlen; // :$metadata
+
+  const size_t atkeylen = atclient_atkey_strlen(&params->key);
+  cmdsize += strlen(":") + atkeylen; // :$atkey
+
+  if (cmdvaluelen > 0) {
+    cmdsize += strlen(":") + cmdvaluelen; // :$value
+  }
+
+  cmdsize += strlen("\r\n");
+
+  cmdsize += 1; // null terminator
+
+  *atkeyolen = atkeylen;
+  *ottln = ttln;
+  *metadataostr = metadatastr;
+  *medatastrlen = metadatastrlen;
+
+  return cmdsize;
 }
