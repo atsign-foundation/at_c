@@ -103,6 +103,8 @@ exit: {
 static int test_1_notify(atclient *atclient, char *notification_id) {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_notify Begin\n");
+
   atclient_notify_params params;
   atclient_notify_params_init(&params);
 
@@ -131,12 +133,15 @@ exit: {
   }
   atclient_notify_params_free(&params);
   atclient_atkey_free(&atkey);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_notify End (%d)\n", ret);
   return ret;
 }
 }
 
 static int test_2_notify_long_text(atclient *atclient, char *notification_id) {
   int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_notify_long_text Begin\n");
 
   atclient_notify_params params;
   atclient_notify_params_init(&params);
@@ -162,6 +167,7 @@ static int test_2_notify_long_text(atclient *atclient, char *notification_id) {
 exit: {
   atclient_notify_params_free(&params);
   atclient_atkey_free(&atkey);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_notify_long_text End (%d)\n", ret);
   return ret;
 }
 }
