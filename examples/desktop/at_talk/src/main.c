@@ -37,8 +37,8 @@ static int attalk_recv_message(atclient *monitor, char **messageptr, char **send
 int main(int argc, char **argv) {
   int ret = 0;
 
-  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
   char *atkeyspath1 = NULL;
 
@@ -213,6 +213,7 @@ static int attalk_send_message(atclient *ctx, const char *recipient_atsign, cons
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending 1message: %s\n", message);
 
   if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ctx->atsign.atsign,
                                              strlen(ctx->atsign.atsign), recipient_atsign, strlen(recipient_atsign),
@@ -220,8 +221,12 @@ static int attalk_send_message(atclient *ctx, const char *recipient_atsign, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create atkey: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending 2message: %s\n", message);
 
   atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, message, true);
+
+  // log sending "message"
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending message: %s\n", message);
 
   if ((ret = atclient_notify(ctx, &params, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify: %d\n", ret);
