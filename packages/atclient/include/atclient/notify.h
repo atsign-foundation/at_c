@@ -45,6 +45,7 @@ enum atclient_notify_strategy {
   ATCLIENT_NOTIFY_STRATEGY_ALL,
   ATCLIENT_NOTIFY_STRATEGY_LATEST
 };
+
 static const char *atclient_notify_strategy_str[] = {
     [ATCLIENT_NOTIFY_STRATEGY_ALL] = "all",
     [ATCLIENT_NOTIFY_STRATEGY_LATEST] = "latest",

@@ -7,6 +7,6 @@ foreach(file ${files})
     string(REPLACE ".c" "" filename ${filename})
 
     add_executable(${filename} ${file})
-    target_link_libraries(${filename} PRIVATE atchops)
+    target_link_libraries(${filename} PRIVATE atchops atlogger)
     add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
 endforeach()
