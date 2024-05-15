@@ -69,22 +69,22 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   // Step 1 encrypt the value if needed
   if (params->value != NULL && params->shouldencrypt) {
-    const size_t ciphertextsize = MAX(strlen(params->value) * 2, 256); // TODO optimize
+    const size_t ciphertextsize = (size_t) (((strlen(params->value) * 2) + 15) / 16) * 16; // round up to the next multiple of 16
     unsigned char ciphertext[ciphertextsize];
     memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
     size_t ciphertextlen = 0;
 
-    const size_t ciphertextbase64size = MAX(ciphertextsize * 2, 256); // TODO optimize
+    const size_t ciphertextbase64size = atchops_base64_encoded_size(ciphertextsize);
     unsigned char ciphertextbase64[ciphertextbase64size];
     memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
     size_t ciphertextbase64len = 0;
 
-    const size_t ivbase64size = 25;
+    const size_t ivbase64size = atchops_base64_encoded_size(ATCHOPS_IV_BUFFER_SIZE) + 1;
     unsigned char ivbase64[ivbase64size];
     memset(ivbase64, 0, sizeof(unsigned char) * ivbase64size);
     size_t ivbase64len = 0;
 
-    const size_t sharedenckeysize = 32;
+    const size_t sharedenckeysize = ATCHOPS_AES_256/8;
     unsigned char sharedenckey[sharedenckeysize];
     memset(sharedenckey, 0, sizeof(unsigned char) * sharedenckeysize);
     size_t sharedenckeylen;
@@ -104,8 +104,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       }
     } else {
       atclient_atsign recipient;
-      unsigned char sharedenckeybase64[45];
-      memset(sharedenckeybase64, 0, sizeof(unsigned char) * 45);
+      const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize) + 1;
+      unsigned char sharedenckeybase64[sharedenckeybase64size];
+      memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
       if ((res = atclient_atsign_init(&recipient, params->key.sharedwith.str)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", res);
         return res;
