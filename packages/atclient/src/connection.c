@@ -147,55 +147,6 @@ exit: {
 }
 }
 
-static void fix_stdout_buffer(char *str, const size_t strlen) {
-  // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
-  // if str == 'Jeremy\n', i want it to be 'Jeremy'
-  // if str == 'Jeremy\r', i want it to be 'Jeremy'
-
-  if (strlen == 0) {
-    goto exit;
-  }
-
-  int carriagereturnindex = -1;
-  int newlineindex = -1;
-
-  for (int i = strlen; i >= 0; i--) {
-    if (str[i] == '\r' && carriagereturnindex == -1) {
-      carriagereturnindex = i;
-    }
-    if (carriagereturnindex != -1 && newlineindex != -1) {
-      break;
-    }
-  }
-
-  if (carriagereturnindex != -1) {
-    for (int i = carriagereturnindex; i < strlen - 1; i++) {
-      str[i] = str[i + 1];
-    }
-    str[strlen - 1] = '\0';
-  }
-
-  for (int i = strlen; i >= 0; i--) {
-    if (str[i] == '\n' && newlineindex == -1) {
-      newlineindex = i;
-    }
-    if (carriagereturnindex != -1 && newlineindex != -1) {
-      break;
-    }
-  }
-
-  if (newlineindex != -1) {
-    for (int i = newlineindex; i < strlen - 1; i++) {
-      str[i] = str[i + 1];
-    }
-    str[strlen - 1] = '\0';
-  }
-
-  goto exit;
-
-exit: { return; }
-}
-
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
                              unsigned char *recv, const size_t recvsize, size_t *recvlen) {
   int ret = 1;
@@ -214,7 +165,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
-  fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
+  atlogger_fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)stdoutbuffer.len,
                stdoutbuffer.str, reset);
@@ -257,7 +208,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
     goto exit;
   }
-  fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
+  atlogger_fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)stdoutbuffer.len,
                stdoutbuffer.str, reset);

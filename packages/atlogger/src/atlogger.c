@@ -85,3 +85,52 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   vprintf(format, args);
   va_end(args);
 }
+
+void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
+  // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
+  // if str == 'Jeremy\n', i want it to be 'Jeremy'
+  // if str == 'Jeremy\r', i want it to be 'Jeremy'
+
+  if (strlen == 0) {
+    goto exit;
+  }
+
+  int carriagereturnindex = -1;
+  int newlineindex = -1;
+
+  for (int i = strlen; i >= 0; i--) {
+    if (str[i] == '\r' && carriagereturnindex == -1) {
+      carriagereturnindex = i;
+    }
+    if (carriagereturnindex != -1 && newlineindex != -1) {
+      break;
+    }
+  }
+
+  if (carriagereturnindex != -1) {
+    for (int i = carriagereturnindex; i < strlen - 1; i++) {
+      str[i] = str[i + 1];
+    }
+    str[strlen - 1] = '\0';
+  }
+
+  for (int i = strlen; i >= 0; i--) {
+    if (str[i] == '\n' && newlineindex == -1) {
+      newlineindex = i;
+    }
+    if (carriagereturnindex != -1 && newlineindex != -1) {
+      break;
+    }
+  }
+
+  if (newlineindex != -1) {
+    for (int i = newlineindex; i < strlen - 1; i++) {
+      str[i] = str[i + 1];
+    }
+    str[strlen - 1] = '\0';
+  }
+
+  goto exit;
+
+exit: { return; }
+}
