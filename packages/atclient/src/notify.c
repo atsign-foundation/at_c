@@ -59,11 +59,13 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     return res;
   }
 
+  // holds the value to be added to the cmd, could be plaintext or ciphertext
+  char *cmdvalue = NULL;
+  size_t cmdvaluelen = 0;
+
+  // holds end notify: command
   char *cmd = NULL;
   size_t cmdsize = 0;
-
-  char *cmdvalue = NULL; // holds the value to be added to the cmd, could be plaintext or ciphertext
-  size_t cmdvaluelen = 0;
 
   // Step 1 encrypt the value if needed
   if (params->value != NULL && params->shouldencrypt) {
@@ -321,7 +323,6 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
 
   // Step 4 build the command
 
-  const char *part;
   size_t off = 0;
 
   snprintf(cmd + off, cmdsize - off, "notify");
