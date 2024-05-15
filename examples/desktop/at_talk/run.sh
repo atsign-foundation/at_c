@@ -3,7 +3,7 @@ set -eu
 
 # clean
 rm -f build/CMakeCache.txt
-sudo rm -f bin/at_talk
+rm -f bin/at_talk
 
 # install dependencies
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
@@ -15,7 +15,7 @@ cd "$SCRIPT_DIRECTORY"
 cmake -S . -B build
 
 # build & install
-sudo cmake --build build --target install
+cmake --build build --target install
 
 # run
 ./bin/at_talk $@

@@ -263,7 +263,7 @@ static int attalk_recv_message(atclient *monitor, char **messageptr, char **send
 
     if (strcmp(atkey.namespacestr.str, ATKEY_NAMESPACE) == 0 && strcmp(atkey.name.str, ATKEY_NAME) == 0) {
       // clear stdin
-      *messageptr = strdup(message->notification.decryptedvalue);
+      *messageptr = strdup((char *) message->notification.decryptedvalue);
       *sender_atsign = strdup(message->notification.from);
       ret = 0;
     }
@@ -276,7 +276,7 @@ static int attalk_recv_message(atclient *monitor, char **messageptr, char **send
   }
   goto exit;
 exit: {
-  atclient_monitor_message_free(&message);
+  atclient_monitor_message_free(message);
   return ret;
 }
 }
