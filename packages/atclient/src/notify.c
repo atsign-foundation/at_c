@@ -74,7 +74,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
     size_t ciphertextlen = 0;
 
-    const size_t ciphertextbase64size = atchops_base64_encoded_size(ciphertextsize);
+    const size_t ciphertextbase64size = atchops_base64_encoded_size(ciphertextsize) + 1;
     unsigned char ciphertextbase64[ciphertextbase64size];
     memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
     size_t ciphertextbase64len = 0;
