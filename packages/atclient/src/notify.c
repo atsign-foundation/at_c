@@ -65,38 +65,23 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   cmdsize += strlen("notify");
 
-  // log "1"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "1\n");
-
   if (params->id != NULL && strlen(params->id) > 0) {
     cmdsize += strlen(":id:") + strlen(params->id); // ":id:" + 36 char uuid
   }
 
-  // log "2"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "2\n");
-
   if (params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
     cmdsize += strlen(":") + strlen(atclient_notify_operation_str[params->operation]); // ":update" | ":delete"
   }
-
-  // log "3"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "3\n");
 
   if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
     cmdsize += strlen(":messageType:") +
                strlen(atclient_notify_message_type_str[params->message_type]); // ":messageType" + ":text" | ":key"
   }
 
-  // log "4"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "4\n");
-
   if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
     cmdsize += strlen(":priority:") +
                strlen(atclient_notify_priority_str[params->priority]); // ":priority" + ":low" | ":medium" | ":high"
   }
-
-  // log "5"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "5\n");
 
   if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
     cmdsize += strlen(":strategy:") +
@@ -109,9 +94,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   const size_t atkeylen = atclient_atkey_strlen(&params->key);
   cmdsize += strlen(":") + atkeylen; // :$atkey
-
-  // log "6"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "6\n");
 
   // *calculate value length later
 
@@ -128,9 +110,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     return res;
   }
 
-  // log "7"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "7\n");
-
   unsigned long long ttln =
       (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000 + params->notification_expiry;
 
@@ -140,13 +119,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         long_strlen(ttln); // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
   }
 
-  // log "8"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "8\n");
-
   // Step 2 encrypt the value if needed
-
-  // log "9"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "9\n");
 
   if (params->value != NULL && params->shouldencrypt) {
     const size_t ciphertextsize = MAX(strlen(params->value) * 2, 256); // TODO optimize
@@ -206,9 +179,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       }
     }
 
-    // log "11"
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "11\n");
-
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
     res = atchops_iv_generate(iv);
@@ -236,9 +206,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return res;
     }
 
-    // log "12"
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "12\n");
-
     res =
         atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
     if (res != 0) {
@@ -246,18 +213,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return res;
     }
 
-    // log "13"
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "13\n");
-
     cmdvalue = malloc(sizeof(char) * (ciphertextbase64len + 1));
     memcpy(cmdvalue, ciphertextbase64, ciphertextbase64len);
     cmdvalue[ciphertextbase64len] = '\0';
     cmdvaluelen = ciphertextbase64len;
-    // log "14"
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "14\n");
-
-    // log cmdvalue and cmdvaluelen
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s, cmdvaluelen: %lu\n", cmdvalue, cmdvaluelen);
   } else if (params->value != NULL && !params->shouldencrypt) {
     cmdvaluelen = strlen(params->value);
     cmdvalue = malloc(sizeof(char) * (cmdvaluelen + 1));
@@ -265,34 +224,20 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     cmdvalue[cmdvaluelen] = '\0';
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
-
-  // log "14"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "14\n");
-
   if (cmdvaluelen > 0) {
     cmdsize += strlen(":") + cmdvaluelen; // :$value
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
-
-  // log "15"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "15\n");
 
   const size_t metadatastrsize = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
   char metadatastr[metadatastrsize];
   memset(metadatastr, 0, sizeof(char) * metadatastrsize);
   size_t metadatastrlen = 0;
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
   res = atclient_atkey_metadata_to_protocol_str(&params->key.metadata, metadatastr, metadatastrsize, &metadatastrlen);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
   if (res != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code %d\n",
                  res);
     return res;
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
 
   cmdsize += strlen(":") + metadatastrlen; // :$metadata
 
@@ -304,15 +249,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   }
   memset(cmd, 0, sizeof(char) * cmdsize);
 
-  // log "16"
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "16\n");
-
   // Step 4 build the command
 
   const char *part;
   size_t off = 0;
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "17\n");
 
   snprintf(cmd + off, cmdsize - off, "notify");
   off += strlen("notify");
@@ -322,21 +262,15 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     off += strlen(":id:") + strlen(params->id);
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "18\n");
-
   if (params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
     snprintf(cmd + off, cmdsize - off, ":%s", atclient_notify_operation_str[params->operation]);
     off += strlen(":") + strlen(atclient_notify_operation_str[params->operation]);
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "19\n");
-
   if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
     snprintf(cmd + off, cmdsize - off, ":messageType:%s", atclient_notify_message_type_str[params->message_type]);
     off += strlen(":messageType:") + strlen(atclient_notify_message_type_str[params->message_type]);
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "20\n");
 
   if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
     snprintf(cmd + off, cmdsize - off, ":priority:%s", atclient_notify_priority_str[params->priority]);
@@ -353,12 +287,8 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     off += strlen(":ttln:") + long_strlen(ttln);
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
-
   snprintf(cmd + off, cmdsize - off, "%.*s", (int)metadatastrlen, metadatastr);
   off += metadatastrlen;
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "21\n");
 
   snprintf(cmd + off, cmdsize - off, ":");
   off += strlen(":");
@@ -374,12 +304,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     return res;
   }
   off += atkeylen;
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "22\n");
-
-  // log cmdvaluelen
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvaluelen: %lu\n", cmdvaluelen);
-  // log cmdvalue
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdvalue: %s\n", cmdvalue);
 
   if (cmdvaluelen > 0) {
     snprintf(cmd + off, cmdsize - off, ":%.*s", (int)cmdvaluelen, cmdvalue);
@@ -393,8 +317,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   cmd[off] = '\0';
   off += 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "23\n");
-
   // Step 6 send the encrypted notification
   const size_t recvsize = 64;
   unsigned char *recv;
@@ -404,16 +326,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   }
   size_t recvlen = 0;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "23\n");
-
-  // Step 5 log the command
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending notification: %.*s\n", (int)cmdsize, cmd);
-
-  // log cmdsize and strlen(cmd)
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cmdsize: %lu, strlen(cmd): %lu\n", cmdsize, strlen(cmd));
-  // log off
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "off: %lu\n", off);
-
   // if cmdsize != off, then WARN that cmd size is not what was expected
   if (cmdsize != off + 1) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "cmdsize was %lu when it was expected to be %lu\n", cmdsize,
@@ -421,7 +333,6 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   }
 
   res = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)cmd, off - 1, recv, recvsize, &recvlen);
-
   if (res != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
     goto exit;
