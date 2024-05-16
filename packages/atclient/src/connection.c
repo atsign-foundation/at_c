@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define TAG "connection"
 
@@ -151,31 +152,25 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
                              unsigned char *recv, const size_t recvsize, size_t *recvlen) {
   int ret = 1;
 
-  atclient_atstr stdoutbuffer;
-  atclient_atstr_init(&stdoutbuffer, 32768);
-
   ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen);
   if (ret < 0) {
     goto exit;
   }
 
-  ret = atclient_atstr_set_literal(&stdoutbuffer, "%.*s", (int)srclen, src);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
-    goto exit;
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_INFO) {
+    unsigned char srccopy[srclen];
+    memcpy(srccopy, src, srclen);
+    atlogger_fix_stdout_buffer(srccopy, srclen);
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen(srccopy), srccopy,
+                 reset);
   }
-
-  atlogger_fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)stdoutbuffer.len,
-               stdoutbuffer.str, reset);
 
   if (recv == NULL) {
     goto exit;
   }
 
-  memset(recv, 0, recvsize);
-  int found = 0;
+  bool found = false;
   size_t l = 0;
   do {
     ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvsize - l);
@@ -188,38 +183,27 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       // printf("i: %d c: %.2x\n", i, (unsigned char) *(recv + i));
       if (*(recv + i) == '\n') {
         *recvlen = i;
-        found = 1;
+        found = true;
         break;
       }
     }
-    if (found == 1) {
+    if (found) {
       break;
     }
 
-  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || found == 0);
+  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || !found);
 
   if (ret < 0) {
     goto exit;
   }
 
-  atclient_atstr_reset(&stdoutbuffer);
-  ret = atclient_atstr_set_literal(&stdoutbuffer, "%.*s", (int)*recvlen, recv);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
-    goto exit;
-  }
-  atlogger_fix_stdout_buffer(stdoutbuffer.str, stdoutbuffer.len);
+  recv[*recvlen] = '\0'; // null terminate the string
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)stdoutbuffer.len,
-               stdoutbuffer.str, reset);
-  memset(recv, 0, sizeof(unsigned char) * recvsize); // clear the buffer
-  memcpy(recv, stdoutbuffer.str, stdoutbuffer.len);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)*recvlen, recv, reset);
+
+  ret = 0;
   goto exit;
-
-exit: {
-  atclient_atstr_free(&stdoutbuffer);
-  return ret;
-}
+exit: { return ret; }
 }
 
 int atclient_connection_disconnect(atclient_connection *ctx) {
