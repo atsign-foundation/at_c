@@ -15,9 +15,9 @@ int atchops_base64_decode(const unsigned char *src, const size_t srclen, unsigne
 }
 
 size_t atchops_base64_encoded_size(const size_t plaintextsize) {
-  return MAX((size_t)(plaintextsize * 3 / 2 + 1), 8); // add 0.5 to ceiling
+  return MAX((size_t)(plaintextsize * 3 / 2 + 1), 16); // add 0.5 to ceiling
 }
 
 size_t atchops_base64_decoded_size(const size_t encodedsize) {
-  return MAX((size_t)(encodedsize * 3 / 4 + 1), 8); // add 0.5 to ceiling
+  return MAX((size_t)(encodedsize * 3 / 4 + 1), 16); // add 0.5 to ceiling
 }
