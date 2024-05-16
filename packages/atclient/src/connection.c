@@ -166,6 +166,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
                  reset);
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)stdoutbuffer.len,
+               stdoutbuffer.str, reset);
+
   if (recv == NULL) {
     goto exit;
   }
