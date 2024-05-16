@@ -22,7 +22,6 @@
 static int parse_message(char *original, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
-static void fix_stdout_buffer(char *str, const size_t strlen);
 
 void atclient_atnotification_init(atclient_atnotification *notification) {
   memset(notification, 0, sizeof(atclient_atnotification));
@@ -592,7 +591,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
   }
-  fix_stdout_buffer(cmd, cmdsize);
+  atlogger_fix_stdout_buffer(cmd, cmdsize);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
 
   ret = 0;
@@ -1069,54 +1068,4 @@ exit: {
   free(decryptedvaluetemp);
   return ret;
 }
-}
-
-// fixes stdout buffer by removing '\r' and '\n' characters for printing nicely
-static void fix_stdout_buffer(char *str, const size_t strlen) {
-  // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
-  // if str == 'Jeremy\n', i want it to be 'Jeremy'
-  // if str == 'Jeremy\r', i want it to be 'Jeremy'
-
-  if (strlen == 0) {
-    goto exit;
-  }
-
-  int carriagereturnindex = -1;
-  int newlineindex = -1;
-
-  for (int i = strlen; i >= 0; i--) {
-    if (str[i] == '\r' && carriagereturnindex == -1) {
-      carriagereturnindex = i;
-    }
-    if (carriagereturnindex != -1 && newlineindex != -1) {
-      break;
-    }
-  }
-
-  if (carriagereturnindex != -1) {
-    for (int i = carriagereturnindex; i < strlen - 1; i++) {
-      str[i] = str[i + 1];
-    }
-    str[strlen - 1] = '\0';
-  }
-
-  for (int i = strlen; i >= 0; i--) {
-    if (str[i] == '\n' && newlineindex == -1) {
-      newlineindex = i;
-    }
-    if (carriagereturnindex != -1 && newlineindex != -1) {
-      break;
-    }
-  }
-
-  if (newlineindex != -1) {
-    for (int i = newlineindex; i < strlen - 1; i++) {
-      str[i] = str[i + 1];
-    }
-    str[strlen - 1] = '\0';
-  }
-
-  goto exit;
-
-exit: { return; }
 }
