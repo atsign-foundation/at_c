@@ -9,11 +9,11 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #define TAG "connection"
 
@@ -167,6 +167,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
 
   if (recv == NULL) {
+    ret = 0;
     goto exit;
   }
 
