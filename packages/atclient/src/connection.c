@@ -1,5 +1,6 @@
 
 #include "atclient/connection.h"
+#include "atclient/stringutils.h"
 #include "atchops/constants.h"
 #include "atclient/atstr.h"
 #include "atclient/cacerts.h"
@@ -28,29 +29,41 @@ static void my_debug(void *ctx, int level, const char *file, int line, const cha
   fflush((FILE *)ctx);
 }
 
-void atclient_connection_init(atclient_connection *ctx) {
-
-  if(ctx == NULL) {
-    return; // how should we handle this error?
-  }
-
-  memset(ctx, 0, sizeof(atclient_connection));
-  memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
-  ctx->port = -1;
-
+static void init_contexts(atclient_connection *ctx) {
   mbedtls_net_init(&(ctx->net));
   mbedtls_ssl_init(&(ctx->ssl));
   mbedtls_ssl_config_init(&(ctx->ssl_config));
   mbedtls_x509_crt_init(&(ctx->cacert));
   mbedtls_entropy_init(&(ctx->entropy));
   mbedtls_ctr_drbg_init(&(ctx->ctr_drbg));
+}
 
-  ctx->should_be_initialized = true;
+static void free_contexts(atclient_connection *ctx) {
+  mbedtls_net_free(&(ctx->net));
+  mbedtls_ssl_free(&(ctx->ssl));
+  mbedtls_ssl_config_free(&(ctx->ssl_config));
+  mbedtls_x509_crt_free(&(ctx->cacert));
+  mbedtls_entropy_free(&(ctx->entropy));
+  mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
+}
+
+void atclient_connection_init(atclient_connection *ctx) {
+
+  if (ctx == NULL) {
+    return; // how should we handle this error?
+  }
+
+  memset(ctx, 0, sizeof(atclient_connection));
+  memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
+  ctx->port = -1;
   ctx->should_be_connected = false;
 }
 
 int atclient_connection_connect(atclient_connection *ctx, const char *host, const int port) {
   int ret = 1;
+
+  init_contexts(ctx);
+  ctx->should_be_connected = true;
 
   atclient_atstr readbuf;
   atclient_atstr_init(&readbuf, 1024);
@@ -59,11 +72,10 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
    * 1. Set the ctx->host and ctx->port
    */
   memcpy(ctx->host, host, strlen(host)); // assume null terminated, example: "root.atsign.org"
-  ctx->port = port;        // example: 64
+  ctx->port = port;                      // example: 64
 
   char portstr[6];
   sprintf(portstr, "%d", ctx->port);
-
 
   /*
    * 2. Parse CA certs
@@ -108,6 +120,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
   mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
+  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), ATCLIENT_CONSTANTS_READ_TIMEOUT); // recv will timeout after X seconds
 
   ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config));
   if (ret != 0) {
@@ -121,7 +134,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     goto exit;
   }
 
-  mbedtls_ssl_set_bio(&(ctx->ssl), &(ctx->net), mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
+  mbedtls_ssl_set_bio(&(ctx->ssl), &(ctx->net), mbedtls_net_send, NULL, mbedtls_net_recv_timeout);
 
   /*
    * 6. Perform the SSL handshake
@@ -168,8 +181,6 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   // now we are guaranteed a blank canvas
 
-  ctx->should_be_connected = true;
-
   if (ret > 0) {
     ret = 0; // a positive exit code is not an error
   }
@@ -177,7 +188,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
 exit: {
   atclient_atstr_free(&readbuf);
-  if(ret != 0) {
+  if (ret != 0) {
     // undo what we set
     memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
     ctx->port = -1;
@@ -190,17 +201,23 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
                              unsigned char *recv, const size_t recvsize, size_t *recvlen) {
   int ret = 1;
 
+  if(!ctx->should_be_connected)
+  {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
+    goto exit;
+  }
+
   ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen);
   if (ret < 0) {
     goto exit;
   }
 
-  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_INFO) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char srccopy[srclen];
     memcpy(srccopy, src, srclen);
-    atlogger_fix_stdout_buffer(srccopy, srclen);
+    atlogger_fix_stdout_buffer((char *) srccopy, srclen);
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen(srccopy), srccopy,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *) srccopy), srccopy,
                  reset);
   }
 
@@ -238,7 +255,13 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   recv[*recvlen] = '\0'; // null terminate the string
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)*recvlen, recv, reset);
+
+  if(atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+    unsigned char recvcopy[*recvlen];
+    memcpy(recvcopy, recv, *recvlen);
+    atlogger_fix_stdout_buffer((char *) recvcopy, *recvlen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, strlen(recvcopy), recvcopy, reset);
+  }
 
   ret = 0;
   goto exit;
@@ -246,59 +269,71 @@ exit: { return ret; }
 }
 
 int atclient_connection_disconnect(atclient_connection *ctx) {
-  int ret = 0;
-  do {
-    ret = mbedtls_ssl_close_notify(&(ctx->ssl));
-  } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
-  ret = 0;
+  int ret = 1;
 
-  return ret;
-}
-
-int atclient_connection_is_connected(atclient_connection *ctx) {
-  int ret = 0; // false by default
-  const char *cmd = "\n";
-  const size_t cmdlen = strlen(cmd);
-  const size_t recvsize = 128;
-  unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
-  size_t recvlen = 0;
-
-  ret = atclient_connection_send(ctx, (const unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
-  if (ret != 0) {
+  if(!ctx->should_be_connected) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false, it was never connected in the first place!\n");
     goto exit;
   }
 
-  if (recvlen > 0) {
-    ret = 1; // true
-  } else {
-    ret = 0; // false
+  do {
+    ret = mbedtls_ssl_close_notify(&(ctx->ssl));
+  } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_WANT_READ || ret != 0);
+
+  free_contexts(ctx);
+  ctx->should_be_connected = false;
+
+  ret = 0;
+
+  goto exit;
+exit: {
+  return ret;
+}
+}
+
+int atclient_connection_is_connected(atclient_connection *ctx) {
+  int ret = -1;
+
+  if(!ctx->should_be_connected) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
+    return ret;
   }
 
+  const char *command = "\n";
+  const size_t commandlen = strlen(command);
+
+  const size_t recvsize = 64;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen;
+
+  ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv,
+                                 recvsize, &recvlen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \n to connection: %d\n", ret);
+    ret = -1;
+    goto exit;
+  }
+
+  if(recvlen <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \'\\n\'\n");
+    ret = 0;
+    goto exit;
+  }
+
+  ret = 1;
   goto exit;
 
 exit: { return ret; }
 }
 
 void atclient_connection_free(atclient_connection *ctx) {
-  if(!ctx->should_be_initialized) {
-    return;
-  }
   if(ctx->should_be_connected) {
-    if((atclient_connection_disconnect(ctx)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_disconnect failed\n");
-    }
+    free_contexts(ctx);
   }
-  mbedtls_net_free(&(ctx->net));
-  mbedtls_ssl_free(&(ctx->ssl));
-  mbedtls_ssl_config_free(&(ctx->ssl_config));
-  mbedtls_x509_crt_free(&(ctx->cacert));
-  mbedtls_entropy_free(&(ctx->entropy));
-  mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
   memset(ctx, 0, sizeof(atclient_connection));
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
-  ctx->should_be_initialized = false;
   ctx->should_be_connected = false;
 }
 

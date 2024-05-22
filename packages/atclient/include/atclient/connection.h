@@ -22,10 +22,10 @@ typedef struct atclient_connection {
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
 
-  bool should_be_initialized; // true, if atclient_connection_init was called, is false when atclient_connection_free is
-                              // called. This is used to prevent double free.
-  bool should_be_connected;   // true, if atclient_connection_connect was called, is false, if
-                              // atclient_connection_disconnect is called. This is used to prevent double free.
+  bool should_be_connected;
+  // atclient_connection_connect sets this to true and atclient_connection_disconnect sets this to false
+  // this does not mean that the connection is still alive, it just means that the connection was established or taken
+  // down at some point, check atclient_connection_is_connected for a live status on the connection
 } atclient_connection;
 
 /**

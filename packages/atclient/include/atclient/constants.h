@@ -12,6 +12,8 @@
 
 #define ATCLIENT_DEFAULT_NOTIFIER "SYSTEM"
 
+#define ATCLIENT_CONSTANTS_READ_TIMEOUT 3*1000 // 3 seconds
+
 #define ATCLIENT_MONITOR_BUFFER_LEN 4096 // max chunk size monitor can read at once
 
 #define BLK "\e[0;30m"
