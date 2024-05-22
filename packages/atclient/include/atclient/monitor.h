@@ -166,7 +166,9 @@ enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
   ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE
+  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
+  ATCLIENT_MONITOR_ERROR_READ, // usually a socket error
+  ATCLIENT_MONITOR_ERROR_PARSE, 
 };
 
 /**
@@ -233,6 +235,14 @@ void atclient_monitor_free(atclient *monitor_conn);
  */
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn,
                                        const atclient_atkeys *atkeys, const char *atsign);
+
+/**
+ * @brief Set how long `atclient_monitor_read` should wait for a message before timing out
+ * 
+ * @param monitor_conn the pkam authenticated monitor connection
+ * @param timeoutms the timeout in milliseconds
+ */
+void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms);
 
 /**
  * @brief Onboards the monitor_connection and starts the monitoring connection.

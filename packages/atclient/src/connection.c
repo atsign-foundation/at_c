@@ -120,7 +120,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
   mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
-  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), ATCLIENT_CONSTANTS_READ_TIMEOUT); // recv will timeout after X seconds
+  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
 
   ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config));
   if (ret != 0) {
