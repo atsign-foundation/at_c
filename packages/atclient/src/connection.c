@@ -47,7 +47,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   atclient_atstr readbuf;
   atclient_atstr_init(&readbuf, 1024);
 
-  strcpy(ctx->host, host); // assume null terminated, example: "root.atsign.org"
+  memcpy(ctx->host, host, strlen(host)); // assume null terminated, example: "root.atsign.org"
   ctx->port = port;        // example: 64
 
   char portstr[6];
