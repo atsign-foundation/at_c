@@ -104,8 +104,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     goto exit;
   }
 
-  mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_ca_chain(&(ctx->ssl_config), &(ctx->cacert), NULL);
+  mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
   mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
 
@@ -167,12 +167,12 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   // now we are guaranteed a blank canvas
-  if (ret > 0) {
-    ret = 0; // a positive exit code is not an error
-  }
 
   ctx->should_be_connected = true;
 
+  if (ret > 0) {
+    ret = 0; // a positive exit code is not an error
+  }
   goto exit;
 
 exit: {
@@ -252,7 +252,6 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
   } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
   ret = 0;
 
-  atclient_connection_free(ctx);
   return ret;
 }
 
