@@ -208,7 +208,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
 
   ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen);
-  if (ret < 0) {
+  if (ret <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
     goto exit;
   }
 
@@ -216,7 +217,6 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     unsigned char srccopy[srclen];
     memcpy(srccopy, src, srclen);
     atlogger_fix_stdout_buffer((char *) srccopy, srclen);
-
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *) srccopy), srccopy,
                  reset);
   }
@@ -249,7 +249,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   } while (ret == MBEDTLS_ERR_SSL_WANT_READ || !found);
 
-  if (ret < 0) {
+  if (ret <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
   }
 
@@ -310,7 +311,7 @@ int atclient_connection_is_connected(atclient_connection *ctx) {
   ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \n to connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \'\\n\' to connection: %d\n", ret);
     ret = -1;
     goto exit;
   }
