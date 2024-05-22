@@ -48,20 +48,14 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const atchops_m
     goto ret;
   }
 
-  printf("n: %lu, %s\n", privatekey.n.len, privatekey.n.value);
-  printf("e: %lu, %s\n", privatekey.e.len, privatekey.e.value);
-  printf("d: %lu, %s\n", privatekey.d.len, privatekey.d.value);
-  printf("p: %lu, %s\n", privatekey.p.len, privatekey.p.value);
-  printf("q: %lu, %s\n", privatekey.q.len, privatekey.q.value);
-
   // 2. sign the hash with rsa private key
   ret = mbedtls_rsa_import_raw(&rsa, privatekey.n.value, privatekey.n.len, privatekey.p.value, privatekey.p.len,
                                privatekey.q.value, privatekey.q.len, privatekey.d.value, privatekey.d.len,
                                privatekey.e.value, privatekey.e.len);
-  // if (ret != 0) {
-  //   atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_rsa_import_raw signing\n");
-  //   goto ret;
-  // }
+  if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_rsa_import_raw signing\n");
+    goto ret;
+  }
 
   ret = mbedtls_rsa_complete(&rsa);
   if (ret != 0) {
