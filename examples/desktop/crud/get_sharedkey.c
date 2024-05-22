@@ -22,7 +22,7 @@
  *      [ SENDER_ATSIGN = other atsign, ie "@alice" ] and [ RECIPIENT_ATSIGN = ATCLIENT_ATSIGN ]
  */
 
-#define SENDER_ATSIGN "@soccer0"    // aka "sharedby"
+#define SENDER_ATSIGN "@soccer0"     // aka "sharedby"
 #define RECIPIENT_ATSIGN "@soccer99" // aka "sharedwith"
 
 #define ATKEY_NAME "test"
@@ -87,8 +87,8 @@ int main() {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
-                        (int)atkeystr.len, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
+               atkeystr.str);
 
   ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.size, &value.len, NULL, false);
   if (ret != 0) {
@@ -96,15 +96,14 @@ int main() {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.len, (int)value.len,
-                        value.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.len, (int)value.len, value.str);
 
   const size_t value_hash_len = 32;
   unsigned char *value_hash = calloc(value_hash_len, sizeof(unsigned char));
   memset(value_hash, 0, value_hash_len);
   size_t value_hash_olen = 0;
 
-  ret = atchops_sha_hash(MBEDTLS_MD_SHA256, (const unsigned char *)value.str, value.len, value_hash);
+  ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *)value.str, value.len, value_hash);
   if (ret != 0) {
     printf("atchops_sha_hash (failed): %d\n", ret);
     goto exit;
@@ -118,16 +117,14 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sha256(value) : %s\n", hex_value_hash);
 
   if ((ret = memcmp(hex_value_hash, EXPECTED_DECRYPTED_VALUE_SHA_256, 64))) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
-                          "sha256(value) NOT equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sha256(value) NOT equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
   } else {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
-                          "sha256(value) equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "sha256(value) equal to EXPECTED_DECRYPTED_VALUE_SHA_256\n");
   }
   free(value_hash);
   free(hex_value_hash);
   goto exit;
-exit : {
+exit: {
   atclient_atstr_free(&value);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
