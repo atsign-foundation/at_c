@@ -6,6 +6,7 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 #define ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE 128 // the size of the buffer for the host name
@@ -20,6 +21,11 @@ typedef struct atclient_connection {
   mbedtls_x509_crt cacert;
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
+
+  bool should_be_initialized; // true, if atclient_connection_init was called, is false when atclient_connection_free is
+                              // called. This is used to prevent double free.
+  bool should_be_connected;   // true, if atclient_connection_connect was called, is false, if
+                              // atclient_connection_disconnect is called. This is used to prevent double free.
 } atclient_connection;
 
 /**
