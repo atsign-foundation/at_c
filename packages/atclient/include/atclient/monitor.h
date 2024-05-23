@@ -168,7 +168,7 @@ enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
   ATCLIENT_MONITOR_ERROR_READ, // usually a socket error
-  ATCLIENT_MONITOR_ERROR_PARSE, 
+  ATCLIENT_MONITOR_ERROR_PARSE,
 };
 
 /**
@@ -238,7 +238,7 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connecti
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out
- * 
+ *
  * @param monitor_conn the pkam authenticated monitor connection
  * @param timeoutms the timeout in milliseconds
  */
@@ -269,5 +269,15 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * data field to use
  */
 int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message);
+
+/**
+ * @brief Check if the monitor connection is still established (client is listening for notifications, and the server
+ * still has potential to send notifications to you)
+ *
+ * @param monitor_conn the monitor connection to check
+ * @return 1 if connected, 0 if not connected, negative on error, you can deduce that 0 and negative basically mean the
+ * same thing (we are not connected :( )
+ */
+int atclient_monitor_is_connected(atclient *monitor_conn);
 
 #endif

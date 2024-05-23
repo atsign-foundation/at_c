@@ -1,10 +1,10 @@
 
 #include "atclient/connection.h"
-#include "atclient/stringutils.h"
 #include "atchops/constants.h"
 #include "atclient/atstr.h"
 #include "atclient/cacerts.h"
 #include "atclient/constants.h"
+#include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
@@ -47,7 +47,7 @@ static void free_contexts(atclient_connection *ctx) {
   mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
 }
 
-void atclient_connection_init(atclient_connection *ctx) {
+void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type) {
 
   if (ctx == NULL) {
     return; // how should we handle this error?
@@ -57,10 +57,15 @@ void atclient_connection_init(atclient_connection *ctx) {
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
   ctx->should_be_connected = false;
+  ctx->type = type;
 }
 
 int atclient_connection_connect(atclient_connection *ctx, const char *host, const int port) {
   int ret = 1;
+
+  if (ctx->should_be_connected) {
+    atclient_connection_disconnect(ctx);
+  }
 
   init_contexts(ctx);
   ctx->should_be_connected = true;
@@ -120,7 +125,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
   mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
-  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
+  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config),
+                                ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
 
   ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config));
   if (ret != 0) {
@@ -201,8 +207,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
                              unsigned char *recv, const size_t recvsize, size_t *recvlen) {
   int ret = 1;
 
-  if(!ctx->should_be_connected)
-  {
+  if (!ctx->should_be_connected) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
     goto exit;
   }
@@ -216,9 +221,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char srccopy[srclen];
     memcpy(srccopy, src, srclen);
-    atlogger_fix_stdout_buffer((char *) srccopy, srclen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *) srccopy), srccopy,
-                 reset);
+    atlogger_fix_stdout_buffer((char *)srccopy, srclen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
+                 srccopy, reset);
   }
 
   if (recv == NULL) {
@@ -256,12 +261,12 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   recv[*recvlen] = '\0'; // null terminate the string
 
-
-  if(atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char recvcopy[*recvlen];
     memcpy(recvcopy, recv, *recvlen);
-    atlogger_fix_stdout_buffer((char *) recvcopy, *recvlen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, strlen(recvcopy), recvcopy, reset);
+    atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, strlen(recvcopy), recvcopy,
+                 reset);
   }
 
   ret = 0;
@@ -272,8 +277,9 @@ exit: { return ret; }
 int atclient_connection_disconnect(atclient_connection *ctx) {
   int ret = 1;
 
-  if(!ctx->should_be_connected) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false, it was never connected in the first place!\n");
+  if (!ctx->should_be_connected) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "ctx->should_be_connected should be true, but is false, it was never connected in the first place!\n");
     goto exit;
   }
 
@@ -287,20 +293,28 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
   ret = 0;
 
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
 
 int atclient_connection_is_connected(atclient_connection *ctx) {
   int ret = -1;
 
-  if(!ctx->should_be_connected) {
+  if (!ctx->should_be_connected) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
     return ret;
   }
 
-  const char *command = "\n";
+  char *command = "\n";
+  if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATSERVER) {
+    command = "noop:0\r\n";
+  } else if (ctx->type == ATCLIENT_CONNECTION_TYPE_DIRECTORY) {
+    command = "\n";
+  } else {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "ctx->type is not ATCLIENT_CONNECTION_TYPE_ATSERVER or ATCLIENT_CONNECTION_TYPE_ROOT\n");
+    return ret;
+  }
+  
   const size_t commandlen = strlen(command);
 
   const size_t recvsize = 64;
@@ -308,15 +322,14 @@ int atclient_connection_is_connected(atclient_connection *ctx) {
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen;
 
-  ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv,
-                                 recvsize, &recvlen);
+  ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \'\\n\' to connection: %d\n", ret);
     ret = -1;
     goto exit;
   }
 
-  if(recvlen <= 0) {
+  if (recvlen <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \'\\n\'\n");
     ret = 0;
     goto exit;
@@ -329,7 +342,7 @@ exit: { return ret; }
 }
 
 void atclient_connection_free(atclient_connection *ctx) {
-  if(ctx->should_be_connected) {
+  if (ctx->should_be_connected) {
     free_contexts(ctx);
   }
   memset(ctx, 0, sizeof(atclient_connection));

@@ -28,7 +28,7 @@ void atclient_init(atclient *ctx) {
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
-  atclient_connection_init(&(ctx->secondary_connection));
+  atclient_connection_init(&(ctx->secondary_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
 
   ret = atclient_connection_connect(&(ctx->secondary_connection), secondaryhost, secondaryport);
   if (ret != 0) {

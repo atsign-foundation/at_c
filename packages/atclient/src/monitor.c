@@ -714,6 +714,10 @@ exit: {
 }
 }
 
+int atclient_monitor_is_connected(atclient *monitor_conn) {
+  return atclient_connection_is_connected(&monitor_conn->secondary_connection);
+}
+
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
 // error, notification) and return the message body which is everything after the prefix (data:, error:, notification:).
 // This function will modify *message_type and *message_body to point to the respective values in *original.

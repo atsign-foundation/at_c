@@ -4,7 +4,7 @@ project(sample_cmake_project)
 
 find_package(atsdk REQUIRED CONFIG)
 
-set(examples notify monitor)
+set(examples notify monitor resilient_monitor)
 
 foreach(example ${examples})
   add_executable(${example} ${CMAKE_CURRENT_LIST_DIR}/${example}.c)

@@ -10,9 +10,14 @@
 #include <stddef.h>
 
 #define ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE 128 // the size of the buffer for the host name
-//
+
+// represents the type of connection
+typedef enum atclient_connection_type {
+  ATCLIENT_CONNECTION_TYPE_DIRECTORY, // uses '\n' to check if it is connected
+  ATCLIENT_CONNECTION_TYPE_ATSERVER // uses 'noop:0\r\n' to check if it is connected
+} atclient_connection_type;
+
 typedef struct atclient_connection {
-  // char *host; // assume null terminated, example: "root.atsign.org"
   char host[ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE];
   int port; // example: 64
   mbedtls_net_context net;
@@ -22,18 +27,23 @@ typedef struct atclient_connection {
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
 
-  bool should_be_connected;
+  atclient_connection_type type;
+
   // atclient_connection_connect sets this to true and atclient_connection_disconnect sets this to false
   // this does not mean that the connection is still alive, it just means that the connection was established or taken
   // down at some point, check atclient_connection_is_connected for a live status on the connection
+  bool should_be_connected;
 } atclient_connection;
 
 /**
  * @brief initialize the context for a connection. this function should be called before use of any other function
  *
  * @param ctx the context to initialize
+ * @param type the type of connection to initialize,
+ * if it is ATCLIENT_CONNECTION_TYPE_ROOT, then '\\n' will be used to check if it is connected.
+ * if it is ATCLIENT_CONNECTION_TYPE_ATSERVER, then 'noop:0\r\n' will be used to check if it is connected
  */
-void atclient_connection_init(atclient_connection *ctx);
+void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type);
 
 /**
  * @brief after initializing a connection context, connect to a host and port
