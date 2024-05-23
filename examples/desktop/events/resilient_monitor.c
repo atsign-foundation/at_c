@@ -70,6 +70,8 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
+  atclient_monitor_set_read_timeout(&monitor_conn, 3*1000); // monitor read will wait at most 3 seconds for a message. As soon bytes are read, it will return. If no bytes are read, it will return after 3 seconds.
+
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
   size_t tries = 1;
   size_t max_tries = 10;

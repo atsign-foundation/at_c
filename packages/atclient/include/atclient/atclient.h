@@ -29,6 +29,14 @@ typedef struct atclient {
 void atclient_init(atclient *ctx);
 
 /**
+ * @brief Frees memory allocated by atclient's _init function. The caller of _init is responsible for calling this once
+ * it is done with the atclient context.
+ *
+ * @param ctx the atclient context to free
+ */
+void atclient_free(atclient *ctx);
+
+/**
  * @brief initialize the atclient's secondary connection to the specified host and port
  *
  * @param ctx initialized atclient context
@@ -176,11 +184,14 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
 int atclient_send_heartbeat(atclient *heartbeat_conn);
 
 /**
- * @brief Frees memory allocated by atclient's _init function. The caller of _init is responsible for calling this once
- * it is done with the atclient context.
+ * @brief For any atclient SSL operations (such as the crud operations like put,get,delete or event operations like
+ * notify), the timeout will be set to this value. Once an operation is ran (mbedtls_ssl_read), it will wait at most
+ * `timeout_ms` before returning. If any bytes are read, it will return immediately. If no bytes are read, it will
+ * return after `timeout_ms` milliseconds.
  *
- * @param ctx the atclient context to free
+ * @param ctx the pkam_authenticated atclient context
+ * @param timeout_ms the timeout in milliseconds
  */
-void atclient_free(atclient *ctx);
+void atclient_set_timeout(atclient *ctx, int timeout_ms);
 
 #endif

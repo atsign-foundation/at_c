@@ -25,6 +25,16 @@ void atclient_init(atclient *ctx) {
   ctx->async_read = false;
 }
 
+void atclient_free(atclient *ctx) { 
+  // TODO: add initialized fields to free
+
+  // TODO: free secondary_connection if it's been started (called atclient_start_secondary_connection)
+  atclient_connection_free(&(ctx->secondary_connection));
+
+  // TODO: free atsign if it's been initialized (called atclient_atsign_init)
+  // TODO: free atkeys if it's been initialized (called atclient_atkeys_init)
+}
+
 int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
@@ -196,8 +206,6 @@ exit: {
 }
 }
 
-void atclient_free(atclient *ctx) { atclient_connection_free(&(ctx->secondary_connection)); }
-
 int atclient_send_heartbeat(atclient *heartbeat_conn) {
   int ret = -1;
 
@@ -239,4 +247,8 @@ exit: {
   }
   return ret;
 }
+}
+
+void atclient_set_timeout(atclient *ctx, int timeout_ms) {
+  mbedtls_ssl_conf_read_timeout(&(ctx->secondary_connection.ssl_config), timeout_ms);
 }
