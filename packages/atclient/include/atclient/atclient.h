@@ -192,6 +192,6 @@ int atclient_send_heartbeat(atclient *heartbeat_conn);
  * @param ctx the pkam_authenticated atclient context
  * @param timeout_ms the timeout in milliseconds
  */
-void atclient_set_timeout(atclient *ctx, int timeout_ms);
+void atclient_set_read_timeout(atclient *ctx, int timeout_ms);
 
 #endif

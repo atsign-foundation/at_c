@@ -249,6 +249,6 @@ exit: {
 }
 }
 
-void atclient_set_timeout(atclient *ctx, int timeout_ms) {
+void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
   mbedtls_ssl_conf_read_timeout(&(ctx->secondary_connection.ssl_config), timeout_ms);
 }
