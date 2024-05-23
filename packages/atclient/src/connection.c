@@ -231,6 +231,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+
   bool found = false;
   size_t l = 0;
   do {
@@ -259,13 +261,14 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
+  // atlogger_fix_stdout_buffer((char *)recv, *recvlen);
   recv[*recvlen] = '\0'; // null terminate the string
 
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char recvcopy[*recvlen];
     memcpy(recvcopy, recv, *recvlen);
     atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, strlen(recvcopy), recvcopy,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy,
                  reset);
   }
 
@@ -318,7 +321,6 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
 
   const size_t recvsize = 64;
   unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen;
 
   int ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recvlen);
