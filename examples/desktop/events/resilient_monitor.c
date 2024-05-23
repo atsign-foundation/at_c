@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
                      message->notification.decryptedvalue);
       }
+      tries = 1;
       break;
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
