@@ -296,12 +296,11 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
 exit: { return ret; }
 }
 
-int atclient_connection_is_connected(atclient_connection *ctx) {
-  int ret = -1;
+bool atclient_connection_is_connected(atclient_connection *ctx) {
 
   if (!ctx->should_be_connected) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
-    return ret;
+    return false;
   }
 
   char *command = "\n";
@@ -312,9 +311,9 @@ int atclient_connection_is_connected(atclient_connection *ctx) {
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "ctx->type is not ATCLIENT_CONNECTION_TYPE_ATSERVER or ATCLIENT_CONNECTION_TYPE_ROOT\n");
-    return ret;
+    return false;
   }
-  
+
   const size_t commandlen = strlen(command);
 
   const size_t recvsize = 64;
@@ -322,23 +321,18 @@ int atclient_connection_is_connected(atclient_connection *ctx) {
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen;
 
-  ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recvlen);
+  int ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \'\\n\' to connection: %d\n", ret);
-    ret = -1;
-    goto exit;
+    return false;
   }
 
   if (recvlen <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \'\\n\'\n");
-    ret = 0;
-    goto exit;
+    return false;
   }
 
-  ret = 1;
-  goto exit;
-
-exit: { return ret; }
+  return true;
 }
 
 void atclient_connection_free(atclient_connection *ctx) {

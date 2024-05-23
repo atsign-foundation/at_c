@@ -275,9 +275,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
  * still has potential to send notifications to you)
  *
  * @param monitor_conn the monitor connection to check
- * @return 1 if connected, 0 if not connected, negative on error, you can deduce that 0 and negative basically mean the
- * same thing (we are not connected :( )
+ * @return true if connected, false if not connected or an error happened
  */
-int atclient_monitor_is_connected(atclient *monitor_conn);
+bool atclient_monitor_is_connected(atclient *monitor_conn);
 
 #endif

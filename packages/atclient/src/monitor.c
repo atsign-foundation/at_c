@@ -714,7 +714,7 @@ exit: {
 }
 }
 
-int atclient_monitor_is_connected(atclient *monitor_conn) {
+bool atclient_monitor_is_connected(atclient *monitor_conn) {
   return atclient_connection_is_connected(&monitor_conn->secondary_connection);
 }
 

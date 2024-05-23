@@ -83,9 +83,9 @@ int atclient_connection_disconnect(atclient_connection *ctx);
  * @brief checks if the connection is connected
  *
  * @param ctx the connection to check
- * @return int 1 if connected, 0 if not connected, negative on error
+ * @return true if the connection is connected, otherwise false if it is not connected or an error occurred
  */
-int atclient_connection_is_connected(atclient_connection *ctx);
+bool atclient_connection_is_connected(atclient_connection *ctx);
 
 /**
  * @brief free memory allocated by the init function
