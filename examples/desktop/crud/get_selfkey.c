@@ -28,14 +28,13 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
+  char *atserver_host = NULL;
+  int atserver_port = -1;
+
   const size_t valuelen = 1024;
   char value[valuelen];
   memset(value, 0, valuelen);
   size_t valueolen = 0;
-
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
-  atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT);
 
   atclient atclient;
   atclient_init(&atclient);
@@ -53,7 +52,12 @@ int main() {
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, atsign.atsign)) != 0) {
+  if((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
@@ -95,7 +99,7 @@ exit : {
   atclient_atstr_free(&atkeystr);
   atclient_atsign_free(&atsign);
   atclient_free(&atclient);
-  atclient_connection_free(&root_conn);
+  free(atserver_host);
   return ret;
 }
 }

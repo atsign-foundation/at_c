@@ -20,6 +20,9 @@
 #define ATKEY_NAMESPACE "dart_playground"
 #define ATKEY_VALUE "test value"
 
+#define ROOT_HOST "root.atsign.org"
+#define ROOT_PORT 64
+
 int main() {
   int ret = 1;
 
@@ -33,9 +36,8 @@ int main() {
   atclient atclient;
   atclient_init(&atclient);
 
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
-  atclient_connection_connect(&root_connection, "root.atsign.org", 64);
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
   atclient_atsign atsign;
   atclient_atsign_init(&atsign, ATSIGN);
@@ -50,7 +52,12 @@ int main() {
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, ATSIGN)) != 0) {
+  if((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
@@ -68,8 +75,8 @@ int main() {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
-                        (int)atkeystr.len, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
+               atkeystr.str);
 
   if ((ret = atclient_put(&atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL) != 0)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put public key");
@@ -85,13 +92,13 @@ int main() {
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   atclient_atstr_free(&atkeystr);
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
   atclient_atsign_free(&atsign);
   atclient_free(&atclient);
-  atclient_connection_free(&root_connection);
+  free(atserver_host);
   return ret;
 }
 }

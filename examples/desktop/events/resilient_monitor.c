@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
   atclient atclient2;
   atclient_init(&atclient2);
@@ -50,17 +50,17 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server\n");
+  if ((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient2, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient2, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
     goto exit;
   }
@@ -70,7 +70,9 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  atclient_monitor_set_read_timeout(&monitor_conn, 3*1000); // monitor read will wait at most 3 seconds for a message. As soon bytes are read, it will return. If no bytes are read, it will return after 3 seconds.
+  atclient_monitor_set_read_timeout(
+      &monitor_conn, 3 * 1000); // monitor read will wait at most 3 seconds for a message. As soon bytes are read, it
+                                // will return. If no bytes are read, it will return after 3 seconds.
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
   size_t tries = 1;
@@ -123,11 +125,11 @@ int main(int argc, char *argv[]) {
     }
     // sleep(3);
 
-    if(tries >= max_tries) {
-      if(!atclient_monitor_is_connected(&monitor_conn)) {
+    if (tries >= max_tries) {
+      if (!atclient_monitor_is_connected(&monitor_conn)) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are not connected :( attempting reconnection\n");
-        if((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0)
-        {
+        if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) !=
+            0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
           goto exit;
         }
@@ -142,9 +144,10 @@ int main(int argc, char *argv[]) {
   goto exit;
 exit: {
   atclient_atkeys_free(&atkeys);
-  atclient_connection_free(&root_connection);
+  free(atserver_host);
   atclient_monitor_free(&monitor_conn);
   atclient_monitor_message_free(message);
+  atclient_free(&atclient2);
   return ret;
 }
 }

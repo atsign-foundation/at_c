@@ -45,11 +45,11 @@ int main(int argc, char **argv) {
   char *from_atsign = NULL;
   char *to_atsign = NULL;
 
+  char *atserver_host = NULL;
+  int atserver_port = -1;
+
   atclient_atkeys atkeys1;
   atclient_atkeys_init(&atkeys1);
-
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   atclient atclient1;
   atclient_init(&atclient1);
@@ -76,20 +76,21 @@ int main(int argc, char **argv) {
     goto exit;
   }
 
-  if ((ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+
+  if((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, from_atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
     goto exit;
   }
 
     printf("(2/3) .. ");
 
 
-  if ((ret = atclient_pkam_authenticate(&atclient1, &root_conn, &atkeys1, from_atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys1, from_atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(&monitor, &root_conn, &atkeys1, from_atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(&monitor, atserver_host, atserver_port, &atkeys1, from_atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -124,7 +125,7 @@ exit: {
   atclient_atkeys_free(&atkeys1);
   atclient_free(&atclient1);
   atclient_free(&monitor);
-  atclient_connection_free(&root_conn);
+  free(atserver_host);
   free(atkeyspath1);
   ret = pthread_cancel(tid);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread exit: %d\n", ret);

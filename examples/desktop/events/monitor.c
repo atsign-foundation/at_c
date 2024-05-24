@@ -26,19 +26,17 @@ int main(int argc, char *argv[]) {
 
   char *atsign = NULL;
 
+  char *atserver_host = NULL;
+  int atserver_port = -1;
+
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
-
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   atclient atclient2;
   atclient_init(&atclient2);
 
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
-
-  pthread_t tid;
 
   atclient_monitor_message *message = NULL;
 
@@ -52,17 +50,17 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server\n");
+  if ((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
   }
 
-  if((ret = atclient_pkam_authenticate(&atclient2, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient2, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
     goto exit;
   }
@@ -89,8 +87,7 @@ int main(int argc, char *argv[]) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
-      if(strcmp(message->notification.id, "-1")== 0)
-      {
+      if (strcmp(message->notification.id, "-1") == 0) {
         // ignore stats notification
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
@@ -120,11 +117,8 @@ int main(int argc, char *argv[]) {
   ret = 0;
   goto exit;
 exit: {
-  if (pthread_cancel(tid) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to cancel heartbeat_handler\n");
-  }
   atclient_atkeys_free(&atkeys);
-  atclient_connection_free(&root_connection);
+  free(atsign);
   atclient_monitor_free(&monitor_conn);
   atclient_monitor_message_free(message);
   return ret;
