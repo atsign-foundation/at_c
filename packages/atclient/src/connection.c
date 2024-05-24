@@ -208,7 +208,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   int ret = 1;
 
   if (!ctx->should_be_connected) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false. You are trying to send messages to a non-connected connection.\n");
     goto exit;
   }
 
