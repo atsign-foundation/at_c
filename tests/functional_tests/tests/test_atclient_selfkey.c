@@ -421,7 +421,7 @@ static int tear_down(atclient *atclient) {
   snprintf(command, commandsize, "delete:%s\r\n", atkeystr);
   commandlen = strlen(command);
 
-  if ((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, commandlen,
                                       (unsigned char *)recv, recvsize, &recvlen)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);

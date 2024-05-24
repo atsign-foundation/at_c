@@ -34,7 +34,7 @@ int main() {
   size_t valueolen = 0;
 
   atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
   atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT);
 
   atclient atclient;

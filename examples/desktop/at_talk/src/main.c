@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   atclient_atkeys_init(&atkeys1);
 
   atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   atclient atclient1;
   atclient_init(&atclient1);

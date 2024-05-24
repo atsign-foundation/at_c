@@ -309,7 +309,7 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
   char *command = "\n";
   if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATSERVER) {
     command = "noop:0\r\n";
-  } else if (ctx->type == ATCLIENT_CONNECTION_TYPE_DIRECTORY) {
+  } else if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATDIRECTORY) {
     command = "\n";
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

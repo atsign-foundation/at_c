@@ -125,7 +125,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command),
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, strlen((char *)command),
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -303,7 +303,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, strlen((char *)command),
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, strlen((char *)command),
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);

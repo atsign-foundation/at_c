@@ -140,7 +140,7 @@ static int test_1_initialize(atclient_connection *conn) {
 
   int ret = 1;
 
-  atclient_connection_init(conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   if ((ret = assert_equals(conn->should_be_connected, false)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->should_be_connected should be false, but is true\n");
@@ -361,7 +361,7 @@ static int test_11_initialize(atclient_connection *conn) {
 
   int ret = 1;
 
-  atclient_connection_init(conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   if ((ret = assert_equals(conn->should_be_connected, false)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->should_be_connected should be false, but is true\n");

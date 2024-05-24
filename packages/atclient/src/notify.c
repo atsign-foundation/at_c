@@ -186,7 +186,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   }
   size_t recvlen = 0;
 
-  res = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
+  res = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
   if (res != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
     goto exit;

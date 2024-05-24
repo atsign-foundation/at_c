@@ -39,7 +39,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
     goto exit;
   }
 
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.len, recv,
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.len, recv,
                                  4096, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);

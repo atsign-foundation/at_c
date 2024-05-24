@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   size_t recvlen = 0;
 
   atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   atclient atclient;
   atclient_init(&atclient);
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
       loop = false;
       continue;
     }
-    ret = atclient_connection_send(&atclient.secondary_connection, (const unsigned char *)buffer, bufferlen, recv,
+    ret = atclient_connection_send(&atclient.atserver_connection, (const unsigned char *)buffer, bufferlen, recv,
                                    recvsize, &recvlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d | failed to send command\n", ret);

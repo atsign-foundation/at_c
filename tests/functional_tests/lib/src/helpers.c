@@ -1,8 +1,8 @@
 #include "functional_tests/helpers.h"
 #include "functional_tests/config.h"
 #include <atclient/atclient.h>
-#include <atclient/stringutils.h>
 #include <atclient/constants.h>
+#include <atclient/stringutils.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -35,21 +35,21 @@ int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, 
 exit: { return ret; }
 }
 
-int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
+int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign,
+                               const size_t atsignlen) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth Begin\n");
 
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
-  if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+  if ((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "root connection established\n");
 
-  if ((ret = atclient_pkam_authenticate(atclient, &root_connection, atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(atclient, atserver_host, atserver_port, atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -58,7 +58,7 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
   goto exit;
 
 exit: {
-  atclient_connection_free(&root_connection);
+  free(atserver_host);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth End (%d)\n", ret);
   return ret;
 }
@@ -95,7 +95,7 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
   snprintf(command, commandsize, "plookup:%s\r\n", atkeystr);
   commandlen = strlen(command);
 
-  if ((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, commandlen,
                                       (unsigned char *)recv, recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -149,7 +149,7 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
   snprintf(command, commandsize, "llookup:%s\r\n", atkeystr);
   commandlen = strlen(command);
 
-  if ((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, commandlen,
                                       (unsigned char *)recv, recvsize, &recvlen)) != 0) {
     ret = -1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -204,7 +204,7 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
   snprintf(command, commandsize, "lookup:%s\r\n", atkeystr);
   commandlen = strlen(command);
 
-  if ((ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)command, commandlen,
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, commandlen,
                                       (unsigned char *)recv, recvsize, &recvlen)) != 0) {
     ret = -1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -228,59 +228,54 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
 exit: { return ret; }
 }
 
-int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient)
-{
-    int ret = 1;
+int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient) {
+  int ret = 1;
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
 
-    char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
+  char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
 
-    atclient_atkey atkeyforme;
-    atclient_atkey_init(&atkeyforme);
+  atclient_atkey atkeyforme;
+  atclient_atkey_init(&atkeyforme);
 
-    atclient_atkey atkeyforthem;
-    atclient_atkey_init(&atkeyforthem);
+  atclient_atkey atkeyforthem;
+  atclient_atkey_init(&atkeyforthem);
 
-    memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-    snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", (recipient+1), atclient1->atsign.atsign);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
-    if((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp, strlen(atkeystrtemp))) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
-        goto exit;
-    }
-
-    memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-    snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", recipient, atclient1->atsign.atsign);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
-    if((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp, strlen(atkeystrtemp))) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
-        goto exit;
-    }
-
-    if((ret = atclient_delete(atclient1, &atkeyforme)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for me\n");
-
-    if((ret = atclient_delete(atclient1, &atkeyforthem)) != 0)
-    {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
-        goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for them\n");
-
-    ret = 0;
+  memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
+  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", (recipient + 1), atclient1->atsign.atsign);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
+  if ((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp, strlen(atkeystrtemp))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
     goto exit;
+  }
+
+  memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
+  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", recipient, atclient1->atsign.atsign);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
+  if ((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp, strlen(atkeystrtemp))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_delete(atclient1, &atkeyforme)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
+    goto exit;
+  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for me\n");
+
+  if ((ret = atclient_delete(atclient1, &atkeyforthem)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
+    goto exit;
+  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for them\n");
+
+  ret = 0;
+  goto exit;
 
 exit: {
-    atclient_atkey_free(&atkeyforme);
-    atclient_atkey_free(&atkeyforthem);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
-    return ret;
+  atclient_atkey_free(&atkeyforme);
+  atclient_atkey_free(&atkeyforthem);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
+  return ret;
 }
 }

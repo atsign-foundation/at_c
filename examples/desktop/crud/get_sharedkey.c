@@ -44,7 +44,7 @@ int main() {
   atclient_atstr_init(&value, valuelen);
 
   atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
   atclient_connection_connect(&root_conn, "root.atsign.org", 64);
 
   atclient atclient;

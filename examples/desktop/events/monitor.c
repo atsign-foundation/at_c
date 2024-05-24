@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
   atclient_atkeys_init(&atkeys);
 
   atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
   atclient atclient2;
   atclient_init(&atclient2);

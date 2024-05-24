@@ -13,7 +13,8 @@
  *
  */
 typedef struct atclient {
-  atclient_connection secondary_connection;
+  atclient_connection atserver_connection;
+  bool atserver_connection_started;
   atclient_atsign atsign;
   atclient_atkeys atkeys;
   // Warning! async_read is an experimental feature and not fully implemented.
@@ -37,27 +38,19 @@ void atclient_init(atclient *ctx);
 void atclient_free(atclient *ctx);
 
 /**
- * @brief initialize the atclient's secondary connection to the specified host and port
- *
- * @param ctx initialized atclient context
- * @param secondaryhost host of secondary. this is usually fetched from the root connection
- * @param secondaryport port of secondary. this is usually fetched from the root connection
- * @return int 0 on success, error otherwise
- */
-int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport);
-
-/**
  * @brief authenticate with secondary server with RSA pkam private key. it is expected atkeys has been populated with
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param root_conn initialized root connection
+ * @param atserver_host host of secondary. if you do not know the host, you can use atclient_find_atserver_address, this
+ * string is assumed to be null terminated
+ * @param atserver_port port of secondary. if you do not know the port, you can use atclient_find_atserver_address,
  * @param atkeys populated atkeys, especially with the pkam private key
- * @param atsign the atsign the atkeys belong to
+ * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
-                               const char *atsign);
+int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
+                               const atclient_atkeys *atkeys, const char *atsign);
 
 /**
  * @brief Put a string value into your atServer.
@@ -193,5 +186,18 @@ int atclient_send_heartbeat(atclient *heartbeat_conn);
  * @param timeout_ms the timeout in milliseconds
  */
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms);
+
+/**
+ * @brief Ask the atDirectory for the address of the secondary server
+ *
+ * @param atdirectory_host the host of the atDirectory (e.g. "root.atsign.org")
+ * @param atdirectory_port the port of the atDirectory (e.g. 64)
+ * @param atsign the null terminated atsign string, doesn't matter if it starts with `@` or not.
+ * @param atserver_host the output host of the secondary server, will be null terminated, caller must free this memory
+ * @param atserver_port the output port of the secondary server, will be set to 0 if the port is not found
+ * @return int 0 on success, non-zero on error
+ */
+int atclient_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
+                                    char **atserver_host, int *atserver_port);
 
 #endif
