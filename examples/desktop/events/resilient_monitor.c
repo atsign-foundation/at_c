@@ -38,8 +38,6 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  pthread_t tid;
-
   atclient_monitor_message *message = NULL;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
@@ -57,7 +55,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if((ret = atclient_pkam_authenticate(&atclient2, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient2, &root_connection, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
@@ -72,14 +70,14 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
+  atclient_monitor_set_read_timeout(&monitor_conn, 3*1000); // monitor read will wait at most 3 seconds for a message. As soon bytes are read, it will return. If no bytes are read, it will return after 3 seconds.
+
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
+  size_t tries = 1;
+  size_t max_tries = 10;
   while (true) {
 
     ret = atclient_monitor_read(&monitor_conn, &atclient2, &message);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
-      continue;
-    }
 
     switch (message->type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
@@ -89,8 +87,7 @@ int main(int argc, char *argv[]) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
-      if(strcmp(message->notification.id, "-1")== 0)
-      {
+      if (strcmp(message->notification.id, "-1") == 0) {
         // ignore stats notification
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
@@ -100,6 +97,7 @@ int main(int argc, char *argv[]) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
                      message->notification.decryptedvalue);
       }
+      tries = 1;
       break;
     }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
@@ -113,16 +111,36 @@ int main(int argc, char *argv[]) {
       // Body: %s\n", message->error_response);
       break;
     }
+    case ATCLIENT_MONITOR_ERROR_PARSE: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_PARSE\n");
+      break;
+    }
+    case ATCLIENT_MONITOR_ERROR_READ: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_READ\n");
+      tries++;
+      break;
+    }
     }
     // sleep(3);
+
+    if(tries >= max_tries) {
+      if(!atclient_monitor_is_connected(&monitor_conn)) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are not connected :( attempting reconnection\n");
+        if((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0)
+        {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
+          goto exit;
+        }
+      } else {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are connected ! :)\n");
+      }
+      tries = 1;
+    }
   }
 
   ret = 0;
   goto exit;
 exit: {
-  if (pthread_cancel(tid) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to cancel heartbeat_handler\n");
-  }
   atclient_atkeys_free(&atkeys);
   atclient_connection_free(&root_connection);
   atclient_monitor_free(&monitor_conn);

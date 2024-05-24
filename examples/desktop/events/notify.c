@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   atclient_init(&atclient);
 
   atclient_connection root_connection;
-  atclient_connection_init(&root_connection);
+  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);

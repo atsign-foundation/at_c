@@ -166,7 +166,9 @@ enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
   ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE
+  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
+  ATCLIENT_MONITOR_ERROR_READ, // usually a socket error
+  ATCLIENT_MONITOR_ERROR_PARSE,
 };
 
 /**
@@ -235,6 +237,14 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connecti
                                        const atclient_atkeys *atkeys, const char *atsign);
 
 /**
+ * @brief Set how long `atclient_monitor_read` should wait for a message before timing out
+ *
+ * @param monitor_conn the pkam authenticated monitor connection
+ * @param timeoutms the timeout in milliseconds
+ */
+void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms);
+
+/**
  * @brief Onboards the monitor_connection and starts the monitoring connection.
  *
  * @param monitor_conn ctx the atclient context for the monitor connection, must be pkam_authenticated already
@@ -259,5 +269,14 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * data field to use
  */
 int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message);
+
+/**
+ * @brief Check if the monitor connection is still established (client is listening for notifications, and the server
+ * still has potential to send notifications to you)
+ *
+ * @param monitor_conn the monitor connection to check
+ * @return true if connected, false if not connected or an error happened
+ */
+bool atclient_monitor_is_connected(atclient *monitor_conn);
 
 #endif

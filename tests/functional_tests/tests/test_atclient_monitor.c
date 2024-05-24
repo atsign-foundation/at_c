@@ -112,7 +112,7 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
   int ret = 1;
 
   atclient_connection root_conn;
-  atclient_connection_init(&root_conn);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
 
   if ((ret = atclient_connection_connect(&root_conn, ROOT_HOST, ROOT_PORT)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
