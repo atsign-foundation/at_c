@@ -51,7 +51,7 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
 exit: { return ret; }
 }
 
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+int atclient_pkam_authenticate(atclient *ctx, const char *host, const int port, const atclient_atkeys *atkeys,
                                const char *atsign) {
   int ret = 1; // error by default
 

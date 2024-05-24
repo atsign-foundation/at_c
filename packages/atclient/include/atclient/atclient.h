@@ -51,12 +51,13 @@ int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param root_conn initialized root connection
+ * @param host host of the secondary server (aka atServer)
+ * @param port port of the secondary server (aka atServer)
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to
  * @return int 0 on success
  */
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
+int atclient_pkam_authenticate(atclient *ctx, const char *host, const int port,  const atclient_atkeys *atkeys,
                                const char *atsign);
 
 /**
