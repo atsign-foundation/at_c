@@ -222,7 +222,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     unsigned char srccopy[srclen];
     memcpy(srccopy, src, srclen);
     atlogger_fix_stdout_buffer((char *)srccopy, srclen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
                  srccopy, reset);
   }
 
