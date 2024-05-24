@@ -184,9 +184,9 @@ static int test_3_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_is_connected(conn);
-  if (ret != 1) {
+  if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
+    ret = 1;
     goto exit;
   }
 
@@ -250,10 +250,9 @@ exit: {
 static int test_6_is_connected_should_be_false(atclient_connection *conn) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_6_is_connected_should_be_false Begin\n");
 
-  int ret;
+  int ret= 1; 
 
-  ret = atclient_connection_is_connected(conn);
-  if (ret == 1) {
+  if (atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_connection_is_connected returned true when it should have been false: %d\n", ret);
     goto exit;
@@ -328,9 +327,9 @@ static int test_9_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_is_connected(conn);
-  if (ret != 1) {
+  if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
+    ret = 1;
     goto exit;
   }
 
@@ -401,8 +400,7 @@ static int test_13_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_is_connected(conn);
-  if (ret != 1) {
+  if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     goto exit;
   }
@@ -469,12 +467,12 @@ exit: {
 static int test_16_is_connected_should_be_false(atclient_connection *conn) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_16_is_connected_should_be_false Begin\n");
 
-  int ret;
+  int ret = 1;
 
-  ret = atclient_connection_is_connected(conn);
-  if (ret == 1) {
+  if (atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_connection_is_connected returned true when it should have been false: %d\n", ret);
+    ret = 1;
     goto exit;
   }
 
