@@ -26,13 +26,16 @@ void atclient_init(atclient *ctx) {
   memset(ctx, 0, sizeof(atclient));
   ctx->async_read = false;
   ctx->atserver_connection_started = false;
+  ctx->atsign_is_allocated = false;
 }
 
 void atclient_free(atclient *ctx) {
-  // TODO: add initialized fields to free
-
   if (ctx->atserver_connection_started) {
     atclient_connection_free(&(ctx->atserver_connection));
+  }
+
+  if(ctx->atsign_is_allocated) {
+    atclient_atsign_free(&(ctx->atsign));
   }
 
   // TODO: free atsign if it's been initialized (called atclient_atsign_init)
@@ -150,6 +153,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     goto exit;
   }
+  ctx->atsign_is_allocated = true;
 
   // set atkeys
   ctx->atkeys = *atkeys;
@@ -158,6 +162,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
 
   goto exit;
 exit: {
+  free(atsign_with_at_symbol);
   free(rootcmd);
   free(fromcmd);
   free(pkamcmd);

@@ -14,8 +14,11 @@
  */
 typedef struct atclient {
   atclient_connection atserver_connection;
-  bool atserver_connection_started;
+  bool atserver_connection_started: 1;
+
   atclient_atsign atsign;
+  bool atsign_is_allocated: 1;
+
   atclient_atkeys atkeys;
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
