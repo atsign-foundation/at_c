@@ -1,7 +1,6 @@
 #include "atchops/rsa.h"
 #include <mbedtls/md.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define PUBLIC_KEY_BASE64                                                                                              \
@@ -82,7 +81,7 @@ int main() {
     goto exit;
   }
 
-  ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
+  ret = atchops_rsa_sign(privatekey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
   if (ret != 0) {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;
@@ -94,7 +93,7 @@ int main() {
     goto exit;
   }
 
-  ret = atchops_rsa_verify(publickey, MBEDTLS_MD_SHA256, message, messagelen, signature);
+  ret = atchops_rsa_verify(publickey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
   if (ret != 0) {
     printf("atchops_rsa_verify (failed): %d\n", ret);
     goto exit;
@@ -104,7 +103,5 @@ int main() {
 
   goto exit;
 
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
