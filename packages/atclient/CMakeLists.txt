@@ -24,6 +24,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/encryption_key_helpers.c
   ${CMAKE_CURRENT_LIST_DIR}/src/encryption_key_helpers.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_utils.c
 )
 
 # Project setup
