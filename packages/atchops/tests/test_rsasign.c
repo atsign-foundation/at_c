@@ -1,10 +1,9 @@
-#include "atchops/rsa.h"
 #include "atchops/base64.h"
+#include "atchops/rsa.h"
 #include <mbedtls/md.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
 #define PRIVATE_KEY_BASE64                                                                                             \
   "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCy64Pzy9ZDdm6e96z3DmjektD7sKUo40Ax+"                              \
@@ -65,7 +64,7 @@ int main() {
   }
   printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
 
-  ret = atchops_rsa_sign(privatekey, MBEDTLS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
+  ret = atchops_rsa_sign(privatekey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
   if (ret != 0) {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;
@@ -73,7 +72,8 @@ int main() {
   printf("atchops_rsa_sign (success): %d\n", ret);
   printf("signature: \"%s\"\n", signature);
 
-  ret = atchops_base64_encode(signature, SIGNATURE_SIZE, signaturebase64, SIGNATURE_BASE64_SIZE, &signaturebase64len);
+  ret = atchops_base64_encode(signature, SIGNATURE_SIZE, (unsigned char *)signaturebase64, SIGNATURE_BASE64_SIZE,
+                              &signaturebase64len);
   if (ret != 0) {
     printf("atchops_base64_encode (failed): %d\n", ret);
     goto exit;
@@ -92,7 +92,5 @@ int main() {
 
   goto exit;
 
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }

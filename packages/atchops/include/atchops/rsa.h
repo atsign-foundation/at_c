@@ -1,22 +1,24 @@
 #ifndef ATCHOPS_RSA_H
 #define ATCHOPS_RSA_H
 
+#include "atchops/constants.h"
 #include "atchops/rsakey.h"
-#include <mbedtls/md.h>
 #include <stddef.h>
 
 /**
  * @brief Sign a hashed message with an RSA private key
  *
  * @param privatekey the private key struct to use for signing, see atchops_rsakey_populate_privatekey
- * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256. The message will be hashed with this algorithm before signing
+ * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256. The message will be hashed with this
+ * algorithm before signing
  * @param message the message to sign
  * @param messagelen the length of the message, most people use strlen() to find this length
  * @param signature the signature buffer to populate, must be pre-allocated. Signature size will correspond to the
- * specified hashing algorithm (e.g., this function expects `signature` to be a buffer of 256 bytes allocated because a RSA-2048 key is used, which corresponds to a 2048-bit signature)
+ * specified hashing algorithm (e.g., this function expects `signature` to be a buffer of 256 bytes allocated because a
+ * RSA-2048 key is used, which corresponds to a 2048-bit signature)
  * @return int 0 on success
  */
-int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_md_type_t mdtype,
+int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const atchops_md_type mdtype,
                      const unsigned char *message, const size_t messagelen, unsigned char *signature);
 
 /**
@@ -26,11 +28,12 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
  * @param mdtype the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
  * @param message the original message to hash, in bytes
  * @param messagelen the length of the original message, most people use strlen() to find this length
- * @param signature the signature to verify, expected to be the same length as the key size (e.g. 256 bytes for 2048 RSA modulus)
+ * @param signature the signature to verify, expected to be the same length as the key size (e.g. 256 bytes for 2048 RSA
+ * modulus)
  * @return int 0 on success
  */
-int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_md_type_t mdtype, const unsigned char *message,
-                       const size_t messagelen, unsigned char *signature);
+int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const atchops_md_type mdtype,
+                       const unsigned char *message, const size_t messagelen, unsigned char *signature);
 
 /**
  * @brief Encrypt bytes with an RSA public key
@@ -40,7 +43,8 @@ int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_m
  * @param plaintextlen the length of the plaintext, most people use strlen() to find this length
  * @param ciphertext the ciphertext buffer to populate
  * @param ciphertextsize the length of the ciphertext buffer
- * @param ciphertextlen the written length of the ciphertext buffer after encryption operation has completed, should be the same as the key size (e.g. 256 bytes for 2048 RSA modulus)
+ * @param ciphertextlen the written length of the ciphertext buffer after encryption operation has completed, should be
+ * the same as the key size (e.g. 256 bytes for 2048 RSA modulus)
  * @return int 0 on success
  */
 int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned char *plaintext,
@@ -52,7 +56,8 @@ int atchops_rsa_encrypt(const atchops_rsakey_publickey publickey, const unsigned
  *
  * @param privatekey the private key struct to use for decryption, see atchops_rsakey_populate_privatekey
  * @param ciphertext the ciphertext to decrypt, in bytes
- * @param ciphertextlen the length of the ciphertext, should be the same as the key size (e.g. 256 bytes for 2048 RSA modulus)
+ * @param ciphertextlen the length of the ciphertext, should be the same as the key size (e.g. 256 bytes for 2048 RSA
+ * modulus)
  * @param plaintext the plaintext buffer to populate
  * @param plaintextsize the size of the plaintext buffer (allocated size)
  * @param plaintextlen the written length of the plaintext buffer after decryption operation has completed
@@ -70,6 +75,6 @@ int atchops_rsa_decrypt(const atchops_rsakey_privatekey privatekey, const unsign
  * @param keysize the size of the key to generate, e.g. 2048
  */
 int atchops_rsa_generate(atchops_rsakey_publickey *publickey, atchops_rsakey_privatekey *privatekey,
-                         const mbedtls_md_type_t mdtype);
+                         const atchops_md_type mdtype);
 
 #endif

@@ -147,7 +147,7 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
   // sign
   atclient_atbytes_reset(&recv);
   ret =
-      atchops_rsa_sign(atkeys->pkamprivatekey, MBEDTLS_MD_SHA256, (unsigned char *)challenge, challengelen, recv.bytes);
+      atchops_rsa_sign(atkeys->pkamprivatekey, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challengelen, recv.bytes);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;

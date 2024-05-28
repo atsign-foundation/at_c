@@ -8,6 +8,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/aes.c
   ${CMAKE_CURRENT_LIST_DIR}/src/aesctr.c
   ${CMAKE_CURRENT_LIST_DIR}/src/base64.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/constants.c
   ${CMAKE_CURRENT_LIST_DIR}/src/iv.c
   ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
   ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
@@ -70,6 +71,12 @@ if(NOT ESP_PLATFORM)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_uuid4.cmake)
   endif()
 
+  # Import atlogger
+  if(NOT TARGET atlogger)
+    set(atlogger_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atlogger)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atlogger.cmake)
+  endif()
+
   # Create library targets
   add_library(${PROJECT_NAME} STATIC ${ATCHOPS_SOURCES})
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -84,7 +91,15 @@ if(NOT ESP_PLATFORM)
   )
 
   # Link dependencies to library targets
-  set(ATCHOPS_INSTALL_TARGETS mbedcrypto everest p256m uuid4-static)
+  set(
+    ATCHOPS_INSTALL_TARGETS
+    atlogger
+    mbedcrypto
+    everest
+    p256m
+    uuid4-static
+  )
+
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCHOPS_INSTALL_TARGETS})
   # INSTALL
   # Install the include headers
