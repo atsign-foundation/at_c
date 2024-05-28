@@ -1,7 +1,7 @@
 #ifndef ATCHOPS_SHA_H
 #define ATCHOPS_SHA_H
 
-#include <mbedtls/md.h>
+#include <atchops/constants.h>
 #include <stddef.h>
 
 /**
@@ -14,7 +14,7 @@
  * type (e.g. 32 bytes for SHA256 (256 bits = 32 bytes))
  * @return int 0 on success
  */
-int atchops_sha_hash(const mbedtls_md_type_t mdtype, const unsigned char *input, const size_t inputlen,
+int atchops_sha_hash(const atchops_md_type mdtype, const unsigned char *input, const size_t inputlen,
                      unsigned char *output);
 
 #endif

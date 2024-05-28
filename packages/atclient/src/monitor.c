@@ -598,7 +598,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
     goto exit;
   }
   atlogger_fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
 
   ret = 0;
   goto exit;
@@ -660,7 +660,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
                reset);
 
   if (strcmp(messagetype, "notification") == 0) {

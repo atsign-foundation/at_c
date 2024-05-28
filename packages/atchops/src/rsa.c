@@ -1,7 +1,7 @@
 #include "atchops/rsa.h"
-#include "atchops/base64.h"
 #include "atchops/rsakey.h"
 #include "atchops/sha.h"
+#include "atlogger/atlogger.h"
 #include <mbedtls/asn1.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
@@ -13,15 +13,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_md_type_t mdtype,
+#define LOGGER_TAG "ATCHOPS RSA"
+
+int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const atchops_md_type mdtype,
                      const unsigned char *message, const size_t messagelen, unsigned char *signature) {
   int ret = 1;
 
   size_t hashsize;
-  if (mdtype == MBEDTLS_MD_SHA256) {
+
+  if (mdtype == ATCHOPS_MD_SHA256) {
     hashsize = 32;
   } else {
     // TODO: log error unsupported hash type, untested
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unsupported hash type for rsa sign\n");
     return 1;
   }
 
@@ -40,6 +44,7 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
   // 1. hash the message
   ret = atchops_sha_hash(mdtype, message, messagelen, hash);
   if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to perform for sha hash for rsa signing\n");
     goto ret;
   }
 
@@ -48,26 +53,32 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const mbedtls_m
                                privatekey.q.value, privatekey.q.len, privatekey.d.value, privatekey.d.len,
                                privatekey.e.value, privatekey.e.len);
   if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_rsa_import_raw signing\n");
     goto ret;
   }
 
   ret = mbedtls_rsa_complete(&rsa);
   if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_rsa_complete operation\n");
     goto ret;
   }
 
   ret = mbedtls_rsa_check_privkey(&rsa);
   if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_rsa_check_privkey operation\n");
     goto ret;
   }
 
   ret = mbedtls_ctr_drbg_seed(&ctr_drbg_ctx, mbedtls_entropy_func, &entropy_ctx, NULL, 0);
   if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_ctr_drbg_seed operation\n");
     goto ret;
   }
 
-  ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, mdtype, hashsize, hash, signature);
+  ret = mbedtls_rsa_pkcs1_sign(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx, atchops_mbedtls_md_map[mdtype], hashsize,
+                               hash, signature);
   if (ret != 0) {
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to do mbedtls_rsa_pkcs1_sign operation\n");
     goto ret;
   }
 
@@ -81,19 +92,17 @@ ret: {
 }
 }
 
-int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_md_type_t mdtype, const unsigned char *message,
-                       const size_t messagelen, unsigned char *signature) {
+int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const atchops_md_type mdtype,
+                       const unsigned char *message, const size_t messagelen, unsigned char *signature) {
   int ret = 1;
 
   size_t hashsize;
 
-  if(mdtype == MBEDTLS_MD_SHA256)
-  {
+  if (mdtype == ATCHOPS_MD_SHA256) {
     hashsize = 32;
-  }
-  else
-  {
+  } else {
     // TODO log error, not supported hash type cause untested
+    atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unsupported hash type for rsa verify\n");
     return 1;
   }
 
@@ -118,7 +127,7 @@ int atchops_rsa_verify(const atchops_rsakey_publickey publickey, const mbedtls_m
   }
 
   // verify the signature
-  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, mdtype, hashsize, hash, signature)) != 0) {
+  if ((ret = mbedtls_rsa_pkcs1_verify(&rsa, atchops_mbedtls_md_map[mdtype], hashsize, hash, signature)) != 0) {
     goto exit;
   }
 

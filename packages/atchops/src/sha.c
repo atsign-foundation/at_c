@@ -1,17 +1,15 @@
 #include "atchops/sha.h"
 #include <mbedtls/md.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stddef.h>
 
-int atchops_sha_hash(const mbedtls_md_type_t mdtype, const unsigned char *input, const size_t inputlen,
+int atchops_sha_hash(const atchops_md_type mdtype, const unsigned char *input, const size_t inputlen,
                      unsigned char *output) {
   int ret = 1;
 
   mbedtls_md_context_t md_ctx;
   mbedtls_md_init(&md_ctx);
 
-  ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(mdtype), 0);
+  ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(atchops_mbedtls_md_map[mdtype]), 0);
   if (ret != 0)
     goto ret;
 
