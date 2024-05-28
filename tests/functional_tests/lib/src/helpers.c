@@ -1,6 +1,7 @@
 #include "functional_tests/helpers.h"
 #include "functional_tests/config.h"
 #include <atclient/atclient.h>
+#include <atclient/atclient_utils.h>
 #include <atclient/constants.h>
 #include <atclient/stringutils.h>
 #include <atlogger/atlogger.h>
@@ -44,7 +45,7 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  if ((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
     goto exit;
   }

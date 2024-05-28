@@ -2,6 +2,7 @@
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
+#include "atclient/atclient.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
@@ -34,7 +35,7 @@ void atclient_free(atclient *ctx) {
     atclient_connection_free(&(ctx->atserver_connection));
   }
 
-  if(ctx->atsign_is_allocated) {
+  if (ctx->atsign_is_allocated) {
     atclient_atsign_free(&(ctx->atsign));
   }
 
@@ -232,70 +233,4 @@ static int atclient_start_atserver_connection(atclient *ctx, const char *seconda
   goto exit;
 
 exit: { return ret; }
-}
-
-int atclient_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
-                                   char **atserver_host, int *atserver_port) {
-  int ret = 1;
-
-  atclient_connection atdirectory_conn;
-  atclient_connection_init(&atdirectory_conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
-
-  const size_t recvsize = 1024;
-  unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
-  size_t recvlen = 0;
-
-  char *atsign_without_at_symbol = NULL;
-  char *cmd = NULL;
-
-  if ((ret = atclient_connection_connect(&atdirectory_conn, atdirectory_host, atdirectory_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = atclient_stringutils_atsign_without_at_symbol(atsign, strlen(atsign), &atsign_without_at_symbol)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at_symbol: %d\n", ret);
-    goto exit;
-  }
-
-  size_t cmdsize = (strlen(atsign_without_at_symbol)) + strlen("\n") + 1;
-  cmd = malloc(sizeof(char) * cmdsize);
-  if (cmd == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmd\n");
-    goto exit;
-  }
-  snprintf(cmd, cmdsize, "%s\n", atsign_without_at_symbol);
-
-  if ((ret = atclient_connection_send(&atdirectory_conn, (unsigned char *)cmd, cmdsize - 1, recv, recvsize,
-                                      &recvlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
-    goto exit;
-  }
-
-  if (recvlen == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No data received from atdirectory\n");
-    goto exit;
-  }
-
-  // recv has something like `228aafb0-94d3-5aa2-a3b3-e36af115480d.swarm0002.atsign.zone:6943`
-  // we need to split it into host and port
-  char *host = strtok((char *)recv, ":");
-  char *portstr = strtok(NULL, ":");
-  if (portstr == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse port from atdirectory response\n");
-    goto exit;
-  }
-
-  *atserver_host = strdup(host);
-  *atserver_port = atoi(portstr);
-
-  ret = 0;
-  goto exit;
-exit: {
-  free(atsign_without_at_symbol);
-  free(cmd);
-  atclient_connection_free(&atdirectory_conn);
-  return ret;
-}
 }

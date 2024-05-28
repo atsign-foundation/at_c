@@ -86,9 +86,9 @@ int main(int argc, char *argv[]) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeysfilepath);
 
-  if ((ret = atclient_find_atserver_address(roothost, rootport, atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(roothost, rootport, atsign, &atserver_host, &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_find_atserver_address: %d | failed to find atserver address\n", ret);
+                 "atclient_utils_find_atserver_address: %d | failed to find atserver address\n", ret);
     goto exit;
   }
 

@@ -117,8 +117,8 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  if ((ret = atclient_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
     goto exit;
   }
 

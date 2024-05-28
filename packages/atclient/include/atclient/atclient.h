@@ -45,9 +45,9 @@ void atclient_free(atclient *ctx);
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param atserver_host host of secondary. if you do not know the host, you can use atclient_find_atserver_address, this
+ * @param atserver_host host of secondary. if you do not know the host, you can use atclient_utils_find_atserver_address, this
  * string is assumed to be null terminated
- * @param atserver_port port of secondary. if you do not know the port, you can use atclient_find_atserver_address,
+ * @param atserver_port port of secondary. if you do not know the port, you can use atclient_utils_find_atserver_address,
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
  * @return int 0 on success
@@ -189,18 +189,5 @@ int atclient_send_heartbeat(atclient *heartbeat_conn);
  * @param timeout_ms the timeout in milliseconds
  */
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms);
-
-/**
- * @brief Ask the atDirectory for the address of the secondary server
- *
- * @param atdirectory_host the host of the atDirectory (e.g. "root.atsign.org")
- * @param atdirectory_port the port of the atDirectory (e.g. 64)
- * @param atsign the null terminated atsign string, doesn't matter if it starts with `@` or not.
- * @param atserver_host the output host of the secondary server, will be null terminated, caller must free this memory
- * @param atserver_port the output port of the secondary server, will be set to 0 if the port is not found
- * @return int 0 on success, non-zero on error
- */
-int atclient_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
-                                    char **atserver_host, int *atserver_port);
 
 #endif
