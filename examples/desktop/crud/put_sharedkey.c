@@ -40,7 +40,7 @@ int main()
     atclient_init(&atclient);
 
     atclient_connection root_connection;
-    atclient_connection_init(&root_connection);
+    atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
     atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
 
     atclient_atsign atsign;

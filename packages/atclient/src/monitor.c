@@ -553,9 +553,16 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connecti
     goto exit;
   }
 
+  atclient_monitor_set_read_timeout(monitor_conn, ATCLIENT_MONITOR_READ_TIMEOUT_MS);
+
   ret = 0;
   goto exit;
 exit: { return ret; }
+}
+
+void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms)
+{
+  mbedtls_ssl_conf_read_timeout(&(monitor_conn->secondary_connection.ssl_config), timeoutms);
 }
 
 int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) {
@@ -592,7 +599,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
     goto exit;
   }
   atlogger_fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
 
   ret = 0;
   goto exit;
@@ -611,6 +618,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   char *buffer = malloc(sizeof(char) * chunksize);
   memset(buffer, 0, sizeof(char) * chunksize);
   char *buffertemp = NULL;
+
+  *message = malloc(sizeof(atclient_monitor_message));
+  atclient_monitor_message_init(*message);
 
   bool done_reading = false;
   while (!done_reading) {
@@ -632,6 +642,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     chunks = chunks + 1;
   }
   if (ret < 0) {
+    (*message)->type = ATCLIENT_MONITOR_ERROR_READ;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
     goto exit;
   }
 
@@ -644,14 +656,12 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   char *messagebody = NULL;
   ret = parse_message(buffer, &messagetype, &messagebody);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find message type and message body from: %s\n", buffer);
+    (*message)->type = ATCLIENT_MONITOR_ERROR_PARSE;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
 
-  *message = malloc(sizeof(atclient_monitor_message));
-  atclient_monitor_message_init(*message);
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
                reset);
 
   if (strcmp(messagetype, "notification") == 0) {
@@ -702,6 +712,10 @@ exit: {
   free(buffertemp);
   return ret;
 }
+}
+
+bool atclient_monitor_is_connected(atclient *monitor_conn) {
+  return atclient_connection_is_connected(&monitor_conn->secondary_connection);
 }
 
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,

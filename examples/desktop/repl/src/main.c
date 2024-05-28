@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   size_t recvlen = 0;
 
   atclient_connection root_conn;
-  atclient_connection_init(&root_conn);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
 
   atclient atclient;
   atclient_init(&atclient);

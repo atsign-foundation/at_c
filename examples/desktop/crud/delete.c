@@ -28,7 +28,7 @@ int main() {
   atclient_atkeys atkeys;
 
   atclient_init(&atclient);
-  atclient_connection_init(&root_conn);
+  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
   atclient_atsign_init(&atsign, ATSIGN);
   atclient_atkey_init(&atkey);
   atclient_atkeys_init(&atkeys);

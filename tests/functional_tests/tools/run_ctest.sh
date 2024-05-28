@@ -10,4 +10,4 @@ cd "$SCRIPT_DIRECTORY/.."
 # 2. Run tests
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
-ctest --test-dir build -VV --timeout 300
+ctest --test-dir build -VV --timeout 60
