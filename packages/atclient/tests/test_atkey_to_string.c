@@ -563,18 +563,15 @@ static int test4b() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const char *expected = TEST_ATKEY_TO_STRING_4B; // "name.wavi@jeremy_0"
-
-  atclient_atstr atstr;
-  atclient_atstr_init(&atstr, ATCLIENT_ATKEY_FULL_LEN);
-
-  atclient_atstr actual;
-  atclient_atstr_init(&actual, ATCLIENT_ATKEY_FULL_LEN);
-  
   atclient_atstr_set_literal(&(atkey.name), "name");
   atclient_atstr_set_literal(&(atkey.namespacestr), "wavi");
   atclient_atstr_set_literal(&(atkey.sharedby), "@jeremy_0");
+  atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
 
+  const char *expected = TEST_ATKEY_TO_STRING_4B; // "name.wavi@jeremy_0"
+
+  atclient_atstr actual;
+  atclient_atstr_init(&actual, ATCLIENT_ATKEY_FULL_LEN);
 
   ret = atclient_atkey_to_string(&atkey, actual.str, actual.size, &actual.len);
 
@@ -592,7 +589,11 @@ static int test4b() {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: { 
+  atclient_atkey_free(&atkey);
+  atclient_atstr_free(&atstr);
+  atclient_atstr_free(&actual);
+  return ret; }
 }
 
 int main() {
