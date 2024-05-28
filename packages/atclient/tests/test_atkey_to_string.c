@@ -591,7 +591,6 @@ static int test4b() {
   goto exit;
 exit: { 
   atclient_atkey_free(&atkey);
-  atclient_atstr_free(&atstr);
   atclient_atstr_free(&actual);
   return ret; }
 }
