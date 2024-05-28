@@ -24,7 +24,6 @@ int atchops_rsa_sign(const atchops_rsakey_privatekey privatekey, const atchops_m
   if (mdtype == ATCHOPS_MD_SHA256) {
     hashsize = 32;
   } else {
-    // TODO: log error unsupported hash type, untested
     atlogger_log(LOGGER_TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unsupported hash type for rsa sign\n");
     return 1;
   }
