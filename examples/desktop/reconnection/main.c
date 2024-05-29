@@ -50,11 +50,11 @@ int main() {
 
   while (true) {
     if ((is_connected = atclient_is_connected(&atclient1))) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected to atserver\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are connected to the atServer! :)\n");
     } else {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Not connected to atserver\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are not connected to atServer? :O\n");
     }
-    sleep(1000);
+    sleep(1);
   }
 
   ret = 0;
