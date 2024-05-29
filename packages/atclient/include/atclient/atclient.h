@@ -14,10 +14,10 @@
  */
 typedef struct atclient {
   atclient_connection atserver_connection;
-  bool atserver_connection_started: 1;
+  bool atserver_connection_started : 1;
 
   atclient_atsign atsign;
-  bool atsign_is_allocated: 1;
+  bool atsign_is_allocated : 1;
 
   atclient_atkeys atkeys;
   // Warning! async_read is an experimental feature and not fully implemented.
@@ -45,9 +45,10 @@ void atclient_free(atclient *ctx);
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param atserver_host host of secondary. if you do not know the host, you can use atclient_utils_find_atserver_address, this
- * string is assumed to be null terminated
- * @param atserver_port port of secondary. if you do not know the port, you can use atclient_utils_find_atserver_address,
+ * @param atserver_host host of secondary. if you do not know the host, you can use
+ * atclient_utils_find_atserver_address, this string is assumed to be null terminated
+ * @param atserver_port port of secondary. if you do not know the port, you can use
+ * atclient_utils_find_atserver_address,
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
  * @return int 0 on success
@@ -178,6 +179,14 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
  * @note It is the responsibility of the caller to ensure that the connection is still alive
  */
 int atclient_send_heartbeat(atclient *heartbeat_conn);
+
+/**
+ * @brief Checks if the atclient is connected to the atserver
+ *
+ * @param ctx the atclient context, must be initialized
+ * @return true, if connected, false otherwise
+ */
+bool atclient_is_connected(atclient *ctx);
 
 /**
  * @brief For any atclient SSL operations (such as the crud operations like put,get,delete or event operations like

@@ -45,6 +45,7 @@ void atclient_free(atclient *ctx) {
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
                                const atclient_atkeys *atkeys, const char *atsign) {
+
   int ret = 1; // error by default
 
   char *rootcmd = NULL;
@@ -82,12 +83,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   }
 
   const char *atsign_without_at_str = (atsign_with_at_symbol + 1);
-
-  // log atsign_without_prefix_str
-  // log atserver_host and port
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign_without_prefix_str: %s\n", atsign_without_at_str);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_host: %s\n", atserver_host);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_port: %d\n", atserver_port);
 
   if ((ret = atclient_start_atserver_connection(ctx, atserver_host, atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
@@ -150,6 +145,10 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   }
 
   // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign
+  if(ctx->atsign_is_allocated)
+  {
+    atclient_atsign_free(&(ctx->atsign));
+  }
   if ((ret = atclient_atsign_init(&(ctx->atsign), atsign) != 0)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     goto exit;
@@ -214,6 +213,10 @@ exit: {
 }
 }
 
+bool atclient_is_connected(atclient *ctx) {
+  return atclient_connection_is_connected(&(ctx->atserver_connection));
+}
+
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
   mbedtls_ssl_conf_read_timeout(&(ctx->atserver_connection.ssl_config), timeout_ms);
 }
@@ -221,14 +224,20 @@ void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
 static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
+  // if(ctx->atserver_connection_started) {
+    atclient_connection_free(&(ctx->atserver_connection));
+    ctx->atserver_connection = (atclient_connection){0};
+  //   ctx->atserver_connection_started = false;
+  // }
+
   atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
+  ctx->atserver_connection_started = true;
 
   if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondaryhost, secondaryport)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
     goto exit;
   }
 
-  ctx->atserver_connection_started = true;
 
   goto exit;
 

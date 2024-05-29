@@ -3,12 +3,12 @@
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
+#include <atclient/atclient_utils.h>
 #include <atclient/atkeysfile.h>
 #include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
-#include <atclient/constants.h>
 #include <atclient/notify.h>
 #include <atlogger/atlogger.h>
 #include <pthread.h>
@@ -29,18 +29,20 @@
 
 static int parse_args(int argc, char **argv, char **from_atsign, char **to_atsign);
 static int get_atkeys_path(const char *atsign, const size_t atsignlen, char **atkeyspath);
+
 static void *monitor_handler(atclient *atclient2);
+
 static int attalk_send_message(atclient *ctx, const char *recipient_atsign, const char *message,
                                const size_t messagelen);
 static int attalk_recv_message(atclient *monitor, char **messageptr, char **sender_atsign);
 
-int main(int argc, char **argv) {
-  int ret = 0;
+int main(int argc, char *argv[]) {
+  int ret = 1;
 
-  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
-  char *atkeyspath1 = NULL;
+  char *atkeyspath = NULL;
 
   char *from_atsign = NULL;
   char *to_atsign = NULL;
@@ -48,8 +50,8 @@ int main(int argc, char **argv) {
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  atclient_atkeys atkeys1;
-  atclient_atkeys_init(&atkeys1);
+  atclient_atkeys atkeys;
+  atclient_atkeys_init(&atkeys);
 
   atclient atclient1;
   atclient_init(&atclient1);
@@ -61,43 +63,72 @@ int main(int argc, char **argv) {
 
   printf("Setup (1/3) .. ");
 
+  /*
+   * 1. Parse args to get `-f` and `-t` atSigns
+   */
   if ((ret = parse_args(argc, argv, &from_atsign, &to_atsign)) != 0) {
-    printf("Issue with parsing arguments\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nFailed to parse args: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = get_atkeys_path(from_atsign, strlen(from_atsign), &atkeyspath1)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Issue with getting atkeys path for %s\n", from_atsign);
+  /*
+   * 2. Get atkeys path from home directory (~/.atsign/keys/<@atsign>_key.atKeys)
+   */
+  if ((ret = get_atkeys_path(from_atsign, strlen(from_atsign), &atkeyspath)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nIssue with getting atkeys path for %s\n", from_atsign);
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_populate_from_path(&atkeys1, atkeyspath1)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_read: %d\n", ret);
+  /*
+   * 3. Populate atkeys struct from atkeys file path
+   */
+  if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeyspath)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_atkeys_file_read: %d\n", ret);
     goto exit;
   }
 
-
-  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, from_atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
+  /*
+   * 4. Find atserver address for root host
+   */
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, from_atsign, &atserver_host, &atserver_port)) !=
+      0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_utils_find_atserver_address: %d\n", ret);
     goto exit;
   }
 
-    printf("(2/3) .. ");
+  printf("(2/3) .. ");
 
-
-  if ((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys1, from_atsign)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
+  /*
+   * 5. Authenticate client connection (for crud operations)
+   */
+  if ((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys, from_atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(&monitor, atserver_host, atserver_port, &atkeys1, from_atsign)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
+  /*
+   * 6. Authenticate monitor connection (for monitoring notifications)
+   */
+  if ((ret = atclient_monitor_pkam_authenticate(&monitor, atserver_host, atserver_port, &atkeys, from_atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
 
-  ret = pthread_create(&tid, NULL,  (void *) monitor_handler, &monitor);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create monitor_handler\n");
+  atclient_monitor_set_read_timeout(&monitor, 1000); // blocking read takes 1 second to timeout
+
+  /*
+   * 7. Sends the `monitor <regex>` command to the atserver to start monitoring notifications
+   */
+  if ((ret = atclient_monitor_start(&monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
+    goto exit;
+  }
+
+  /*
+   * 8. Read messages from monitor
+   */
+  if ((ret = pthread_create(&tid, NULL, (void *)monitor_handler, &monitor)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nFailed to create monitor_handler\n");
     return ret;
   }
 
@@ -122,11 +153,13 @@ int main(int argc, char **argv) {
   goto exit;
 exit: {
   // free everything
-  atclient_atkeys_free(&atkeys1);
+  atclient_atkeys_free(&atkeys);
   atclient_free(&atclient1);
   atclient_free(&monitor);
   free(atserver_host);
-  free(atkeyspath1);
+  free(atkeyspath);
+  free(from_atsign);
+  free(to_atsign);
   ret = pthread_cancel(tid);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread exit: %d\n", ret);
   return ret;
@@ -181,16 +214,7 @@ static int get_atkeys_path(const char *atsign, const size_t atsignlen, char **at
 }
 
 static void *monitor_handler(atclient *atclient2) {
-  int ret = 0;
-
-  if ((ret = atclient_monitor_start(atclient2, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
-    goto exit;
-  }
-
-  bool loop = true;
-
-  while (loop) {
+  while (true) {
     char *messageptr = NULL;
     char *sender_atsign = NULL;
     attalk_recv_message(atclient2, &messageptr, &sender_atsign);
@@ -199,6 +223,7 @@ static void *monitor_handler(atclient *atclient2) {
       free(messageptr);
       free(sender_atsign);
     }
+    sleep(1);
   }
   goto exit;
 
@@ -239,15 +264,9 @@ static int attalk_recv_message(atclient *monitor, char **messageptr, char **send
 
   atclient_monitor_message *message = NULL;
 
-  if ((ret = atclient_monitor_read(monitor, monitor, &message)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_for_notification: %d\n", ret);
-    goto exit;
-  }
+  ret = atclient_monitor_read(monitor, monitor, &message);
 
   switch (message->type) {
-  case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
-    break;
-  }
   case ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE: {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Received message: %s\n", message->data_response);
     break;
@@ -264,14 +283,34 @@ static int attalk_recv_message(atclient *monitor, char **messageptr, char **send
 
     if (strcmp(atkey.namespacestr.str, ATKEY_NAMESPACE) == 0 && strcmp(atkey.name.str, ATKEY_NAME) == 0) {
       // clear stdin
-      *messageptr = strdup((char *) message->notification.decryptedvalue);
+      *messageptr = strdup((char *)message->notification.decryptedvalue);
       *sender_atsign = strdup(message->notification.from);
       ret = 0;
     }
     atclient_atkey_free(&atkey);
     break;
   }
+  case ATCLIENT_MONITOR_ERROR_PARSE:
+  case ATCLIENT_MONITOR_ERROR_READ: {
+    ret = 0;
+    if (!atclient_monitor_is_connected(monitor)) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Monitor disconnected! Reconnecting...\n");
+      if ((ret = atclient_monitor_pkam_authenticate(monitor, monitor->atserver_connection.host,
+                                                    monitor->atserver_connection.port, &monitor->atkeys,
+                                                    monitor->atsign.atsign)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect monitor: %d\n", ret);
+        break;
+      }
+      if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to restart monitor: %d\n", ret);
+        break;
+      }
+    }
+    break;
+  }
+  case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE:
   default: {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Unknown message type\n");
     break;
   }
   }

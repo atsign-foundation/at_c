@@ -553,8 +553,6 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atser
     goto exit;
   }
 
-  atclient_monitor_set_read_timeout(monitor_conn, ATCLIENT_MONITOR_READ_TIMEOUT_MS);
-
   ret = 0;
   goto exit;
 exit: { return ret; }
