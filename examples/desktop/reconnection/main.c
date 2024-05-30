@@ -48,13 +48,15 @@ int main() {
     goto exit;
   }
 
+  atclient_set_read_timeout(&atclient1, 1000);
+
   bool is_connected;
 
   while (true) {
     if ((is_connected = atclient_is_connected(&atclient1))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are connected to the atServer! :)\n");
     } else {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are not connected to atServer? :O\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are not connected to atServer? :(\n");
     }
     sleep(1);
   }
