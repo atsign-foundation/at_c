@@ -1,9 +1,12 @@
 #include "atclient/atclient_utils.h"
+#include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include "atclient/stringutils.h"
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <pwd.h>
+#include <unistd.h>
 #include <string.h>
 
 #define TAG "atclient_utils"
@@ -72,4 +75,26 @@ exit: {
   atclient_connection_free(&atdirectory_conn);
   return ret;
 }
+}
+
+int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen)
+{
+  int ret = 1;
+
+  struct passwd *pw = getpwuid(getuid());
+  const char *homedir = pw->pw_dir;
+
+  const size_t atkeyspathsize = strlen(homedir) + strlen("/.atsign/keys/") + atsignlen + strlen("_key.atKeys") + 1;
+  char atkeyspath[atkeyspathsize];
+
+  snprintf(atkeyspath, atkeyspathsize, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
+
+  if ((ret = atclient_atkeys_populate_from_path(atkeys, atkeyspath)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys from path: %d\n", ret);
+    goto exit;
+  }
+
+  goto exit;
+
+exit: { return ret; }
 }

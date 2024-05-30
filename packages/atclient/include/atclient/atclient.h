@@ -20,6 +20,7 @@ typedef struct atclient {
   bool atsign_is_allocated : 1;
 
   atclient_atkeys atkeys;
+  bool atkeys_is_allocated_by_caller: 1;
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
   bool async_read;
@@ -51,10 +52,20 @@ void atclient_free(atclient *ctx);
  * atclient_utils_find_atserver_address,
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
- * @return int 0 on success
+ * @return int 0 on success, non-zero on error
  */
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
                                const atclient_atkeys *atkeys, const char *atsign);
+
+/**
+ * @brief A more specific version of the atclient_pkam_authenticate function where the atserver_host and atserver_port
+ * are found from the production atDirectory server. This function will also attempt to find the atKeys in the default location (~/.atsign/keys/) of a typical PC user. This function is a subset of the generic atclient_pkam_authenticate function.
+ *
+ * @param ctx the initialized atclient context to populate
+ * @param atsign the atsign to authenticate with
+ * @return int 0 on success, non-zero on error
+ */
+int atclient_pkam_authenticate_basic(atclient *ctx, const char *atsign);
 
 /**
  * @brief Put a string value into your atServer.
@@ -198,13 +209,5 @@ bool atclient_is_connected(atclient *ctx);
  * @param timeout_ms the timeout in milliseconds
  */
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms);
-
-/**
- * @brief Tries to reconnect and pkam authenticate with the atServer
- *
- * @param ctx the atclient context
- * @return int 0 on success
- */
-int atclient_try_reconnect(atclient *ctx);
 
 #endif

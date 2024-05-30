@@ -1,4 +1,6 @@
 #include "atclient/atclient.h"
+#include "atclient/constants.h"
+#include "atclient/atclient_utils.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
@@ -28,6 +30,7 @@ void atclient_init(atclient *ctx) {
   ctx->async_read = false;
   ctx->atserver_connection_started = false;
   ctx->atsign_is_allocated = false;
+  ctx->atkeys_is_allocated_by_caller = false;
 }
 
 void atclient_free(atclient *ctx) {
@@ -39,8 +42,11 @@ void atclient_free(atclient *ctx) {
     atclient_atsign_free(&(ctx->atsign));
   }
 
+  if(!ctx->atkeys_is_allocated_by_caller) {
+    atclient_atkeys_free(&(ctx->atkeys));
+  }
+
   // TODO: free atsign if it's been initialized (called atclient_atsign_init)
-  // TODO: free atkeys if it's been initialized (called atclient_atkeys_init)
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
@@ -156,6 +162,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
 
   // set atkeys
   ctx->atkeys = *atkeys;
+  ctx->atkeys_is_allocated_by_caller = true;
 
   ret = 0;
 
@@ -165,6 +172,42 @@ exit: {
   free(rootcmd);
   free(fromcmd);
   free(pkamcmd);
+  return ret;
+}
+}
+
+int atclient_pkam_authenticate_basic(atclient *ctx, const char *atsign)
+{
+  int ret = 1;
+
+  atclient_atkeys atkeys;
+  atclient_atkeys_init(&atkeys);
+
+  char *atserver_host = NULL;
+  int atserver_port = 0;
+
+  if((ret = atclient_utils_populate_atkeys_from_homedir(&atkeys, atsign, strlen(atsign))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys from homedir: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST, ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_pkam_authenticate(ctx, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to PKAM authenticate.\n");
+    goto exit;
+  }
+
+  ctx->atkeys_is_allocated_by_caller = false;
+
+  ret = 0;
+  goto exit;
+exit: {
+  free(atserver_host);
   return ret;
 }
 }
@@ -216,33 +259,6 @@ bool atclient_is_connected(atclient *ctx) { return atclient_connection_is_connec
 
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
   mbedtls_ssl_conf_read_timeout(&(ctx->atserver_connection.ssl_config), timeout_ms);
-}
-
-int atclient_try_reconnect(atclient *ctx) {
-  int ret = 1;
-
-  if (ctx->atserver_connection_started) {
-    atclient_connection_disconnect(&(ctx->atserver_connection));
-    atclient_connection_free(&(ctx->atserver_connection));
-    ctx->atserver_connection = (atclient_connection){0};
-    ctx->atserver_connection_started = false;
-  }
-
-  if ((ret = atclient_start_atserver_connection(ctx, ctx->atserver_connection.host, ctx->atserver_connection.port)) !=
-      0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
-    goto exit;
-  }
-
-  if((ret = atclient_pkam_authenticate(ctx, ctx->atserver_connection.host, ctx->atserver_connection.port, &(ctx->atkeys), ctx->atsign.atsign)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
-    goto exit;
-  }
-
-  ret = 0;
-
-  goto exit;
-exit: { return ret; }
 }
 
 static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {

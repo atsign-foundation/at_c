@@ -1,6 +1,8 @@
 #ifndef ATCLIENT_UTILS_H
 #define ATCLIENT_UTILS_H
 
+#include "atclient/atkeys.h"
+
 /**
  * @brief Get address of atServer from the atDirectory, You should check the return code of this function before using
  * any of the output parameters.
@@ -14,5 +16,15 @@
  */
 int atclient_utils_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
                                    char **atserver_host, int *atserver_port);
+
+/**
+ * @brief Populate atkeys from the atkeys file in the home directory of the user.
+ * 
+ * @param atkeys the atkeys struct to populate
+ * @param atsign the atsign string
+ * @param atsignlen the length of the atsign string, most likely strlen(atsign)
+ * @return int 0 on success, non-zero on error
+ */
+int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
 
 #endif // ATCLIENT_UTILS_H

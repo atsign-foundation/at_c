@@ -1,6 +1,9 @@
 #ifndef ATCLIENT_CONSTANTS_H
 #define ATCLIENT_CONSTANTS_H
 
+#define ATCLIENT_ATDIRECTORY_PRODUCTION_HOST "root.atsign.org"
+#define ATCLIENT_ATDIRECTORY_PRODUCTION_PORT 64
+
 #define ATCLIENT_ATSIGN_INNER_LEN 55                                                             // 55 utf7 chars
 #define ATCLIENT_ATSIGN_FULL_LEN (1 + ATCLIENT_ATSIGN_INNER_LEN)                                 // '@' + 55 utf7 chars
 #define ATCLIENT_ATKEY_KEY_LEN 55                                                                // 55 utf7 chars
