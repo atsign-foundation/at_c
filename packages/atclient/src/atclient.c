@@ -145,8 +145,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   }
 
   // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign
-  if(ctx->atsign_is_allocated)
-  {
+  if (ctx->atsign_is_allocated) {
     atclient_atsign_free(&(ctx->atsign));
   }
   if ((ret = atclient_atsign_init(&(ctx->atsign), atsign) != 0)) {
@@ -213,20 +212,45 @@ exit: {
 }
 }
 
-bool atclient_is_connected(atclient *ctx) {
-  return atclient_connection_is_connected(&(ctx->atserver_connection));
-}
+bool atclient_is_connected(atclient *ctx) { return atclient_connection_is_connected(&(ctx->atserver_connection)); }
 
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
   mbedtls_ssl_conf_read_timeout(&(ctx->atserver_connection.ssl_config), timeout_ms);
+}
+
+int atclient_try_reconnect(atclient *ctx) {
+  int ret = 1;
+
+  if (ctx->atserver_connection_started) {
+    atclient_connection_disconnect(&(ctx->atserver_connection));
+    atclient_connection_free(&(ctx->atserver_connection));
+    ctx->atserver_connection = (atclient_connection){0};
+    ctx->atserver_connection_started = false;
+  }
+
+  if ((ret = atclient_start_atserver_connection(ctx, ctx->atserver_connection.host, ctx->atserver_connection.port)) !=
+      0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_pkam_authenticate(ctx, ctx->atserver_connection.host, ctx->atserver_connection.port, &(ctx->atkeys), ctx->atsign.atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+
+  goto exit;
+exit: { return ret; }
 }
 
 static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
   // if(ctx->atserver_connection_started) {
-    atclient_connection_free(&(ctx->atserver_connection));
-    ctx->atserver_connection = (atclient_connection){0};
+  atclient_connection_free(&(ctx->atserver_connection));
+  ctx->atserver_connection = (atclient_connection){0};
   //   ctx->atserver_connection_started = false;
   // }
 
@@ -237,7 +261,6 @@ static int atclient_start_atserver_connection(atclient *ctx, const char *seconda
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
     goto exit;
   }
-
 
   goto exit;
 

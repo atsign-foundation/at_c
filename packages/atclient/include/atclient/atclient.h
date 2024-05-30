@@ -199,4 +199,12 @@ bool atclient_is_connected(atclient *ctx);
  */
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms);
 
+/**
+ * @brief Tries to reconnect and pkam authenticate with the atServer
+ *
+ * @param ctx the atclient context
+ * @return int 0 on success
+ */
+int atclient_try_reconnect(atclient *ctx);
+
 #endif

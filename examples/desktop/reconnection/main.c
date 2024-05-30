@@ -3,9 +3,9 @@
 #include <atlogger/atlogger.h>
 #include <pwd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 #define ATSIGN "@soccer0"
 
@@ -15,6 +15,8 @@
 #define ATDIRECTORY_PORT 64
 
 static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
+
+static int reconnect(atclient *atclient);
 
 int main() {
   int ret = 1;
@@ -85,5 +87,14 @@ static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size
 
   goto exit;
 
+exit: { return ret; }
+}
+
+static int reconnect(atclient *atclient) {
+  int ret = 1;
+
+  atclient_try_reconnect(atclient);
+
+  goto exit;
 exit: { return ret; }
 }
