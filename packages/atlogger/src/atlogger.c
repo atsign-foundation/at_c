@@ -68,7 +68,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
   if (ctx->opts & ATLOGGER_ENABLE_TIMESTAMPS) {
     int res = clock_gettime(CLOCK_REALTIME, &timespec); // posix-1.2008 way
     if (res == 0) {
-      snprintf(prefix + off, PREFIX_BUFFER_LEN - off, "%ld", timespec.tv_sec * 1000000 + timespec.tv_nsec);
+      snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " %ld", timespec.tv_sec * 1000000 + timespec.tv_nsec);
       // TODO: adjust off if any other things need to be added to the prefix
     }
   }
