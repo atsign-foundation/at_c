@@ -27,7 +27,8 @@
 
 #define TAG "at_talk"
 
-pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t client_mutex;
+pthread_mutex_t monitor_mutex;
 
 typedef struct pthread_args_1 {
   atclient *monitor;
@@ -39,6 +40,9 @@ typedef struct pthread_args_1 {
 } pthread_args_1;
 
 static int parse_args(int argc, char **argv, char **from_atsign, char **to_atsign);
+
+static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atserver_host, const int atserver_port,
+                             atclient_atkeys *atkeys, const char *from_atsign);
 
 static void *monitor_handler(void *xargs);
 
@@ -63,9 +67,10 @@ int main(int argc, char *argv[]) {
   atclient monitor; // free later
   atclient_init(&monitor);
 
-  pthread_t tid[2];
+  pthread_t tid[1];
 
   pthread_mutex_init(&client_mutex, NULL);
+  pthread_mutex_init(&monitor_mutex, NULL);
 
   printf("Setup (1/3) .. ");
 
@@ -99,12 +104,13 @@ int main(int argc, char *argv[]) {
   /*
    * 4. Authenticate client connection (for crud operations)
    */
+  pthread_mutex_lock(&client_mutex);
   if ((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys, from_atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
-
   atclient_set_read_timeout(&atclient1, 500); // blocking read takes 50 ms to timeout
+  pthread_mutex_unlock(&client_mutex);
 
   /*
    * 5. Start at talk receive messages thread
@@ -137,16 +143,16 @@ int main(int argc, char *argv[]) {
     atclient_atkey atkey;
     atclient_atkey_init(&atkey);
 
-    atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), from_atsign, strlen(from_atsign), to_atsign, strlen(to_atsign), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE));
+    atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), from_atsign, strlen(from_atsign), to_atsign,
+                                    strlen(to_atsign), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE));
 
     atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, line, true);
 
-    // pthread_mutex_lock(&client_mutex);
+    pthread_mutex_lock(&client_mutex);
     if ((ret = atclient_notify(&atclient1, &params, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify: %d\n", ret);
-      goto exit;
     }
-    // pthread_mutex_unlock(&client_mutex);
+    pthread_mutex_unlock(&client_mutex);
 
     printf("%s%s%s -> ", HBLU, from_atsign, reset);
   }
@@ -161,10 +167,9 @@ exit: {
   free(atserver_host);
   ret = pthread_cancel(tid[0]);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread[0] exit: %d\n", ret);
-  ret = pthread_cancel(tid[1]);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread[1] exit: %d\n", ret);
   atclient_atkeys_free(&atkeys);
   pthread_mutex_destroy(&client_mutex);
+  pthread_mutex_destroy(&monitor_mutex);
   return ret;
 }
 }
@@ -209,64 +214,73 @@ static void *monitor_handler(void *xargs) {
   atclient_atkeys *atkeys = args->atkeys;
   const char *from_atsign = args->from_atsign;
 
-
+  pthread_mutex_lock(&monitor_mutex);
   if ((ret = atclient_monitor_pkam_authenticate(monitor, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
-
   atclient_monitor_set_read_timeout(monitor, 500); // blocking read takes 1 second to timeout
-
   if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }
+  pthread_mutex_unlock(&monitor_mutex);
 
   int tries = 1;
-  const size_t max_tries = 5; // if we have 5 consecutive read failures, we should check if the connection is still alive.
+  const size_t max_tries =
+      5; // if we have 5 consecutive read failures, we should check if the connection is still alive.
 
   while (true) {
+    if (tries >= max_tries) {
+      pthread_mutex_lock(&monitor_mutex);
+      pthread_mutex_lock(&client_mutex);
+      if(!atclient_is_connected(ctx) || !atclient_monitor_is_connected(monitor)) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is not alive. Attempting reconnection...\n", ret);
+        reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign);
+      }
+      pthread_mutex_unlock(&monitor_mutex);
+      pthread_mutex_unlock(&client_mutex);
+    }
     atclient_monitor_message *message = NULL;
+    pthread_mutex_lock(&monitor_mutex);
+    pthread_mutex_lock(&client_mutex);
     ret = atclient_monitor_read(monitor, ctx, &message);
+    pthread_mutex_unlock(&monitor_mutex);
+    pthread_mutex_unlock(&client_mutex);
 
     switch (message->type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-      if(strcmp(message->notification.id, "-1") == 0) {
+      if (strcmp(message->notification.id, "-1") == 0) {
         // We received a stats notification. Ignore it.
         break;
       }
       if (atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
         atclient_atnotification *notification = &(message->notification);
-        printf("%s%s%s <- %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
+        printf("\n%s%s%s <- %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
+        printf("%s%s%s -> ", HBLU, from_atsign, reset);
       }
       tries = 1;
     }
     case ATCLIENT_MONITOR_ERROR_READ:
     case ATCLIENT_MONITOR_ERROR_PARSE: {
-      if(tries >= max_tries) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to read a message for 30 consecutive reads, checking if connection is alive...\n", ret);
-        if(atclient_monitor_is_connected(monitor)) {
+      if (tries >= max_tries) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
+                     "Failed to read a message for 30 consecutive reads, checking if connection is alive...\n", ret);
+        pthread_mutex_lock(&monitor_mutex);
+        pthread_mutex_lock(&client_mutex);
+        if (atclient_monitor_is_connected(monitor)) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is still alive.\n", ret);
           tries = 1;
         } else {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is not alive. Attempting reconnection...\n", ret);
-          if((ret = atclient_pkam_authenticate(ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
-            break;
+          if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect clients: %d\n", ret);
+          } else {
+            tries = 1;
           }
-          atclient_set_read_timeout(ctx, 500); // blocking read takes 0.5 second to timeout
-          if ((ret = atclient_monitor_pkam_authenticate(monitor, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
-            break;
-          }
-          atclient_monitor_set_read_timeout(monitor, 500); // blocking read takes 0.5 second to timeout
-          if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
-            break;
-          }
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reconnection successful.\n", ret);
-          tries = 1;
         }
+        pthread_mutex_unlock(&monitor_mutex);
+        pthread_mutex_unlock(&client_mutex);
       } else {
         tries++;
       }
@@ -283,4 +297,33 @@ static void *monitor_handler(void *xargs) {
   goto exit;
 
 exit: { return NULL; }
+}
+
+static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atserver_host, const int atserver_port,
+                             atclient_atkeys *atkeys, const char *from_atsign) {
+  int ret = 1;
+
+  if ((ret = atclient_pkam_authenticate(ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
+    return ret;
+  }
+  atclient_set_read_timeout(ctx, 500); // blocking read takes 0.5 second to timeout
+  if ((ret = atclient_monitor_pkam_authenticate(monitor, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
+    return ret;
+  }
+  atclient_monitor_set_read_timeout(monitor, 500); // blocking read takes 0.5 second to timeout
+  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
+    return ret;
+  }
+  if (ret == 0) {
+    if (atclient_is_connected(ctx) && atclient_monitor_is_connected(monitor)) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reconnection successful.\n", ret);
+      ret = 0;
+      return ret;
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Reconnection failed.\n", ret);
+    }
+  }
 }

@@ -306,7 +306,7 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
     return false;
   }
 
-  char *command = "\n";
+  char *command = NULL;
   if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATSERVER) {
     command = "noop:0\r\n";
   } else if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATDIRECTORY) {
@@ -325,12 +325,12 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
 
   int ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recvlen);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \'\\n\' to connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \"%s\" to connection: %d\n", command, ret);
     return false;
   }
 
   if (recvlen <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \'\\n\'\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \"%s\"\n", command);
     return false;
   }
 

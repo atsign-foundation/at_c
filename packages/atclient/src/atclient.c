@@ -228,11 +228,9 @@ void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
 static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
-  // if(ctx->atserver_connection_started) {
   atclient_connection_free(&(ctx->atserver_connection));
-  ctx->atserver_connection = (atclient_connection){0};
-  //   ctx->atserver_connection_started = false;
-  // }
+  ctx->atserver_connection_started = false;
+  memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
 
   atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
   ctx->atserver_connection_started = true;
