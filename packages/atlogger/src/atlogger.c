@@ -69,7 +69,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
     int res = clock_gettime(CLOCK_REALTIME, &timespec);
 
     if (res == 0) {
-      res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, " | %F %T",
+      res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, "%F %T",
                      gmtime(&timespec.tv_sec)); // format accurate to the second
       if (res != 0) {
         off += res;
@@ -82,7 +82,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
       off += strlen(prefix + off);
     }
 
-    snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " | ");
+    snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " |");
     off += 3;
     prefix[off] = '\0';
   }
@@ -116,7 +116,7 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   va_start(args, format);
   printf(" %.*s", (int)strlen(prefix), prefix);
   if (tag != NULL) {
-    printf("\t%s", tag);
+    printf(" %s", tag);
   }
   printf(" | ");
   vprintf(format, args);
