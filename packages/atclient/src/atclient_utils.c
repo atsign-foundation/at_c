@@ -40,6 +40,7 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
   cmd = malloc(sizeof(char) * cmdsize);
   if (cmd == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmd\n");
+    ret = 1;
     goto exit;
   }
   snprintf(cmd, cmdsize, "%s\n", atsign_without_at_symbol);
@@ -52,6 +53,7 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
 
   if (recvlen == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No data received from atdirectory\n");
+    ret = 1;
     goto exit;
   }
 
@@ -61,6 +63,7 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
   char *portstr = strtok(NULL, ":");
   if (portstr == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse port from atdirectory response\n");
+    ret = 1;
     goto exit;
   }
 
