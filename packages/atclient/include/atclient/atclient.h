@@ -58,16 +58,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
                                const atclient_atkeys *atkeys, const char *atsign);
 
 /**
- * @brief A more specific version of the atclient_pkam_authenticate function where the atserver_host and atserver_port
- * are found from the production atDirectory server. This function will also attempt to find the atKeys in the default location (~/.atsign/keys/) of a typical PC user. This function is a subset of the generic atclient_pkam_authenticate function.
- *
- * @param ctx the initialized atclient context to populate
- * @param atsign the atsign to authenticate with
- * @return int 0 on success, non-zero on error
- */
-int atclient_pkam_authenticate_basic(atclient *ctx, const char *atsign);
-
-/**
  * @brief Put a string value into your atServer.
  * `atclient` must satisfy two conditions before calling this function:
  * 1. initialized with atclient_init()

@@ -176,42 +176,6 @@ exit: {
 }
 }
 
-int atclient_pkam_authenticate_basic(atclient *ctx, const char *atsign)
-{
-  int ret = 1;
-
-  atclient_atkeys atkeys;
-  atclient_atkeys_init(&atkeys);
-
-  char *atserver_host = NULL;
-  int atserver_port = 0;
-
-  if((ret = atclient_utils_populate_atkeys_from_homedir(&atkeys, atsign, strlen(atsign))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys from homedir: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST, ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
-                                                  &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address: %d\n", ret);
-    goto exit;
-  }
-
-  if((ret = atclient_pkam_authenticate(ctx, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to PKAM authenticate.\n");
-    goto exit;
-  }
-
-  ctx->atkeys_is_allocated_by_caller = false;
-
-  ret = 0;
-  goto exit;
-exit: {
-  free(atserver_host);
-  return ret;
-}
-}
-
 int atclient_send_heartbeat(atclient *heartbeat_conn) {
   int ret = -1;
 
