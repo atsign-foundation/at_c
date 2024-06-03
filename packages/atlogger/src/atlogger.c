@@ -69,7 +69,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
     int res = clock_gettime(CLOCK_REALTIME, &timespec);
 
     if (res == 0) {
-      res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, "%F %T",
+      res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, " %F %T",
                      gmtime(&timespec.tv_sec)); // format accurate to the second
       if (res != 0) {
         off += res;
