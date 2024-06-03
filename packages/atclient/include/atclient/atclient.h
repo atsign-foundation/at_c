@@ -78,8 +78,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
  */
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid);
 
-// TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
-
 /**
  * @brief Get a string value from your atServer.
  * `atclient` must satisfy two conditions before calling this function:
