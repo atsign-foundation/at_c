@@ -80,14 +80,14 @@ exit: {
 }
 }
 
-int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen)
+int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign)
 {
   int ret = 1;
 
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;
 
-  const size_t atkeyspathsize = strlen(homedir) + strlen("/.atsign/keys/") + atsignlen + strlen("_key.atKeys") + 1;
+  const size_t atkeyspathsize = strlen(homedir) + strlen("/.atsign/keys/") + strlen(atsign) + strlen("_key.atKeys") + 1;
   char atkeyspath[atkeyspathsize];
 
   snprintf(atkeyspath, atkeyspathsize, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);

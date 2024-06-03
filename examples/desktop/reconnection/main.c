@@ -28,7 +28,7 @@ int main() {
   char *atserver_host = NULL;
   int atserver_port = 0;
 
-  if ((ret = atclient_utils_populate_atkeys_from_homedir(&atkeys, ATSIGN, strlen(ATSIGN))) != 0) {
+  if ((ret = atclient_utils_populate_atkeys_from_homedir(&atkeys, ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
     goto exit;
   }

@@ -15,16 +15,15 @@
  * @return int 0 on success, non-zero on error
  */
 int atclient_utils_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
-                                   char **atserver_host, int *atserver_port);
+                                         char **atserver_host, int *atserver_port);
 
 /**
  * @brief Populate atkeys from the atkeys file in the home directory of the user.
- * 
+ *
  * @param atkeys the atkeys struct to populate
- * @param atsign the atsign string
- * @param atsignlen the length of the atsign string, most likely strlen(atsign)
+ * @param atsign the atsign string, assumed to be null terminated
  * @return int 0 on success, non-zero on error
  */
-int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
+int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign);
 
 #endif // ATCLIENT_UTILS_H
