@@ -114,7 +114,7 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
 
   va_list args;
   va_start(args, format);
-  printf(" %.*s", (int)strlen(prefix), prefix);
+  printf("%.*s", (int)strlen(prefix), prefix);
   if (tag != NULL) {
     printf(" %s", tag);
   }
