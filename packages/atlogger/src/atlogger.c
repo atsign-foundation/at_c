@@ -82,8 +82,9 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
       off += strlen(prefix + off);
     }
 
+    off -= 3;
     snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " |");
-    off += 3;
+    off += 2;
     prefix[off] = '\0';
   }
 }
