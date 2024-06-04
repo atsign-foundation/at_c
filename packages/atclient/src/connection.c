@@ -218,7 +218,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
-  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == srclen) {
     unsigned char srccopy[srclen];
     memcpy(srccopy, src, srclen);
     atlogger_fix_stdout_buffer((char *)srccopy, srclen);
