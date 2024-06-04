@@ -125,8 +125,10 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
   mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
-  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config),
-                                ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
+  if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATSERVER) {
+    mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config),
+                                  ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
+  }
 
   ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config));
   if (ret != 0) {
@@ -208,7 +210,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   int ret = 1;
 
   if (!ctx->should_be_connected) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false. You are trying to send messages to a non-connected connection.\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "ctx->should_be_connected should be true, but is false. You are trying to send messages to a "
+                 "non-connected connection.\n");
     goto exit;
   }
 
@@ -233,18 +237,28 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   memset(recv, 0, sizeof(unsigned char) * recvsize);
 
+  int tries = 0;
   bool found = false;
   size_t l = 0;
   do {
     ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvsize - l);
     if (ret < 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
+    }
+    if (ret == 0) {
+      tries++;
+      if (tries > ATCLIENT_CONNECTION_MAX_READ_TRIES) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "mbedtls_ssl_read tried to read %d times and found nothing: %d\n", tries, ret);
+        goto exit;
+      }
     }
     l = l + ret;
 
     for (int i = l; i >= l - ret && i >= 0; i--) {
       // printf("i: %d c: %.2x\n", i, (unsigned char) *(recv + i));
-      if (*(recv + i) == '\n') {
+      if (*(recv + i) == '\n' || *(recv + i) == '\r') {
         *recvlen = i;
         found = true;
         break;
@@ -268,8 +282,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     unsigned char recvcopy[*recvlen];
     memcpy(recvcopy, recv, *recvlen);
     atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy,
-                 reset);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy, reset);
   }
 
   ret = 0;

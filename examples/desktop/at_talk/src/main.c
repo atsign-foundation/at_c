@@ -49,6 +49,7 @@ static void *monitor_handler(void *xargs);
 int main(int argc, char *argv[]) {
   int ret = 1;
 
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
   // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
@@ -232,7 +233,7 @@ static void *monitor_handler(void *xargs) {
 
   int tries = 1;
   const size_t max_tries =
-      20; // if we have 20 consecutive read failures, we should check if the connection is still alive.
+      5; // if we have 5 consecutive read failures, we should check if the connection is still alive.
 
   while (true) {
     atclient_monitor_message *message = NULL;
@@ -263,10 +264,10 @@ static void *monitor_handler(void *xargs) {
         pthread_mutex_lock(&monitor_mutex);
         pthread_mutex_lock(&client_mutex);
         if (atclient_monitor_is_connected(monitor) && atclient_is_connected(ctx)) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is still alive.\n", ret);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connections are still alive.\n", ret);
           tries = 1;
         } else {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connection is not alive. Attempting reconnection...\n", ret);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connections not alive. Attempting reconnection...\n", ret);
           if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect clients: %d\n", ret);
           } else {
