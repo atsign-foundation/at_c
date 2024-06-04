@@ -78,7 +78,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
     }
 
     if (res == 0) {
-      snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%ld", timespec.tv_nsec);
+      snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%09lu", timespec.tv_nsec);
       off += strlen(prefix + off);
     }
 
