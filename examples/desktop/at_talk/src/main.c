@@ -49,8 +49,8 @@ static void *monitor_handler(void *xargs);
 int main(int argc, char *argv[]) {
   int ret = 1;
 
-  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
   char *from_atsign = NULL; // free later
   char *to_atsign = NULL;   // free later
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   atclient monitor; // free later
   atclient_init(&monitor);
 
-  pthread_t tid[1];
+  pthread_t tid;
 
   pthread_mutex_init(&client_mutex, NULL);
   pthread_mutex_init(&monitor_mutex, NULL);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   printf("(3/3).\n");
 
   /*
-   * 7. Send at talk messages
+   * 6. Send at talk messages
    */
   char *line = NULL;
   size_t linelen = 0;
@@ -135,6 +135,10 @@ int main(int argc, char *argv[]) {
 
     if (line[read - 1] == '\n') {
       line[read - 1] = '\0';
+    }
+
+    if (strlen(line) == 0) {
+      continue;
     }
 
     atclient_notify_params params;
@@ -165,11 +169,11 @@ exit: {
   free(from_atsign);
   free(to_atsign);
   free(atserver_host);
-  ret = pthread_cancel(tid[0]);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread[0] exit: %d\n", ret);
   atclient_atkeys_free(&atkeys);
   pthread_mutex_destroy(&client_mutex);
   pthread_mutex_destroy(&monitor_mutex);
+  ret = pthread_cancel(tid);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread exit: %d\n", ret);
   return ret;
 }
 }
