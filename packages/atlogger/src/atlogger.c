@@ -1,10 +1,11 @@
 
 #include "atlogger/atlogger.h"
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
+#include <time.h>
 
 #define PREFIX_BUFFER_LEN 64
 #define INFO_PREFIX "\e[0;32m[INFO]\e[0m"
@@ -13,36 +14,12 @@
 #define DEBUG_PREFIX "\e[0;34m[DEBG]\e[0m"
 
 static char *prefix;
+static struct timespec timespec;
 
 typedef struct atlogger_ctx {
   enum atlogger_logging_level level;
+  int opts;
 } atlogger_ctx;
-
-static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix,
-                                size_t prefixlen) {
-  memset(prefix, 0, prefixlen);
-  switch (logging_level) {
-  case ATLOGGER_LOGGING_LEVEL_INFO: {
-    memcpy(prefix, INFO_PREFIX, strlen(INFO_PREFIX));
-    break;
-  }
-  case ATLOGGER_LOGGING_LEVEL_WARN: {
-    memcpy(prefix, WARN_PREFIX, strlen(WARN_PREFIX));
-    break;
-  }
-  case ATLOGGER_LOGGING_LEVEL_ERROR: {
-    memcpy(prefix, ERROR_PREFIX, strlen(ERROR_PREFIX));
-    break;
-  }
-  case ATLOGGER_LOGGING_LEVEL_DEBUG: {
-    memcpy(prefix, DEBUG_PREFIX, strlen(DEBUG_PREFIX));
-    break;
-  }
-  default: {
-    break;
-  }
-  }
-}
 
 static atlogger_ctx *atlogger_get_instance() {
   static atlogger_ctx *ctx;
@@ -53,7 +30,63 @@ static atlogger_ctx *atlogger_get_instance() {
     memset(prefix, 0, sizeof(char) * PREFIX_BUFFER_LEN);
   }
 
+  ctx->opts = ATLOGGER_ENABLE_TIMESTAMPS;
   return ctx;
+}
+
+static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix, size_t prefixlen) {
+  memset(prefix, 0, prefixlen);
+  int off = 0;
+
+  switch (logging_level) {
+  case ATLOGGER_LOGGING_LEVEL_INFO: {
+    off = strlen(INFO_PREFIX);
+    memcpy(prefix, INFO_PREFIX, off);
+    break;
+  }
+  case ATLOGGER_LOGGING_LEVEL_WARN: {
+    off = strlen(WARN_PREFIX);
+    memcpy(prefix, WARN_PREFIX, off);
+    break;
+  }
+  case ATLOGGER_LOGGING_LEVEL_ERROR: {
+    off = strlen(ERROR_PREFIX);
+    memcpy(prefix, ERROR_PREFIX, off);
+    break;
+  }
+  case ATLOGGER_LOGGING_LEVEL_DEBUG: {
+    off = strlen(DEBUG_PREFIX);
+    memcpy(prefix, DEBUG_PREFIX, off);
+    break;
+  }
+  default: {
+    break;
+  }
+  }
+
+  atlogger_ctx *ctx = atlogger_get_instance();
+  if (ctx->opts & ATLOGGER_ENABLE_TIMESTAMPS) {
+    int res = clock_gettime(CLOCK_REALTIME, &timespec);
+
+    if (res == 0) {
+      res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, " %F %T",
+                     gmtime(&timespec.tv_sec)); // format accurate to the second
+      if (res != 0) {
+        off += res;
+        res = 0;
+      }
+    }
+
+    if (res == 0) {
+      snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%09lu", timespec.tv_nsec);
+      off += strlen(prefix + off);
+    }
+
+    off -= 3;
+    snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " |");
+    off += 2;
+    prefix[off] = '\0';
+  }
 }
 
 enum atlogger_logging_level atlogger_get_logging_level() {
@@ -64,6 +97,11 @@ enum atlogger_logging_level atlogger_get_logging_level() {
 void atlogger_set_logging_level(const enum atlogger_logging_level level) {
   atlogger_ctx *ctx = atlogger_get_instance();
   ctx->level = level;
+}
+
+void atlogger_set_opts(int opts) {
+  atlogger_ctx *ctx = atlogger_get_instance();
+  ctx->opts = opts;
 }
 
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...) {
@@ -77,9 +115,9 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
 
   va_list args;
   va_start(args, format);
-  printf(" %.*s", (int)strlen(prefix), prefix);
+  printf("%.*s", (int)strlen(prefix), prefix);
   if (tag != NULL) {
-    printf("\t%s", tag);
+    printf(" %s", tag);
   }
   printf(" | ");
   vprintf(format, args);
