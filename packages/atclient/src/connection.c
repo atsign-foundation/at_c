@@ -247,9 +247,10 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     }
     if (ret == 0) {
       tries++;
-      if (tries > ATCLIENT_CONNECTION_MAX_READ_TRIES) {
+      if (tries >= ATCLIENT_CONNECTION_MAX_READ_TRIES) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                      "mbedtls_ssl_read tried to read %d times and found nothing: %d\n", tries, ret);
+        ret = 1;
         goto exit;
       }
     }

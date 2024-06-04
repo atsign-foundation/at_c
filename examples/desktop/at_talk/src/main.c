@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     }
     pthread_mutex_unlock(&client_mutex);
 
-    // printf("%s%s%s: ", HBLU, from_atsign, reset);
+    printf("%s%s%s: ", HBLU, from_atsign, reset);
   }
 
   ret = 0;
@@ -250,9 +250,10 @@ static void *monitor_handler(void *xargs) {
         break;
       }
       if (atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
-        atclient_atnotification *notification = &(message->notification);
+        const atclient_atnotification *notification = &(message->notification);
         printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
-        // printf("%s%s%s: ", HBLU, from_atsign, reset);
+        printf("%s%s%s: ", HBLU, from_atsign, reset);
+        fflush(stdout);
       }
       tries = 1;
     }
