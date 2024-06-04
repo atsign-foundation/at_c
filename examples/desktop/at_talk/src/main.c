@@ -269,11 +269,11 @@ static void *monitor_handler(void *xargs) {
           tries = 1;
         } else {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connections not alive. Attempting reconnection...\n", ret);
-          if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect clients: %d\n", ret);
-          } else {
+          if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) == 0) {
             tries = 1;
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Reconnection successful.\n", ret);
+          } else {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect clients: %d\n", ret);
           }
         }
         pthread_mutex_unlock(&monitor_mutex);
