@@ -49,8 +49,8 @@ static void *monitor_handler(void *xargs);
 int main(int argc, char *argv[]) {
   int ret = 1;
 
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
   char *from_atsign = NULL; // free later
   char *to_atsign = NULL;   // free later
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   size_t linelen = 0;
   size_t read;
 
-  printf("%s%s%s -> ", HBLU, from_atsign, reset);
+  printf("%s%s%s: ", HBLU, from_atsign, reset);
   while ((read = getline(&line, &linelen, stdin)) != -1) {
 
     if (line[read - 1] == '\n') {
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     }
     pthread_mutex_unlock(&client_mutex);
 
-    printf("%s%s%s -> ", HBLU, from_atsign, reset);
+    // printf("%s%s%s: ", HBLU, from_atsign, reset);
   }
 
   ret = 0;
@@ -228,19 +228,9 @@ static void *monitor_handler(void *xargs) {
 
   int tries = 1;
   const size_t max_tries =
-      5; // if we have 5 consecutive read failures, we should check if the connection is still alive.
+      20; // if we have 20 consecutive read failures, we should check if the connection is still alive.
 
   while (true) {
-    if (tries >= max_tries) {
-      pthread_mutex_lock(&monitor_mutex);
-      pthread_mutex_lock(&client_mutex);
-      if(!atclient_is_connected(ctx) || !atclient_monitor_is_connected(monitor)) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is not alive. Attempting reconnection...\n", ret);
-        reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign);
-      }
-      pthread_mutex_unlock(&monitor_mutex);
-      pthread_mutex_unlock(&client_mutex);
-    }
     atclient_monitor_message *message = NULL;
     pthread_mutex_lock(&monitor_mutex);
     pthread_mutex_lock(&client_mutex);
@@ -256,8 +246,8 @@ static void *monitor_handler(void *xargs) {
       }
       if (atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
         atclient_atnotification *notification = &(message->notification);
-        printf("\n%s%s%s <- %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
-        printf("%s%s%s -> ", HBLU, from_atsign, reset);
+        printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
+        // printf("%s%s%s: ", HBLU, from_atsign, reset);
       }
       tries = 1;
     }
@@ -268,15 +258,16 @@ static void *monitor_handler(void *xargs) {
                      "Failed to read a message for 30 consecutive reads, checking if connection is alive...\n", ret);
         pthread_mutex_lock(&monitor_mutex);
         pthread_mutex_lock(&client_mutex);
-        if (atclient_monitor_is_connected(monitor)) {
+        if (atclient_monitor_is_connected(monitor) && atclient_is_connected(ctx)) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is still alive.\n", ret);
           tries = 1;
         } else {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is not alive. Attempting reconnection...\n", ret);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connection is not alive. Attempting reconnection...\n", ret);
           if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect clients: %d\n", ret);
           } else {
             tries = 1;
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Reconnection successful.\n", ret);
           }
         }
         pthread_mutex_unlock(&monitor_mutex);
