@@ -79,3 +79,9 @@ jobs:
         run: |
           cmake -S . -B build
           cmake --build build --target install
+
+      - name: Build reconnection example
+        working-directory: examples/desktop/reconnection
+        run: |
+          cmake -S . -B build
+          cmake --build build --target install

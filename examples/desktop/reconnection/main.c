@@ -39,7 +39,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate_basic(&atclient1, ATSIGN)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys, ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to PKAM authenticate.\n");
     goto exit;
   }
@@ -53,6 +53,11 @@ int main() {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are connected to the atServer! :)\n");
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "We are not connected to atServer? :(\n");
+      if((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys, ATSIGN)) == 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Reconnected to atServer! :)\n");
+      } else {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to PKAM authenticate.\n");
+      }
     }
     sleep(1);
   }
@@ -61,6 +66,7 @@ int main() {
   goto exit;
 exit: {
   atclient_free(&atclient1);
+  atclient_atkeys_free(&atkeys);
   free(atserver_host);
   return ret;
 }
