@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
   int ret = 1;
 
   // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
   char *from_atsign = NULL; // free later
   char *to_atsign = NULL;   // free later

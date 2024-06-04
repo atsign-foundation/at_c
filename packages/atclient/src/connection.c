@@ -71,8 +71,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   ctx->should_be_connected = true;
 
   const size_t readbufsize = 1024;
-  char readbuf[readbufsize];
-  memset(readbuf, 0, sizeof(char) * readbufsize);
+  unsigned char readbuf[readbufsize];
+  memset(readbuf, 0, sizeof(unsigned char) * readbufsize);
   size_t readbuflen = 0;
 
   /*
@@ -167,7 +167,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // ===============
 
   // read anything that was already sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf, readbufsize);
+  ret = mbedtls_ssl_read(&(ctx->ssl), readbuf, readbufsize);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -181,7 +181,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   // read anything that was sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf, readbufsize);
+  ret = mbedtls_ssl_read(&(ctx->ssl), readbuf, readbufsize);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -195,7 +195,6 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   goto exit;
 
 exit: {
-  atclient_atstr_free(&readbuf);
   if (ret != 0) {
     // undo what we set
     memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
