@@ -70,8 +70,10 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   init_contexts(ctx);
   ctx->should_be_connected = true;
 
-  atclient_atstr readbuf;
-  atclient_atstr_init(&readbuf, 1024);
+  const size_t readbufsize = 1024;
+  char readbuf[readbufsize];
+  memset(readbuf, 0, sizeof(char) * readbufsize);
+  size_t readbuflen = 0;
 
   /*
    * 1. Set the ctx->host and ctx->port
@@ -125,10 +127,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
   mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
   mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
-  if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATSERVER) {
-    mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config),
-                                  ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
-  }
+  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config),
+                                ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
 
   ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config));
   if (ret != 0) {
@@ -167,7 +167,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // ===============
 
   // read anything that was already sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.size);
+  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf, readbufsize);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -181,7 +181,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   // read anything that was sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.size);
+  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf, readbufsize);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;

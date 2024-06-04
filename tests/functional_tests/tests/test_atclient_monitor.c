@@ -9,6 +9,7 @@
 #include <atclient/monitor.h>
 #include <atclient/notify.h>
 #include <atclient/stringutils.h>
+#include <atclient/atclient_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
