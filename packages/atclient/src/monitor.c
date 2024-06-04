@@ -969,21 +969,21 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   unsigned char *decryptedvaluetemp = NULL;
 
   // holds encrypted value but in raw bytes (after base64 decode operation)
-  const size_t ciphertextsize = strlen(notification->value) * 4;
+  const size_t ciphertextsize = (strlen(notification->value) + 15) / 16 * 16;
   unsigned char ciphertext[ciphertextsize];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
   size_t ciphertextlen = 0;
 
-  // temporarily holds the shared encryption key in base64
-  const size_t sharedenckeybase64size = 64;
-  unsigned char sharedenckeybase64[sharedenckeybase64size];
-  memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-  size_t sharedenckeybase64len = 0;
-
   // holds shared encryption key in raw bytes (after base64 decode operation)
   const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
   unsigned char sharedenckey[sharedenckeysize];
-  size_t sharedenckeylen;
+  size_t sharedenckeylen = 0;
+
+  // temporarily holds the shared encryption key in base64
+  const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize / 8);
+  unsigned char sharedenckeybase64[sharedenckeybase64size];
+  memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
+  size_t sharedenckeybase64len = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 

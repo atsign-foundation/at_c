@@ -49,9 +49,9 @@ static void *monitor_handler(void *xargs);
 int main(int argc, char *argv[]) {
   int ret = 1;
 
-  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
   // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
+  // atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_WARN);
 
   char *from_atsign = NULL; // free later
   char *to_atsign = NULL;   // free later
@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
                                     strlen(to_atsign), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE));
 
     atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, line, true);
+    params.notification_expiry = 5000;
 
     pthread_mutex_lock(&client_mutex);
     if ((ret = atclient_notify(&atclient1, &params, NULL)) != 0) {

@@ -15,8 +15,8 @@
 
 #define ATCLIENT_DEFAULT_NOTIFIER "SYSTEM"
 
-#define ATCLIENT_CLIENT_READ_TIMEOUT_MS 3*1000 // 3 seconds
-#define ATCLIENT_MONITOR_READ_TIMEOUT_MS 100 // 0.1 seconds to time out if no data is available
+#define ATCLIENT_CLIENT_READ_TIMEOUT_MS 3*1000 // 3 seconds to time out if no data is available
+#define ATCLIENT_MONITOR_READ_TIMEOUT_MS 3*1000 // 3 seconds to time out if no data is available
 
 #define ATCLIENT_CONNECTION_MAX_READ_TRIES 50 // if 0 bytes are read after 10 consecutive retries, the read is unsuccessful. See connection.c
 
