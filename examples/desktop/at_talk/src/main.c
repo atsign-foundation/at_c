@@ -321,6 +321,8 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
       return ret;
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Reconnection failed.\n", ret);
+      ret = 1;
+      return ret;
     }
   }
 }
