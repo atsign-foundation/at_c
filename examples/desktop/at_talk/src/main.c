@@ -27,12 +27,17 @@
 
 #define TAG "at_talk"
 
+struct thread_args {
+  atclient *atclient_ctx;
+  atclient *monitor;
+};
+
 static int parse_args(int argc, char **argv, char **from_atsign, char **to_atsign);
 static int get_atkeys_path(const char *atsign, const size_t atsignlen, char **atkeyspath);
-static void *monitor_handler(atclient *atclient2);
+static void *monitor_handler(void *args);
 static int attalk_send_message(atclient *ctx, const char *recipient_atsign, const char *message,
                                const size_t messagelen);
-static int attalk_recv_message(atclient *monitor, char **messageptr, char **sender_atsign);
+static int attalk_recv_message(atclient *ctx, atclient *monitor, char **messageptr, char **sender_atsign);
 
 int main(int argc, char **argv) {
   int ret = 0;
@@ -94,7 +99,12 @@ int main(int argc, char **argv) {
     goto exit;
   }
 
-  ret = pthread_create(&tid, NULL,  (void *) monitor_handler, &monitor);
+  struct thread_args contexts;
+  contexts.atclient_ctx = &atclient1;
+  contexts.monitor = &monitor;
+
+
+  ret = pthread_create(&tid, NULL,  (void *) monitor_handler, (void *) &contexts);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create monitor_handler\n");
     return ret;
@@ -167,22 +177,26 @@ static int get_atkeys_path(const char *atsign, const size_t atsignlen, char **at
   }
 
   // allocate memory for atkeys path
-  char *atkeys_path = (char *)malloc(strlen(home) + strlen("/.atsign/keys/") + atsignlen + strlen("_key.atkeys") + 1);
+  char *atkeys_path = (char *)malloc(strlen(home) + strlen("/.atsign/keys/") + atsignlen + strlen("_key.atKeys") + 1);
   if (atkeys_path == NULL) {
     return 1;
   }
 
   // create atkeys path
-  sprintf(atkeys_path, "%s/.atsign/keys/%.*s_key.atkeys", home, (int)atsignlen, atsign);
+  sprintf(atkeys_path, "%s/.atsign/keys/%.*s_key.atKeys", home, (int)atsignlen, atsign);
 
   *atkeyspath = atkeys_path;
   return 0;
 }
 
-static void *monitor_handler(atclient *atclient2) {
+static void *monitor_handler(void* args){
   int ret = 0;
 
-  if ((ret = atclient_monitor_start(atclient2, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+  struct thread_args *contexts = args;
+  atclient *atclient_ctx = contexts->atclient_ctx;
+  atclient *monitor = contexts->monitor;
+
+  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }
@@ -192,7 +206,7 @@ static void *monitor_handler(atclient *atclient2) {
   while (loop) {
     char *messageptr = NULL;
     char *sender_atsign = NULL;
-    attalk_recv_message(atclient2, &messageptr, &sender_atsign);
+    attalk_recv_message(atclient_ctx, monitor, &messageptr, &sender_atsign);
     if (messageptr != NULL) {
       printf("\n%s%s%s: %s\n", HMAG, sender_atsign, reset, messageptr);
       free(messageptr);
@@ -233,13 +247,12 @@ static int attalk_send_message(atclient *ctx, const char *recipient_atsign, cons
 exit: { return ret; }
 }
 
-static int attalk_recv_message(atclient *monitor, char **messageptr, char **sender_atsign) {
+static int attalk_recv_message(atclient *atclient_ctx, atclient *monitor, char **messageptr, char **sender_atsign) {
   int ret = 1;
 
   atclient_monitor_message *message = NULL;
 
-  if ((ret = atclient_monitor_read(monitor, monitor, &message)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_for_notification: %d\n", ret);
+  if ((ret = atclient_monitor_read(monitor, atclient_ctx, &message)) != 0) {
     goto exit;
   }
 
