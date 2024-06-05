@@ -212,8 +212,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   size_t srclen = srclen_r;
   size_t recvsize = recvsize_r;
 
+  bool try_hooks = ctx->hooks != NULL;
   unsigned char *src;
-  if (ctx->hooks != NULL && ctx->hooks->readonly_src == false) {
+  if (try_hooks && ctx->hooks->readonly_src == false) {
     src = malloc(sizeof(unsigned char) * srclen);
     if (src == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for src\n");
@@ -230,7 +231,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     goto exit;
   }
 
-  if (ctx->hooks->pre_send != NULL) {
+  if (try_hooks && ctx->hooks->pre_send != NULL) {
     ret = ctx->hooks->pre_send(src, srclen, recv, recvsize, recvlen);
     if (ret <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_send hook failed with exit code: %d\n", ret);
@@ -244,7 +245,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     goto exit;
   }
 
-  if (ctx->hooks->post_send != NULL) {
+  if (try_hooks && ctx->hooks->post_send != NULL) {
     ret = ctx->hooks->post_send(src, srclen, recv, recvsize, recvlen);
     if (ret <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_send hook failed with exit code: %d\n", ret);
@@ -267,7 +268,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
 
   memset(recv, 0, sizeof(unsigned char) * recvsize);
 
-  if (ctx->hooks->pre_recv != NULL) {
+  if (try_hooks && ctx->hooks->pre_recv != NULL) {
     ret = ctx->hooks->pre_recv(src, srclen, recv, recvsize, recvlen);
     if (ret <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_recv hook failed with exit code: %d\n", ret);
@@ -324,7 +325,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy, reset);
   }
 
-  if (ctx->hooks->post_recv != NULL) {
+  if (try_hooks && ctx->hooks->post_recv != NULL) {
     ret = ctx->hooks->post_recv(src, srclen, recv, recvsize, recvlen);
     if (ret <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_recv hook failed with exit code: %d\n", ret);
