@@ -14,8 +14,27 @@
 // represents the type of connection
 typedef enum atclient_connection_type {
   ATCLIENT_CONNECTION_TYPE_ATDIRECTORY, // uses '\n' to check if it is connected
-  ATCLIENT_CONNECTION_TYPE_ATSERVER // uses 'noop:0\r\n' to check if it is connected
+  ATCLIENT_CONNECTION_TYPE_ATSERVER     // uses 'noop:0\r\n' to check if it is connected
 } atclient_connection_type;
+
+typedef int(atclient_connection_hook)(const unsigned char *src, const size_t srclen, unsigned char *recv,
+                                      const size_t recvsize, size_t *recvlen);
+
+typedef enum atclient_connection_hook_type {
+  ACHT_NONE = 0,
+  ACHT_PRE_SEND,
+  ACHT_POST_SEND,
+  ACHT_PRE_RECV,
+  ACHT_POST_RECV,
+} atclient_connection_hook_type;
+
+typedef struct atclient_connection_hooks {
+  atclient_connection_hook *pre_send;
+  atclient_connection_hook *post_send;
+  atclient_connection_hook *pre_recv;
+  atclient_connection_hook *post_recv;
+  bool readonly_src;
+} atclient_connection_hooks;
 
 typedef struct atclient_connection {
   char host[ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE];
@@ -33,6 +52,8 @@ typedef struct atclient_connection {
   // this does not mean that the connection is still alive, it just means that the connection was established or taken
   // down at some point, check atclient_connection_is_connected for a live status on the connection
   bool should_be_connected;
+
+  atclient_connection_hooks *hooks;
 } atclient_connection;
 
 /**
@@ -42,6 +63,9 @@ typedef struct atclient_connection {
  * @param type the type of connection to initialize,
  * if it is ATCLIENT_CONNECTION_TYPE_ROOT, then '\\n' will be used to check if it is connected.
  * if it is ATCLIENT_CONNECTION_TYPE_ATSERVER, then 'noop:0\r\n' will be used to check if it is connected
+ *
+ * @note hooks have a separate init method, called atlcient_connection_hooks_init. After this method, call
+ * atclient_connection_hooks_init, if you intend to use hooks.
  */
 void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type);
 
@@ -105,4 +129,30 @@ void atclient_connection_free(atclient_connection *ctx);
  */
 int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url);
 
+/**
+ * @brief Initialize the hooks memory allocation
+ *
+ * @param ctx the struct for the connection
+ */
+void atclient_connection_hooks_init(atclient_connection *ctx);
+
+/**
+ * @brief Add a hook to be called during the connection lifecycle
+ *
+ * @param ctx the struct for the connection
+ * @param type the hook type you want to add
+ * @param hook the hook function itself
+ *
+ */
+void atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_hook_type type, void *hook);
+
+/**
+ * @brief Set whether the readonly_src status for all hooks
+ *
+ * @param ctx the struct for the connection
+ * @param readonly_src the new state for readonly_src
+ *
+ * @note For performance, keep readonly_src set to true if you don't need to write access to src
+ */
+void atclient_connection_hooks_set_readonly_src(atclient_connection *ctx, bool readonly_src);
 #endif
