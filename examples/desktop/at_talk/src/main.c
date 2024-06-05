@@ -20,8 +20,8 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define ATKEY_NAME "at_talk"
-#define ATKEY_NAMESPACE "at_talk"
+#define ATKEY_NAME "attalk"
+#define ATKEY_NAMESPACE "ai6bh"
 
 #define MONITOR_REGEX ".*"
 
@@ -118,12 +118,14 @@ int main(int argc, char **argv) {
 
   printf("%s%s%s -> ", HBLU, from_atsign, reset);
   while ((read = getline(&line, &linelen, stdin)) != -1) {
+    if (read > 1){
+      if (line[read - 1] == '\n') {
+       line[read - 1] = '\0';
+      }
 
-    if (line[read - 1] == '\n') {
-      line[read - 1] = '\0';
+      ret = attalk_send_message(&atclient1, to_atsign, line, linelen);
     }
 
-    ret = attalk_send_message(&atclient1, to_atsign, line, linelen);
     printf("%s%s%s -> ", HBLU, from_atsign, reset);
   }
 
