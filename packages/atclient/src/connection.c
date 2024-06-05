@@ -213,11 +213,16 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   size_t recvsize = recvsize_r;
 
   bool try_hooks = ctx->hooks != NULL;
+  bool allocate_src = try_hooks && ctx->hooks->readonly_src == false;
+
   unsigned char *src;
-  if (try_hooks && ctx->hooks->readonly_src == false) {
+
+  if (allocate_src) {
     src = malloc(sizeof(unsigned char) * srclen);
     if (src == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for src\n");
+      allocate_src = false; // don't try to free since the memory failed to be allocated
+      goto exit;
     }
     memcpy(src, src_r, srclen);
   } else {
@@ -335,7 +340,12 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  if (allocate_src) {
+    free(src);
+  }
+  return ret;
+}
 }
 
 int atclient_connection_disconnect(atclient_connection *ctx) {
