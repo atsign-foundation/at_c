@@ -17,7 +17,7 @@ void atclient_atsign_free(atclient_atsign *atsign);
 
 /**
  * @brief populates *atsign and *atsignlen with the atsign without the prefixed `@` symbol . Calling this function will
- * guarantee that *atsign is always withot a prefixed `@` symbol, whether if it started with one or not.
+ * guarantee that *atsign is always without a prefixed `@` symbol, whether if it started with one or not.
  *
  * @param atsign the atsign to populate (there will be no prefixed `@` symbol. example: @bob -> bob)
  * @param atsignsize the buffer size
@@ -31,7 +31,7 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignsize, siz
 
 /**
  * @brief populates *atsign and *atsignlen with the atsign with the prefixed `@` symbol. Calling this function will
- *
+ * guarantee that *atsign is always prefixed with '@' symbol, whether it started with one or not.
  * @param atsign the atsign buffer to populate
  * @param atsignsize the buffer size
  * @param atsignlen the actually written size of the atsign
