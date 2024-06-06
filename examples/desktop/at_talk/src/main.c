@@ -137,8 +137,6 @@ int main(int argc, char *argv[]) {
       if (line[read - 1] == '\n') {
        line[read - 1] = '\0';
       }
-
-      ret = attalk_send_message(&atclient1, to_atsign, line, linelen);
     }
 
     if (strlen(line) == 0) {
