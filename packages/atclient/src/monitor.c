@@ -630,18 +630,17 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     size_t off = chunksize * chunks;
     for (int i = 0; i < chunksize; i++) {
       ret = mbedtls_ssl_read(&(monitor_conn->atserver_connection.ssl), (unsigned char *)buffer + off + i, 1);
-      if (ret <= 0 || buffer[off + i] == '\n') {
+      if (ret > 0 && buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
         done_reading = true;
         break;
+      } else if (ret <= 0) {
+        (*message)->type = ATCLIENT_MONITOR_ERROR_READ;
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
+        goto exit;
       }
     }
     chunks = chunks + 1;
-  }
-  if (ret <= 0) {
-    (*message)->type = ATCLIENT_MONITOR_ERROR_READ;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
-    goto exit;
   }
 
   int i = 0;
