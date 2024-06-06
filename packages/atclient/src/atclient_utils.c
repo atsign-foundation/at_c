@@ -68,6 +68,11 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
   }
 
   *atserver_host = strdup(host);
+  if(*atserver_host == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for atserver_host\n");
+    ret = 1;
+    goto exit;
+  }
   *atserver_port = atoi(portstr);
 
   ret = 0;
