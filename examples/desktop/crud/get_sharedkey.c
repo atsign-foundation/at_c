@@ -11,6 +11,9 @@
 
 #define TAG "Debug"
 
+#define ROOT_HOST "root.atsign.org"
+#define ROOT_PORT 64
+
 #define ATCLIENT_ATSIGN "@soccer0"
 #define ATSIGN_ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@soccer0_key.atKeys"
 
@@ -43,9 +46,9 @@ int main() {
   atclient_atstr value;
   atclient_atstr_init(&value, valuelen);
 
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
-  atclient_connection_connect(&root_conn, "root.atsign.org", 64);
+
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
   atclient atclient;
   atclient_init(&atclient);
@@ -63,7 +66,12 @@ int main() {
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, ATCLIENT_ATSIGN)) != 0) {
+  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, ATCLIENT_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
@@ -131,6 +139,7 @@ exit: {
   atclient_atstr_free(&atkeystr);
   atclient_atsign_free(&atsign);
   atclient_free(&atclient);
+  free(atserver_host);
   return ret;
 }
 }

@@ -227,30 +227,33 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @brief pkam authenticates the monitor connection
  *
  * @param monitor_conn the atclient context for the monitor connection, assumed that it is already initialized
- * @param root_conn the atDirectory root connection, assumed that it is already initialized and connected to the root
- * server
+ * @param atserver_host the atserver host to use for the pkam authentication, see atclient_find_secondary_address for
+ * typical method to find this value.
+ * @param atserver_port the atserver port to use for the pkam authentication, see atclient_find_secondary_address for
+ * typical method to find this value.
  * @param atkeys the atkeys to use for the pkam authentication
  * @param atsign the atsign to use for the pkam authentication
  * @return int 0 on success
  */
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn,
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
                                        const atclient_atkeys *atkeys, const char *atsign);
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out
  *
  * @param monitor_conn the pkam authenticated monitor connection
- * @param timeoutms the timeout in milliseconds
+ * @param timeout_ms the timeout in milliseconds
  */
-void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms);
+void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout_ms);
 
 /**
- * @brief Onboards the monitor_connection and starts the monitoring connection.
+ * @brief Sends the monitor command to the atserver to start monitoring notifications, assumed that the monitor atclient
+ * context is already pkam authenticated
  *
  * @param monitor_conn ctx the atclient context for the monitor connection, must be pkam_authenticated already
  * @param regex the regex to monitor for
  * @param regexlen the length of the regex string, most people will typically use strlen(regex)
- * @return int 0 on success
+ * @return int 0 on success, non-zero on error
  */
 int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen);
 

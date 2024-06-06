@@ -7,6 +7,9 @@
 
 #define TAG "Debug"
 
+#define ROOT_HOST "root.atsign.org"
+#define ROOT_PORT 64
+
 // #define ATSIGN "@jeremy_0"
 #define ATSIGN "@qt_thermostat"
 #define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@qt_thermostat_key.atKeys"
@@ -21,22 +24,18 @@ int main() {
 
   atlogger_set_logging_level(ATCLIENT_LOGGING_LEVEL);
 
+  char *atserver_host = NULL;
+  int atserver_port = -1;
+
   atclient atclient;
-  atclient_connection root_conn;
   atclient_atsign atsign;
   atclient_atkey atkey;
   atclient_atkeys atkeys;
 
   atclient_init(&atclient);
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
   atclient_atsign_init(&atsign, ATSIGN);
   atclient_atkey_init(&atkey);
   atclient_atkeys_init(&atkeys);
-
-  if ((ret = atclient_connection_connect(&root_conn, "root.atsign.org", 64)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect");
-    goto exit;
-  }
 
   if ((ret = atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys");
@@ -49,7 +48,12 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, atsign.atsign)) != 0) {
+  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
@@ -63,7 +67,7 @@ int main() {
   goto exit;
 exit: {
   atclient_free(&atclient);
-  atclient_connection_free(&root_conn);
+  free(atserver_host);
   atclient_atsign_free(&atsign);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);

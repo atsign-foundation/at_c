@@ -13,8 +13,8 @@
  * @param outlen the output length of the output buffer that is actually used
  * @return int 0 on success, non-zero on failure
  */
-int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out,
-                                         const size_t outsize, size_t *outlen);
+int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outsize,
+                                         size_t *outlen);
 
 /**
  * @brief returns 1 (true) if the string starts with the prefix, 0 (false) otherwise
@@ -37,6 +37,28 @@ int atclient_stringutils_starts_with(const char *string, const size_t stringlen,
  */
 int atclient_stringutils_ends_with(const char *string, const size_t stringlen, const char *suffix,
                                    const size_t suffixlen);
+
+/**
+ * @brief generate a new string with the atsign and the guaranteed @ symbol
+ *
+ * @param original_atsign the original atsign
+ * @param original_atsign_len the length of the original atsign
+ * @param output_atsign_with_at_symbol the output atsign with the @ symbol, must be freed by the caller
+ * @return int 0 on success
+ */
+int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, const size_t original_atsign_len,
+                                               char **output_atsign_with_at_symbol);
+
+/**
+ * @brief generate a new string with the atsign and the guaranteed @ symbol
+ *
+ * @param original_atsign the original atsign
+ * @param original_atsign_len the length of the original atsign
+ * @param output_atsign_without_at_symbol the output atsign without the @ symbol, must be freed by the caller
+ * @return int 0 on success
+ */
+int atclient_stringutils_atsign_without_at_symbol(const char *original_atsign, const size_t original_atsign_len,
+                                                  char **output_atsign_without_at_symbol);
 
 /**
  * @brief get the length of a long if it were converted to a string

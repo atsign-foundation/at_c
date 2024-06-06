@@ -26,7 +26,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, commandsize - 1, recv,
+  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, commandsize - 1, recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
     return ret;
@@ -120,7 +120,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, strlen((char *)command), recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
     return ret;
@@ -202,7 +202,7 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
   memset(recv, 0, sizeof(unsigned char) * recvlen);
   size_t olen = 0;
 
-  ret = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)command, strlen((char *)command), recv,
+  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, strlen((char *)command), recv,
                                  recvlen, &olen);
   if (ret != 0) {
     return ret;
@@ -348,7 +348,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   size_t recvlen = 0;
 
   // 5. put "encrypted for us" into key store
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -366,7 +366,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   memset(recv, 0, sizeof(unsigned char) * recvsize);
 
   // 6. put "encrypted for them" into key store
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer2, cmdbuffersize2 - 1,
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer2, cmdbuffersize2 - 1,
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);

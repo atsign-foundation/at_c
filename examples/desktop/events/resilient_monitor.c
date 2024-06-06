@@ -1,4 +1,5 @@
 #include <atclient/atclient.h>
+#include <atclient/atclient_utils.h>
 #include <atclient/atkey.h>
 #include <atclient/atsign.h>
 #include <atclient/constants.h>
@@ -16,6 +17,8 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
+#define MONITOR_REGEX ".*"
+
 static int get_atsign_input(int argc, char *argv[], char **atsign_input);
 static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
 
@@ -29,8 +32,8 @@ int main(int argc, char *argv[]) {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
   atclient atclient2;
   atclient_init(&atclient2);
@@ -50,27 +53,29 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root server\n");
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient2, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient2, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
     goto exit;
   }
 
-  if ((ret = atclient_monitor_start(&monitor_conn, ".*", strlen(".*"))) != 0) {
+  atclient_monitor_set_read_timeout(
+      &monitor_conn, 1 * 1000); // monitor read will wait at most 1 second for a message. As soon bytes are read, it
+                                // will return. If no bytes are read, it will return after 3 seconds.
+
+  if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
-
-  atclient_monitor_set_read_timeout(&monitor_conn, 3*1000); // monitor read will wait at most 3 seconds for a message. As soon bytes are read, it will return. If no bytes are read, it will return after 3 seconds.
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
   size_t tries = 1;
@@ -121,30 +126,36 @@ int main(int argc, char *argv[]) {
       break;
     }
     }
-    // sleep(3);
 
-    if(tries >= max_tries) {
-      if(!atclient_monitor_is_connected(&monitor_conn)) {
+    if (tries >= max_tries) {
+      if (!atclient_monitor_is_connected(&monitor_conn)) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are not connected :( attempting reconnection\n");
-        if((ret = atclient_monitor_pkam_authenticate(&monitor_conn, &root_connection, &atkeys, atsign)) != 0)
-        {
+        if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) !=
+            0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
-          goto exit;
+          continue;
         }
+        if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
+          continue;
+        }
+        atclient_monitor_set_read_timeout(&monitor_conn, 1 * 1000);
       } else {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are connected ! :)\n");
       }
       tries = 1;
     }
+    sleep(1);
   }
 
   ret = 0;
   goto exit;
 exit: {
   atclient_atkeys_free(&atkeys);
-  atclient_connection_free(&root_connection);
+  free(atserver_host);
   atclient_monitor_free(&monitor_conn);
   atclient_monitor_message_free(message);
+  atclient_free(&atclient2);
   return ret;
 }
 }

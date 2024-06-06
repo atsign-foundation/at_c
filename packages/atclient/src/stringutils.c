@@ -99,6 +99,67 @@ int atclient_stringutils_ends_with(const char *string, const size_t stringlen, c
 exit: { return ret; }
 }
 
+int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, const size_t original_atsign_len,
+                                               char **output_atsign_with_at_symbol) {
+  int ret = -1;
+  if (original_atsign == NULL) {
+    ret = -1;
+    goto exit;
+  }
+  if (original_atsign_len == 0) {
+    ret = -1;
+    goto exit;
+  }
+  if (output_atsign_with_at_symbol == NULL) {
+    ret = -1;
+    goto exit;
+  }
+
+  *output_atsign_with_at_symbol = malloc(sizeof(char) * (original_atsign_len + 2));
+  if (*output_atsign_with_at_symbol == NULL) {
+    ret = -1;
+    goto exit;
+  }
+
+  memset(*output_atsign_with_at_symbol, 0, sizeof(char) * (original_atsign_len + 2));
+  memcpy(*output_atsign_with_at_symbol, "@", 1);
+  memcpy(*output_atsign_with_at_symbol + 1, original_atsign, original_atsign_len);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_stringutils_atsign_without_at_symbol(const char *original_atsign, const size_t original_atsign_len,
+                                                  char **output_atsign_without_at_symbol) {
+  int ret = -1;
+  if (original_atsign == NULL) {
+    ret = -1;
+    goto exit;
+  }
+  if (original_atsign_len == 0) {
+    ret = -1;
+    goto exit;
+  }
+  if (output_atsign_without_at_symbol == NULL) {
+    ret = -1;
+    goto exit;
+  }
+
+  *output_atsign_without_at_symbol = malloc(sizeof(char) * (original_atsign_len));
+  if (*output_atsign_without_at_symbol == NULL) {
+    ret = -1;
+    goto exit;
+  }
+
+  memset(*output_atsign_without_at_symbol, 0, sizeof(char) * (original_atsign_len));
+  memcpy(*output_atsign_without_at_symbol, original_atsign + 1, original_atsign_len - 1);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
 int long_strlen(long n) {
   // could use log10 for this, but it's probably slower...
   size_t len = 0;

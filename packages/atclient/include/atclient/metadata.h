@@ -100,7 +100,6 @@ typedef struct atclient_atkey_metadata {
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
   atclient_atstr updatedat; // date and time representing when the key was last updated, read only
 
-  // TODO: info about this metadata
   // ispublic=true means this key is accessible by all atSigns and contains non-encrypted data.
   // ispublic=false means this key is only accessible by either sharedWith or sharedBy
   // This field is not written to the protocol string by the SDK. It is a strictly client-side metadata.

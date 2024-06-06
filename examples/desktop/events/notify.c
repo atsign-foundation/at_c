@@ -1,4 +1,5 @@
 #include <atclient/atclient.h>
+#include <atclient/atclient_utils.h>
 #include <atclient/atkey.h>
 #include <atclient/atsign.h>
 #include <atclient/constants.h>
@@ -33,8 +34,8 @@ int main(int argc, char *argv[]) {
   atclient atclient;
   atclient_init(&atclient);
 
-  atclient_connection root_connection;
-  atclient_connection_init(&root_connection, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -81,10 +82,9 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  ret = atclient_connection_connect(&root_connection, ROOT_HOST, ROOT_PORT);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect to root\n");
-    atclient_connection_free(&root_connection);
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) !=
+      0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
   }
 
@@ -98,11 +98,11 @@ int main(int argc, char *argv[]) {
   ret = atclient_atkeys_populate_from_path(&atkeys, atkeys_path);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys\n");
-    atclient_connection_free(&root_connection);
+    free(atserver_host);
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &root_connection, &atkeys, atsign.atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
@@ -141,7 +141,7 @@ exit: {
   atclient_atstr_free(&atkeystr);
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
-  atclient_connection_free(&root_connection);
+  free(atserver_host);
   atclient_free(&atclient);
   return ret;
 }

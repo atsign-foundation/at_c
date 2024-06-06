@@ -1,5 +1,6 @@
 #include <atclient/atbytes.h>
 #include <atclient/atclient.h>
+#include <atclient/atclient_utils.h>
 #include <atclient/atkeys.h>
 #include <atclient/atkeysfile.h>
 #include <atclient/connection.h>
@@ -32,13 +33,13 @@ int main(int argc, char *argv[]) {
   memset(buffer, 0, sizeof(char) * buffersize); // Clear the buffer (for safety
   size_t bufferlen = 0;
 
-  const size_t recvsize = 8192*4;
+  const size_t recvsize = 8192 * 4;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize); // Clear the buffer (for safety
   size_t recvlen = 0;
 
-  atclient_connection root_conn;
-  atclient_connection_init(&root_conn, ATCLIENT_CONNECTION_TYPE_DIRECTORY);
+  char *atserver_host = NULL;
+  int atserver_port = -1;
 
   atclient atclient;
   atclient_init(&atclient);
@@ -86,14 +87,13 @@ int main(int argc, char *argv[]) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeysfilepath);
 
-  ret = atclient_connection_connect(&root_conn, roothost, rootport);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d | failed to connect to root\n",
-                 ret);
+  if ((ret = atclient_utils_find_atserver_address(roothost, rootport, atsign, &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_utils_find_atserver_address: %d | failed to find atserver address\n", ret);
     goto exit;
   }
 
-  ret = atclient_pkam_authenticate(&atclient, &root_conn, &atkeys, atsign);
+  ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
     goto exit;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
       loop = false;
       continue;
     }
-    ret = atclient_connection_send(&atclient.secondary_connection, (const unsigned char *)buffer, bufferlen, recv,
+    ret = atclient_connection_send(&atclient.atserver_connection, (const unsigned char *)buffer, bufferlen, recv,
                                    recvsize, &recvlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d | failed to send command\n", ret);
@@ -124,9 +124,10 @@ int main(int argc, char *argv[]) {
   goto exit;
 
 exit: {
-  atclient_connection_free(&root_conn);
+  free(atserver_host);
   free(temp);
   atclient_free(&atclient);
+  atclient_atkeys_free(&atkeys);
   return ret;
 }
 }

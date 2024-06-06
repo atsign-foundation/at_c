@@ -1,6 +1,9 @@
 #ifndef ATCLIENT_CONSTANTS_H
 #define ATCLIENT_CONSTANTS_H
 
+#define ATCLIENT_ATDIRECTORY_PRODUCTION_HOST "root.atsign.org"
+#define ATCLIENT_ATDIRECTORY_PRODUCTION_PORT 64
+
 #define ATCLIENT_ATSIGN_INNER_LEN 55                                                             // 55 utf7 chars
 #define ATCLIENT_ATSIGN_FULL_LEN (1 + ATCLIENT_ATSIGN_INNER_LEN)                                 // '@' + 55 utf7 chars
 #define ATCLIENT_ATKEY_KEY_LEN 55                                                                // 55 utf7 chars
@@ -12,8 +15,10 @@
 
 #define ATCLIENT_DEFAULT_NOTIFIER "SYSTEM"
 
-#define ATCLIENT_CLIENT_READ_TIMEOUT_MS 3*1000 // 3 seconds
-#define ATCLIENT_MONITOR_READ_TIMEOUT_MS 100 // 0.1 seconds
+#define ATCLIENT_CLIENT_READ_TIMEOUT_MS 3*1000 // 3 seconds to time out if no data is available
+#define ATCLIENT_MONITOR_READ_TIMEOUT_MS 3*1000 // 3 seconds to time out if no data is available
+
+#define ATCLIENT_CONNECTION_MAX_READ_TRIES 50 // if 0 bytes are read after 10 consecutive retries, the read is unsuccessful. See connection.c
 
 #define ATCLIENT_MONITOR_BUFFER_LEN 4096 // max chunk size monitor can read at once
 

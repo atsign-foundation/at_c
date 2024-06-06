@@ -563,14 +563,36 @@ static int test4b() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  atclient_atstr_set_literal(&(atkey.name), "name");
+  atclient_atstr_set_literal(&(atkey.namespacestr), "wavi");
+  atclient_atstr_set_literal(&(atkey.sharedby), "@jeremy_0");
+  atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
 
-  // TODO: implement test
+  const char *expected = TEST_ATKEY_TO_STRING_4B; // "name.wavi@jeremy_0"
+
+  atclient_atstr actual;
+  atclient_atstr_init(&actual, ATCLIENT_ATKEY_FULL_LEN);
+
+  ret = atclient_atkey_to_string(&atkey, actual.str, actual.size, &actual.len);
+
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
+    goto exit;
+  }
+
+  if (strncmp(actual.str, expected, strlen(expected)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
+                          actual.str);
+    ret = 1;
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  atclient_atkey_free(&atkey);
+  atclient_atstr_free(&actual);
+  return ret; }
 }
 
 int main() {

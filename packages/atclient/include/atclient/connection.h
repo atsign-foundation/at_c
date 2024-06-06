@@ -13,7 +13,7 @@
 
 // represents the type of connection
 typedef enum atclient_connection_type {
-  ATCLIENT_CONNECTION_TYPE_DIRECTORY, // uses '\n' to check if it is connected
+  ATCLIENT_CONNECTION_TYPE_ATDIRECTORY, // uses '\n' to check if it is connected
   ATCLIENT_CONNECTION_TYPE_ATSERVER // uses 'noop:0\r\n' to check if it is connected
 } atclient_connection_type;
 

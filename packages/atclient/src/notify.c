@@ -20,7 +20,7 @@
 static int generate_cmd(const atclient_notify_params *params, const char *cmdvalue, const size_t cmdvaluelen,
                         char **ocmd, size_t *ocmdolen);
 static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen,
-                                 unsigned long long *ottln, size_t *medatastrolen);
+                                 size_t *medatastrolen);
 
 #define TAG "atclient_notify"
 
@@ -69,7 +69,8 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   // Step 1 encrypt the value if needed
   if (params->value != NULL && params->shouldencrypt) {
-    const size_t ciphertextsize = (size_t) (((strlen(params->value) * 2) + 15) / 16) * 16; // round up to the next multiple of 16
+    const size_t ciphertextsize =
+        (size_t)(((strlen(params->value) * 2) + 15) / 16) * 16; // round up to the next multiple of 16
     unsigned char ciphertext[ciphertextsize];
     memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
     size_t ciphertextlen = 0;
@@ -84,7 +85,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     memset(ivbase64, 0, sizeof(unsigned char) * ivbase64size);
     size_t ivbase64len = 0;
 
-    const size_t sharedenckeysize = ATCHOPS_AES_256/8;
+    const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
     unsigned char sharedenckey[sharedenckeysize];
     memset(sharedenckey, 0, sizeof(unsigned char) * sharedenckeysize);
     size_t sharedenckeylen;
@@ -186,7 +187,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   }
   size_t recvlen = 0;
 
-  res = atclient_connection_send(&(ctx->secondary_connection), (unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
+  res = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
   if (res != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
     goto exit;
@@ -223,7 +224,7 @@ exit: {
 }
 
 static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen,
-                                 unsigned long long *ottln, size_t *medatastrolen) {
+                                 size_t *medatastrolen) {
   // notify command will look something like this:
   // "notify[:messageType:<type>][:priority:<priority>][:strategy:<strategy>][:ttln:<ttln>]<:atkey_metadata>:<atkey>[:<value>]\r\n"
   size_t cmdsize = 0;
@@ -253,23 +254,8 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
                strlen(atclient_notify_strategy_str[params->strategy]); // ":strategy" + ":all" | ":latest"
   }
 
-  int res;
-  struct timeval tv;
-  res = gettimeofday(&tv, NULL);
-  if (res != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 // TODO: get errno
-                 "gettimeofday failed with code stored in errno %d\n", res);
-    return -1;
-  }
-
-  unsigned long long ttln =
-      (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000 + params->notification_expiry;
-
-  if (params->notification_expiry > 0) {
-    cmdsize +=
-        strlen(":ttln:") + // ":ttln:"
-        long_strlen(ttln); // epochMillis (20 digits covers all 2^64 of unsigned long long, good for 300,000+ years)
+  if(params->notification_expiry > 0) {
+    cmdsize += strlen(":ttln:") + long_strlen(params->notification_expiry); // :$ttln
   }
 
   const size_t metadatastrlen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
@@ -287,7 +273,6 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
   cmdsize += 1; // null terminator
 
   *atkeyolen = atkeylen;
-  *ottln = ttln;
   *medatastrolen = metadatastrlen;
 
   return cmdsize;
@@ -301,12 +286,11 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   char *metadatastr = NULL;
 
   size_t atkeylen = 0;
-  unsigned long long ttln = 0;
   size_t metadatastrlen = 0;
 
   size_t cmdsize = 0;
 
-  cmdsize = calculate_cmd_size(params, cmdvaluelen, &atkeylen, &ttln, &metadatastrlen);
+  cmdsize = calculate_cmd_size(params, cmdvaluelen, &atkeylen, &metadatastrlen);
   if (cmdsize <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "calculate_cmd_size failed with code %d\n", cmdsize);
     res = 1;
@@ -355,8 +339,8 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   if (params->notification_expiry > 0) {
-    snprintf(cmd + off, cmdsize - off, ":ttln:%llu", ttln);
-    off += strlen(":ttln:") + long_strlen(ttln);
+    snprintf(cmd + off, cmdsize - off, ":ttln:%llu", params->notification_expiry);
+    off += strlen(":ttln:") + long_strlen(params->notification_expiry);
   }
 
   size_t metadatastrolen;
@@ -409,7 +393,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   *ocmd = cmd;
-  *ocmdolen = off-1; // off includes the null terminator
+  *ocmdolen = off - 1; // off includes the null terminator
 
   res = 0;
   goto exit;

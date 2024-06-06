@@ -70,8 +70,10 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   init_contexts(ctx);
   ctx->should_be_connected = true;
 
-  atclient_atstr readbuf;
-  atclient_atstr_init(&readbuf, 1024);
+  const size_t readbufsize = 1024;
+  unsigned char readbuf[readbufsize];
+  memset(readbuf, 0, sizeof(unsigned char) * readbufsize);
+  size_t readbuflen = 0;
 
   /*
    * 1. Set the ctx->host and ctx->port
@@ -165,7 +167,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // ===============
 
   // read anything that was already sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.size);
+  ret = mbedtls_ssl_read(&(ctx->ssl), readbuf, readbufsize);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -179,7 +181,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   // read anything that was sent
-  ret = mbedtls_ssl_read(&(ctx->ssl), (unsigned char *)readbuf.str, readbuf.size);
+  ret = mbedtls_ssl_read(&(ctx->ssl), readbuf, readbufsize);
   if (ret < 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
@@ -193,7 +195,6 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   goto exit;
 
 exit: {
-  atclient_atstr_free(&readbuf);
   if (ret != 0) {
     // undo what we set
     memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
@@ -208,7 +209,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   int ret = 1;
 
   if (!ctx->should_be_connected) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false. You are trying to send messages to a non-connected connection.\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "ctx->should_be_connected should be true, but is false. You are trying to send messages to a "
+                 "non-connected connection.\n");
     goto exit;
   }
 
@@ -218,7 +221,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
-  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == srclen) {
     unsigned char srccopy[srclen];
     memcpy(srccopy, src, srclen);
     atlogger_fix_stdout_buffer((char *)srccopy, srclen);
@@ -233,18 +236,29 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   memset(recv, 0, sizeof(unsigned char) * recvsize);
 
+  int tries = 0;
   bool found = false;
   size_t l = 0;
   do {
     ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvsize - l);
-    if (ret < 0) {
+    if (ret <= 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
     }
+    // if (ret == 0) {
+    //   tries++;
+    //   if (tries >= ATCLIENT_CONNECTION_MAX_READ_TRIES) {
+    //     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+    //                  "mbedtls_ssl_read tried to read %d times and found nothing: %d\n", tries, ret);
+    //     ret = 1;
+    //     goto exit;
+    //   }
+    // }
     l = l + ret;
 
     for (int i = l; i >= l - ret && i >= 0; i--) {
       // printf("i: %d c: %.2x\n", i, (unsigned char) *(recv + i));
-      if (*(recv + i) == '\n') {
+      if (*(recv + i) == '\n' || *(recv + i) == '\r') {
         *recvlen = i;
         found = true;
         break;
@@ -254,12 +268,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       break;
     }
 
-  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || !found);
-
-  if (ret <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
-    goto exit;
-  }
+  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found);
 
   // atlogger_fix_stdout_buffer((char *)recv, *recvlen);
   recv[*recvlen] = '\0'; // null terminate the string
@@ -268,8 +277,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     unsigned char recvcopy[*recvlen];
     memcpy(recvcopy, recv, *recvlen);
     atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy,
-                 reset);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy, reset);
   }
 
   ret = 0;
@@ -306,10 +314,10 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
     return false;
   }
 
-  char *command = "\n";
+  char *command = NULL;
   if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATSERVER) {
     command = "noop:0\r\n";
-  } else if (ctx->type == ATCLIENT_CONNECTION_TYPE_DIRECTORY) {
+  } else if (ctx->type == ATCLIENT_CONNECTION_TYPE_ATDIRECTORY) {
     command = "\n";
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -325,12 +333,12 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
 
   int ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recvlen);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \'\\n\' to connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send \"%s\" to connection: %d\n", command, ret);
     return false;
   }
 
   if (recvlen <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \'\\n\'\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recvlen is <= 0, connection did not respond to \"%s\"\n", command);
     return false;
   }
 

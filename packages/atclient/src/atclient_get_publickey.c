@@ -67,7 +67,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   const size_t cmdbufferlen = strlen(cmdbuffer);
 
   // 3. send plookup: command
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen,
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen,
                                  recv.bytes, recv.size, &recv.len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);

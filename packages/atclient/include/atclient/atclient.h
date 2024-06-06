@@ -13,9 +13,14 @@
  *
  */
 typedef struct atclient {
-  atclient_connection secondary_connection;
+  atclient_connection atserver_connection;
+  bool atserver_connection_started : 1;
+
   atclient_atsign atsign;
+  bool atsign_is_allocated : 1;
+
   atclient_atkeys atkeys;
+  bool atkeys_is_allocated_by_caller: 1;
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
   bool async_read;
@@ -37,27 +42,20 @@ void atclient_init(atclient *ctx);
 void atclient_free(atclient *ctx);
 
 /**
- * @brief initialize the atclient's secondary connection to the specified host and port
- *
- * @param ctx initialized atclient context
- * @param secondaryhost host of secondary. this is usually fetched from the root connection
- * @param secondaryport port of secondary. this is usually fetched from the root connection
- * @return int 0 on success, error otherwise
- */
-int atclient_start_secondary_connection(atclient *ctx, const char *secondaryhost, const int secondaryport);
-
-/**
  * @brief authenticate with secondary server with RSA pkam private key. it is expected atkeys has been populated with
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param root_conn initialized root connection
+ * @param atserver_host host of secondary. if you do not know the host, you can use
+ * atclient_utils_find_atserver_address, this string is assumed to be null terminated
+ * @param atserver_port port of secondary. if you do not know the port, you can use
+ * atclient_utils_find_atserver_address,
  * @param atkeys populated atkeys, especially with the pkam private key
- * @param atsign the atsign the atkeys belong to
- * @return int 0 on success
+ * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
+ * @return int 0 on success, non-zero on error
  */
-int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, const atclient_atkeys *atkeys,
-                               const char *atsign);
+int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
+                               const atclient_atkeys *atkeys, const char *atsign);
 
 /**
  * @brief Put a string value into your atServer.
@@ -79,8 +77,6 @@ int atclient_pkam_authenticate(atclient *ctx, atclient_connection *root_conn, co
  * @return int 0 on success
  */
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid);
-
-// TODO: add put self which doesn't need the root_conn OR allow root_conn to be null if the key is a self key
 
 /**
  * @brief Get a string value from your atServer.
@@ -182,6 +178,14 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
  * @note It is the responsibility of the caller to ensure that the connection is still alive
  */
 int atclient_send_heartbeat(atclient *heartbeat_conn);
+
+/**
+ * @brief Checks if the atclient is connected to the atserver
+ *
+ * @param ctx the atclient context, must be initialized
+ * @return true, if connected, false otherwise
+ */
+bool atclient_is_connected(atclient *ctx);
 
 /**
  * @brief For any atclient SSL operations (such as the crud operations like put,get,delete or event operations like

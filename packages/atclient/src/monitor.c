@@ -543,26 +543,23 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
 void atclient_monitor_init(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
 void atclient_monitor_free(atclient *monitor_conn) { return; }
 
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, atclient_connection *root_conn,
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
                                        const atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
-  ret = atclient_pkam_authenticate(monitor_conn, root_conn, atkeys, atsign);
+  ret = atclient_pkam_authenticate(monitor_conn, atserver_host, atserver_port, atkeys, atsign);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
-
-  atclient_monitor_set_read_timeout(monitor_conn, ATCLIENT_MONITOR_READ_TIMEOUT_MS);
 
   ret = 0;
   goto exit;
 exit: { return ret; }
 }
 
-void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms)
-{
-  mbedtls_ssl_conf_read_timeout(&(monitor_conn->secondary_connection.ssl_config), timeoutms);
+void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms) {
+  mbedtls_ssl_conf_read_timeout(&(monitor_conn->atserver_connection.ssl_config), timeoutms);
 }
 
 int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) {
@@ -592,7 +589,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 
   monitor_conn->async_read = true;
 
-  ret = atclient_connection_send(&monitor_conn->secondary_connection, (unsigned char *)cmd, cmdlen, NULL, 0, NULL);
+  ret = atclient_connection_send(&monitor_conn->atserver_connection, (unsigned char *)cmd, cmdlen, NULL, 0, NULL);
   // 3. send monitor cmd
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
@@ -632,7 +629,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
     size_t off = chunksize * chunks;
     for (int i = 0; i < chunksize; i++) {
-      ret = mbedtls_ssl_read(&(monitor_conn->secondary_connection.ssl), (unsigned char *)buffer + off + i, 1);
+      ret = mbedtls_ssl_read(&(monitor_conn->atserver_connection.ssl), (unsigned char *)buffer + off + i, 1);
       if (ret < 0 || buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
         done_reading = true;
@@ -715,7 +712,7 @@ exit: {
 }
 
 bool atclient_monitor_is_connected(atclient *monitor_conn) {
-  return atclient_connection_is_connected(&monitor_conn->secondary_connection);
+  return atclient_connection_is_connected(&monitor_conn->atserver_connection);
 }
 
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
@@ -972,21 +969,21 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   unsigned char *decryptedvaluetemp = NULL;
 
   // holds encrypted value but in raw bytes (after base64 decode operation)
-  const size_t ciphertextsize = strlen(notification->value) * 4;
+  const size_t ciphertextsize = (strlen(notification->value) + 15) / 16 * 16;
   unsigned char ciphertext[ciphertextsize];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
   size_t ciphertextlen = 0;
 
-  // temporarily holds the shared encryption key in base64
-  const size_t sharedenckeybase64size = 64;
-  unsigned char sharedenckeybase64[sharedenckeybase64size];
-  memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-  size_t sharedenckeybase64len = 0;
-
   // holds shared encryption key in raw bytes (after base64 decode operation)
   const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
   unsigned char sharedenckey[sharedenckeysize];
-  size_t sharedenckeylen;
+  size_t sharedenckeylen = 0;
+
+  // temporarily holds the shared encryption key in base64
+  const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize / 8);
+  unsigned char sharedenckeybase64[sharedenckeybase64size];
+  memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
+  size_t sharedenckeybase64len = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 

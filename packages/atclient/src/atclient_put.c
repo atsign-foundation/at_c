@@ -195,7 +195,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int)metadataprotocolstrlen, metadataprotocolstr,
            (int)atkeystrlen, atkeystr, (int)ciphertextbase64len, ciphertextbase64);
 
-  ret = atclient_connection_send(&(atclient->secondary_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
