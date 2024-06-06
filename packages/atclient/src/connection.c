@@ -268,7 +268,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       break;
     }
 
-  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found);
+  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found);
 
   // atlogger_fix_stdout_buffer((char *)recv, *recvlen);
   recv[*recvlen] = '\0'; // null terminate the string
