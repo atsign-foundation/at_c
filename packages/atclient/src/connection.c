@@ -473,32 +473,24 @@ int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_
     return -1;
   }
 
-  atclient_connection_send_hook *_hook;
-
   switch (type) {
   case ACHT_NONE:
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received 'NONE' hook as hook set input type\n");
     return 1;
   case ACHT_PRE_SEND:
-    _hook = hooks->pre_send;
+    hooks->pre_send = (atclient_connection_send_hook *)hook;
     break;
   case ACHT_POST_SEND:
-    _hook = hooks->post_send;
+    hooks->post_send = (atclient_connection_send_hook *)hook;
     break;
   case ACHT_PRE_RECV:
-    _hook = hooks->pre_recv;
+    hooks->pre_recv = (atclient_connection_send_hook *)hook;
     break;
   case ACHT_POST_RECV:
-    _hook = hooks->post_recv;
+    hooks->post_recv = (atclient_connection_send_hook *)hook;
     break;
   }
 
-  if (_hook == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for the hook\n");
-    return -1;
-  }
-
-  _hook = hook;
   return 0;
 }
 
