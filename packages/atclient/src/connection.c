@@ -238,7 +238,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     ctx->hooks->_is_nested_call = true;
     ret = ctx->hooks->pre_send(src, srclen, recv, recvsize, recvlen);
     ctx->hooks->_is_nested_call = false;
-    if (ret <= 0) {
+    if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_send hook failed with exit code: %d\n", ret);
       goto exit;
     }
@@ -254,7 +254,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     ctx->hooks->_is_nested_call = true;
     ret = ctx->hooks->post_send(src, srclen, recv, recvsize, recvlen);
     ctx->hooks->_is_nested_call = false;
-    if (ret <= 0) {
+    if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_send hook failed with exit code: %d\n", ret);
       goto exit;
     }
@@ -279,7 +279,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     ctx->hooks->_is_nested_call = true;
     ret = ctx->hooks->pre_recv(src, srclen, recv, recvsize, recvlen);
     ctx->hooks->_is_nested_call = false;
-    if (ret <= 0) {
+    if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_recv hook failed with exit code: %d\n", ret);
       goto exit;
     }
@@ -333,7 +333,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     ctx->hooks->_is_nested_call = true;
     ret = ctx->hooks->post_recv(src, srclen, recv, recvsize, recvlen);
     ctx->hooks->_is_nested_call = false;
-    if (ret <= 0) {
+    if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_recv hook failed with exit code: %d\n", ret);
       goto exit;
     }
