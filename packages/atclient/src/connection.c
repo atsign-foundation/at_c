@@ -284,7 +284,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   size_t l = 0;
   do {
     ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvsize - l);
-    if (ret < 0) {
+    if (ret <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
     }
@@ -311,12 +311,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
       break;
     }
 
-  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || !found);
-
-  if (ret <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
-    goto exit;
-  }
+  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found);
 
   // atlogger_fix_stdout_buffer((char *)recv, *recvlen);
   recv[*recvlen] = '\0'; // null terminate the string

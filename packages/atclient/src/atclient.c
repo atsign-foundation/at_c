@@ -1,4 +1,6 @@
 #include "atclient/atclient.h"
+#include "atclient/constants.h"
+#include "atclient/atclient_utils.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
 #include "atclient/atclient.h"
