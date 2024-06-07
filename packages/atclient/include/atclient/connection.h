@@ -17,8 +17,8 @@ typedef enum atclient_connection_type {
   ATCLIENT_CONNECTION_TYPE_ATSERVER     // uses 'noop:0\r\n' to check if it is connected
 } atclient_connection_type;
 
-typedef int(atclient_connection_hook)(const unsigned char *src, const size_t srclen, unsigned char *recv,
-                                      const size_t recvsize, size_t *recvlen);
+typedef int(atclient_connection_send_hook)(const unsigned char *src, const size_t srclen, unsigned char *recv,
+                                           const size_t recvsize, size_t *recvlen);
 
 typedef enum atclient_connection_hook_type {
   ACHT_NONE = 0,
@@ -29,10 +29,12 @@ typedef enum atclient_connection_hook_type {
 } atclient_connection_hook_type;
 
 typedef struct atclient_connection_hooks {
-  atclient_connection_hook *pre_send;
-  atclient_connection_hook *post_send;
-  atclient_connection_hook *pre_recv;
-  atclient_connection_hook *post_recv;
+  bool _is_nested_call; // internal variable for preventing infinite recursion (hooks cannot trigger other hooks in
+                        // their nested calls)
+  atclient_connection_send_hook *pre_send;
+  atclient_connection_send_hook *post_send;
+  atclient_connection_send_hook *pre_recv;
+  atclient_connection_send_hook *post_recv;
   bool readonly_src;
 } atclient_connection_hooks;
 
