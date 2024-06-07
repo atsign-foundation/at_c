@@ -678,7 +678,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         goto exit;
       }
       if (hooks != NULL && hooks->pre_decrypt_notification != NULL) {
-        ret = hooks->pre_decrypt_notification(NULL);
+        ret = hooks->pre_decrypt_notification();
         if (ret != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call pre decrypt notification hook\n");
           goto exit;
@@ -689,7 +689,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         goto exit;
       }
       if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
-        ret = hooks->post_decrypt_notification(NULL);
+        ret = hooks->post_decrypt_notification();
         if (ret != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call post decrypt notification hook\n");
           goto exit;
