@@ -5,11 +5,11 @@
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
+#include <atclient/atclient_utils.h>
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
 #include <atclient/notify.h>
 #include <atclient/stringutils.h>
-#include <atclient/atclient_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -201,7 +201,7 @@ static int test_3_monitor_for_notification(atclient *monitor_conn, atclient *atc
   int tries = 1;
 
   while (tries < max_tries) {
-    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message)) != 0) {
+    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       goto exit;
     }
