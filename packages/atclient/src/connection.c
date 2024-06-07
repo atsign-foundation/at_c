@@ -473,7 +473,7 @@ int atclient_connection_hooks_add(atclient_connection *ctx, atclient_connection_
     return -1;
   }
 
-  atclient_connection_hook *_hook;
+  atclient_connection_send_hook *_hook;
 
   switch (type) {
   case ACHT_NONE:
