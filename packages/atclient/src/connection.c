@@ -65,7 +65,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   if (ctx->should_be_connected) {
     if((ret = atclient_connection_disconnect(ctx)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_disconnect failed with exit code: %d. Continuing connection anyways..\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "atclient_connection_disconnect failed with exit code: %d. Continuing connection anyways..\n", ret);
     }
   }
 
