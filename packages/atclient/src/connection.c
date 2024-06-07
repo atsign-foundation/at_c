@@ -260,12 +260,19 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     }
   }
 
+  unsigned char *srccopy;
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == srclen) {
-    unsigned char srccopy[srclen];
-    memcpy(srccopy, src, srclen);
-    atlogger_fix_stdout_buffer((char *)srccopy, srclen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
-                 srccopy, reset);
+    srccopy = malloc(sizeof(unsigned char) * srclen);
+    if (srccopy != NULL) {
+      memcpy(srccopy, src, srclen);
+      atlogger_fix_stdout_buffer((char *)srccopy, srclen);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
+                   srccopy, reset);
+      free(srccopy);
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed to allocate memory to pretty print the network sent transmission\n");
+    }
   }
 
   if (recv == NULL) {
@@ -322,11 +329,19 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   // atlogger_fix_stdout_buffer((char *)recv, *recvlen);
   recv[*recvlen] = '\0'; // null terminate the string
 
+  unsigned char *recvcopy;
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
-    unsigned char recvcopy[*recvlen];
-    memcpy(recvcopy, recv, *recvlen);
-    atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy, reset);
+    recvcopy = malloc(sizeof(unsigned char) * (*recvlen));
+    if (recvcopy != NULL) {
+      memcpy(recvcopy, recv, *recvlen);
+      atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy,
+                   reset);
+      free(recvcopy);
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed to allocate memory to pretty print the network received buffer\n");
+    }
   }
 
   if (try_hooks && ctx->hooks->post_recv != NULL) {
