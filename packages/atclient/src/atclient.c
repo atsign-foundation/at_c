@@ -1,14 +1,14 @@
 #include "atclient/atclient.h"
-#include "atclient/constants.h"
-#include "atclient/atclient_utils.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
 #include "atclient/atbytes.h"
 #include "atclient/atclient.h"
+#include "atclient/atclient_utils.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
+#include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
@@ -42,7 +42,7 @@ void atclient_free(atclient *ctx) {
     atclient_atsign_free(&(ctx->atsign));
   }
 
-  if(!ctx->atkeys_is_allocated_by_caller) {
+  if (!ctx->atkeys_is_allocated_by_caller) {
     atclient_atkeys_free(&(ctx->atkeys));
   }
 
@@ -153,8 +153,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign
   if (ctx->atsign_is_allocated) {
     atclient_atsign_free(&(ctx->atsign));
+    ctx->atsign_is_allocated = false;
   }
-  if ((ret = atclient_atsign_init(&(ctx->atsign), atsign) != 0)) {
+  if ((ret = atclient_atsign_init(&(ctx->atsign), atsign_with_at_symbol) != 0)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
     goto exit;
   }
@@ -228,6 +229,11 @@ void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
 static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
+  if (ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    goto exit;
+  }
+
   atclient_connection_free(&(ctx->atserver_connection));
   ctx->atserver_connection_started = false;
   memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
@@ -242,5 +248,7 @@ static int atclient_start_atserver_connection(atclient *ctx, const char *seconda
 
   goto exit;
 
-exit: { return ret; }
+exit: {
+  return ret;
+}
 }

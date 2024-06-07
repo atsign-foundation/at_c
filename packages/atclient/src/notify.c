@@ -180,7 +180,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   // Step 6 send the encrypted notification
   const size_t recvsize = 64;
-  unsigned char *recv;
+  unsigned char *recv = NULL;
   if (!ctx->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
     memset(recv, 0, sizeof(unsigned char) * recvsize);
