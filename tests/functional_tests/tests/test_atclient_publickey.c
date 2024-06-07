@@ -20,15 +20,14 @@
 #define ATKEY_ISENCRYPTED false
 #define ATKEY_ISBINARY false
 
-static int test_1_should_not_exist(atclient *atclient);
-static int test_2_put(atclient *atclient);
-static int test_3_get(atclient *atclient);
-static int test_4_delete(atclient *atclient);
-static int test_5_should_not_exist(atclient *atclient);
-static int test_6_put_with_metadata(atclient *atclient);
-static int test_7_get_with_metadata(atclient *atclient);
-static int test_8_delete(atclient *atclient);
-static int test_9_should_not_exist(atclient *atclient);
+static int test_1_put(atclient *atclient);
+static int test_2_get(atclient *atclient);
+static int test_3_delete(atclient *atclient);
+static int test_4_should_not_exist(atclient *atclient);
+static int test_5_put_with_metadata(atclient *atclient);
+static int test_6_get_with_metadata(atclient *atclient);
+static int test_7_delete(atclient *atclient);
+static int test_8_should_not_exist(atclient *atclient);
 static int tear_down(atclient *atclient);
 
 int main() {
@@ -52,48 +51,43 @@ int main() {
     goto exit;
   }
 
-  if ((ret = test_1_should_not_exist(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_1_should_not_exist: %d\n", ret);
+  if ((ret = test_1_put(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_1_put: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_2_put(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_2_put: %d\n", ret);
+  if ((ret = test_2_get(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_2_get: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_3_get(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_3_get: %d\n", ret);
+  if ((ret = test_3_delete(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_3_delete: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_4_delete(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_4_delete: %d\n", ret);
+  if ((ret = test_4_should_not_exist(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_4_should_not_exist: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_5_should_not_exist(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_5_should_not_exist: %d\n", ret);
+  if ((ret = test_5_put_with_metadata(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_5_put_with_metadata: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_6_put_with_metadata(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_6_put_with_metadata: %d\n", ret);
+  if ((ret = test_6_get_with_metadata(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_6_get_with_metadata: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_7_get_with_metadata(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_7_get_with_metadata: %d\n", ret);
+  if ((ret = test_7_delete(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_7_delete: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_8_delete(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_8_delete: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = test_9_should_not_exist(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_9_should_not_exist: %d\n", ret);
+  if ((ret = test_8_should_not_exist(&atclient)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_8_should_not_exist: %d\n", ret);
     goto exit;
   }
 
@@ -109,33 +103,10 @@ exit: {
 }
 }
 
-static int test_1_should_not_exist(atclient *atclient) {
+static int test_1_put(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_should_not_exist Begin\n");
-
-  if (functional_tests_publickey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed functional_tests_publickey_exists when it shouldn't: %d\n",
-                 ret);
-    ret = 1;
-    goto exit;
-  }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "AtKey doesn't exist, which is expected. (%d)\n", ret);
-
-  ret = 0;
-
-  goto exit;
-exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_should_not_exist End (%d)\n", ret);
-  return ret;
-}
-}
-
-static int test_2_put(atclient *atclient) {
-  int ret = 1;
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_put Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_put Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -156,15 +127,15 @@ static int test_2_put(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_put End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_put End (%d)\n", ret);
   return ret;
 }
 }
 
-static int test_3_get(atclient *atclient) {
+static int test_2_get(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_get Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_get Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -197,15 +168,15 @@ static int test_3_get(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_get End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_get End (%d)\n", ret);
   return ret;
 }
 }
 
-static int test_4_delete(atclient *atclient) {
+static int test_3_delete(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_delete Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_delete Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -227,15 +198,15 @@ static int test_4_delete(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_delete End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_delete End (%d)\n", ret);
   return ret;
 }
 }
 
-static int test_5_should_not_exist(atclient *atclient) {
+static int test_4_should_not_exist(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_should_not_exist Begin\n");
 
   if ((ret = functional_tests_publickey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != false) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed functional_tests_atkey_should_not_exist: %d\n", ret);
@@ -248,15 +219,15 @@ static int test_5_should_not_exist(atclient *atclient) {
 
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_should_not_exist End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_should_not_exist End (%d)\n", ret);
   return ret;
 }
 }
 
-static int test_6_put_with_metadata(atclient *atclient) {
+static int test_5_put_with_metadata(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_6_put_with_metadata Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_5_put_with_metadata Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -289,10 +260,10 @@ exit: {
 }
 }
 
-static int test_7_get_with_metadata(atclient *atclient) {
+static int test_6_get_with_metadata(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_get_with_metadata Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_6_get_with_metadata Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -359,15 +330,15 @@ static int test_7_get_with_metadata(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_get_with_metadata End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_6_get_with_metadata End (%d)\n", ret);
   return ret;
 }
 }
 
-static int test_8_delete(atclient *atclient) {
+static int test_7_delete(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_delete Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_delete Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -387,15 +358,15 @@ static int test_8_delete(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_delete End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_delete End (%d)\n", ret);
   return ret;
 }
 }
 
-static int test_9_should_not_exist(atclient *atclient) {
+static int test_8_should_not_exist(atclient *atclient) {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_9_should_not_exist Begin\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_should_not_exist Begin\n");
 
   if ((ret = functional_tests_publickey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != false) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed functional_tests_atkey_should_not_exist");
@@ -406,7 +377,7 @@ static int test_9_should_not_exist(atclient *atclient) {
 
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_9_should_not_exist End (%d)\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_should_not_exist End (%d)\n", ret);
   return ret;
 }
 }
