@@ -1,10 +1,8 @@
-
 #include "atclient/connection.h"
 #include "atchops/constants.h"
 #include "atclient/atstr.h"
 #include "atclient/cacerts.h"
 #include "atclient/constants.h"
-#include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
