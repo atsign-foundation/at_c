@@ -465,7 +465,7 @@ void atclient_connection_hooks_init(atclient_connection *ctx) {
 
 // Q. Why is hook a void pointer?
 // A. In case we want to add future hook types which use a different function signature
-int atclient_connection_hooks_add(atclient_connection *ctx, atclient_connection_hook_type type, void *hook) {
+int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_hook_type type, void *hook) {
   atclient_connection_hooks *hooks = ctx->hooks;
   if (hooks == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

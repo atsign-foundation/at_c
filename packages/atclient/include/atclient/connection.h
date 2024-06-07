@@ -145,8 +145,9 @@ void atclient_connection_hooks_init(atclient_connection *ctx);
  * @param type the hook type you want to add
  * @param hook the hook function itself
  *
+ * @return int 0 on success, otherwise error
  */
-void atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_hook_type type, void *hook);
+int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_hook_type type, void *hook);
 
 /**
  * @brief Set whether the readonly_src status for all hooks
