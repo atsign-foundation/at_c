@@ -62,8 +62,9 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   int ret = 1;
 
   if (ctx->should_be_connected) {
-    if((ret = atclient_connection_disconnect(ctx)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "atclient_connection_disconnect failed with exit code: %d. Continuing connection anyways..\n", ret);
+    if ((ret = atclient_connection_disconnect(ctx)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+                   "atclient_connection_disconnect failed with exit code: %d. Continuing connection anyways..\n", ret);
     }
   }
 
@@ -238,7 +239,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
 
   if (try_hooks && ctx->hooks->pre_send != NULL) {
     ctx->hooks->_is_nested_call = true;
+    printf("Before pre-send\n");
     ret = ctx->hooks->pre_send(src, srclen, recv, recvsize, recvlen);
+    printf("After pre-send\n");
     ctx->hooks->_is_nested_call = false;
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_send hook failed with exit code: %d\n", ret);
