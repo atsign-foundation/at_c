@@ -21,11 +21,11 @@ typedef int(atclient_connection_send_hook)(const unsigned char *src, const size_
                                            const size_t recvsize, size_t *recvlen);
 
 typedef enum atclient_connection_hook_type {
-  ACHT_NONE = 0,
-  ACHT_PRE_SEND,
-  ACHT_POST_SEND,
-  ACHT_PRE_RECV,
-  ACHT_POST_RECV,
+  ATCLIENT_CONNECTION_HOOK_TYPE_NONE = 0,
+  ATCLIENT_CONNECTION_HOOK_TYPE_PRE_SEND,
+  ATCLIENT_CONNECTION_HOOK_TYPE_POST_SEND,
+  ATCLIENT_CONNECTION_HOOK_TYPE_PRE_RECV,
+  ATCLIENT_CONNECTION_HOOK_TYPE_POST_RECV,
 } atclient_connection_hook_type;
 
 typedef struct atclient_connection_hooks {
