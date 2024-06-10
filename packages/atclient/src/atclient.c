@@ -3,7 +3,6 @@
 #include "atclient/atclient_utils.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
-#include "atclient/atbytes.h"
 #include "atclient/atclient.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
@@ -42,7 +41,7 @@ void atclient_free(atclient *ctx) {
     atclient_atsign_free(&(ctx->atsign));
   }
 
-  if(!ctx->atkeys_is_allocated_by_caller) {
+  if (!ctx->atkeys_is_allocated_by_caller) {
     atclient_atkeys_free(&(ctx->atkeys));
   }
 

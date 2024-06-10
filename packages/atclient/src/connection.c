@@ -1,10 +1,8 @@
-
 #include "atclient/connection.h"
 #include "atchops/constants.h"
 #include "atclient/atstr.h"
 #include "atclient/cacerts.h"
 #include "atclient/constants.h"
-#include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
@@ -204,9 +202,30 @@ exit: {
 }
 }
 
-int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
-                             unsigned char *recv, const size_t recvsize, size_t *recvlen) {
+int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_r, const size_t srclen_r,
+                             unsigned char *recv, const size_t recvsize_r, size_t *recvlen) {
   int ret = 1;
+
+  // Clone readonly inputs so it is editable by the hooks
+  size_t srclen = srclen_r;
+  size_t recvsize = recvsize_r;
+
+  bool try_hooks = ctx->hooks != NULL && !ctx->hooks->_is_nested_call;
+  bool allocate_src = try_hooks && ctx->hooks->readonly_src == false;
+
+  unsigned char *src;
+
+  if (allocate_src) {
+    src = malloc(sizeof(unsigned char) * srclen);
+    if (src == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for src\n");
+      allocate_src = false; // don't try to free since the memory failed to be allocated
+      goto exit;
+    }
+    memcpy(src, src_r, srclen);
+  } else {
+    src = (unsigned char *)src_r;
+  }
 
   if (!ctx->should_be_connected) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -215,18 +234,45 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
 
+  if (try_hooks && ctx->hooks->pre_send != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    ret = ctx->hooks->pre_send(src, srclen, recv, recvsize, recvlen);
+    ctx->hooks->_is_nested_call = false;
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_send hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
+  }
+
   ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen);
   if (ret <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
     goto exit;
   }
 
+  if (try_hooks && ctx->hooks->post_send != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    ret = ctx->hooks->post_send(src, srclen, recv, recvsize, recvlen);
+    ctx->hooks->_is_nested_call = false;
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_send hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  unsigned char *srccopy;
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == srclen) {
-    unsigned char srccopy[srclen];
-    memcpy(srccopy, src, srclen);
-    atlogger_fix_stdout_buffer((char *)srccopy, srclen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
-                 srccopy, reset);
+    srccopy = malloc(sizeof(unsigned char) * srclen);
+    if (srccopy != NULL) {
+      memcpy(srccopy, src, srclen);
+      atlogger_fix_stdout_buffer((char *)srccopy, srclen);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
+                   srccopy, reset);
+      free(srccopy);
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed to allocate memory to pretty print the network sent transmission\n");
+    }
   }
 
   if (recv == NULL) {
@@ -236,6 +282,16 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   memset(recv, 0, sizeof(unsigned char) * recvsize);
 
+  if (try_hooks && ctx->hooks->pre_recv != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    ret = ctx->hooks->pre_recv(src, srclen, recv, recvsize, recvlen);
+    ctx->hooks->_is_nested_call = false;
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_recv hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
+  }
+
   int tries = 0;
   bool found = false;
   size_t l = 0;
@@ -244,6 +300,15 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     if (ret <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
+    }
+    if (ret == 0) {
+      tries++;
+      if (tries >= ATCLIENT_CONNECTION_MAX_READ_TRIES) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "mbedtls_ssl_read tried to read %d times and found nothing: %d\n", tries, ret);
+        ret = 1;
+        goto exit;
+      }
     }
     l = l + ret;
 
@@ -264,16 +329,39 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   // atlogger_fix_stdout_buffer((char *)recv, *recvlen);
   recv[*recvlen] = '\0'; // null terminate the string
 
+  unsigned char *recvcopy;
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
-    unsigned char recvcopy[*recvlen];
-    memcpy(recvcopy, recv, *recvlen);
-    atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy, reset);
+    recvcopy = malloc(sizeof(unsigned char) * (*recvlen));
+    if (recvcopy != NULL) {
+      memcpy(recvcopy, recv, *recvlen);
+      atlogger_fix_stdout_buffer((char *)recvcopy, *recvlen);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recvlen, recvcopy,
+                   reset);
+      free(recvcopy);
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed to allocate memory to pretty print the network received buffer\n");
+    }
+  }
+
+  if (try_hooks && ctx->hooks->post_recv != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    ret = ctx->hooks->post_recv(src, srclen, recv, recvsize, recvlen);
+    ctx->hooks->_is_nested_call = false;
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_recv hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  if (allocate_src) {
+    free(src);
+  }
+  return ret;
+}
 }
 
 int atclient_connection_disconnect(atclient_connection *ctx) {
@@ -344,6 +432,10 @@ void atclient_connection_free(atclient_connection *ctx) {
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
   ctx->should_be_connected = false;
+
+  if (ctx->hooks != NULL) {
+    free(ctx->hooks);
+  }
 }
 
 int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url) {
@@ -378,4 +470,50 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
   goto exit;
 
 exit: { return ret; }
+}
+
+void atclient_connection_enable_hooks(atclient_connection *ctx) {
+  ctx->hooks = malloc(sizeof(atclient_connection_hooks));
+  memset(ctx->hooks, 0, sizeof(atclient_connection_hooks));
+  ctx->hooks->readonly_src = true;
+}
+
+// Q. Why is hook a void pointer?
+// A. In case we want to add future hook types which use a different function signature
+int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_hook_type type, void *hook) {
+  atclient_connection_hooks *hooks = ctx->hooks;
+  if (hooks == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Make sure to initialize hooks struct before trying to set a hook\n");
+    return -1;
+  }
+
+  switch (type) {
+  case ATCLIENT_CONNECTION_HOOK_TYPE_NONE:
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received 'NONE' hook as hook set input type\n");
+    return 1;
+  case ATCLIENT_CONNECTION_HOOK_TYPE_PRE_SEND:
+    hooks->pre_send = (atclient_connection_send_hook *)hook;
+    break;
+  case ATCLIENT_CONNECTION_HOOK_TYPE_POST_SEND:
+    hooks->post_send = (atclient_connection_send_hook *)hook;
+    break;
+  case ATCLIENT_CONNECTION_HOOK_TYPE_PRE_RECV:
+    hooks->pre_recv = (atclient_connection_send_hook *)hook;
+    break;
+  case ATCLIENT_CONNECTION_HOOK_TYPE_POST_RECV:
+    hooks->post_recv = (atclient_connection_send_hook *)hook;
+    break;
+  }
+
+  return 0;
+}
+
+void atclient_connection_hooks_set_readonly_src(atclient_connection *ctx, bool readonly_src) {
+  if (ctx->hooks == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Make sure to initialize hooks struct before trying to set readonly_src\n");
+    return;
+  }
+  ctx->hooks->readonly_src = readonly_src;
 }
