@@ -26,8 +26,8 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, commandsize - 1, recv,
-                                 recvsize, &recvlen);
+  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, commandsize - 1, recv, recvsize,
+                                 &recvlen);
   if (ret != 0) {
     return ret;
   }
@@ -137,9 +137,13 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     response = response + response_prefix_len;
   }
 
+  printf("PASS A: '%s'\n", response);
+
   if (atclient_stringutils_ends_with(response, recvsize, response_prefix, response_prefix_len)) {
     response[strlen(response) - response_prefix_len - 1] = '\0';
   }
+
+  printf("PASS B: '%s'\n", response);
 
   // does my atSign already have the recipient's shared key?
   if (atclient_stringutils_starts_with(response, recvsize, "data:", 5)) {
