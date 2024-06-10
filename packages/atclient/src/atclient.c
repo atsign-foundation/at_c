@@ -234,12 +234,12 @@ static int atclient_start_atserver_connection(atclient *ctx, const char *seconda
 
   // clear the atserver connection
   atclient_connection_free(&(ctx->atserver_connection));
-  ctx->atserver_connection_started = false;
+  ctx->_atserver_connection_started = false;
   memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
 
   // (re) initialize the atserver connection
   atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
-  ctx->atserver_connection_started = true;
+  ctx->_atserver_connection_started = true;
 
   // add back hooks
   ctx->atserver_connection.hooks = conn_hooks;
