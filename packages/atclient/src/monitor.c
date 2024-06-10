@@ -1058,6 +1058,8 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     goto exit;
   }
 
+  printf("sharedenckeylen: '%lu'\n", sharedenckeylen);
+  printf("sharedenckeysize: '%lu'\n", sharedenckeysize);
   if (sharedenckeylen != sharedenckeysize) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid shared encryption key length was decoded.\n");
     goto exit;

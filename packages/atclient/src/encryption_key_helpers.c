@@ -137,6 +137,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     response = response + response_prefix_len;
   }
 
+  printf("recvlen: '%lu'\n", recvlen);
   printf("PASS A: '%s'\n", response);
 
   if (atclient_stringutils_ends_with(response, recvsize, response_prefix, response_prefix_len)) {
@@ -147,7 +148,6 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
 
   // does my atSign already have the recipient's shared key?
   if (atclient_stringutils_starts_with(response, recvsize, "data:", 5)) {
-
     response = response + 5;
 
     // 44 + 1
