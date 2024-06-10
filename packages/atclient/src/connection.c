@@ -432,6 +432,22 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
   return true;
 }
 
+void atclient_connection_reset(atclient_connection *ctx) {
+  atclient_connection_type type = ctx->type;
+
+  if (ctx->should_be_connected) {
+    free_contexts(ctx);
+  }
+
+  memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
+  ctx->port = -1;
+  ctx->should_be_connected = false;
+  ctx->type = type;
+
+  // make sure not to wipe the hooks
+  memset(ctx, 0, sizeof(atclient_connection) - sizeof(atclient_connection_hooks *));
+}
+
 void atclient_connection_free(atclient_connection *ctx) {
   if (ctx->should_be_connected) {
     free_contexts(ctx);
