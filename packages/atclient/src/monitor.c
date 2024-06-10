@@ -1058,6 +1058,18 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     goto exit;
   }
 
+  // iterate through and check for certain values to prevent leaking the key
+  printf("Checking sharedenckey for certain values:\n");
+  for (int i = 0; i < sharedenckeylen; i++) {
+    if (sharedenckey[i] == '\n') {
+      printf("pos %d is '\\n'\n", i);
+    }
+    if (sharedenckey[i] == '\0') {
+      printf("pos %d i '\\0'\n", i);
+    }
+  }
+  printf("Done checking sharedenckey for certain values.\n");
+
   printf("sharedenckeylen: '%lu'\n", sharedenckeylen);
   printf("sharedenckeysize: '%lu'\n", sharedenckeysize);
   if (sharedenckeylen != sharedenckeysize) {
