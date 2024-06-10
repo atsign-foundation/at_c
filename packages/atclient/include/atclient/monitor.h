@@ -248,7 +248,7 @@ void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout
 
 typedef struct atclient_monitor_hooks {
   int (*pre_decrypt_notification)(void);
-  int (*post_decrypt_notification)(void);
+  int (*post_decrypt_notification)(int);
 } atclient_monitor_hooks;
 
 /**
