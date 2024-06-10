@@ -112,6 +112,13 @@ int atclient_connection_disconnect(atclient_connection *ctx);
 bool atclient_connection_is_connected(atclient_connection *ctx);
 
 /**
+ * @brief reset the connection, preserving the hooks & type
+ *
+ * @param ctx the struct which was previously initialized
+ */
+void atclient_connection_reset(atclient_connection *ctx);
+
+/**
  * @brief free memory allocated by the init function
  *
  * @param ctx the struct which was previously initialized

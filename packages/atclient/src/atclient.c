@@ -233,11 +233,8 @@ static int atclient_start_atserver_connection(atclient *ctx, const char *seconda
     goto exit;
   }
 
-  atclient_connection_free(&(ctx->atserver_connection));
   ctx->_atserver_connection_started = false;
-  memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
-
-  atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
+  atclient_connection_reset(&ctx->atserver_connection);
   ctx->_atserver_connection_started = true;
 
   if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondaryhost, secondaryport)) != 0) {
@@ -247,7 +244,5 @@ static int atclient_start_atserver_connection(atclient *ctx, const char *seconda
 
   goto exit;
 
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
