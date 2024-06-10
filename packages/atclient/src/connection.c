@@ -439,13 +439,13 @@ void atclient_connection_reset(atclient_connection *ctx) {
     free_contexts(ctx);
   }
 
+  // make sure not to wipe the hooks
+  memset(ctx, 0, sizeof(atclient_connection) - sizeof(atclient_connection_hooks *));
+
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
   ctx->should_be_connected = false;
   ctx->type = type;
-
-  // make sure not to wipe the hooks
-  memset(ctx, 0, sizeof(atclient_connection) - sizeof(atclient_connection_hooks *));
 }
 
 void atclient_connection_free(atclient_connection *ctx) {
