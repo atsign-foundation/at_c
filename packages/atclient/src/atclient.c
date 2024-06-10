@@ -1,13 +1,13 @@
 #include "atclient/atclient.h"
-#include "atclient/constants.h"
-#include "atclient/atclient_utils.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
 #include "atclient/atclient.h"
+#include "atclient/atclient_utils.h"
 #include "atclient/atkeys.h"
 #include "atclient/atsign.h"
 #include "atclient/atstr.h"
 #include "atclient/connection.h"
+#include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
@@ -227,12 +227,21 @@ void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
 static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
   int ret = 1; // error by default
 
+  // remove hooks to preserve them across resets
+  atclient_connection_hooks *conn_hooks = ctx->atserver_connection.hooks;
+  ctx->atserver_connection.hooks = NULL;
+
+  // clear the atserver connection
   atclient_connection_free(&(ctx->atserver_connection));
   ctx->atserver_connection_started = false;
   memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
 
+  // (re) initialize the atserver connection
   atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
   ctx->atserver_connection_started = true;
+
+  // add back hooks
+  ctx->atserver_connection.hooks = conn_hooks;
 
   if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondaryhost, secondaryport)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
