@@ -489,19 +489,19 @@ int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_
   }
 
   switch (type) {
-  case ACHT_NONE:
+  case ATCLIENT_CONNECTION_HOOK_TYPE_NONE:
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received 'NONE' hook as hook set input type\n");
     return 1;
-  case ACHT_PRE_SEND:
+  case ATCLIENT_CONNECTION_HOOK_TYPE_PRE_SEND:
     hooks->pre_send = (atclient_connection_send_hook *)hook;
     break;
-  case ACHT_POST_SEND:
+  case ATCLIENT_CONNECTION_HOOK_TYPE_POST_SEND:
     hooks->post_send = (atclient_connection_send_hook *)hook;
     break;
-  case ACHT_PRE_RECV:
+  case ATCLIENT_CONNECTION_HOOK_TYPE_PRE_RECV:
     hooks->pre_recv = (atclient_connection_send_hook *)hook;
     break;
-  case ACHT_POST_RECV:
+  case ATCLIENT_CONNECTION_HOOK_TYPE_POST_RECV:
     hooks->post_recv = (atclient_connection_send_hook *)hook;
     break;
   }
