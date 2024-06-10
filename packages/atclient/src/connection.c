@@ -472,7 +472,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
 exit: { return ret; }
 }
 
-void atclient_connection_hooks_init(atclient_connection *ctx) {
+void atclient_connection_enable_hooks(atclient_connection *ctx) {
   ctx->hooks = malloc(sizeof(atclient_connection_hooks));
   memset(ctx->hooks, 0, sizeof(atclient_connection_hooks));
   ctx->hooks->readonly_src = true;

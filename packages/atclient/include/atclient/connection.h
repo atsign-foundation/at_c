@@ -66,8 +66,6 @@ typedef struct atclient_connection {
  * if it is ATCLIENT_CONNECTION_TYPE_ROOT, then '\\n' will be used to check if it is connected.
  * if it is ATCLIENT_CONNECTION_TYPE_ATSERVER, then 'noop:0\r\n' will be used to check if it is connected
  *
- * @note hooks have a separate init method, called atlcient_connection_hooks_init. After this method, call
- * atclient_connection_hooks_init, if you intend to use hooks.
  */
 void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type);
 
@@ -136,7 +134,7 @@ int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const
  *
  * @param ctx the struct for the connection
  */
-void atclient_connection_hooks_init(atclient_connection *ctx);
+void atclient_connection_enable_hooks(atclient_connection *ctx);
 
 /**
  * @brief Add a hook to be called during the connection lifecycle
