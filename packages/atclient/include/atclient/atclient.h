@@ -14,13 +14,14 @@
  */
 typedef struct atclient {
   atclient_connection atserver_connection;
-  bool atserver_connection_started : 1;
+  bool _atserver_connection_started : 1; // internally used for memory management
 
   atclient_atsign atsign;
-  bool atsign_is_allocated : 1;
+  bool _atsign_is_allocated : 1; // internally used for memory management
 
   atclient_atkeys atkeys;
-  bool atkeys_is_allocated_by_caller: 1;
+  bool _atkeys_is_allocated_by_caller : 1; // internally used for memory management
+  
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
   bool async_read;
