@@ -606,7 +606,8 @@ exit: {
 }
 }
 
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message) {
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message,
+                          atclient_monitor_hooks *hooks) {
   int ret = -1;
 
   const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
@@ -676,9 +677,23 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         ret = 0;
         goto exit;
       }
+      if (hooks != NULL && hooks->pre_decrypt_notification != NULL) {
+        ret = hooks->pre_decrypt_notification();
+        if (ret != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call pre decrypt notification hook\n");
+          goto exit;
+        }
+      }
       if ((ret = decrypt_notification(atclient, &((*message)->notification))) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
+      }
+      if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
+        ret = hooks->post_decrypt_notification();
+        if (ret != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call post decrypt notification hook\n");
+          goto exit;
+        }
       }
     } else {
       atclient_atnotification_set_decryptedvalue(&((*message)->notification),
@@ -1043,6 +1058,19 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     goto exit;
   }
 
+  // iterate through and check for corrupted values to prevent leaking the key
+  int not_corrupted = -1;
+  for (int i = sharedenckeylen - 1; i >= 0; i--) {
+    if (sharedenckey[i] != 255) {
+      not_corrupted = i;
+    }
+  }
+  if (not_corrupted != -1) {
+    printf("The last %lu bytes of sharedkeyenc are corrupted\n", sharedenckeylen - not_corrupted);
+  }
+
+  printf("sharedenckeylen: '%lu'\n", sharedenckeylen);
+  printf("sharedenckeysize: '%lu'\n", sharedenckeysize);
   if (sharedenckeylen != sharedenckeysize) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid shared encryption key length was decoded.\n");
     goto exit;
