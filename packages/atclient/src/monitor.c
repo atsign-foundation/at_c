@@ -1064,6 +1064,9 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     if (sharedenckey[i] == '\n') {
       printf("pos %d is '\\n'\n", i);
     }
+    if (sharedenckey[i] == '\r') {
+      printf("pos %d i '\\r'\n", i);
+    }
     if (sharedenckey[i] == '\0') {
       printf("pos %d i '\\0'\n", i);
     }
