@@ -115,15 +115,25 @@ int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, cons
     goto exit;
   }
 
-  *output_atsign_with_at_symbol = malloc(sizeof(char) * (original_atsign_len + 2));
-  if (*output_atsign_with_at_symbol == NULL) {
-    ret = -1;
-    goto exit;
+  if (original_atsign[0] == '@') {
+    *output_atsign_with_at_symbol = malloc(sizeof(char) * (original_atsign_len + 1));
+    if (*output_atsign_with_at_symbol == NULL) {
+      ret = -1;
+      goto exit;
+    }
+    memcpy(*output_atsign_with_at_symbol, original_atsign, original_atsign_len);
+    (*output_atsign_with_at_symbol)[original_atsign_len] = '\0';                                 // Missing NULL terminator
+  } else {
+    *output_atsign_with_at_symbol = malloc(sizeof(char) * (original_atsign_len + 2));
+    if (*output_atsign_with_at_symbol == NULL) {
+      ret = -1;
+      goto exit;
+    }
+    memset(*output_atsign_with_at_symbol, 0, sizeof(char) * (original_atsign_len + 2));
+    memcpy(*output_atsign_with_at_symbol, "@", 1);
+    memcpy(*output_atsign_with_at_symbol + 1, original_atsign, original_atsign_len);
+    (*output_atsign_with_at_symbol)[original_atsign_len + 1] = '\0';                             // Missing NULL terminator
   }
-
-  memset(*output_atsign_with_at_symbol, 0, sizeof(char) * (original_atsign_len + 2));
-  memcpy(*output_atsign_with_at_symbol, "@", 1);
-  memcpy(*output_atsign_with_at_symbol + 1, original_atsign, original_atsign_len);
 
   ret = 0;
   goto exit;
