@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
       break;
     }
     case ATCLIENT_MONITOR_EMPTY_READ: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_READ\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_EMPTY_READ\n");
       tries++;
       break;
     }
