@@ -276,8 +276,10 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * @param atclient the atclient context for the atclient connection, it is advised that this connection an entirely
  * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is
  * initialized and pkam authenticated.
- * @param message pass in a double pointer to the message, it will be allocated and filled in by this function. The
- * caller is responsible for freeing the message, using atclient_monitor_message_free
+ * @param message A pointer to the initialized atclient_monitor_message. It is up to
+ * the caller to allocate memory to this struct, call atclient_monitor_message_init before passing to this function,
+ * then call atclient_monitor_free use. This function populates the message struct with the notification, data response,
+ * or error response read from the monitor connection.
  * @return 0 on success, non-zero on error
  *
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
