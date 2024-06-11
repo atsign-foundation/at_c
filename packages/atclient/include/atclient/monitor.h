@@ -163,10 +163,15 @@ void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *noti
  *
  */
 enum atclient_monitor_message_type {
+  // the following 4 enums help indicate what type of message was received from the monitor connection and which field
+  // of the union to access
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
   ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
+
+  // the following 3 enums help indicate what type of error occurred when reading from the monitor connection, you will
+  // expect one of these enums along with a non-zero return value from atclient_monitor_read
   ATCLIENT_MONITOR_EMPTY_READ, // nothing was read from the socket, could be a socket error, disconnection, or simply
                                // that nothing was read
   ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION,
