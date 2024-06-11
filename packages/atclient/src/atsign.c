@@ -1,10 +1,10 @@
 #include "atclient/atsign.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define TAG "atsign"
 
@@ -33,15 +33,17 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
   return ret;
 }
 
-void atclient_atsign_free(atclient_atsign *atsign) { free(atsign->atsign); }
+void atclient_atsign_free(atclient_atsign *atsign) {
+  free(atsign->atsign);
+  memset(atsign, 0, sizeof(atclient_atsign));
+}
 
 int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
                                       const char *originalatsign, const size_t originalatsignlen) {
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n",
-                          atsignlen);
+                 "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n", atsignlen);
     ret = 1;
     goto exit;
   }
@@ -66,13 +68,12 @@ int atclient_atsign_without_at_symbol(char *atsign, const size_t atsignlen, size
 exit: { return ret; }
 }
 
-int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen,
-                                   const char *originalatsign, const size_t originalatsignlen) {
+int atclient_atsign_with_at_symbol(char *atsign, const size_t atsignlen, size_t *atsignolen, const char *originalatsign,
+                                   const size_t originalatsignlen) {
   int ret = 1;
   if (atsignlen + 1 < originalatsignlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n",
-                          atsignlen);
+                 "atsignlen might be too low. consider allocating more buffer space. atsignlen: %d\n", atsignlen);
     ret = 1;
     goto exit;
   }
