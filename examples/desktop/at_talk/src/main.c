@@ -239,21 +239,23 @@ static void *monitor_handler(void *xargs) {
   int tries = 1;
 
   while (true) {
-    atclient_monitor_message *message = NULL;
+    atclient_monitor_message message;
+    atclient_monitor_message_init(&message);
+
     pthread_mutex_lock(&monitor_mutex);
     pthread_mutex_lock(&client_mutex);
     ret = atclient_monitor_read(monitor, ctx, &message, NULL);
     pthread_mutex_unlock(&monitor_mutex);
     pthread_mutex_unlock(&client_mutex);
 
-    switch (message->type) {
+    switch (message.type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-      if (strcmp(message->notification.id, "-1") == 0) {
+      if (strcmp(message.notification.id, "-1") == 0) {
         // We received a stats notification. Ignore it.
         break;
       }
-      if (atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
-        const atclient_atnotification *notification = &(message->notification);
+      if (atclient_atnotification_decryptedvalue_is_initialized(&(message.notification))) {
+        const atclient_atnotification *notification = &(message.notification);
         printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
         printf("%s%s%s: ", HBLU, from_atsign, reset);
         fflush(stdout);
@@ -288,11 +290,11 @@ static void *monitor_handler(void *xargs) {
       break;
     }
     default: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received message type: %d\n", message->type);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received message type: %d\n", message.type);
     }
     }
 
-    atclient_monitor_message_free(message);
+    atclient_monitor_message_free(&message);
     usleep(100);
   }
   goto exit;

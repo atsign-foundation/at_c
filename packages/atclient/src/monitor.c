@@ -610,16 +610,18 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
                           atclient_monitor_hooks *hooks) {
   int ret = -1;
 
-  const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
+  char *buffertemp = NULL;
+  char *buffer = NULL;
 
   size_t chunks = 0;
-  char *buffer = malloc(sizeof(char) * chunksize);
+  const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
+  
+  buffer = malloc(sizeof(char) * chunksize);
   if(buffer == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for buffer\n");
     goto exit;
   }
   memset(buffer, 0, sizeof(char) * chunksize);
-  char *buffertemp = NULL;
 
   bool done_reading = false;
   while (!done_reading) {

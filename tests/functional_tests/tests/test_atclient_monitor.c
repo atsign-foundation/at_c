@@ -194,7 +194,8 @@ exit: {
 static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2) {
   int ret = 1;
 
-  atclient_monitor_message *message = NULL;
+  atclient_monitor_message message;
+  atclient_monitor_message_init(&message);
 
   const int max_tries = 10;
   int tries = 1;
@@ -206,30 +207,23 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
       continue;
     }
 
-    if (message == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                   "monitor message is NULL, when it is expected to be populated :(\n");
-      tries++;
-      continue;
-    }
-
-    if (!atclient_atnotification_decryptedvalue_is_initialized(&(message->notification))) {
+    if (!atclient_atnotification_decryptedvalue_is_initialized(&(message.notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value is not initialized\n");
       tries++;
       continue;
     }
 
-    if (!atclient_atnotification_decryptedvaluelen_is_initialized(&(message->notification))) {
+    if (!atclient_atnotification_decryptedvaluelen_is_initialized(&(message.notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value length is not initialized\n");
       tries++;
       continue;
     }
 
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n",
-                 (int)message->notification.decryptedvaluelen, message->notification.decryptedvalue);
+                 (int)message.notification.decryptedvaluelen, message.notification.decryptedvalue);
 
     // compare the decrypted value with the expected value
-    if (strcmp(message->notification.decryptedvalue, ATKEY_VALUE) != 0) {
+    if (strcmp(message.notification.decryptedvalue, ATKEY_VALUE) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value does not match expected value\n");
       tries++;
       continue;
@@ -248,7 +242,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
   ret = 1;
   goto exit;
 exit: {
-  atclient_monitor_message_free(message);
+  atclient_monitor_message_free(&message);
   return ret;
 }
 }
