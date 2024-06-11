@@ -122,6 +122,7 @@ int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, cons
       goto exit;
     }
     memcpy(*output_atsign_with_at_symbol, original_atsign, original_atsign_len);
+    (*output_atsign_with_at_symbol)[original_atsign_len] = '\0';
   } else {
     *output_atsign_with_at_symbol = malloc(sizeof(char) * (original_atsign_len + 2));
     if (*output_atsign_with_at_symbol == NULL) {
@@ -131,6 +132,7 @@ int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, cons
     memset(*output_atsign_with_at_symbol, 0, sizeof(char) * (original_atsign_len + 2));
     memcpy(*output_atsign_with_at_symbol, "@", 1);
     memcpy(*output_atsign_with_at_symbol + 1, original_atsign, original_atsign_len);
+    (*output_atsign_with_at_symbol)[original_atsign_len + 1] = '\0';
   }
 
   ret = 0;

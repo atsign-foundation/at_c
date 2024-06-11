@@ -1,4 +1,3 @@
-#include "atclient/atbytes.h"
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
@@ -29,9 +28,10 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   atclient_atstr atkeystr;
   atclient_atstr_init(&atkeystr, atkeystrlen);
 
-  const size_t recvlen = 4096;
-  atclient_atbytes recv;
-  atclient_atbytes_init(&recv, recvlen);
+  const size_t recvsize = valuesize;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
 
   cJSON *root = NULL;
   char *cmdbuffer = NULL;
@@ -67,8 +67,8 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   const size_t cmdbufferlen = strlen(cmdbuffer);
 
   // 3. send plookup: command
-  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen,
-                                 recv.bytes, recv.size, &recv.len);
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen, recv,
+                                 recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -77,14 +77,14 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   // 4. parse response
 
   // 4a. if recv does not start with "data:", we probably got an error
-  if (!atclient_stringutils_starts_with((char *)recv.bytes, recv.len, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                 (int)recv.len, recv.bytes);
+                 (int)recvlen, recv);
     goto exit;
   }
 
-  char *recvwithoutdata = (char *)recv.bytes + 5;
+  char *recvwithoutdata = (char *)recv + 5;
 
   root = cJSON_Parse(recvwithoutdata);
   if (root == NULL) {
