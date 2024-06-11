@@ -540,8 +540,8 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   }
 }
 
-void atclient_monitor_init(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
-void atclient_monitor_free(atclient *monitor_conn) { return; }
+void atclient_monitor_init(atclient *monitor_conn) { atclient_init(monitor_conn); }
+void atclient_monitor_free(atclient *monitor_conn) { atclient_free(monitor_conn); }
 
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
                                        const atclient_atkeys *atkeys, const char *atsign) {
@@ -606,19 +606,22 @@ exit: {
 }
 }
 
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message,
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message *message,
                           atclient_monitor_hooks *hooks) {
   int ret = -1;
 
-  const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
+  char *buffertemp = NULL;
+  char *buffer = NULL;
 
   size_t chunks = 0;
-  char *buffer = malloc(sizeof(char) * chunksize);
+  const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
+  
+  buffer = malloc(sizeof(char) * chunksize);
+  if(buffer == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for buffer\n");
+    goto exit;
+  }
   memset(buffer, 0, sizeof(char) * chunksize);
-  char *buffertemp = NULL;
-
-  *message = malloc(sizeof(atclient_monitor_message));
-  atclient_monitor_message_init(*message);
 
   bool done_reading = false;
   while (!done_reading) {
@@ -639,8 +642,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
     chunks = chunks + 1;
   }
-  if (ret <= 0) {
-    (*message)->type = ATCLIENT_MONITOR_ERROR_READ;
+  if(ret <= 0) { // you should reconnect...
+    message->type = ATCLIENT_MONITOR_ERROR_READ;
+    message->error_read.error_code = ret;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
     goto exit;
   }
@@ -654,7 +658,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   char *messagebody = NULL;
   ret = parse_message(buffer, &messagetype, &messagebody);
   if (ret != 0) {
-    (*message)->type = ATCLIENT_MONITOR_ERROR_PARSE;
+    message->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
@@ -663,16 +667,18 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
                reset);
 
   if (strcmp(messagetype, "notification") == 0) {
-    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
-    atclient_atnotification_init(&((*message)->notification));
-    if ((ret = parse_notification(&((*message)->notification), messagebody)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification\n");
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
+    atclient_atnotification_init(&(message->notification));
+    if ((ret = parse_notification(&(message->notification), messagebody)) != 0) {
+      message->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification with messagebody: \"%s\"\n",
+                   messagebody);
       goto exit;
     }
-    if (atclient_atnotification_isEncrypted_is_initialized(&((*message)->notification)) &&
-        (*message)->notification.isEncrypted == true) {
+    if (atclient_atnotification_isEncrypted_is_initialized(&(message->notification)) &&
+        message->notification.isEncrypted == true) {
       // if key contains \"shared_key\", could be in the middle of string, ignore it
-      if (strstr((*message)->notification.key, "shared_key") != NULL) {
+      if (strstr(message->notification.key, "shared_key") != NULL) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ignoring shared_key\n");
         ret = 0;
         goto exit;
@@ -685,7 +691,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         }
       }
 
-      int decrypt_ret = decrypt_notification(atclient, &((*message)->notification));
+      int decrypt_ret = decrypt_notification(atclient, &(message->notification));
 
       if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
         ret = hooks->post_decrypt_notification(decrypt_ret);
@@ -697,26 +703,27 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
       ret = decrypt_ret;
       if (ret != 0) {
+        message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
       }
     } else {
-      atclient_atnotification_set_decryptedvalue(&((*message)->notification),
-                                                 (unsigned char *)(*message)->notification.value,
-                                                 strlen((*message)->notification.value));
-      atclient_atnotification_set_decryptedvaluelen(&((*message)->notification),
-                                                    strlen((*message)->notification.value));
+      atclient_atnotification_set_decryptedvalue(&(message->notification),
+                                                 (unsigned char *)message->notification.value,
+                                                 strlen(message->notification.value));
+      atclient_atnotification_set_decryptedvaluelen(&(message->notification),
+                                                    strlen(message->notification.value));
     }
   } else if (strcmp(messagetype, "data") == 0) {
-    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
-    (*message)->data_response = malloc(strlen(messagebody) + 1);
-    strcpy((*message)->data_response, messagebody);
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
+    message->data_response = malloc(strlen(messagebody) + 1);
+    strcpy(message->data_response, messagebody);
   } else if (strcmp(messagetype, "error") == 0) {
-    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
-    (*message)->error_response = malloc(strlen(messagebody) + 1);
-    strcpy((*message)->error_response, messagebody);
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
+    message->error_response = malloc(strlen(messagebody) + 1);
+    strcpy(message->error_response, messagebody);
   } else {
-    (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to identify message type from \"%s\"\n", buffer);
     ret = -1;
     goto exit;

@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  atclient_monitor_message *message = NULL;
+  atclient_monitor_message message;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    switch (message->type) {
+    switch (message.type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
       break;
@@ -88,15 +88,15 @@ int main(int argc, char *argv[]) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
-      if (strcmp(message->notification.id, "-1") == 0) {
+      if (strcmp(message.notification.id, "-1") == 0) {
         // ignore stats notification
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
       }
-      if (atclient_atnotification_decryptedvalue_is_initialized(&message->notification)) {
+      if (atclient_atnotification_decryptedvalue_is_initialized(&message.notification)) {
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
-                     message->notification.decryptedvalue);
+                     message.notification.decryptedvalue);
       }
       break;
     }
@@ -111,6 +111,12 @@ int main(int argc, char *argv[]) {
       // Body: %s\n", message->error_response);
       break;
     }
+    case ATCLIENT_MONITOR_ERROR_READ:
+    case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION:
+    case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: %d\n", message.type);
+      break;
+    }
     }
     // sleep(3);
   }
@@ -121,7 +127,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   free(atsign);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_message_free(message);
+  atclient_monitor_message_free(&message);
   return ret;
 }
 }

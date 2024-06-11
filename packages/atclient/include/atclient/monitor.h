@@ -163,13 +163,27 @@ void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *noti
  *
  */
 enum atclient_monitor_message_type {
+  // the following 4 enums help indicate what type of message was received from the monitor connection and which field
+  // of the union to access
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
-  ATCLIENT_MONITOR_ERROR_READ, // usually a socket error
-  ATCLIENT_MONITOR_ERROR_PARSE,
+  ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,   // indicates caller to access `notification` from the union
+  ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,  // indicates caller to access `data_response` from the union
+  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE, // indicates caller to access `error_response` from the union
+
+  // the following 3 enums help indicate what type of error occurred when reading from the monitor connection, you will
+  // expect one of these enums along with a non-zero return value from atclient_monitor_read
+  ATCLIENT_MONITOR_ERROR_READ, // could be a read timeout or some other error, indicates the caller to access
+                               // `error_read` from the union
+  ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION,
+  ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION,
 };
+
+// Represents error information when `ATCLIENT_MONITOR_ERROR_READ` is the message type given by atclient_monitor_read
+typedef struct atclient_monitor_message_error_read {
+  int error_code; // if 0, then the connection should be disposed of immediately, as it is of no use anymore,
+                  // if MBEDTLS_ERR_SSL_TIMEOUT, then a read timeout occurred,
+                  // else if < 0, then an error occurred when reading from the SSL connection.
+} atclient_monitor_message_error_read;
 
 /**
  * @brief Represents a message received from the monitor connection
@@ -184,6 +198,7 @@ typedef struct atclient_monitor_message {
     atclient_atnotification notification; // when is_notification is true
     char *data_response;                  // message of the data response (e.g. "ok", when "data:ok" is received)
     char *error_response;                 // message of the error_response
+    atclient_monitor_message_error_read error_read;
   };
 } atclient_monitor_message;
 
@@ -265,18 +280,20 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 /**
  * @brief Read a notification from the monitor connection into message
  * @param monitor_conn the atclient context for the monitor connection. it is assumed that this is intialized and pkam
- * authenticated.
+ * authenticated. See atclient_monitor_init and atclient_monitor_pkam_authenticate
  * @param atclient the atclient context for the atclient connection, it is advised that this connection an entirely
  * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is
  * initialized and pkam authenticated.
- * @param message pass in a double pointer to the message, it will be allocated and filled in by this function. The
- * caller is responsible for freeing the message, using atclient_monitor_message_free
+ * @param message A pointer to the initialized atclient_monitor_message. It is up to
+ * the caller to allocate memory to this struct, call atclient_monitor_message_init before passing to this function,
+ * then call atclient_monitor_free use. This function populates the message struct with the notification, data response,
+ * or error response read from the monitor connection.
  * @return 0 on success, non-zero on error
  *
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message,
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message *message,
                           atclient_monitor_hooks *hooks);
 
 /**
