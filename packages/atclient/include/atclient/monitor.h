@@ -167,8 +167,10 @@ enum atclient_monitor_message_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
   ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
   ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
-  ATCLIENT_MONITOR_ERROR_READ, // usually a socket error
-  ATCLIENT_MONITOR_ERROR_PARSE,
+  ATCLIENT_MONITOR_EMPTY_READ, // nothing was read from the socket, could be a socket error, disconnection, or simply
+                               // that nothing was read
+  ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION,
+  ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION,
 };
 
 /**

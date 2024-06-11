@@ -640,7 +640,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     chunks = chunks + 1;
   }
   if (ret <= 0) {
-    (*message)->type = ATCLIENT_MONITOR_ERROR_READ;
+    (*message)->type = ATCLIENT_MONITOR_EMPTY_READ;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
     goto exit;
   }
@@ -654,7 +654,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   char *messagebody = NULL;
   ret = parse_message(buffer, &messagetype, &messagebody);
   if (ret != 0) {
-    (*message)->type = ATCLIENT_MONITOR_ERROR_PARSE;
+    (*message)->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
@@ -666,7 +666,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     (*message)->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
     atclient_atnotification_init(&((*message)->notification));
     if ((ret = parse_notification(&((*message)->notification), messagebody)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification\n");
+      (*message)->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification with messagebody: \"%s\"\n", messagebody);
       goto exit;
     }
     if (atclient_atnotification_isEncrypted_is_initialized(&((*message)->notification)) &&
@@ -697,6 +698,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
       ret = decrypt_ret;
       if (ret != 0) {
+        (*message)->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
       }

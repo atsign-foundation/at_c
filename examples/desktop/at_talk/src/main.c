@@ -260,8 +260,9 @@ static void *monitor_handler(void *xargs) {
       }
       tries = 1;
     }
-    case ATCLIENT_MONITOR_ERROR_READ:
-    case ATCLIENT_MONITOR_ERROR_PARSE: {
+    case ATCLIENT_MONITOR_EMPTY_READ:
+    case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION:
+    case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION: {
       if (tries >= MAX_RETRIES) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
                      "Failed to read a message for 5 consecutive reads, checking if connection is alive...\n", ret);
