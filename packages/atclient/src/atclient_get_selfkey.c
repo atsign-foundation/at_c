@@ -34,12 +34,12 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
   size_t atkeystrlen = 0;
 
-  const size_t recvsize = 4096;
+  const size_t recvsize = valuesize;
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
+  const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8; // 32 byte = 256 bits
   unsigned char selfencryptionkey[selfencryptionkeysize];
   memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
   size_t selfencryptionkeylen = 0;
@@ -139,7 +139,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  const size_t valuerawsize = strlen(data->valuestring) * 8;
+  // holds base64 decoded value. Once decoded, it is encrypted cipher text bytes that need to be decrypted
+  const size_t valuerawsize = atchops_base64_decoded_size(strlen(data->valuestring));
   valueraw = (char *)malloc(sizeof(char) * valuerawsize);
   memset(valueraw, 0, sizeof(char) * valuerawsize);
   size_t valuerawlen = 0;
