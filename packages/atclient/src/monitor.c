@@ -684,16 +684,21 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
           goto exit;
         }
       }
-      if ((ret = decrypt_notification(atclient, &((*message)->notification))) != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
-        goto exit;
-      }
+
+      int decrypt_ret = decrypt_notification(atclient, &((*message)->notification));
+
       if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
-        ret = hooks->post_decrypt_notification();
+        ret = hooks->post_decrypt_notification(decrypt_ret);
         if (ret != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call post decrypt notification hook\n");
           goto exit;
         }
+      }
+
+      ret = decrypt_ret;
+      if (ret != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
+        goto exit;
       }
     } else {
       atclient_atnotification_set_decryptedvalue(&((*message)->notification),
