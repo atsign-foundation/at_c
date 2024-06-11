@@ -117,17 +117,17 @@ int main(int argc, char *argv[]) {
       break;
     }
     case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_PARSE\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION\n");
       tries++;
       break;
     }
     case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_DECRYPT\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION\n");
       tries++;
       break;
     }
     case ATCLIENT_MONITOR_ERROR_READ: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_EMPTY_READ\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_READ with error code %d\n", message->error_read.error_code);
       tries++;
       break;
     }
