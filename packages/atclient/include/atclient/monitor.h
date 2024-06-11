@@ -285,7 +285,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message,
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message *message,
                           atclient_monitor_hooks *hooks);
 
 /**
