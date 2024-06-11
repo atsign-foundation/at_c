@@ -1000,7 +1000,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   size_t sharedenckeylen = 0;
 
   // temporarily holds the shared encryption key in base64
-  const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize / 8);
+  const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize);
   unsigned char sharedenckeybase64[sharedenckeybase64size];
   memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
   size_t sharedenckeybase64len = 0;
