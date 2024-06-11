@@ -51,7 +51,7 @@ int main() {
   atclient_atkeys_init(&atkeys_sharedby);
 
   atclient monitor_conn;
-  atclient_init(&monitor_conn);
+  atclient_monitor_init(&monitor_conn);
 
   atclient atclient2;
   atclient_init(&atclient2);

@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
   atclient_init(&atclient1);
 
   atclient monitor; // free later
-  atclient_init(&monitor);
+  atclient_monitor_init(&monitor);
 
   pthread_t tid;
 
