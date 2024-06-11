@@ -246,6 +246,11 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atser
  */
 void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout_ms);
 
+typedef struct atclient_monitor_hooks {
+  int (*pre_decrypt_notification)(void);
+  int (*post_decrypt_notification)(void);
+} atclient_monitor_hooks;
+
 /**
  * @brief Sends the monitor command to the atserver to start monitoring notifications, assumed that the monitor atclient
  * context is already pkam authenticated
@@ -271,7 +276,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message);
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message **message,
+                          atclient_monitor_hooks *hooks);
 
 /**
  * @brief Check if the monitor connection is still established (client is listening for notifications, and the server

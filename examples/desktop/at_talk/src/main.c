@@ -242,7 +242,7 @@ static void *monitor_handler(void *xargs) {
     atclient_monitor_message *message = NULL;
     pthread_mutex_lock(&monitor_mutex);
     pthread_mutex_lock(&client_mutex);
-    ret = atclient_monitor_read(monitor, ctx, &message);
+    ret = atclient_monitor_read(monitor, ctx, &message, NULL);
     pthread_mutex_unlock(&monitor_mutex);
     pthread_mutex_unlock(&client_mutex);
 

@@ -231,7 +231,7 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
 
   cmdsize += strlen("notify");
 
-  if (params->id != NULL && strlen(params->id) > 0) {
+  if (strlen(params->id) > 0) {
     cmdsize += strlen(":id:") + strlen(params->id); // ":id:" + 36 char uuid
   }
 
@@ -254,7 +254,7 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
                strlen(atclient_notify_strategy_str[params->strategy]); // ":strategy" + ":all" | ":latest"
   }
 
-  if(params->notification_expiry > 0) {
+  if (params->notification_expiry > 0) {
     cmdsize += strlen(":ttln:") + long_strlen(params->notification_expiry); // :$ttln
   }
 
@@ -313,7 +313,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   snprintf(cmd + off, cmdsize - off, "notify");
   off += strlen("notify");
 
-  if (params->id != NULL && strlen(params->id) > 0) {
+  if (strlen(params->id) > 0) {
     snprintf(cmd + off, cmdsize - off, ":id:%s", params->id);
     off += strlen(":id:") + strlen(params->id);
   }
@@ -339,7 +339,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   if (params->notification_expiry > 0) {
-    snprintf(cmd + off, cmdsize - off, ":ttln:%llu", params->notification_expiry);
+    snprintf(cmd + off, cmdsize - off, ":ttln:%lu", params->notification_expiry);
     off += strlen(":ttln:") + long_strlen(params->notification_expiry);
   }
 
