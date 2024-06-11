@@ -180,7 +180,9 @@ enum atclient_monitor_message_type {
 
 // Represents error information when `ATCLIENT_MONITOR_ERROR_READ` is the message type given by atclient_monitor_read
 typedef struct atclient_monitor_message_error_read {
-  int error_code;
+  int error_code; // if 0, then the connection should be disposed of immediately, as it is of no use anymore,
+                  // if MBEDTLS_ERR_SSL_TIMEOUT, then a read timeout occurred,
+                  // else if < 0, then an error occurred when reading from the SSL connection.
 } atclient_monitor_message_error_read;
 
 /**
