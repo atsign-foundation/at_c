@@ -262,7 +262,7 @@ static void *monitor_handler(void *xargs) {
       }
       tries = 1;
     }
-    case ATCLIENT_MONITOR_EMPTY_READ:
+    case ATCLIENT_MONITOR_ERROR_READ:
     case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION:
     case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION: {
       if (tries >= MAX_RETRIES) {

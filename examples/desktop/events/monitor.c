@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
       // Body: %s\n", message->error_response);
       break;
     }
-    case ATCLIENT_MONITOR_EMPTY_READ:
+    case ATCLIENT_MONITOR_ERROR_READ:
     case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION:
     case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION: {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: %d\n", message.type);
