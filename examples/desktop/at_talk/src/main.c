@@ -262,35 +262,54 @@ static void *monitor_handler(void *xargs) {
       }
       tries = 1;
     }
-    case ATCLIENT_MONITOR_ERROR_READ:
-    case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION:
-    case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION: {
+    case ATCLIENT_MONITOR_ERROR_READ: {
+      if (message.error_read.error_code == MBEDTLS_ERR_SSL_TIMEOUT) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read timed out.\n", ret);
+        tries++;
+      } else if(message.error_read.error_code < 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Read failed with error code: %d\n", message.error_read.error_code);
+        tries++;
+      } else if (message.error_read.error_code == 0) {
+        // must reconnect IMMEDIATELY.
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Read failed with error code 0. Reconnecting immediately.\n",
+                     ret);
+        tries = MAX_RETRIES;
+      }
       if (tries >= MAX_RETRIES) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
-                     "Failed to read a message for 5 consecutive reads, checking if connection is alive...\n", ret);
         pthread_mutex_lock(&monitor_mutex);
         pthread_mutex_lock(&client_mutex);
-        if (atclient_monitor_is_connected(monitor) && atclient_is_connected(ctx)) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connections are still alive.\n", ret);
-          tries = 1;
+        if (atclient_is_connected(ctx) && atclient_monitor_is_connected(monitor)) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Connection is still alive. Doing nothing.\n");
         } else {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connections not alive. Attempting reconnection...\n", ret);
-          if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) == 0) {
-            tries = 1;
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Reconnection successful.\n", ret);
-          } else {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is dead. Reconnecting...\n");
+          if ((ret = reconnect_clients(monitor, ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect clients: %d\n", ret);
+            pthread_mutex_unlock(&client_mutex);
+            pthread_mutex_unlock(&monitor_mutex);
+            break;
           }
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully reconnected clients.\n");
         }
-        pthread_mutex_unlock(&monitor_mutex);
         pthread_mutex_unlock(&client_mutex);
-      } else {
-        tries++;
+        pthread_mutex_unlock(&monitor_mutex);
+        tries = 1;
       }
       break;
     }
+    case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION error occurred: %d\n",
+                   ret);
+      break;
+    }
+    case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION: {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION error occurred: %d\n", ret);
+      break;
+    }
     default: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received message type: %d\n", message.type);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Received message type: %d, with atclient_monitor_read return value: %d\n", message.type, ret);
+      break;
     }
     }
 
