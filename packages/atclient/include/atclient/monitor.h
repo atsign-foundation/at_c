@@ -166,17 +166,22 @@ enum atclient_monitor_message_type {
   // the following 4 enums help indicate what type of message was received from the monitor connection and which field
   // of the union to access
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,
-  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE,
+  ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,   // indicates caller to access `notification` from the union
+  ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,  // indicates caller to access `data_response` from the union
+  ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE, // indicates caller to access `error_response` from the union
 
   // the following 3 enums help indicate what type of error occurred when reading from the monitor connection, you will
   // expect one of these enums along with a non-zero return value from atclient_monitor_read
-  ATCLIENT_MONITOR_EMPTY_READ, // nothing was read from the socket, could be a socket error, disconnection, or simply
-                               // that nothing was read
+  ATCLIENT_MONITOR_ERROR_READ, // could be a read timeout or some other error, indicates the caller to access
+                               // `error_read` from the union
   ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION,
   ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION,
 };
+
+// Represents error information when `ATCLIENT_MONITOR_ERROR_READ` is the message type given by atclient_monitor_read
+typedef struct atclient_monitor_message_error_read {
+  int error_code;
+} atclient_monitor_message_error_read;
 
 /**
  * @brief Represents a message received from the monitor connection
@@ -191,6 +196,7 @@ typedef struct atclient_monitor_message {
     atclient_atnotification notification; // when is_notification is true
     char *data_response;                  // message of the data response (e.g. "ok", when "data:ok" is received)
     char *error_response;                 // message of the error_response
+    atclient_monitor_message_error_read error_read;
   };
 } atclient_monitor_message;
 

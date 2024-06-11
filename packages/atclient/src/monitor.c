@@ -642,8 +642,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
     chunks = chunks + 1;
   }
-  if (ret <= 0) {
-    message->type = ATCLIENT_MONITOR_EMPTY_READ;
+  if(ret <= 0) { // you should reconnect...
+    message->type = ATCLIENT_MONITOR_ERROR_READ;
+    message->error_read.error_code = ret;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
     goto exit;
   }
