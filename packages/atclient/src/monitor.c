@@ -540,8 +540,8 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   }
 }
 
-void atclient_monitor_init(atclient *monitor_conn) { memset(monitor_conn, 0, sizeof(atclient)); }
-void atclient_monitor_free(atclient *monitor_conn) { return; }
+void atclient_monitor_init(atclient *monitor_conn) { atclient_init(monitor_conn); }
+void atclient_monitor_free(atclient *monitor_conn) { atclient_free(monitor_conn); }
 
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
                                        const atclient_atkeys *atkeys, const char *atsign) {
@@ -667,7 +667,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     atclient_atnotification_init(&((*message)->notification));
     if ((ret = parse_notification(&((*message)->notification), messagebody)) != 0) {
       (*message)->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification with messagebody: \"%s\"\n", messagebody);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse notification with messagebody: \"%s\"\n",
+                   messagebody);
       goto exit;
     }
     if (atclient_atnotification_isEncrypted_is_initialized(&((*message)->notification)) &&

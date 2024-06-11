@@ -272,7 +272,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
 /**
  * @brief Read a notification from the monitor connection into message
  * @param monitor_conn the atclient context for the monitor connection. it is assumed that this is intialized and pkam
- * authenticated.
+ * authenticated. See atclient_monitor_init and atclient_monitor_pkam_authenticate
  * @param atclient the atclient context for the atclient connection, it is advised that this connection an entirely
  * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is
  * initialized and pkam authenticated.
