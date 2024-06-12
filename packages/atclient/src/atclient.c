@@ -41,10 +41,6 @@ void atclient_free(atclient *ctx) {
     atclient_atsign_free(&(ctx->atsign));
   }
 
-  if (!ctx->_atkeys_is_allocated_by_caller) {
-    atclient_atkeys_free(&(ctx->atkeys));
-  }
-
   // TODO: free atsign if it's been initialized (called atclient_atsign_init)
 }
 
@@ -162,7 +158,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
 
   // set atkeys
   ctx->atkeys = *atkeys;
-  ctx->_atkeys_is_allocated_by_caller = true;
 
   ret = 0;
 
