@@ -39,8 +39,6 @@ void atclient_free(atclient *ctx) {
   if (ctx->_atsign_is_allocated) {
     atclient_atsign_free(&(ctx->atsign));
   }
-
-  // TODO: free atsign if it's been initialized (called atclient_atsign_init)
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
