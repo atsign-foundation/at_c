@@ -29,7 +29,6 @@ void atclient_init(atclient *ctx) {
   ctx->async_read = false;
   ctx->_atserver_connection_started = false;
   ctx->_atsign_is_allocated = false;
-  ctx->_atkeys_is_allocated_by_caller = false;
 }
 
 void atclient_free(atclient *ctx) {
