@@ -20,7 +20,6 @@ typedef struct atclient {
   bool _atsign_is_allocated : 1; // internally used for memory management
 
   atclient_atkeys atkeys;
-  bool _atkeys_is_allocated_by_caller : 1; // internally used for memory management
   
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
