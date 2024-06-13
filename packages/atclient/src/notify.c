@@ -116,13 +116,16 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
           0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                      "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", res);
+                     atclient_atsign_free(&recipient);
         return res;
       }
       if ((res = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
                                        sharedenckeysize, &sharedenckeylen)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", res);
+        atclient_atsign_free(&recipient);
         return res;
       }
+      atclient_atsign_free(&recipient);
     }
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
