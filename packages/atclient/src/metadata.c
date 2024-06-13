@@ -777,7 +777,7 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, 
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   cJSON_Delete(root);
   return ret;
 }
