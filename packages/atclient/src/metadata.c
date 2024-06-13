@@ -11,354 +11,38 @@
 
 #define TAG "metadata"
 
-static int set_createdby(atclient_atkey_metadata *metadata, const char *createdby, const size_t createdbylen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_createdby_initialized(metadata)) {
-    atclient_atsign_free(&metadata->createdby);
-  }
-  atclient_atsign_init(&metadata->createdby, createdby);
-  metadata->initializedfields[0] |= ATKEY_METADATA_CREATEDBY_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_updatedby(atclient_atkey_metadata *metadata, const char *updatedby, const size_t updatedbylen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_updatedby_initialized(metadata)) {
-    atclient_atsign_free(&metadata->updatedby);
-  }
-  atclient_atsign_init(&metadata->updatedby, updatedby);
-  metadata->initializedfields[0] |= ATKEY_METADATA_UPDATEDBY_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_status(atclient_atkey_metadata *metadata, const char *status, const size_t statuslen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_status_initialized(metadata)) {
-    atclient_atstr_free(&metadata->status);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->status, statuslen + 1, status)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 statuslen, status);
-    goto exit;
-  }
-  metadata->initializedfields[0] |= ATKEY_METADATA_STATUS_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static void set_version(atclient_atkey_metadata *metadata, int version) {
-  metadata->version = version;
-  metadata->initializedfields[0] |= ATKEY_METADATA_VERSION_INITIALIZED;
-}
-
-static int set_expiresat(atclient_atkey_metadata *metadata, const char *expiresat, const size_t expiresatlen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_expiresat_initialized(metadata)) {
-    atclient_atstr_free(&metadata->expiresat);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->expiresat, expiresatlen + 1, expiresat)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 expiresatlen, expiresat);
-    goto exit;
-  }
-  metadata->initializedfields[0] |= ATKEY_METADATA_EXPIRESAT_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_availableat(atclient_atkey_metadata *metadata, const char *availableat, const size_t availableatlen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_availableat_initialized(metadata)) {
-    atclient_atstr_free(&metadata->availableat);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->availableat, availableatlen + 1, availableat)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 availableatlen, availableat);
-    goto exit;
-  }
-  metadata->initializedfields[0] |= ATKEY_METADATA_AVAILABLEAT_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_refreshat(atclient_atkey_metadata *metadata, const char *refreshat, const size_t refreshatlen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_refreshat_initialized(metadata)) {
-    atclient_atstr_free(&metadata->refreshat);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->refreshat, refreshatlen + 1, refreshat)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 refreshatlen, refreshat);
-    goto exit;
-  }
-  metadata->initializedfields[0] |= ATKEY_METADATA_REFRESHAT_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_createdat(atclient_atkey_metadata *metadata, const char *createdat, const size_t createdatlen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_createdat_initialized(metadata)) {
-    atclient_atstr_free(&metadata->createdat);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->createdat, createdatlen + 1, createdat)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 createdatlen, createdat);
-    goto exit;
-  }
-  metadata->initializedfields[0] |= ATKEY_METADATA_CREATEDAT_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_updatedat(atclient_atkey_metadata *metadata, const char *updatedat, const size_t updatedatlen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_updatedat_initialized(metadata)) {
-    atclient_atstr_free(&metadata->updatedat);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->updatedat, updatedatlen + 1, updatedat)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 updatedatlen, updatedat);
-    goto exit;
-  }
-  metadata->initializedfields[1] |= ATKEY_METADATA_UPDATEDAT_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
-  metadata->ispublic = ispublic;
-  metadata->initializedfields[1] |= ATKEY_METADATA_ISPUBLIC_INITIALIZED;
-}
-
-static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
-  metadata->ishidden = ishidden;
-  metadata->initializedfields[1] |= ATKEY_METADATA_ISHIDDEN_INITIALIZED;
-}
-
-static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
-  metadata->iscached = iscached;
-  metadata->initializedfields[1] |= ATKEY_METADATA_ISCACHED_INITIALIZED;
-}
-
-static void set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
-  metadata->ttl = ttl;
-  metadata->initializedfields[1] |= ATKEY_METADATA_TTL_INITIALIZED;
-}
-
-static void set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
-  metadata->ttb = ttb;
-  metadata->initializedfields[1] |= ATKEY_METADATA_TTB_INITIALIZED;
-}
-
-static void set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
-  metadata->ttr = ttr;
-  metadata->initializedfields[1] |= ATKEY_METADATA_TTR_INITIALIZED;
-}
-
-static void set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
-  metadata->ccd = ccd;
-  metadata->initializedfields[1] |= ATKEY_METADATA_CCD_INITIALIZED;
-}
-
-static void set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
-  metadata->isbinary = isbinary;
-  metadata->initializedfields[2] |= ATKEY_METADATA_ISBINARY_INITIALIZED;
-}
-
-static void set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
-  metadata->isencrypted = isencrypted;
-  metadata->initializedfields[2] |= ATKEY_METADATA_ISENCRYPTED_INITIALIZED;
-}
-
+static int set_createdby(atclient_atkey_metadata *metadata, const char *createdby, const size_t createdbylen);
+static int set_updatedby(atclient_atkey_metadata *metadata, const char *updatedby, const size_t updatedbylen);
+static int set_status(atclient_atkey_metadata *metadata, const char *status, const size_t statuslen);
+static void set_version(atclient_atkey_metadata *metadata, int version);
+static int set_expiresat(atclient_atkey_metadata *metadata, const char *expiresat, const size_t expiresatlen);
+static int set_availableat(atclient_atkey_metadata *metadata, const char *availableat, const size_t availableatlen);
+static int set_refreshat(atclient_atkey_metadata *metadata, const char *refreshat, const size_t refreshatlen);
+static int set_createdat(atclient_atkey_metadata *metadata, const char *createdat, const size_t createdatlen);
+static int set_updatedat(atclient_atkey_metadata *metadata, const char *updatedat, const size_t updatedatlen);
+static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
+static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
+static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
+static void set_ttl(atclient_atkey_metadata *metadata, const long ttl);
+static void set_ttb(atclient_atkey_metadata *metadata, const long ttb);
+static void set_ttr(atclient_atkey_metadata *metadata, const long ttr);
+static void set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
+static void set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary);
+static void set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted);
 static int set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
-                             const size_t datasignaturelen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
-    atclient_atstr_free(&metadata->datasignature);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->datasignature, datasignaturelen + 1, datasignature)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 datasignaturelen, datasignature);
-    goto exit;
-  }
-  metadata->initializedfields[2] |= ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
+                             const size_t datasignaturelen);
 static int set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,
-                               const size_t sharedkeystatuslen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_sharedkeystatus_initialized(metadata)) {
-    atclient_atstr_free(&metadata->sharedkeystatus);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->sharedkeystatus, sharedkeystatuslen + 1, sharedkeystatus)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 sharedkeystatuslen, sharedkeystatus);
-    goto exit;
-  }
-  metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc, const size_t sharedkeyenclen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_sharedkeyenc_initialized(metadata)) {
-    atclient_atstr_free(&metadata->sharedkeyenc);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->sharedkeyenc, sharedkeyenclen + 1, sharedkeyenc)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 sharedkeyenclen + 1, sharedkeyenc);
-    goto exit;
-  }
-  metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash, const size_t pubkeyhashlen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_pubkeyhash_initialized(metadata)) {
-    atclient_atstr_free(&metadata->pubkeyhash);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->pubkeyhash, pubkeyhashlen + 1, pubkeyhash)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 pubkeyhashlen, pubkeyhash);
-    goto exit;
-  }
-  metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo, const size_t pubkeyalgolen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_pubkeyalgo_initialized(metadata)) {
-    atclient_atstr_free(&metadata->pubkeyalgo);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->pubkeyalgo, pubkeyalgolen + 1, pubkeyalgo)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 pubkeyalgolen, pubkeyalgo);
-    goto exit;
-  }
-  metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding, const size_t encodinglen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
-    atclient_atstr_free(&metadata->encoding);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->encoding, encodinglen + 1, encoding)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 encodinglen, encoding);
-    goto exit;
-  }
-  metadata->initializedfields[2] |= ATKEY_METADATA_ENCODING_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname, const size_t enckeynamelen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
-    atclient_atstr_free(&metadata->enckeyname);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->enckeyname, enckeynamelen + 1, enckeyname)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 enckeynamelen, enckeyname);
-    goto exit;
-  }
-  metadata->initializedfields[3] |= ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, const size_t encalgolen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
-    atclient_atstr_free(&metadata->encalgo);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->encalgo, encalgolen + 1, encalgo)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 encalgolen, encalgo);
-    goto exit;
-  }
-  metadata->initializedfields[3] |= ATKEY_METADATA_ENCALGO_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, const size_t ivnoncelen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
-    atclient_atstr_free(&metadata->ivnonce);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->ivnonce, ivnoncelen + 1, ivnonce)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 ivnoncelen, ivnonce);
-    goto exit;
-  }
-  metadata->initializedfields[3] |= ATKEY_METADATA_IVNONCE_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
+                               const size_t sharedkeystatuslen);
+static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc, const size_t sharedkeyenclen);
+static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash, const size_t pubkeyhashlen);
+static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo, const size_t pubkeyalgolen);
+static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding, const size_t encodinglen);
+static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname, const size_t enckeynamelen);
+static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, const size_t encalgolen);
+static int set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, const size_t ivnoncelen);
 static int set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname,
-                             const size_t skeenckeynamelen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_skeenckeyname_initialized(metadata)) {
-    atclient_atstr_free(&metadata->skeenckeyname);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->skeenckeyname, skeenckeynamelen + 1, skeenckeyname)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 skeenckeynamelen, skeenckeyname);
-    goto exit;
-  }
-  metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
-
-static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo, const size_t skeencalgolen) {
-  int ret = 1;
-  if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
-    atclient_atstr_free(&metadata->skeencalgo);
-  }
-  if ((ret = atclient_atstr_init_literal(&metadata->skeencalgo, skeencalgolen + 1, skeencalgo)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
-                 skeencalgolen, skeencalgo);
-    goto exit;
-  }
-  metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCALGO_INITIALIZED;
-  ret = 0;
-  goto exit;
-exit : { return ret; }
-}
+                             const size_t skeenckeynamelen);
+static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo, const size_t skeencalgolen);
 
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
   memset(metadata, 0, sizeof(atclient_atkey_metadata));
@@ -379,7 +63,7 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
   ret = 0;
   goto exit;
 
-exit : { return ret; }
+exit: { return ret; }
 }
 
 void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json) {
@@ -1074,71 +758,71 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   ret = 0;
   goto exit;
 
-exit : { return ret; }
+exit: { return ret; }
 }
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_CREATEDBY_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_CREATEDBY_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_UPDATEDBY_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_UPDATEDBY_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_status_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_STATUS_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_STATUS_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_version_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_VERSION_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_VERSION_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_availableat_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_AVAILABLEAT_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_AVAILABLEAT_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_expiresat_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_EXPIRESAT_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_EXPIRESAT_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_refreshat_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_REFRESHAT_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_REFRESHAT_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_createdat_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[0] & ATKEY_METADATA_CREATEDAT_INITIALIZED;
+  return (metadata->initializedfields[0] & ATKEY_METADATA_CREATEDAT_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_updatedat_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_UPDATEDAT_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_UPDATEDAT_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ispublic_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_ISPUBLIC_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_ISPUBLIC_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ishidden_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_ISHIDDEN_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_ISHIDDEN_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_iscached_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_ISCACHED_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_ISCACHED_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ttl_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_TTL_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_TTL_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ttb_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_TTB_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_TTB_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ttr_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_TTR_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_TTR_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ccd_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[1] & ATKEY_METADATA_CCD_INITIALIZED;
+  return (metadata->initializedfields[1] & ATKEY_METADATA_CCD_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_isbinary_initialized(const atclient_atkey_metadata *metadata) {
@@ -1146,51 +830,51 @@ bool atclient_atkey_metadata_is_isbinary_initialized(const atclient_atkey_metada
 }
 
 bool atclient_atkey_metadata_is_isencrypted_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_ISENCRYPTED_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_ISENCRYPTED_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_datasignature_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_DATASIGNATURE_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_sharedkeystatus_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_sharedkeyenc_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_SHAREDKEYENC_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_pubkeyhash_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_PUBKEYHASH_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_pubkeyalgo_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_PUBKEYALGO_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_encoding_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[2] & ATKEY_METADATA_ENCODING_INITIALIZED;
+  return (metadata->initializedfields[2] & ATKEY_METADATA_ENCODING_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_enckeyname_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[3] & ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
+  return (metadata->initializedfields[3] & ATKEY_METADATA_ENCKEYNAME_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_encalgo_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[3] & ATKEY_METADATA_ENCALGO_INITIALIZED;
+  return (metadata->initializedfields[3] & ATKEY_METADATA_ENCALGO_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_ivnonce_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[3] & ATKEY_METADATA_IVNONCE_INITIALIZED;
+  return (metadata->initializedfields[3] & ATKEY_METADATA_IVNONCE_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_skeenckeyname_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[3] & ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
+  return (metadata->initializedfields[3] & ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED);
 }
 
 bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_metadata *metadata) {
-  return metadata->initializedfields[3] & ATKEY_METADATA_SKEENCALGO_INITIALIZED;
+  return (metadata->initializedfields[3] & ATKEY_METADATA_SKEENCALGO_INITIALIZED);
 }
 
 void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
@@ -1357,9 +1041,16 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
     metadata->initializedfields[3] &= ~ATKEY_METADATA_ENCALGO_INITIALIZED;
   }
 
+  // log bits of metadata->initializedfields[3]
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "metadata->initializedfields[3]: %d\n",
+               metadata->initializedfields[3]);
   if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
+    // log freeing
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Freeing ivnonce\n");
     atclient_atstr_free(&metadata->ivnonce);
     metadata->initializedfields[3] &= ~ATKEY_METADATA_IVNONCE_INITIALIZED;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "metadata->initializedfields[3]: %d\n",
+                 metadata->initializedfields[3]);
   }
 
   if (atclient_atkey_metadata_is_skeenckeyname_initialized(metadata)) {
@@ -1371,4 +1062,397 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
     atclient_atstr_free(&metadata->skeencalgo);
     metadata->initializedfields[3] &= ~ATKEY_METADATA_SKEENCALGO_INITIALIZED;
   }
+}
+
+static int set_createdby(atclient_atkey_metadata *metadata, const char *createdby, const size_t createdbylen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_createdby_initialized(metadata)) {
+    atclient_atsign_free(&metadata->createdby);
+    metadata->createdby = (atclient_atsign){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_CREATEDBY_INITIALIZED;
+  }
+  atclient_atsign_init(&metadata->createdby, createdby);
+  metadata->initializedfields[0] |= ATKEY_METADATA_CREATEDBY_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_updatedby(atclient_atkey_metadata *metadata, const char *updatedby, const size_t updatedbylen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_updatedby_initialized(metadata)) {
+    atclient_atsign_free(&metadata->updatedby);
+    metadata->updatedby = (atclient_atsign){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_UPDATEDBY_INITIALIZED;
+  }
+  atclient_atsign_init(&metadata->updatedby, updatedby);
+  metadata->initializedfields[0] |= ATKEY_METADATA_UPDATEDBY_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_status(atclient_atkey_metadata *metadata, const char *status, const size_t statuslen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_status_initialized(metadata)) {
+    atclient_atstr_free(&metadata->status);
+    metadata->status = (atclient_atstr){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_STATUS_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->status, statuslen + 1, status)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 statuslen, status);
+    goto exit;
+  }
+  metadata->initializedfields[0] |= ATKEY_METADATA_STATUS_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static void set_version(atclient_atkey_metadata *metadata, int version) {
+  metadata->version = version;
+  metadata->initializedfields[0] |= ATKEY_METADATA_VERSION_INITIALIZED;
+}
+
+static int set_expiresat(atclient_atkey_metadata *metadata, const char *expiresat, const size_t expiresatlen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_expiresat_initialized(metadata)) {
+    atclient_atstr_free(&metadata->expiresat);
+    metadata->expiresat = (atclient_atstr){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_EXPIRESAT_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->expiresat, expiresatlen + 1, expiresat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 expiresatlen, expiresat);
+    goto exit;
+  }
+  metadata->initializedfields[0] |= ATKEY_METADATA_EXPIRESAT_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_availableat(atclient_atkey_metadata *metadata, const char *availableat, const size_t availableatlen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_availableat_initialized(metadata)) {
+    atclient_atstr_free(&metadata->availableat);
+    metadata->availableat = (atclient_atstr){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_AVAILABLEAT_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->availableat, availableatlen + 1, availableat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 availableatlen, availableat);
+    goto exit;
+  }
+  metadata->initializedfields[0] |= ATKEY_METADATA_AVAILABLEAT_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_refreshat(atclient_atkey_metadata *metadata, const char *refreshat, const size_t refreshatlen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_refreshat_initialized(metadata)) {
+    atclient_atstr_free(&metadata->refreshat);
+    metadata->refreshat = (atclient_atstr){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_REFRESHAT_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->refreshat, refreshatlen + 1, refreshat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 refreshatlen, refreshat);
+    goto exit;
+  }
+  metadata->initializedfields[0] |= ATKEY_METADATA_REFRESHAT_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_createdat(atclient_atkey_metadata *metadata, const char *createdat, const size_t createdatlen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_createdat_initialized(metadata)) {
+    atclient_atstr_free(&metadata->createdat);
+    metadata->createdat = (atclient_atstr){0};
+    metadata->initializedfields[0] &= ~ATKEY_METADATA_CREATEDAT_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->createdat, createdatlen + 1, createdat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 createdatlen, createdat);
+    goto exit;
+  }
+  metadata->initializedfields[0] |= ATKEY_METADATA_CREATEDAT_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_updatedat(atclient_atkey_metadata *metadata, const char *updatedat, const size_t updatedatlen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_updatedat_initialized(metadata)) {
+    atclient_atstr_free(&metadata->updatedat);
+    metadata->updatedat = (atclient_atstr){0};
+    metadata->initializedfields[1] &= ~ATKEY_METADATA_UPDATEDAT_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->updatedat, updatedatlen + 1, updatedat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 updatedatlen, updatedat);
+    goto exit;
+  }
+  metadata->initializedfields[1] |= ATKEY_METADATA_UPDATEDAT_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
+  metadata->ispublic = ispublic;
+  metadata->initializedfields[1] |= ATKEY_METADATA_ISPUBLIC_INITIALIZED;
+}
+
+static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
+  metadata->ishidden = ishidden;
+  metadata->initializedfields[1] |= ATKEY_METADATA_ISHIDDEN_INITIALIZED;
+}
+
+static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
+  metadata->iscached = iscached;
+  metadata->initializedfields[1] |= ATKEY_METADATA_ISCACHED_INITIALIZED;
+}
+
+static void set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
+  metadata->ttl = ttl;
+  metadata->initializedfields[1] |= ATKEY_METADATA_TTL_INITIALIZED;
+}
+
+static void set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
+  metadata->ttb = ttb;
+  metadata->initializedfields[1] |= ATKEY_METADATA_TTB_INITIALIZED;
+}
+
+static void set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
+  metadata->ttr = ttr;
+  metadata->initializedfields[1] |= ATKEY_METADATA_TTR_INITIALIZED;
+}
+
+static void set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
+  metadata->ccd = ccd;
+  metadata->initializedfields[1] |= ATKEY_METADATA_CCD_INITIALIZED;
+}
+
+static void set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
+  metadata->isbinary = isbinary;
+  metadata->initializedfields[2] |= ATKEY_METADATA_ISBINARY_INITIALIZED;
+}
+
+static void set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
+  metadata->isencrypted = isencrypted;
+  metadata->initializedfields[2] |= ATKEY_METADATA_ISENCRYPTED_INITIALIZED;
+}
+
+static int set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
+                             const size_t datasignaturelen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
+    atclient_atstr_free(&metadata->datasignature);
+    metadata->datasignature = (atclient_atstr){0};
+    metadata->initializedfields[2] &= ~ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->datasignature, datasignaturelen + 1, datasignature)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 datasignaturelen, datasignature);
+    goto exit;
+  }
+  metadata->initializedfields[2] |= ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,
+                               const size_t sharedkeystatuslen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_sharedkeystatus_initialized(metadata)) {
+    atclient_atstr_free(&metadata->sharedkeystatus);
+    metadata->sharedkeystatus = (atclient_atstr){0};
+    metadata->initializedfields[2] &= ~ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->sharedkeystatus, sharedkeystatuslen + 1, sharedkeystatus)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 sharedkeystatuslen, sharedkeystatus);
+    goto exit;
+  }
+  metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc, const size_t sharedkeyenclen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_sharedkeyenc_initialized(metadata)) {
+    atclient_atstr_free(&metadata->sharedkeyenc);
+    metadata->sharedkeyenc = (atclient_atstr){0};
+    metadata->initializedfields[2] &= ~ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->sharedkeyenc, sharedkeyenclen + 1, sharedkeyenc)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 sharedkeyenclen + 1, sharedkeyenc);
+    goto exit;
+  }
+  metadata->initializedfields[2] |= ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash, const size_t pubkeyhashlen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_pubkeyhash_initialized(metadata)) {
+    atclient_atstr_free(&metadata->pubkeyhash);
+    metadata->pubkeyhash = (atclient_atstr){0};
+    metadata->initializedfields[2] &= ~ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->pubkeyhash, pubkeyhashlen + 1, pubkeyhash)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 pubkeyhashlen, pubkeyhash);
+    goto exit;
+  }
+  metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo, const size_t pubkeyalgolen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_pubkeyalgo_initialized(metadata)) {
+    atclient_atstr_free(&metadata->pubkeyalgo);
+    metadata->pubkeyalgo = (atclient_atstr){0};
+    metadata->initializedfields[2] &= ~ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->pubkeyalgo, pubkeyalgolen + 1, pubkeyalgo)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 pubkeyalgolen, pubkeyalgo);
+    goto exit;
+  }
+  metadata->initializedfields[2] |= ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding, const size_t encodinglen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
+    atclient_atstr_free(&metadata->encoding);
+    metadata->encoding = (atclient_atstr){0};
+    metadata->initializedfields[2] &= ~ATKEY_METADATA_ENCODING_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->encoding, encodinglen + 1, encoding)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 encodinglen, encoding);
+    goto exit;
+  }
+  metadata->initializedfields[2] |= ATKEY_METADATA_ENCODING_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname, const size_t enckeynamelen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
+    atclient_atstr_free(&metadata->enckeyname);
+    metadata->enckeyname = (atclient_atstr){0};
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->enckeyname, enckeynamelen + 1, enckeyname)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 enckeynamelen, enckeyname);
+    goto exit;
+  }
+  metadata->initializedfields[3] |= ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, const size_t encalgolen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
+    atclient_atstr_free(&metadata->encalgo);
+    metadata->encalgo = (atclient_atstr){0};
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_ENCALGO_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->encalgo, encalgolen + 1, encalgo)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 encalgolen, encalgo);
+    goto exit;
+  }
+  metadata->initializedfields[3] |= ATKEY_METADATA_ENCALGO_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, const size_t ivnoncelen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
+    atclient_atstr_free(&metadata->ivnonce);
+    metadata->ivnonce = (atclient_atstr){0};
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_IVNONCE_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->ivnonce, ivnoncelen + 1, ivnonce)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 ivnoncelen, ivnonce);
+    goto exit;
+  }
+  // log metadata->initializedfields[3]
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "metadata->initializedfields[3] = %d\n",
+               metadata->initializedfields[3]);
+  metadata->initializedfields[3] |= ATKEY_METADATA_IVNONCE_INITIALIZED;
+  // log metadata->initializedfields[3]
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "metadata->initializedfields[3] = %d\n",
+               metadata->initializedfields[3]);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname,
+                             const size_t skeenckeynamelen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_skeenckeyname_initialized(metadata)) {
+    atclient_atstr_free(&metadata->skeenckeyname);
+    metadata->skeenckeyname = (atclient_atstr){0};
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->skeenckeyname, skeenckeynamelen + 1, skeenckeyname)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 skeenckeynamelen, skeenckeyname);
+    goto exit;
+  }
+  metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo, const size_t skeencalgolen) {
+  int ret = 1;
+  if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
+    atclient_atstr_free(&metadata->skeencalgo);
+    metadata->skeencalgo = (atclient_atstr){0};
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_SKEENCALGO_INITIALIZED;
+  }
+  if ((ret = atclient_atstr_init_literal(&metadata->skeencalgo, skeencalgolen + 1, skeencalgo)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_init_literal failed with string \"%.*s\"\n",
+                 skeencalgolen, skeencalgo);
+    goto exit;
+  }
+  metadata->initializedfields[3] |= ATKEY_METADATA_SKEENCALGO_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
