@@ -165,6 +165,9 @@ int main(int argc, char *argv[]) {
     pthread_mutex_unlock(&client_mutex);
 
     printf("%s%s%s: ", HBLU, from_atsign, reset);
+    
+    atclient_atkey_free(&atkey);
+    atclient_notify_params_free(&params);
   }
 
   ret = 0;
