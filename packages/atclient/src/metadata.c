@@ -1349,12 +1349,12 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
 
   if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
     atclient_atstr_free(&metadata->enckeyname);
-    metadata->initializedfields[2] &= ~ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
   }
 
   if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
     atclient_atstr_free(&metadata->encalgo);
-    metadata->initializedfields[2] &= ~ATKEY_METADATA_ENCALGO_INITIALIZED;
+    metadata->initializedfields[3] &= ~ATKEY_METADATA_ENCALGO_INITIALIZED;
   }
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
