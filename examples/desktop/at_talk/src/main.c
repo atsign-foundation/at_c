@@ -152,8 +152,11 @@ int main(int argc, char *argv[]) {
     atclient_atkey atkey;
     atclient_atkey_init(&atkey);
 
-    atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), from_atsign, strlen(from_atsign), to_atsign,
-                                    strlen(to_atsign), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE));
+    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), from_atsign, strlen(from_atsign),
+                                               to_atsign, strlen(to_atsign), ATKEY_NAMESPACE,
+                                               strlen(ATKEY_NAMESPACE))) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+    }
 
     atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, line, true);
     params.notification_expiry = 5000;
@@ -165,6 +168,9 @@ int main(int argc, char *argv[]) {
     pthread_mutex_unlock(&client_mutex);
 
     printf("%s%s%s: ", HBLU, from_atsign, reset);
+
+    atclient_atkey_free(&atkey);
+    atclient_notify_params_free(&params);
   }
 
   ret = 0;
@@ -266,8 +272,9 @@ static void *monitor_handler(void *xargs) {
       if (message.error_read.error_code == MBEDTLS_ERR_SSL_TIMEOUT) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read timed out.\n", ret);
         tries++;
-      } else if(message.error_read.error_code < 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Read failed with error code: %d\n", message.error_read.error_code);
+      } else if (message.error_read.error_code < 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Read failed with error code: %d\n",
+                     message.error_read.error_code);
         tries++;
       } else if (message.error_read.error_code == 0) {
         // must reconnect IMMEDIATELY.
