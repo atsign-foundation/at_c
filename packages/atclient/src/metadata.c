@@ -11,65 +11,65 @@
 
 #define TAG "metadata"
 
-static bool createdby_is_initialized(const atclient_atkey_metadata *metadata);
-static bool updatedby_is_initialized(const atclient_atkey_metadata *metadata);
-static bool status_is_initialized(const atclient_atkey_metadata *metadata);
-static bool version_is_initialized(const atclient_atkey_metadata *metadata);
-static bool expiresat_is_initialized(const atclient_atkey_metadata *metadata);
-static bool availableat_is_initialized(const atclient_atkey_metadata *metadata);
-static bool refreshat_is_initialized(const atclient_atkey_metadata *metadata);
-static bool createdat_is_initialized(const atclient_atkey_metadata *metadata);
-static bool updatedat_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ispublic_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ishidden_is_initialized(const atclient_atkey_metadata *metadata);
-static bool iscached_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ttl_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ttb_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ttr_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ccd_is_initialized(const atclient_atkey_metadata *metadata);
-static bool isbinary_is_initialized(const atclient_atkey_metadata *metadata);
-static bool isencrypted_is_initialized(const atclient_atkey_metadata *metadata);
-static bool datasignature_is_initialized(const atclient_atkey_metadata *metadata);
-static bool sharedkeystatus_is_initialized(const atclient_atkey_metadata *metadata);
-static bool sharedkeyenc_is_initialized(const atclient_atkey_metadata *metadata);
-static bool pubkeyhash_is_initialized(const atclient_atkey_metadata *metadata);
-static bool pubkeyalgo_is_initialized(const atclient_atkey_metadata *metadata);
-static bool encoding_is_initialized(const atclient_atkey_metadata *metadata);
-static bool enckeyname_is_initialized(const atclient_atkey_metadata *metadata);
-static bool encalgo_is_initialized(const atclient_atkey_metadata *metadata);
-static bool ivnonce_is_initialized(const atclient_atkey_metadata *metadata);
-static bool skeenckeyname_is_initialized(const atclient_atkey_metadata *metadata);
-static bool skeencalgo_is_initialized(const atclient_atkey_metadata *metadata);
+static bool is_createdby_initialized(const atclient_atkey_metadata *metadata);
+static bool is_updatedby_initialized(const atclient_atkey_metadata *metadata);
+static bool is_status_initialized(const atclient_atkey_metadata *metadata);
+static bool is_version_initialized(const atclient_atkey_metadata *metadata);
+static bool is_expiresat_initialized(const atclient_atkey_metadata *metadata);
+static bool is_availableat_initialized(const atclient_atkey_metadata *metadata);
+static bool is_refreshat_initialized(const atclient_atkey_metadata *metadata);
+static bool is_createdat_initialized(const atclient_atkey_metadata *metadata);
+static bool is_updatedat_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ispublic_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ishidden_initialized(const atclient_atkey_metadata *metadata);
+static bool is_iscached_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ttl_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ttb_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ttr_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ccd_initialized(const atclient_atkey_metadata *metadata);
+static bool is_isbinary_initialized(const atclient_atkey_metadata *metadata);
+static bool is_isencrypted_initialized(const atclient_atkey_metadata *metadata);
+static bool is_datasignature_initialized(const atclient_atkey_metadata *metadata);
+static bool is_sharedkeystatus_initialized(const atclient_atkey_metadata *metadata);
+static bool is_sharedkeyenc_initialized(const atclient_atkey_metadata *metadata);
+static bool is_pubkeyhash_initialized(const atclient_atkey_metadata *metadata);
+static bool is_pubkeyalgo_initialized(const atclient_atkey_metadata *metadata);
+static bool is_encoding_initialized(const atclient_atkey_metadata *metadata);
+static bool is_enckeyname_initialized(const atclient_atkey_metadata *metadata);
+static bool is_encalgo_initialized(const atclient_atkey_metadata *metadata);
+static bool is_ivnonce_initialized(const atclient_atkey_metadata *metadata);
+static bool is_skeenckeyname_initialized(const atclient_atkey_metadata *metadata);
+static bool is_skeencalgo_initialized(const atclient_atkey_metadata *metadata);
 
-static void set_createdby_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_updatedby_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_status_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_version_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_availableat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_expiresat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_refreshat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_createdat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_updatedat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ispublic_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ishidden_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_iscached_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ttl_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ttb_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ttr_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ccd_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_isbinary_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_isencrypted_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_datasignature_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_sharedkeystatus_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_sharedkeyenc_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_pubkeyhash_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_pubkeyalgo_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_encoding_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_enckeyname_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_encalgo_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_ivnonce_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_skeenckeyname_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_skeencalgo_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_createdby_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_updatedby_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_status_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_version_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_availableat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_expiresat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_refreshat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_createdat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_updatedat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ispublic_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ishidden_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_iscached_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ttl_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ttb_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ttr_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ccd_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_isbinary_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_isencrypted_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_datasignature_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_sharedkeystatus_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_sharedkeyenc_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_pubkeyhash_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_pubkeyalgo_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_encoding_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_enckeyname_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_encalgo_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_ivnonce_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_skeenckeyname_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
+static void set_is_skeencalgo_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
 
 static void unset_createdby(atclient_atkey_metadata *metadata);
 static void unset_updatedby(atclient_atkey_metadata *metadata);
@@ -852,179 +852,179 @@ exit: { return ret; }
 }
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata) {
-  return createdby_is_initialized(metadata);
+  return is_createdby_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata *metadata) {
-  return updatedby_is_initialized(metadata);
+  return is_updatedby_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_status_initialized(const atclient_atkey_metadata *metadata) {
-  return status_is_initialized(metadata);
+  return is_status_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_version_initialized(const atclient_atkey_metadata *metadata) {
-  return version_is_initialized(metadata);
+  return is_version_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_availableat_initialized(const atclient_atkey_metadata *metadata) {
-  return availableat_is_initialized(metadata);
+  return is_availableat_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_expiresat_initialized(const atclient_atkey_metadata *metadata) {
-  return expiresat_is_initialized(metadata);
+  return is_expiresat_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_refreshat_initialized(const atclient_atkey_metadata *metadata) {
-  return refreshat_is_initialized(metadata);
+  return is_refreshat_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_createdat_initialized(const atclient_atkey_metadata *metadata) {
-  return createdat_is_initialized(metadata);
+  return is_createdat_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_updatedat_initialized(const atclient_atkey_metadata *metadata) {
-  return updatedat_is_initialized(metadata);
+  return is_updatedat_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ispublic_initialized(const atclient_atkey_metadata *metadata) {
-  return ispublic_is_initialized(metadata);
+  return is_ispublic_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ishidden_initialized(const atclient_atkey_metadata *metadata) {
-  return ishidden_is_initialized(metadata);
+  return is_ishidden_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_iscached_initialized(const atclient_atkey_metadata *metadata) {
-  return iscached_is_initialized(metadata);
+  return is_iscached_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ttl_initialized(const atclient_atkey_metadata *metadata) {
-  return ttl_is_initialized(metadata);
+  return is_ttl_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ttb_initialized(const atclient_atkey_metadata *metadata) {
-  return ttb_is_initialized(metadata);
+  return is_ttb_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ttr_initialized(const atclient_atkey_metadata *metadata) {
-  return ttr_is_initialized(metadata);
+  return is_ttr_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ccd_initialized(const atclient_atkey_metadata *metadata) {
-  return ccd_is_initialized(metadata);
+  return is_ccd_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_isbinary_initialized(const atclient_atkey_metadata *metadata) {
-  return isbinary_is_initialized(metadata);
+  return is_isbinary_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_isencrypted_initialized(const atclient_atkey_metadata *metadata) {
-  return isencrypted_is_initialized(metadata);
+  return is_isencrypted_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_datasignature_initialized(const atclient_atkey_metadata *metadata) {
-  return datasignature_is_initialized(metadata);
+  return is_datasignature_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_sharedkeystatus_initialized(const atclient_atkey_metadata *metadata) {
-  return sharedkeystatus_is_initialized(metadata);
+  return is_sharedkeystatus_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_sharedkeyenc_initialized(const atclient_atkey_metadata *metadata) {
-  return sharedkeyenc_is_initialized(metadata);
+  return is_sharedkeyenc_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_pubkeyhash_initialized(const atclient_atkey_metadata *metadata) {
-  return pubkeyhash_is_initialized(metadata);
+  return is_pubkeyhash_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_pubkeyalgo_initialized(const atclient_atkey_metadata *metadata) {
-  return pubkeyalgo_is_initialized(metadata);
+  return is_pubkeyalgo_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_encoding_initialized(const atclient_atkey_metadata *metadata) {
-  return encoding_is_initialized(metadata);
+  return is_encoding_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_enckeyname_initialized(const atclient_atkey_metadata *metadata) {
-  return enckeyname_is_initialized(metadata);
+  return is_enckeyname_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_encalgo_initialized(const atclient_atkey_metadata *metadata) {
-  return encalgo_is_initialized(metadata);
+  return is_encalgo_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_ivnonce_initialized(const atclient_atkey_metadata *metadata) {
-  return ivnonce_is_initialized(metadata);
+  return is_ivnonce_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_skeenckeyname_initialized(const atclient_atkey_metadata *metadata) {
-  return skeenckeyname_is_initialized(metadata);
+  return is_skeenckeyname_initialized(metadata);
 }
 
 bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_metadata *metadata) {
-  return skeencalgo_is_initialized(metadata);
+  return is_skeencalgo_initialized(metadata);
 }
 
 void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
-  if (ispublic_is_initialized(metadata)) {
+  if (is_ispublic_initialized(metadata)) {
     unset_ispublic(metadata);
   }
   set_ispublic(metadata, ispublic);
 }
 
 void atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
-  if (ishidden_is_initialized(metadata)) {
+  if (is_ishidden_initialized(metadata)) {
     unset_ishidden(metadata);
   }
   set_ishidden(metadata, ishidden);
 }
 
 void atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
-  if (iscached_is_initialized(metadata)) {
+  if (is_iscached_initialized(metadata)) {
     unset_iscached(metadata);
   }
   set_iscached(metadata, iscached);
 }
 
 void atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
-  if (ttl_is_initialized(metadata)) {
+  if (is_ttl_initialized(metadata)) {
     unset_ttl(metadata);
   }
   set_ttl(metadata, ttl);
 }
 
 void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
-  if (ttb_is_initialized(metadata)) {
+  if (is_ttb_initialized(metadata)) {
     unset_ttb(metadata);
   }
   set_ttb(metadata, ttb);
 }
 
 void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
-  if (ttr_is_initialized(metadata)) {
+  if (is_ttr_initialized(metadata)) {
     unset_ttr(metadata);
   }
   set_ttr(metadata, ttr);
 }
 
 void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
-  if (ccd_is_initialized(metadata)) {
+  if (is_ccd_initialized(metadata)) {
     unset_ccd(metadata);
   }
   set_ccd(metadata, ccd);
 }
 
 void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
-  if (isbinary_is_initialized(metadata)) {
+  if (is_isbinary_initialized(metadata)) {
     unset_isbinary(metadata);
   }
   set_isbinary(metadata, isbinary);
 }
 
 void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
-  if (isencrypted_is_initialized(metadata)) {
+  if (is_isencrypted_initialized(metadata)) {
     unset_isencrypted(metadata);
   }
   set_isencrypted(metadata, isencrypted);
@@ -1032,7 +1032,7 @@ void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, 
 
 int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
                                               const size_t datasignaturelen) {
-  if (datasignature_is_initialized(metadata)) {
+  if (is_datasignature_initialized(metadata)) {
     unset_datasignature(metadata);
   }
   return set_datasignature(metadata, datasignature, datasignaturelen);
@@ -1040,7 +1040,7 @@ int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata,
 
 int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,
                                                 const size_t sharedkeystatuslen) {
-  if(sharedkeystatus_is_initialized(metadata)) {
+  if (is_sharedkeystatus_initialized(metadata)) {
     unset_sharedkeystatus(metadata);
   }
   return set_sharedkeystatus(metadata, sharedkeystatus, sharedkeystatuslen);
@@ -1048,7 +1048,7 @@ int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadat
 
 int atclient_atkey_metadata_set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc,
                                              const size_t sharedkeyenclen) {
-  if(sharedkeyenc_is_initialized(metadata)) {
+  if (is_sharedkeyenc_initialized(metadata)) {
     unset_sharedkeyenc(metadata);
   }
   return set_sharedkeyenc(metadata, sharedkeyenc, sharedkeyenclen);
@@ -1056,7 +1056,7 @@ int atclient_atkey_metadata_set_sharedkeyenc(atclient_atkey_metadata *metadata, 
 
 int atclient_atkey_metadata_set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash,
                                            const size_t pubkeyhashlen) {
-  if(pubkeyhash_is_initialized(metadata)) {
+  if (is_pubkeyhash_initialized(metadata)) {
     unset_pubkeyhash(metadata);
   }
   return set_pubkeyhash(metadata, pubkeyhash, pubkeyhashlen);
@@ -1064,7 +1064,7 @@ int atclient_atkey_metadata_set_pubkeyhash(atclient_atkey_metadata *metadata, co
 
 int atclient_atkey_metadata_set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo,
                                            const size_t pubkeyalgolen) {
-  if(pubkeyalgo_is_initialized(metadata)) {
+  if (is_pubkeyalgo_initialized(metadata)) {
     unset_pubkeyalgo(metadata);
   }
   return set_pubkeyalgo(metadata, pubkeyalgo, pubkeyalgolen);
@@ -1072,7 +1072,7 @@ int atclient_atkey_metadata_set_pubkeyalgo(atclient_atkey_metadata *metadata, co
 
 int atclient_atkey_metadata_set_encoding(atclient_atkey_metadata *metadata, const char *encoding,
                                          const size_t encodinglen) {
-  if(encoding_is_initialized(metadata)) {
+  if (is_encoding_initialized(metadata)) {
     unset_encoding(metadata);
   }
   return set_encoding(metadata, encoding, encodinglen);
@@ -1080,7 +1080,7 @@ int atclient_atkey_metadata_set_encoding(atclient_atkey_metadata *metadata, cons
 
 int atclient_atkey_metadata_set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname,
                                            const size_t enckeynamelen) {
-  if(enckeyname_is_initialized(metadata)) {
+  if (is_enckeyname_initialized(metadata)) {
     unset_enckeyname(metadata);
   }
   return set_enckeyname(metadata, enckeyname, enckeynamelen);
@@ -1088,7 +1088,7 @@ int atclient_atkey_metadata_set_enckeyname(atclient_atkey_metadata *metadata, co
 
 int atclient_atkey_metadata_set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo,
                                         const size_t encalgolen) {
-  if(encalgo_is_initialized(metadata)) {
+  if (is_encalgo_initialized(metadata)) {
     unset_encalgo(metadata);
   }
   return set_encalgo(metadata, encalgo, encalgolen);
@@ -1096,7 +1096,7 @@ int atclient_atkey_metadata_set_encalgo(atclient_atkey_metadata *metadata, const
 
 int atclient_atkey_metadata_set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce,
                                         const size_t ivnoncelen) {
-  if(ivnonce_is_initialized(metadata)) {
+  if (is_ivnonce_initialized(metadata)) {
     unset_ivnonce(metadata);
   }
   return set_ivnonce(metadata, ivnonce, ivnoncelen);
@@ -1104,7 +1104,7 @@ int atclient_atkey_metadata_set_ivnonce(atclient_atkey_metadata *metadata, const
 
 int atclient_atkey_metadata_set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname,
                                               const size_t skeenckeynamelen) {
-  if(skeenckeyname_is_initialized(metadata)) {
+  if (is_skeenckeyname_initialized(metadata)) {
     unset_skeenckeyname(metadata);
   }
   return set_skeenckeyname(metadata, skeenckeyname, skeenckeynamelen);
@@ -1112,250 +1112,250 @@ int atclient_atkey_metadata_set_skeenckeyname(atclient_atkey_metadata *metadata,
 
 int atclient_atkey_metadata_set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo,
                                            const size_t skeencalgolen) {
-  if(skeencalgo_is_initialized(metadata)) {
+  if (is_skeencalgo_initialized(metadata)) {
     unset_skeencalgo(metadata);
   }
   return set_skeencalgo(metadata, skeencalgo, skeencalgolen);
 }
 
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
-  if (createdby_is_initialized(metadata)) {
+  if (is_createdby_initialized(metadata)) {
     unset_createdby(metadata);
   }
 
-  if (updatedby_is_initialized(metadata)) {
+  if (is_updatedby_initialized(metadata)) {
     unset_updatedby(metadata);
   }
 
-  if (status_is_initialized(metadata)) {
+  if (is_status_initialized(metadata)) {
     unset_status(metadata);
   }
 
-  if (version_is_initialized(metadata)) {
+  if (is_version_initialized(metadata)) {
     unset_version(metadata);
   }
 
-  if (expiresat_is_initialized(metadata)) {
+  if (is_expiresat_initialized(metadata)) {
     unset_expiresat(metadata);
   }
 
-  if (availableat_is_initialized(metadata)) {
+  if (is_availableat_initialized(metadata)) {
     unset_availableat(metadata);
   }
 
-  if (refreshat_is_initialized(metadata)) {
+  if (is_refreshat_initialized(metadata)) {
     unset_refreshat(metadata);
   }
 
-  if (createdat_is_initialized(metadata)) {
+  if (is_createdat_initialized(metadata)) {
     unset_createdat(metadata);
   }
 
-  if (updatedat_is_initialized(metadata)) {
+  if (is_updatedat_initialized(metadata)) {
     unset_updatedat(metadata);
   }
 
-  if (ispublic_is_initialized(metadata)) {
+  if (is_ispublic_initialized(metadata)) {
     unset_ispublic(metadata);
   }
 
-  if (ishidden_is_initialized(metadata)) {
+  if (is_ishidden_initialized(metadata)) {
     unset_ishidden(metadata);
   }
 
-  if (iscached_is_initialized(metadata)) {
+  if (is_iscached_initialized(metadata)) {
     unset_iscached(metadata);
   }
 
-  if (ttl_is_initialized(metadata)) {
+  if (is_ttl_initialized(metadata)) {
     unset_ttl(metadata);
   }
 
-  if (ttb_is_initialized(metadata)) {
+  if (is_ttb_initialized(metadata)) {
     unset_ttb(metadata);
   }
 
-  if (ttr_is_initialized(metadata)) {
+  if (is_ttr_initialized(metadata)) {
     unset_ttr(metadata);
   }
 
-  if (ccd_is_initialized(metadata)) {
+  if (is_ccd_initialized(metadata)) {
     unset_ccd(metadata);
   }
 
-  if (isbinary_is_initialized(metadata)) {
+  if (is_isbinary_initialized(metadata)) {
     unset_isbinary(metadata);
   }
 
-  if (isencrypted_is_initialized(metadata)) {
+  if (is_isencrypted_initialized(metadata)) {
     unset_isencrypted(metadata);
   }
 
-  if (datasignature_is_initialized(metadata)) {
+  if (is_datasignature_initialized(metadata)) {
     unset_datasignature(metadata);
   }
 
-  if (sharedkeystatus_is_initialized(metadata)) {
+  if (is_sharedkeystatus_initialized(metadata)) {
     unset_sharedkeystatus(metadata);
   }
 
-  if (sharedkeyenc_is_initialized(metadata)) {
+  if (is_sharedkeyenc_initialized(metadata)) {
     unset_sharedkeyenc(metadata);
   }
 
-  if (pubkeyhash_is_initialized(metadata)) {
+  if (is_pubkeyhash_initialized(metadata)) {
     unset_pubkeyhash(metadata);
   }
 
-  if (pubkeyalgo_is_initialized(metadata)) {
+  if (is_pubkeyalgo_initialized(metadata)) {
     unset_pubkeyalgo(metadata);
   }
 
-  if (encoding_is_initialized(metadata)) {
+  if (is_encoding_initialized(metadata)) {
     unset_encoding(metadata);
   }
 
-  if (enckeyname_is_initialized(metadata)) {
+  if (is_enckeyname_initialized(metadata)) {
     unset_enckeyname(metadata);
   }
 
-  if (encalgo_is_initialized(metadata)) {
+  if (is_encalgo_initialized(metadata)) {
     unset_encalgo(metadata);
   }
 
-  if (ivnonce_is_initialized(metadata)) {
+  if (is_ivnonce_initialized(metadata)) {
     unset_ivnonce(metadata);
   }
 
-  if (skeenckeyname_is_initialized(metadata)) {
+  if (is_skeenckeyname_initialized(metadata)) {
     unset_skeenckeyname(metadata);
   }
 
-  if (skeencalgo_is_initialized(metadata)) {
+  if (is_skeencalgo_initialized(metadata)) {
     unset_skeencalgo(metadata);
   }
 
   memset(metadata, 0, sizeof(atclient_atkey_metadata));
 }
 
-static bool createdby_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_createdby_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_CREATEDBY_INDEX] & ATKEY_METADATA_CREATEDBY_INITIALIZED);
 }
 
-static bool updatedby_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_updatedby_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_UPDATEDBY_INDEX] & ATKEY_METADATA_UPDATEDBY_INITIALIZED);
 }
 
-static bool status_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_status_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_STATUS_INDEX] & ATKEY_METADATA_STATUS_INITIALIZED);
 }
 
-static bool version_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_version_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_VERSION_INDEX] & ATKEY_METADATA_VERSION_INITIALIZED);
 }
 
-static bool expiresat_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_expiresat_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_EXPIRESAT_INDEX] & ATKEY_METADATA_EXPIRESAT_INITIALIZED);
 }
 
-static bool availableat_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_availableat_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_AVAILABLEAT_INDEX] & ATKEY_METADATA_AVAILABLEAT_INITIALIZED);
 }
 
-static bool refreshat_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_refreshat_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_REFRESHAT_INDEX] & ATKEY_METADATA_REFRESHAT_INITIALIZED);
 }
 
-static bool createdat_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_createdat_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_CREATEDAT_INDEX] & ATKEY_METADATA_CREATEDAT_INITIALIZED);
 }
 
-static bool updatedat_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_updatedat_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_UPDATEDAT_INDEX] & ATKEY_METADATA_UPDATEDAT_INITIALIZED);
 }
 
-static bool ispublic_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ispublic_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ISPUBLIC_INDEX] & ATKEY_METADATA_ISPUBLIC_INITIALIZED);
 }
 
-static bool ishidden_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ishidden_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ISHIDDEN_INDEX] & ATKEY_METADATA_ISHIDDEN_INITIALIZED);
 }
 
-static bool iscached_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_iscached_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ISCACHED_INDEX] & ATKEY_METADATA_ISCACHED_INITIALIZED);
 }
 
-static bool ttl_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ttl_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_TTL_INDEX] & ATKEY_METADATA_TTL_INITIALIZED);
 }
 
-static bool ttb_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ttb_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_TTB_INDEX] & ATKEY_METADATA_TTB_INITIALIZED);
 }
 
-static bool ttr_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ttr_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_TTR_INDEX] & ATKEY_METADATA_TTR_INITIALIZED);
 }
 
-static bool ccd_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ccd_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_CCD_INDEX] & ATKEY_METADATA_CCD_INITIALIZED);
 }
 
-static bool isbinary_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_isbinary_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ISBINARY_INDEX] & ATKEY_METADATA_ISBINARY_INITIALIZED);
 }
 
-static bool isencrypted_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_isencrypted_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ISENCRYPTED_INDEX] & ATKEY_METADATA_ISENCRYPTED_INITIALIZED);
 }
 
-static bool datasignature_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_datasignature_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_DATASIGNATURE_INDEX] & ATKEY_METADATA_DATASIGNATURE_INITIALIZED);
 }
 
-static bool sharedkeystatus_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_sharedkeystatus_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_SHAREDKEYSTATUS_INDEX] &
           ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED);
 }
 
-static bool sharedkeyenc_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_sharedkeyenc_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_SHAREDKEYENC_INDEX] & ATKEY_METADATA_SHAREDKEYENC_INITIALIZED);
 }
 
-static bool pubkeyhash_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_pubkeyhash_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_PUBKEYHASH_INDEX] & ATKEY_METADATA_PUBKEYHASH_INITIALIZED);
 }
 
-static bool pubkeyalgo_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_pubkeyalgo_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_PUBKEYALGO_INDEX] & ATKEY_METADATA_PUBKEYALGO_INITIALIZED);
 }
 
-static bool encoding_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_encoding_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ENCODING_INDEX] & ATKEY_METADATA_ENCODING_INITIALIZED);
 }
 
-static bool enckeyname_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_enckeyname_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ENCKEYNAME_INDEX] & ATKEY_METADATA_ENCKEYNAME_INITIALIZED);
 }
 
-static bool encalgo_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_encalgo_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_ENCALGO_INDEX] & ATKEY_METADATA_ENCALGO_INITIALIZED);
 }
 
-static bool ivnonce_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_ivnonce_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_IVNONCE_INDEX] & ATKEY_METADATA_IVNONCE_INITIALIZED);
 }
 
-static bool skeenckeyname_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_skeenckeyname_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_SKEENCKEYNAME_INDEX] & ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED);
 }
 
-static bool skeencalgo_is_initialized(const atclient_atkey_metadata *metadata) {
+static bool is_skeencalgo_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->initializedfields[ATKEY_METADATA_SKEENCALGO_INDEX] & ATKEY_METADATA_SKEENCALGO_INITIALIZED);
 }
 
-static void set_createdby_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_createdby_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_CREATEDBY_INDEX] |= ATKEY_METADATA_CREATEDBY_INITIALIZED;
   } else {
@@ -1363,7 +1363,7 @@ static void set_createdby_is_initialized(atclient_atkey_metadata *metadata, bool
   }
 }
 
-static void set_updatedby_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_updatedby_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_UPDATEDBY_INDEX] |= ATKEY_METADATA_UPDATEDBY_INITIALIZED;
   } else {
@@ -1371,7 +1371,7 @@ static void set_updatedby_is_initialized(atclient_atkey_metadata *metadata, bool
   }
 }
 
-static void set_status_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_status_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_STATUS_INDEX] |= ATKEY_METADATA_STATUS_INITIALIZED;
   } else {
@@ -1379,7 +1379,7 @@ static void set_status_is_initialized(atclient_atkey_metadata *metadata, bool is
   }
 }
 
-static void set_version_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_version_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_VERSION_INDEX] |= ATKEY_METADATA_VERSION_INITIALIZED;
   } else {
@@ -1387,7 +1387,7 @@ static void set_version_is_initialized(atclient_atkey_metadata *metadata, bool i
   }
 }
 
-static void set_expiresat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_expiresat_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_EXPIRESAT_INDEX] |= ATKEY_METADATA_EXPIRESAT_INITIALIZED;
   } else {
@@ -1395,7 +1395,7 @@ static void set_expiresat_is_initialized(atclient_atkey_metadata *metadata, bool
   }
 }
 
-static void set_availableat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_availableat_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_AVAILABLEAT_INDEX] |= ATKEY_METADATA_AVAILABLEAT_INITIALIZED;
   } else {
@@ -1403,7 +1403,7 @@ static void set_availableat_is_initialized(atclient_atkey_metadata *metadata, bo
   }
 }
 
-static void set_refreshat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_refreshat_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_REFRESHAT_INDEX] |= ATKEY_METADATA_REFRESHAT_INITIALIZED;
   } else {
@@ -1411,7 +1411,7 @@ static void set_refreshat_is_initialized(atclient_atkey_metadata *metadata, bool
   }
 }
 
-static void set_createdat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_createdat_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_CREATEDAT_INDEX] |= ATKEY_METADATA_CREATEDAT_INITIALIZED;
   } else {
@@ -1419,7 +1419,7 @@ static void set_createdat_is_initialized(atclient_atkey_metadata *metadata, bool
   }
 }
 
-static void set_updatedat_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_updatedat_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_UPDATEDAT_INDEX] |= ATKEY_METADATA_UPDATEDAT_INITIALIZED;
   } else {
@@ -1427,7 +1427,7 @@ static void set_updatedat_is_initialized(atclient_atkey_metadata *metadata, bool
   }
 }
 
-static void set_ispublic_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ispublic_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ISPUBLIC_INDEX] |= ATKEY_METADATA_ISPUBLIC_INITIALIZED;
   } else {
@@ -1435,7 +1435,7 @@ static void set_ispublic_is_initialized(atclient_atkey_metadata *metadata, bool 
   }
 }
 
-static void set_ishidden_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ishidden_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ISHIDDEN_INDEX] |= ATKEY_METADATA_ISHIDDEN_INITIALIZED;
   } else {
@@ -1443,7 +1443,7 @@ static void set_ishidden_is_initialized(atclient_atkey_metadata *metadata, bool 
   }
 }
 
-static void set_iscached_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_iscached_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ISCACHED_INDEX] |= ATKEY_METADATA_ISCACHED_INITIALIZED;
   } else {
@@ -1451,7 +1451,7 @@ static void set_iscached_is_initialized(atclient_atkey_metadata *metadata, bool 
   }
 }
 
-static void set_ttl_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ttl_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_TTL_INDEX] |= ATKEY_METADATA_TTL_INITIALIZED;
   } else {
@@ -1459,7 +1459,7 @@ static void set_ttl_is_initialized(atclient_atkey_metadata *metadata, bool is_in
   }
 }
 
-static void set_ttb_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ttb_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_TTB_INDEX] |= ATKEY_METADATA_TTB_INITIALIZED;
   } else {
@@ -1467,7 +1467,7 @@ static void set_ttb_is_initialized(atclient_atkey_metadata *metadata, bool is_in
   }
 }
 
-static void set_ttr_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ttr_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_TTR_INDEX] |= ATKEY_METADATA_TTR_INITIALIZED;
   } else {
@@ -1475,7 +1475,7 @@ static void set_ttr_is_initialized(atclient_atkey_metadata *metadata, bool is_in
   }
 }
 
-static void set_ccd_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ccd_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_CCD_INDEX] |= ATKEY_METADATA_CCD_INITIALIZED;
   } else {
@@ -1483,7 +1483,7 @@ static void set_ccd_is_initialized(atclient_atkey_metadata *metadata, bool is_in
   }
 }
 
-static void set_isbinary_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_isbinary_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ISBINARY_INDEX] |= ATKEY_METADATA_ISBINARY_INITIALIZED;
   } else {
@@ -1491,7 +1491,7 @@ static void set_isbinary_is_initialized(atclient_atkey_metadata *metadata, bool 
   }
 }
 
-static void set_isencrypted_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_isencrypted_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ISENCRYPTED_INDEX] |= ATKEY_METADATA_ISENCRYPTED_INITIALIZED;
   } else {
@@ -1499,7 +1499,7 @@ static void set_isencrypted_is_initialized(atclient_atkey_metadata *metadata, bo
   }
 }
 
-static void set_datasignature_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_datasignature_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_DATASIGNATURE_INDEX] |= ATKEY_METADATA_DATASIGNATURE_INITIALIZED;
   } else {
@@ -1507,7 +1507,7 @@ static void set_datasignature_is_initialized(atclient_atkey_metadata *metadata, 
   }
 }
 
-static void set_sharedkeystatus_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_sharedkeystatus_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_SHAREDKEYSTATUS_INDEX] |= ATKEY_METADATA_SHAREDKEYSTATUS_INITIALIZED;
   } else {
@@ -1515,7 +1515,7 @@ static void set_sharedkeystatus_is_initialized(atclient_atkey_metadata *metadata
   }
 }
 
-static void set_sharedkeyenc_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_sharedkeyenc_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_SHAREDKEYENC_INDEX] |= ATKEY_METADATA_SHAREDKEYENC_INITIALIZED;
   } else {
@@ -1523,7 +1523,7 @@ static void set_sharedkeyenc_is_initialized(atclient_atkey_metadata *metadata, b
   }
 }
 
-static void set_pubkeyhash_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_pubkeyhash_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_PUBKEYHASH_INDEX] |= ATKEY_METADATA_PUBKEYHASH_INITIALIZED;
   } else {
@@ -1531,7 +1531,7 @@ static void set_pubkeyhash_is_initialized(atclient_atkey_metadata *metadata, boo
   }
 }
 
-static void set_pubkeyalgo_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_pubkeyalgo_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_PUBKEYALGO_INDEX] |= ATKEY_METADATA_PUBKEYALGO_INITIALIZED;
   } else {
@@ -1539,7 +1539,7 @@ static void set_pubkeyalgo_is_initialized(atclient_atkey_metadata *metadata, boo
   }
 }
 
-static void set_encoding_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_encoding_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ENCODING_INDEX] |= ATKEY_METADATA_ENCODING_INITIALIZED;
   } else {
@@ -1547,7 +1547,7 @@ static void set_encoding_is_initialized(atclient_atkey_metadata *metadata, bool 
   }
 }
 
-static void set_enckeyname_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_enckeyname_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ENCKEYNAME_INDEX] |= ATKEY_METADATA_ENCKEYNAME_INITIALIZED;
   } else {
@@ -1555,7 +1555,7 @@ static void set_enckeyname_is_initialized(atclient_atkey_metadata *metadata, boo
   }
 }
 
-static void set_encalgo_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_encalgo_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_ENCALGO_INDEX] |= ATKEY_METADATA_ENCALGO_INITIALIZED;
   } else {
@@ -1563,7 +1563,7 @@ static void set_encalgo_is_initialized(atclient_atkey_metadata *metadata, bool i
   }
 }
 
-static void set_ivnonce_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_ivnonce_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_IVNONCE_INDEX] |= ATKEY_METADATA_IVNONCE_INITIALIZED;
   } else {
@@ -1571,7 +1571,7 @@ static void set_ivnonce_is_initialized(atclient_atkey_metadata *metadata, bool i
   }
 }
 
-static void set_skeenckeyname_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_skeenckeyname_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_SKEENCKEYNAME_INDEX] |= ATKEY_METADATA_SKEENCKEYNAME_INITIALIZED;
   } else {
@@ -1579,7 +1579,7 @@ static void set_skeenckeyname_is_initialized(atclient_atkey_metadata *metadata, 
   }
 }
 
-static void set_skeencalgo_is_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
+static void set_is_skeencalgo_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
   if (is_initialized) {
     metadata->initializedfields[ATKEY_METADATA_SKEENCALGO_INDEX] |= ATKEY_METADATA_SKEENCALGO_INITIALIZED;
   } else {
@@ -1589,119 +1589,148 @@ static void set_skeencalgo_is_initialized(atclient_atkey_metadata *metadata, boo
 
 static void unset_createdby(atclient_atkey_metadata *metadata) {
   atclient_atsign_free(&metadata->createdby);
-  set_createdby_is_initialized(metadata, false);
+  set_is_createdby_initialized(metadata, false);
 }
 
 static void unset_updatedby(atclient_atkey_metadata *metadata) {
   atclient_atsign_free(&metadata->updatedby);
-  set_updatedby_is_initialized(metadata, false);
+  set_is_updatedby_initialized(metadata, false);
 }
 
 static void unset_status(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->status);
-  set_status_is_initialized(metadata, false);
+  set_is_status_initialized(metadata, false);
 }
 
-static void unset_version(atclient_atkey_metadata *metadata) { set_version_is_initialized(metadata, false); }
+static void unset_version(atclient_atkey_metadata *metadata) {
+  metadata->version = 0;
+  set_is_version_initialized(metadata, false);
+}
 
 static void unset_expiresat(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->expiresat);
-  set_expiresat_is_initialized(metadata, false);
+  set_is_expiresat_initialized(metadata, false);
 }
 
 static void unset_availableat(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->availableat);
-  set_availableat_is_initialized(metadata, false);
+  set_is_availableat_initialized(metadata, false);
 }
 
 static void unset_refreshat(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->refreshat);
-  set_refreshat_is_initialized(metadata, false);
+  set_is_refreshat_initialized(metadata, false);
 }
 
 static void unset_createdat(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->createdat);
-  set_createdat_is_initialized(metadata, false);
+  set_is_createdat_initialized(metadata, false);
 }
 
 static void unset_updatedat(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->updatedat);
-  set_updatedat_is_initialized(metadata, false);
+  set_is_updatedat_initialized(metadata, false);
 }
 
-static void unset_ispublic(atclient_atkey_metadata *metadata) { set_ispublic_is_initialized(metadata, false); }
+static void unset_ispublic(atclient_atkey_metadata *metadata) {
+  metadata->ispublic = false;
+  set_is_ispublic_initialized(metadata, false);
+}
 
-static void unset_ishidden(atclient_atkey_metadata *metadata) { set_ishidden_is_initialized(metadata, false); }
+static void unset_ishidden(atclient_atkey_metadata *metadata) {
+  metadata->ishidden = false;
+  set_is_ishidden_initialized(metadata, false);
+}
 
-static void unset_iscached(atclient_atkey_metadata *metadata) { set_iscached_is_initialized(metadata, false); }
+static void unset_iscached(atclient_atkey_metadata *metadata) {
+  metadata->iscached = false;
+  set_is_iscached_initialized(metadata, false);
+}
 
-static void unset_ttl(atclient_atkey_metadata *metadata) { set_ttl_is_initialized(metadata, false); }
+static void unset_ttl(atclient_atkey_metadata *metadata) {
+  metadata->ttl = 0;
+  set_is_ttl_initialized(metadata, false);
+}
 
-static void unset_ttb(atclient_atkey_metadata *metadata) { set_ttb_is_initialized(metadata, false); }
+static void unset_ttb(atclient_atkey_metadata *metadata) { 
+  metadata->ttb = 0;
+  set_is_ttb_initialized(metadata, false); 
+}
 
-static void unset_ttr(atclient_atkey_metadata *metadata) { set_ttr_is_initialized(metadata, false); }
+static void unset_ttr(atclient_atkey_metadata *metadata) {
+  metadata->ttr = 0;
+  set_is_ttr_initialized(metadata, false);
+}
 
-static void unset_ccd(atclient_atkey_metadata *metadata) { set_ccd_is_initialized(metadata, false); }
+static void unset_ccd(atclient_atkey_metadata *metadata) {
+  metadata->ccd = false;
+  set_is_ccd_initialized(metadata, false);
+}
 
-static void unset_isbinary(atclient_atkey_metadata *metadata) { set_isbinary_is_initialized(metadata, false); }
+static void unset_isbinary(atclient_atkey_metadata *metadata) {
+  metadata->isbinary = false;
+  set_is_isbinary_initialized(metadata, false);
+}
 
-static void unset_isencrypted(atclient_atkey_metadata *metadata) { set_isencrypted_is_initialized(metadata, false); }
+static void unset_isencrypted(atclient_atkey_metadata *metadata) { 
+  metadata->isencrypted = false;
+  set_is_isencrypted_initialized(metadata, false); }
 
 static void unset_datasignature(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->datasignature);
-  set_datasignature_is_initialized(metadata, false);
+  set_is_datasignature_initialized(metadata, false);
 }
 
 static void unset_sharedkeystatus(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->sharedkeystatus);
-  set_sharedkeystatus_is_initialized(metadata, false);
+  set_is_sharedkeystatus_initialized(metadata, false);
 }
 
 static void unset_sharedkeyenc(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->sharedkeyenc);
-  set_sharedkeyenc_is_initialized(metadata, false);
+  set_is_sharedkeyenc_initialized(metadata, false);
 }
 
 static void unset_pubkeyhash(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->pubkeyhash);
-  set_pubkeyhash_is_initialized(metadata, false);
+  set_is_pubkeyhash_initialized(metadata, false);
 }
 
 static void unset_pubkeyalgo(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->pubkeyalgo);
-  set_pubkeyalgo_is_initialized(metadata, false);
+  set_is_pubkeyalgo_initialized(metadata, false);
 }
 
 static void unset_encoding(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->encoding);
-  set_encoding_is_initialized(metadata, false);
+  set_is_encoding_initialized(metadata, false);
 }
 
 static void unset_enckeyname(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->enckeyname);
-  set_enckeyname_is_initialized(metadata, false);
+  set_is_enckeyname_initialized(metadata, false);
 }
 
 static void unset_encalgo(atclient_atkey_metadata *metadata) {
   if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
     atclient_atstr_free(&metadata->encalgo);
   }
-  set_encalgo_is_initialized(metadata, false);
+  set_is_encalgo_initialized(metadata, false);
 }
 
 static void unset_ivnonce(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->ivnonce);
-  set_ivnonce_is_initialized(metadata, false);
+  set_is_ivnonce_initialized(metadata, false);
 }
 
 static void unset_skeenckeyname(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->skeenckeyname);
-  set_skeenckeyname_is_initialized(metadata, false);
+  set_is_skeenckeyname_initialized(metadata, false);
 }
 
 static void unset_skeencalgo(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->skeencalgo);
-  set_skeencalgo_is_initialized(metadata, false);
+  set_is_skeencalgo_initialized(metadata, false);
 }
 
 static int set_createdby(atclient_atkey_metadata *metadata, const char *createdby, const size_t createdbylen) {
@@ -1711,7 +1740,7 @@ static int set_createdby(atclient_atkey_metadata *metadata, const char *createdb
                  createdby);
     goto exit;
   }
-  set_createdby_is_initialized(metadata, true);
+  set_is_createdby_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1724,7 +1753,7 @@ static int set_updatedby(atclient_atkey_metadata *metadata, const char *updatedb
                  updatedby);
     goto exit;
   }
-  set_updatedby_is_initialized(metadata, true);
+  set_is_updatedby_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1737,7 +1766,7 @@ static int set_status(atclient_atkey_metadata *metadata, const char *status, con
                  statuslen, status);
     goto exit;
   }
-  set_status_is_initialized(metadata, true);
+  set_is_status_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1745,7 +1774,7 @@ exit: { return ret; }
 
 static void set_version(atclient_atkey_metadata *metadata, int version) {
   metadata->version = version;
-  set_version_is_initialized(metadata, true);
+  set_is_version_initialized(metadata, true);
 }
 
 static int set_expiresat(atclient_atkey_metadata *metadata, const char *expiresat, const size_t expiresatlen) {
@@ -1755,7 +1784,7 @@ static int set_expiresat(atclient_atkey_metadata *metadata, const char *expiresa
                  expiresatlen, expiresat);
     goto exit;
   }
-  set_expiresat_is_initialized(metadata, true);
+  set_is_expiresat_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1768,7 +1797,7 @@ static int set_availableat(atclient_atkey_metadata *metadata, const char *availa
                  availableatlen, availableat);
     goto exit;
   }
-  set_availableat_is_initialized(metadata, true);
+  set_is_availableat_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1781,7 +1810,7 @@ static int set_refreshat(atclient_atkey_metadata *metadata, const char *refresha
                  refreshatlen, refreshat);
     goto exit;
   }
-  set_refreshat_is_initialized(metadata, true);
+  set_is_refreshat_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1794,7 +1823,7 @@ static int set_createdat(atclient_atkey_metadata *metadata, const char *createda
                  createdatlen, createdat);
     goto exit;
   }
-  set_createdat_is_initialized(metadata, true);
+  set_is_createdat_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1807,7 +1836,7 @@ static int set_updatedat(atclient_atkey_metadata *metadata, const char *updateda
                  updatedatlen, updatedat);
     goto exit;
   }
-  set_updatedat_is_initialized(metadata, true);
+  set_is_updatedat_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1815,47 +1844,47 @@ exit: { return ret; }
 
 static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
   metadata->ispublic = ispublic;
-  set_ispublic_is_initialized(metadata, true);
+  set_is_ispublic_initialized(metadata, true);
 }
 
 static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
   metadata->ishidden = ishidden;
-  set_ishidden_is_initialized(metadata, true);
+  set_is_ishidden_initialized(metadata, true);
 }
 
 static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
   metadata->iscached = iscached;
-  set_iscached_is_initialized(metadata, true);
+  set_is_iscached_initialized(metadata, true);
 }
 
 static void set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
   metadata->ttl = ttl;
-  set_ttl_is_initialized(metadata, true);
+  set_is_ttl_initialized(metadata, true);
 }
 
 static void set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
   metadata->ttb = ttb;
-  set_ttb_is_initialized(metadata, true);
+  set_is_ttb_initialized(metadata, true);
 }
 
 static void set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
   metadata->ttr = ttr;
-  set_ttr_is_initialized(metadata, true);
+  set_is_ttr_initialized(metadata, true);
 }
 
 static void set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
   metadata->ccd = ccd;
-  set_ccd_is_initialized(metadata, true);
+  set_is_ccd_initialized(metadata, true);
 }
 
 static void set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
   metadata->isbinary = isbinary;
-  set_isbinary_is_initialized(metadata, true);
+  set_is_isbinary_initialized(metadata, true);
 }
 
 static void set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
   metadata->isencrypted = isencrypted;
-  set_isencrypted_is_initialized(metadata, true);
+  set_is_isencrypted_initialized(metadata, true);
 }
 
 static int set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
@@ -1866,7 +1895,7 @@ static int set_datasignature(atclient_atkey_metadata *metadata, const char *data
                  datasignaturelen, datasignature);
     goto exit;
   }
-  set_datasignature_is_initialized(metadata, true);
+  set_is_datasignature_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1880,7 +1909,7 @@ static int set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sh
                  sharedkeystatuslen, sharedkeystatus);
     goto exit;
   }
-  set_sharedkeystatus_is_initialized(metadata, true);
+  set_is_sharedkeystatus_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1893,7 +1922,7 @@ static int set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *share
                  sharedkeyenclen + 1, sharedkeyenc);
     goto exit;
   }
-  set_sharedkeyenc_is_initialized(metadata, true);
+  set_is_sharedkeyenc_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1906,7 +1935,7 @@ static int set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyh
                  pubkeyhashlen, pubkeyhash);
     goto exit;
   }
-  set_pubkeyhash_is_initialized(metadata, true);
+  set_is_pubkeyhash_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1919,7 +1948,7 @@ static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeya
                  pubkeyalgolen, pubkeyalgo);
     goto exit;
   }
-  set_pubkeyalgo_is_initialized(metadata, true);
+  set_is_pubkeyalgo_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1932,7 +1961,7 @@ static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding,
                  encodinglen, encoding);
     goto exit;
   }
-  set_encoding_is_initialized(metadata, true);
+  set_is_encoding_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1945,7 +1974,7 @@ static int set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyn
                  enckeynamelen, enckeyname);
     goto exit;
   }
-  set_enckeyname_is_initialized(metadata, true);
+  set_is_enckeyname_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1958,7 +1987,7 @@ static int set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo, c
                  encalgolen, encalgo);
     goto exit;
   }
-  set_encalgo_is_initialized(metadata, true);
+  set_is_encalgo_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1971,7 +2000,7 @@ static int set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce, c
                  ivnoncelen, ivnonce);
     goto exit;
   }
-  set_ivnonce_is_initialized(metadata, true);
+  set_is_ivnonce_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1985,7 +2014,7 @@ static int set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skee
                  skeenckeynamelen, skeenckeyname);
     goto exit;
   }
-  set_skeenckeyname_is_initialized(metadata, true);
+  set_is_skeenckeyname_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1998,7 +2027,7 @@ static int set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeenca
                  skeencalgolen, skeencalgo);
     goto exit;
   }
-  set_skeencalgo_is_initialized(metadata, true);
+  set_is_skeencalgo_initialized(metadata, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
