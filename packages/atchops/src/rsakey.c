@@ -52,63 +52,62 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
                                       const size_t publickeybase64len) {
   int ret = 0;
 
-  // 1. base64 decode the key
-  size_t dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
-  unsigned char *dst = (unsigned char *)malloc(sizeof(unsigned char) * dstlen);
-  memset(dst, 0, dstlen);
-  size_t writtenlen = 0;
-  ret = atchops_base64_decode((const unsigned char *)publickeybase64, publickeybase64len, dst, dstlen, &writtenlen);
+  mbedtls_asn1_sequence *seq = NULL; // free later
+
+  size_t dstsize = BASE64_DECODED_KEY_BUFFER_SIZE;
+  unsigned char dst[dstsize];
+  memset(dst, 0, sizeof(unsigned char) * dstsize);
+  size_t dstlen = 0;
+  ret = atchops_base64_decode((const unsigned char *)publickeybase64, publickeybase64len, dst, dstsize, &dstlen);
   if (ret != 0) {
     goto exit;
   }
 
-  unsigned char *end = dst + writtenlen;
+  unsigned char *p = dst;
+  unsigned char *end = dst + dstlen;
 
   size_t lengthread = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
 
   size_t lengthread2 = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread2, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread2, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
-  dst = dst + (lengthread2);
+  p = p + (lengthread2);
 
   size_t lengthread3 = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread3, MBEDTLS_ASN1_BIT_STRING);
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread3, MBEDTLS_ASN1_BIT_STRING);
   if (ret != 0) {
     goto exit;
   }
 
-  if (*dst == 0x00) {
-    dst = dst + 1;
+  if (*p == 0x00) {
+    p = p + 1;
   }
 
-  unsigned char *p = dst;
-
-  mbedtls_asn1_sequence seq;
-  memset(&seq, 0, sizeof(mbedtls_asn1_sequence));
-  ret = mbedtls_asn1_get_sequence_of(&p, end, &seq, MBEDTLS_ASN1_INTEGER);
+  seq = malloc(sizeof(mbedtls_asn1_sequence));
+  memset(seq, 0, sizeof(mbedtls_asn1_sequence));  
+  ret = mbedtls_asn1_get_sequence_of(&p, end, seq, MBEDTLS_ASN1_INTEGER);
   if (ret != 0) {
     goto exit;
   }
 
-  mbedtls_asn1_sequence *current = &seq;
+  mbedtls_asn1_sequence *current = seq;
   publickey->n.len = current->buf.len;
   memcpy(publickey->n.value, current->buf.p, publickey->n.len);
 
   current = current->next;
   publickey->e.len = current->buf.len;
-  memcpy(publickey->e.value, current->buf.p, publickey->e.len);
+  memcpy(publickey->e.value, current->buf.p, publickey->e.len);  
 
+  ret = 0;
   goto exit;
-
 exit: {
-  // dst is already freed by mbedtls_asn1_get_sequence_of
-  // mbedtls_asn1_sequence does not need to be freed.
+  mbedtls_asn1_sequence_free(seq);
   return ret;
 }
 }
@@ -117,54 +116,54 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
                                        const size_t privatekeybase64len) {
   int ret = 1;
 
-  size_t dstlen = BASE64_DECODED_KEY_BUFFER_SIZE;
-  unsigned char *dst = malloc(sizeof(unsigned char) * dstlen);
-  memset(dst, 0, dstlen);
-  size_t writtenlen = 0;
-  ret = atchops_base64_decode((const unsigned char *)privatekeybase64, privatekeybase64len, dst, dstlen, &writtenlen);
-  if (ret != 0) {
-    goto exit;
-  }
+  mbedtls_asn1_sequence *seq = NULL; // free later
 
-  unsigned char *end = dst + writtenlen;
-
-  size_t lengthread = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
-  if (ret != 0) {
-    goto exit;
-  }
-
-  size_t lengthread2 = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread2, MBEDTLS_ASN1_INTEGER);
-  if (ret != 0) {
-    goto exit;
-  }
-  dst = dst + lengthread2;
-
-  size_t lengthread3 = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread3, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
-  if (ret != 0) {
-    goto exit;
-  }
-  dst = dst + lengthread3;
-
-  size_t lengthread4 = 0;
-  ret = mbedtls_asn1_get_tag(&dst, end, &lengthread4, 0x04);
+  const size_t dstsize = BASE64_DECODED_KEY_BUFFER_SIZE;
+  unsigned char dst[dstsize];
+  memset(dst, 0, sizeof(unsigned char) * dstsize);
+  size_t dstlen = 0;
+  ret = atchops_base64_decode((const unsigned char *)privatekeybase64, privatekeybase64len, dst, dstsize, &dstlen);
   if (ret != 0) {
     goto exit;
   }
 
   unsigned char *p = dst;
+  unsigned char *end = dst + dstlen;
 
-  mbedtls_asn1_sequence seq;
-  memset(&seq, 0, sizeof(mbedtls_asn1_sequence));
-
-  ret = mbedtls_asn1_get_sequence_of(&p, end, &seq, MBEDTLS_ASN1_INTEGER);
+  size_t lengthread = 0;
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (ret != 0) {
     goto exit;
   }
 
-  mbedtls_asn1_sequence *current = &seq;
+  size_t lengthread2 = 0;
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread2, MBEDTLS_ASN1_INTEGER);
+  if (ret != 0) {
+    goto exit;
+  }
+  p = p + lengthread2;
+
+  size_t lengthread3 = 0;
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread3, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  if (ret != 0) {
+    goto exit;
+  }
+  p = p + lengthread3;
+
+  size_t lengthread4 = 0;
+  ret = mbedtls_asn1_get_tag(&p, end, &lengthread4, 0x04);
+  if (ret != 0) {
+    goto exit;
+  }
+
+  seq = malloc(sizeof(mbedtls_asn1_sequence));
+  memset(seq, 0, sizeof(mbedtls_asn1_sequence));
+  ret = mbedtls_asn1_get_sequence_of(&p, end, seq, MBEDTLS_ASN1_INTEGER);
+  if (ret != 0) {
+    goto exit;
+  }
+
+  mbedtls_asn1_sequence *current = seq;
   current = current->next;
 
   privatekey->n.len = current->buf.len;
@@ -186,11 +185,10 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
   privatekey->q.len = current->buf.len;
   memcpy(privatekey->q.value, current->buf.p, privatekey->q.len);
 
+  ret = 0;
   goto exit;
-
 exit: {
-  // dst is already freed by mbedtls_asn1_get_sequence_of
-  // mbedtls_asn1_sequence does not need to be freed.
+  mbedtls_asn1_sequence_free(seq);
   return ret;
 }
 }
