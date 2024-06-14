@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
                atkeystr.str);
 
-  notify_params.key = atkey;
+  notify_params.atkey = &atkey;
   notify_params.value = ATKEY_VALUE;
   notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
 
