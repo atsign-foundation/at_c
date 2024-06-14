@@ -1032,90 +1032,168 @@ void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, 
 
 int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
                                               const size_t datasignaturelen) {
+  int ret = 1;
   if (is_datasignature_initialized(metadata)) {
     unset_datasignature(metadata);
   }
-  return set_datasignature(metadata, datasignature, datasignaturelen);
+  if ((ret = set_datasignature(metadata, datasignature, datasignaturelen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_datasignature failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,
                                                 const size_t sharedkeystatuslen) {
+  int ret = 1;
   if (is_sharedkeystatus_initialized(metadata)) {
     unset_sharedkeystatus(metadata);
   }
-  return set_sharedkeystatus(metadata, sharedkeystatus, sharedkeystatuslen);
+  if ((ret = set_sharedkeystatus(metadata, sharedkeystatus, sharedkeystatuslen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeystatus failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc,
                                              const size_t sharedkeyenclen) {
+  int ret = 1;
   if (is_sharedkeyenc_initialized(metadata)) {
     unset_sharedkeyenc(metadata);
   }
-  return set_sharedkeyenc(metadata, sharedkeyenc, sharedkeyenclen);
+  if ((ret = set_sharedkeyenc(metadata, sharedkeyenc, sharedkeyenclen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeyenc failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash,
                                            const size_t pubkeyhashlen) {
+  int ret = 1;
   if (is_pubkeyhash_initialized(metadata)) {
     unset_pubkeyhash(metadata);
   }
-  return set_pubkeyhash(metadata, pubkeyhash, pubkeyhashlen);
+  if ((ret = set_pubkeyhash(metadata, pubkeyhash, pubkeyhashlen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyhash failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo,
                                            const size_t pubkeyalgolen) {
+  int ret = 1;
   if (is_pubkeyalgo_initialized(metadata)) {
     unset_pubkeyalgo(metadata);
   }
-  return set_pubkeyalgo(metadata, pubkeyalgo, pubkeyalgolen);
+  if ((ret = set_pubkeyalgo(metadata, pubkeyalgo, pubkeyalgolen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyalgo failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_encoding(atclient_atkey_metadata *metadata, const char *encoding,
                                          const size_t encodinglen) {
+  int ret = 1;
   if (is_encoding_initialized(metadata)) {
     unset_encoding(metadata);
   }
-  return set_encoding(metadata, encoding, encodinglen);
+
+  if ((ret = set_encoding(metadata, encoding, encodinglen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encoding failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname,
                                            const size_t enckeynamelen) {
+  int ret = 1;
   if (is_enckeyname_initialized(metadata)) {
     unset_enckeyname(metadata);
   }
-  return set_enckeyname(metadata, enckeyname, enckeynamelen);
+  if ((ret = set_enckeyname(metadata, enckeyname, enckeynamelen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_enckeyname failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo,
                                         const size_t encalgolen) {
+  int ret = 1;
   if (is_encalgo_initialized(metadata)) {
     unset_encalgo(metadata);
   }
-  return set_encalgo(metadata, encalgo, encalgolen);
+  if ((ret = set_encalgo(metadata, encalgo, encalgolen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encalgo failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce,
                                         const size_t ivnoncelen) {
+  int ret = 1;
   if (is_ivnonce_initialized(metadata)) {
     unset_ivnonce(metadata);
   }
-  return set_ivnonce(metadata, ivnonce, ivnoncelen);
+  if ((ret = set_ivnonce(metadata, ivnonce, ivnoncelen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_ivnonce failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname,
                                               const size_t skeenckeynamelen) {
+  int ret = 1;
   if (is_skeenckeyname_initialized(metadata)) {
     unset_skeenckeyname(metadata);
   }
-  return set_skeenckeyname(metadata, skeenckeyname, skeenckeynamelen);
+  if ((ret = set_skeenckeyname(metadata, skeenckeyname, skeenckeynamelen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeenckeyname failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo,
                                            const size_t skeencalgolen) {
+  int ret = 1;
   if (is_skeencalgo_initialized(metadata)) {
     unset_skeencalgo(metadata);
   }
-  return set_skeencalgo(metadata, skeencalgo, skeencalgolen);
+  if ((ret = set_skeencalgo(metadata, skeencalgo, skeencalgolen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeencalgo failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
@@ -1652,9 +1730,9 @@ static void unset_ttl(atclient_atkey_metadata *metadata) {
   set_is_ttl_initialized(metadata, false);
 }
 
-static void unset_ttb(atclient_atkey_metadata *metadata) { 
+static void unset_ttb(atclient_atkey_metadata *metadata) {
   metadata->ttb = 0;
-  set_is_ttb_initialized(metadata, false); 
+  set_is_ttb_initialized(metadata, false);
 }
 
 static void unset_ttr(atclient_atkey_metadata *metadata) {
@@ -1672,9 +1750,10 @@ static void unset_isbinary(atclient_atkey_metadata *metadata) {
   set_is_isbinary_initialized(metadata, false);
 }
 
-static void unset_isencrypted(atclient_atkey_metadata *metadata) { 
+static void unset_isencrypted(atclient_atkey_metadata *metadata) {
   metadata->isencrypted = false;
-  set_is_isencrypted_initialized(metadata, false); }
+  set_is_isencrypted_initialized(metadata, false);
+}
 
 static void unset_datasignature(atclient_atkey_metadata *metadata) {
   atclient_atstr_free(&metadata->datasignature);

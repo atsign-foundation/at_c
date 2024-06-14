@@ -26,6 +26,8 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
 
 void atclient_notify_params_init(atclient_notify_params *params) {
   memset(params, 0, sizeof(atclient_notify_params));
+  memset(params->id, 0, sizeof(char) * 37); // uuid v4 + '\0'
+  params->atkey = NULL;
   params->value = NULL;
   params->operation = ATCLIENT_NOTIFY_OPERATION_NONE;
   params->message_type = ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY;
@@ -41,7 +43,7 @@ void atclient_notify_params_init(atclient_notify_params *params) {
 void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
                                    atclient_atkey *atkey, const char *value, bool shouldencrypt) {
   params->operation = operation;
-  params->key = *atkey;
+  params->atkey = atkey;
   params->value = (char *)value;
   params->shouldencrypt = shouldencrypt;
 }
@@ -108,7 +110,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize) + 1;
       unsigned char sharedenckeybase64[sharedenckeybase64size];
       memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-      if ((res = atclient_atsign_init(&recipient, params->key.sharedwith.str)) != 0) {
+      if ((res = atclient_atsign_init(&recipient, params->atkey->sharedwith.str)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", res);
         return res;
       }
@@ -142,7 +144,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return res;
     }
 
-    res = atclient_atkey_metadata_set_ivnonce(&params->key.metadata, (char *)ivbase64, ivbase64len);
+    res = atclient_atkey_metadata_set_ivnonce(&(params->atkey->metadata), (char *)ivbase64, ivbase64len);
     if (res != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", res);
       return res;
@@ -261,10 +263,10 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
     cmdsize += strlen(":ttln:") + long_strlen(params->notification_expiry); // :$ttln
   }
 
-  const size_t metadatastrlen = atclient_atkey_metadata_protocol_strlen(&params->key.metadata);
+  const size_t metadatastrlen = atclient_atkey_metadata_protocol_strlen(&params->atkey->metadata);
   cmdsize += strlen(":") + metadatastrlen; // :$metadata
 
-  const size_t atkeylen = atclient_atkey_strlen(&params->key);
+  const size_t atkeylen = atclient_atkey_strlen(params->atkey);
   cmdsize += strlen(":") + atkeylen; // :$atkey
 
   if (cmdvaluelen > 0) {
@@ -347,7 +349,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   size_t metadatastrolen;
-  if ((res = atclient_atkey_metadata_to_protocol_str(&params->key.metadata, cmd + off, metadatastrlen,
+  if ((res = atclient_atkey_metadata_to_protocol_str(&params->atkey->metadata, cmd + off, metadatastrlen,
                                                      &metadatastrolen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code: %d\n",
                  res);
@@ -366,7 +368,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   off += strlen(":");
 
   size_t atkeyolen;
-  if ((res = atclient_atkey_to_string(&params->key, cmd + off, atkeylen, &atkeyolen)) != 0) {
+  if ((res = atclient_atkey_to_string(params->atkey, cmd + off, atkeylen, &atkeyolen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed with code: %d\n", res);
     return res;
   }
