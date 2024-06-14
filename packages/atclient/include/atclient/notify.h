@@ -53,7 +53,7 @@ static const char *atclient_notify_strategy_str[] = {
 
 typedef struct atclient_notify_params {
   char id[37]; // uuid v4 + '\0'
-  atclient_atkey key;
+  atclient_atkey *atkey;
   char *value;
   bool shouldencrypt;
   enum atclient_notify_operation operation;
