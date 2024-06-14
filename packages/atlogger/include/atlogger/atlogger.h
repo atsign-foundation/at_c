@@ -20,5 +20,5 @@ void atlogger_set_logging_level(const enum atlogger_logging_level level);
 void atlogger_set_opts(int opts);
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...);
 void atlogger_fix_stdout_buffer(char *str, const size_t strlen);
-
+void atlogger_free(void);
 #endif

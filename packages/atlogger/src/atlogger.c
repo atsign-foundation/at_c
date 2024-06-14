@@ -21,13 +21,21 @@ typedef struct atlogger_ctx {
   int opts;
 } atlogger_ctx;
 
-static atlogger_ctx *atlogger_get_instance() {
-  static atlogger_ctx *ctx;
+static atlogger_ctx *ctx;
+static void atlogger_init() {
+  ctx = (atlogger_ctx *)malloc(sizeof(atlogger_ctx));
+  prefix = (char *)malloc(sizeof(char) * PREFIX_BUFFER_LEN);
+  memset(prefix, 0, sizeof(char) * PREFIX_BUFFER_LEN);
+}
 
+void atlogger_free() {
+  free(prefix);
+  free(ctx);
+}
+
+static atlogger_ctx *atlogger_get_instance() {
   if (ctx == NULL) {
-    ctx = (atlogger_ctx *)malloc(sizeof(atlogger_ctx));
-    prefix = (char *)malloc(sizeof(char) * PREFIX_BUFFER_LEN);
-    memset(prefix, 0, sizeof(char) * PREFIX_BUFFER_LEN);
+    atlogger_init();
   }
 
   ctx->opts = ATLOGGER_ENABLE_TIMESTAMPS;
