@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 typedef struct atchops_rsakey_param {
-  size_t len;    // length of the number in bytes
+  size_t len;           // length of the number in bytes
   unsigned char *value; // hex byte array of the number
 } atchops_rsakey_param;
 
@@ -22,9 +22,32 @@ typedef struct atchops_rsakey_privatekey {
 } atchops_rsakey_privatekey;
 
 void atchops_rsakey_publickey_init(atchops_rsakey_publickey *publickey);
+
+/**
+ * @brief Deep clone an atchops_rsakey_publickey
+ *
+ * @param dst the new copy of key
+ * @param src the src from which to copy from
+ *
+ * @note this allocates memory the same way that atchops_rsakey_publickey_init
+ * does, do not call atchops_rsakey_publickey_init or make sure to call
+ * atchops_rsakey_publickey_free on dst if you are using this function
+ */
+void atchops_rsakey_publickey_clone(atchops_rsakey_publickey *dst, atchops_rsakey_publickey *src);
 void atchops_rsakey_publickey_free(atchops_rsakey_publickey *publickey);
 
 void atchops_rsakey_privatekey_init(atchops_rsakey_privatekey *privatekey);
+/**
+ * @brief Deep clone an atchops_rsakey_privatekey
+ *
+ * @param dst the new copy of key
+ * @param src the src from which to copy from
+ *
+ * @note this allocates memory the same way that atchops_rsakey_privatekey_init
+ * does, do not call atchops_rsakey_privatekey_init or make sure to call
+ * atchops_rsakey_privatekey_free on dst if you are using this function
+ */
+void atchops_rsakey_privatekey_clone(atchops_rsakey_privatekey *dst, atchops_rsakey_privatekey *src);
 void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey);
 
 /**
