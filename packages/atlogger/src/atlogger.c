@@ -13,7 +13,7 @@
 #define ERROR_PREFIX "\e[1;31m[ERRO]\e[0m"
 #define DEBUG_PREFIX "\e[0;34m[DEBG]\e[0m"
 
-static char *prefix;
+static char prefix[PREFIX_BUFFER_LEN];
 static struct timespec timespec;
 
 typedef struct atlogger_ctx {
@@ -21,17 +21,18 @@ typedef struct atlogger_ctx {
   int opts;
 } atlogger_ctx;
 
-static atlogger_ctx *atlogger_get_instance() {
-  static atlogger_ctx *ctx;
+static atlogger_ctx ctx;
+static int is_ctx_initalized = 0;
 
-  if (ctx == NULL) {
-    ctx = (atlogger_ctx *)malloc(sizeof(atlogger_ctx));
-    prefix = (char *)malloc(sizeof(char) * PREFIX_BUFFER_LEN);
+static atlogger_ctx *atlogger_get_instance() {
+  if (is_ctx_initalized == 0) {
     memset(prefix, 0, sizeof(char) * PREFIX_BUFFER_LEN);
+    ctx.opts = ATLOGGER_ENABLE_TIMESTAMPS;
+
+    is_ctx_initalized = 1;
   }
 
-  ctx->opts = ATLOGGER_ENABLE_TIMESTAMPS;
-  return ctx;
+  return &ctx;
 }
 
 static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix, size_t prefixlen) {
