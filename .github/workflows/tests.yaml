@@ -18,7 +18,10 @@ jobs:
 
       - name: atsdk Unit CTest
         run: |
-          ./tools/run_ctest.sh
+          cmake -S . -B build -DATSDK_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+          cmake --build build --target all
+          ctest --test-dir build/packages/atchops/tests --output-on-failure --timeout 2
+          ctest --test-dir build/packages/atclient/tests --output-on-failure --timeout 2
 
   functional-tests:
     runs-on: "ubuntu-latest"
@@ -35,7 +38,10 @@ jobs:
       - name: Build and Run Functional Tests
         working-directory: tests/functional_tests
         run: |
-          tools/run_ctest.sh
+          cmake -S . -B build
+          cmake --build build
+          ctest --test-dir build -VV --timeout 60
+
   build-examples:
     runs-on: "ubuntu-latest"
     steps:
@@ -43,7 +49,8 @@ jobs:
 
       - name: Install atSDK
         run: |
-          tools/install.sh
+          cmake -S . -B build
+          cmake --build build --target install
 
       - name: Build at_talk
         working-directory: examples/desktop/at_talk
@@ -85,3 +92,9 @@ jobs:
         run: |
           cmake -S . -B build
           cmake --build build --target install
+
+      - name: Build sample cmake project
+        working-directory: examples/desktop/sample_cmake_project
+        run: |
+          cmake -S . -B build
+          cmake --build build
