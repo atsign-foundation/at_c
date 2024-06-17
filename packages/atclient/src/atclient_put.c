@@ -130,26 +130,26 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
     ret = atclient_get_shared_encryption_key_shared_by_me(atclient, &recipient, sharedenckeybase64, true);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
 
     // encrypt with shared encryption key
     ret = atchops_iv_generate(iv);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
 
     ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, (unsigned char *)ivbase64, ivbase64size, &ivbase64len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
 
     ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64, ivbase64len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
 
     unsigned char sharedenckey[ATCHOPS_AES_256 / 8];
@@ -159,22 +159,31 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
                                 sizeof(sharedenckey), &sharedenckeylen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
 
     ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertext,
                                  ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
 
     ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *)ciphertextbase64, ciphertextbase64size,
                                 &ciphertextbase64len);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
-      goto exit;
+      goto error_cleanup;
     }
+
+    goto non_error_cleanup;
+
+  error_cleanup: {
+    atclient_atsign_free(&recipient);
+    goto exit;
+  }
+
+  non_error_cleanup: { atclient_atsign_free(&recipient); }
   }
 
   size_t cmdbufferlen = strlen(" update:\r\n") + atkeystrlen + ciphertextbase64len + 1; // + 1 for null terminator
