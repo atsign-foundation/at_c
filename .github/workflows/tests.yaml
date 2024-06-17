@@ -50,7 +50,7 @@ jobs:
       - name: Install atSDK
         run: |
           cmake -S . -B build
-          cmake --build build --target install
+          sudo cmake --build build --target install
 
       - name: Build at_talk
         working-directory: examples/desktop/at_talk
