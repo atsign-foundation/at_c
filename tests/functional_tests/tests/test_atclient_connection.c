@@ -142,8 +142,8 @@ static int test_1_initialize(atclient_connection *conn) {
 
   atclient_connection_init(conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
-  if ((ret = assert_equals(conn->should_be_connected, false)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->should_be_connected should be false, but is true\n");
+  if ((ret = assert_equals(conn->_should_be_connected, false)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->_should_be_connected should be false, but is true\n");
     goto exit;
   }
 
@@ -166,8 +166,8 @@ static int test_2_connect(atclient_connection *conn) {
     goto exit;
   }
 
-  if ((ret = assert_equals(conn->should_be_connected, true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "root_conn.should_be_connected should be true, but is false\n");
+  if ((ret = assert_equals(conn->_should_be_connected, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "root_conn._should_be_connected should be true, but is false\n");
     goto exit;
   }
 
@@ -234,8 +234,8 @@ static int test_5_disconnect(atclient_connection *conn) {
     goto exit;
   }
 
-  if ((ret = assert_equals(conn->should_be_connected, false)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "root_conn.should_be_connected should be false, but is true\n");
+  if ((ret = assert_equals(conn->_should_be_connected, false)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "root_conn._should_be_connected should be false, but is true\n");
     goto exit;
   }
 
@@ -308,8 +308,8 @@ static int test_8_reconnect(atclient_connection *conn) {
     goto exit;
   }
 
-  if (!conn->should_be_connected) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
+  if (!conn->_should_be_connected) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->_should_be_connected should be true, but is false\n");
     ret = 1;
     goto exit;
   }
@@ -345,8 +345,8 @@ static int test_10_free(atclient_connection *conn) {
 
   atclient_connection_free(conn);
 
-  if ((ret = assert_equals(conn->should_be_connected, false)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->should_be_connected should be false, but is true\n");
+  if ((ret = assert_equals(conn->_should_be_connected, false)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->_should_be_connected should be false, but is true\n");
     goto exit;
   }
 
@@ -363,8 +363,8 @@ static int test_11_initialize(atclient_connection *conn) {
 
   atclient_connection_init(conn, ATCLIENT_CONNECTION_TYPE_ATDIRECTORY);
 
-  if ((ret = assert_equals(conn->should_be_connected, false)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->should_be_connected should be false, but is true\n");
+  if ((ret = assert_equals(conn->_should_be_connected, false)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->_should_be_connected should be false, but is true\n");
     goto exit;
   }
 
@@ -491,11 +491,11 @@ static int test_17_should_be_connected_should_be_true(atclient_connection *conn)
 
   int ret = 1;
 
-  if ((ret = assert_equals(conn->should_be_connected, true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->should_be_connected should be true, but is false\n");
+  if ((ret = assert_equals(conn->_should_be_connected, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->_should_be_connected should be true, but is false\n");
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "conn->should_be_connected is true, as expected\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "conn->_should_be_connected is true, as expected\n");
 
   ret = 0;
   goto exit;
