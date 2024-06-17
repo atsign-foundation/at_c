@@ -46,16 +46,12 @@ static void free_contexts(atclient_connection *ctx) {
 }
 
 void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type) {
-
-  if (ctx == NULL) {
-    return; // how should we handle this error?
-  }
-
   memset(ctx, 0, sizeof(atclient_connection));
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
   ctx->should_be_connected = false;
   ctx->type = type;
+  ctx->hooks = NULL;
 }
 
 int atclient_connection_connect(atclient_connection *ctx, const char *host, const int port) {
@@ -494,7 +490,7 @@ int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_
   atclient_connection_hooks *hooks = ctx->hooks;
   if (hooks == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Make sure to initialize hooks struct before trying to set a hook\n");
+                 "Make sure to enable hooks struct before trying to set a hook\n");
     return -1;
   }
 
@@ -522,7 +518,7 @@ int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_
 void atclient_connection_hooks_set_readonly_src(atclient_connection *ctx, bool readonly_src) {
   if (ctx->hooks == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Make sure to initialize hooks struct before trying to set readonly_src\n");
+                 "Make sure to enable hooks struct before trying to set readonly_src\n");
     return;
   }
   ctx->hooks->readonly_src = readonly_src;
