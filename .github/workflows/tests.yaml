@@ -96,5 +96,5 @@ jobs:
       - name: Build sample cmake project
         working-directory: examples/desktop/sample_cmake_project
         run: |
-          cmake -S . -B build
+          cmake -S . -B build -Datsdk="/usr/local/bin/cmake/atsdk"
           cmake --build build
