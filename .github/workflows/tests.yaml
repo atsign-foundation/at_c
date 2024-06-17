@@ -35,6 +35,11 @@ jobs:
           echo "${{ secrets.ATKEYS_12ALPACA }}" > ~/.atsign/keys/@12alpaca_key.atKeys
           echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > ~/.atsign/keys/@12snowboating_key.atKeys
 
+      - name: Install atSDK
+        run: |
+          cmake -S . -B build
+          sudo cmake --build build --target install
+
       - name: Build and Run Functional Tests
         working-directory: tests/functional_tests
         run: |
