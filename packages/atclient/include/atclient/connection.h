@@ -39,8 +39,17 @@ typedef struct atclient_connection_hooks {
 } atclient_connection_hooks;
 
 typedef struct atclient_connection {
+  atclient_connection_type type;
+
   char host[ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE];
   int port; // example: 64
+
+  // atclient_connection_connect sets this to true and atclient_connection_disconnect sets this to false
+  // this does not mean that the connection is still alive, it just means that the connection was established at least
+  // once, at some  point, check atclient_connection_is_connected for a live status on the connection
+  // _should_be_connected also serves as an internal boolean to check if the following mbedlts contexts have been
+  // initialized and need to be freed at the end
+  bool _should_be_connected;
   mbedtls_net_context net;
   mbedtls_ssl_context ssl;
   mbedtls_ssl_config ssl_config;
@@ -48,13 +57,7 @@ typedef struct atclient_connection {
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
 
-  atclient_connection_type type;
-
-  // atclient_connection_connect sets this to true and atclient_connection_disconnect sets this to false
-  // this does not mean that the connection is still alive, it just means that the connection was established or taken
-  // down at some point, check atclient_connection_is_connected for a live status on the connection
-  bool should_be_connected;
-
+  bool _is_hooks_enabled;
   atclient_connection_hooks *hooks;
 } atclient_connection;
 

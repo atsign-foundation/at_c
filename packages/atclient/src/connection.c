@@ -45,30 +45,35 @@ static void free_contexts(atclient_connection *ctx) {
   mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
 }
 
-void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type) {
-
-  if (ctx == NULL) {
-    return; // how should we handle this error?
+static void free_connection_hooks(atclient_connection *ctx) {
+  if (ctx->hooks != NULL && ctx->_is_hooks_enabled) {
+    free(ctx->hooks);
+    ctx->hooks = NULL;
+    ctx->_is_hooks_enabled = false;
   }
+}
 
+void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type) {
   memset(ctx, 0, sizeof(atclient_connection));
+  ctx->type = type;
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
-  ctx->should_be_connected = false;
-  ctx->type = type;
+  ctx->_should_be_connected = false;
+  ctx->hooks = NULL;
+  ctx->_is_hooks_enabled = false;
 }
 
 int atclient_connection_connect(atclient_connection *ctx, const char *host, const int port) {
   int ret = 1;
 
-  if (ctx->should_be_connected) {
+  if (ctx->_should_be_connected) {
     if((ret = atclient_connection_disconnect(ctx)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "atclient_connection_disconnect failed with exit code: %d. Continuing connection anyways..\n", ret);
     }
   }
 
   init_contexts(ctx);
-  ctx->should_be_connected = true;
+  ctx->_should_be_connected = true;
 
   const size_t readbufsize = 1024;
   unsigned char readbuf[readbufsize];
@@ -229,9 +234,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     src = (unsigned char *)src_r;
   }
 
-  if (!ctx->should_be_connected) {
+  if (!ctx->_should_be_connected) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "ctx->should_be_connected should be true, but is false. You are trying to send messages to a "
+                 "ctx->_should_be_connected should be true, but is false. You are trying to send messages to a "
                  "non-connected connection.\n");
     goto exit;
   }
@@ -377,9 +382,9 @@ exit: {
 int atclient_connection_disconnect(atclient_connection *ctx) {
   int ret = 1;
 
-  if (!ctx->should_be_connected) {
+  if (!ctx->_should_be_connected) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "ctx->should_be_connected should be true, but is false, it was never connected in the first place!\n");
+                 "ctx->_should_be_connected should be true, but is false, it was never connected in the first place!\n");
     goto exit;
   }
 
@@ -388,7 +393,7 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
   } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_WANT_READ || ret != 0);
 
   free_contexts(ctx);
-  ctx->should_be_connected = false;
+  ctx->_should_be_connected = false;
 
   ret = 0;
 
@@ -398,8 +403,8 @@ exit: { return ret; }
 
 bool atclient_connection_is_connected(atclient_connection *ctx) {
 
-  if (!ctx->should_be_connected) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->should_be_connected should be true, but is false\n");
+  if (!ctx->_should_be_connected) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->_should_be_connected should be true, but is false\n");
     return false;
   }
 
@@ -435,17 +440,16 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
 }
 
 void atclient_connection_free(atclient_connection *ctx) {
-  if (ctx->should_be_connected) {
+  if (ctx->_should_be_connected) {
     free_contexts(ctx);
+  }
+  if (ctx->hooks != NULL) {
+    free(ctx->hooks);
   }
   memset(ctx, 0, sizeof(atclient_connection));
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
-  ctx->should_be_connected = false;
-
-  if (ctx->hooks != NULL) {
-    free(ctx->hooks);
-  }
+  ctx->_should_be_connected = false;
 }
 
 int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url) {
@@ -486,15 +490,16 @@ void atclient_connection_enable_hooks(atclient_connection *ctx) {
   ctx->hooks = malloc(sizeof(atclient_connection_hooks));
   memset(ctx->hooks, 0, sizeof(atclient_connection_hooks));
   ctx->hooks->readonly_src = true;
+  ctx->_is_hooks_enabled = true;
 }
 
 // Q. Why is hook a void pointer?
 // A. In case we want to add future hook types which use a different function signature
 int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_hook_type type, void *hook) {
   atclient_connection_hooks *hooks = ctx->hooks;
-  if (hooks == NULL) {
+  if (hooks == NULL || !ctx->_is_hooks_enabled) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Make sure to initialize hooks struct before trying to set a hook\n");
+                 "Make sure to enable hooks struct before trying to set a hook\n");
     return -1;
   }
 
@@ -522,7 +527,7 @@ int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_
 void atclient_connection_hooks_set_readonly_src(atclient_connection *ctx, bool readonly_src) {
   if (ctx->hooks == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Make sure to initialize hooks struct before trying to set readonly_src\n");
+                 "Make sure to enable hooks struct before trying to set readonly_src\n");
     return;
   }
   ctx->hooks->readonly_src = readonly_src;
