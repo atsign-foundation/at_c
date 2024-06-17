@@ -443,14 +443,13 @@ void atclient_connection_free(atclient_connection *ctx) {
   if (ctx->_should_be_connected) {
     free_contexts(ctx);
   }
+  if (ctx->hooks != NULL) {
+    free(ctx->hooks);
+  }
   memset(ctx, 0, sizeof(atclient_connection));
   memset(ctx->host, 0, ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE);
   ctx->port = -1;
   ctx->_should_be_connected = false;
-
-  if (ctx->hooks != NULL) {
-    free(ctx->hooks);
-  }
 }
 
 int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url) {
