@@ -124,6 +124,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   ret = 0;
   goto exit;
 exit: {
+  atclient_atstr_free(&atkeystr);
   if (root != NULL) {
     cJSON_Delete(root);
   }
