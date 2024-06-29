@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No atKey entered\n");
           continue;
         }
+        atkeystr[strcspn(atkeystr, "\n")] = 0;
         atclient_atkey atkey;
         atclient_atkey_init(&atkey);
 
