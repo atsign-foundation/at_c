@@ -169,6 +169,18 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
 
 /**
+ * @brief Runs a scan of the atServer to see what atKeys you have.
+ *
+ * @param atclient the initialized and pkam_authenticated atclient context
+ * @param regex (input): the regex pattern for what keys to filter
+ * @param showhidden (input): true to show "hidden" keys (which are keys that begin with an _), false otherwise
+ * @param atkey (output): a double pointer which will be a pointer to the first atkey in the array. caller of this function is responsible for 
+ * @param output_array_len (output): the overall size of the array that was allocated
+ * @return int 0 on success
+ */
+int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhidden, atclient_atkey **atkey, size_t *output_array_len);
+
+/**
  * @brief Send a heartbeat (noop)
  * @param heartbeat_conn the initialized and pkam authenticated atclient context to send the heartbeat
  * @return 0 on success, non-zero on error

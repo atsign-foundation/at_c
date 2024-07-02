@@ -6,6 +6,7 @@ set(ATCLIENT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(
   ATCLIENT_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/src/atbytes.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_atkeys.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
