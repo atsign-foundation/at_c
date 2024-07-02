@@ -5,6 +5,7 @@
 #include "atclient/atkeys.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define TAG "encryption_key_helpers"
@@ -337,13 +338,13 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith->without_prefix_str) +
                                 strlen(sharedby->atsign) + 1 + sharedenckeybase64encryptedforuslen;
   cmdbuffer1 = (char *)malloc(sizeof(char) * cmdbuffersize1);
-  memset(cmdbuffer1, 0, sizeof(char) * cmdbuffersize1);
+  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
+           sharedby->atsign, sharedenckeybase64encryptedforus);
 
   // 5b. for them (update:shared_key.sharedwith@sharedby <encrypted for them>\r\n)
   const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
                                 strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
   cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2);
-  memset(cmdbuffer2, 0, sizeof(char) * cmdbuffersize2);
   snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
            sharedby->atsign, sharedenckeybase64encryptedforus);
 
