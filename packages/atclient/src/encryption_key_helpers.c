@@ -282,7 +282,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
     return ret;
   }
 
-  // 3. encrypt for us (with self encryption key)
+  // 3. encrypt for us (with encrypt public key)
   ret =
       atchops_rsa_encrypt(atclient->atkeys.encryptpublickey, (unsigned char *)sharedenckeybase64, sharedenckeybase64len,
                           sharedenckeyencryptedforus, sharedenckeyencryptedforussize, &sharedenckeyencryptedforuslen);
