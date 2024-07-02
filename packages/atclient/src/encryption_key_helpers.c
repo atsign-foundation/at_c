@@ -345,8 +345,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
                                 strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
   cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2);
-  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
-           sharedby->atsign, sharedenckeybase64encryptedforus);
+  snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith->atsign, sharedby->atsign,
+           sharedenckeybase64encryptedforthem);
 
   // 6. put "encrypted for us" into key store
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
