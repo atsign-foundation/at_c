@@ -5,6 +5,7 @@
 #include "atclient/atkeys.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define TAG "encryption_key_helpers"
@@ -26,8 +27,8 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, commandsize - 1, recv,
-                                 recvsize, &recvlen);
+  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)command, commandsize - 1, recv, recvsize,
+                                 &recvlen);
   if (ret != 0) {
     return ret;
   }
@@ -262,6 +263,17 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   char publickeybase64[publickeybase64size];
   memset(publickeybase64, 0, sizeof(char) * publickeybase64size);
 
+  const size_t recvsize = 2048;
+  unsigned char recv[recvsize];
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  size_t recvlen = 0;
+
+  char *cmdbuffer1 = NULL;
+  char *cmdbuffer2 = NULL;
+
+  atchops_rsakey_publickey publickeystruct;
+  atchops_rsakey_publickey_init(&publickeystruct);
+
   // 2. generate shared encryption key
   ret = atchops_aes_generate_keybase64(sharedenckeybase64, sharedenckeybase64size, &sharedenckeybase64len,
                                        ATCHOPS_AES_256);
@@ -270,7 +282,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
     return ret;
   }
 
-  // 3. encrypt for us (with self encryption key)
+  // 3. encrypt for us (with encrypt public key)
   ret =
       atchops_rsa_encrypt(atclient->atkeys.encryptpublickey, (unsigned char *)sharedenckeybase64, sharedenckeybase64len,
                           sharedenckeyencryptedforus, sharedenckeyencryptedforussize, &sharedenckeyencryptedforuslen);
@@ -297,8 +309,6 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   }
 
   // create a rsakey public (atchops)
-  atchops_rsakey_publickey publickeystruct;
-  atchops_rsakey_publickey_init(&publickeystruct);
   ret = atchops_rsakey_populate_publickey(&publickeystruct, publickeybase64, strlen(publickeybase64));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d\n", ret);
@@ -320,39 +330,30 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "failed to base64 encode shared enc key for them | atchops_base64_encode: %d\n", ret);
-    return ret;
+    goto exit;
   }
 
   // 5. prep protocol commands
-
   // 5a. for us (update:shared_key.sharedby@sharedwith <encrypted for us>\r\n)
   const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith->without_prefix_str) +
                                 strlen(sharedby->atsign) + 1 + sharedenckeybase64encryptedforuslen;
-  char cmdbuffer1[cmdbuffersize1];
-  memset(cmdbuffer1, 0, sizeof(char) * cmdbuffersize1);
+  cmdbuffer1 = (char *)malloc(sizeof(char) * cmdbuffersize1);
   snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
            sharedby->atsign, sharedenckeybase64encryptedforus);
 
   // 5b. for them (update:shared_key.sharedwith@sharedby <encrypted for them>\r\n)
   const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
                                 strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
-  char cmdbuffer2[cmdbuffersize2];
-  memset(cmdbuffer2, 0, sizeof(char) * cmdbuffersize2);
+  cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2);
   snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith->atsign, sharedby->atsign,
            sharedenckeybase64encryptedforthem);
 
-  // 5c. receive buffer
-  const size_t recvsize = 2048;
-  unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
-  size_t recvlen = 0;
-
-  // 5. put "encrypted for us" into key store
+  // 6. put "encrypted for us" into key store
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
-    return ret;
+    goto exit;
   }
 
   // check if the key was successfully stored
@@ -360,7 +361,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
-    return ret;
+    goto exit;
   }
 
   memset(recv, 0, sizeof(unsigned char) * recvsize);
@@ -370,7 +371,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
                                  recv, recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
-    return ret;
+    goto exit;
   }
 
   // check if the key was successfully stored
@@ -378,11 +379,19 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
-    return ret;
+    goto exit;
   }
 
   // 7. return shared encryption key by me
   memcpy(sharedenckeybyme, sharedenckeybase64, sharedenckeybase64len);
 
-  return 0;
+  ret = 0;
+  goto exit;
+
+exit: {
+  atchops_rsakey_publickey_free(&publickeystruct);
+  free(cmdbuffer1);
+  free(cmdbuffer2);
+  return ret;
+}
 }

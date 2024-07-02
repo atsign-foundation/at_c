@@ -102,19 +102,83 @@ int main(int argc, char *argv[]) {
 
   bool loop = true;
   do {
-    printf("Enter command: \n");
+    printf("Enter command: ");
     fgets(buffer, buffersize, stdin);
     bufferlen = strlen(buffer);
-    if (strncmp(buffer, "/exit", strlen("/exit")) == 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Exiting REPL...\n");
-      loop = false;
+
+    if (bufferlen <= 0) {
       continue;
     }
-    ret = atclient_connection_send(&atclient.atserver_connection, (const unsigned char *)buffer, bufferlen, recv,
-                                   recvsize, &recvlen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d | failed to send command\n", ret);
-      goto exit;
+
+    if (buffer[0] != '/') {
+      ret = atclient_connection_send(&(atclient.atserver_connection), (const unsigned char *)buffer, bufferlen, recv,
+                                     recvsize, &recvlen);
+      if (ret != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d | failed to send command: %s\n",
+                     ret, buffer);
+      }
+    } else {
+
+      char *command = strtok(buffer, " ");
+      if (command == NULL) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No command entered\n");
+        continue;
+      }
+
+      if (strcmp(command, "/exit") == 0) {
+        loop = false;
+        continue;
+      } else if (strcmp(command, "/get") == 0) {
+        char *atkeystr = strtok(NULL, " ");
+        if (atkeystr == NULL) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No atKey entered\n");
+          continue;
+        }
+        atkeystr[strcspn(atkeystr, "\n")] = 0;
+        atclient_atkey atkey;
+        atclient_atkey_init(&atkey);
+
+        if ((ret = atclient_atkey_from_string(&atkey, atkeystr, strlen(atkeystr)))) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n",
+                       ret);
+          goto get_end;
+        }
+
+        switch (atkey.atkeytype) {
+        case ATCLIENT_ATKEY_TYPE_UNKNOWN: {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown atKey type\n");
+          goto get_end;
+        }
+        case ATCLIENT_ATKEY_TYPE_PUBLICKEY: {
+          if ((ret = atclient_get_publickey(&atclient, &atkey, recv, recvsize, &recvlen, true)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_publickey: %d | failed to get public key\n",
+                         ret);
+            goto get_end;
+          }
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
+          break;
+        }
+        case ATCLIENT_ATKEY_TYPE_SELFKEY: {
+          if ((ret = atclient_get_selfkey(&atclient, &atkey, recv, recvsize, &recvlen)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_selfkey: %d | failed to get self key\n", ret);
+            goto get_end;
+          }
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
+          break;
+        }
+        case ATCLIENT_ATKEY_TYPE_SHAREDKEY: {
+          if ((ret = atclient_get_sharedkey(&atclient, &atkey, recv, recvsize, &recvlen, NULL, true)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey: %d | failed to get shared key\n",
+                         ret);
+            goto get_end;
+          }
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
+          break;
+        }
+        }
+
+      get_end: { atclient_atkey_free(&atkey); }
+      }
     }
     memset(buffer, 0, sizeof(char) * buffersize);
     memset(recv, 0, sizeof(unsigned char) * recvsize);
