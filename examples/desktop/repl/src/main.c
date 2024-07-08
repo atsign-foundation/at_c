@@ -124,6 +124,7 @@ int main(int argc, char *argv[]) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No command entered\n");
         continue;
       }
+      command[strcspn(command, "\n")] = 0;
 
       if (strcmp(command, "/exit") == 0) {
         loop = false;
@@ -178,10 +179,38 @@ int main(int argc, char *argv[]) {
         }
 
       get_end: { atclient_atkey_free(&atkey); }
+      } else if (strcmp(command, "/scan") == 0) {
+        char *regex = NULL;
+        char *saveptr = NULL;
+        regex = strtok_r(NULL, " ", &saveptr);
+        atclient_atkey *arr = NULL;
+        size_t arrlen = 0;
+        if ((ret = atclient_get_atkeys(&atclient, regex, true, 8192, &arr, &arrlen)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
+          goto scan_end;
+        }
+        const size_t atkeybufsize = 1024;
+        char atkeybuf[1024];
+        size_t atkey_buf_len;
+        for (size_t i = 0; i < arrlen; i++) {
+          memset(atkeybuf, 0, sizeof(char) * atkeybufsize);
+          atclient_atkey_to_string(&arr[i], atkeybuf, atkeybufsize, &atkey_buf_len);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atKey[%i]: \'%s\'\n", i, atkeybuf);
+        }
+      scan_end: {
+        for (size_t i = 0; i < arrlen; i++) {
+          atclient_atkey_free(&arr[i]);
+        }
+        free(arr);
+      }
+      } else {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown command: %s\n", command);
       }
     }
+
     memset(buffer, 0, sizeof(char) * buffersize);
     memset(recv, 0, sizeof(unsigned char) * recvsize);
+
   } while (loop);
 
   ret = 0;
