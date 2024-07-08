@@ -20,7 +20,7 @@ typedef struct atclient {
   bool _atsign_is_allocated : 1; // internally used for memory management
 
   atclient_atkeys atkeys;
-  
+
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
   bool async_read;
@@ -174,11 +174,14 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
  * @param atclient the initialized and pkam_authenticated atclient context
  * @param regex (input): the regex pattern for what keys to filter
  * @param showhidden (input): true to show "hidden" keys (which are keys that begin with an _), false otherwise
- * @param atkey (output): a double pointer which will be a pointer to the first atkey in the array. caller of this function is responsible for 
+ * @param recvbuffersize (input): the size of the buffer to receive the response from the atServer
+ * @param atkey (output): a double pointer which will be a pointer to the first atkey in the array. caller of this
+ * function is responsible for each individual atkey in the array using `atclient_atkey_free`
  * @param output_array_len (output): the overall size of the array that was allocated
  * @return int 0 on success
  */
-int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhidden, atclient_atkey **atkey, size_t *output_array_len);
+int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhidden, const size_t recvbuffersize,
+                        atclient_atkey **atkey, size_t *output_array_len);
 
 /**
  * @brief Send a heartbeat (noop)
