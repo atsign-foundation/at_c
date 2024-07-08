@@ -62,6 +62,9 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
     goto exit;
   }
 
+  // log recevied bytes
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv was %lu bytes long\n", recvlen);
+
   // 2. parse response
   if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
