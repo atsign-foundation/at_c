@@ -203,6 +203,30 @@ int main(int argc, char *argv[]) {
         }
         free(arr);
       }
+      } else if(strcmp(command, "/deleteall") == 0) {
+        atclient_atkey *arr = NULL;
+        size_t arrlen = 0;
+        if((ret = atclient_get_atkeys(&atclient, NULL, true, 8192, &arr, &arrlen)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
+          goto deleteall_end;
+        }
+        char buf[4096];
+        size_t bufolen;
+        for(size_t i = 0; i < arrlen; i++) {
+          if((ret = atclient_delete(&atclient, &arr[i])) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d | failed to delete atKey\n", ret);
+            continue;
+          }
+          memset(buf, 0, sizeof(char) * 4096);
+          atclient_atkey_to_string(&arr[i], buf, 4096, &bufolen);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Deleted atKey: %s\n", buf);
+        }
+      deleteall_end: {
+        for (size_t i = 0; i < arrlen; i++) {
+          atclient_atkey_free(&arr[i]);
+        }
+        free(arr);
+      }
       } else {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown command: %s\n", command);
       }
