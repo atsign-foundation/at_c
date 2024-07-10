@@ -164,7 +164,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
       goto exit;
     }
-    char *namespacestr = strtok_r(NULL, ".", &saveptr2);
+    char *namespacestr = strtok_r(NULL, "", &saveptr2);
     if (namespacestr == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                             "namespacestr is NULL. %s atkey is probably incomplete\n", atkeystr);
