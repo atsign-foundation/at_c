@@ -122,10 +122,10 @@ exit: {
 
 size_t atchops_aes_ctr_ciphertext_size(const size_t plaintextlen)
 {
-  return (plaintextlen + 15) & ~0xF;
+  return ((plaintextlen + 15) & ~0xF) + 16;
 }
 
 size_t atchops_aes_ctr_plaintext_size(const size_t ciphertextlen)
 {
-  return (ciphertextlen + 15) & ~0xF;
+  return ((ciphertextlen + 15) & ~0xF) + 16;
 }
