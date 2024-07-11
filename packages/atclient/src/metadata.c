@@ -726,15 +726,25 @@ size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *
          + metadata->skeencalgo.len;
 }
 
-int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                            const size_t metadatastrsize, size_t *metadatastrlen) {
+int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char **metadatastr) {
   int ret = 1;
-  size_t pos = 0;
-  size_t len = atclient_atkey_metadata_protocol_strlen(metadata);
-  if (len > metadatastrsize) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr buffer too small: %lu > %lu\n", len, metadatastrsize);
-    return 1;
+
+  if (metadata == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata is NULL\n");
+    goto exit;
   }
+
+  if (metadatastr == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr is NULL\n");
+    goto exit;
+  }
+
+  const size_t metadatastrsize = atclient_atkey_metadata_protocol_strlen(metadata) + 1;
+  const size_t expected_metadatastr_len = metadatastrsize - 1;
+  size_t pos = 0;
+
+  *metadatastr = malloc(sizeof(char) * metadatastrsize);
+  memset(*metadatastr, 0, sizeof(char) * metadatastrsize);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
     sprintf(metadatastr + pos, ":ttl:%ld", metadata->ttl);
@@ -836,18 +846,15 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
     pos += 12 + metadata->skeencalgo.len;
   }
 
-  if (strlen(metadatastr) != len) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n", strlen(metadatastr),
-                 len);
+  if (strlen(metadatastr) != (expected_metadatastr_len - 1)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n", strlen(metadatastr),
+                 (expected_metadatastr_len - 1));
     goto exit;
   }
 
-  *metadatastrlen = len;
-
   ret = 0;
   goto exit;
-
 exit: { return ret; }
 }
 

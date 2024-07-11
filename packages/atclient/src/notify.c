@@ -52,13 +52,13 @@ void atclient_notify_params_free(atclient_notify_params *params) { memset(params
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id) {
 
-  int res = 1;
+  int ret = 1;
 
   if (ctx->async_read) {
     atlogger_log(
         TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
         "atclient_notify cannot be called from an async_read=true atclient, it will cause a race condition.\n");
-    return res;
+    return ret;
   }
 
   // holds the value to be added to the cmd, could be plaintext or ciphertext
@@ -93,75 +93,75 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     size_t sharedenckeylen;
 
     if (params->sharedenckeybase64 != NULL) {
-      res = atchops_base64_decode((unsigned char *)params->sharedenckeybase64, strlen(params->sharedenckeybase64),
+      ret = atchops_base64_decode((unsigned char *)params->sharedenckeybase64, strlen(params->sharedenckeybase64),
                                   sharedenckey, sharedenckeysize, &sharedenckeylen);
-      if (res != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", res);
-        return res;
+      if (ret != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", ret);
+        return ret;
       }
       if (sharedenckeylen != sharedenckeysize) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed. Expected %lu but got %lu\n",
                      sharedenckeysize, sharedenckeylen);
-        res = 1;
-        return res;
+        ret = 1;
+        return ret;
       }
     } else {
       atclient_atsign recipient;
       const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize) + 1;
       unsigned char sharedenckeybase64[sharedenckeybase64size];
       memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-      if ((res = atclient_atsign_init(&recipient, params->atkey->sharedwith.str)) != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", res);
-        return res;
+      if ((ret = atclient_atsign_init(&recipient, params->atkey->sharedwith.str)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", ret);
+        return ret;
       }
-      if ((res = atclient_get_shared_encryption_key_shared_by_me(ctx, &recipient, (char *)sharedenckeybase64, true)) !=
+      if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, &recipient, (char *)sharedenckeybase64, true)) !=
           0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                     "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", res);
+                     "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", ret);
                      atclient_atsign_free(&recipient);
-        return res;
+        return ret;
       }
-      if ((res = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
+      if ((ret = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
                                        sharedenckeysize, &sharedenckeylen)) != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", res);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", ret);
         atclient_atsign_free(&recipient);
-        return res;
+        return ret;
       }
       atclient_atsign_free(&recipient);
     }
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
     memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-    res = atchops_iv_generate(iv);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate failed with code %d\n", res);
-      return res;
+    ret = atchops_iv_generate(iv);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate failed with code %d\n", ret);
+      return ret;
     }
 
-    res = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, &ivbase64len);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
-      return res;
+    ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, &ivbase64len);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", ret);
+      return ret;
     }
 
-    res = atclient_atkey_metadata_set_ivnonce(&(params->atkey->metadata), (char *)ivbase64, ivbase64len);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", res);
-      return res;
+    ret = atclient_atkey_metadata_set_ivnonce(&(params->atkey->metadata), (char *)ivbase64, ivbase64len);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", ret);
+      return ret;
     }
 
-    res = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)params->value,
+    ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)params->value,
                                  strlen(params->value), ciphertext, ciphertextsize, &ciphertextlen);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt failed with code %d\n", res);
-      return res;
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt failed with code %d\n", ret);
+      return ret;
     }
 
-    res =
+    ret =
         atchops_base64_encode(ciphertext, ciphertextlen, ciphertextbase64, ciphertextbase64size, &ciphertextbase64len);
-    if (res != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", res);
-      return res;
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode failed with code %d\n", ret);
+      return ret;
     }
 
     cmdvalue = malloc(sizeof(char) * (ciphertextbase64len + 1));
@@ -177,9 +177,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
 
   size_t cmdlen = 0;
 
-  res = generate_cmd(params, cmdvalue, cmdvaluelen, &cmd, &cmdlen);
-  if (res != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "generate_cmd failed with code %d\n", res);
+  ret = generate_cmd(params, cmdvalue, cmdvaluelen, &cmd, &cmdlen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "generate_cmd failed with code %d\n", ret);
     goto exit;
   }
 
@@ -192,9 +192,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   }
   size_t recvlen = 0;
 
-  res = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
-  if (res != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", res);
+  ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cmd, cmdlen, recv, recvsize, &recvlen);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send failed with code %d\n", ret);
     goto exit;
   } else if (ctx->async_read) {
     goto exit;
@@ -212,10 +212,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       strncpy(notification_id, data, datalen);
       notification_id[datalen] = '\0';
     }
-    res = 0;
+    ret = 0;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unexpected response: %.*s\n", (int)recvlen, recv);
-    res = 1;
+    ret = 1;
   }
 
 exit: {
@@ -224,7 +224,7 @@ exit: {
   }
   free(cmdvalue);
   free(cmd);
-  return res;
+  return ret;
 }
 }
 
@@ -288,7 +288,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   int res = 1;
 
   char *cmd = NULL;
-  char *metadatastr = NULL;
+  char *metadata_protocol_str = NULL;
 
   size_t atkeylen = 0;
   size_t metadatastrlen = 0;
@@ -348,21 +348,21 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
     off += strlen(":ttln:") + long_strlen(params->notification_expiry);
   }
 
-  size_t metadatastrolen;
-  if ((res = atclient_atkey_metadata_to_protocol_str(&params->atkey->metadata, cmd + off, metadatastrlen,
-                                                     &metadatastrolen)) != 0) {
+  if ((res = atclient_atkey_metadata_to_protocol_str(&params->atkey->metadata, &metadata_protocol_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code: %d\n",
                  res);
     goto exit;
   }
-  if (metadatastrolen != metadatastrlen) {
+  snprintf(cmd + off, cmdsize - off, "%s", metadata_protocol_str);
+
+  if (strlen(metadata_protocol_str) != metadatastrlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkey_metadata_to_protocol_str mismatch. Expected %lu but got %lu\n", metadatastrlen,
-                 metadatastrolen);
+                 strlen(metadata_protocol_str));
     res = 1;
     goto exit;
   }
-  off += metadatastrolen;
+  off += strlen(metadata_protocol_str);
 
   snprintf(cmd + off, metadatastrlen, ":");
   off += strlen(":");
@@ -404,7 +404,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   goto exit;
 
 exit: {
-  free(metadatastr);
+  free(metadata_protocol_str);
   return res;
 }
 }

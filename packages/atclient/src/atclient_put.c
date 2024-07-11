@@ -16,16 +16,42 @@
 #define TAG "atclient_put"
 
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
-  if (atclient->async_read) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
-    return 1;
-  }
   int ret = 1;
+
+  if (atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    return ret;
+  }
+
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    return ret;
+  }
+
+  if (value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
+    return ret;
+  }
+
+  if (valuelen == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuelen is 0\n");
+    return ret;
+  }
 
   // make sure shared by is atclient->atsign.atsign
   if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
+    return ret;
+  }
+
+  if (atclient->async_read) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
     return ret;
   }
 
@@ -36,7 +62,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   size_t atkeystrlen = 0;
 
   const size_t recvsize = 4096;
-  unsigned char *recv;
+  unsigned char *recv = NULL;
   if (!atclient->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
     memset(recv, 0, sizeof(unsigned char) * recvsize);
@@ -47,15 +73,10 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
   memset(iv, 0, sizeof(unsigned char) * ivsize);
 
-  const size_t ivbase64size = 64;
+  const size_t ivbase64size = atchops_base64_encoded_size(ivsize);
   char ivbase64[ivbase64size];
   memset(ivbase64, 0, sizeof(char) * ivbase64size);
   size_t ivbase64len = 0;
-
-  const size_t metadataprotocolstrsize = 2048;
-  char metadataprotocolstr[metadataprotocolstrsize];
-  memset(metadataprotocolstr, 0, sizeof(char) * metadataprotocolstrsize);
-  size_t metadataprotocolstrlen = 0;
 
   const size_t ciphertextsize = 4096;
   unsigned char ciphertext[ciphertextsize];
@@ -72,18 +93,12 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   memset(sharedenckeybase64, 0, sizeof(char) * sharedenckeybase64size);
 
   char *cmdbuffer = NULL;
+  char *metadata_protocol_str = NULL;
 
   // 2. build update: command
   ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrsize, &atkeystrlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), metadataprotocolstr, metadataprotocolstrsize,
-                                                &metadataprotocolstrlen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;
   }
 
@@ -188,20 +203,21 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
 
   size_t cmdbufferlen = strlen(" update:\r\n") + atkeystrlen + ciphertextbase64len + 1; // + 1 for null terminator
 
-  ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), metadataprotocolstr, metadataprotocolstrsize,
-                                                &metadataprotocolstrlen);
+  ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), &(metadata_protocol_str));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
     goto exit;
   }
 
-  if (metadataprotocolstrlen > 0) {
-    cmdbufferlen += metadataprotocolstrlen;
+  const size_t metadata_protocol_str_len = strlen(metadata_protocol_str);
+
+  if (metadata_protocol_str_len > 0) {
+    cmdbufferlen += metadata_protocol_str_len;
   }
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, sizeof(char) * cmdbufferlen);
 
-  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int)metadataprotocolstrlen, metadataprotocolstr,
+  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int) metadata_protocol_str_len, metadata_protocol_str,
            (int)atkeystrlen, atkeystr, (int)ciphertextbase64len, ciphertextbase64);
 
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
@@ -232,6 +248,7 @@ exit: {
     free(recv);
   }
   free(cmdbuffer);
+  free(metadata_protocol_str);
   return ret;
 }
 }

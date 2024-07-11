@@ -307,13 +307,13 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
  * update:meta and notify)
  *
  * @param metadata the metadata struct to read from
- * @param metadatastr the buffer to write the metadata to
- * @param metadatastrsize the allocated length of the metadatastr buffer
- * @param metadatastrlen the length of the metadata string written to metadatastr once the operation is complete
+ * @param metadatastr a double pointer to the string that will be allocated and written to. This function will allocate
+ * the memory dynamically for you. All you have to do is pass the address to a pointer where the function will give you
+ * an address for you. If this function returns a zero (which means success), then it is the caller's responsibility to
+ * free the pointer.
  * @return int 0 on success
  */
-int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                            const size_t metadatastrsize, size_t *metadatastrlen);
+int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metadata, char **metadatastr);
 
 bool atclient_atkey_metadata_is_createdby_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_updatedby_initialized(const atclient_atkey_metadata *metadata);
