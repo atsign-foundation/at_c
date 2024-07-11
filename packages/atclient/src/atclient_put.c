@@ -15,47 +15,22 @@
 
 #define TAG "atclient_put"
 
+static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid);
+
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
   int ret = 1;
 
-  if (atclient == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+  /*
+   * 1. Check if valid arguments were passed
+   */
+  if((ret = atclient_put_valid_args_check(atclient, atkey, value, valuelen, commitid)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_valid_args_check: %d\n", ret);
     return ret;
   }
 
-  if (atkey == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
-    return ret;
-  }
-
-  if (value == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
-    return ret;
-  }
-
-  if (valuelen == 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuelen is 0\n");
-    return ret;
-  }
-
-  // make sure shared by is atclient->atsign.atsign
-  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
-    return ret;
-  }
-
-  if (atclient->async_read) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
-    return ret;
-  }
-
-  // 1. initialize variables
+  /*
+   * 2. Allocate variables
+   */
   const size_t atkeystrsize = ATCLIENT_ATKEY_FULL_LEN;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
@@ -251,5 +226,48 @@ exit: {
   free(cmdbuffer);
   free(metadata_protocol_str);
   return ret;
+}
+}
+
+static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) 
+{
+{
+  int ret = 1;
+  if (atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    return ret;
+  }
+
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    return ret;
+  }
+
+  if (value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
+    return ret;
+  }
+
+  if (valuelen == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuelen is 0\n");
+    return ret;
+  }
+
+  // make sure shared by is atclient->atsign.atsign
+  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
+    return ret;
+  }
+
+  if (atclient->async_read) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
+    return ret;
+  }
 }
 }
