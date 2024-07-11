@@ -118,7 +118,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
           0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                      "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", ret);
-                     atclient_atsign_free(&recipient);
+        atclient_atsign_free(&recipient);
         return ret;
       }
       if ((ret = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
@@ -297,16 +297,16 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
 
   cmdsize = calculate_cmd_size(params, cmdvaluelen, &atkeylen, &metadatastrlen);
   if (cmdsize <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "calculate_cmd_size failed with code %d\n", cmdsize);
     res = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "calculate_cmd_size failed with code %d\n", cmdsize);
     goto exit;
   }
 
   // Step 3 allocate the buffer
   cmd = malloc(sizeof(char) * cmdsize);
   if (cmd == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
     res = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
     goto exit;
   }
   memset(cmd, 0, sizeof(char) * cmdsize);
@@ -348,7 +348,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
     off += strlen(":ttln:") + long_strlen(params->notification_expiry);
   }
 
-  if ((res = atclient_atkey_metadata_to_protocol_str(&params->atkey->metadata, &metadata_protocol_str)) != 0) {
+  if ((res = atclient_atkey_metadata_to_protocol_str(&(params->atkey->metadata), &metadata_protocol_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str failed with code: %d\n",
                  res);
     goto exit;
@@ -356,10 +356,10 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   snprintf(cmd + off, cmdsize - off, "%s", metadata_protocol_str);
 
   if (strlen(metadata_protocol_str) != metadatastrlen) {
+    res = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkey_metadata_to_protocol_str mismatch. Expected %lu but got %lu\n", metadatastrlen,
                  strlen(metadata_protocol_str));
-    res = 1;
     goto exit;
   }
   off += strlen(metadata_protocol_str);

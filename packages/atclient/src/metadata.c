@@ -747,23 +747,23 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   memset(*metadatastr, 0, sizeof(char) * metadatastrsize);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":ttl:%ld", metadata->ttl);
+    sprintf(*metadatastr + pos, ":ttl:%ld", metadata->ttl);
     pos += 5 + long_strlen(metadata->ttl);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":ttb:%ld", metadata->ttb);
+    sprintf(*metadatastr + pos, ":ttb:%ld", metadata->ttb);
     pos += 5 + long_strlen(metadata->ttb);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":ttr:%ld", metadata->ttr);
+    sprintf(*metadatastr + pos, ":ttr:%ld", metadata->ttr);
     pos += 5 + long_strlen(metadata->ttr);
   }
 
   if (atclient_atkey_metadata_is_ccd_initialized(metadata)) {
     if (metadata->ccd) {
-      sprintf(metadatastr + pos, ":ccd:true");
+      sprintf(*metadatastr + pos, ":ccd:true");
       pos += 9;
     } else {
       sprintf(metadatastr + pos, ":ccd:false");
@@ -773,82 +773,82 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
 
   if (atclient_atkey_metadata_is_isbinary_initialized(metadata)) {
     if (metadata->isbinary) {
-      sprintf(metadatastr + pos, ":isBinary:true");
+      sprintf(*metadatastr + pos, ":isBinary:true");
       pos += 14;
     } else {
-      sprintf(metadatastr + pos, ":isBinary:false");
+      sprintf(*metadatastr + pos, ":isBinary:false");
       pos += 15;
     }
   }
 
   if (atclient_atkey_metadata_is_isencrypted_initialized(metadata)) {
     if (metadata->isencrypted) {
-      sprintf(metadatastr + pos, ":isEncrypted:true");
+      sprintf(*metadatastr + pos, ":isEncrypted:true");
       pos += 17;
     } else {
-      sprintf(metadatastr + pos, ":isEncrypted:false");
+      sprintf(*metadatastr + pos, ":isEncrypted:false");
       pos += 18;
     }
   }
 
   if (atclient_atkey_metadata_is_datasignature_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":dataSignature:%s", metadata->datasignature.str);
+    sprintf(*metadatastr + pos, ":dataSignature:%s", metadata->datasignature.str);
     pos += 15 + metadata->datasignature.len;
   }
 
   if (atclient_atkey_metadata_is_sharedkeystatus_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":sharedKeyStatus:%s", metadata->sharedkeystatus.str);
+    sprintf(*metadatastr + pos, ":sharedKeyStatus:%s", metadata->sharedkeystatus.str);
     pos += 17 + metadata->sharedkeystatus.len;
   }
 
   if (atclient_atkey_metadata_is_sharedkeyenc_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":sharedKeyEnc:%s", metadata->sharedkeyenc.str);
+    sprintf(*metadatastr + pos, ":sharedKeyEnc:%s", metadata->sharedkeyenc.str);
     pos += 14 + metadata->sharedkeyenc.len;
   }
 
   if (atclient_atkey_metadata_is_pubkeyhash_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":hash:%s", metadata->pubkeyhash.str);
+    sprintf(*metadatastr + pos, ":hash:%s", metadata->pubkeyhash.str);
     pos += 6 + metadata->pubkeyhash.len;
   }
 
   if (atclient_atkey_metadata_is_pubkeyalgo_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":algo:%s", metadata->pubkeyalgo.str);
+    sprintf(*metadatastr + pos, ":algo:%s", metadata->pubkeyalgo.str);
     pos += 6 + metadata->pubkeyalgo.len;
   }
 
   if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":encoding:%s", metadata->encoding.str);
+    sprintf(*metadatastr + pos, ":encoding:%s", metadata->encoding.str);
     pos += 10 + metadata->encoding.len;
   }
 
   if (atclient_atkey_metadata_is_enckeyname_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":encKeyName:%s", metadata->enckeyname.str);
+    sprintf(*metadatastr + pos, ":encKeyName:%s", metadata->enckeyname.str);
     pos += 12 + metadata->enckeyname.len;
   }
 
   if (atclient_atkey_metadata_is_encalgo_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":encAlgo:%s", metadata->encalgo.str);
+    sprintf(*metadatastr + pos, ":encAlgo:%s", metadata->encalgo.str);
     pos += 9 + metadata->encalgo.len;
   }
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":ivNonce:%s", metadata->ivnonce.str);
+    sprintf(*metadatastr + pos, ":ivNonce:%s", metadata->ivnonce.str);
     pos += 9 + metadata->ivnonce.len;
   }
 
   if (atclient_atkey_metadata_is_skeenckeyname_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":skeEncKeyName:%s", metadata->skeenckeyname.str);
+    sprintf(*metadatastr + pos, ":skeEncKeyName:%s", metadata->skeenckeyname.str);
     pos += 15 + metadata->skeenckeyname.len;
   }
 
   if (atclient_atkey_metadata_is_skeencalgo_initialized(metadata)) {
-    sprintf(metadatastr + pos, ":skeEncAlgo:%s", metadata->skeencalgo.str);
+    sprintf(*metadatastr + pos, ":skeEncAlgo:%s", metadata->skeencalgo.str);
     pos += 12 + metadata->skeencalgo.len;
   }
 
-  if (strlen(metadatastr) != (expected_metadatastr_len)) {
+  if (strlen(*metadatastr) != (expected_metadatastr_len)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n", strlen(metadatastr),
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n", strlen(*metadatastr),
                  (expected_metadatastr_len));
     goto exit;
   }
