@@ -61,7 +61,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
   size_t atkeystrlen = 0;
 
-  const size_t recvsize = 4096;
+  const size_t recvsize = 4096; // sufficient buffer size to 1. receive data from a `llookup:shared_key@<>` and 2. to
+                                // receive commmit id from `update:`
   unsigned char *recv = NULL;
   if (!atclient->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
@@ -217,7 +218,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   cmdbuffer = malloc(sizeof(char) * cmdbufferlen);
   memset(cmdbuffer, 0, sizeof(char) * cmdbufferlen);
 
-  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int) metadata_protocol_str_len, metadata_protocol_str,
+  snprintf(cmdbuffer, cmdbufferlen, "update%.*s:%.*s %.*s\r\n", (int)metadata_protocol_str_len, metadata_protocol_str,
            (int)atkeystrlen, atkeystr, (int)ciphertextbase64len, ciphertextbase64);
 
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen - 1, recv,
