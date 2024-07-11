@@ -78,17 +78,17 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   memset(ivbase64, 0, sizeof(char) * ivbase64size);
   size_t ivbase64len = 0;
 
-  const size_t ciphertextsize = 4096;
+  const size_t ciphertextsize = atchops_aes_ctr_ciphertext_size(valuelen);
   unsigned char ciphertext[ciphertextsize];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
   size_t ciphertextlen = 0;
 
-  const size_t ciphertextbase64size = 4096;
+  const size_t ciphertextbase64size = atchops_base64_encoded_size(ciphertextsize) + 1;
   char ciphertextbase64[ciphertextbase64size];
   memset(ciphertextbase64, 0, sizeof(char) * ciphertextbase64size);
   size_t ciphertextbase64len = 0;
 
-  const size_t sharedenckeybase64size = 45;
+  const size_t sharedenckeybase64size = atchops_base64_encoded_size(ATCHOPS_AES_256 / 8) + 1;
   char sharedenckeybase64[sharedenckeybase64size];
   memset(sharedenckeybase64, 0, sizeof(char) * sharedenckeybase64size);
 

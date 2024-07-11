@@ -40,4 +40,20 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
                            const unsigned char *ciphertext, const size_t ciphertextlen, unsigned char *plaintext,
                            const size_t plaintextsize, size_t *plaintextlen);
 
+/**
+ * @brief Used to calculate the length of the ciphertext buffer given the plaintext length
+ *
+ * @param plaintextlen the length of the plaintext string
+ * @return a sufficient length of the ciphertext buffer
+ */
+size_t atchops_aes_ctr_ciphertext_size(const size_t plaintextlen);
+
+/**
+ * @brief Used to calculate the length of the plaintext buffer given the ciphertext length
+ *
+ * @param ciphertextlen the length of the ciphertext string
+ * @return a sufficient length of the plaintext buffer
+ */
+size_t atchops_aes_ctr_plaintext_size(const size_t ciphertextlen);
+
 #endif

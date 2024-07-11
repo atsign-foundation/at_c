@@ -846,10 +846,10 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
     pos += 12 + metadata->skeencalgo.len;
   }
 
-  if (strlen(metadatastr) != (expected_metadatastr_len - 1)) {
+  if (strlen(metadatastr) != (expected_metadatastr_len)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr length mismatch: %lu != %lu\n", strlen(metadatastr),
-                 (expected_metadatastr_len - 1));
+                 (expected_metadatastr_len));
     goto exit;
   }
 
