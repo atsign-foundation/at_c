@@ -113,12 +113,12 @@ static int test_1_put(atclient *atclient) {
 
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
 
   if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_put");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_put\n");
     goto exit;
   }
 
@@ -148,18 +148,18 @@ static int test_2_get(atclient *atclient) {
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
 
   if ((ret = atclient_get_publickey(atclient, &atkey, value, valuesize, &valuelen, false)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey\n");
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   if (strcmp(value, ATKEY_VALUE) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed value comparison");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed value comparison\n");
     goto exit;
   }
 
@@ -184,12 +184,12 @@ static int test_3_delete(atclient *atclient) {
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
 
   if ((ret = atclient_delete(atclient, &atkey)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_delete");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_delete\n");
     goto exit;
   }
 
@@ -235,7 +235,7 @@ static int test_5_put_with_metadata(atclient *atclient) {
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
 
@@ -246,7 +246,7 @@ static int test_5_put_with_metadata(atclient *atclient) {
   atclient_atkey_metadata_set_isbinary(&(atkey.metadata), ATKEY_ISBINARY);
 
   if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_put");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_put\n");
     goto exit;
   }
 
@@ -276,12 +276,12 @@ static int test_6_get_with_metadata(atclient *atclient) {
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
 
   if ((ret = atclient_get_publickey(atclient, &atkey, value, valuesize, &valuelen, true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey\n");
     goto exit;
   }
 
@@ -292,35 +292,35 @@ static int test_6_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
-  if (atkey.metadata.ccd != ATKEY_CCD) {
+  if (atclient_atkey_metadata_is_ccd_initialized(&(atkey.metadata)) && atkey.metadata.ccd != ATKEY_CCD) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ccd comparison, got %d and expected %d\n",
                  atkey.metadata.ccd, ATKEY_CCD);
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ccd: %d\n", atkey.metadata.ccd);
 
-  if (atkey.metadata.ttl != ATKEY_TTL) {
+  if (atclient_atkey_metadata_is_ttl_initialized(&(atkey.metadata)) && atkey.metadata.ttl != ATKEY_TTL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ttl comparison, got %d and expected %d\n",
                  atkey.metadata.ttl, ATKEY_TTL);
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
 
-  if (atkey.metadata.ttr != ATKEY_TTR) {
+  if (atclient_atkey_metadata_is_ttr_initialized(&(atkey.metadata)) && atkey.metadata.ttr != ATKEY_TTR) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ttr comparison, got %d and expected %d\n",
                  atkey.metadata.ttr, ATKEY_TTR);
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttr: %d\n", atkey.metadata.ttr);
 
-  if (atkey.metadata.isencrypted != ATKEY_ISENCRYPTED) {
+  if (atclient_atkey_metadata_is_isencrypted_initialized(&(atkey.metadata)) && atkey.metadata.isencrypted != ATKEY_ISENCRYPTED) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed isencrypted comparison, got %d and expected %d\n",
                  atkey.metadata.isencrypted, ATKEY_ISENCRYPTED);
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.isencrypted: %d\n", atkey.metadata.isencrypted);
 
-  if (atkey.metadata.isbinary != ATKEY_ISBINARY) {
+  if (atclient_atkey_metadata_is_isbinary_initialized(&(atkey.metadata)) && atkey.metadata.isbinary != ATKEY_ISBINARY) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed isbinary comparison, got %d and expected %d\n",
                  atkey.metadata.isbinary, ATKEY_ISBINARY);
     goto exit;
@@ -346,12 +346,12 @@ static int test_7_delete(atclient *atclient) {
   if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
                                              strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
                                              ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
 
   if ((ret = atclient_delete(atclient, &atkey)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_delete");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_delete\n");
     goto exit;
   }
 
@@ -369,7 +369,7 @@ static int test_8_should_not_exist(atclient *atclient) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_8_should_not_exist Begin\n");
 
   if ((ret = functional_tests_publickey_exists(atclient, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed functional_tests_atkey_should_not_exist");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed functional_tests_atkey_should_not_exist\n");
     goto exit;
   }
 

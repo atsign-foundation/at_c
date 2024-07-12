@@ -15,7 +15,8 @@
 
 #define TAG "atclient_put"
 
-static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid);
+static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value,
+                                         const size_t valuelen, int *commitid);
 
 int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
   int ret = 1;
@@ -23,7 +24,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   /*
    * 1. Check if valid arguments were passed
    */
-  if((ret = atclient_put_valid_args_check(atclient, atkey, value, valuelen, commitid)) != 0) {
+  if ((ret = atclient_put_valid_args_check(atclient, atkey, value, valuelen, commitid)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_valid_args_check: %d\n", ret);
     return ret;
   }
@@ -228,9 +229,8 @@ exit: {
 }
 }
 
-static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) 
-{
-{
+static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value,
+                                         const size_t valuelen, int *commitid) {
   int ret = 1;
   if (atclient == NULL) {
     ret = 1;
@@ -268,5 +268,6 @@ static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atk
                  "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
     return ret;
   }
-}
+  ret = 0;
+  return ret;
 }

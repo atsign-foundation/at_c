@@ -135,7 +135,6 @@ exit: {
   atclient_atstr_free(&value);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
-  atclient_atstr_free(&atkeystr);
   atclient_atsign_free(&atsign);
   atclient_free(&atclient);
   free(atserver_host);

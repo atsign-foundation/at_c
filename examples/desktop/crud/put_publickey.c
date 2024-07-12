@@ -95,7 +95,6 @@ int main() {
   ret = 0;
   goto exit;
 exit: {
-  atclient_atstr_free(&atkeystr);
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
   atclient_atsign_free(&atsign);
