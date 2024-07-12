@@ -122,17 +122,6 @@ bool atclient_connection_is_connected(atclient_connection *ctx);
 void atclient_connection_free(atclient_connection *ctx);
 
 /**
- * @brief get the host and port from a url
- *
- * @param host a pointer to an atclient_atstr to store the host, will hold "root.atsign.org" after the function call,
- * for example. Assumed that this is already initialized via atclient_atstr_init(&host)
- * @param port a pointer to an int to store the port, will hold 64 after the function call, for example
- * @param url the url to parse (example "root.atsign.org:64")
- * @return int 0 on success, otherwise error
- */
-int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url);
-
-/**
  * @brief Initialize the hooks memory allocation
  *
  * @param ctx the struct for the connection

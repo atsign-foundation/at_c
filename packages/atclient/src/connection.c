@@ -452,40 +452,6 @@ void atclient_connection_free(atclient_connection *ctx) {
   ctx->_should_be_connected = false;
 }
 
-int atclient_connection_get_host_and_port(atclient_atstr *host, int *port, const atclient_atstr url) {
-  int ret = 1;
-
-  char *colon = strchr(url.str, ':');
-  if (colon == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "no colon in url\n");
-    ret = 1;
-    goto exit;
-  }
-
-  int hostlen = colon - url.str;
-  if (hostlen > ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "hostlen > ATCLIENT_CONSTANTS_HOST_BUFFER_SIZE\n");
-    ret = 1;
-    goto exit;
-  }
-
-  strncpy(host->str, url.str, hostlen);
-  host->size = hostlen;
-  host->str[hostlen] = '\0';
-  *port = atoi(colon + 1);
-  if (*port == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "port is 0\n");
-    ret = 1;
-    goto exit;
-  }
-
-  ret = 0;
-
-  goto exit;
-
-exit: { return ret; }
-}
-
 void atclient_connection_enable_hooks(atclient_connection *ctx) {
   ctx->hooks = malloc(sizeof(atclient_connection_hooks));
   memset(ctx->hooks, 0, sizeof(atclient_connection_hooks));
