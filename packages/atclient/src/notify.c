@@ -366,9 +366,6 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
   off += strlen(metadata_protocol_str);
 
-  snprintf(cmd + off, metadatastrlen, ":");
-  off += strlen(":");
-
   if ((res = atclient_atkey_to_string(params->atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed with code: %d\n", res);
     return res;
@@ -379,7 +376,8 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
                  atkeylen, atkeystrlen);
     goto exit;
   }
-  off += atkeylen;
+  snprintf(cmd + off, cmdsize - off, ":%s", atkeystr);
+  off += strlen(":") + atkeylen;
 
   if (cmdvaluelen > 0) {
     snprintf(cmd + off, cmdsize - off, ":%.*s", (int)cmdvaluelen, cmdvalue);
