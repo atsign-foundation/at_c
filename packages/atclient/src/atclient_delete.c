@@ -12,10 +12,14 @@
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
-  atclient_atstr cmdbuffer;
-  atclient_atstr_init_literal(&cmdbuffer, ATCLIENT_ATKEY_FULL_LEN + strlen("delete:"), "delete:");
+  size_t pos = 0;
+
+  const size_t cmdbuffersize = strlen("delete:") + ATCLIENT_ATKEY_FULL_LEN + strlen("\r\n") + 1;
+  char cmdbuffer[cmdbuffersize];
+  memset(cmdbuffer, 0, sizeof(char) * (cmdbuffersize));
 
   char *atkeystr = NULL;
+  size_t atkeystrlen = 0;
 
   const size_t recvsize = 4096;
   unsigned char *recv;
@@ -25,20 +29,20 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   }
   size_t recvlen = 0;
 
+  snprintf(cmdbuffer + pos, cmdbuffersize - pos, "delete:");
+  pos += strlen("delete:");
+
   ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+  atkeystrlen = strlen(atkeystr);
 
-  ret = atclient_atstr_append(&cmdbuffer, "%.*s\n", (int)strlen(atkeystr), atkeystr);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
-    goto exit;
-  }
+  snprintf(cmdbuffer + pos, cmdbuffersize - pos, "%.*s\r\n", (int)atkeystrlen, atkeystr);
 
-  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer.str, cmdbuffer.len, recv,
-                                 4096, &recvlen);
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
+                                 recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -59,7 +63,6 @@ exit: {
   if (!atclient->async_read) {
     free(recv);
   }
-  atclient_atstr_free(&cmdbuffer);
   free(atkeystr);
   return ret;
 }
