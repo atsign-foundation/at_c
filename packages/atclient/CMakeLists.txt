@@ -5,6 +5,7 @@ option(ATCLIENT_BUILD_TESTS "Build tests for atclient" OFF)
 set(ATCLIENT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(
   ATCLIENT_SOURCES
+  ${CMAKE_CURRENT_LIST_DIR}/src/atbytes.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_delete.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_atkeys.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_publickey.c
@@ -17,6 +18,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
   ${CMAKE_CURRENT_LIST_DIR}/src/encryption_key_helpers.c
   ${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
