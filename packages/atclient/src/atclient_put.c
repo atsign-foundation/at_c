@@ -31,10 +31,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   /*
    * 2. Allocate variables
    */
-  const size_t atkeystrsize = ATCLIENT_ATKEY_FULL_LEN;
-  char atkeystr[atkeystrsize];
-  memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
+  char *atkeystr = NULL;
 
   const size_t recvsize = 4096; // sufficient buffer size to 1. receive data from a `llookup:shared_key@<>` and 2. to
                                 // receive commmit id from `update:`
@@ -72,11 +69,12 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   char *metadata_protocol_str = NULL;
 
   // 2. build update: command
-  ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrsize, &atkeystrlen);
+  ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
   if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     // no encryption
@@ -225,6 +223,7 @@ exit: {
   }
   free(cmdbuffer);
   free(metadata_protocol_str);
+  free(atkeystr);
   return ret;
 }
 }

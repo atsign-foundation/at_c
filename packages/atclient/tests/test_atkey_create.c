@@ -2,6 +2,7 @@
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define TAG "test_atkey_create"
@@ -12,12 +13,10 @@ static int test_create_publickey() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  char atkeystr[ATCLIENT_ATKEY_FULL_LEN + 1];
-  memset(atkeystr, 0, ATCLIENT_ATKEY_FULL_LEN + 1);
+  char *atkeystr = NULL;
 
   const char *expected = "public:test@alice";
   const size_t expectedlen = strlen(expected);
-  size_t expectedolen = 0;
 
   ret = atclient_atkey_create_publickey(&atkey, "test", strlen("test"), "@alice", strlen("@alice"), NULL, 0);
   if (ret != 0) {
@@ -26,32 +25,32 @@ static int test_create_publickey() {
   }
 
   if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atkey type is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n", atkey.atkeytype);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey type is not ATCLIENT_ATKEY_TYPE_PUBLICKEY, it is %d\n",
+                 atkey.atkeytype);
     ret = 1;
     goto exit;
   }
 
   if (strcmp(atkey.name.str, "test") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name.str is not test, it is \"%s\"\n",
-                          atkey.name.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name.str is not test, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
   if (strcmp(atkey.sharedby.str, "@alice") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby.str is not @alice, it is \"%s\"\n",
-                          atkey.sharedby.str);
+                 atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &expectedolen);
+  ret = atclient_atkey_to_string(&atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
     goto exit;
   }
+  const size_t expectedolen = strlen(atkeystr);
 
   if (strcmp(atkeystr, expected) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystr is not %s, it is %s\n", expected, atkeystr);
@@ -60,8 +59,7 @@ static int test_create_publickey() {
   }
 
   if (expectedolen != expectedlen) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expectedolen is not %lu, it is %lu\n", expectedlen,
-                          expectedolen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expectedolen is not %lu, it is %lu\n", expectedlen, expectedolen);
     ret = 1;
     goto exit;
   }
@@ -70,6 +68,7 @@ static int test_create_publickey() {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
+  free(atkeystr);
   return ret;
 }
 }
@@ -80,8 +79,7 @@ static int test_create_selfkey() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
-  memset(atkeystr, 0, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
   const char *expected = "name@jeremy";
   const size_t expectedlen = strlen(expected);
@@ -93,33 +91,32 @@ static int test_create_selfkey() {
   }
 
   if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atkey type is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n", atkey.atkeytype);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey type is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n",
+                 atkey.atkeytype);
     ret = 1;
     goto exit;
   }
 
   if (strcmp(atkey.name.str, "name") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name.str is not name, it is \"%s\"\n",
-                          atkey.name.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name.str is not name, it is \"%s\"\n", atkey.name.str);
     ret = 1;
     goto exit;
   }
 
   if (strcmp(atkey.sharedby.str, "@jeremy") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby.str is not @jeremy, it is \"%s\"\n",
-                          atkey.sharedby.str);
+                 atkey.sharedby.str);
     ret = 1;
     goto exit;
   }
 
-  size_t atkeystrolen = 0;
-  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
+  ret = atclient_atkey_to_string(&atkey, &atkeystr);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+  const size_t atkeystrolen = strlen(atkeystr);
 
   if (strcmp(atkeystr, expected) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystr is not %s, it is %s\n", expected, atkeystr);
@@ -128,15 +125,17 @@ static int test_create_selfkey() {
   }
 
   if (atkeystrolen != expectedlen) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystrolen is not %lu, it is %lu\n", expectedlen,
-                          atkeystrolen);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystrolen is not %lu, it is %lu\n", expectedlen, atkeystrolen);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(atkeystr);
+  return ret;
+}
 }
 
 static int test_create_sharedkey() {
@@ -145,8 +144,7 @@ static int test_create_sharedkey() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
-  memset(atkeystr, 0, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
   const char *expected = "@jeremy:name.wavi@chess69lovely";
   const size_t expectedlen = strlen(expected);
@@ -159,64 +157,65 @@ static int test_create_sharedkey() {
   }
 
   if (atkey.atkeytype != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atkey type is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n", atkey.atkeytype);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey type is not ATCLIENT_ATKEY_TYPE_SHAREDKEY, it is %d\n",
+                 atkey.atkeytype);
     goto exit;
   }
 
   if (strcmp(atkey.name.str, "name") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name.str is not name, it is \"%s\"\n",
-                          atkey.name.str);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name.str is not name, it is \"%s\"\n", atkey.name.str);
     goto exit;
   }
 
   if (strcmp(atkey.sharedby.str, "@jeremy") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby.str is not @jeremy, it is \"%s\"\n",
-                          atkey.sharedby.str);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby.str is not @jeremy, it is \"%s\"\n",
+                 atkey.sharedby.str);
     goto exit;
   }
 
   if (strcmp(atkey.sharedwith.str, "@chess69lovely") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atkey.sharedwith.str is not @chess69lovely, it is \"%s\"\n", atkey.sharedwith.str);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not @chess69lovely, it is \"%s\"\n",
+                 atkey.sharedwith.str);
     goto exit;
   }
 
   if (strcmp(atkey.namespacestr.str, "wavi") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwithname.str is not wavi, it is \"%s\"\n",
-                          atkey.sharedwith.str);
+                 atkey.sharedwith.str);
     ret = 1;
     goto exit;
   }
 
-  size_t atkeystrolen = 0;
-  ret = atclient_atkey_to_string(&atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrolen);
+  ret = atclient_atkey_to_string(&atkey, &atkeystr);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+  const size_t atkeystrolen = strlen(atkeystr);
 
   if (strcmp(atkeystr, expected) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystr is not %s, it is %s\n", expected, atkeystr);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystr is not %s, it is %s\n", expected, atkeystr);
     goto exit;
   }
 
   if (atkeystrolen != expectedlen) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystrolen is not %lu, it is %lu\n", expectedlen,
-                          atkeystrolen);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystrolen is not %lu, it is %lu\n", expectedlen, atkeystrolen);
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(atkeystr);
+  return ret;
+}
 }
 
 int main() {

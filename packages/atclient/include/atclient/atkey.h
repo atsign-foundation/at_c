@@ -66,13 +66,11 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey);
  * @brief convert an atkey struct to its string format
  *
  * @param atkey atkey struct to read, assumed that this was already initialized via atclient_atkey_init
- * @param atkeystr buffer to write to, assumed that this was already allocated
- * @param atkeystrsize buffer allocated size
- * @param atkeystrlen the written (output) length of the atkeystr
+ * @param atkeystr a double pointer to the atkey string, this will be allocated by this function and is the
+ * responsibility of the caller of this function to free it
  * @return int 0 on success
  */
-int atclient_atkey_to_string(const atclient_atkey *atkey, char *atkeystr, const size_t atkeystrsize,
-                             size_t *atkeystrlen);
+int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr);
 
 /**
  * @brief Populate an atkey struct representing a PublicKey AtKey with null terminated strings. An example of a Public

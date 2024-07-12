@@ -2,8 +2,9 @@
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
-#include <string.h>
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TAG "test_atkey_to_string"
 
@@ -37,17 +38,18 @@
 static int test1a() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1a Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1A;
   const size_t expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = true;
-  atkey.metadata.ispublic = true;
+  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
+  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "publickey");
@@ -62,16 +64,15 @@ static int test1a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
@@ -80,7 +81,8 @@ static int test1a() {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atclient_atstr_free(&string);
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1a Ended:%d\n", ret);
   return ret;
 }
 }
@@ -88,16 +90,17 @@ exit: {
 static int test1b() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
   const size_t expectedlen = strlen(expected);
 
-  atkey.metadata.ispublic = true;
+  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "publickey");
@@ -112,38 +115,42 @@ static int test1b() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test1c() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1c Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1C; // "public:name.wavi@jeremy"
   const size_t expectedlen = strlen(expected);
 
-  atkey.metadata.ispublic = true;
+  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "name");
@@ -164,39 +171,43 @@ static int test1c() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1c Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test1d() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1d Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
   const size_t expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = true;
-  atkey.metadata.ispublic = true;
+  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
+  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.name), "name");
@@ -217,33 +228,37 @@ static int test1d() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1d Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test2a() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2a Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_2A; // "@alice:name.wavi@bob"
   const size_t expectedlen = strlen(expected);
@@ -274,7 +289,7 @@ static int test2a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -282,22 +297,27 @@ static int test2a() {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2a Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test2b() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2b Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_2B; // "cached:@bob:name@alice"
   const size_t expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = true;
+  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@bob");
@@ -318,33 +338,37 @@ static int test2b() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2b Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test2c() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_2C; // "@bob:name@alice"
   const size_t expectedlen = strlen(expected);
@@ -369,7 +393,7 @@ static int test2c() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -382,32 +406,36 @@ static int test2c() {
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test2d() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2d Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_2D; // "cached:@bob:name.wavi@alice"
   const size_t expectedlen = strlen(expected);
 
-  atkey.metadata.iscached = true;
+  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
   atkey.atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
 
   ret = atclient_atstr_set_literal(&(atkey.sharedwith), "@bob");
@@ -434,33 +462,37 @@ static int test2d() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2d Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test3a() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3a Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_3A; // "_lastnotificationid@alice123_4😘"
   const size_t expectedlen = strlen(expected);
@@ -479,7 +511,7 @@ static int test3a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -487,32 +519,36 @@ static int test3a() {
 
   if (atkey.namespacestr.len > 0 || strlen(atkey.namespacestr.str) > 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.len > 0: %d or strlen(%s) > 0\n",
-                          atkey.namespacestr.len, atkey.namespacestr.str);
+                 atkey.namespacestr.len, atkey.namespacestr.str);
     ret = 1;
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3a Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test4a() {
   int ret = 1;
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4a Starting...\n");
+
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  atclient_atstr string;
-  atclient_atstr_init(&string, ATCLIENT_ATKEY_FULL_LEN);
+  char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_4A; // "name@alice"
   const size_t expectedlen = strlen(expected);
@@ -531,7 +567,7 @@ static int test4a() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, string.str, string.size, &string.len);
+  ret = atclient_atkey_to_string(&atkey, &string);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
@@ -539,26 +575,31 @@ static int test4a() {
 
   if (atkey.namespacestr.len > 0 || strlen(atkey.namespacestr.str) > 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr.len > 0: %d or strlen(%s) > 0\n",
-                          atkey.namespacestr.len, atkey.namespacestr.str);
+                 atkey.namespacestr.len, atkey.namespacestr.str);
     ret = 1;
     goto exit;
   }
 
-  ret = strncmp(string.str, expected, expectedlen);
+  ret = strcmp(string, expected);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          string.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, string);
     ret = 1;
     goto exit;
   }
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(string);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4a Ended:%d\n", ret);
+  return ret;
+}
 }
 
 static int test4b() {
   int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4b Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -570,19 +611,16 @@ static int test4b() {
 
   const char *expected = TEST_ATKEY_TO_STRING_4B; // "name.wavi@jeremy_0"
 
-  atclient_atstr actual;
-  atclient_atstr_init(&actual, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
-  ret = atclient_atkey_to_string(&atkey, actual.str, actual.size, &actual.len);
-
+  ret = atclient_atkey_to_string(&atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed\n");
     goto exit;
   }
 
-  if (strncmp(actual.str, expected, strlen(expected)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected,
-                          actual.str);
+  if (strcmp(atkeystr, expected) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "expected: \"%s\", actual: \"%s\"\n", expected, atkeystr);
     ret = 1;
     goto exit;
   }
@@ -591,14 +629,16 @@ static int test4b() {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
-  atclient_atstr_free(&actual);
-  return ret; }
+  free(atkeystr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4b Ended:%d\n", ret);
+  return ret;
+}
 }
 
 int main() {
   int ret = 1;
 
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_ERROR);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   ret = test1a();
   if (ret != 0) {

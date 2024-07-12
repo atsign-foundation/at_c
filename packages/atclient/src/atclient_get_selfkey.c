@@ -29,10 +29,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   int ret = 1;
 
   // 1. initialize variables
-  const size_t atkeystrsize = ATCLIENT_ATKEY_FULL_LEN;
-  char atkeystr[atkeystrsize];
-  memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
+  char *atkeystr = NULL;
 
   const size_t recvsize = valuesize;
   unsigned char recv[recvsize];
@@ -51,18 +48,19 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   char *valueraw = NULL;
 
   // 2. build llookup: command
-  ret = atclient_atkey_to_string(atkey, atkeystr, atkeystrsize, &atkeystrlen);
-
+  ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+  
+  const size_t atkeystrlen = strlen(atkeystr);
 
   const size_t cmdbuffersize = strlen("llookup:all:\r\n") + atkeystrlen + 1;
   cmdbuffer = (char *)malloc(sizeof(char) * cmdbuffersize);
   memset(cmdbuffer, 0, sizeof(char) * cmdbuffersize);
 
-  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int)atkeystrlen, atkeystr);
+  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int) atkeystrlen, atkeystr);
 
   // 3. send llookup: command
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
@@ -168,6 +166,7 @@ exit: {
   }
   free(valueraw);
   free(cmdbuffer);
+  free(atkeystr);
   return ret;
 }
 }

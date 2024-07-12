@@ -24,9 +24,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   }
 
   // 1. initialize variables
-  const size_t atkeystrlen = ATCLIENT_ATKEY_FULL_LEN;
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, atkeystrlen);
+  char *atkeystr = NULL;
 
   const size_t recvsize = valuesize;
   unsigned char recv[recvsize];
@@ -38,7 +36,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   char *metadatastr = NULL;
 
   // 2. build plookup: command
-  ret = atclient_atkey_to_string(atkey, atkeystr.str, atkeystr.size, &atkeystr.len);
+  ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
@@ -50,11 +48,11 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   }
 
   char *atkeystrwithoutpublic = NULL;
-  char *ptr = strstr(atkeystr.str, "public:");
+  char *ptr = strstr(atkeystr, "public:");
   if (ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n", atkeystr.str);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n", atkeystr);
     goto exit;
   }
 
@@ -130,6 +128,7 @@ exit: {
   }
   free(metadatastr);
   free(cmdbuffer);
+  free(atkeystr);
   return ret;
 }
 }

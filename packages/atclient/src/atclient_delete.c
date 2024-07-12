@@ -15,9 +15,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   atclient_atstr cmdbuffer;
   atclient_atstr_init_literal(&cmdbuffer, ATCLIENT_ATKEY_FULL_LEN + strlen("delete:"), "delete:");
 
-  char atkeystr[ATCLIENT_ATKEY_FULL_LEN];
-  memset(atkeystr, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-  size_t atkeystrlen = 0;
+  char *atkeystr = NULL;
 
   const size_t recvsize = 4096;
   unsigned char *recv;
@@ -27,13 +25,13 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   }
   size_t recvlen = 0;
 
-  ret = atclient_atkey_to_string(atkey, atkeystr, ATCLIENT_ATKEY_FULL_LEN, &atkeystrlen);
+  ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
 
-  ret = atclient_atstr_append(&cmdbuffer, "%.*s\n", (int)atkeystrlen, atkeystr);
+  ret = atclient_atstr_append(&cmdbuffer, "%.*s\n", (int)strlen(atkeystr), atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_append: %d\n", ret);
     goto exit;
@@ -62,6 +60,7 @@ exit: {
     free(recv);
   }
   atclient_atstr_free(&cmdbuffer);
+  free(atkeystr);
   return ret;
 }
 }

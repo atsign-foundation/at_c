@@ -290,6 +290,8 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   char *cmd = NULL;
   char *metadata_protocol_str = NULL;
 
+  char *atkeystr = NULL;
+
   size_t atkeylen = 0;
   size_t metadatastrlen = 0;
 
@@ -367,14 +369,14 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   snprintf(cmd + off, metadatastrlen, ":");
   off += strlen(":");
 
-  size_t atkeyolen;
-  if ((res = atclient_atkey_to_string(params->atkey, cmd + off, atkeylen, &atkeyolen)) != 0) {
+  if ((res = atclient_atkey_to_string(params->atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string failed with code: %d\n", res);
     return res;
   }
-  if (atkeylen != atkeyolen) {
+  const size_t atkeystrlen = strlen(atkeystr);
+  if (atkeylen != atkeystrlen) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string mismatch. Expected %lu but got %lu\n",
-                 atkeylen, atkeyolen);
+                 atkeylen, atkeystrlen);
     goto exit;
   }
   off += atkeylen;
