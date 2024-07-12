@@ -79,14 +79,11 @@ static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, con
     goto exit;
   }
 
-  char buf[4096];
-  memset(buf, 0, sizeof(char) * 4096);
-  size_t bufolen = 0;
-
   for(size_t i = 0; i < atkey_array_len; i++) {
-    atclient_atkey_to_string(&atkey_array[i], buf, 4096, &bufolen);
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkey_array[%zu]: %s\n", i, buf);
-    memset(buf, 0, sizeof(char) * 4096);
+    char *atkeystr = NULL;
+    atclient_atkey_to_string(&atkey_array[i], &atkeystr);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkey_array[%zu]: %s\n", i, atkeystr);
+    free(atkeystr);
   }
 
   for (size_t i = 0; i < atkey_array_len; i++) {
