@@ -81,15 +81,16 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
 
   /*
    * 3. Build `update:` command
-   *    3a. Encrypt the value, if needed.
-   *        3a.1 If the AtKey is a publickey, no encryption is needed.
-   *        3a.2 If the AtKey is a selfkey, encrypt with self encryption key.
-   *        3a.3 If the AtKey is a sharedkey, encrypt with shared encryption key.
-   *          If the shared encryption key doesn't exist, create one for us and one for the other person.
-   *          If the shared encryption key does exist, encrypt with it.
-   *    3b. Build the command
+   * 3a. Encrypt the value, if needed.
+   * 3b. Build the command
    */
 
+  // 3a. Encrypt the value, if needed.
+  // > 3a.1 If the AtKey is a publickey, no encryption is needed.
+  // > 3a.2 If the AtKey is a selfkey, encrypt with self encryption key.
+  // > 3a.3 If the AtKey is a sharedkey, encrypt with shared encryption key.
+  // > > If the shared encryption key doesn't exist, create one for us and one for the other person.
+  // > > If the shared encryption key does exist, encrypt with it.
   if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     // 3a.1 no encryption
     memcpy(ciphertextbase64, value, valuelen);
@@ -120,7 +121,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
       goto exit;
     }
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    // 3aA.3 encrypt with shared encryption key
+    // 3A.3 encrypt with shared encryption key
 
     // get our AES shared key
     // if it doesn't exist, create one for us and create one for the other person
