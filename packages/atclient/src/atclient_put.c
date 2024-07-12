@@ -81,36 +81,22 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
 
   /*
    * 3. Build `update:` command
-   * 3a. Build the AtKey string and Metadata Protocol String
-   * 3b. Encrypt the value, if needed.
-   * 3c. Build the command
+   * 3a. Encrypt the value, if needed.
+   * 3b. Build the command
    */
 
-  // 3a. Build the AtKey string and Metadata Protocol String
-  if ((ret = atclient_atkey_to_string(atkey, &atkeystr)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
-    goto exit;
-  }
-  atkeystrlen = strlen(atkeystr);
-
-  if ((ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), &(metadataprotocolstr))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
-    goto exit;
-  }
-  metadataprotocolstrlen = strlen(metadataprotocolstr);
-
-  // 3b. Encrypt the value, if needed.
-  // > 3b.1 If the AtKey is a publickey, no encryption is needed.
-  // > 3b.2 If the AtKey is a selfkey, encrypt with self encryption key.
-  // > 3b.3 If the AtKey is a sharedkey, encrypt with shared encryption key.
-  // > > 3b.3a If the shared encryption key doesn't exist, create one for us and one for the other person.
-  // > > 3b.3b If the shared encryption key does exist, encrypt with it.
+  // 3a. Encrypt the value, if needed.
+  // > 3a.1 If the AtKey is a publickey, no encryption is needed.
+  // > 3a.2 If the AtKey is a selfkey, encrypt with self encryption key.
+  // > 3a.3 If the AtKey is a sharedkey, encrypt with shared encryption key.
+  // > > If the shared encryption key doesn't exist, create one for us and one for the other person.
+  // > > If the shared encryption key does exist, encrypt with it.
   if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
-    // 3b.1 no encryption
+    // 3a.1 no encryption
     memcpy(ciphertextbase64, value, valuelen);
     ciphertextbase64len = valuelen;
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SELFKEY) {
-    // 3b.2 encrypt with self encryption key
+    // 3a.2 encrypt with self encryption key
     const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
     unsigned char selfencryptionkey[selfencryptionkeysize];
     memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
@@ -135,7 +121,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
       goto exit;
     }
   } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    // 3b.3 encrypt with shared encryption key
+    // 3A.3 encrypt with shared encryption key
 
     // get our AES shared key
     // if it doesn't exist, create one for us and create one for the other person
@@ -193,7 +179,19 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   non_error_cleanup: { atclient_atsign_free(&recipient); }
   }
 
-  // 3c. Build the command
+  // 3b. Build the command
+
+  if ((ret = atclient_atkey_to_string(atkey, &atkeystr)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
+    goto exit;
+  }
+  atkeystrlen = strlen(atkeystr);
+
+  if ((ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), &(metadataprotocolstr))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr: %d\n", ret);
+    goto exit;
+  }
+  metadataprotocolstrlen = strlen(metadataprotocolstr);
 
   cmdbuffersize = strlen("update: \r\n") + metadataprotocolstrlen + atkeystrlen + ciphertextbase64len +
                   1; // + 1 for null terminator
@@ -205,12 +203,13 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   /*
    * 4. Send the command
    */
-
   if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1,
                                       recv, recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
-  } else if (atclient->async_read) {
+  }
+
+  if (atclient->async_read) {
     goto exit;
   }
 
