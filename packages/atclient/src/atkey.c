@@ -278,8 +278,6 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     goto error_exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "4\n");
-
   snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%.*s", (int)atkey->name.len, atkey->name.str);
   index_pos += atkey->name.len;
 
@@ -289,8 +287,6 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     index_pos += strlen(".") + atkey->namespacestr.len;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "5\n");
-
   if (atkey->sharedby.str == NULL || atkey->sharedby.len == 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -298,8 +294,6 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
                  atkey->sharedby.str, atkey->sharedby.len);
     goto error_exit;
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "6\n");
 
   snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%.*s", (int)atkey->sharedby.len, atkey->sharedby.str);
   index_pos += (int)atkey->sharedby.len;
