@@ -43,8 +43,7 @@ int main(int argc, char *argv[]) {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
   atclient_notify_params notify_params;
   atclient_notify_params_init(&notify_params);
@@ -116,13 +115,14 @@ int main(int argc, char *argv[]) {
 
   atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
-               atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
 
   notify_params.atkey = &atkey;
   notify_params.value = ATKEY_VALUE;
@@ -143,6 +143,7 @@ exit: {
   atclient_atkey_free(&atkey);
   free(atserver_host);
   atclient_free(&atclient);
+  free(atkeystr);
   return ret;
 }
 }
