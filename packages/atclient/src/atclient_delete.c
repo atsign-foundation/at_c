@@ -14,9 +14,8 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
 
   size_t pos = 0;
 
-  const size_t cmdbuffersize = strlen("delete:") + ATCLIENT_ATKEY_FULL_LEN + strlen("\r\n") + 1;
-  char cmdbuffer[cmdbuffersize];
-  memset(cmdbuffer, 0, sizeof(char) * (cmdbuffersize));
+  size_t cmdbuffersize;
+  char *cmdbuffer = NULL;
 
   char *atkeystr = NULL;
   size_t atkeystrlen = 0;
@@ -29,8 +28,6 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   }
   size_t recvlen = 0;
 
-  snprintf(cmdbuffer + pos, cmdbuffersize - pos, "delete:");
-  pos += strlen("delete:");
 
   ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
@@ -39,7 +36,9 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   }
   atkeystrlen = strlen(atkeystr);
 
-  snprintf(cmdbuffer + pos, cmdbuffersize - pos, "%.*s\r\n", (int)atkeystrlen, atkeystr);
+  cmdbuffersize = strlen("delete:") + atkeystrlen + strlen("\r\n") + 1;
+  cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
+  snprintf(cmdbuffer, cmdbuffersize, "delete:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
                                  recvsize, &recvlen);
@@ -64,6 +63,7 @@ exit: {
     free(recv);
   }
   free(atkeystr);
+  free(cmdbuffer);
   return ret;
 }
 }
