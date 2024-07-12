@@ -189,13 +189,12 @@ int main(int argc, char *argv[]) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
           goto scan_end;
         }
-        const size_t atkeybufsize = 1024;
-        char atkeybuf[1024];
-        size_t atkey_buf_len;
+        char *atkeystr = NULL;
         for (size_t i = 0; i < arrlen; i++) {
-          memset(atkeybuf, 0, sizeof(char) * atkeybufsize);
-          atclient_atkey_to_string(&arr[i], atkeybuf, atkeybufsize, &atkey_buf_len);
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atKey[%i]: \'%s\'\n", i, atkeybuf);
+          atclient_atkey_to_string(&arr[i], &atkeystr);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atKey[%i]: \'%s\'\n", i, atkeystr);
+          free(atkeystr);
+          atkeystr = NULL;
         }
       scan_end: {
         for (size_t i = 0; i < arrlen; i++) {
@@ -210,16 +209,16 @@ int main(int argc, char *argv[]) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
           goto deleteall_end;
         }
-        char buf[4096];
-        size_t bufolen;
+        char *atkeystr = NULL;
         for(size_t i = 0; i < arrlen; i++) {
           if((ret = atclient_delete(&atclient, &arr[i])) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d | failed to delete atKey\n", ret);
             continue;
           }
-          memset(buf, 0, sizeof(char) * 4096);
-          atclient_atkey_to_string(&arr[i], buf, 4096, &bufolen);
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Deleted atKey: %s\n", buf);
+          atclient_atkey_to_string(&arr[i], &atkeystr);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Deleted atKey: %s\n", atkeystr);
+          free(atkeystr);
+          atkeystr = NULL;
         }
       deleteall_end: {
         for (size_t i = 0; i < arrlen; i++) {
