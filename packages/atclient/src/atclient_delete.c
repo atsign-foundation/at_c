@@ -9,15 +9,27 @@
 
 #define TAG "atclient_delete"
 
+static int atclient_delete_validate_arguments(atclient *atclient, const atclient_atkey *atkey);
+
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
-  size_t pos = 0;
+  /*
+   * 1. Check arguments
+   */
+  if ((ret = atclient_delete_validate_arguments(atclient, atkey)) != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_validate_arguments: %d\n", ret);
+    goto exit;
+  }
 
+  /*
+   * 2. Initialize variables
+   */
   size_t cmdbuffersize;
-  char *cmdbuffer = NULL;
+  char *cmdbuffer = NULL; // free later
 
-  char *atkeystr = NULL;
+  char *atkeystr = NULL; // free later
   size_t atkeystrlen = 0;
 
   const size_t recvsize = 4096;
@@ -28,9 +40,11 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   }
   size_t recvlen = 0;
 
+  /*
+   * 3. Build delete command
+   */
 
-  ret = atclient_atkey_to_string(atkey, &atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_to_string(atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
@@ -40,12 +54,17 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
   snprintf(cmdbuffer, cmdbuffersize, "delete:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
-  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
-                                 recvsize, &recvlen);
-  if (ret != 0) {
+  /*
+   * 4. Send command
+   */
+
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1,
+                                      recv, recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
-  } else if (atclient->async_read) {
+  }
+
+  if (atclient->async_read) {
     goto exit;
   }
 
@@ -66,4 +85,26 @@ exit: {
   free(cmdbuffer);
   return ret;
 }
+}
+
+static int atclient_delete_validate_arguments(atclient *atclient, const atclient_atkey *atkey) {
+  int ret = 1;
+
+  if (atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    goto exit;
+  }
+
+  // TODO use a function in atclient_atkey to check if atkey is complete
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
