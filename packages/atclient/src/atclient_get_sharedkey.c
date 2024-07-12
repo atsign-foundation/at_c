@@ -109,11 +109,9 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
 
   // build command
   // command_prefix = "llookup:all:"
-  const short command_prefix_len = 12;
-
-  const size_t command_len = command_prefix_len + atkeystrlen + 3;
-  command = malloc(command_len * sizeof(char));
-  snprintf(command, command_len, "llookup:all:%s\r\n", atkeystr);
+  const size_t commandsize = strlen("llookup:all:") + atkeystrlen + strlen("\r\n") + 1;
+  command = malloc(commandsize * sizeof(char));
+  snprintf(command, commandsize, "llookup:all:%s\r\n", atkeystr);
 
   // send command and recv response
   const size_t recvsize = 4096;
@@ -121,8 +119,8 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, strlen((char *)command),
-                                 recv, recvsize, &recvlen);
+  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)command, commandsize - 1, recv,
+                                 recvsize, &recvlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -227,14 +225,9 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   ret = 0;
   goto exit;
 exit: {
-  if (enc_key_mem)
-    free(enc_key);
-  if (command)
-    free(command);
-  if (recv)
-    free(recv);
-  if (response_prefix)
-    free(response_prefix);
+  free(enc_key);
+  free(command);
+  free(recv);
   free(atkeystr);
   return ret;
 }
