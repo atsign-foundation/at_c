@@ -47,8 +47,7 @@ int main() {
   atclient_atkeys_init(&atkeys);
   atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH);
 
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
   char *atserver_host = NULL;
   int atserver_port = -1;
@@ -69,13 +68,14 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
-                        (int)atkeystr.len, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+                        atkeystr);
 
   ret = atclient_get_publickey(&atclient, &atkey, value, valuelen, &valueolen, true);
   if (ret != 0) {
@@ -107,6 +107,7 @@ exit : {
   atclient_atsign_free(&atsign);
   atclient_free(&atclient);
   free(atserver_host);
+  free(atkeystr);
   return ret;
 }
 }
