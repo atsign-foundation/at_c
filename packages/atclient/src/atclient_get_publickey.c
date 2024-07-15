@@ -59,6 +59,11 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   const size_t cmdbuffersize = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) +
                                strlen(atkeystrwithoutpublic) + 1;
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
+  if(cmdbuffer == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
+    goto exit;
+  }
   memset(cmdbuffer, 0, cmdbuffersize);
   snprintf(cmdbuffer, cmdbuffersize, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "",
            atkeystrwithoutpublic);

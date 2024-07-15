@@ -58,6 +58,11 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   const size_t cmdbuffersize = strlen("llookup:all:\r\n") + atkeystrlen + 1;
   cmdbuffer = (char *)malloc(sizeof(char) * cmdbuffersize);
+  if(cmdbuffer == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
+    goto exit;
+  }
   memset(cmdbuffer, 0, sizeof(char) * cmdbuffersize);
 
   snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int) atkeystrlen, atkeystr);
@@ -140,6 +145,11 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   // holds base64 decoded value. Once decoded, it is encrypted cipher text bytes that need to be decrypted
   const size_t valuerawsize = atchops_base64_decoded_size(strlen(data->valuestring));
   valueraw = (char *)malloc(sizeof(char) * valuerawsize);
+  if(valueraw == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for valueraw\n");
+    goto exit;
+  }
   memset(valueraw, 0, sizeof(char) * valuerawsize);
   size_t valuerawlen = 0;
 

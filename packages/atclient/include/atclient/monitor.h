@@ -131,30 +131,30 @@ void atclient_atnotification_free_decryptedvaluelen(atclient_atnotification *not
 
 // Setters for the fields, these functions check if the field is initialized before setting the value (and overwrites if
 // it is)
-void atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen);
-void atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen);
-void atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen);
-void atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen);
-void atclient_atnotification_set_value(atclient_atnotification *notification, const char *value, const size_t valuelen);
-void atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
+int atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen);
+int atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen);
+int atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen);
+int atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen);
+int atclient_atnotification_set_value(atclient_atnotification *notification, const char *value, const size_t valuelen);
+int atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
                                            const size_t operationlen);
-void atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis);
-void atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
+int atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis);
+int atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
                                              const size_t messageTypelen);
-void atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted);
-void atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
+int atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted);
+int atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
                                             const size_t encKeyNamelen);
-void atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
+int atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
                                          const size_t encAlgolen);
-void atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
+int atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
                                          const size_t ivNoncelen);
-void atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
+int atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
                                                const size_t skeEncKeyNamelen);
-void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
+int atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
                                             const size_t skeEncAlgolen);
-void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
+int atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
                                                 const unsigned char *decryptedvalue, const size_t decryptedvaluelen);
-void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
+int atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
                                                    const size_t decryptedvaluelen);
 
 /**

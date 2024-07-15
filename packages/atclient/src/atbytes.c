@@ -10,7 +10,7 @@
 void atclient_atbytes_init(atclient_atbytes *atbytes, const size_t atbyteslen) {
   memset(atbytes, 0, sizeof(atclient_atbytes));
   atbytes->size = atbyteslen;
-  atbytes->bytes = malloc(sizeof(unsigned char) * atbytes->size);
+  atbytes->bytes = malloc(sizeof(unsigned char) * atbytes->size); // TODO handle null
   atbytes->len = 0;
 }
 

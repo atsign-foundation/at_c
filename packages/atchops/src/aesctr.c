@@ -5,8 +5,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <atlogger/atlogger.h>
+#include <stdio.h>
 
-#include <stdio.h> // TODO remove
+#define TAG "atchops_aesctr"
 
 int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size keybits, unsigned char *iv,
                            const unsigned char *plaintext, // plaintext to encrypt
@@ -32,6 +34,11 @@ int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size
   // printf("plaintext_paddedlen: %lu = %d + %d\n", plaintextpaddedlen, plaintextlen, numpadbytestoadd);
 
   plaintextpadded = malloc(sizeof(unsigned char) * (plaintextpaddedlen + 1));
+  if(plaintextpadded == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for plaintextpadded\n");
+    goto exit;
+  }
   memcpy(plaintextpadded, plaintext, plaintextlen);
   memset(plaintextpadded + plaintextlen, padval, numpadbytestoadd);
   plaintextpadded[plaintextpaddedlen] = '\0';
@@ -73,10 +80,20 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
 
   size_t nc_off = 0;
   unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
+  if(stream_block == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for stream_block\n");
+    goto exit;
+  }
   memset(stream_block, 0, sizeof(unsigned char) * 16);
 
   size_t plaintextpaddedsize = plaintextsize + 16;
   unsigned char *plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedsize);
+  if(plaintextpadded == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for plaintextpadded\n");
+    goto exit;
+  }
   memset(plaintextpadded, 0, plaintextpaddedsize);
   size_t plaintextpaddedlen = 0;
 

@@ -75,6 +75,11 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   unsigned char *recv = NULL;
   if (!atclient->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
+    if(recv == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for recv\n");
+      goto exit;
+    }
     memset(recv, 0, sizeof(unsigned char) * recvsize);
   }
   size_t recvlen = 0;
@@ -195,6 +200,11 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   cmdbuffersize = strlen("update: \r\n") + metadataprotocolstrlen + atkeystrlen + ciphertextbase64len +
                   1; // + 1 for null terminator
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
+  if(cmdbuffer == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
+    goto exit;
+  }
   memset(cmdbuffer, 0, sizeof(char) * cmdbuffersize);
   snprintf(cmdbuffer, cmdbuffersize, "update%.*s:%.*s %.*s\r\n", (int)metadataprotocolstrlen, metadataprotocolstr,
            (int)atkeystrlen, atkeystr, (int)ciphertextbase64len, ciphertextbase64);

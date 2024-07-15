@@ -743,7 +743,10 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   const size_t expected_metadatastr_len = metadatastrsize - 1;
   size_t pos = 0;
 
-  *metadatastr = malloc(sizeof(char) * metadatastrsize);
+  if((*metadatastr = malloc(sizeof(char) * metadatastrsize)) == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+    goto exit;
+  }
   memset(*metadatastr, 0, sizeof(char) * metadatastrsize);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {

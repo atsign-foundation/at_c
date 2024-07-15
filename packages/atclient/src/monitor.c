@@ -362,108 +362,180 @@ void atclient_atnotification_free_decryptedvaluelen(atclient_atnotification *not
   atclient_atnotification_decryptedvaluelen_set_initialized(notification, false);
 }
 
-void atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen) {
+int atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen) {
+  int ret = 1;
   if (atclient_atnotification_id_is_initialized(notification)) {
     atclient_atnotification_free_id(notification);
   }
   notification->id = malloc(sizeof(char) * (idlen + 1));
+  if (notification->id == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification id\n");
+    goto exit;
+  }
   memcpy(notification->id, id, idlen);
   *(notification->id + idlen) = '\0';
   atclient_atnotification_id_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen) {
+int atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen) {
+  int ret = 1;
   if (atclient_atnotification_from_is_initialized(notification)) {
     atclient_atnotification_free_from(notification);
   }
   notification->from = malloc(sizeof(char) * (fromlen + 1));
+  if (notification->from == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification from\n");
+    goto exit;
+  }
   memcpy(notification->from, from, fromlen);
   *(notification->from + fromlen) = '\0';
   atclient_atnotification_from_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen) {
+int atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen) {
+  int ret = 1;
   if (atclient_atnotification_to_is_initialized(notification)) {
     atclient_atnotification_free_to(notification);
   }
   notification->to = malloc(sizeof(char) * (tolen + 1));
+  if (notification->to == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification to\n");
+    goto exit;
+  }
   memcpy(notification->to, to, tolen);
   *(notification->to + tolen) = '\0';
   atclient_atnotification_to_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen) {
+int atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen) {
+  int ret = 1;
   if (atclient_atnotification_key_is_initialized(notification)) {
     atclient_atnotification_free_key(notification);
   }
   notification->key = malloc(sizeof(char) * (keylen + 1));
+  if (notification->key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification key\n");
+    goto exit;
+  }
   memcpy(notification->key, key, keylen);
   *(notification->key + keylen) = '\0';
   atclient_atnotification_key_set_initialized(notification, true);
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_value(atclient_atnotification *notification, const char *value,
-                                       const size_t valuelen) {
+int atclient_atnotification_set_value(atclient_atnotification *notification, const char *value, const size_t valuelen) {
+  int ret = 1;
   if (atclient_atnotification_value_is_initialized(notification)) {
     atclient_atnotification_free_value(notification);
   }
   notification->value = malloc(sizeof(char) * (valuelen + 1));
+  if (notification->value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification value\n");
+    goto exit;
+  }
   memcpy(notification->value, value, valuelen);
   *(notification->value + valuelen) = '\0';
   atclient_atnotification_value_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
-                                           const size_t operationlen) {
+int atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
+                                          const size_t operationlen) {
+  int ret = 1;
   if (atclient_atnotification_operation_is_initialized(notification)) {
     atclient_atnotification_free_operation(notification);
   }
   notification->operation = malloc(sizeof(char) * (operationlen + 1));
+  if (notification->operation == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification operation\n");
+    goto exit;
+  }
   memcpy(notification->operation, operation, operationlen);
   *(notification->operation + operationlen) = '\0';
   atclient_atnotification_operation_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis) {
+int atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis) {
   if (atclient_atnotification_epochMillis_is_initialized(notification)) {
     atclient_atnotification_free_epochMillis(notification);
   }
   notification->epochMillis = epochMillis;
   atclient_atnotification_epochMillis_set_initialized(notification, true);
+  return 0;
 }
 
-void atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
+int atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
                                              const size_t messageTypelen) {
+  int ret = 1;
   if (atclient_atnotification_messageType_is_initialized(notification)) {
     atclient_atnotification_free_messageType(notification);
   }
   notification->messageType = malloc(sizeof(char) * (messageTypelen + 1));
+  if (notification->messageType == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification messageType\n");
+    goto exit;
+  }
   memcpy(notification->messageType, messageType, messageTypelen);
   *(notification->messageType + messageTypelen) = '\0';
   atclient_atnotification_messageType_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted) {
+int atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted) {
   if (atclient_atnotification_isEncrypted_is_initialized(notification)) {
     atclient_atnotification_free_isEncrypted(notification);
   }
   notification->isEncrypted = isEncrypted;
   atclient_atnotification_isEncrypted_set_initialized(notification, true);
+  return 0;
 }
 
-void atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
-                                            const size_t encKeyNamelen) {
+int atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
+                                           const size_t encKeyNamelen) {
+  int ret = 1;
   if (atclient_atnotification_encKeyName_is_initialized(notification)) {
     atclient_atnotification_free_encKeyName(notification);
   }
   notification->encKeyName = malloc(sizeof(char) * (encKeyNamelen + 1));
+  if (notification->encKeyName == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification encKeyName\n");
+    goto exit;
+  }
   memcpy(notification->encKeyName, encKeyName, encKeyNamelen);
   *(notification->encKeyName + encKeyNamelen) = '\0';
   atclient_atnotification_encKeyName_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
-                                         const size_t encAlgolen) {
+int atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
+                                        const size_t encAlgolen) {
+  int ret = 1;
   if (atclient_atnotification_encAlgo_is_initialized(notification)) {
     atclient_atnotification_free_encAlgo(notification);
   }
@@ -471,59 +543,102 @@ void atclient_atnotification_set_encAlgo(atclient_atnotification *notification, 
   memcpy(notification->encAlgo, encAlgo, encAlgolen);
   *(notification->encAlgo + encAlgolen) = '\0';
   atclient_atnotification_encAlgo_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
-                                         const size_t ivNoncelen) {
+int atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
+                                        const size_t ivNoncelen) {
+  int ret = 1;
   if (atclient_atnotification_ivNonce_is_initialized(notification)) {
     atclient_atnotification_free_ivNonce(notification);
   }
   notification->ivNonce = malloc(sizeof(char) * (ivNoncelen + 1));
+  if (notification->ivNonce == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification ivNonce\n");
+    goto exit;
+  }
   memcpy(notification->ivNonce, ivNonce, ivNoncelen);
   *(notification->ivNonce + ivNoncelen) = '\0';
   atclient_atnotification_ivNonce_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
-                                               const size_t skeEncKeyNamelen) {
+int atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
+                                              const size_t skeEncKeyNamelen) {
+  int ret = 1;
   if (atclient_atnotification_skeEncKeyName_is_initialized(notification)) {
     atclient_atnotification_free_skeEncKeyName(notification);
   }
   notification->skeEncKeyName = malloc(sizeof(char) * (skeEncKeyNamelen + 1));
+  if (notification->skeEncKeyName == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification skeEncKeyName\n");
+    goto exit;
+  }
   memcpy(notification->skeEncKeyName, skeEncKeyName, skeEncKeyNamelen);
   *(notification->skeEncKeyName + skeEncKeyNamelen) = '\0';
   atclient_atnotification_skeEncKeyName_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
-                                            const size_t skeEncAlgolen) {
+int atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
+                                           const size_t skeEncAlgolen) {
+  int ret = 1;
   if (atclient_atnotification_skeEncAlgo_is_initialized(notification)) {
     atclient_atnotification_free_skeEncAlgo(notification);
   }
   notification->skeEncAlgo = malloc(sizeof(char) * (skeEncAlgolen + 1));
+  if (notification->skeEncAlgo == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification skeEncAlgo\n");
+    goto exit;
+  }
   memcpy(notification->skeEncAlgo, skeEncAlgo, skeEncAlgolen);
   *(notification->skeEncAlgo + skeEncAlgolen) = '\0';
   atclient_atnotification_skeEncAlgo_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
-                                                const unsigned char *decryptedvalue, const size_t decryptedvaluelen) {
+int atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
+                                               const unsigned char *decryptedvalue, const size_t decryptedvaluelen) {
+  int ret = 1;
   if (atclient_atnotification_decryptedvalue_is_initialized(notification)) {
     atclient_atnotification_free_decryptedvalue(notification);
   }
   notification->decryptedvalue = malloc(sizeof(unsigned char) * (decryptedvaluelen + 1));
+  if (notification->decryptedvalue == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification decryptedvalue\n");
+    goto exit;
+  }
   memcpy(notification->decryptedvalue, decryptedvalue, decryptedvaluelen);
   notification->decryptedvalue[decryptedvaluelen] = '\0';
   atclient_atnotification_decryptedvalue_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
-void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
-                                                   const size_t decryptedvaluelen) {
+int atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
+                                                  const size_t decryptedvaluelen) {
+  int ret = 1;
   if (atclient_atnotification_decryptedvaluelen_is_initialized(notification)) {
     atclient_atnotification_free_decryptedvaluelen(notification);
   }
   notification->decryptedvaluelen = decryptedvaluelen;
   atclient_atnotification_decryptedvaluelen_set_initialized(notification, true);
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 void atclient_monitor_message_init(atclient_monitor_message *message) {
@@ -615,9 +730,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
   size_t chunks = 0;
   const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
-  
+
   buffer = malloc(sizeof(char) * chunksize);
-  if(buffer == NULL) {
+  if (buffer == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for buffer\n");
     goto exit;
   }
@@ -642,7 +757,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
     chunks = chunks + 1;
   }
-  if(ret <= 0) { // you should reconnect...
+  if (ret <= 0) { // you should reconnect...
     message->type = ATCLIENT_MONITOR_ERROR_READ;
     message->error_read.error_code = ret;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
@@ -708,11 +823,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         goto exit;
       }
     } else {
-      atclient_atnotification_set_decryptedvalue(&(message->notification),
-                                                 (unsigned char *)message->notification.value,
+      atclient_atnotification_set_decryptedvalue(&(message->notification), (unsigned char *)message->notification.value,
                                                  strlen(message->notification.value));
-      atclient_atnotification_set_decryptedvaluelen(&(message->notification),
-                                                    strlen(message->notification.value));
+      atclient_atnotification_set_decryptedvaluelen(&(message->notification), strlen(message->notification.value));
     }
   } else if (strcmp(messagetype, "data") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
@@ -823,7 +936,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_id(notification, val, vallen);
+    if((ret = atclient_atnotification_set_id(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification id\n");
+      goto exit;
+    }
   }
 
   cJSON *from = cJSON_GetObjectItem(root, "from");
@@ -835,7 +951,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_from(notification, val, vallen);
+    if((ret = atclient_atnotification_set_from(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification from\n");
+      goto exit;
+    }
   }
 
   cJSON *to = cJSON_GetObjectItem(root, "to");
@@ -847,7 +966,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_to(notification, val, vallen);
+    if((ret = atclient_atnotification_set_to(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification to\n");
+      goto exit;
+    }
   }
 
   cJSON *key = cJSON_GetObjectItem(root, "key");
@@ -859,7 +981,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_key(notification, val, vallen);
+    if((ret = atclient_atnotification_set_key(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification key\n");
+      goto exit;
+    }
   }
 
   cJSON *value = cJSON_GetObjectItem(root, "value");
@@ -871,7 +996,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_value(notification, val, vallen);
+    if((ret = atclient_atnotification_set_value(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification value\n");
+      goto exit;
+    }
   }
 
   cJSON *operation = cJSON_GetObjectItem(root, "operation");
@@ -883,12 +1011,18 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_operation(notification, val, vallen);
+    if((ret = atclient_atnotification_set_operation(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification operation\n");
+      goto exit;
+    }
   }
 
   cJSON *epochMillis = cJSON_GetObjectItem(root, "epochMillis");
   if (epochMillis != NULL) {
-    atclient_atnotification_set_epochMillis(notification, epochMillis->valueint);
+    if((ret = atclient_atnotification_set_epochMillis(notification, epochMillis->valueint)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification epochMillis\n");
+      goto exit;
+    }
   }
 
   cJSON *messageType = cJSON_GetObjectItem(root, "messageType");
@@ -900,12 +1034,18 @@ static int parse_notification(atclient_atnotification *notification, const char 
       val = "null";
       vallen = strlen("null");
     }
-    atclient_atnotification_set_messageType(notification, val, vallen);
+    if((ret = atclient_atnotification_set_messageType(notification, val, vallen)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification messageType\n");
+      goto exit;
+    }
   }
 
   cJSON *isEncrypted = cJSON_GetObjectItem(root, "isEncrypted");
   if (isEncrypted != NULL) {
-    atclient_atnotification_set_isEncrypted(notification, isEncrypted->valueint);
+    if((ret = atclient_atnotification_set_isEncrypted(notification, isEncrypted->valueint)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification isEncrypted\n");
+      goto exit;
+    }
   }
 
   cJSON *metadata = cJSON_GetObjectItem(root, "metadata");
@@ -920,7 +1060,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
         val = "null";
         vallen = strlen("null");
       }
-      atclient_atnotification_set_encKeyName(notification, val, vallen);
+      if((ret = atclient_atnotification_set_encKeyName(notification, val, vallen)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification encKeyName\n");
+        goto exit;
+      }
     }
 
     // get encAlgo
@@ -933,7 +1076,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
         val = "null";
         vallen = strlen("null");
       }
-      atclient_atnotification_set_encAlgo(notification, val, vallen);
+      if((ret = atclient_atnotification_set_encAlgo(notification, val, vallen)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification encAlgo\n");
+        goto exit;
+      }
     }
 
     // get ivNonce
@@ -946,7 +1092,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
         val = "null";
         vallen = strlen("null");
       }
-      atclient_atnotification_set_ivNonce(notification, val, vallen);
+      if((ret = atclient_atnotification_set_ivNonce(notification, val, vallen)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ivNonce\n");
+        goto exit;
+      }
     }
 
     // get skeEncKeyName
@@ -959,7 +1108,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
         val = "null";
         vallen = strlen("null");
       }
-      atclient_atnotification_set_skeEncKeyName(notification, val, vallen);
+      if((ret = atclient_atnotification_set_skeEncKeyName(notification, val, vallen)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification skeEncKeyName\n");
+        goto exit;
+      }
     }
 
     // get skeEncAlgo
@@ -972,7 +1124,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
         val = "null";
         vallen = strlen("null");
       }
-      atclient_atnotification_set_skeEncAlgo(notification, val, vallen);
+      if((ret = atclient_atnotification_set_skeEncAlgo(notification, val, vallen)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification skeEncAlgo\n");
+        goto exit;
+      }
     }
   }
 

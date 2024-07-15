@@ -47,6 +47,10 @@ int main() {
   size_t plaintextlen = 0;
 
   unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  if(iv == NULL) {
+    printf("malloc (failed): %d\n", ret);
+    goto exit;
+  }
   memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
   const size_t ciphertextsize = 8192;

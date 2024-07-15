@@ -81,6 +81,11 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   if (enc_key == NULL) {
     enc_key_mem = 1;
     enc_key = malloc(45);
+    if(enc_key == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for enc_key\n");
+      goto exit;
+    }
     atclient_atsign recipient;
     ret = atclient_atsign_init(&recipient, atkey->sharedwith.str);
     if (ret != 0) {
@@ -111,6 +116,11 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   // command_prefix = "llookup:all:"
   const size_t commandsize = strlen("llookup:all:") + atkeystrlen + strlen("\r\n") + 1;
   command = malloc(commandsize * sizeof(char));
+  if(command == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for command\n");
+    goto exit;
+  }
   snprintf(command, commandsize, "llookup:all:%s\r\n", atkeystr);
 
   // send command and recv response
@@ -132,6 +142,11 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
   response_prefix = malloc(response_prefix_len * sizeof(char));
+  if(response_prefix == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for response_prefix\n");
+    goto exit;
+  }
   snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
 
   if (atclient_stringutils_starts_with(response, recvsize, response_prefix, response_prefix_len)) {
@@ -199,6 +214,11 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
 
     const size_t valuerawsize = strlen(data->valuestring) * 4; // most likely enough space after base64 decode
     valueraw = malloc(sizeof(char) * valuerawsize);
+    if(valueraw == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for valueraw\n");
+      goto exit;
+    }
     memset(valueraw, 0, sizeof(char) * valuerawsize);
     size_t valuerawlen = 0;
 
@@ -254,6 +274,11 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   char *enc_key = shared_enc_key;
   if (enc_key == NULL) {
     enc_key = malloc(45);
+    if(enc_key == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for enc_key\n");
+      goto exit;
+    }
     atclient_atsign recipient;
     ret = atclient_atsign_init(&recipient, atkey->sharedby.str);
     if (ret != 0) {
@@ -304,6 +329,11 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
   response_prefix = malloc(response_prefix_len * sizeof(char));
+  if(response_prefix == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for response_prefix\n");
+    goto exit;
+  }
   snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
 
   if (atclient_stringutils_starts_with(response, recvlen, response_prefix, response_prefix_len)) {

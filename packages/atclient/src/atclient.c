@@ -179,6 +179,11 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
   const size_t recvsize = 64;
   if (!heartbeat_conn->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
+    if(recv == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for recv\n");
+      ret = 1;
+      goto exit;
+    }
     memset(recv, 0, sizeof(unsigned char) * recvsize);
   }
   size_t recvlen = 0;

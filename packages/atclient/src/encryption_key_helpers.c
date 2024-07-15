@@ -338,13 +338,22 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith->without_prefix_str) +
                                 strlen(sharedby->atsign) + 1 + sharedenckeybase64encryptedforuslen;
   cmdbuffer1 = (char *)malloc(sizeof(char) * cmdbuffersize1);
+  if(cmdbuffer1 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer1\n");
+    goto exit;
+  }
   snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
            sharedby->atsign, sharedenckeybase64encryptedforus);
 
   // 5b. for them (update:shared_key.sharedwith@sharedby <encrypted for them>\r\n)
   const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
                                 strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
-  cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2);
+  if((cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer2\n");
+    goto exit;
+  }
   snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith->atsign, sharedby->atsign,
            sharedenckeybase64encryptedforthem);
 

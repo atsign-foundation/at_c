@@ -11,21 +11,21 @@ void atchops_rsakey_publickey_init(atchops_rsakey_publickey *publickey) {
   memset(publickey, 0, sizeof(atchops_rsakey_publickey));
 
   publickey->n.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  publickey->n.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->n.len);
+  publickey->n.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->n.len); // TODO handle null
 
   publickey->e.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  publickey->e.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->e.len);
+  publickey->e.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->e.len); // TODO handle null
 }
 
 void atchops_rsakey_publickey_clone(atchops_rsakey_publickey *dst, atchops_rsakey_publickey *src) {
   memset(dst, 0, sizeof(atchops_rsakey_publickey));
 
   dst->n.len = src->n.len;
-  dst->n.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->n.len);
+  dst->n.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->n.len); // TODO handle null
   memcpy(dst->n.value, src->n.value, dst->n.len);
 
   dst->e.len = src->e.len;
-  dst->e.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->e.len);
+  dst->e.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->e.len); // TODO handle null
   memcpy(dst->e.value, src->e.value, dst->e.len);
 }
 
@@ -38,16 +38,16 @@ void atchops_rsakey_privatekey_init(atchops_rsakey_privatekey *privatekey) {
   memset(privatekey, 0, sizeof(atchops_rsakey_privatekey));
 
   privatekey->n.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->n.value = malloc(sizeof(unsigned char) * privatekey->n.len);
+  privatekey->n.value = malloc(sizeof(unsigned char) * privatekey->n.len); // TODO handle null
 
   privatekey->e.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->e.value = malloc(sizeof(unsigned char) * privatekey->e.len);
+  privatekey->e.value = malloc(sizeof(unsigned char) * privatekey->e.len); // TODO handle null
 
   privatekey->d.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->d.value = malloc(sizeof(unsigned char) * privatekey->d.len);
+  privatekey->d.value = malloc(sizeof(unsigned char) * privatekey->d.len); // TODO handle null
 
   privatekey->p.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->p.value = malloc(sizeof(unsigned char) * privatekey->p.len);
+  privatekey->p.value = malloc(sizeof(unsigned char) * privatekey->p.len); // TODO handle null
 
   privatekey->q.len = BASE64_DECODED_KEY_BUFFER_SIZE;
   privatekey->q.value = malloc(sizeof(unsigned char) * privatekey->q.len);
@@ -56,23 +56,23 @@ void atchops_rsakey_privatekey_init(atchops_rsakey_privatekey *privatekey) {
 void atchops_rsakey_privatekey_clone(atchops_rsakey_privatekey *dst, atchops_rsakey_privatekey *src) {
   memset(dst, 0, sizeof(atchops_rsakey_privatekey));
   dst->n.len = src->n.len;
-  dst->n.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->n.len);
+  dst->n.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->n.len); // TODO handle null
   memcpy(dst->n.value, src->n.value, dst->n.len);
 
   dst->e.len = src->e.len;
-  dst->e.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->e.len);
+  dst->e.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->e.len); // TODO handle null
   memcpy(dst->e.value, src->e.value, dst->e.len);
 
   dst->d.len = src->d.len;
-  dst->d.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->d.len);
+  dst->d.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->d.len); // TODO handle null
   memcpy(dst->d.value, src->d.value, dst->d.len);
 
   dst->p.len = src->p.len;
-  dst->p.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->p.len);
+  dst->p.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->p.len); // TODO handle null
   memcpy(dst->p.value, src->p.value, dst->p.len);
 
   dst->q.len = src->q.len;
-  dst->q.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->q.len);
+  dst->q.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->q.len); // TODO handle null
   memcpy(dst->q.value, src->q.value, dst->q.len);
 }
 
@@ -126,6 +126,10 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
   }
 
   seq = malloc(sizeof(mbedtls_asn1_sequence));
+  if(seq == NULL) {
+    ret = 1;
+    goto exit;
+  }
   memset(seq, 0, sizeof(mbedtls_asn1_sequence));
   ret = mbedtls_asn1_get_sequence_of(&p, end, seq, MBEDTLS_ASN1_INTEGER);
   if (ret != 0) {
@@ -193,6 +197,10 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
   }
 
   seq = malloc(sizeof(mbedtls_asn1_sequence));
+  if(seq == NULL) {
+    ret = 1;
+    goto exit;
+  }
   memset(seq, 0, sizeof(mbedtls_asn1_sequence));
   ret = mbedtls_asn1_get_sequence_of(&p, end, seq, MBEDTLS_ASN1_INTEGER);
   if (ret != 0) {

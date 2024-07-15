@@ -21,6 +21,11 @@ int atclient_atsign_init(atclient_atsign *atsign, const char *atsign_str) {
 
   memset(atsign, 0, sizeof(atclient_atsign));
   atsign->atsign = malloc(strlen(atsign_str) + 1);
+  if(atsign->atsign == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for atsign->atsign\n");
+    return ret;
+  }
 
   size_t atolen = 0;
   ret = atclient_atsign_with_at_symbol(atsign->atsign, maxatlen, &(atolen), atsign_str, strlen(atsign_str));

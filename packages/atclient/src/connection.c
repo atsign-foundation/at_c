@@ -453,7 +453,7 @@ void atclient_connection_free(atclient_connection *ctx) {
 }
 
 void atclient_connection_enable_hooks(atclient_connection *ctx) {
-  ctx->hooks = malloc(sizeof(atclient_connection_hooks));
+  ctx->hooks = malloc(sizeof(atclient_connection_hooks)); // TODO handle malloc failure
   memset(ctx->hooks, 0, sizeof(atclient_connection_hooks));
   ctx->hooks->readonly_src = true;
   ctx->_is_hooks_enabled = true;
