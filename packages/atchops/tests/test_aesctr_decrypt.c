@@ -46,13 +46,6 @@ int main() {
   memset(plaintext, 0, plaintextsize);
   size_t plaintextlen = 0;
 
-  unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  if(iv == NULL) {
-    printf("malloc (failed): %d\n", ret);
-    goto exit;
-  }
-  memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
-
   const size_t ciphertextsize = 8192;
   unsigned char ciphertext[ciphertextsize];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
@@ -61,6 +54,13 @@ int main() {
   unsigned char key[32];
   memset(key, 0, sizeof(unsigned char) * 32);
   size_t keylen = 0;
+
+  unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  if(iv == NULL) {
+    printf("malloc (failed): %d\n", ret);
+    goto exit;
+  }
+  memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
   ret = atchops_base64_decode(CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize, &ciphertextlen);
   if(ret != 0) {
