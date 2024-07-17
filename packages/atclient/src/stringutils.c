@@ -99,13 +99,13 @@ int atclient_stringutils_ends_with(const char *string, const size_t stringlen, c
 exit: { return ret; }
 }
 
-int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, const size_t original_atsign_len,
-                                               char **output_atsign_with_at_symbol) {
+int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, char **output_atsign_with_at_symbol) {
   int ret = -1;
   if (original_atsign == NULL) {
     ret = -1;
     goto exit;
   }
+  const size_t original_atsign_len = strlen(original_atsign);
   if (original_atsign_len == 0) {
     ret = -1;
     goto exit;
@@ -140,13 +140,13 @@ int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, cons
 exit: { return ret; }
 }
 
-int atclient_stringutils_atsign_without_at_symbol(const char *original_atsign, const size_t original_atsign_len,
-                                                  char **output_atsign_without_at_symbol) {
+int atclient_stringutils_atsign_without_at_symbol(const char *original_atsign, char **output_atsign_without_at_symbol) {
   int ret = -1;
   if (original_atsign == NULL) {
     ret = -1;
     goto exit;
   }
+  const size_t original_atsign_len = strlen(original_atsign);
   if (original_atsign_len == 0) {
     ret = -1;
     goto exit;

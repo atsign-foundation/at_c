@@ -31,7 +31,7 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_without_at_symbol(atsign, strlen(atsign), &atsign_without_at_symbol)) != 0) {
+  if ((ret = atclient_stringutils_atsign_without_at_symbol(atsign, &atsign_without_at_symbol)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at_symbol: %d\n", ret);
     goto exit;
   }

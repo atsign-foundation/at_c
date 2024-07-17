@@ -90,7 +90,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   /*
    * 3. Ensure that the atsign has the @ symbol.
    */
-  if ((ret = atclient_stringutils_atsign_with_at_symbol(atsign, strlen(atsign), &(atsign_with_at))) != 0) {
+  if ((ret = atclient_stringutils_atsign_with_at_symbol(atsign, &(atsign_with_at))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at_symbol: %d\n", ret);
     goto exit;
   }

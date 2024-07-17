@@ -35,7 +35,7 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
                              (strlen(regex) > 0 ? (strlen(" ") + strlen(regex)) : 0) + strlen("\r\n") + 1;
   char scancmd[scancmdsize];
 
-  const unsigned char recv[recvbuffersize];
+  unsigned char recv[recvbuffersize];
   size_t recvlen = 0;
 
   cJSON *root = NULL; // free later
