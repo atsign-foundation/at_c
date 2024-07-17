@@ -36,7 +36,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   unsigned char *recv;
   if (!atclient->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
-    if(recv == NULL) {
+    if (recv == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for recv\n");
       goto exit;
@@ -57,7 +57,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
 
   cmdbuffersize = strlen("delete:") + atkeystrlen + strlen("\r\n") + 1;
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
-  if(cmdbuffer == NULL) {
+  if (cmdbuffer == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
     goto exit;
@@ -67,7 +67,6 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   /*
    * 4. Send command
    */
-
   if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1,
                                       recv, recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
@@ -78,7 +77,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);

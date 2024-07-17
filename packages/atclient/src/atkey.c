@@ -15,21 +15,50 @@
 
 void atclient_atkey_init(atclient_atkey *atkey) {
   memset(atkey, 0, sizeof(atclient_atkey));
-  atclient_atstr_init(&(atkey->name), ATCLIENT_ATKEY_KEY_LEN + 1);
-  atclient_atstr_init(&(atkey->namespacestr), ATCLIENT_ATKEY_NAMESPACE_LEN + 1);
-  atclient_atstr_init(&(atkey->sharedby), ATCLIENT_ATKEY_FULL_LEN);
-  atclient_atstr_init(&(atkey->sharedwith), ATCLIENT_ATKEY_FULL_LEN);
-
+  atkey->key = NULL;
+  atkey->sharedby = NULL;
+  atkey->sharedwith = NULL;
+  atkey->namespacestr = NULL;
+  memset(atkey->_initializedfields, 0, sizeof(atkey->_initializedfields));
   atclient_atkey_metadata_init(&(atkey->metadata));
 }
 
-void atclient_atkey_free(atclient_atkey *atkey) {
-  free(atkey->name.str);
-  free(atkey->namespacestr.str);
-  free(atkey->sharedwith.str);
-  free(atkey->sharedby.str);
+void atclient_atkey_free(atclient_atkey *atkey) { atclient_atkey_metadata_free(&atkey->metadata); }
 
-  atclient_atkey_metadata_free(&atkey->metadata);
+size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
+  if (atkey == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    return -1;
+  }
+  if (!atclient_atkey_is_key_initialized(atkey) || !atclient_atkey_is_sharedby_initialized(atkey)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key or atkey->sharedby is not initialized\n");
+    return -1;
+  }
+  if (strlen(atkey->key) <= 0 || strlen(atkey->sharedby) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key or atkey->sharedby is empty\n");
+    return -1;
+  }
+  atclient_atkey_type type = atclient_atkey_get_type(atkey);
+  if (type == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey type is unknown\n");
+    return -1;
+  }
+  size_t len = 0;
+  if (atclient_atkey_metadata_is_iscached_initialized(&(atkey->metadata)) && atkey->metadata.iscached) {
+    len += strlen("cached:");
+  }
+  if (atclient_atkey_metadata_is_ispublic_initialized(&(atkey->metadata)) && atkey->metadata.ispublic) {
+    len += strlen("public:");
+  }
+  if (type == ATCLIENT_ATKEY_TYPE_SHAREDKEY && atclient_atkey_is_sharedwith_initialized(atkey)) {
+    len += strlen(atkey->sharedwith) + strlen(":");
+  }
+  len += strlen(atkey->key);
+  if (atclient_atkey_is_namespacestr_initialized(atkey) && strlen(atkey->namespacestr) > 0) {
+    len += strlen(".") + strlen(atkey->namespacestr);
+  }
+  len += strlen(atkey->sharedby);
+  return len;
 }
 
 int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen) {
@@ -75,6 +104,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   //      namespace = NULL
   //      cached = false
   int ret = 1;
+  char *sharedby_withat = NULL;
   char *saveptr;
   char *copy = strndup(atkeystr, atkeylen);
   if (copy == NULL) {
@@ -82,12 +112,12 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   char *token = strtok_r(copy, ":", &saveptr);
-  size_t tokenlen = strlen(token);
   if (token == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tokens[0] is NULL\n");
     ret = 1;
     goto exit;
   }
+  size_t tokenlen = strlen(token);
   // check if cached
   if (strncmp(token, "cached", strlen("cached")) == 0) {
     atclient_atkey_metadata_set_iscached(&(atkey->metadata), true);
@@ -99,10 +129,9 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     }
   }
 
-  if (atclient_stringutils_starts_with(token, tokenlen, "public", strlen("public")) == 1) {
+  if (atclient_stringutils_starts_with(token, "public")) {
     // it is a public key
     atclient_atkey_metadata_set_ispublic(&(atkey->metadata), true);
-    atkey->atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
     // shift tokens array to the left
     token = strtok_r(NULL, ":", &saveptr);
     if (token == NULL) {
@@ -110,29 +139,25 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
       ret = 1;
       goto exit;
     }
-  } else if (atclient_stringutils_starts_with(token, tokenlen, "@", strlen("@")) == 1) {
+  } else if (atclient_stringutils_starts_with(token, "@")) {
     // it is a shared key
-    atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
     // set sharedwith
-    ret = atclient_atstr_set_literal(&(atkey->sharedwith), token, tokenlen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+    if ((ret = atclient_atkey_set_sharedwith(atkey, token)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
       goto exit;
     }
     token = strtok_r(NULL, ":", &saveptr);
     if (token == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
       ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
       goto exit;
     }
-  } else if (atclient_stringutils_starts_with(token, tokenlen, "_", strlen("_")) == 1) {
+  } else if (atclient_stringutils_starts_with(token, "_")) {
     // it is an internal key
-    atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
-    atclient_atkey_metadata_set_ishidden(&(atkey->metadata), true);
   } else {
     // it is a self key
-    atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
   }
+
   // set atkey->name
   token = strtok_r(token, "@", &saveptr);
   if (token == NULL) {
@@ -141,47 +166,45 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char nameandnamespacestr[ATCLIENT_ATKEY_COMPOSITE_LEN + 1];
-  memset(nameandnamespacestr, 0, sizeof(char) * ATCLIENT_ATKEY_COMPOSITE_LEN + 1);
-  memcpy(nameandnamespacestr, token, tokenlen);
-  char *check = strchr(nameandnamespacestr, '.');
-  if (check != NULL && *(check + 1) != '\0') {
-    // there is a namespace
+
+  const size_t compositesize = ATCLIENT_ATKEY_COMPOSITE_LEN + 1;
+  char composite[compositesize];
+  memset(composite, 0, sizeof(char) * compositesize);
+  memcpy(composite, token, tokenlen);
+
+  char *check = strchr(composite, '.');
+  if (check != NULL && *(check + 1) != '\0') { // there is a namespace
     char *saveptr2;
-    char *name = strtok_r(nameandnamespacestr, ".", &saveptr2);
-    if (name == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "name is NULL. %s atkey is probably incomplete\n", atkeystr);
+
+    char *key = strtok_r(composite, ".", &saveptr2);
+    if (key == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is NULL. %s atkey is probably incomplete\n", atkeystr);
       ret = 1;
       goto exit;
     }
-    size_t namelen = strlen(name);
-    ret = atclient_atstr_set_literal(&(atkey->name), name, namelen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+    if ((ret = atclient_atkey_set_key(atkey, key)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
       goto exit;
     }
+
     char *namespacestr = strtok_r(NULL, "", &saveptr2);
     if (namespacestr == NULL) {
+      ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is NULL. %s atkey is probably incomplete\n",
                    atkeystr);
-      ret = 1;
       goto exit;
     }
-    size_t namespacestrlen = strlen(namespacestr);
-    ret = atclient_atstr_set_literal(&(atkey->namespacestr), namespacestr, namespacestrlen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+    if ((ret = atclient_atkey_set_namespacestr(atkey, namespacestr)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
       goto exit;
     }
-  } else {
-    // there is no namespace
-    size_t namelen = strlen(nameandnamespacestr);
-    ret = atclient_atstr_set_literal(&(atkey->name), nameandnamespacestr, namelen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+  } else { // there is no namespace
+    if ((ret = atclient_atkey_set_key(atkey, composite)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
       goto exit;
     }
   }
+
   // set atkey->sharedby
   token = strtok_r(NULL, "", &saveptr);
   if (token == NULL) {
@@ -190,51 +213,61 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
     goto exit;
   }
   tokenlen = strlen(token);
-  char sharedbystr[ATCLIENT_ATKEY_FULL_LEN + 1];
-  memset(sharedbystr, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN + 1);
-  size_t sharedbystrlen = 0;
-  ret = atclient_atsign_with_at_symbol(sharedbystr, ATCLIENT_ATSIGN_FULL_LEN, &sharedbystrlen, token, tokenlen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_with_at_symbol failed\n");
+
+  if ((ret = atclient_stringutils_atsign_with_at(token, &sharedby_withat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed\n");
     goto exit;
   }
-  ret = atclient_atstr_set_literal(&(atkey->sharedby), sharedbystr, sharedbystrlen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+
+  if ((ret = atclient_atkey_set_sharedby(atkey, sharedby_withat)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
     goto exit;
   }
+
   ret = 0;
   goto exit;
 exit: {
   free(copy);
+  free(sharedby_withat);
   return ret;
 }
-}
-
-size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
-  size_t len = 0;
-  if (atclient_atkey_metadata_is_iscached_initialized(&(atkey->metadata)) && atkey->metadata.iscached) {
-    len += strlen("cached:");
-  }
-  if (atclient_atkey_metadata_is_ispublic_initialized(&(atkey->metadata)) && atkey->metadata.ispublic) {
-    len += strlen("public:");
-  }
-  if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    len += atkey->sharedwith.len + strlen(":");
-  }
-  len += atkey->name.len;
-  if (atkey->namespacestr.len > 0) {
-    len += strlen(".") + atkey->namespacestr.len;
-  }
-  len += atkey->sharedby.len;
-  return len;
 }
 
 int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
   int ret = 1;
 
-  size_t index_pos = 0;
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    return ret;
+  }
 
+  if (atkeystr == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "**atkeystr is NULL\n");
+    return ret;
+  }
+
+  atclient_atkey_type atkeytype = atclient_atkey_get_type(atkey);
+
+  if (atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeytype is unknown\n");
+    return ret;
+  }
+
+  if (!atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atkey->sharedby is not initialized or strlen(atkey->sharedby) <= 0. AtKey is incomplete.\n");
+    return ret;
+  }
+
+  if (!atclient_atkey_is_key_initialized(atkey) || strlen(atkey->key) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atkey->key is not initialized or strlen(atkey->key) <= 0. AtKey is incomplete.\n");
+    return ret;
+  }
+
+  size_t index_pos = 0;
   const size_t atkeystrsize = atclient_atkey_strlen(atkey) + 1;
   *atkeystr = (char *)malloc(sizeof(char) * atkeystrsize);
   if (*atkeystr == NULL) {
@@ -248,62 +281,40 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     index_pos += strlen("cached:");
   }
 
-  if (atclient_atkey_metadata_is_ispublic_initialized(&(atkey->metadata)) && atkey->metadata.ispublic &&
-      atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  if (atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    if (!atclient_atkey_metadata_is_ispublic_initialized(&(atkey->metadata)) || !atkey->metadata.ispublic) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+                   "atkey's metadata ispublic is either not initialized or false, even though it was deemed a "
+                   "ATCLIENT_ATKEY_TYPE_PUBLICKEY by atclient_atkey_get_type\n");
+    }
     snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "public:");
     index_pos += strlen("public:");
-  } else if (atkey->metadata.ispublic || atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  } else if (atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
+    if (atclient_atkey_is_sharedwith_initialized(atkey)) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+                   "atkey's sharedwith is initialized, even though it was deemed a ATCLIENT_ATKEY_TYPE_SHAREDKEY by "
+                   "atclient_atkey_get_type\n");
+    }
+    snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%s:", atkey->sharedwith);
+    index_pos += strlen(atkey->sharedwith) + strlen(":");
+  }
+
+  snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%s", atkey->key);
+  index_pos += strlen(atkey->key);
+
+  if (atclient_atkey_is_namespacestr_initialized(atkey) && strlen(atkey->namespacestr) > 0) {
+    snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, ".%s", atkey->namespacestr);
+    index_pos += strlen(".") + strlen(atkey->namespacestr);
+  }
+
+  snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%s", atkey->sharedby);
+  index_pos += strlen(atkey->sharedby);
+
+  if (index_pos != atkeystrsize - 1) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                 "either atkey's metadata ispublic is not set to 1 or atkey's atkeytype is not set to "
-                 "ATCLIENT_ATKEY_TYPE_PUBLICKEY for atkey: %.*s\n",
-                 (int)atkey->name.len, atkey->name.str);
-    snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "public:");
-    index_pos += strlen("public:");
-  } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%.*s:", (int)atkey->sharedwith.len,
-             atkey->sharedwith.str);
-    index_pos += (atkey->sharedwith.len) + strlen(":");
-  } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's atkeytype is %d: %.*s\n", atkey->atkeytype,
-                 (int)atkey->name.len, atkey->name.str);
-    goto error_exit;
-  }
-
-  if (atkey->name.str == NULL || atkey->name.len == 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atkey's name is NULL or empty. atkey.name.str: \"%s\", atkey.name.len: %d\n", atkey->name.str,
-                 atkey->name.len);
-    goto error_exit;
-  }
-
-  snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%.*s", (int)atkey->name.len, atkey->name.str);
-  index_pos += atkey->name.len;
-
-  if (atkey->namespacestr.len > 0) {
-    snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, ".%.*s", (int)atkey->namespacestr.len,
-             atkey->namespacestr.str);
-    index_pos += strlen(".") + atkey->namespacestr.len;
-  }
-
-  if (atkey->sharedby.str == NULL || atkey->sharedby.len == 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atkey's sharedby is NULL or empty. atkey.sharedby.str: \"%s\", atkey.sharedby.len: %d\n",
-                 atkey->sharedby.str, atkey->sharedby.len);
-    goto error_exit;
-  }
-
-  snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%.*s", (int)atkey->sharedby.len, atkey->sharedby.str);
-  index_pos += (int)atkey->sharedby.len;
-
-  if (strlen(*atkeystr) > atkeystrsize) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atkeystr is too small. Conditiion strlen(atkey)str > atkeystrsize: %d > %d, is true\n",
-                 strlen(*atkeystr), atkeystrsize);
-    goto error_exit;
+                 "index_pos != atkeystrsize - 1 (%d != %d - 1). The predicted `atkeystrsize` variable was not "
+                 "evaluated correctly.\n",
+                 index_pos, atkeystrsize);
   }
 
   ret = 0;
@@ -315,41 +326,233 @@ error_exit: {
 exit: { return ret; }
 }
 
-int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
-                                    const size_t sharedbylen, const char *namespacestr, const size_t namespacestrlen) {
+bool atclient_atkey_is_key_initialized(const atclient_atkey *atkey) {
+  return (atkey->_initializedfields[ATKEY_KEY_INDEX] & ATKEY_KEY_INITIALIZED);
+}
+
+bool atclient_atkey_is_namespacestr_initialized(const atclient_atkey *atkey) {
+  return (atkey->_initializedfields[ATKEY_NAMESPACESTR_INDEX] & ATKEY_NAMESPACESTR_INITIALIZED);
+}
+
+bool atclient_atkey_is_sharedby_initialized(const atclient_atkey *atkey) {
+  return (atkey->_initializedfields[ATKEY_SHAREDBY_INDEX] & ATKEY_SHAREDBY_INITIALIZED);
+}
+
+bool atclient_atkey_is_sharedwith_initialized(const atclient_atkey *atkey) {
+  return (atkey->_initializedfields[ATKEY_SHAREDWITH_INDEX] & ATKEY_SHAREDWITH_INITIALIZED);
+}
+
+int atclient_atkey_set_key(atclient_atkey *atkey, const char *key) {
+  int ret = 1;
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (atclient_atkey_is_key_initialized(atkey)) {
+    free(atkey->key);
+    atkey->key = NULL;
+    atkey->_initializedfields[ATKEY_KEY_INDEX] &= ~ATKEY_KEY_INITIALIZED;
+  }
+  atkey->key = strdup(key);
+  if (atkey->key == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    ret = 1;
+    goto exit;
+  }
+  atkey->_initializedfields[ATKEY_KEY_INDEX] |= ATKEY_KEY_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkey_set_namespacestr(atclient_atkey *atkey, const char *namespacestr) {
+  int ret = 1;
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (namespacestr == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (atclient_atkey_is_namespacestr_initialized(atkey)) {
+    free(atkey->namespacestr);
+    atkey->namespacestr = NULL;
+    atkey->_initializedfields[ATKEY_NAMESPACESTR_INDEX] &= ~ATKEY_NAMESPACESTR_INITIALIZED;
+  }
+  atkey->namespacestr = strdup(namespacestr);
+  if (atkey->namespacestr == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    ret = 1;
+    goto exit;
+  }
+  atkey->_initializedfields[ATKEY_NAMESPACESTR_INDEX] |= ATKEY_NAMESPACESTR_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkey_set_sharedby(atclient_atkey *atkey, const char *sharedby) {
+  int ret = 1;
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (sharedby == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (atclient_atkey_is_sharedby_initialized(atkey)) {
+    free(atkey->sharedby);
+    atkey->sharedby = NULL;
+    atkey->_initializedfields[ATKEY_SHAREDBY_INDEX] &= ~ATKEY_SHAREDBY_INITIALIZED;
+  }
+  atkey->sharedby = strdup(sharedby);
+  if (atkey->sharedby == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    ret = 1;
+    goto exit;
+  }
+  atkey->_initializedfields[ATKEY_SHAREDBY_INDEX] |= ATKEY_SHAREDBY_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkey_set_sharedwith(atclient_atkey *atkey, const char *sharedwith) {
+  int ret = 1;
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (sharedwith == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (atclient_atkey_is_sharedwith_initialized(atkey)) {
+    free(atkey->sharedwith);
+    atkey->sharedwith = NULL;
+    atkey->_initializedfields[ATKEY_SHAREDWITH_INDEX] &= ~ATKEY_SHAREDWITH_INITIALIZED;
+  }
+  atkey->sharedwith = strdup(sharedwith);
+  if (atkey->sharedwith == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    ret = 1;
+    goto exit;
+  }
+  atkey->_initializedfields[ATKEY_SHAREDWITH_INDEX] |= ATKEY_SHAREDWITH_INITIALIZED;
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atclient_atkey_unset_key(atclient_atkey *atkey) {
+  if (atclient_atkey_is_key_initialized(atkey)) {
+    free(atkey->key);
+    atkey->key = NULL;
+    atkey->_initializedfields[ATKEY_KEY_INDEX] &= ~ATKEY_KEY_INITIALIZED;
+  }
+}
+
+void atclient_atkey_unset_namespacestr(atclient_atkey *atkey) {
+  if (atclient_atkey_is_namespacestr_initialized(atkey)) {
+    free(atkey->namespacestr);
+    atkey->namespacestr = NULL;
+    atkey->_initializedfields[ATKEY_NAMESPACESTR_INDEX] &= ~ATKEY_NAMESPACESTR_INITIALIZED;
+  }
+}
+
+void atclient_atkey_unset_sharedby(atclient_atkey *atkey) {
+  if (atclient_atkey_is_sharedby_initialized(atkey)) {
+    free(atkey->sharedby);
+    atkey->sharedby = NULL;
+    atkey->_initializedfields[ATKEY_SHAREDBY_INDEX] &= ~ATKEY_SHAREDBY_INITIALIZED;
+  }
+}
+
+void atclient_atkey_unset_sharedwith(atclient_atkey *atkey) {
+  if (atclient_atkey_is_sharedwith_initialized(atkey)) {
+    free(atkey->sharedwith);
+    atkey->sharedwith = NULL;
+    atkey->_initializedfields[ATKEY_SHAREDWITH_INDEX] &= ~ATKEY_SHAREDWITH_INITIALIZED;
+  }
+}
+
+atclient_atkey_type atclient_atkey_get_type(const atclient_atkey *atkey) {
+  if (atclient_atkey_metadata_is_ispublic_initialized(&(atkey->metadata)) && atkey->metadata.ispublic &&
+      !atclient_atkey_is_sharedwith_initialized(atkey)) {
+    return ATCLIENT_ATKEY_TYPE_PUBLICKEY;
+  }
+  if (atclient_atkey_is_sharedby_initialized(atkey) && atclient_atkey_is_sharedwith_initialized(atkey)) {
+    if (strcmp(atkey->sharedby, atkey->sharedwith) == 0) { // special case
+      return ATCLIENT_ATKEY_TYPE_SELFKEY;
+    }
+    return ATCLIENT_ATKEY_TYPE_SHAREDKEY;
+  }
+
+  if (atclient_atkey_is_sharedby_initialized(atkey) && !atclient_atkey_is_sharedwith_initialized(atkey)) {
+    return ATCLIENT_ATKEY_TYPE_SELFKEY;
+  }
+  return ATCLIENT_ATKEY_TYPE_UNKNOWN;
+}
+
+int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *key, const char *sharedby,
+                                    const char *namespacestr) {
   int ret = 1;
 
-  if (name == NULL || sharedby == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "name or sharedby is NULL. These are required arguments.\n");
+  if (atkey == NULL) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (strlen(key) == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is empty. This is a required argument.\n");
+    goto exit;
+  }
+  if (sharedby == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is NULL. This is a required argument.\n");
+    goto exit;
+  }
+  if (strlen(sharedby) == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is empty. This is a required argument.\n");
     goto exit;
   }
 
-  if (namelen == 0 || sharedbylen == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namelen or sharedbylen is 0. These are required arguments.\n");
-    ret = 1;
-    goto exit;
-  }
-
-  atkey->atkeytype = ATCLIENT_ATKEY_TYPE_PUBLICKEY;
   atclient_atkey_metadata_set_ispublic(&(atkey->metadata), true);
 
-  ret = atclient_atstr_set_literal(&(atkey->name), name, namelen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+  if ((ret = atclient_atkey_set_key(atkey, key)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
     goto exit;
   }
 
-  ret = atclient_atstr_set_literal(&(atkey->sharedby), sharedby, sharedbylen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+  if ((ret = atclient_atkey_set_sharedby(atkey, sharedby)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
     goto exit;
   }
 
   if (namespacestr != NULL) {
-    ret = atclient_atstr_set_literal(&(atkey->namespacestr), namespacestr, namespacestrlen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+    if ((ret = atclient_atkey_set_namespacestr(atkey, namespacestr)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
       goto exit;
     }
   }
@@ -359,46 +562,54 @@ int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, con
 exit: { return ret; }
 }
 
-int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
-                                  const size_t sharedbylen, const char *namespacestr, const size_t namespacestrlen) {
+int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *key, const char *sharedby,
+                                  const char *namespacestr) {
   int ret = 1;
 
-  if (name == NULL || sharedby == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "name or sharedby is NULL. These are required arguments.\n");
+  if (atkey == NULL) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
     goto exit;
   }
 
-  if (namelen == 0 || sharedbylen == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namelen or sharedbylen is 0. These are required arguments.\n");
+  if (key == NULL) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is NULL. This is a required argument.\n");
     goto exit;
   }
 
-  atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SELFKEY;
-
-  ret = atclient_atstr_set_literal(&(atkey->name), "%.*s", (int)namelen, name);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+  if (strlen(key) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is empty. This is a required argument.\n");
     goto exit;
   }
 
-  if (namespacestr != NULL) {
-    if (namespacestrlen == 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestrlen is 0. This is a required argument.\n");
-      ret = 1;
+  if (sharedby == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is NULL. This is a required argument.\n");
+    goto exit;
+  }
+
+  if (strlen(sharedby) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is empty. This is a required argument.\n");
+    goto exit;
+  }
+
+  if ((ret = atclient_atkey_set_key(atkey, key)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
+    goto exit;
+  }
+
+  if (namespacestr != NULL && strlen(namespacestr) > 0) {
+    if ((ret = atclient_atkey_set_namespacestr(atkey, namespacestr)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
       goto exit;
     }
-    ret = atclient_atstr_set_literal(&(atkey->namespacestr), "%.*s", (int)namespacestrlen, namespacestr);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
-      goto exit;
-    }
   }
 
-  ret = atclient_atstr_set_literal(&(atkey->sharedby), "%.*s", (int)sharedbylen, sharedby);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set_literal failed\n");
+  if ((ret = atclient_atkey_set_sharedby(atkey, sharedby)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
     goto exit;
   }
 
@@ -407,50 +618,71 @@ int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const
 exit: { return ret; }
 }
 
-int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const size_t namelen, const char *sharedby,
-                                    const size_t sharedbylen, const char *sharedwith, const size_t sharedwithlen,
-                                    const char *namespacestr, const size_t namespacestrlen) {
+int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *key, const char *sharedby,
+                                    const char *sharedwith, const char *namespacestr) {
   int ret = 1;
 
-  if (name == NULL || sharedby == NULL || sharedwith == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "name, sharedby, or sharedwith is NULL. These are required arguments.\n");
+  if (atkey == NULL) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
     goto exit;
   }
 
-  if (namelen == 0 || sharedbylen == 0 || sharedwithlen == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "namelen, sharedbylen, or sharedwithlen is 0. These are required arguments.\n");
+  if (key == NULL) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is NULL. This is a required argument.\n");
     goto exit;
   }
 
-  atkey->atkeytype = ATCLIENT_ATKEY_TYPE_SHAREDKEY;
-
-  ret = atclient_atstr_set(&(atkey->sharedwith), sharedwith, sharedwithlen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set failed\n");
+  if (strlen(key) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is empty. This is a required argument.\n");
     goto exit;
   }
 
-  ret = atclient_atstr_set(&(atkey->name), name, namelen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set failed\n");
+  if (sharedby == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is NULL. This is a required argument.\n");
     goto exit;
   }
 
-  if (namespacestr != NULL) {
-    ret = atclient_atstr_set(&(atkey->namespacestr), namespacestr, namespacestrlen);
-    if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set failed\n");
+  if (strlen(sharedby) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is empty. This is a required argument.\n");
+    goto exit;
+  }
+
+  if (sharedwith == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is NULL. This is a required argument.\n");
+    goto exit;
+  }
+
+  if (strlen(sharedwith) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is empty. This is a required argument.\n");
+    goto exit;
+  }
+
+  if ((ret = atclient_atkey_set_sharedwith(atkey, sharedwith)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
+    goto exit;
+  }
+
+  if ((ret = atclient_atkey_set_key(atkey, key)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
+    goto exit;
+  }
+
+  if (namespacestr != NULL && strlen(namespacestr) <= 0) {
+    if ((ret = atclient_atkey_set_namespacestr(atkey, namespacestr)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
       goto exit;
     }
   }
 
-  ret = atclient_atstr_set(&(atkey->sharedby), sharedby, sharedbylen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set failed\n");
+  if ((ret = atclient_atkey_set_sharedby(atkey, sharedby)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
     goto exit;
   }
 

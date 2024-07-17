@@ -1,6 +1,7 @@
 #ifndef ATCLIENT_STRINGUTILS_H
 #define ATCLIENT_STRINGUTILS_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 /**
@@ -17,26 +18,24 @@ int atclient_stringutils_trim_whitespace(const char *string, const size_t string
                                          size_t *outlen);
 
 /**
- * @brief returns 1 (true) if the string starts with the prefix, 0 (false) otherwise
+ * @brief check if string starts with prefix
  *
  * @param string the string to check
- * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
  * @param prefix the prefix to check for
- * @return int 1 (true) if the string starts with the prefix, 0 (false) otherwise
+ * @return true, if string starts with `prefix`, where `prefix` is a valid substring of `string`
+ * @return false, otherwise
  */
-int atclient_stringutils_starts_with(const char *string, const size_t stringlen, const char *prefix,
-                                     const size_t prefixlen);
+bool atclient_stringutils_starts_with(const char *string, const char *prefix);
 
 /**
- * @brief returns 1 (true) if the string ends with the suffix, 0 (false) otherwise
+ * @brief check if string ends with suffix
  *
  * @param string the string to check
- * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
- * @param suffix the suffix to check for
- * @return int 1 (true) if the string ends with the suffix, 0 (false) otherwise
+ * @param suffix suffix to check for
+ * @return true, if string ends with `suffix`, where `suffix` is a valid substring of `string`
+ * @return false, otherwise
  */
-int atclient_stringutils_ends_with(const char *string, const size_t stringlen, const char *suffix,
-                                   const size_t suffixlen);
+bool atclient_stringutils_ends_with(const char *string, const char *suffix);
 
 /**
  * @brief generate a new string with the atsign and the guaranteed @ symbol

@@ -14,21 +14,23 @@
 
 #define TAG "atclient_get_selfkey"
 
+static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuesize, const size_t *valuelen);
+
 int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
                          size_t *valuelen) {
-  if (atclient->async_read) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_selfkey cannot be called from an async_read atclient, it will cause a race condition\n");
-    return 1;
-  }
-  if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_SELFKEY) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_SELF\n");
-    return 1;
-  }
-
   int ret = 1;
 
-  // 1. initialize variables
+  /*
+   * 1. Validate arguments
+   */
+  if((ret = atclient_get_selfkey_valid_arguments(atclient, atkey, value, valuesize, valuelen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_selfkey_valid_arguments: %d\n", ret);
+    return ret;
+  }
+
+  /*
+   * 2. Initialize variables
+   */
   char *atkeystr = NULL;
 
   const size_t recvsize = valuesize;
@@ -76,7 +78,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   }
 
   // 4. parse response
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
@@ -177,6 +179,75 @@ exit: {
   free(valueraw);
   free(cmdbuffer);
   free(atkeystr);
+  return ret;
+}
+}
+
+static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuesize, const size_t *valuelen) {
+  int ret = 1;
+
+  if(atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+
+  if(!atclient->_atsign_is_allocated) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient->_atsign_is_allocated is false\n");
+    goto exit;
+  }
+
+  if(!atclient->_atserver_connection_started) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
+    goto exit;
+  }
+
+  if (atclient->async_read) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_selfkey cannot be called from an async_read atclient, it will cause a race condition\n");
+    return 1;
+  }
+
+  if(atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_key_initialized(atkey) || strlen(atkey->key) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not initialized\n");
+    goto exit;
+  }
+
+  if(atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is shared by someone else\n");
+    goto exit;
+  }
+
+  if(value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
+    goto exit;
+  }
+
+  if(valuesize == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuesize is 0\n");
+    goto exit;
+  }
+
+  if(valuelen == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuelen is NULL\n");
+    goto exit;
+  }
+
+  ret = 0;
+exit: {
   return ret;
 }
 }

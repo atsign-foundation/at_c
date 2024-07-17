@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outsize,
                                          size_t *outlen) {
@@ -44,59 +45,18 @@ int atclient_stringutils_trim_whitespace(const char *string, const size_t string
 exit: { return ret; }
 }
 
-int atclient_stringutils_starts_with(const char *string, const size_t stringlen, const char *prefix,
-                                     const size_t prefixlen) {
-  int ret = -1;
-  if (string == NULL || prefix == NULL) {
-    ret = -1;
-    goto exit;
-  }
-
-  if (stringlen == 0 || prefixlen == 0) {
-    ret = -1;
-    goto exit;
-  }
-
-  if (stringlen < prefixlen) {
-    ret = -1;
-    goto exit;
-  }
-
-  ret = strncmp(string, prefix, strlen(prefix));
-  if (ret == 0) {
-    ret = 1; // true
-  } else if (ret != 0) {
-    ret = 0; // false
-  }
-
-  goto exit;
-exit: { return ret; }
+bool atclient_stringutils_starts_with(const char *string, const char *prefix) {
+  return strncmp(string, prefix, strlen(prefix)) == 0;
 }
 
-int atclient_stringutils_ends_with(const char *string, const size_t stringlen, const char *suffix,
-                                   const size_t suffixlen) {
-  int ret = -1;
-  if (string == NULL || suffix == NULL) {
-    ret = -1;
-    goto exit;
+bool atclient_stringutils_ends_with(const char *string, const char *suffix) {
+  const size_t string_len = strlen(string);
+  const size_t suffix_len = strlen(suffix);
+  if (suffix_len > string_len) {
+    return false;
   }
-  if (stringlen == 0 || suffixlen == 0) {
-    ret = -1;
-    goto exit;
-  }
-  if (stringlen < suffixlen) {
-    ret = -1;
-    goto exit;
-  }
-  ret = strncmp(string + stringlen - suffixlen, suffix, suffixlen);
-  if (ret == 0) {
-    ret = 1; // true
-  } else if (ret != 0) {
-    ret = 0; // false
-  }
+  return strncmp(string + string_len - suffix_len, suffix, suffix_len) == 0;
 
-  goto exit;
-exit: { return ret; }
 }
 
 int atclient_stringutils_atsign_with_at(const char *original_atsign, char **output_atsign_with_at_symbol) {

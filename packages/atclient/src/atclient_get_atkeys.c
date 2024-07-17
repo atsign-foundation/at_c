@@ -60,7 +60,7 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
   /*
    * 5. Parse response
    */
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
@@ -109,7 +109,7 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
       goto atkeys_allocated_error;
     }
 
-    if ((ret = atclient_atkey_from_string(&(*atkey)[i], atkey_str, strlen(atkey_str))) != 0) {
+    if ((ret = atclient_atkey_from_string(&(*atkey)[i], atkey_str)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed: %d\n", ret);
       goto atkeys_allocated_error;
     }

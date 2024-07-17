@@ -83,7 +83,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   /*
    * 5. Parse response
    */
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
@@ -157,7 +157,9 @@ static int atclient_get_publickey_validate_arguments(atclient *atclient, atclien
     goto exit;
   }
 
-  if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  const atclient_atkey_type atkey_type = atclient_atkey_get_type(atkey);
+
+  if (atkey_type != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not a public key\n");
     goto exit;
