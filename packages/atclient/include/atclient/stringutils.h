@@ -45,7 +45,7 @@ int atclient_stringutils_ends_with(const char *string, const size_t stringlen, c
  * @param output_atsign_with_at_symbol the output atsign with the @ symbol, must be freed by the caller
  * @return int 0 on success
  */
-int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, char **output_atsign_with_at_symbol);
+int atclient_stringutils_atsign_with_at(const char *original_atsign, char **output_atsign_with_at_symbol);
 
 /**
  * @brief generate a new string with the atsign and the guaranteed @ symbol
@@ -54,7 +54,7 @@ int atclient_stringutils_atsign_with_at_symbol(const char *original_atsign, char
  * @param output_atsign_without_at_symbol the output atsign without the @ symbol, must be freed by the caller
  * @return int 0 on success
  */
-int atclient_stringutils_atsign_without_at_symbol(const char *original_atsign, char **output_atsign_without_at_symbol);
+int atclient_stringutils_atsign_without_at(const char *original_atsign, char **output_atsign_without_at_symbol);
 
 /**
  * @brief get the length of a long if it were converted to a string
