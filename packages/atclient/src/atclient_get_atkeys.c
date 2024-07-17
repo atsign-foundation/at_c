@@ -99,25 +99,25 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
     if (!cJSON_IsString(atkey_json)) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey_json is not a string\n");
-      goto exit1;
+      goto atkeys_allocated_error;
     }
 
     const char *atkey_str = cJSON_GetStringValue(atkey_json);
     if (atkey_str == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetStringValue failed\n");
-      goto exit1;
+      goto atkeys_allocated_error;
     }
 
     if ((ret = atclient_atkey_from_string(&(*atkey)[i], atkey_str, strlen(atkey_str))) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed: %d\n", ret);
-      goto exit1;
+      goto atkeys_allocated_error;
     }
   }
 
   ret = 0;
   goto exit;
-exit1: {
+atkeys_allocated_error: { // error cleanup
   for (size_t i = 0; i < *output_array_len; i++) {
     atclient_atkey_free(&(*atkey)[i]);
   }
