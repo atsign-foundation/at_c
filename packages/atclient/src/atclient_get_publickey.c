@@ -157,7 +157,7 @@ static int atclient_get_publickey_validate_arguments(atclient *atclient, atclien
     goto exit;
   }
 
-  if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not a public key\n");
     goto exit;
