@@ -8,22 +8,25 @@
 
 #define TAG "atclient_get_publickey"
 
+static int atclient_get_publickey_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
+                                                     const size_t valuesize, size_t *valuelen, bool bypasscache);
+
 int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
                            size_t *valuelen, bool bypasscache) {
-  if (atclient->async_read) {
-    atlogger_log(
-        TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-        "atclient_get_publickey cannot be called from an async_read atclient, it will cause a race condition\n");
-    return 1;
-  }
   int ret = 1;
 
-  if (atkey->atkeytype != ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->atkeytype != ATKEYTYPE_PUBLIC\n");
-    return 1;
+  /*
+   * 1. Validate arguments
+   */
+  if ((ret = atclient_get_publickey_validate_arguments(atclient, atkey, value, valuesize, valuelen, bypasscache)) !=
+      0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_publickey_validate_arguments: %d\n", ret);
+    return ret;
   }
 
-  // 1. initialize variables
+  /*
+   * 2. Initialize variables
+   */
   char *atkeystr = NULL;
 
   const size_t recvsize = valuesize;
@@ -35,16 +38,13 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   char *cmdbuffer = NULL;
   char *metadatastr = NULL;
 
-  // 2. build plookup: command
+  /*
+   * 3. Build `plookup:` command
+   */
   ret = atclient_atkey_to_string(atkey, &atkeystr);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
-  }
-
-  char *bypasscachestr = NULL;
-  if (bypasscache) {
-    bypasscachestr = "bypassCache:true:";
   }
 
   char *atkeystrwithoutpublic = NULL;
@@ -52,24 +52,27 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
   if (ptr != NULL) {
     atkeystrwithoutpublic = ptr + strlen("public:");
   } else {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not find \"public:\" from string \"%s\"\n", atkeystr);
     goto exit;
   }
 
-  const size_t cmdbuffersize = strlen("plookup:all:\r\n") + (bypasscachestr != NULL ? strlen(bypasscachestr) : 0) +
+  const size_t cmdbuffersize = strlen("plookup:all:\r\n") + (bypasscache ? strlen("bypassCache:true:") : 0) +
                                strlen(atkeystrwithoutpublic) + 1;
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
-  if(cmdbuffer == NULL) {
+  if (cmdbuffer == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
     goto exit;
   }
   memset(cmdbuffer, 0, cmdbuffersize);
-  snprintf(cmdbuffer, cmdbuffersize, "plookup:%sall:%s\r\n", bypasscachestr != NULL ? bypasscachestr : "",
+  snprintf(cmdbuffer, cmdbuffersize, "plookup:%sall:%s\r\n", bypasscache ? "bypassCache:true:" : "",
            atkeystrwithoutpublic);
   const size_t cmdbufferlen = strlen(cmdbuffer);
 
-  // 3. send plookup: command
+  /*
+   * 4. Send `plookup:` command
+   */
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbufferlen, recv,
                                  recvsize, &recvlen);
   if (ret != 0) {
@@ -77,9 +80,9 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
     goto exit;
   }
 
-  // 4. parse response
-
-  // 4a. if recv does not start with "data:", we probably got an error
+  /*
+   * 5. Parse response
+   */
   if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
@@ -96,7 +99,6 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
     goto exit;
   }
 
-  // 4b. set *value and *valuelen
   cJSON *data = cJSON_GetObjectItem(root, "data");
   if (data == NULL) {
     ret = 1;
@@ -104,11 +106,13 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
     goto exit;
   }
 
-  memset(value, 0, valuesize);
+  /*
+   * 6. Return data to caller
+   */
   memcpy(value, data->valuestring, strlen(data->valuestring));
   *valuelen = strlen(value);
 
-  // 4c. write to atkey->metadata
+  // 6b. write to atkey->metadata
   cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
   if (metadata == NULL) {
     ret = 1;
@@ -135,4 +139,49 @@ exit: {
   free(atkeystr);
   return ret;
 }
+}
+
+static int atclient_get_publickey_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
+                                                     const size_t valuesize, size_t *valuelen, bool bypasscache) {
+  int ret = 1;
+
+  if (atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    goto exit;
+  }
+
+  if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not a public key\n");
+    goto exit;
+  }
+
+  if (value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
+    goto exit;
+  }
+
+  if (valuesize == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuesize is 0\n");
+    goto exit;
+  }
+
+  if (valuelen == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuelen is NULL\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
