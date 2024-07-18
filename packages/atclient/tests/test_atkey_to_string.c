@@ -17,6 +17,7 @@
 #define TEST_ATKEY_TO_STRING_1C "public:name.wavi@jeremy"
 // 1D. cached public key with namespace
 #define TEST_ATKEY_TO_STRING_1D "cached:public:name.wavi@jeremy"
+
 // Test 2: shared keys
 // 2A: non-cached shared key with namespace
 #define TEST_ATKEY_TO_STRING_2A "@alice:name.wavi@bob"
@@ -26,95 +27,97 @@
 #define TEST_ATKEY_TO_STRING_2C "@bob:name@alice"
 // 2D: cached shared key with namespace
 #define TEST_ATKEY_TO_STRING_2D "cached:@bob:name.wavi@alice"
+
 // Test 3: private hidden keys
 // 3A: private hidden key
 #define TEST_ATKEY_TO_STRING_3A "_lastnotificationid@alice123_4😘"
+
 // Test 4: self keys
 // 4A: self key with no namespace
 #define TEST_ATKEY_TO_STRING_4A "name@alice"
 // 4B: self key with namespace
 #define TEST_ATKEY_TO_STRING_4B "name.wavi@jeremy_0"
 
-static int test1a();
-static int test1b();
-static int test1c();
-static int test1d();
-static int test2a();
-static int test2b();
-static int test2c();
-static int test2d();
-static int test3a();
-static int test4a();
-static int test4b();
+static int test1a_cached_publickey_without_namespace();
+static int test1b_publickey_without_namespace();
+static int test1c_publickey_with_namespace();
+static int test1d_cached_publickey_with_namespace();
+static int test2a_sharedkey_with_namespace();
+static int test2b_cached_sharedkey_without_namespace();
+static int test2c_sharedkey_without_namespace();
+static int test2d_cached_sharedkey_with_namespace();
+static int test3a_privatehiddenkey();
+static int test4a_selfkey_without_namespace();
+static int test4b_selfkey_with_namespace();
 
 int main() {
   int ret = 1;
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  ret = test1a();
+  ret = test1a_cached_publickey_without_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1a failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1a_cached_publickey_without_namespace failed\n");
     goto exit;
   }
 
-  ret = test1b();
+  ret = test1b_publickey_without_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1b failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1b_publickey_without_namespace failed\n");
     goto exit;
   }
 
-  ret = test1c();
+  ret = test1c_publickey_with_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1c failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1c_publickey_with_namespace failed\n");
     goto exit;
   }
 
-  ret = test1d();
+  ret = test1d_cached_publickey_with_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1d failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1d_cached_publickey_with_namespace failed\n");
     goto exit;
   }
 
-  ret = test2a();
+  ret = test2a_sharedkey_with_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2a failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2a_sharedkey_with_namespace failed\n");
     goto exit;
   }
 
-  ret = test2b();
+  ret = test2b_cached_sharedkey_without_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2b failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2b_cached_sharedkey_without_namespace failed\n");
     goto exit;
   }
 
-  ret = test2c();
+  ret = test2c_sharedkey_without_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2c failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2c_sharedkey_without_namespace failed\n");
     goto exit;
   }
 
-  ret = test2d();
+  ret = test2d_cached_sharedkey_with_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2d failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2d_cached_sharedkey_with_namespace failed\n");
     goto exit;
   }
 
-  ret = test3a();
+  ret = test3a_privatehiddenkey();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test3a failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test3a_privatehiddenkey failed\n");
     goto exit;
   }
 
-  ret = test4a();
+  ret = test4a_selfkey_without_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4a failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4a_selfkey_without_namespace failed\n");
     goto exit;
   }
 
-  ret = test4b();
+  ret = test4b_selfkey_with_namespace();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4b failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test4b_selfkey_with_namespace failed\n");
     goto exit;
   }
 
@@ -123,11 +126,10 @@ int main() {
 exit: { return ret; }
 }
 
-
-static int test1a() {
+static int test1a_cached_publickey_without_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1a Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1a_cached_publickey_without_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -135,10 +137,16 @@ static int test1a() {
   char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1A;
-  const size_t expectedlen = strlen(expected);
 
-  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
-  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
+  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+    goto exit;
+  }
+
+  if((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_set_key(&atkey, "publickey")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
@@ -165,15 +173,15 @@ static int test1a() {
 exit: {
   atclient_atkey_free(&atkey);
   free(string);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1a Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1a_cached_publickey_without_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test1b() {
+static int test1b_publickey_without_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b_publickey_without_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -181,9 +189,11 @@ static int test1b() {
   char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
-  const size_t expectedlen = strlen(expected);
 
-  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
+  if((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_set_key(&atkey, "publickey")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
@@ -209,15 +219,15 @@ static int test1b() {
   goto exit;
 exit: {
   free(string);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b_publickey_without_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test1c() {
+static int test1c_publickey_with_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1c Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1c_publickey_with_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -225,9 +235,11 @@ static int test1c() {
   char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1C; // "public:name.wavi@jeremy"
-  const size_t expectedlen = strlen(expected);
 
-  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
+  if ((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_set_key(&atkey, "name")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
@@ -255,19 +267,18 @@ static int test1c() {
   }
 
   ret = 0;
-  goto exit;
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1c Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1c_publickey_with_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test1d() {
+static int test1d_cached_publickey_with_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1d Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1d_cached_publickey_with_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -277,8 +288,15 @@ static int test1d() {
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
   const size_t expectedlen = strlen(expected);
 
-  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
-  atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true);
+  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+    goto exit;
+  }
+
+  if((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_set_key(&atkey, "name")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
@@ -309,15 +327,15 @@ static int test1d() {
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1d Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1d_cached_publickey_with_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test2a() {
+static int test2a_sharedkey_with_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2a Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2a_sharedkey_with_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -360,15 +378,15 @@ static int test2a() {
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2a Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2a_sharedkey_with_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test2b() {
+static int test2b_cached_sharedkey_without_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2b Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2b_cached_sharedkey_without_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -377,7 +395,10 @@ static int test2b() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2B; // "cached:@bob:name@alice"
 
-  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
+  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_set_sharedwith(&atkey, "@bob")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
@@ -409,15 +430,15 @@ static int test2b() {
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2b Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2b_cached_sharedkey_without_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test2c() {
+static int test2c_sharedkey_without_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c_sharedkey_without_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -446,8 +467,7 @@ static int test2c() {
     goto exit;
   }
 
-  // namespace should be empty
-  if (atclient_atkey_is_namespacestr_initialized(&atkey) || strlen(atkey.namespacestr) > 0) {
+  if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is initialized when it isn't supposed to be\n");
     goto exit;
@@ -462,15 +482,15 @@ static int test2c() {
   goto exit;
 exit: {
   free(string);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c_sharedkey_without_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test2d() {
+static int test2d_cached_sharedkey_with_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2d Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2d_cached_sharedkey_with_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -479,7 +499,10 @@ static int test2d() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2D; // "cached:@bob:name.wavi@alice"
 
-  atclient_atkey_metadata_set_iscached(&(atkey.metadata), true);
+  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_set_sharedwith(&atkey, "@bob")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
@@ -515,15 +538,15 @@ static int test2d() {
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2d Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2d_cached_sharedkey_with_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test3a() {
+static int test3a_privatehiddenkey() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3a Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3a_privatehiddenkey Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -542,13 +565,13 @@ static int test3a() {
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedwith_initialized(&atkey) || strlen(atkey.sharedwith) > 0) {
+  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
-  if (atclient_atkey_is_namespacestr_initialized(&atkey) || strlen(atkey.namespacestr) > 0) {
+  if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is initialized when it isn't supposed to be\n");
     goto exit;
@@ -569,15 +592,15 @@ static int test3a() {
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3a Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3a_privatehiddenkey Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test4a() {
+static int test4a_selfkey_without_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4a Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4a_selfkey_without_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -601,13 +624,13 @@ static int test4a() {
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedwith_initialized(&atkey) || strlen(atkey.sharedwith) > 0) {
+  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
-  if (atclient_atkey_is_namespacestr_initialized(&atkey) || strlen(atkey.namespacestr) > 0) {
+  if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is initialized when it isn't supposed to be\n");
     goto exit;
@@ -624,15 +647,15 @@ static int test4a() {
 exit: {
   free(string);
   atclient_atkey_free(&atkey);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4a Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4a_selfkey_without_namespace Ended:%d\n", ret);
   return ret;
 }
 }
 
-static int test4b() {
+static int test4b_selfkey_with_namespace() {
   int ret = 1;
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4b Starting...\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4b_selfkey_with_namespace Starting...\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -670,8 +693,7 @@ static int test4b() {
 exit: {
   atclient_atkey_free(&atkey);
   free(atkeystr);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4b Ended:%d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test4b_selfkey_with_namespace Ended:%d\n", ret);
   return ret;
 }
 }
-
