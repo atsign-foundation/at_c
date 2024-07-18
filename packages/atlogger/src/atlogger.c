@@ -112,15 +112,12 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
     return;
   }
 
-  atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
-
   va_list args;
   va_start(args, format);
-  printf("%.*s", (int)strlen(prefix), prefix);
   if (tag != NULL) {
-    printf(" %s", tag);
+    atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
+    printf("%.*s %s | ", (int)strlen(prefix), prefix, tag);
   }
-  printf(" | ");
   vprintf(format, args);
   va_end(args);
 }
