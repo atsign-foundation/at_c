@@ -189,15 +189,15 @@ static int test1b_publickey_without_namespace() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
     goto exit;
   }
 
-  if (atkey.metadata.iscached != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
+
+  if(!atclient_atkey_metadata_is_ispublic_initialized(&atkey.metadata)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not initialized\n");
     goto exit;
   }
 
@@ -247,7 +247,7 @@ static int test1b_publickey_without_namespace() {
     goto exit;
   }
 
-  if (!tclient_atkey_is_sharedwith_initialized(&atkey)) {
+  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is initialized when it should not be\n");
     goto exit;
@@ -274,19 +274,7 @@ static int test1c_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_metadata_is_iscached_initialized(&atkey)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not initialized\n");
-    goto exit;
-  }
-
-  if (atkey.metadata.iscached != false) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-    goto exit;
-  }
-
-  if(!atclient_atkey_metadata_is_ispublic_initialized(&atkey)) {
+  if (!atclient_atkey_metadata_is_ispublic_initialized(&atkey.metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not initialized\n");
     goto exit;
@@ -308,7 +296,7 @@ static int test1c_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(&atkey)) {
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
@@ -320,7 +308,7 @@ static int test1c_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
     goto exit;
@@ -331,7 +319,7 @@ static int test1c_publickey_with_namespace() {
     ret = 1;
     goto exit;
   }
-  if(!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized, when it should be\n");
     goto exit;
@@ -371,28 +359,28 @@ static int test1d_cached_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_metadata_is_iscached_initialized(&atkey)) {
+  if (!atclient_atkey_metadata_is_iscached_initialized(&atkey.metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not initialized\n");
     goto exit;
   }
 
-  if (atkey.metadata.iscached != 1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+  if (atkey.metadata.iscached != true) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
     goto exit;
   }
 
-  if(!atclient_atkey_metadata_is_ispublic_initialized(&atkey)) {
+  if (!atclient_atkey_metadata_is_ispublic_initialized(&atkey.metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not initialized\n");
     goto exit;
   }
 
-  if (atkey.metadata.ispublic != 1) {
+  if (atkey.metadata.ispublic != true) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
                  atkey.metadata.ispublic);
-    ret = 1;
     goto exit;
   }
 
@@ -405,7 +393,7 @@ static int test1d_cached_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(&atkey)) {
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
@@ -417,7 +405,7 @@ static int test1d_cached_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
     goto exit;
@@ -429,7 +417,7 @@ static int test1d_cached_publickey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized, when it should be\n");
     goto exit;
@@ -442,9 +430,9 @@ static int test1d_cached_publickey_with_namespace() {
     goto exit;
   }
 
-  if(atclient_atkey_is_sharedby_initialized(&atkey)) {
+  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is initialized, when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is initialized, when it should not be\n");
     goto exit;
   }
 
@@ -470,31 +458,6 @@ static int test2a_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_metadata_is_iscached_initialized(&atkey)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not initialized\n");
-    goto exit;
-  }
-
-  if (atkey.metadata.iscached != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-    ret = 1;
-    goto exit;
-  }
-
-  if(!atclient_atkey_metadata_is_ispublic_initialized(&atkey)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not initialized\n");
-    goto exit;
-  }
-
-  if (atkey.metadata.ispublic != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
-    ret = 1;
-    goto exit;
-  }
-
   const atclient_atkey_type atkey_type = atclient_atkey_get_type(&atkey);
 
   if (atkey_type != ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
@@ -504,7 +467,7 @@ static int test2a_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(&atkey)) {
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
@@ -516,7 +479,7 @@ static int test2a_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
     goto exit;
@@ -528,7 +491,7 @@ static int test2a_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized, when it should be\n");
     goto exit;
@@ -540,7 +503,7 @@ static int test2a_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+  if (!atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not initialized, when it should be\n");
     goto exit;
@@ -565,27 +528,24 @@ static int test2b_cached_sharedkey_without_namespace() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2B;
-  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
     goto exit;
   }
 
-  if (atkey.metadata.iscached != 1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
+  if (!atclient_atkey_metadata_is_iscached_initialized(&atkey.metadata)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not initialized\n");
     goto exit;
   }
 
-  if (atkey.metadata.ispublic != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
+  if (atkey.metadata.iscached != true) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
     goto exit;
   }
 
@@ -598,15 +558,33 @@ static int test2b_cached_sharedkey_without_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not name, it is \"%s\"\n", atkey.key);
     ret = 1;
     goto exit;
   }
 
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.sharedby, "@alice") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -625,34 +603,22 @@ static int test2b_cached_sharedkey_without_namespace() {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
 }
 
 static int test2c_sharedkey_without_namespace() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2C;
-  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-    goto exit;
-  }
-
-  if (atkey.metadata.iscached != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-    ret = 1;
-    goto exit;
-  }
-
-  if (atkey.metadata.ispublic != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
-    ret = 1;
     goto exit;
   }
 
@@ -665,15 +631,33 @@ static int test2c_sharedkey_without_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is \"%s\"\n", atkey.key);
     goto exit;
   }
 
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.sharedby, "@alice") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby);
     ret = 1;
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -702,26 +686,23 @@ static int test2d_cached_sharedkey_with_namespace() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_2D;
-  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_iscached_initialized(&atkey.metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not initialized\n");
     goto exit;
   }
 
   if (atkey.metadata.iscached != true) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
-    ret = 1;
-    goto exit;
-  }
-
-  if (atkey.metadata.ispublic != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
     ret = 1;
     goto exit;
   }
@@ -735,9 +716,21 @@ static int test2d_cached_sharedkey_with_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not name, it is \"%s\"\n", atkey.key);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -747,9 +740,21 @@ static int test2d_cached_sharedkey_with_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.sharedwith, "@bob") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @bob, it is \"%s\"\n", atkey.sharedwith);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -779,10 +784,22 @@ static int test2e_sharedkey_with_compounding_namespace() {
     goto exit;
   }
 
-  // @alice:name.vpsx.sshnp.abcd.efgh@xavierbob123
+
+  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.sharedby, "@xavierbob123") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is %s\n", atkey.sharedby);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not initialized when it should be\n");
     goto exit;
   }
 
@@ -792,9 +809,21 @@ static int test2e_sharedkey_with_compounding_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not name, it is %s\n", atkey.key);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized when it should be\n");
     goto exit;
   }
 
@@ -824,8 +853,6 @@ static int test2f_cached_sharedkey_with_compounding_namespace() {
     goto exit;
   }
 
-  // cached:@jeremy:name.vps1.sshnp@xavier
-
   if (!atclient_atkey_metadata_is_iscached_initialized(&atkey.metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not initialized when it should be\n");
@@ -838,9 +865,21 @@ static int test2f_cached_sharedkey_with_compounding_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.sharedby, "@xavier") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is %s\n", atkey.sharedby);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not initialized when it should be\n");
     goto exit;
   }
 
@@ -850,9 +889,21 @@ static int test2f_cached_sharedkey_with_compounding_namespace() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.name is not name, it is %s\n", atkey.key);
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized when it should be\n");
     goto exit;
   }
 
@@ -865,7 +916,10 @@ static int test2f_cached_sharedkey_with_compounding_namespace() {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
 }
 
 static int test3a_privatehiddenkey_without_namespace() {
@@ -876,22 +930,8 @@ static int test3a_privatehiddenkey_without_namespace() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-    goto exit;
-  }
-
-  if (atkey.metadata.iscached != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-    ret = 1;
-    goto exit;
-  }
-
-  if (atkey.metadata.ispublic != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
-    ret = 1;
     goto exit;
   }
 
@@ -904,9 +944,21 @@ static int test3a_privatehiddenkey_without_namespace() {
     goto exit;
   }
 
+  if(!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "_lastnotificationid") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not _lastnotificationid, it is \"%s\"\n", atkey.key);
     ret = 1;
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -917,13 +969,13 @@ static int test3a_privatehiddenkey_without_namespace() {
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedwith_initialized(&atkey) || strlen(atkey.sharedwith) > 0) {
+  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_is_namespacestr_initialized(&atkey) || strlen(atkey.namespacestr) > 0) {
+  if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is initialized when it should not be\n");
     goto exit;
@@ -946,31 +998,23 @@ static int test4a_selfkey_without_namespace() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
-    goto exit;
-  }
-
-  if (atclient_atkey_metadata_is_iscached_initialized(&(atkey.metadata)) && atkey.metadata.iscached != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-    ret = 1;
-    goto exit;
-  }
-
-  if (atclient_atkey_metadata_is_ispublic_initialized(&(atkey.metadata)) && atkey.metadata.ispublic != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
-    ret = 1;
     goto exit;
   }
 
   const atclient_atkey_type atkey_type = atclient_atkey_get_type(&atkey);
 
   if (atkey_type != ATCLIENT_ATKEY_TYPE_SELFKEY) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey_type is not ATCLIENT_ATKEY_TYPE_SELFKEY, it is %d\n",
                  atkey_type);
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -980,22 +1024,25 @@ static int test4a_selfkey_without_namespace() {
     goto exit;
   }
 
+  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.sharedby, "@alice") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @alice, it is \"%s\"\n", atkey.sharedby);
     ret = 1;
     goto exit;
   }
 
-  if (strlen(atkey.sharedwith) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.len is not 0, it is %lu\n",
-                 strlen(atkey.sharedwith));
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith.str is not empty, it is \"%s\"\n",
-                 atkey.sharedwith);
+  if(atclient_atkey_is_sharedwith_initialized(&atkey)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_is_namespacestr_initialized(&atkey) || strlen(atkey.namespacestr) > 0) {
+  if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is initialized when it should not be\n");
     goto exit;
@@ -1017,25 +1064,10 @@ static int test4b_selfkey_with_namespace() {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
     goto exit;
   }
-
-  if (atkey.metadata.iscached != false) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 0\n");
-    goto exit;
-  }
-
-  if (atkey.metadata.ispublic != false) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 0, it is %d\n",
-                 atkey.metadata.ispublic);
-    goto exit;
-  }
-
   const atclient_atkey_type atkey_type = atclient_atkey_get_type(&atkey);
 
   if (atkey_type != ATCLIENT_ATKEY_TYPE_SELFKEY) {
@@ -1045,9 +1077,21 @@ static int test4b_selfkey_with_namespace() {
     goto exit;
   }
 
+  if(!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not name, it is \"%s\"\n", atkey.key);
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -1057,9 +1101,9 @@ static int test4b_selfkey_with_namespace() {
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedwith_initialized(&atkey) || strlen(atkey.sharedwith) > 0) {
+  if(!atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not initialized, when it should be\n");
     goto exit;
   }
 
@@ -1067,6 +1111,12 @@ static int test4b_selfkey_with_namespace() {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespacestr is not wavi, it is \"%s\"\n",
                  atkey.namespacestr);
+    goto exit;
+  }
+
+  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is initialized when it should not be\n");
     goto exit;
   }
 
