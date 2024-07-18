@@ -31,7 +31,7 @@ typedef struct atclient_atkey {
   char *sharedby;
   char *sharedwith;
 
-  u_int8_t _initializedfields[1]; // internal field to track which fields are allocated
+  uint8_t _initializedfields[1]; // internal field to track which fields are allocated
 
   atclient_atkey_metadata metadata;
 
