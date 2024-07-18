@@ -116,7 +116,8 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   va_start(args, format);
   if (tag != NULL) {
     atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
-    printf("%.*s %s | ", (int)strlen(prefix), prefix, tag);
+    printf("%.*s", (int)strlen(prefix), prefix);
+    printf("%.*s| ", (int)strlen(tag), tag);
   }
   vprintf(format, args);
   va_end(args);
