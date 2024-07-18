@@ -375,15 +375,15 @@ size_t atclient_atkey_metadata_ivnonce_strlen(const atclient_atkey_metadata *met
 size_t atclient_atkey_metadata_skeenckeyname_strlen(const atclient_atkey_metadata *metadata);
 size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *metadata);
 
-void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
-void atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
-void atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
-void atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl);
-void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb);
-void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr);
-void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
-void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary);
-void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted);
+int atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
+int atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
+int atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
+int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl);
+int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb);
+int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr);
+int atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
+int atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary);
+int atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted);
 int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
                                               const size_t datasignaturelen);
 int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,

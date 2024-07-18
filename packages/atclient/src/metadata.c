@@ -977,67 +977,76 @@ bool atclient_atkey_metadata_is_skeencalgo_initialized(const atclient_atkey_meta
   return is_skeencalgo_initialized(metadata);
 }
 
-void atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
+int atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
   if (is_ispublic_initialized(metadata)) {
     unset_ispublic(metadata);
   }
   set_ispublic(metadata, ispublic);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
+int atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
   if (is_ishidden_initialized(metadata)) {
     unset_ishidden(metadata);
   }
   set_ishidden(metadata, ishidden);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
+int atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
   if (is_iscached_initialized(metadata)) {
     unset_iscached(metadata);
   }
   set_iscached(metadata, iscached);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
+int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
   if (is_ttl_initialized(metadata)) {
     unset_ttl(metadata);
   }
   set_ttl(metadata, ttl);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
+int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
   if (is_ttb_initialized(metadata)) {
     unset_ttb(metadata);
   }
   set_ttb(metadata, ttb);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
+int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
   if (is_ttr_initialized(metadata)) {
     unset_ttr(metadata);
   }
   set_ttr(metadata, ttr);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
+int atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd) {
   if (is_ccd_initialized(metadata)) {
     unset_ccd(metadata);
   }
   set_ccd(metadata, ccd);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
+int atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary) {
   if (is_isbinary_initialized(metadata)) {
     unset_isbinary(metadata);
   }
   set_isbinary(metadata, isbinary);
+  return 0;
 }
 
-void atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
+int atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted) {
   if (is_isencrypted_initialized(metadata)) {
     unset_isencrypted(metadata);
   }
   set_isencrypted(metadata, isencrypted);
+  return 0;
 }
 
 int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
