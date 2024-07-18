@@ -4,6 +4,7 @@
 #include "atclient/atstr.h"
 #include "atclient/metadata.h"
 #include <stddef.h>
+#include <stdint.h>
 
 #define VALUE_INITIALIZED 0b00000001
 
