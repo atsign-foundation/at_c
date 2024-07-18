@@ -29,19 +29,19 @@ int main() {
   int startswith;
 
   // 1a. @bob starts with @
-  startswith = atclient_stringutils_starts_with(string, strlen(string), "@", strlen("@"));
+  startswith = atclient_stringutils_starts_with(string, "@");
   if (startswith != 1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, string, "@");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret,
+                 string, "@");
     ret = 1;
     goto exit;
   }
 
   // 1b. @bob does not start with 123
-  startswith = atclient_stringutils_starts_with(string, strlen(string), "123", strlen("123"));
+  startswith = atclient_stringutils_starts_with(string, "123");
   if (startswith != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                          "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret, string, "bob");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret,
+                 string, "bob");
     ret = 1;
     goto exit;
   }
@@ -49,19 +49,19 @@ int main() {
   int endswith;
   strcpy(string, "root.atsign.org:64");
   // 2a. root.atsign.org:64 ends with 64
-  endswith = atclient_stringutils_ends_with(string, strlen(string), "64", strlen("64"));
+  endswith = atclient_stringutils_ends_with(string, "64");
   if (endswith != 1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n",
-                          ret, string, "64");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret,
+                 string, "64");
     ret = 1;
     goto exit;
   }
 
   // 2b. root.atsign.org:64 does not end with org
-  endswith = atclient_stringutils_ends_with(string, strlen(string), "org", strlen("org"));
+  endswith = atclient_stringutils_ends_with(string, "org");
   if (endswith != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n",
-                          ret, string, "org");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret,
+                 string, "org");
     ret = 1;
     goto exit;
   }
@@ -71,15 +71,14 @@ int main() {
   const char *expectedresult = "scan jeremy_0";
   ret = atclient_stringutils_trim_whitespace(string, strlen(string), out, outsize, &outlen);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: %d | %s\n", ret,
-                          string);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: %d | %s\n", ret, string);
     ret = 1;
     goto exit;
   }
 
   if (strncmp(out, expectedresult, strlen(expectedresult)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: \"%s\" != \"%s\"\n",
-                          string, expectedresult);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: \"%s\" != \"%s\"\n", string,
+                 expectedresult);
     ret = 1;
     goto exit;
   }

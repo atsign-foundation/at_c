@@ -128,7 +128,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
     goto exit;
   }
 
-  if(!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", strlen("data:"))) {
+  if(!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n", (int)recvlen, recv);
     goto exit;
@@ -179,7 +179,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   }
 
   // check for data:success
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:success", strlen("data:success"))) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:success")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
                  (int)recvlen, recv);
@@ -246,8 +246,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok")) &&
-      !atclient_stringutils_ends_with((const char *)ptr, recvlen, "data:ok", strlen("data:ok"))) {
+  if (!atclient_stringutils_starts_with((const char *)ptr, "data:ok") &&
+      !atclient_stringutils_ends_with((const char *)ptr, "data:ok")) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
     ret = -1;
     goto exit;

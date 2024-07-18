@@ -110,7 +110,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize) + 1;
       unsigned char sharedenckeybase64[sharedenckeybase64size];
       memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-      if ((ret = atclient_atsign_init(&recipient, params->atkey->sharedwith.str)) != 0) {
+      if ((ret = atclient_atsign_init(&recipient, params->atkey->sharedwith)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", ret);
         return ret;
       }
@@ -200,7 +200,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     goto exit;
   }
   // if starts with data:
-  if (atclient_stringutils_starts_with((char *)recv, recvlen, "data:", strlen("data:"))) {
+  if (atclient_stringutils_starts_with((char *)recv, "data:")) {
     if (notification_id != NULL) { // if not null, then they care about the notification id
       // parse the notification id
       char *data = (char *)recv + strlen("data:");

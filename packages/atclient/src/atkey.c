@@ -61,7 +61,7 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
   return len;
 }
 
-int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, const size_t atkeylen) {
+int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
   // 6 scenarios:
   // 1. PublicKey:            "public:name.wavi@smoothalligator"
   //      name == "name"
@@ -106,7 +106,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr, cons
   int ret = 1;
   char *sharedby_withat = NULL;
   char *saveptr;
-  char *copy = strndup(atkeystr, atkeylen);
+  char *copy = strdup(atkeystr);
   if (copy == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdndup failed\n");
     goto exit;

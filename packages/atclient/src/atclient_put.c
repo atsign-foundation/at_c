@@ -95,11 +95,13 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
    *    3b. Build the command
    */
 
-  if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
+  const atclient_atkey_type atkey_type = atclient_atkey_get_type(atkey);
+
+  if (atkey_type == ATCLIENT_ATKEY_TYPE_PUBLICKEY) {
     // 3a.1 no encryption
     memcpy(ciphertextbase64, value, valuelen);
     ciphertextbase64len = valuelen;
-  } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SELFKEY) {
+  } else if (atkey_type == ATCLIENT_ATKEY_TYPE_SELFKEY) {
     // 3a.2 encrypt with self encryption key
     const size_t selfencryptionkeysize = ATCHOPS_AES_256 / 8;
     unsigned char selfencryptionkey[selfencryptionkeysize];
@@ -124,7 +126,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
       goto exit;
     }
-  } else if (atkey->atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
+  } else if (atkey_type == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
     // 3aA.3 encrypt with shared encryption key
 
     // get our AES shared key
@@ -132,7 +134,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
     // create one for us -> encrypted with our self encryption key
     // create one for the other person -> encrypted with their public encryption key
     atclient_atsign recipient;
-    atclient_atsign_init(&recipient, atkey->sharedwith.str);
+    atclient_atsign_init(&recipient, atkey->sharedwith);
 
     if ((ret = atclient_get_shared_encryption_key_shared_by_me(atclient, &recipient, sharedenckeybase64, true)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
@@ -222,7 +224,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
@@ -260,6 +262,18 @@ static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atk
     goto exit;
   }
 
+  if(!atclient->_atsign_is_allocated) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient's atsign is not allocated\n");
+    goto exit;
+  }
+
+  if(!atclient->_atserver_connection_started) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient's atserver connection is not started\n");
+    goto exit;
+  }
+
   if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
@@ -278,7 +292,13 @@ static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atk
     goto exit;
   }
 
-  if (strncmp(atkey->sharedby.str, atclient->atsign.atsign, atkey->sharedby.len) != 0) {
+  if(!atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not initialized or is empty\n");
+    goto exit;
+  }
+
+  if (strcmp(atkey->sharedby, atclient->atsign.atsign) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
     goto exit;

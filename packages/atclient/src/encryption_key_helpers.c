@@ -42,17 +42,17 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   snprintf(responseprefix, responseprefixsize, "@%s@", ctx->atsign.without_prefix_str);
   const short responseprefixlen = (short)strlen(response);
 
-  if (atclient_stringutils_starts_with(response, responseprefixlen, responseprefix, responseprefixlen)) {
+  if (atclient_stringutils_starts_with(response, responseprefix)) {
     response = response + responseprefixlen;
   }
   short responselen = (short)strlen(response);
 
-  if (atclient_stringutils_ends_with(response, responselen, responseprefix, responseprefixlen)) {
+  if (atclient_stringutils_ends_with(response, responseprefix)) {
     response[responselen - responseprefixlen - 1] = '\0';
   }
 
   // does my atSign already have the recipient's shared key?
-  if (atclient_stringutils_starts_with(response, responselen, "data:", 5)) {
+  if (atclient_stringutils_starts_with(response, "data:")) {
     response = response + 5;
     responselen = (short)strlen(response);
 
@@ -83,8 +83,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
     memcpy(enc_key_shared_by_me, plaintext, plaintextsize);
   }
 
-  else if (atclient_stringutils_starts_with((char *)recv, recvsize, "error:AT0015-key not found",
-                                            strlen("error:AT0015-key not found"))) {
+  else if (atclient_stringutils_starts_with((char *)recv, "error:AT0015-key not found")) {
     // or do I need to create, store and share a new shared key?
     if (create_new_if_not_found) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Creating new shared encryption key for %s\n", recipient->atsign);
@@ -134,16 +133,16 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
   char response_prefix[response_prefix_len];
   snprintf(response_prefix, response_prefix_len, "@%s@", ctx->atsign.without_prefix_str);
 
-  if (atclient_stringutils_starts_with(response, recvsize, response_prefix, response_prefix_len)) {
+  if (atclient_stringutils_starts_with(response, response_prefix)) {
     response = response + response_prefix_len;
   }
 
-  if (atclient_stringutils_ends_with(response, recvsize, response_prefix, response_prefix_len)) {
+  if (atclient_stringutils_ends_with(response, response_prefix)) {
     response[strlen(response) - response_prefix_len - 1] = '\0';
   }
 
   // does my atSign already have the recipient's shared key?
-  if (atclient_stringutils_starts_with(response, recvsize, "data:", 5)) {
+  if (atclient_stringutils_starts_with(response, "data:")) {
 
     response = response + 5;
 
@@ -173,8 +172,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
     }
 
     memcpy(enc_key_shared_by_other, plaintext, plaintextlen);
-  } else if (atclient_stringutils_starts_with((char *)recv, recvsize, "error:AT0015-key not found",
-                                              strlen("error:AT0015-key not found"))) {
+  } else if (atclient_stringutils_starts_with((char *)recv, "error:AT0015-key not found")) {
     // There is nothing we can do, except wait for the recipient to share a new key
     // We want to mark this situation with a easily distinguishable return value
     ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
@@ -211,11 +209,10 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
 
   char *response = (char *)recv;
 
-  if (atclient_stringutils_starts_with(response, recvlen, "data:", 5)) {
+  if (atclient_stringutils_starts_with(response, "data:")) {
     response = response + 5;
     memcpy(public_encryption_key, response, 1024);
-  } else if (atclient_stringutils_starts_with((char *)recv, recvlen, "error:AT0015-key not found",
-                                              strlen("error:AT0015-key not found"))) {
+  } else if (atclient_stringutils_starts_with((char *)recv, "error:AT0015-key not found")) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n", ret);
     ret = 1;
     return ret;
@@ -338,7 +335,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith->without_prefix_str) +
                                 strlen(sharedby->atsign) + 1 + sharedenckeybase64encryptedforuslen;
   cmdbuffer1 = (char *)malloc(sizeof(char) * cmdbuffersize1);
-  if(cmdbuffer1 == NULL) {
+  if (cmdbuffer1 == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer1\n");
     goto exit;
@@ -349,7 +346,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   // 5b. for them (update:shared_key.sharedwith@sharedby <encrypted for them>\r\n)
   const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
                                 strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
-  if((cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2)) == NULL) {
+  if ((cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer2\n");
     goto exit;
@@ -366,7 +363,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   }
 
   // check if the key was successfully stored
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
@@ -384,7 +381,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   }
 
   // check if the key was successfully stored
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
