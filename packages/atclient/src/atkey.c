@@ -674,7 +674,7 @@ int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *key, cons
     goto exit;
   }
 
-  if (namespacestr != NULL && strlen(namespacestr) <= 0) {
+  if (namespacestr != NULL && strlen(namespacestr) > 0) {
     if ((ret = atclient_atkey_set_namespacestr(atkey, namespacestr)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
       goto exit;

@@ -7,8 +7,39 @@
 
 #define TAG "test_atkey_create"
 
-static int test_create_publickey() {
+static int test1_create_publickey();
+static int test2_create_selfkey();
+static int test3_create_sharedkey();
+
+int main() {
   int ret = 1;
+
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+
+  if ((ret = test1_create_publickey()) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test1_create_publickey: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test2_create_selfkey()) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test2_create_selfkey: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = test3_create_sharedkey()) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test3_create_sharedkey: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int test1_create_publickey() {
+  int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1_create_publickey Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -18,8 +49,7 @@ static int test_create_publickey() {
   const char *expected = "public:test@alice";
   const size_t expectedlen = strlen(expected);
 
-  ret = atclient_atkey_create_publickey(&atkey, "test", "@alice", NULL);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, "test", "@alice", NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
     goto exit;
   }
@@ -33,9 +63,21 @@ static int test_create_publickey() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey key is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "test") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not test, it is \"%s\"\n", atkey.key);
     ret = 1;
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey sharedby is not initialized when it should be\n");
     goto exit;
   }
 
@@ -45,8 +87,7 @@ static int test_create_publickey() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, &atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     ret = 1;
     goto exit;
@@ -66,16 +107,18 @@ static int test_create_publickey() {
   }
 
   ret = 0;
-  goto exit;
 exit: {
   atclient_atkey_free(&atkey);
   free(atkeystr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1_create_publickey End: %d\n", ret);
   return ret;
 }
 }
 
-static int test_create_selfkey() {
+static int test2_create_selfkey() {
   int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2_create_selfkey Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -100,9 +143,21 @@ static int test_create_selfkey() {
     goto exit;
   }
 
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey key is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not name, it is \"%s\"\n", atkey.key);
     ret = 1;
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedby_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey sharedby is not initialized when it should be\n");
     goto exit;
   }
 
@@ -112,12 +167,12 @@ static int test_create_selfkey() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, &atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+
   const size_t atkeystrolen = strlen(atkeystr);
 
   if (strcmp(atkeystr, expected) != 0) {
@@ -127,8 +182,8 @@ static int test_create_selfkey() {
   }
 
   if (atkeystrolen != expectedlen) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystrolen is not %lu, it is %lu\n", expectedlen, atkeystrolen);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeystrolen is not %lu, it is %lu\n", expectedlen, atkeystrolen);
     goto exit;
   }
 
@@ -136,12 +191,16 @@ static int test_create_selfkey() {
   goto exit;
 exit: {
   free(atkeystr);
+  atclient_atkey_free(&atkey);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2_create_selfkey End: %d\n", ret);
   return ret;
 }
 }
 
-static int test_create_sharedkey() {
+static int test3_create_sharedkey() {
   int ret = 1;
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test3_create_sharedkey Begin\n");
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -151,8 +210,7 @@ static int test_create_sharedkey() {
   const char *expected = "@jeremy:name.wavi@chess69lovely";
   const size_t expectedlen = strlen(expected);
 
-  ret = atclient_atkey_create_sharedkey(&atkey, "name", "@jeremy", "@chess69lovely", "wavi");
-  if (ret != 0) {
+  if ((ret = atclient_atkey_create_sharedkey(&atkey, "name", "@chess69lovely", "@jeremy", "wavi")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
     goto exit;
   }
@@ -166,22 +224,46 @@ static int test_create_sharedkey() {
     goto exit;
   }
 
+  if(!atclient_atkey_is_key_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey key is not initialized when it should be\n");
+    goto exit;
+  }
+
   if (strcmp(atkey.key, "name") != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not name, it is \"%s\"\n", atkey.key);
     goto exit;
   }
 
-  if (strcmp(atkey.sharedby, "@jeremy") != 0) {
+  if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @jeremy, it is \"%s\"\n", atkey.sharedby);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey sharedby is not initialized when it should be\n");
     goto exit;
   }
 
-  if (strcmp(atkey.sharedwith, "@chess69lovely") != 0) {
+  if (strcmp(atkey.sharedby, "@chess69lovely") != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @chess69lovely, it is \"%s\"\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not @chess69lovely, it is \"%s\"\n", atkey.sharedby);
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_sharedwith_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey sharedwith is not initialized when it should be\n");
+    goto exit;
+  }
+
+  if (strcmp(atkey.sharedwith, "@jeremy") != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedwith is not @jeremy, it is \"%s\"\n",
                  atkey.sharedwith);
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey namespace is not initialized when it should be\n");
     goto exit;
   }
 
@@ -192,12 +274,12 @@ static int test_create_sharedkey() {
     goto exit;
   }
 
-  ret = atclient_atkey_to_string(&atkey, &atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
+
   const size_t atkeystrolen = strlen(atkeystr);
 
   if (strcmp(atkeystr, expected) != 0) {
@@ -216,22 +298,7 @@ static int test_create_sharedkey() {
   goto exit;
 exit: {
   free(atkeystr);
+  atclient_atkey_free(&atkey);
   return ret;
 }
-}
-
-int main() {
-  int ret = 1;
-
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-
-  ret = test_create_publickey();
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_create_publickey: %d\n", ret);
-    goto exit;
-  }
-
-  ret = 0;
-  goto exit;
-exit: { return ret; }
 }
