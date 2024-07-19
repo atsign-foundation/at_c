@@ -223,15 +223,15 @@ static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const 
     goto exit;
   }
 
-  if (!atclient_atkey_is_key_initialized(atkey) || strlen(atkey->key) <= 0) {
+  if (!atclient_atkey_is_key_initialized(atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not initialized\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized when it should be\n");
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
+  if (!atclient_atkey_is_sharedby_initialized(atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is shared by someone else\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.sharedby is not initialized when it should be\n");
     goto exit;
   }
 
