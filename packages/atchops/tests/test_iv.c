@@ -26,12 +26,5 @@ int main() {
   }
   printf("\n");
 
-  ret = atchops_iv_generate_base64(ivbase64, ivbase64size, &ivbase64len);
-  if (ret != 0) {
-    printf("atchops_iv_generate_base64 (failed): %d\n", ret);
-    goto exit;
-  }
-  printf("ivbase64 (%lu): %s\n", ivbase64len, ivbase64);
-
 exit: { return ret; }
 }
