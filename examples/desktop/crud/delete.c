@@ -4,6 +4,7 @@
 #include <atclient/metadata.h>
 #include <atlogger/atlogger.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define TAG "Debug"
 
@@ -42,13 +43,13 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), atsign.atsign, strlen(atsign.atsign),
-                                           ATKEY_NAME, strlen(ATKEY_NAME))) != 0) {
+  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, atsign.atsign, ATKEY_NAME)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create selfkey");
     goto exit;
   }
 
-  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
