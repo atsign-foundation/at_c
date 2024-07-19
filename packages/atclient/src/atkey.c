@@ -106,6 +106,9 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
   int ret = 1;
   char *sharedby_withat = NULL;
   char *saveptr;
+  const size_t compositesize = ATCLIENT_ATKEY_COMPOSITE_LEN + 1;
+  char composite[compositesize]; // holds {key}.{namespace}
+  memset(composite, 0, sizeof(char) * compositesize);
   char *copy = strdup(atkeystr);
   if (copy == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdndup failed\n");
@@ -167,9 +170,6 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
   }
   tokenlen = strlen(token);
 
-  const size_t compositesize = ATCLIENT_ATKEY_COMPOSITE_LEN + 1;
-  char composite[compositesize];
-  memset(composite, 0, sizeof(char) * compositesize);
   memcpy(composite, token, tokenlen);
 
   char *check = strchr(composite, '.');
