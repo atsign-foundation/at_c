@@ -152,9 +152,7 @@ int main(int argc, char *argv[]) {
     atclient_atkey atkey;
     atclient_atkey_init(&atkey);
 
-    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), from_atsign, strlen(from_atsign),
-                                               to_atsign, strlen(to_atsign), ATKEY_NAMESPACE,
-                                               strlen(ATKEY_NAMESPACE))) != 0) {
+    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, from_atsign, to_atsign, ATKEY_NAMESPACE)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
     }
 
