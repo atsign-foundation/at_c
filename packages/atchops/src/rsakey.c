@@ -137,12 +137,16 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
   }
 
   mbedtls_asn1_sequence *current = seq;
-  publickey->n.len = current->buf.len;
-  memcpy(publickey->n.value, current->buf.p, publickey->n.len);
+  if((ret = atchops_rsakey_publickey_set_n(publickey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
 
   current = current->next;
-  publickey->e.len = current->buf.len;
-  memcpy(publickey->e.value, current->buf.p, publickey->e.len);
+  if((ret = atchops_rsakey_publickey_set_e(publickey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set e\n");
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
