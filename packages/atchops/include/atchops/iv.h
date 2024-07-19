@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define ATCHOPS_IV_BUFFER_SIZE 16 // ivs are always 16 bytes long
+#define ATCHOPS_IV_BUFFER_SIZE 16 // non-base64 ivs are always 16 bytes long
 
 /**
  * @brief Generates a random initialization vector (implied 16 bytes long)
