@@ -102,7 +102,7 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with(recv, "data:")) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "publickey does not exist: \"%s\"\n", recv);
     goto exit;
@@ -157,7 +157,7 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with(recv, "data:")) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "selfkey does not exist: \"%s\"\n", recv);
     goto exit;
@@ -212,7 +212,7 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", 5)) {
+  if (!atclient_stringutils_starts_with(recv, "data:")) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "sharedkey does not exist: \"%s\"\n", recv);
     goto exit;
@@ -245,7 +245,7 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
   snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", (recipient + 1), atclient1->atsign.atsign);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
-  if ((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp, strlen(atkeystrtemp))) != 0) {
+  if ((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
     goto exit;
   }
@@ -253,7 +253,7 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
   snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", recipient, atclient1->atsign.atsign);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
-  if ((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp, strlen(atkeystrtemp))) != 0) {
+  if ((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
     goto exit;
   }
