@@ -1,5 +1,6 @@
 #include "atchops/rsakey.h"
 #include "atchops/base64.h"
+#include <atlogger/atlogger.h>
 #include <mbedtls/asn1.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -7,81 +8,80 @@
 
 #define BASE64_DECODED_KEY_BUFFER_SIZE 8192 // the max buffer size of a decoded RSA key
 
+#define TAG "rsakey"
+
 void atchops_rsakey_publickey_init(atchops_rsakey_publickey *publickey) {
   memset(publickey, 0, sizeof(atchops_rsakey_publickey));
-
-  publickey->n.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  publickey->n.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->n.len); // TODO handle null
-
-  publickey->e.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  publickey->e.value = (unsigned char *)malloc(sizeof(unsigned char) * publickey->e.len); // TODO handle null
-}
-
-void atchops_rsakey_publickey_clone(atchops_rsakey_publickey *dst, atchops_rsakey_publickey *src) {
-  memset(dst, 0, sizeof(atchops_rsakey_publickey));
-
-  dst->n.len = src->n.len;
-  dst->n.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->n.len); // TODO handle null
-  memcpy(dst->n.value, src->n.value, dst->n.len);
-
-  dst->e.len = src->e.len;
-  dst->e.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->e.len); // TODO handle null
-  memcpy(dst->e.value, src->e.value, dst->e.len);
 }
 
 void atchops_rsakey_publickey_free(atchops_rsakey_publickey *publickey) {
-  free(publickey->n.value);
-  free(publickey->e.value);
+  atchops_rsakey_publickey_unset_n(publickey);
+  atchops_rsakey_publickey_unset_e(publickey);
+  memset(publickey, 0, sizeof(atchops_rsakey_publickey));
 }
 
 void atchops_rsakey_privatekey_init(atchops_rsakey_privatekey *privatekey) {
   memset(privatekey, 0, sizeof(atchops_rsakey_privatekey));
-
-  privatekey->n.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->n.value = malloc(sizeof(unsigned char) * privatekey->n.len); // TODO handle null
-
-  privatekey->e.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->e.value = malloc(sizeof(unsigned char) * privatekey->e.len); // TODO handle null
-
-  privatekey->d.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->d.value = malloc(sizeof(unsigned char) * privatekey->d.len); // TODO handle null
-
-  privatekey->p.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->p.value = malloc(sizeof(unsigned char) * privatekey->p.len); // TODO handle null
-
-  privatekey->q.len = BASE64_DECODED_KEY_BUFFER_SIZE;
-  privatekey->q.value = malloc(sizeof(unsigned char) * privatekey->q.len);
-}
-
-void atchops_rsakey_privatekey_clone(atchops_rsakey_privatekey *dst, atchops_rsakey_privatekey *src) {
-  memset(dst, 0, sizeof(atchops_rsakey_privatekey));
-  dst->n.len = src->n.len;
-  dst->n.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->n.len); // TODO handle null
-  memcpy(dst->n.value, src->n.value, dst->n.len);
-
-  dst->e.len = src->e.len;
-  dst->e.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->e.len); // TODO handle null
-  memcpy(dst->e.value, src->e.value, dst->e.len);
-
-  dst->d.len = src->d.len;
-  dst->d.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->d.len); // TODO handle null
-  memcpy(dst->d.value, src->d.value, dst->d.len);
-
-  dst->p.len = src->p.len;
-  dst->p.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->p.len); // TODO handle null
-  memcpy(dst->p.value, src->p.value, dst->p.len);
-
-  dst->q.len = src->q.len;
-  dst->q.value = (unsigned char *)malloc(sizeof(unsigned char) * dst->q.len); // TODO handle null
-  memcpy(dst->q.value, src->q.value, dst->q.len);
 }
 
 void atchops_rsakey_privatekey_free(atchops_rsakey_privatekey *privatekey) {
-  free(privatekey->n.value);
-  free(privatekey->e.value);
-  free(privatekey->d.value);
-  free(privatekey->p.value);
-  free(privatekey->q.value);
+  atchops_rsakey_privatekey_unset_n(privatekey);
+  atchops_rsakey_privatekey_unset_e(privatekey);
+  atchops_rsakey_privatekey_unset_d(privatekey);
+  atchops_rsakey_privatekey_unset_p(privatekey);
+  atchops_rsakey_privatekey_unset_q(privatekey);
+  memset(privatekey, 0, sizeof(atchops_rsakey_privatekey));
+}
+
+int atchops_rsakey_publickey_clone(const atchops_rsakey_publickey *src, atchops_rsakey_publickey *dst) {
+  int ret = 1;
+
+  if ((ret = atchops_rsakey_publickey_set_n(dst, src->n.value, src->n.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_publickey_set_e(dst, src->e.value, src->e.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set e\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atchops_rsakey_privatekey_clone(const atchops_rsakey_privatekey *src, atchops_rsakey_privatekey *dst) {
+  int ret = 1;
+
+  if ((ret = atchops_rsakey_privatekey_set_n(dst, src->n.value, src->n.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_e(dst, src->e.value, src->e.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set e\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_d(dst, src->d.value, src->d.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set d\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_p(dst, src->p.value, src->p.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set p\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_q(dst, src->q.value, src->q.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set q\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const char *publickeybase64,
@@ -126,7 +126,7 @@ int atchops_rsakey_populate_publickey(atchops_rsakey_publickey *publickey, const
   }
 
   seq = malloc(sizeof(mbedtls_asn1_sequence));
-  if(seq == NULL) {
+  if (seq == NULL) {
     ret = 1;
     goto exit;
   }
@@ -197,7 +197,7 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
   }
 
   seq = malloc(sizeof(mbedtls_asn1_sequence));
-  if(seq == NULL) {
+  if (seq == NULL) {
     ret = 1;
     goto exit;
   }
@@ -210,24 +210,34 @@ int atchops_rsakey_populate_privatekey(atchops_rsakey_privatekey *privatekey, co
   mbedtls_asn1_sequence *current = seq;
   current = current->next;
 
-  privatekey->n.len = current->buf.len;
-  memcpy(privatekey->n.value, current->buf.p, privatekey->n.len);
+  if ((ret = atchops_rsakey_privatekey_set_n(privatekey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
 
   current = current->next;
-  privatekey->e.len = current->buf.len;
-  memcpy(privatekey->e.value, current->buf.p, privatekey->e.len);
+  if ((ret = atchops_rsakey_privatekey_set_e(privatekey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
 
   current = current->next;
-  privatekey->d.len = current->buf.len;
-  memcpy(privatekey->d.value, current->buf.p, privatekey->d.len);
+  if ((ret = atchops_rsakey_privatekey_set_d(privatekey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
 
   current = current->next;
-  privatekey->p.len = current->buf.len;
-  memcpy(privatekey->p.value, current->buf.p, privatekey->p.len);
+  if ((ret = atchops_rsakey_privatekey_set_p(privatekey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
 
   current = current->next;
-  privatekey->q.len = current->buf.len;
-  memcpy(privatekey->q.value, current->buf.p, privatekey->q.len);
+  if ((ret = atchops_rsakey_privatekey_set_q(privatekey, current->buf.p, current->buf.len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
@@ -235,4 +245,344 @@ exit: {
   mbedtls_asn1_sequence_free(seq);
   return ret;
 }
+}
+
+int atchops_rsakey_publickey_set_ne(atchops_rsakey_publickey *publickey, const unsigned char *n, const size_t nlen,
+                                    const unsigned char *e, const size_t elen) {
+  int ret = 1;
+
+  if ((ret = atchops_rsakey_publickey_set_n(publickey, n, nlen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_publickey_set_e(publickey, e, elen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set e\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+bool atchops_rsakey_publickey_is_n_initialized(atchops_rsakey_publickey *publickey) {
+  return publickey->n._is_value_initialized;
+}
+
+int atchops_rsakey_publickey_set_n(atchops_rsakey_publickey *publickey, const unsigned char *n, const size_t nlen) {
+  int ret = 1;
+  if (n == NULL || nlen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "n is null or nlen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_publickey_unset_n(publickey);
+
+  publickey->n.len = nlen;
+
+  publickey->n.value = (unsigned char *)malloc(sizeof(unsigned char) * (publickey->n.len));
+  if (publickey->n.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for n value\n");
+    goto exit;
+  }
+
+  publickey->n._is_value_initialized = true;
+  memcpy(publickey->n.value, n, nlen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_publickey_unset_n(atchops_rsakey_publickey *publickey) {
+  if (publickey->n._is_value_initialized) {
+    free(publickey->n.value);
+  }
+  publickey->n._is_value_initialized = false;
+  publickey->n.value = NULL;
+  publickey->n.len = 0;
+}
+
+bool atchops_rsakey_publickey_is_e_initialized(atchops_rsakey_publickey *publickey) {
+  return publickey->e._is_value_initialized;
+}
+
+int atchops_rsakey_publickey_set_e(atchops_rsakey_publickey *publickey, const unsigned char *e, const size_t elen) {
+  int ret = 1;
+  if (e == NULL || elen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "e is null or elen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_publickey_unset_e(publickey);
+
+  publickey->e.len = elen;
+
+  publickey->e.value = (unsigned char *)malloc(sizeof(unsigned char) * (publickey->e.len));
+  if (publickey->e.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for e value\n");
+    goto exit;
+  }
+
+  publickey->e._is_value_initialized = true;
+  memcpy(publickey->e.value, e, elen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_publickey_unset_e(atchops_rsakey_publickey *publickey) {
+  if (publickey->e._is_value_initialized) {
+    free(publickey->e.value);
+  }
+  publickey->e._is_value_initialized = false;
+  publickey->e.value = NULL;
+  publickey->e.len = 0;
+}
+
+int atchops_rsakey_privatekey_set_nedpq(atchops_rsakey_privatekey *privatekey, const unsigned char *n,
+                                        const size_t nlen, const unsigned char *e, const size_t elen,
+                                        const unsigned char *d, const size_t dlen, const unsigned char *p,
+                                        const size_t plen, const unsigned char *q, const size_t qlen) {
+  int ret = 1;
+
+  if ((ret = atchops_rsakey_privatekey_set_n(privatekey, n, nlen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set n\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_e(privatekey, e, elen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set e\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_d(privatekey, d, dlen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set d\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_p(privatekey, p, plen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set p\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsakey_privatekey_set_q(privatekey, q, qlen)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set q\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+bool atchops_rsakey_privatekey_is_n_initialized(atchops_rsakey_privatekey *privatekey) {
+  return privatekey->n._is_value_initialized;
+}
+
+int atchops_rsakey_privatekey_set_n(atchops_rsakey_privatekey *privatekey, const unsigned char *n, const size_t nlen) {
+  int ret = 1;
+
+  if (n == NULL || nlen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "n is null or nlen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_privatekey_unset_n(privatekey);
+
+  privatekey->n.len = nlen;
+
+  privatekey->n.value = (unsigned char *)malloc(sizeof(unsigned char) * (privatekey->n.len));
+  if (privatekey->n.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for n value\n");
+    goto exit;
+  }
+
+  privatekey->n._is_value_initialized = true;
+  memcpy(privatekey->n.value, n, nlen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_privatekey_unset_n(atchops_rsakey_privatekey *privatekey) {
+  if (privatekey->n._is_value_initialized) {
+    free(privatekey->n.value);
+  }
+  privatekey->n._is_value_initialized = false;
+  privatekey->n.value = NULL;
+  privatekey->n.len = 0;
+}
+
+bool atchops_rsakey_privatekey_is_e_initialized(atchops_rsakey_privatekey *privatekey) {
+  return privatekey->e._is_value_initialized;
+}
+
+int atchops_rsakey_privatekey_set_e(atchops_rsakey_privatekey *privatekey, const unsigned char *e, const size_t elen) {
+  int ret = 1;
+
+  if (e == NULL || elen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "e is null or elen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_privatekey_unset_e(privatekey);
+
+  privatekey->e.len = elen;
+
+  privatekey->e.value = (unsigned char *)malloc(sizeof(unsigned char) * (privatekey->e.len));
+  if (privatekey->e.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for e value\n");
+    goto exit;
+  }
+
+  privatekey->e._is_value_initialized = true;
+  memcpy(privatekey->e.value, e, elen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_privatekey_unset_e(atchops_rsakey_privatekey *privatekey) {
+  if (privatekey->e._is_value_initialized) {
+    free(privatekey->e.value);
+  }
+  privatekey->e.value = NULL;
+  privatekey->e.len = 0;
+  privatekey->e._is_value_initialized = false;
+}
+
+bool atchops_rsakey_privatekey_is_d_initialized(atchops_rsakey_privatekey *privatekey) {
+  return privatekey->d._is_value_initialized;
+}
+
+int atchops_rsakey_privatekey_set_d(atchops_rsakey_privatekey *privatekey, const unsigned char *d, const size_t dlen) {
+  int ret = 1;
+
+  if (d == NULL || dlen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "d is null or dlen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_privatekey_unset_d(privatekey);
+
+  privatekey->d.len = dlen;
+
+  privatekey->d.value = (unsigned char *)malloc(sizeof(unsigned char) * (privatekey->d.len));
+  if (privatekey->d.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for d value\n");
+    goto exit;
+  }
+
+  privatekey->d._is_value_initialized = true;
+  memcpy(privatekey->d.value, d, dlen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_privatekey_unset_d(atchops_rsakey_privatekey *privatekey) {
+  if (privatekey->d._is_value_initialized) {
+    free(privatekey->d.value);
+  }
+  privatekey->d._is_value_initialized = false;
+  privatekey->d.value = NULL;
+  privatekey->d.len = 0;
+}
+
+bool atchops_rsakey_privatekey_is_p_initialized(atchops_rsakey_privatekey *privatekey) {
+  return privatekey->p._is_value_initialized;
+}
+
+int atchops_rsakey_privatekey_set_p(atchops_rsakey_privatekey *privatekey, const unsigned char *p, const size_t plen) {
+  int ret = 1;
+
+  if (p == NULL || plen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "p is null or plen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_privatekey_unset_p(privatekey);
+
+  privatekey->p.len = plen;
+
+  privatekey->p.value = (unsigned char *)malloc(sizeof(unsigned char) * (privatekey->p.len));
+  if (privatekey->p.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for p value\n");
+    goto exit;
+  }
+
+  privatekey->p._is_value_initialized = true;
+  memcpy(privatekey->p.value, p, plen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_privatekey_unset_p(atchops_rsakey_privatekey *privatekey) {
+  if (privatekey->p._is_value_initialized) {
+    free(privatekey->p.value);
+  }
+  privatekey->p._is_value_initialized = false;
+  privatekey->p.value = NULL;
+  privatekey->p.len = 0;
+}
+
+bool atchops_rsakey_privatekey_is_q_initialized(atchops_rsakey_privatekey *privatekey) {
+  return privatekey->q._is_value_initialized;
+}
+
+int atchops_rsakey_privatekey_set_q(atchops_rsakey_privatekey *privatekey, const unsigned char *q, const size_t qlen) {
+  int ret = 1;
+
+  if (q == NULL || qlen <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "q is null or qlen is less than or equal to 0\n");
+    goto exit;
+  }
+
+  atchops_rsakey_privatekey_unset_q(privatekey);
+
+  privatekey->q.len = qlen;
+
+  privatekey->q.value = (unsigned char *)malloc(sizeof(unsigned char) * qlen);
+  if (privatekey->q.value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for q value\n");
+    goto exit;
+  }
+
+  privatekey->q._is_value_initialized = true;
+  memcpy(privatekey->q.value, q, qlen);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atchops_rsakey_privatekey_unset_q(atchops_rsakey_privatekey *privatekey) {
+  if (privatekey->q._is_value_initialized) {
+    free(privatekey->q.value);
+  }
+  privatekey->q.value = NULL;
+  privatekey->q.len = 0;
+  privatekey->q._is_value_initialized = false;
 }
