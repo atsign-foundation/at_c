@@ -65,7 +65,8 @@ int main() {
 
   char *atkeystr = NULL;
 
-  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
@@ -80,9 +81,8 @@ int main() {
   atclient.atkeys = atkeys;
   atclient.atsign = atsign;
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), SENDER_ATSIGN,
-                                             strlen(SENDER_ATSIGN), RECIPIENT_ATSIGN, strlen(RECIPIENT_ATSIGN),
-                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, SENDER_ATSIGN, RECIPIENT_ATSIGN, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
     goto exit;
   } else {
@@ -95,7 +95,8 @@ int main() {
   }
   const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int) atkeystrlen, atkeystr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
 
   ret = atclient_get_sharedkey(&atclient, &atkey, value, valuesize, valuelen, NULL, false);
   if (ret != 0) {

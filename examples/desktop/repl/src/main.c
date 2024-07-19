@@ -139,13 +139,15 @@ int main(int argc, char *argv[]) {
         atclient_atkey atkey;
         atclient_atkey_init(&atkey);
 
-        if ((ret = atclient_atkey_from_string(&atkey, atkeystr, strlen(atkeystr)))) {
+        if ((ret = atclient_atkey_from_string(&atkey, atkeystr))) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n",
                        ret);
           goto get_end;
         }
 
-        switch (atkey.atkeytype) {
+        const atclient_atkey_type atkey_type = atclient_atkey_get_type(&atkey);
+
+        switch (atkey_type) {
         case ATCLIENT_ATKEY_TYPE_UNKNOWN: {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown atKey type\n");
           goto get_end;

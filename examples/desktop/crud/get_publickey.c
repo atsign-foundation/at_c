@@ -62,8 +62,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), NULL, 0)) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
     goto exit;
   }

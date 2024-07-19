@@ -81,8 +81,8 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) !=
-      0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
   }
@@ -106,9 +106,8 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), atsign_input, strlen(atsign_input),
-                                             other_atsign_input, strlen(other_atsign_input), ATKEY_NAMESPACE,
-                                             strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, atsign_input, other_atsign_input, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
     goto exit;
   }
