@@ -111,8 +111,7 @@ static int test_1_put(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
@@ -145,9 +144,7 @@ static int test_2_get(atclient *atclient) {
   memset(value, 0, sizeof(char) * valuesize);
   size_t valuelen = 0;
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                             ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
@@ -181,9 +178,7 @@ static int test_3_delete(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                             ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
@@ -232,9 +227,7 @@ static int test_5_put_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                             ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
@@ -273,9 +266,7 @@ static int test_6_get_with_metadata(atclient *atclient) {
   memset(value, 0, sizeof(char) * valuesize);
   size_t valuelen = 0;
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                             ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
@@ -313,7 +304,8 @@ static int test_6_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttr: %d\n", atkey.metadata.ttr);
 
-  if (atclient_atkey_metadata_is_isencrypted_initialized(&(atkey.metadata)) && atkey.metadata.isencrypted != ATKEY_ISENCRYPTED) {
+  if (atclient_atkey_metadata_is_isencrypted_initialized(&(atkey.metadata)) &&
+      atkey.metadata.isencrypted != ATKEY_ISENCRYPTED) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed isencrypted comparison, got %d and expected %d\n",
                  atkey.metadata.isencrypted, ATKEY_ISENCRYPTED);
     goto exit;
@@ -343,9 +335,7 @@ static int test_7_delete(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                             ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_publickey\n");
     goto exit;
   }
@@ -427,7 +417,7 @@ static int tear_down(atclient *atclient) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
+  if (!atclient_stringutils_starts_with(recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Failed to delete: \"%.*s\"\n", (int)recvlen, recv);
     goto exit;
