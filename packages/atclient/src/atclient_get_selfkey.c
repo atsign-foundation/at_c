@@ -14,7 +14,8 @@
 
 #define TAG "atclient_get_selfkey"
 
-static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuesize, const size_t *valuelen);
+static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                                const char *value, const size_t valuesize, const size_t *valuelen);
 
 int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
                          size_t *valuelen) {
@@ -23,7 +24,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   /*
    * 1. Validate arguments
    */
-  if((ret = atclient_get_selfkey_valid_arguments(atclient, atkey, value, valuesize, valuelen)) != 0) {
+  if ((ret = atclient_get_selfkey_valid_arguments(atclient, atkey, value, valuesize, valuelen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_selfkey_valid_arguments: %d\n", ret);
     return ret;
   }
@@ -45,39 +46,44 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
+  // free later
   cJSON *root = NULL;
   char *cmdbuffer = NULL;
   char *valueraw = NULL;
 
-  // 2. build llookup: command
-  ret = atclient_atkey_to_string(atkey, &atkeystr);
-  if (ret != 0) {
+  /*
+   * 3. Build `llookup:` command
+   */
+  if ((ret = atclient_atkey_to_string(atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
-  
+
   const size_t atkeystrlen = strlen(atkeystr);
 
   const size_t cmdbuffersize = strlen("llookup:all:\r\n") + atkeystrlen + 1;
   cmdbuffer = (char *)malloc(sizeof(char) * cmdbuffersize);
-  if(cmdbuffer == NULL) {
+  if (cmdbuffer == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
     goto exit;
   }
   memset(cmdbuffer, 0, sizeof(char) * cmdbuffersize);
 
-  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int) atkeystrlen, atkeystr);
+  snprintf(cmdbuffer, cmdbuffersize, "llookup:all:%.*s\r\n", (int)atkeystrlen, atkeystr);
 
-  // 3. send llookup: command
-  ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
-                                 recvsize, &recvlen);
-  if (ret != 0) {
+  /*
+   * 4. Send `llookup:` command
+   */
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1,
+                                      recv, recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
-  // 4. parse response
+  /*
+   * 5. Parse response
+   */
   if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
@@ -103,11 +109,14 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   char *metadatastr = cJSON_Print(metadata);
 
-  ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
-  if (ret != 0) {
+  if ((ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
     goto exit;
   }
+
+  /**
+   * 6. Decrypt value
+   */
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(&atkey->metadata)) {
     size_t ivlen;
@@ -136,10 +145,9 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  ret = atchops_base64_decode((unsigned char *)atclient->atkeys.selfencryptionkeystr.str,
-                              atclient->atkeys.selfencryptionkeystr.len, selfencryptionkey, selfencryptionkeysize,
-                              &selfencryptionkeylen);
-  if (ret != 0) {
+  if ((ret = atchops_base64_decode((unsigned char *)atclient->atkeys.selfencryptionkeystr.str,
+                                   atclient->atkeys.selfencryptionkeystr.len, selfencryptionkey, selfencryptionkeysize,
+                                   &selfencryptionkeylen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -147,7 +155,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   // holds base64 decoded value. Once decoded, it is encrypted cipher text bytes that need to be decrypted
   const size_t valuerawsize = atchops_base64_decoded_size(strlen(data->valuestring));
   valueraw = (char *)malloc(sizeof(char) * valuerawsize);
-  if(valueraw == NULL) {
+  if (valueraw == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for valueraw\n");
     goto exit;
@@ -155,16 +163,14 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   memset(valueraw, 0, sizeof(char) * valuerawsize);
   size_t valuerawlen = 0;
 
-  ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring), (unsigned char *)valueraw,
-                              valuerawsize, &valuerawlen);
-  if (ret != 0) {
+  if ((ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring),
+                                   (unsigned char *)valueraw, valuerawsize, &valuerawlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)valueraw, valuerawlen,
-                               (unsigned char *)value, valuesize, valuelen);
-  if (ret != 0) {
+  if ((ret = atchops_aesctr_decrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)valueraw, valuerawlen,
+                                    (unsigned char *)value, valuesize, valuelen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;
   }
@@ -183,22 +189,23 @@ exit: {
 }
 }
 
-static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey, const char *value, const size_t valuesize, const size_t *valuelen) {
+static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                                const char *value, const size_t valuesize, const size_t *valuelen) {
   int ret = 1;
 
-  if(atclient == NULL) {
+  if (atclient == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
     goto exit;
   }
 
-  if(!atclient->_atsign_is_allocated) {
+  if (!atclient->_atsign_is_allocated) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient->_atsign_is_allocated is false\n");
     goto exit;
   }
 
-  if(!atclient->_atserver_connection_started) {
+  if (!atclient->_atserver_connection_started) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
     goto exit;
@@ -210,44 +217,42 @@ static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const 
     return 1;
   }
 
-  if(atkey == NULL) {
+  if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(atkey) || strlen(atkey->key) <= 0) {
+  if (!atclient_atkey_is_key_initialized(atkey) || strlen(atkey->key) <= 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not initialized\n");
     goto exit;
   }
 
-  if(atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
+  if (atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is shared by someone else\n");
     goto exit;
   }
 
-  if(value == NULL) {
+  if (value == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
     goto exit;
   }
 
-  if(valuesize == 0) {
+  if (valuesize == 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuesize is 0\n");
     goto exit;
   }
 
-  if(valuelen == NULL) {
+  if (valuelen == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "valuelen is NULL\n");
     goto exit;
   }
 
   ret = 0;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
