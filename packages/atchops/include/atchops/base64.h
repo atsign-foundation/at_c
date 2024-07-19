@@ -32,7 +32,7 @@ int atchops_base64_decode(const unsigned char *src, const size_t srcsize, unsign
 
 /**
  * @brief calculate the size of the base64 encoded string. This function is usually called before encoding to allocate the optimal buffer size
- * 
+ *
  * @param plaintextsize the size of the original plain text (to be encoded)
  * @return size_t the output buffer size needed to store the encoded base64 string
  */
@@ -40,7 +40,7 @@ size_t atchops_base64_encoded_size(const size_t plaintextsize);
 
 /**
  * @brief calculate the size of the base64 decoded string. This function is usually called before decoding to allocate the optimal buffer size
- * 
+ *
  * @param encodedsize the size of the base64 encoded string (to be decoded)
  * @return size_t the output buffer size needed to store the decoded plain text
  */
