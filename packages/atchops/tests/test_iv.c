@@ -3,25 +3,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <atlogger/atlogger.h>
+
+#define TAG "test_iv"
 
 int main() {
   int ret = 1;
 
-  unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
-  memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  const size_t ivsize = ATCHOPS_IV_BUFFER_SIZE;
+  unsigned char iv[ivsize];
+  memset(iv, 0, sizeof(unsigned char) * ivsize);
 
-  const size_t ivbase64size = 1024;
-  unsigned char ivbase64[ivbase64size];
-  memset(ivbase64, 0, sizeof(unsigned char) * ivbase64size);
-  size_t ivbase64len = 0;
-
-  ret = atchops_iv_generate(iv);
-  if (ret != 0) {
-    printf("atchops_iv_generate (failed): %d\n", ret);
+  if ((ret = atchops_iv_generate(iv)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate IV\n");
     goto exit;
   }
-  printf("iv: ");
-  for (int i = 0; i < ATCHOPS_IV_BUFFER_SIZE; i++) {
+  
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "IV (%d bytes): ", ivsize);
+  for (int i = 0; i < ivsize; i++) {
     printf("%02x ", iv[i]);
   }
   printf("\n");
