@@ -28,13 +28,10 @@ int atchops_aesctr_encrypt(const unsigned char *key, const enum atchops_aes_size
 
   const int numpadbytestoadd = 16 - (plaintextlen % 16);
   const unsigned char padval = numpadbytestoadd;
-  // printf("appending %d bytes of padding: 0x%02x\n", numpadbytestoadd, padval);
 
   plaintextpaddedlen = plaintextlen + numpadbytestoadd;
-  // printf("plaintext_paddedlen: %lu = %d + %d\n", plaintextpaddedlen, plaintextlen, numpadbytestoadd);
 
-  plaintextpadded = malloc(sizeof(unsigned char) * (plaintextpaddedlen + 1));
-  if(plaintextpadded == NULL) {
+  if((plaintextpadded = malloc(sizeof(unsigned char) * (plaintextpaddedlen + 1))) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for plaintextpadded\n");
     goto exit;
@@ -78,18 +75,29 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
   mbedtls_aes_context aes;
   mbedtls_aes_init(&aes);
 
+  unsigned char *stream_block = NULL;
+  unsigned char *plaintextpadded = NULL;
+
+  /*
+   * 1. Prepare AES context
+   */
+  if ((ret = mbedtls_aes_setkey_enc(&aes, key, keybits)) != 0) {
+    goto exit;
+  }
+
+  /*
+   * 2. Allocate buffers required for decryption
+   */
   size_t nc_off = 0;
-  unsigned char *stream_block = malloc(sizeof(unsigned char) * 16);
-  if(stream_block == NULL) {
+  if((stream_block = malloc(sizeof(unsigned char) * 16)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for stream_block\n");
     goto exit;
   }
   memset(stream_block, 0, sizeof(unsigned char) * 16);
 
-  size_t plaintextpaddedsize = plaintextsize + 16;
-  unsigned char *plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedsize);
-  if(plaintextpadded == NULL) {
+  const size_t plaintextpaddedsize = plaintextsize + 16;
+  if((plaintextpadded = malloc(sizeof(unsigned char) * plaintextpaddedsize)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for plaintextpadded\n");
     goto exit;
@@ -97,29 +105,24 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
   memset(plaintextpadded, 0, plaintextpaddedsize);
   size_t plaintextpaddedlen = 0;
 
-  // 3. AES decrypt
-  ret = mbedtls_aes_setkey_enc(&aes, key, keybits);
-  if (ret != 0) {
+  /*
+   * 3. Decrypt
+   */
+  if ((ret = mbedtls_aes_crypt_ctr(&aes, ciphertextlen, &nc_off, iv, stream_block, ciphertext, plaintextpadded)) != 0) {
     goto exit;
   }
 
-  ret = mbedtls_aes_crypt_ctr(&aes, ciphertextlen, &nc_off, iv, stream_block, ciphertext, plaintextpadded);
-  if (ret != 0) {
-    goto exit;
-  }
-
+  /*
+   * 4. Remove padding
+   */
   while (*(plaintextpadded + plaintextpaddedlen++) != '\0')
     ;
   --plaintextpaddedlen; // don't count the null terminator
 
-  // 4. remove padding
   // IBM PKCS Padding method states that there is always at least 1 padded value:
   // https://www.ibm.com/docs/en/zos/2.4.0?topic=rules-pkcs-padding-method the value of the padded byte is always the
   // number of padded bytes to expect, padval == num_padded_bytes
   unsigned char padval = *(plaintextpadded + (plaintextpaddedlen - 1));
-
-  // add null terminator for good sake
-  *(plaintextpadded + plaintextpaddedlen - padval) = '\0';
 
   *plaintextlen = plaintextpaddedlen - padval;
   memcpy(plaintext, plaintextpadded, *plaintextlen);
@@ -127,22 +130,19 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
   goto exit;
 
 exit: {
-
-  // free everything
   free(stream_block);
   free(plaintextpadded);
   mbedtls_aes_free(&aes);
-
   return ret;
 }
 }
 
-size_t atchops_aes_ctr_ciphertext_size(const size_t plaintextlen)
+size_t atchops_aesctr_ciphertext_size(const size_t plaintextlen)
 {
   return ((plaintextlen + 15) & ~0xF) + 16;
 }
 
-size_t atchops_aes_ctr_plaintext_size(const size_t ciphertextlen)
+size_t atchops_aesctr_plaintext_size(const size_t ciphertextlen)
 {
   return ((ciphertextlen + 15) & ~0xF) + 16;
 }

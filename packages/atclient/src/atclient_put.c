@@ -50,7 +50,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   memset(ivbase64, 0, sizeof(char) * ivbase64size);
   size_t ivbase64len = 0;
 
-  const size_t ciphertextsize = atchops_aes_ctr_ciphertext_size(valuelen) + 1;
+  const size_t ciphertextsize = atchops_aesctr_ciphertext_size(valuelen) + 1;
   unsigned char ciphertext[ciphertextsize];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
   size_t ciphertextlen = 0;

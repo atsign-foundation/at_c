@@ -41,19 +41,19 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
                            const size_t plaintextsize, size_t *plaintextlen);
 
 /**
- * @brief Used to calculate the length of the ciphertext buffer given the plaintext length
+ * @brief Used to calculate the length of the ciphertext buffer given the plaintext length. This is used when encrypting.
  *
  * @param plaintextlen the length of the plaintext string
  * @return a sufficient length of the ciphertext buffer
  */
-size_t atchops_aes_ctr_ciphertext_size(const size_t plaintextlen);
+size_t atchops_aesctr_ciphertext_size(const size_t plaintextlen);
 
 /**
- * @brief Used to calculate the length of the plaintext buffer given the ciphertext length
+ * @brief Used to calculate the a sufficient buffer size of the plaintext buffer given the ciphertext length. This is used when decrypting.
  *
  * @param ciphertextlen the length of the ciphertext string
  * @return a sufficient length of the plaintext buffer
  */
-size_t atchops_aes_ctr_plaintext_size(const size_t ciphertextlen);
+size_t atchops_aesctr_plaintext_size(const size_t ciphertextlen);
 
 #endif

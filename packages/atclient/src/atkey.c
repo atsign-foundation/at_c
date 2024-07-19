@@ -269,8 +269,7 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
 
   size_t index_pos = 0;
   const size_t atkeystrsize = atclient_atkey_strlen(atkey) + 1;
-  *atkeystr = (char *)malloc(sizeof(char) * atkeystrsize);
-  if (*atkeystr == NULL) {
+  if ((*atkeystr = (char *)malloc(sizeof(char) * atkeystrsize)) == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
     goto error_exit;
   }
