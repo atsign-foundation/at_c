@@ -136,10 +136,6 @@ typedef struct atclient_atkey_metadata {
   // This field is not written to the protocol string by the SDK. It is a strictly client-side metadata.
   bool ispublic : 1;
 
-  // TODO: info about this metadata
-  // This field is not written to the protocol string by the SDK. It is a strictly client-side metadata.
-  bool ishidden : 1;
-
   // iscached=true means the key contains 'cached:', written and used by client SDK only, not written to protocol string
   // iscached=false means the key does not contain 'cached:'
   bool iscached : 1;
@@ -324,7 +320,6 @@ bool atclient_atkey_metadata_is_refreshat_initialized(const atclient_atkey_metad
 bool atclient_atkey_metadata_is_createdat_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_updatedat_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_ispublic_initialized(const atclient_atkey_metadata *metadata);
-bool atclient_atkey_metadata_is_ishidden_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_iscached_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_ttl_initialized(const atclient_atkey_metadata *metadata);
 bool atclient_atkey_metadata_is_ttb_initialized(const atclient_atkey_metadata *metadata);
@@ -354,7 +349,6 @@ size_t atclient_atkey_metadata_refreshat_strlen(const atclient_atkey_metadata *m
 size_t atclient_atkey_metadata_createdat_strlen(const atclient_atkey_metadata *metadata);
 size_t atclient_atkey_metadata_updatedat_strlen(const atclient_atkey_metadata *metadata);
 size_t atclient_atkey_metadata_ispublic_strlen(const atclient_atkey_metadata *metadata);
-size_t atclient_atkey_metadata_ishidden_strlen(const atclient_atkey_metadata *metadata);
 size_t atclient_atkey_metadata_iscached_strlen(const atclient_atkey_metadata *metadata);
 size_t atclient_atkey_metadata_ttl_strlen(const atclient_atkey_metadata *metadata);
 size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadata);
@@ -375,7 +369,6 @@ size_t atclient_atkey_metadata_skeenckeyname_strlen(const atclient_atkey_metadat
 size_t atclient_atkey_metadata_skeencalgo_strlen(const atclient_atkey_metadata *metadata);
 
 int atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
-int atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
 int atclient_atkey_metadata_set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
 int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl);
 int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb);

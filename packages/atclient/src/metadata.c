@@ -19,7 +19,6 @@ static bool is_refreshat_initialized(const atclient_atkey_metadata *metadata);
 static bool is_createdat_initialized(const atclient_atkey_metadata *metadata);
 static bool is_updatedat_initialized(const atclient_atkey_metadata *metadata);
 static bool is_ispublic_initialized(const atclient_atkey_metadata *metadata);
-static bool is_ishidden_initialized(const atclient_atkey_metadata *metadata);
 static bool is_iscached_initialized(const atclient_atkey_metadata *metadata);
 static bool is_ttl_initialized(const atclient_atkey_metadata *metadata);
 static bool is_ttb_initialized(const atclient_atkey_metadata *metadata);
@@ -49,7 +48,6 @@ static void set_is_refreshat_initialized(atclient_atkey_metadata *metadata, bool
 static void set_is_createdat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
 static void set_is_updatedat_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
 static void set_is_ispublic_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
-static void set_is_ishidden_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
 static void set_is_iscached_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
 static void set_is_ttl_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
 static void set_is_ttb_initialized(atclient_atkey_metadata *metadata, bool is_initialized);
@@ -79,7 +77,6 @@ static void unset_refreshat(atclient_atkey_metadata *metadata);
 static void unset_createdat(atclient_atkey_metadata *metadata);
 static void unset_updatedat(atclient_atkey_metadata *metadata);
 static void unset_ispublic(atclient_atkey_metadata *metadata);
-static void unset_ishidden(atclient_atkey_metadata *metadata);
 static void unset_iscached(atclient_atkey_metadata *metadata);
 static void unset_ttl(atclient_atkey_metadata *metadata);
 static void unset_ttb(atclient_atkey_metadata *metadata);
@@ -109,7 +106,6 @@ static int set_refreshat(atclient_atkey_metadata *metadata, const char *refresha
 static int set_createdat(atclient_atkey_metadata *metadata, const char *createdat);
 static int set_updatedat(atclient_atkey_metadata *metadata, const char *updatedat);
 static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic);
-static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden);
 static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached);
 static void set_ttl(atclient_atkey_metadata *metadata, const long ttl);
 static void set_ttb(atclient_atkey_metadata *metadata, const long ttb);
@@ -302,12 +298,6 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
   // cJSON *ispublic = cJSON_GetObjectItem(root, "isPublic");
   // if(ispublic != NULL) {
   //   set_ispublic(metadata, ispublic->valueint);
-  // }
-
-  // I don't think this field exists when reading metadata from atServer
-  // cJSON *ishidden = cJSON_GetObjectItem(root, "isHidden");
-  // if(ishidden != NULL) {
-  //   set_ishidden(metadata, ishidden->valueint);
   // }
 
   // I don't think this field exists when reading metadata from atServer
@@ -601,10 +591,6 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, 
 
   if (atclient_atkey_metadata_is_ispublic_initialized(metadata)) {
     cJSON_AddBoolToObject(root, "isPublic", metadata->ispublic);
-  }
-
-  if (atclient_atkey_metadata_is_ishidden_initialized(metadata)) {
-    cJSON_AddBoolToObject(root, "isHidden", metadata->ishidden);
   }
 
   if (atclient_atkey_metadata_is_iscached_initialized(metadata)) {
@@ -1037,10 +1023,6 @@ bool atclient_atkey_metadata_is_ispublic_initialized(const atclient_atkey_metada
   return is_ispublic_initialized(metadata);
 }
 
-bool atclient_atkey_metadata_is_ishidden_initialized(const atclient_atkey_metadata *metadata) {
-  return is_ishidden_initialized(metadata);
-}
-
 bool atclient_atkey_metadata_is_iscached_initialized(const atclient_atkey_metadata *metadata) {
   return is_iscached_initialized(metadata);
 }
@@ -1118,14 +1100,6 @@ int atclient_atkey_metadata_set_ispublic(atclient_atkey_metadata *metadata, cons
     unset_ispublic(metadata);
   }
   set_ispublic(metadata, ispublic);
-  return 0;
-}
-
-int atclient_atkey_metadata_set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
-  if (is_ishidden_initialized(metadata)) {
-    unset_ishidden(metadata);
-  }
-  set_ishidden(metadata, ishidden);
   return 0;
 }
 
@@ -1381,10 +1355,6 @@ void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
     unset_ispublic(metadata);
   }
 
-  if (is_ishidden_initialized(metadata)) {
-    unset_ishidden(metadata);
-  }
-
   if (is_iscached_initialized(metadata)) {
     unset_iscached(metadata);
   }
@@ -1498,10 +1468,6 @@ static bool is_updatedat_initialized(const atclient_atkey_metadata *metadata) {
 
 static bool is_ispublic_initialized(const atclient_atkey_metadata *metadata) {
   return (metadata->_initializedfields[ATKEY_METADATA_ISPUBLIC_INDEX] & ATKEY_METADATA_ISPUBLIC_INITIALIZED);
-}
-
-static bool is_ishidden_initialized(const atclient_atkey_metadata *metadata) {
-  return (metadata->_initializedfields[ATKEY_METADATA_ISHIDDEN_INDEX] & ATKEY_METADATA_ISHIDDEN_INITIALIZED);
 }
 
 static bool is_iscached_initialized(const atclient_atkey_metadata *metadata) {
@@ -1654,14 +1620,6 @@ static void set_is_ispublic_initialized(atclient_atkey_metadata *metadata, bool 
     metadata->_initializedfields[ATKEY_METADATA_ISPUBLIC_INDEX] |= ATKEY_METADATA_ISPUBLIC_INITIALIZED;
   } else {
     metadata->_initializedfields[ATKEY_METADATA_ISPUBLIC_INDEX] &= ~ATKEY_METADATA_ISPUBLIC_INITIALIZED;
-  }
-}
-
-static void set_is_ishidden_initialized(atclient_atkey_metadata *metadata, bool is_initialized) {
-  if (is_initialized) {
-    metadata->_initializedfields[ATKEY_METADATA_ISHIDDEN_INDEX] |= ATKEY_METADATA_ISHIDDEN_INITIALIZED;
-  } else {
-    metadata->_initializedfields[ATKEY_METADATA_ISHIDDEN_INDEX] &= ~ATKEY_METADATA_ISHIDDEN_INITIALIZED;
   }
 }
 
@@ -1881,11 +1839,6 @@ static void unset_updatedat(atclient_atkey_metadata *metadata) {
 static void unset_ispublic(atclient_atkey_metadata *metadata) {
   metadata->ispublic = false;
   set_is_ispublic_initialized(metadata, false);
-}
-
-static void unset_ishidden(atclient_atkey_metadata *metadata) {
-  metadata->ishidden = false;
-  set_is_ishidden_initialized(metadata, false);
 }
 
 static void unset_iscached(atclient_atkey_metadata *metadata) {
@@ -2154,11 +2107,6 @@ exit: { return ret; }
 static void set_ispublic(atclient_atkey_metadata *metadata, const bool ispublic) {
   metadata->ispublic = ispublic;
   set_is_ispublic_initialized(metadata, true);
-}
-
-static void set_ishidden(atclient_atkey_metadata *metadata, const bool ishidden) {
-  metadata->ishidden = ishidden;
-  set_is_ishidden_initialized(metadata, true);
 }
 
 static void set_iscached(atclient_atkey_metadata *metadata, const bool iscached) {
