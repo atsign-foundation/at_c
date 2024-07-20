@@ -152,7 +152,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
       goto error_cleanup;
     }
 
-    if ((ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64, ivbase64len)) != 0) {
+    if ((ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce: %d\n", ret);
       goto error_cleanup;
     }

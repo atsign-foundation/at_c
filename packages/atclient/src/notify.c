@@ -144,7 +144,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
       return ret;
     }
 
-    ret = atclient_atkey_metadata_set_ivnonce(&(params->atkey->metadata), (char *)ivbase64, ivbase64len);
+    ret = atclient_atkey_metadata_set_ivnonce(&(params->atkey->metadata), (char *)ivbase64);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", ret);
       return ret;

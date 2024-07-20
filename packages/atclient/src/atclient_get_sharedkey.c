@@ -256,7 +256,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
 
     char *metadatastr = cJSON_Print(metadata);
 
-    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
       goto exit;
@@ -442,7 +442,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 
     char *metadatastr = cJSON_Print(metadata);
 
-    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr));
+    ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
       goto exit;

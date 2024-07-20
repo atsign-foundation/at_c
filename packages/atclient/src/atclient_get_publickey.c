@@ -121,7 +121,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
 
   metadatastr = cJSON_Print(metadata);
 
-  if ((ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr, strlen(metadatastr))) != 0) {
+  if ((ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
     goto exit;
   }

@@ -133,8 +133,7 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
   memset(metadata, 0, sizeof(atclient_atkey_metadata));
 }
 
-int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
-                                         const size_t metadatastrlen) {
+int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr) {
   int ret = 1;
 
   cJSON *root = cJSON_Parse(metadatastr);
@@ -405,10 +404,22 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
   }
 }
 
-int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                       const size_t metadatastrsize, size_t *metadatastrlen) {
+int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char **metadatastr) {
   int ret = 1;
 
+  if(metadata == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata is NULL\n");
+    return ret;
+  }
+
+  if(metadatastr == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr is NULL\n");
+    return ret;
+  }
+
+  char *jsonstr = NULL;
   cJSON *root = cJSON_CreateObject();
 
   if (atclient_atkey_metadata_is_createdby_initialized(metadata)) {
@@ -527,26 +538,26 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, 
     cJSON_AddStringToObject(root, "skeEncAlgo", metadata->skeencalgo);
   }
 
-  char *jsonstr = cJSON_Print(root);
+  jsonstr = cJSON_Print(root);
   if (jsonstr == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Print failed\n");
     goto exit;
   }
 
-  if (strlen(jsonstr) > metadatastrsize) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr buffer too small: %lu > %lu\n", strlen(jsonstr),
-                 metadatastrsize);
-    free(jsonstr);
+  const size_t metadatastrsize = strlen(jsonstr) + 1;
+  *metadatastr = (char *)malloc(sizeof(char) * metadatastrsize);
+  if (*metadatastr == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
     goto exit;
   }
+  memcpy(*metadatastr, jsonstr, strlen(jsonstr));
+  (*metadatastr)[strlen(jsonstr)] = '\0';
 
-  strcpy(metadatastr, jsonstr);
-  *metadatastrlen = strlen(jsonstr);
-  free(jsonstr);
 
   ret = 0;
   goto exit;
 exit: {
+  free(jsonstr);
   cJSON_Delete(root);
   return ret;
 }

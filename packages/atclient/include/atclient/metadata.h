@@ -277,8 +277,7 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
  * strlen(metadatastr)
  * @return int 0 on success
  */
-int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr,
-                                         const size_t metadatastrsize);
+int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr);
 /**
  * @brief Populates the metadata struct from a cJSON pointer. This function is good for debugging.
  *
@@ -290,14 +289,13 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
  * @brief Reads metadata struct and converts it to a json formatted string. This function should mostly be used for
  * debugging only. See atclient_atkey_metadata_to_protocolstr for a more useful function when working with atProtocol
  *
- * @param metadata the metadata struct to convert to a string
- * @param metadatastr the buffer to write the metadata to
- * @param metadatastrsize the allocated length of the metadatastr buffer
- * @param metadatastrlen the length of the metadata string written to metadatastr once the operation is complete
+ * @param metadata the metadata struct to convert to a JSON string, typically used for debugging by printing
+ * @param metadatastr the pointer that will be allocated and written to. This function will allocate the memory for you
+ * and give you an address to it. If this function returns a zero (which means success), then it is the caller's
+ * responsibility to free the pointer.
  * @return int 0 on success
  */
-int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char *metadatastr,
-                                       const size_t metadatastrsize, size_t *metadatastrlen);
+int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char **metadatastr);
 
 size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *metadata);
 /**
