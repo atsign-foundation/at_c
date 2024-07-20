@@ -52,7 +52,10 @@ int main() {
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+  char *metadatajsonstr = NULL;
+
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
@@ -74,32 +77,25 @@ int main() {
   const size_t atkeystrlen = strlen(atkeystr);
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
-                        atkeystr);
+               atkeystr);
 
-  ret = atclient_get_publickey(&atclient, &atkey, value, valuelen, &valueolen, true);
-  if (ret != 0) {
+  if ((ret = atclient_get_publickey(&atclient, &atkey, value, valuelen, &valueolen, true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
     goto exit;
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Data: \"%.*s\"\n", (int)valueolen, value);
 
-  char metadatajsonstr[4096];
-  memset(metadatajsonstr, 0, 4096);
-  size_t metadatstrolen = 0;
-
-  ret = atclient_atkey_metadata_to_jsonstr(&atkey.metadata, metadatajsonstr, 4096, &metadatstrolen);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_metadata_to_jsonstr(&atkey.metadata, &metadatajsonstr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert metadata to json string");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Metadata: \"%.*s\"\n", (int)metadatstrolen,
-                        metadatajsonstr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Metadata: \"%.*s\"\n", metadatajsonstr);
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
   atclient_atsign_free(&atsign);
