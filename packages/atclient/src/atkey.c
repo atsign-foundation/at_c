@@ -292,9 +292,9 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "public:");
     index_pos += strlen("public:");
   } else if (atkeytype == ATCLIENT_ATKEY_TYPE_SHAREDKEY) {
-    if (atclient_atkey_is_sharedwith_initialized(atkey)) {
+    if (!atclient_atkey_is_sharedwith_initialized(atkey)) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                   "atkey's sharedwith is initialized, even though it was deemed a ATCLIENT_ATKEY_TYPE_SHAREDKEY by "
+                   "atkey's sharedwith is not initialized, even though it was deemed a ATCLIENT_ATKEY_TYPE_SHAREDKEY by "
                    "atclient_atkey_get_type\n");
     }
     snprintf(*atkeystr + index_pos, atkeystrsize - index_pos, "%s:", atkey->sharedwith);
