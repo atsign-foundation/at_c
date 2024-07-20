@@ -1,5 +1,4 @@
 #include "atclient/atkeysfile.h"
-#include "atclient/atstr.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
 #include <stdbool.h>

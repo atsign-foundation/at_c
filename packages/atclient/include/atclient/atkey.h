@@ -1,7 +1,6 @@
 #ifndef ATCLIENT_ATKEY_H
 #define ATCLIENT_ATKEY_H
 
-#include "atclient/atstr.h"
 #include "atclient/metadata.h"
 #include <stddef.h>
 #include <stdint.h>

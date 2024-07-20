@@ -1,6 +1,5 @@
 #include "atclient/atkey.h"
 #include "atclient/atsign.h"
-#include "atclient/atstr.h"
 #include "atclient/constants.h"
 #include "atclient/metadata.h"
 #include "atclient/stringutils.h"
