@@ -141,40 +141,76 @@ int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse failed\n");
     goto exit;
   }
-  atclient_atkey_metadata_from_cjson_node(metadata, root);
-  cJSON_Delete(root);
+
+  if ((ret = atclient_atkey_metadata_from_cjson_node(metadata, root)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_cjson_node: %d\n", ret);
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
 
-exit: { return ret; }
+exit: {
+  cJSON_Delete(root);
+  return ret;
+}
 }
 
-void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json) {
+int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json) {
+  int ret = 1;
+
+  if(json == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "json is NULL\n");
+    goto exit;
+  }
+
+  if(metadata == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata is NULL\n");
+    goto exit;
+  }
+
   cJSON *createdby = cJSON_GetObjectItem(json, "createdBy");
   if (createdby != NULL) {
     if (createdby->type != cJSON_NULL) {
-      set_createdby(metadata, createdby->valuestring);
+      if ((ret = set_createdby(metadata, createdby->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_createdby: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_createdby(metadata, "null");
+      if ((ret = set_createdby(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_createdby: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *updatedby = cJSON_GetObjectItem(json, "updatedBy");
   if (updatedby != NULL) {
     if (updatedby->type != cJSON_NULL) {
-      set_updatedby(metadata, updatedby->valuestring);
+      if ((ret = set_updatedby(metadata, updatedby->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updatedby: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_updatedby(metadata, "null");
+      if ((ret = set_updatedby(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updatedby: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *status = cJSON_GetObjectItem(json, "status");
   if (status != NULL) {
     if (status->type != cJSON_NULL) {
-      set_status(metadata, status->valuestring);
+      if ((ret = set_status(metadata, status->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_status: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_status(metadata, "null");
+      if ((ret = set_status(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_status: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
@@ -190,45 +226,75 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
   cJSON *expiresat = cJSON_GetObjectItem(json, "expiresAt");
   if (expiresat != NULL) {
     if (expiresat->type != cJSON_NULL) {
-      set_expiresat(metadata, expiresat->valuestring);
+      if ((ret = set_expiresat(metadata, expiresat->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_expiresat: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_expiresat(metadata, "null");
+      if ((ret = set_expiresat(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_expiresat: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *availableat = cJSON_GetObjectItem(json, "availableAt");
   if (availableat != NULL) {
     if (availableat->type != cJSON_NULL) {
-      set_availableat(metadata, availableat->valuestring);
+      if ((ret = set_availableat(metadata, availableat->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_availableat: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_availableat(metadata, "null");
+      if ((ret = set_availableat(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_availableat: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *refreshat = cJSON_GetObjectItem(json, "refreshAt");
   if (refreshat != NULL) {
     if (refreshat->type != cJSON_NULL) {
-      set_refreshat(metadata, refreshat->valuestring);
+      if((ret = set_refreshat(metadata, refreshat->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_refreshat: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_refreshat(metadata, "null");
+      if((ret = set_refreshat(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_refreshat: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *createdat = cJSON_GetObjectItem(json, "createdAt");
   if (createdat != NULL) {
     if (createdat->type != cJSON_NULL) {
-      set_createdat(metadata, createdat->valuestring);
+      if((ret = set_createdat(metadata, createdat->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_createdat: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_createdat(metadata, "null");
+      if((ret = set_createdat(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_createdat: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *updatedat = cJSON_GetObjectItem(json, "updatedAt");
   if (updatedat != NULL) {
     if (updatedat->type != cJSON_NULL) {
-      set_updatedat(metadata, updatedat->valuestring);
+      if((ret = set_updatedat(metadata, updatedat->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updatedat: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_updatedat(metadata, "null");
+      if((ret = set_updatedat(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updatedat: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
@@ -307,113 +373,183 @@ void atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, 
   cJSON *datasignature = cJSON_GetObjectItem(json, "dataSignature");
   if (datasignature != NULL) {
     if (datasignature->type != cJSON_NULL) {
-      set_datasignature(metadata, datasignature->valuestring);
+      if((ret = set_datasignature(metadata, datasignature->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_datasignature: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_datasignature(metadata, "null");
+      if((ret = set_datasignature(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_datasignature: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *sharedkeystatus = cJSON_GetObjectItem(json, "sharedKeyStatus");
   if (sharedkeystatus != NULL) {
     if (sharedkeystatus->type != cJSON_NULL) {
-      set_sharedkeystatus(metadata, sharedkeystatus->valuestring);
+      if((ret = set_sharedkeystatus(metadata, sharedkeystatus->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeystatus: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_sharedkeystatus(metadata, "null");
+      if((ret = set_sharedkeystatus(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeystatus: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *sharedkeyenc = cJSON_GetObjectItem(json, "sharedKeyEnc");
   if (sharedkeyenc != NULL) {
     if (sharedkeyenc->type != cJSON_NULL) {
-      set_sharedkeyenc(metadata, sharedkeyenc->valuestring);
+      if((ret = set_sharedkeyenc(metadata, sharedkeyenc->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeyenc: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_sharedkeyenc(metadata, "null");
+      if((ret = set_sharedkeyenc(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeyenc: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *pubkeyhash = cJSON_GetObjectItem(json, "pubKeyHash");
   if (pubkeyhash != NULL) {
     if (pubkeyhash->type != cJSON_NULL) {
-      set_pubkeyhash(metadata, pubkeyhash->valuestring);
+      if((ret = set_pubkeyhash(metadata, pubkeyhash->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyhash: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_pubkeyhash(metadata, "null");
+      if((ret = set_pubkeyhash(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyhash: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *pubkeyalgo = cJSON_GetObjectItem(json, "pubKeyAlgo");
   if (pubkeyalgo != NULL) {
     if (pubkeyalgo->type != cJSON_NULL) {
-      set_pubkeyalgo(metadata, pubkeyalgo->valuestring);
+      if((ret = set_pubkeyalgo(metadata, pubkeyalgo->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyalgo: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_pubkeyalgo(metadata, "null");
+      if((ret = set_pubkeyalgo(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyalgo: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *encoding = cJSON_GetObjectItem(json, "encoding");
   if (encoding != NULL) {
     if (encoding->type != cJSON_NULL) {
-      set_encoding(metadata, encoding->valuestring);
+      if((ret = set_encoding(metadata, encoding->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encoding: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_encoding(metadata, "null");
+      if((ret = set_encoding(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encoding: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *enckeyname = cJSON_GetObjectItem(json, "encKeyName");
   if (enckeyname != NULL) {
     if (enckeyname->type != cJSON_NULL) {
-      set_enckeyname(metadata, enckeyname->valuestring);
+      if((ret = set_enckeyname(metadata, enckeyname->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_enckeyname: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_enckeyname(metadata, "null");
+      if((ret = set_enckeyname(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_enckeyname: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *encalgo = cJSON_GetObjectItem(json, "encAlgo");
   if (encalgo != NULL) {
     if (encalgo->type != cJSON_NULL) {
-      set_encalgo(metadata, encalgo->valuestring);
+      if((ret = set_encalgo(metadata, encalgo->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encalgo: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_encalgo(metadata, "null");
+      if((ret = set_encalgo(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encalgo: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *ivnonce = cJSON_GetObjectItem(json, "ivNonce");
   if (ivnonce != NULL) {
     if (ivnonce->type != cJSON_NULL) {
-      set_ivnonce(metadata, ivnonce->valuestring);
+      if((ret = set_ivnonce(metadata, ivnonce->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_ivnonce: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_ivnonce(metadata, "null");
+      if((ret = set_ivnonce(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_ivnonce: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *skeenckeyname = cJSON_GetObjectItem(json, "skeEncKeyName");
   if (skeenckeyname != NULL) {
     if (skeenckeyname->type != cJSON_NULL) {
-      set_skeenckeyname(metadata, skeenckeyname->valuestring);
+      if((ret = set_skeenckeyname(metadata, skeenckeyname->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeenckeyname: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_skeenckeyname(metadata, "null");
+      if((ret = set_skeenckeyname(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeenckeyname: %d\n", ret);
+        goto exit;
+      }
     }
   }
 
   cJSON *skeencalgo = cJSON_GetObjectItem(json, "skeEncAlgo");
   if (skeencalgo != NULL) {
     if (skeencalgo->type != cJSON_NULL) {
-      set_skeencalgo(metadata, skeencalgo->valuestring);
+      if((ret = set_skeencalgo(metadata, skeencalgo->valuestring)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeencalgo: %d\n", ret);
+        goto exit;
+      }
     } else {
-      set_skeencalgo(metadata, "null");
+      if((ret = set_skeencalgo(metadata, "null")) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeencalgo: %d\n", ret);
+        goto exit;
+      }
     }
   }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, char **metadatastr) {
   int ret = 1;
 
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata is NULL\n");
     return ret;
   }
 
-  if(metadatastr == NULL) {
+  if (metadatastr == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadatastr is NULL\n");
     return ret;
@@ -421,6 +557,11 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, 
 
   char *jsonstr = NULL;
   cJSON *root = cJSON_CreateObject();
+  if (root == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_CreateObject failed\n");
+    goto exit;
+  }
 
   if (atclient_atkey_metadata_is_createdby_initialized(metadata)) {
     cJSON_AddStringToObject(root, "createdBy", metadata->createdby);
@@ -552,7 +693,6 @@ int atclient_atkey_metadata_to_jsonstr(const atclient_atkey_metadata *metadata, 
   }
   memcpy(*metadatastr, jsonstr, strlen(jsonstr));
   (*metadatastr)[strlen(jsonstr)] = '\0';
-
 
   ret = 0;
   goto exit;
