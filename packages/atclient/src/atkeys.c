@@ -177,7 +177,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 4a. self encryption key
   if ((ret = set_selfencryptionkeybase64(atkeys, selfencryptionkeystr, selfencryptionkeylen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_selfencryptionkeybase64: %d | failed to set selfencryptionkeystr\n",
                  ret);
     goto exit;
   }
@@ -197,7 +197,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_pkampublickeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set pkampublickeystr\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkampublickeybase64: %d | failed to set pkampublickeystr\n", ret);
     goto exit;
   }
 
@@ -220,7 +220,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_pkamprivatekeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set pkamprivatekeystr\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkamprivatekeybase64: %d | failed to set pkamprivatekeystr\n", ret);
     goto exit;
   }
 
@@ -243,7 +243,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_encryptpublickeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set encryptpublickeystr\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encryptpublickeybase64: %d | failed to set encryptpublickeystr\n",
                  ret);
     goto exit;
   }
@@ -267,7 +267,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_encryptprivatekeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set encryptprivatekeystr\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encryptprivatekeybase64: %d | failed to set encryptprivatekeystr\n",
                  ret);
     goto exit;
   }
