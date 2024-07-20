@@ -108,8 +108,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
     memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
     size_t selfencryptionkeylen = 0;
 
-    if ((ret = atchops_base64_decode((const unsigned char *)atclient->atkeys.selfencryptionkeystr.str,
-                                     atclient->atkeys.selfencryptionkeystr.len, selfencryptionkey,
+    if ((ret = atchops_base64_decode((const unsigned char *)atclient->atkeys.selfencryptionkeybase64,
+                                     strlen(atclient->atkeys.selfencryptionkeybase64), selfencryptionkey,
                                      selfencryptionkeysize, &selfencryptionkeylen)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;

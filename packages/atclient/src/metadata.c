@@ -1315,118 +1315,34 @@ exit: { return ret; }
 }
 
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata) {
-  if (is_createdby_initialized(metadata)) {
-    unset_createdby(metadata);
-  }
-
-  if (is_updatedby_initialized(metadata)) {
-    unset_updatedby(metadata);
-  }
-
-  if (is_status_initialized(metadata)) {
-    unset_status(metadata);
-  }
-
-  if (is_version_initialized(metadata)) {
-    unset_version(metadata);
-  }
-
-  if (is_expiresat_initialized(metadata)) {
-    unset_expiresat(metadata);
-  }
-
-  if (is_availableat_initialized(metadata)) {
-    unset_availableat(metadata);
-  }
-
-  if (is_refreshat_initialized(metadata)) {
-    unset_refreshat(metadata);
-  }
-
-  if (is_createdat_initialized(metadata)) {
-    unset_createdat(metadata);
-  }
-
-  if (is_updatedat_initialized(metadata)) {
-    unset_updatedat(metadata);
-  }
-
-  if (is_ispublic_initialized(metadata)) {
-    unset_ispublic(metadata);
-  }
-
-  if (is_iscached_initialized(metadata)) {
-    unset_iscached(metadata);
-  }
-
-  if (is_ttl_initialized(metadata)) {
-    unset_ttl(metadata);
-  }
-
-  if (is_ttb_initialized(metadata)) {
-    unset_ttb(metadata);
-  }
-
-  if (is_ttr_initialized(metadata)) {
-    unset_ttr(metadata);
-  }
-
-  if (is_ccd_initialized(metadata)) {
-    unset_ccd(metadata);
-  }
-
-  if (is_isbinary_initialized(metadata)) {
-    unset_isbinary(metadata);
-  }
-
-  if (is_isencrypted_initialized(metadata)) {
-    unset_isencrypted(metadata);
-  }
-
-  if (is_datasignature_initialized(metadata)) {
-    unset_datasignature(metadata);
-  }
-
-  if (is_sharedkeystatus_initialized(metadata)) {
-    unset_sharedkeystatus(metadata);
-  }
-
-  if (is_sharedkeyenc_initialized(metadata)) {
-    unset_sharedkeyenc(metadata);
-  }
-
-  if (is_pubkeyhash_initialized(metadata)) {
-    unset_pubkeyhash(metadata);
-  }
-
-  if (is_pubkeyalgo_initialized(metadata)) {
-    unset_pubkeyalgo(metadata);
-  }
-
-  if (is_encoding_initialized(metadata)) {
-    unset_encoding(metadata);
-  }
-
-  if (is_enckeyname_initialized(metadata)) {
-    unset_enckeyname(metadata);
-  }
-
-  if (is_encalgo_initialized(metadata)) {
-    unset_encalgo(metadata);
-  }
-
-  if (is_ivnonce_initialized(metadata)) {
-    unset_ivnonce(metadata);
-  }
-
-  if (is_skeenckeyname_initialized(metadata)) {
-    unset_skeenckeyname(metadata);
-  }
-
-  if (is_skeencalgo_initialized(metadata)) {
-    unset_skeencalgo(metadata);
-  }
-
+  unset_createdby(metadata);
+  unset_updatedby(metadata);
+  unset_status(metadata);
+  unset_version(metadata);
+  unset_expiresat(metadata);
+  unset_availableat(metadata);
+  unset_refreshat(metadata);
+  unset_createdat(metadata);
+  unset_updatedat(metadata);
+  unset_ispublic(metadata);
+  unset_iscached(metadata);
+  unset_ttl(metadata);
+  unset_ttb(metadata);
+  unset_ttr(metadata);
+  unset_ccd(metadata);
+  unset_isbinary(metadata);
+  unset_isencrypted(metadata);
+  unset_datasignature(metadata);
+  unset_sharedkeystatus(metadata);
+  unset_sharedkeyenc(metadata);
+  unset_pubkeyhash(metadata);
+  unset_pubkeyalgo(metadata);
+  unset_encoding(metadata);
+  unset_enckeyname(metadata);
+  unset_encalgo(metadata);
+  unset_ivnonce(metadata);
+  unset_skeenckeyname(metadata);
+  unset_skeencalgo(metadata);
   memset(metadata, 0, sizeof(atclient_atkey_metadata));
 }
 

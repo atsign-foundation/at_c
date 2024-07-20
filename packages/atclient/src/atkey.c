@@ -23,7 +23,10 @@ void atclient_atkey_init(atclient_atkey *atkey) {
   atclient_atkey_metadata_init(&(atkey->metadata));
 }
 
-void atclient_atkey_free(atclient_atkey *atkey) { atclient_atkey_metadata_free(&atkey->metadata); }
+void atclient_atkey_free(atclient_atkey *atkey) {
+  atclient_atkey_metadata_free(&atkey->metadata);
+  memset(atkey, 0, sizeof(atclient_atkey));
+}
 
 size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
   if (atkey == NULL) {

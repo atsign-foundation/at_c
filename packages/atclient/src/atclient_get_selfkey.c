@@ -145,8 +145,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  if ((ret = atchops_base64_decode((unsigned char *)atclient->atkeys.selfencryptionkeystr.str,
-                                   atclient->atkeys.selfencryptionkeystr.len, selfencryptionkey, selfencryptionkeysize,
+  if ((ret = atchops_base64_decode((unsigned char *)atclient->atkeys.selfencryptionkeybase64,
+                                   strlen(atclient->atkeys.selfencryptionkeybase64), selfencryptionkey, selfencryptionkeysize,
                                    &selfencryptionkeylen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
