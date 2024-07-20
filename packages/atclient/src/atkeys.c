@@ -318,10 +318,10 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atcl
   int ret = 1;
 
   ret = atclient_atkeys_populate_from_strings(
-      atkeys, atkeysfile.aespkampublickeystr.str, atkeysfile.aespkampublickeystr.len,
-      atkeysfile.aespkamprivatekeystr.str, atkeysfile.aespkamprivatekeystr.len, atkeysfile.aesencryptpublickeystr.str,
-      atkeysfile.aesencryptpublickeystr.len, atkeysfile.aesencryptprivatekeystr.str,
-      atkeysfile.aesencryptprivatekeystr.len, atkeysfile.selfencryptionkeystr.str, atkeysfile.selfencryptionkeystr.len);
+      atkeys, atkeysfile.aespkampublickeystr, strlen(atkeysfile.aespkampublickeystr),
+      atkeysfile.aespkamprivatekeystr, strlen(atkeysfile.aespkamprivatekeystr), atkeysfile.aesencryptpublickeystr,
+      strlen(atkeysfile.aesencryptpublickeystr), atkeysfile.aesencryptprivatekeystr,
+      strlen(atkeysfile.aesencryptprivatekeystr), atkeysfile.selfencryptionkeystr, strlen(atkeysfile.selfencryptionkeystr));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
