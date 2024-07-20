@@ -55,6 +55,303 @@ void atclient_atkeys_free(atclient_atkeys *atkeys) {
   atchops_rsakey_privatekey_free(&(atkeys->encryptprivatekey));
 }
 
+int atclient_atkeys_set_pkampublickeybase64(atclient_atkeys *atkeys, const char *pkampublickeybase64,
+                                            const size_t pkampublickeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (pkampublickeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkampublickeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (pkampublickeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkampublickeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = set_pkampublickeybase64(atkeys, pkampublickeybase64, pkampublickeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkampublickeybase64: %d | failed to set pkampublickeybase64\n",
+                 ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_set_pkamprivatekeybase64(atclient_atkeys *atkeys, const char *pkamprivatekeybase64,
+                                             const size_t pkamprivatekeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (pkamprivatekeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkamprivatekeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (pkamprivatekeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkamprivatekeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = set_pkamprivatekeybase64(atkeys, pkamprivatekeybase64, pkamprivatekeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_pkamprivatekeybase64: %d | failed to set pkamprivatekeybase64\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_set_encryptpublickeybase64(atclient_atkeys *atkeys, const char *encryptpublickeybase64,
+                                               const size_t encryptpublickeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (encryptpublickeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptpublickeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (encryptpublickeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptpublickeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = set_encryptpublickeybase64(atkeys, encryptpublickeybase64, encryptpublickeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_encryptpublickeybase64: %d | failed to set encryptpublickeybase64\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_set_encryptprivatekeybase64(atclient_atkeys *atkeys, const char *encryptprivatekeybase64,
+                                                const size_t encryptprivatekeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (encryptprivatekeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptprivatekeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (encryptprivatekeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptprivatekeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = set_encryptprivatekeybase64(atkeys, encryptprivatekeybase64, encryptprivatekeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_encryptprivatekeybase64: %d | failed to set encryptprivatekeybase64\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_set_selfencryptionkeybase64(atclient_atkeys *atkeys, const char *selfencryptionkeybase64,
+                                                const size_t selfencryptionkeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (selfencryptionkeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "selfencryptionkeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (selfencryptionkeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "selfencryptionkeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = set_selfencryptionkeybase64(atkeys, selfencryptionkeybase64, selfencryptionkeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_selfencryptionkeybase64: %d | failed to set selfencryptionkeybase64\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_populate_pkampublickey(atclient_atkeys *atkeys, const char *pkampublickeybase64,
+                                           const size_t pkampublickeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (pkampublickeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkampublickeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (pkampublickeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkampublickeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = atchops_rsakey_populate_publickey(&(atkeys->pkampublickey), pkampublickeybase64, pkampublickeybase64)) !=
+      0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atchops_rsakey_populate_publickey: %d | failed to populate pkampublickey\n", ret);
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_populate_pkamprivatekey(atclient_atkeys *atkeys, const char *pkamprivatekeybase64,
+                                            const size_t pkamprivatekeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (pkamprivatekeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkamprivatekeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (pkamprivatekeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkamprivatekeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = atchops_rsakey_populate_privatekey(&(atkeys->pkamprivatekey), pkamprivatekeybase64,
+                                                pkamprivatekeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atchops_rsakey_populate_privatekey: %d | failed to populate pkamprivatekey\n", ret);
+    goto exit;
+  }
+exit: { return ret; }
+}
+
+int atclient_atkeys_populate_encryptpublickey(atclient_atkeys *atkeys, const char *encryptpublickeybase64,
+                                              const size_t encryptpublickeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (encryptpublickeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptpublickeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (encryptpublickeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptpublickeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = atchops_rsakey_populate_publickey(&(atkeys->encryptpublickey), encryptpublickeybase64,
+                                               encryptpublickeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atchops_rsakey_populate_publickey: %d | failed to populate encryptpublickey\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_populate_encryptprivatekey(atclient_atkeys *atkeys, const char *encryptprivatekeybase64,
+                                               const size_t encryptprivatekeybase64len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (encryptprivatekeybase64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptprivatekeybase64 is NULL\n");
+    return ret;
+  }
+
+  if (encryptprivatekeybase64len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encryptprivatekeybase64len is 0\n");
+    return ret;
+  }
+
+  if ((ret = atchops_rsakey_populate_privatekey(&(atkeys->encryptprivatekey), encryptprivatekeybase64,
+                                                encryptprivatekeybase64len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atchops_rsakey_populate_privatekey: %d | failed to populate encryptprivatekey\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
                                           const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
                                           const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
@@ -176,8 +473,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   // 4a. self encryption key
   if ((ret = set_selfencryptionkeybase64(atkeys, selfencryptionkeystr, selfencryptionkeylen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_selfencryptionkeybase64: %d | failed to set selfencryptionkeystr\n",
-                 ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_selfencryptionkeybase64: %d | failed to set selfencryptionkeystr\n", ret);
     goto exit;
   }
 
@@ -196,7 +493,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_pkampublickeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkampublickeybase64: %d | failed to set pkampublickeystr\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkampublickeybase64: %d | failed to set pkampublickeystr\n",
+                 ret);
     goto exit;
   }
 
@@ -219,7 +517,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_pkamprivatekeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkamprivatekeybase64: %d | failed to set pkamprivatekeystr\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkamprivatekeybase64: %d | failed to set pkamprivatekeystr\n",
+                 ret);
     goto exit;
   }
 
@@ -242,8 +541,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_encryptpublickeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encryptpublickeybase64: %d | failed to set encryptpublickeystr\n",
-                 ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_encryptpublickeybase64: %d | failed to set encryptpublickeystr\n", ret);
     goto exit;
   }
 
@@ -266,8 +565,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   if ((ret = set_encryptprivatekeybase64(atkeys, (const char *)rsakeydecrypted, rsakeydecryptedlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encryptprivatekeybase64: %d | failed to set encryptprivatekeystr\n",
-                 ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_encryptprivatekeybase64: %d | failed to set encryptprivatekeystr\n", ret);
     goto exit;
   }
 
@@ -317,10 +616,11 @@ int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atcl
   int ret = 1;
 
   ret = atclient_atkeys_populate_from_strings(
-      atkeys, atkeysfile.aespkampublickeystr, strlen(atkeysfile.aespkampublickeystr),
-      atkeysfile.aespkamprivatekeystr, strlen(atkeysfile.aespkamprivatekeystr), atkeysfile.aesencryptpublickeystr,
+      atkeys, atkeysfile.aespkampublickeystr, strlen(atkeysfile.aespkampublickeystr), atkeysfile.aespkamprivatekeystr,
+      strlen(atkeysfile.aespkamprivatekeystr), atkeysfile.aesencryptpublickeystr,
       strlen(atkeysfile.aesencryptpublickeystr), atkeysfile.aesencryptprivatekeystr,
-      strlen(atkeysfile.aesencryptprivatekeystr), atkeysfile.selfencryptionkeystr, strlen(atkeysfile.selfencryptionkeystr));
+      strlen(atkeysfile.aesencryptprivatekeystr), atkeysfile.selfencryptionkeystr,
+      strlen(atkeysfile.selfencryptionkeystr));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);

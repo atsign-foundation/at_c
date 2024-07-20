@@ -63,6 +63,34 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
  */
 void atclient_atkeys_free(atclient_atkeys *atkeys);
 
+int atclient_atkeys_set_pkampublickeybase64(atclient_atkeys *atkeys, const char *pkampublickeybase64,
+                                            const size_t pkampublickeybase64len);
+
+int atclient_atkeys_set_pkamprivatekeybase64(atclient_atkeys *atkeys, const char *pkamprivatekeybase64,
+                                             const size_t pkamprivatekeybase64len);
+
+int atclient_atkeys_set_encryptpublickeybase64(atclient_atkeys *atkeys, const char *encryptpublickeybase64,
+                                               const size_t encryptpublickeybase64len);
+
+int atclient_atkeys_set_encryptprivatekeybase64(atclient_atkeys *atkeys, const char *encryptprivatekeybase64,
+                                                const size_t encryptprivatekeybase64len);
+
+int atclient_atkeys_set_selfencryptionkeybase64(atclient_atkeys *atkeys, const char *selfencryptionkeybase64,
+                                                const size_t selfencryptionkeybase64len);
+
+int atclient_atkeys_populate_pkampublickey(atclient_atkeys *atkeys, const char *pkampublickeybase64,
+                                           const size_t pkampublickeybase64len);
+
+int atclient_atkeys_populate_pkamprivatekey(atclient_atkeys *atkeys, const char *pkamprivatekeybase64,
+                                            const size_t pkamprivatekeybase64len);
+
+int atclient_atkeys_populate_encryptpublickey(atclient_atkeys *atkeys, const char *encryptpublickeybase64,
+                                              const size_t encryptpublickeybase64len);
+
+int atclient_atkeys_populate_encryptprivatekey(atclient_atkeys *atkeys, const char *encryptprivatekeybase64,
+                                               const size_t encryptprivatekeybase64len);
+
+
 /**
  * @brief populates the struct by decrypting the encrypted RSA keys passed. It is assumed that the passed strings are
  * encrypted RSA keys that were in base64 format.
