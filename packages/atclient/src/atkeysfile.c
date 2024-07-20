@@ -156,62 +156,62 @@ void atclient_atkeysfile_free(atclient_atkeysfile *atkeysfile) {
 }
 
 static bool is_aespkampublickeystr_initialized(atclient_atkeysfile *atkeysfile) {
-  return atkeysfile->_initializedfields[AESPKAMPUBLICKEYSTR_INDEX] & AESPKAMPUBLICKEYSTR_INTIIALIZED;
+  return atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESPKAMPUBLICKEYSTR_INDEX] & ATCLIENT_ATKEYSFILE_AESPKAMPUBLICKEYSTR_INTIIALIZED;
 }
 
 static bool is_aespkamprivatekeystr_initialized(atclient_atkeysfile *atkeysfile) {
-  return atkeysfile->_initializedfields[AESPKAMPRIVATEKEYSTR_INDEX] & AESPKAMPRIVATEKEYSTR_INTIIALIZED;
+  return atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESPKAMPRIVATEKEYSTR_INDEX] & ATCLIENT_ATKEYSFILE_AESPKAMPRIVATEKEYSTR_INTIIALIZED;
 }
 
 static bool is_aesencryptpublickeystr_initialized(atclient_atkeysfile *atkeysfile) {
-  return atkeysfile->_initializedfields[AESENCRYPTPUBLICKEYSTR_INDEX] & AESENCRYPTPUBLICKEYSTR_INTIIALIZED;
+  return atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESENCRYPTPUBLICKEYSTR_INDEX] & ATCLIENT_ATKEYSFILE_AESENCRYPTPUBLICKEYSTR_INTIIALIZED;
 }
 
 static bool is_aesencryptprivatekeystr_initialized(atclient_atkeysfile *atkeysfile) {
-  return atkeysfile->_initializedfields[AESENCRYPTPRIVATEKEYSTR_INDEX] & AESENCRYPTPRIVATEKEYSTR_INTIIALIZED;
+  return atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESENCRYPTPRIVATEKEYSTR_INDEX] & ATCLIENT_ATKEYSFILE_AESENCRYPTPRIVATEKEYSTR_INTIIALIZED;
 }
 
 static bool is_selfencryptionkeystr_initialized(atclient_atkeysfile *atkeysfile) {
-  return atkeysfile->_initializedfields[SELFENCRYPTIONKEYSTR_INDEX] & SELFENCRYPTIONKEYSTR_INTIIALIZED;
+  return atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_SELFENCRYPTIONKEYSTR_INDEX] & ATCLIENT_ATKEYSFILE_SELFENCRYPTIONKEYSTR_INTIIALIZED;
 }
 
 static void set_aespkampublickestr_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
   if (initialized) {
-    atkeysfile->_initializedfields[AESPKAMPUBLICKEYSTR_INDEX] |= AESPKAMPUBLICKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESPKAMPUBLICKEYSTR_INDEX] |= ATCLIENT_ATKEYSFILE_AESPKAMPUBLICKEYSTR_INTIIALIZED;
   } else {
-    atkeysfile->_initializedfields[AESPKAMPUBLICKEYSTR_INDEX] &= ~AESPKAMPUBLICKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESPKAMPUBLICKEYSTR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AESPKAMPUBLICKEYSTR_INTIIALIZED;
   }
 }
 
 static void set_aespkamprivatekeystr_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
   if (initialized) {
-    atkeysfile->_initializedfields[AESPKAMPRIVATEKEYSTR_INDEX] |= AESPKAMPRIVATEKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESPKAMPRIVATEKEYSTR_INDEX] |= ATCLIENT_ATKEYSFILE_AESPKAMPRIVATEKEYSTR_INTIIALIZED;
   } else {
-    atkeysfile->_initializedfields[AESPKAMPRIVATEKEYSTR_INDEX] &= ~AESPKAMPRIVATEKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESPKAMPRIVATEKEYSTR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AESPKAMPRIVATEKEYSTR_INTIIALIZED;
   }
 }
 
 static void set_aesencryptpublickeystr_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
   if (initialized) {
-    atkeysfile->_initializedfields[AESENCRYPTPUBLICKEYSTR_INDEX] |= AESENCRYPTPUBLICKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESENCRYPTPUBLICKEYSTR_INDEX] |= ATCLIENT_ATKEYSFILE_AESENCRYPTPUBLICKEYSTR_INTIIALIZED;
   } else {
-    atkeysfile->_initializedfields[AESENCRYPTPUBLICKEYSTR_INDEX] &= ~AESENCRYPTPUBLICKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESENCRYPTPUBLICKEYSTR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AESENCRYPTPUBLICKEYSTR_INTIIALIZED;
   }
 }
 
 static void set_aesencryptprivatekeystr_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
   if (initialized) {
-    atkeysfile->_initializedfields[AESENCRYPTPRIVATEKEYSTR_INDEX] |= AESENCRYPTPRIVATEKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESENCRYPTPRIVATEKEYSTR_INDEX] |= ATCLIENT_ATKEYSFILE_AESENCRYPTPRIVATEKEYSTR_INTIIALIZED;
   } else {
-    atkeysfile->_initializedfields[AESENCRYPTPRIVATEKEYSTR_INDEX] &= ~AESENCRYPTPRIVATEKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_AESENCRYPTPRIVATEKEYSTR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AESENCRYPTPRIVATEKEYSTR_INTIIALIZED;
   }
 }
 
 static void set_selfencryptionkeystr_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
   if (initialized) {
-    atkeysfile->_initializedfields[SELFENCRYPTIONKEYSTR_INDEX] |= SELFENCRYPTIONKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_SELFENCRYPTIONKEYSTR_INDEX] |= ATCLIENT_ATKEYSFILE_SELFENCRYPTIONKEYSTR_INTIIALIZED;
   } else {
-    atkeysfile->_initializedfields[SELFENCRYPTIONKEYSTR_INDEX] &= ~SELFENCRYPTIONKEYSTR_INTIIALIZED;
+    atkeysfile->_initializedfields[ATCLIENT_ATKEYSFILE_SELFENCRYPTIONKEYSTR_INDEX] &= ~ATCLIENT_ATKEYSFILE_SELFENCRYPTIONKEYSTR_INTIIALIZED;
   }
 }
 

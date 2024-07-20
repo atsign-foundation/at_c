@@ -8,17 +8,17 @@
 
 #define VALUE_INITIALIZED 0b00000001
 
-#define PKAMPUBLICKEY_INDEX 0
-#define PKAMPRIVATEKEY_INDEX 0
-#define ENCRYPTPUBLICKEY_INDEX 0
-#define ENCRYPTPRIVATEKEY_INDEX 0
-#define SELFENCRYPTIONKEY_INDEX 0
+#define ATCLIENT_ATKEYS_PKAMPUBLICKEY_INDEX 0
+#define ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INDEX 0
+#define ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INDEX 0
+#define ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INDEX 0
+#define ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INDEX 0
 
-#define PKAMPUBLICKEY_INITIALIZED (VALUE_INITIALIZED << 0)
-#define PKAMPRIVATEKEY_INITIALIZED (VALUE_INITIALIZED << 1)
-#define ENCRYPTPUBLICKEY_INITIALIZED (VALUE_INITIALIZED << 2)
-#define ENCRYPTPRIVATEKEY_INITIALIZED (VALUE_INITIALIZED << 3)
-#define SELFENCRYPTIONKEY_INITIALIZED (VALUE_INITIALIZED << 4)
+#define ATCLIENT_ATKEYS_PKAMPUBLICKEY_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INITIALIZED (VALUE_INITIALIZED << 2)
+#define ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INITIALIZED (VALUE_INITIALIZED << 3)
+#define ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INITIALIZED (VALUE_INITIALIZED << 4)
 
 /**
  * @brief represents the atkeys file
@@ -90,6 +90,11 @@ int atclient_atkeys_populate_encryptpublickey(atclient_atkeys *atkeys, const cha
 int atclient_atkeys_populate_encryptprivatekey(atclient_atkeys *atkeys, const char *encryptprivatekeybase64,
                                                const size_t encryptprivatekeybase64len);
 
+bool atclient_atkeys_is_pkampublickeybase64_initialized(atclient_atkeys *atkeys);
+bool atclient_atkeys_is_pkamprivatekeybase64_initialized(atclient_atkeys *atkeys);
+bool atclient_atkeys_is_encryptpublickeybase64_initialized(atclient_atkeys *atkeys);
+bool atclient_atkeys_is_encryptprivatekeybase64_initialized(atclient_atkeys *atkeys);
+bool atclient_atkeys_is_selfencryptionkeybase64_initialized(atclient_atkeys *atkeys);
 
 /**
  * @brief populates the struct by decrypting the encrypted RSA keys passed. It is assumed that the passed strings are

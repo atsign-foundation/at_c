@@ -24,7 +24,7 @@ int main() {
   atclient atclient1;
   atclient_init(&atclient1);
 
-  atclient atkeys1;
+  atclient_atkeys atkeys1;
   atclient_atkeys_init(&atkeys1);
 
   if ((ret = functional_tests_set_up_atkeys(&atkeys1, ATSIGN1, strlen(ATSIGN1))) != 0) {

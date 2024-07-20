@@ -1,11 +1,9 @@
 #ifndef ATCLIENT_ENCRYPTION_KEY_HELPERS_H
 #define ATCLIENT_ENCRYPTION_KEY_HELPERS_H
 
-
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
-#include "atlogger/atlogger.h"
 
 /**
  * @brief Looks up the symmetric shared key which the atclient's atsign shared with the recipient's atsign.

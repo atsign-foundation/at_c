@@ -352,6 +352,26 @@ int atclient_atkeys_populate_encryptprivatekey(atclient_atkeys *atkeys, const ch
 exit: { return ret; }
 }
 
+bool atclient_atkeys_is_pkampublickeybase64_initialized(atclient_atkeys *atkeys) {
+  return is_pkampublickeybase64_initialized(atkeys);
+}
+
+bool atclient_atkeys_is_pkamprivatekeybase64_initialized(atclient_atkeys *atkeys) {
+  return is_pkamprivatekeybase64_initialized(atkeys);
+}
+
+bool atclient_atkeys_is_encryptpublickeybase64_initialized(atclient_atkeys *atkeys) {
+  return is_encryptpublickeybase64_initialized(atkeys);
+}
+
+bool atclient_atkeys_is_encryptprivatekeybase64_initialized(atclient_atkeys *atkeys) {
+  return is_encryptprivatekeybase64_initialized(atkeys);
+}
+
+bool atclient_atkeys_is_selfencryptionkeybase64_initialized(atclient_atkeys *atkeys) {
+  return is_selfencryptionkeybase64_initialized(atkeys);
+}
+
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aespkampublickeystr,
                                           const size_t aespkampublickeylen, const char *aespkamprivatekeystr,
                                           const size_t aespkamprivatekeylen, const char *aesencryptpublickeystr,
@@ -660,62 +680,62 @@ exit: {
 }
 
 static bool is_pkampublickeybase64_initialized(atclient_atkeys *atkeys) {
-  return atkeys->_initializedfields[PKAMPUBLICKEY_INDEX] & PKAMPUBLICKEY_INITIALIZED;
+  return atkeys->_initializedfields[ATCLIENT_ATKEYS_PKAMPUBLICKEY_INDEX] & ATCLIENT_ATKEYS_PKAMPUBLICKEY_INITIALIZED;
 }
 
 static bool is_pkamprivatekeybase64_initialized(atclient_atkeys *atkeys) {
-  return atkeys->_initializedfields[PKAMPRIVATEKEY_INDEX] & PKAMPRIVATEKEY_INITIALIZED;
+  return atkeys->_initializedfields[ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INDEX] & ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INITIALIZED;
 }
 
 static bool is_encryptpublickeybase64_initialized(atclient_atkeys *atkeys) {
-  return atkeys->_initializedfields[ENCRYPTPUBLICKEY_INDEX] & ENCRYPTPUBLICKEY_INITIALIZED;
+  return atkeys->_initializedfields[ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INDEX] & ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INITIALIZED;
 }
 
 static bool is_encryptprivatekeybase64_initialized(atclient_atkeys *atkeys) {
-  return atkeys->_initializedfields[ENCRYPTPRIVATEKEY_INDEX] & ENCRYPTPRIVATEKEY_INITIALIZED;
+  return atkeys->_initializedfields[ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INDEX] & ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INITIALIZED;
 }
 
 static bool is_selfencryptionkeybase64_initialized(atclient_atkeys *atkeys) {
-  return atkeys->_initializedfields[SELFENCRYPTIONKEY_INDEX] & SELFENCRYPTIONKEY_INITIALIZED;
+  return atkeys->_initializedfields[ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INDEX] & ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INITIALIZED;
 }
 
 static void set_pkampublickeybase64_initialized(atclient_atkeys *atkeys, const bool initialized) {
   if (initialized) {
-    atkeys->_initializedfields[PKAMPUBLICKEY_INDEX] |= PKAMPUBLICKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_PKAMPUBLICKEY_INDEX] |= ATCLIENT_ATKEYS_PKAMPUBLICKEY_INITIALIZED;
   } else {
-    atkeys->_initializedfields[PKAMPUBLICKEY_INDEX] &= ~PKAMPUBLICKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_PKAMPUBLICKEY_INDEX] &= ~ATCLIENT_ATKEYS_PKAMPUBLICKEY_INITIALIZED;
   }
 }
 
 static void set_pkamprivatekeybase64_initialized(atclient_atkeys *atkeys, const bool initialized) {
   if (initialized) {
-    atkeys->_initializedfields[PKAMPRIVATEKEY_INDEX] |= PKAMPRIVATEKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INDEX] |= ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INITIALIZED;
   } else {
-    atkeys->_initializedfields[PKAMPRIVATEKEY_INDEX] &= ~PKAMPRIVATEKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INDEX] &= ~ATCLIENT_ATKEYS_PKAMPRIVATEKEY_INITIALIZED;
   }
 }
 
 static void set_encryptpublickeybase64_initialized(atclient_atkeys *atkeys, const bool initialized) {
   if (initialized) {
-    atkeys->_initializedfields[ENCRYPTPUBLICKEY_INDEX] |= ENCRYPTPUBLICKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INDEX] |= ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INITIALIZED;
   } else {
-    atkeys->_initializedfields[ENCRYPTPUBLICKEY_INDEX] &= ~ENCRYPTPUBLICKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INDEX] &= ~ATCLIENT_ATKEYS_ENCRYPTPUBLICKEY_INITIALIZED;
   }
 }
 
 static void set_encryptprivatekeybase64_initialized(atclient_atkeys *atkeys, const bool initialized) {
   if (initialized) {
-    atkeys->_initializedfields[ENCRYPTPRIVATEKEY_INDEX] |= ENCRYPTPRIVATEKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INDEX] |= ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INITIALIZED;
   } else {
-    atkeys->_initializedfields[ENCRYPTPRIVATEKEY_INDEX] &= ~ENCRYPTPRIVATEKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INDEX] &= ~ATCLIENT_ATKEYS_ENCRYPTPRIVATEKEY_INITIALIZED;
   }
 }
 
 static void set_selfencryptionkeybase64_initialized(atclient_atkeys *atkeys, const bool initialized) {
   if (initialized) {
-    atkeys->_initializedfields[SELFENCRYPTIONKEY_INDEX] |= SELFENCRYPTIONKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INDEX] |= ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INITIALIZED;
   } else {
-    atkeys->_initializedfields[SELFENCRYPTIONKEY_INDEX] &= ~SELFENCRYPTIONKEY_INITIALIZED;
+    atkeys->_initializedfields[ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INDEX] &= ~ATCLIENT_ATKEYS_SELFENCRYPTIONKEY_INITIALIZED;
   }
 }
 
