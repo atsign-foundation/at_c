@@ -2,8 +2,6 @@
 #ifndef ATCLIENT_METADATA_H
 #define ATCLIENT_METADATA_H
 
-#include "atclient/atsign.h"
-#include "atclient/atstr.h"
 #include "cJSON.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -88,17 +86,17 @@ typedef struct atclient_atkey_metadata {
   // Represents the atSign who created this atkey.
   // This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atsign createdby;
+  char *createdby;
 
   // Represents the atSign who last updated this atkey.
   // This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atsign updatedby; // repreesnts the atSign who last updated this atkey. read from protocol string only
+  char *updatedby; // repreesnts the atSign who last updated this atkey. read from protocol string only
 
   // TODO: info about this metadata
   // This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atstr status;
+  char *status;
 
   // TODO: info about this metadata
   // This field is read from protocol string only and is not meant to be written to by the developer.
@@ -109,29 +107,29 @@ typedef struct atclient_atkey_metadata {
   // This field is derived from the [ttl] value. If the ttl value does not exist, then this field should not exist
   // either. This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atstr expiresat;
+  char *expiresat;
 
   // Date and time representing when the atkey will be available at (in UTC date/time format).
   // This field is derived from the [ttb] value. If the ttr value does not exist, then this field should not exist
   // either. This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atstr availableat;
+  char *availableat;
 
   // Date and time repreesnts when the atkey will refresh at (in UTC date/time format).
   // This field is derived from the [ttr] value. If the ttr value does not exist, then this field should not exist
   // either. This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atstr refreshat;
+  char *refreshat;
 
   // Date and time representing when the atkey was created at (in UTC date/time format).
   // This field is read from protocol string only and is not meant to be written to by the developer.
   // this field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atstr createdat;
+  char *createdat;
 
   // Date and time representing when the atkey was last updated at (in UTC date/time format).
   // This field is read from protocol string only and is not meant to be written to by the developer.
   // This field is read by the protocol and populated by the SDK for the developer to read from only.
-  atclient_atstr updatedat; // date and time representing when the key was last updated, read only
+  char *updatedat; // date and time representing when the key was last updated, read only
 
   // ispublic=true means this key is accessible by all atSigns and contains non-encrypted data.
   // ispublic=false means this key is only accessible by either sharedWith or sharedBy
@@ -194,18 +192,18 @@ typedef struct atclient_atkey_metadata {
   // the data came from the owner of the public/private keypair
   // This field is read from protocol string and can also be set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr datasignature;
+  char *datasignature;
 
   // Represents the status of the shared key.
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr sharedkeystatus;
+  char *sharedkeystatus;
 
   // Stores the sharedkey that the data is encrypted with. This is only set if sharedWith is set. The contents will be
   // encrypted using the public key of the sharedWith atSign.
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr sharedkeyenc;
+  char *sharedkeyenc;
 
   // Regarding the following 2 fields...
   // The pubkey pair stores the hash of the encryption public key used to encrypt the [sharedKeyEnc]. The hash is used
@@ -216,17 +214,17 @@ typedef struct atclient_atkey_metadata {
   // The hash of the public key used to encrypt the [sharedKeyEnc].
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr pubkeyhash;
+  char *pubkeyhash;
 
   // The algorithm used to hash the public key used to encrypt the [sharedKeyEnc] (e.g. "sha256" or "sha512")
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr pubkeyalgo;
+  char *pubkeyalgo;
 
   // The type of encoding the value is (e.g. "base64")
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr encoding;
+  char *encoding;
 
   // The name of the key used to encrypt the value. If not provided, use sharedKeyEnc in the metadata. If sharedKeyEnc
   // is not provided, use the default shared key. If enckeyname is provided, just the key name must be provided example
@@ -234,31 +232,31 @@ typedef struct atclient_atkey_metadata {
   // must be only be 'shared_key.wavi'
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr enckeyname;
+  char *enckeyname;
 
   // The name of the algorithm used to encrypt the value. For data, the default algorithm is 'AES/SIC/PKCS7Padding', for
   // cryptographic keys, the default algorithm is 'RSA'
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr encalgo;
+  char *encalgo;
 
   // The initialization vector or nonce used when the data was encrypted with the shared symmetric encryption key
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr ivnonce;
+  char *ivnonce;
 
-  // TODO: info about this metadata
+  // TODO: documentation info about this metadata
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr skeenckeyname;
+  char *skeenckeyname;
 
-  // TODO: info about this metadata
+  // TODO: documentation info about this metadata
   // This field is read from protocol string and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  atclient_atstr skeencalgo;
+  char *skeencalgo;
 
-  // Holds the metadata fields that have not been initialized (0) or have been initialized (1)
-  uint8_t initializedfields[4];
+  // Internal field that holds the metadata fields that have not been initialized (0) or have been initialized (1)
+  uint8_t _initializedfields[4];
 } atclient_atkey_metadata;
 
 /**
@@ -384,28 +382,17 @@ int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const lon
 int atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
 int atclient_atkey_metadata_set_isbinary(atclient_atkey_metadata *metadata, const bool isbinary);
 int atclient_atkey_metadata_set_isencrypted(atclient_atkey_metadata *metadata, const bool isencrypted);
-int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature,
-                                              const size_t datasignaturelen);
-int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus,
-                                                const size_t sharedkeystatuslen);
-int atclient_atkey_metadata_set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc,
-                                             const size_t sharedkeyenclen);
-int atclient_atkey_metadata_set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash,
-                                           const size_t pubkeyhashlen);
-int atclient_atkey_metadata_set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo,
-                                           const size_t pubkeyalgolen);
-int atclient_atkey_metadata_set_encoding(atclient_atkey_metadata *metadata, const char *encoding,
-                                         const size_t encodinglen);
-int atclient_atkey_metadata_set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname,
-                                           const size_t enckeynamelen);
-int atclient_atkey_metadata_set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo,
-                                        const size_t encalgolen);
-int atclient_atkey_metadata_set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce,
-                                        const size_t ivnoncelen);
-int atclient_atkey_metadata_set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname,
-                                              const size_t skeenckeynamelen);
-int atclient_atkey_metadata_set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo,
-                                           const size_t skeencalgolen);
+int atclient_atkey_metadata_set_datasignature(atclient_atkey_metadata *metadata, const char *datasignature);
+int atclient_atkey_metadata_set_sharedkeystatus(atclient_atkey_metadata *metadata, const char *sharedkeystatus);
+int atclient_atkey_metadata_set_sharedkeyenc(atclient_atkey_metadata *metadata, const char *sharedkeyenc);
+int atclient_atkey_metadata_set_pubkeyhash(atclient_atkey_metadata *metadata, const char *pubkeyhash);
+int atclient_atkey_metadata_set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pubkeyalgo);
+int atclient_atkey_metadata_set_encoding(atclient_atkey_metadata *metadata, const char *encoding);
+int atclient_atkey_metadata_set_enckeyname(atclient_atkey_metadata *metadata, const char *enckeyname);
+int atclient_atkey_metadata_set_encalgo(atclient_atkey_metadata *metadata, const char *encalgo);
+int atclient_atkey_metadata_set_ivnonce(atclient_atkey_metadata *metadata, const char *ivnonce);
+int atclient_atkey_metadata_set_skeenckeyname(atclient_atkey_metadata *metadata, const char *skeenckeyname);
+int atclient_atkey_metadata_set_skeencalgo(atclient_atkey_metadata *metadata, const char *skeencalgo);
 
 /**
  * @brief frees the metadata struct's variables that were allocated in the atclient_atkey_metadata_init function.

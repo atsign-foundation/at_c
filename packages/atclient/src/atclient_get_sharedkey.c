@@ -265,7 +265,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     // manage IV
     if (atclient_atkey_metadata_is_ivnonce_initialized(&atkey->metadata)) {
       size_t ivlen;
-      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.len, iv,
+      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce, strlen(atkey->metadata.ivnonce), iv,
                                   ATCHOPS_IV_BUFFER_SIZE, &ivlen);
       if (ret != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
@@ -451,7 +451,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     // manage IV
     if (atclient_atkey_metadata_is_ivnonce_initialized(&atkey->metadata)) {
       size_t ivlen;
-      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.len, iv,
+      ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce, strlen(atkey->metadata.ivnonce), iv,
                                   ATCHOPS_IV_BUFFER_SIZE, &ivlen);
       if (ret != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);

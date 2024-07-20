@@ -40,87 +40,163 @@ static int test_atkey_metadata_from_jsonstr() {
   atclient_atkey_metadata metadata;
   atclient_atkey_metadata_init(&metadata);
 
-  ret = atclient_atkey_metadata_from_jsonstr(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR,
-                                             strlen(TEST_ATKEY_METADATA_FROM_JSONSTR));
-  if (ret != 0) {
+  if ((ret = atclient_atkey_metadata_from_jsonstr(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR,
+                                                  strlen(TEST_ATKEY_METADATA_FROM_JSONSTR))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr failed");
     goto exit;
   }
 
-  if (strncmp(metadata.createdby.atsign, "@qt_thermostat", strlen("@qt_thermostat")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdby.str != @qt_thermostat: %s",
-                 metadata.createdby.atsign);
+  if (!atclient_atkey_metadata_is_createdby_initialized(&metadata)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_createdby_initialized failed");
     goto exit;
   }
 
-  if (strncmp(metadata.updatedby.atsign, "@qt_thermostat", strlen("@qt_thermostat")) != 0) {
+  if (strcmp(metadata.createdby, "@qt_thermostat") != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdby != @qt_thermostat: %s", metadata.createdby);
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_updatedby_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updatedby_initialized failed");
+    goto exit;
+  }
+
+  if (strcmp(metadata.updatedby, "@qt_thermostat") != 0) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updatedby.atsign != @qt_thermostat: %s",
-                 metadata.updatedby.atsign);
+                 metadata.updatedby);
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_createdat_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_createdat_initialized failed");
+    goto exit;
+  }
+
+  if (strlen(metadata.createdat) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.createdat) <= 0: %lu", strlen(metadata.createdat));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.createdat.len <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdat.len <= 0: %lu", metadata.createdat.len);
+  if (!atclient_atkey_metadata_is_updatedat_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updatedat_initialized failed");
+    goto exit;
+  }
+
+  if (strcmp(metadata.createdat, "2024-02-17 19:54:12.037Z") != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdat != 2024-02-17 19:54:12.037Z: %s",
+                 metadata.createdat);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(metadata.createdat.str, "2024-02-17 19:54:12.037Z", strlen("2024-02-17 19:54:12.037Z")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdat.str != 2024-02-17 19:54:12.037Z: %s",
-                 metadata.createdat.str);
+  if (!atclient_atkey_metadata_is_updatedat_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updatedat_initialized failed");
+    goto exit;
+  }
+
+  if (strlen(metadata.updatedat) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.updatedat) <= 0: %lu", strlen(metadata.updatedat));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.updatedat.len <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updatedat.len <= 0: %lu", metadata.updatedat.len);
+  if (!atclient_atkey_metadata_is_updatedat_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updatedat_initialized failed");
+    goto exit;
+  }
+
+  if (strcmp(metadata.updatedat, "2024-02-17 19:54:12.037Z") != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updatedat != 2024-02-17 19:54:12.037Z: %s",
+                 metadata.updatedat);
     ret = 1;
     goto exit;
   }
 
-  if (strncmp(metadata.updatedat.str, "2024-02-17 19:54:12.037Z", strlen("2024-02-17 19:54:12.037Z")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updatedat.str != 2024-02-17 19:54:12.037Z: %s",
-                 metadata.updatedat.str);
+  if (!atclient_atkey_metadata_is_expiresat_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_expiresat_initialized failed");
+    goto exit;
+  }
+
+  if (strlen(metadata.expiresat) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.expiresat) <= 0: %lu", strlen(metadata.expiresat));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.expiresat.len <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.expiresat.len <= 0: %lu", metadata.expiresat.len);
+  if (!atclient_atkey_metadata_is_status_initialized(&metadata)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_status_initialized failed");
     goto exit;
   }
 
-  if (strncmp(metadata.expiresat.str, "2024-02-17 19:55:38.437Z", strlen("2024-02-17 19:55:38.437Z")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.expiresat.str != 2024-02-17 19:55:38.437Z: %s",
-                 metadata.expiresat.str);
+  if (strcmp(metadata.expiresat, "2024-02-17 19:55:38.437Z") != 0) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.expiresat != 2024-02-17 19:55:38.437Z: %s",
+                 metadata.expiresat);
     goto exit;
   }
 
-  if (metadata.status.len != strlen("active")) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.status.len != strlen(active): %lu", metadata.status.len);
+  if (!atclient_atkey_metadata_is_status_initialized(&metadata)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_status_initialized failed");
     goto exit;
   }
 
-  if (strncmp(metadata.status.str, "active", strlen("active")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.status.str != active: %s", metadata.status.str);
+  if (strlen(metadata.status) != strlen("active")) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.status != strlen(active): %lu", strlen(metadata.status));
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_version_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_version_initialized failed");
+    goto exit;
+  }
+
+  if (strcmp(metadata.status, "active") != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.status != active: %s", metadata.status);
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_version_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_version_initialized failed");
     goto exit;
   }
 
   if (metadata.version != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.version != 0: %d", metadata.version);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.version != 0: %d", metadata.version);
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_ttl_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_ttl_initialized failed");
     goto exit;
   }
 
   if (metadata.ttl != 86400) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.ttl != 86400: %ld", metadata.ttl);
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.ttl != 86400: %ld", metadata.ttl);
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_isbinary_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isbinary_initialized failed");
     goto exit;
   }
 
@@ -130,9 +206,21 @@ static int test_atkey_metadata_from_jsonstr() {
     goto exit;
   }
 
+  if (!atclient_atkey_metadata_is_isencrypted_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isencrypted_initialized failed");
+    goto exit;
+  }
+
   if (metadata.isencrypted != false) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.isencrypted != false: %d", metadata.isencrypted);
     ret = 1;
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_iscached_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_iscached_initialized failed");
     goto exit;
   }
 
@@ -142,82 +230,162 @@ static int test_atkey_metadata_from_jsonstr() {
     goto exit;
   }
 
-  if (metadata.availableat.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.availableat.len != 0: %lu", metadata.availableat.len);
+  if (!atclient_atkey_metadata_is_availableat_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isavailableat_initialized failed");
+    goto exit;
+  }
+
+  if (strlen(metadata.availableat) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.availableat) != 0: %lu",
+                 strlen(metadata.availableat));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.refreshat.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.refreshat.len != 0: %lu", metadata.refreshat.len);
+  if (strlen(metadata.refreshat) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.refreshat) != 0: %lu", strlen(metadata.refreshat));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.datasignature.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.datasignature.len != 0: %lu", metadata.datasignature.len);
+  if (atclient_atkey_metadata_is_datasignature_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "datasignature is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.datasignature) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.datasignature != 0: %lu",
+                 strlen(metadata.datasignature));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.sharedkeystatus.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.sharedkeystatus.len != 0: %lu",
-                 metadata.sharedkeystatus.len);
+  if (atclient_atkey_metadata_is_sharedkeystatus_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.sharedkeystatus) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.sharedkeystatus) != 0: %lu",
+                 strlen(metadata.sharedkeystatus));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.sharedkeyenc.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.sharedkeyenc.len != 0: %lu", metadata.sharedkeyenc.len);
+  if (atclient_atkey_metadata_is_sharedkeyenc_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedkeyenc is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.sharedkeyenc) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.sharedkeyenc) != 0: %lu",
+                 strlen(metadata.sharedkeyenc));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.pubkeyhash.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.pubkeyhash.len != 0: %lu", metadata.pubkeyhash.len);
+  if (atclient_atkey_metadata_is_pubkeyhash_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pubkeyhash is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.pubkeyhash) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.pubkeyhash) != 0: %lu",
+                 strlen(metadata.pubkeyhash));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.pubkeyalgo.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.pubkeyalgo.len != 0: %lu", metadata.pubkeyalgo.len);
+  if (atclient_atkey_metadata_is_pubkeyalgo_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pubkeyalgo is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.pubkeyalgo) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.pubkeyalgo) != 0: %lu",
+                 strlen(metadata.pubkeyalgo));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.encoding.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.encoding.len != 0: %lu", metadata.encoding.len);
+  if (atclient_atkey_metadata_is_encoding_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encoding is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.encoding) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.encoding) != 0: %lu", strlen(metadata.encoding));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.enckeyname.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.enckeyname.len != 0: %lu", metadata.enckeyname.len);
+  if (atclient_atkey_metadata_is_enckeyname_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enckeyname is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.enckeyname) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.enckeyname) != 0: %lu",
+                 strlen(metadata.enckeyname));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.encalgo.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.encalgo.len != 0: %lu", metadata.encalgo.len);
+  if (atclient_atkey_metadata_is_encalgo_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encalgo is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.encalgo) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.encalgo) != 0: %lu", strlen(metadata.encalgo));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.ivnonce.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.ivnonce.len != 0: %lu", metadata.ivnonce.len);
+  if (atclient_atkey_metadata_is_ivnonce_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivnonce is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.ivnonce) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.ivnonce) != 0: %lu", strlen(metadata.ivnonce));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.skeenckeyname.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.skeenckeyname.len != 0: %lu", metadata.skeenckeyname.len);
+  if (atclient_atkey_metadata_is_skeenckeyname_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "skeenckeyname is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.skeenckeyname) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.skeenckeyname) != 0: %lu",
+                 strlen(metadata.skeenckeyname));
     ret = 1;
     goto exit;
   }
 
-  if (metadata.skeencalgo.len != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.skeencalgo.len != 0: %lu", metadata.skeencalgo.len);
+  if (atclient_atkey_metadata_is_skeencalgo_initialized(&metadata)) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "skeencalgo is initialized when it should not be");
+    goto exit;
+  }
+
+  if (strlen(metadata.skeencalgo) != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strlen(metadata.skeencalgo) != 0: %lu",
+                 strlen(metadata.skeencalgo));
     goto exit;
   }
 

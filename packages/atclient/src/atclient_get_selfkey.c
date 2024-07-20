@@ -120,7 +120,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
 
   if (atclient_atkey_metadata_is_ivnonce_initialized(&atkey->metadata)) {
     size_t ivlen;
-    ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce.str, atkey->metadata.ivnonce.len, iv,
+    ret = atchops_base64_decode((unsigned char *)atkey->metadata.ivnonce, strlen(atkey->metadata.ivnonce), iv,
                                 ATCHOPS_IV_BUFFER_SIZE, &ivlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
