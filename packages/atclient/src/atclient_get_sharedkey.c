@@ -280,6 +280,9 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   char *sender_atsign_with_at = NULL;
   char *recipient_atsign_with_at = NULL;
 
+  const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
+  unsigned char shared_encryption_key_to_use[shared_encryption_key_size];
+
   const size_t recvsize = 4096;
   unsigned char recv[recvsize];
 
@@ -310,8 +313,6 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   /*
    * 4. Get shared_encryption_key, if necessary
    */
-  const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
-  unsigned char shared_encryption_key_to_use[shared_encryption_key_size];
   if (shared_encryption_key == NULL) {
     if ((ret = atclient_get_shared_encryption_key_shared_by_other(atclient, atkey->sharedby,
                                                                   shared_encryption_key_to_use)) != 0) {
@@ -415,7 +416,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   const size_t value_raw_encrypted_base64_len = strlen(data->valuestring);
 
   // 9a. base64 decode
-  const value_raw_encryted_size = atchops_base64_decoded_size(value_raw_encrypted_base64_len);
+  const size_t value_raw_encryted_size = atchops_base64_decoded_size(value_raw_encrypted_base64_len);
   if ((value_raw_encryted = malloc(sizeof(unsigned char) * value_raw_encryted_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value_raw_encryted\n");
