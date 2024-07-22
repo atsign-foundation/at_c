@@ -325,7 +325,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   /*
    * 5. Build lookup: command
    */
-  size_t commandsize = strlen("lookup:") + strlen(atkey->key);
+  size_t commandsize = strlen("lookup:all:") + strlen(atkey->key);
   bool namespace_exists = atclient_atkey_is_namespacestr_initialized(atkey);
   if (namespace_exists) {
     commandsize += strlen(".") + strlen(atkey->namespacestr);
@@ -337,9 +337,9 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     goto exit;
   }
   if (namespace_exists) {
-    snprintf(command, commandsize, "lookup:%s.%s%s\r\n", atkey->key, atkey->namespacestr, sender_atsign_with_at);
+    snprintf(command, commandsize, "lookup:all:%s.%s%s\r\n", atkey->key, atkey->namespacestr, sender_atsign_with_at);
   } else {
-    snprintf(command, commandsize, "lookup:%s%s\r\n", atkey->key, sender_atsign_with_at);
+    snprintf(command, commandsize, "lookup:all:%s%s\r\n", atkey->key, sender_atsign_with_at);
   }
 
   /*
@@ -367,8 +367,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 
   char *response_without_data = response + 5;
 
-  root = cJSON_Parse(response_without_data);
-  if (root == NULL) {
+  if ((root = cJSON_Parse(response_without_data)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
