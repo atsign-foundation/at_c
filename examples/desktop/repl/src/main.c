@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SHAREDKEY: {
-          if ((ret = atclient_get_sharedkey(&atclient, &atkey, recv, recvsize, &recvlen, NULL, true)) != 0) {
+          if ((ret = atclient_get_sharedkey(&atclient, &atkey, recv, recvsize, &recvlen, NULL)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey: %d | failed to get shared key\n",
                          ret);
             goto get_end;
