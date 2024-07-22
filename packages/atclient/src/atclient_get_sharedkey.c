@@ -84,6 +84,10 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
    */
   char *client_atsign_with_at = NULL;
   char *recipient_atsign_with_at = NULL;
+
+  unsigned char shared_encryption_key_to_use[ATCHOPS_AES_256 / 8];
+  memset(shared_encryption_key_to_use, 0, sizeof(unsigned char) * ATCHOPS_AES_256 / 8);
+
   char *atkeystr = NULL;
   char *command = NULL;
 
@@ -97,7 +101,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   char *value_raw_encrypted = NULL;
   char *value_raw = NULL;
 
-  const cJSON *root = NULL;
+  cJSON *root = NULL;
 
   /*
    * 3. Format atSigns
@@ -115,8 +119,6 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   /*
    * 4. Get shared_encryption_key, if necessary
    */
-  unsigned char shared_encryption_key_to_use[ATCHOPS_AES_256 / 8];
-  memset(shared_encryption_key_to_use, 0, sizeof(unsigned char) * ATCHOPS_AES_256 / 8);
   if (shared_encryption_key != NULL) {
     memcpy(shared_encryption_key_to_use, shared_encryption_key, ATCHOPS_AES_256 / 8);
   } else {
