@@ -134,23 +134,21 @@ static int test1a_cached_publickey_without_namespace() {
   int ret = 1;
 
   const char *atkeystr = TEST_ATKEY_FROM_STRING_1A;
-  const size_t atkeystrlen = strlen(atkeystr);
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  ret = atclient_atkey_from_string(&atkey, atkeystr);
-  if (ret != 0) {
+  if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed\n");
     goto exit;
   }
 
-  if (atkey.metadata.iscached != 1) {
+  if (atkey.metadata.iscached != true) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.iscached is not 1\n");
     goto exit;
   }
 
-  if (atkey.metadata.ispublic != 1) {
+  if (atkey.metadata.ispublic != true) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
                  atkey.metadata.ispublic);
     goto exit;
@@ -201,7 +199,7 @@ static int test1b_publickey_without_namespace() {
     goto exit;
   }
 
-  if (atkey.metadata.ispublic != 1) {
+  if (atkey.metadata.ispublic != true) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ispublic is not 1, it is %d\n",
                  atkey.metadata.ispublic);
     ret = 1;
@@ -783,7 +781,6 @@ static int test2e_sharedkey_with_compounding_namespace() {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed: %d\n", ret);
     goto exit;
   }
-
 
   if(!atclient_atkey_is_sharedby_initialized(&atkey)) {
     ret = 1;
