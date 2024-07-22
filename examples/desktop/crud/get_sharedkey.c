@@ -53,8 +53,7 @@ int main() {
   atclient atclient;
   atclient_init(&atclient);
 
-  atclient_atsign atsign;
-  atclient_atsign_init(&atsign, ATCLIENT_ATSIGN);
+  const char *atsign = ATCLIENT_ATSIGN;
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -65,21 +64,18 @@ int main() {
 
   char *atkeystr = NULL;
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
                                                   &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, ATCLIENT_ATSIGN)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
-
-  atclient.atkeys = atkeys;
-  atclient.atsign = atsign;
 
   if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, SENDER_ATSIGN, RECIPIENT_ATSIGN, ATKEY_NAMESPACE)) !=
       0) {
@@ -135,7 +131,6 @@ int main() {
 exit: {
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
-  atclient_atsign_free(&atsign);
   atclient_free(&atclient);
   free(atserver_host);
   free(atkeystr);

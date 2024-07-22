@@ -3,24 +3,50 @@
 #include "atchops/base64.h"
 #include "atclient/atclient.h"
 #include "atclient/atkeys.h"
+#include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
 #include <stdlib.h>
 #include <string.h>
 
 #define TAG "encryption_key_helpers"
-#define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
 
-int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
+int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *recipient_atsign,
                                                     char *enc_key_shared_by_me, bool create_new_if_not_found) {
   int ret = 1;
 
+  char *sender_atsign_with_at = NULL;
+  char *sender_atsign_without_at = NULL;
+
+  char *recipient_atsign_with_at = NULL;
+  char *recipient_atsign_without_at = NULL;
+
+  if ((ret = atclient_stringutils_atsign_with_at(ctx->atsign, &sender_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(sender_atsign_with_at, &sender_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_with_at(recipient_atsign, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(recipient_atsign_with_at, &recipient_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    return ret;
+  }
+
   // llookup:shared_key.recipient_atsign@myatsign
-  const short commandsize = strlen("llookup:shared_key.") + strlen(recipient->without_prefix_str) +
-                            strlen(ctx->atsign.atsign) + strlen("\r\n") + 1;
+  const short commandsize =
+      strlen("llookup:shared_key.") + strlen(recipient_atsign_without_at) + strlen(sender_atsign_with_at) + strlen("\r\n") + 1;
   char command[commandsize];
   memset(command, 0, sizeof(char) * commandsize);
-  snprintf(command, commandsize, "llookup:shared_key.%s%s\r\n", recipient->without_prefix_str, ctx->atsign.atsign);
+  snprintf(command, commandsize, "llookup:shared_key.%s%s\r\n", recipient_atsign_without_at, sender_atsign_with_at);
 
   const size_t recvsize = 1024;
   unsigned char recv[recvsize];
@@ -36,10 +62,10 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   char *response = (char *)recv;
 
   // Truncate response: "@" + myatsign + "@"
-  const short responseprefixsize = strlen(ctx->atsign.atsign) + 3;
+  const short responseprefixsize = strlen(sender_atsign_with_at) + 3;
   char responseprefix[responseprefixsize];
   memset(responseprefix, 0, sizeof(char) * responseprefixsize);
-  snprintf(responseprefix, responseprefixsize, "@%s@", ctx->atsign.without_prefix_str);
+  snprintf(responseprefix, responseprefixsize, "@%s@", sender_atsign_without_at);
   const short responseprefixlen = (short)strlen(response);
 
   if (atclient_stringutils_starts_with(response, responseprefix)) {
@@ -86,9 +112,10 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   else if (atclient_stringutils_starts_with((char *)recv, "error:AT0015-key not found")) {
     // or do I need to create, store and share a new shared key?
     if (create_new_if_not_found) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Creating new shared encryption key for %s\n", recipient->atsign);
-      ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, &(ctx->atsign), recipient,
-                                                                        enc_key_shared_by_me);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Creating new shared encryption key for %s\n",
+                   recipient_atsign_with_at);
+      ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, sender_atsign_with_at,
+                                                                        recipient_atsign_with_at, enc_key_shared_by_me);
       if (ret != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_create_shared_encryption_key: %d\n", ret);
         return ret;
@@ -102,18 +129,44 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
   return 0;
 }
 
-int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
+int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char *recipient_atsign,
                                                        char *enc_key_shared_by_other) {
   int ret = 1;
+
+  char *sender_atsign_with_at = NULL;
+  char *sender_atsign_without_at = NULL;
+
+  char *recipient_atsign_with_at = NULL;
+  char *recipient_atsign_without_at = NULL;
+
+  if ((ret = atclient_stringutils_atsign_with_at(ctx->atsign, &sender_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(sender_atsign_with_at, &sender_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_with_at(recipient_atsign, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(recipient_atsign_with_at, &recipient_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    return ret;
+  }
 
   // llookup:cached:@myatsign:shared_key@recipient_atsign
   // lookup:shared_key@recipient_atsign
   char *command_prefix = "lookup:shared_key@";
   const short command_prefix_len = 18;
 
-  short commandsize = command_prefix_len + strlen(recipient->without_prefix_str) + 3;
+  short commandsize = command_prefix_len + strlen(recipient_atsign_without_at) + 3;
   char command[commandsize];
-  snprintf(command, commandsize, "lookup:shared_key@%s\r\n", recipient->without_prefix_str);
+  snprintf(command, commandsize, "lookup:shared_key@%s\r\n", recipient_atsign_without_at);
 
   const size_t recvsize = 1024;
   unsigned char recv[recvsize];
@@ -129,9 +182,9 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
   char *response = (char *)recv;
 
   // Truncate response: "@" + myatsign + "@"
-  short response_prefix_len = (short)strlen(ctx->atsign.without_prefix_str) + 3;
+  short response_prefix_len = (short)strlen(sender_atsign_without_at) + 3;
   char response_prefix[response_prefix_len];
-  snprintf(response_prefix, response_prefix_len, "@%s@", ctx->atsign.without_prefix_str);
+  snprintf(response_prefix, response_prefix_len, "@%s@", sender_atsign_without_at);
 
   if (atclient_stringutils_starts_with(response, response_prefix)) {
     response = response + response_prefix_len;
@@ -182,18 +235,28 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atcl
   return 0;
 }
 
-int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign, char *public_encryption_key) {
+int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *public_encryption_key) {
 
   int ret = 1;
+
+  bool should_free_atsign_with_at = false;
+  char *atsign_with_at = ctx->atsign;
+
+  if (atsign != NULL) {
+    if ((ret = atclient_stringutils_atsign_with_at(atsign, &atsign_with_at)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+      return ret;
+    }
+    should_free_atsign_with_at = true;
+  }
 
   // plookup:publickey@atsign
   char *command_prefix = "plookup:publickey";
   const short command_prefix_len = 17;
 
-  const atclient_atsign *pub_enc_key_atsign = atsign != NULL ? atsign : &ctx->atsign;
-  short command_len = command_prefix_len + strlen(pub_enc_key_atsign->atsign) + 3;
+  short command_len = command_prefix_len + strlen(atsign_with_at) + 3;
   char command[command_len];
-  snprintf(command, command_len, "plookup:publickey%s\r\n", pub_enc_key_atsign->atsign);
+  snprintf(command, command_len, "plookup:publickey%s\r\n", atsign_with_at);
 
   // execute command
   const size_t recvlen = 1024;
@@ -218,12 +281,17 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
     return ret;
   }
 
-  return 0;
+  ret = 0;
+exit: {
+  if (should_free_atsign_with_at) {
+    free(atsign_with_at);
+  }
+  return ret;
+}
 }
 
-int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, const atclient_atsign *sharedby,
-                                                                const atclient_atsign *sharedwith,
-                                                                char *sharedenckeybyme) {
+int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, const char *sharedby,
+                                                                const char *sharedwith, char *sharedenckeybyme) {
   int ret = 1;
 
   // 1. variables
@@ -268,8 +336,34 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
   char *cmdbuffer1 = NULL;
   char *cmdbuffer2 = NULL;
 
+  char *sharedby_atsign_with_at = NULL;
+  char *sharedby_atsign_without_at = NULL;
+
+  char *sharedwith_atsign_with_at = NULL;
+  char *sharedwith_atsign_without_at = NULL;
+
   atchops_rsakey_publickey publickeystruct;
   atchops_rsakey_publickey_init(&publickeystruct);
+
+  if ((ret = atclient_stringutils_atsign_with_at(sharedby, &sharedby_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(sharedby_atsign_with_at, &sharedby_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_with_at(sharedwith, &sharedwith_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    return ret;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(sharedwith_atsign_with_at, &sharedwith_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    return ret;
+  }
 
   // 2. generate shared encryption key
   ret = atchops_aes_generate_keybase64(sharedenckeybase64, sharedenckeybase64size, &sharedenckeybase64len,
@@ -332,27 +426,27 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclie
 
   // 5. prep protocol commands
   // 5a. for us (update:shared_key.sharedby@sharedwith <encrypted for us>\r\n)
-  const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith->without_prefix_str) +
-                                strlen(sharedby->atsign) + 1 + sharedenckeybase64encryptedforuslen;
+  const size_t cmdbuffersize1 = strlen("update:shared_key. \r\n") + strlen(sharedwith_atsign_without_at) +
+                                strlen(sharedby_atsign_with_at) + 1 + sharedenckeybase64encryptedforuslen;
   cmdbuffer1 = (char *)malloc(sizeof(char) * cmdbuffersize1);
   if (cmdbuffer1 == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer1\n");
     goto exit;
   }
-  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith->without_prefix_str,
-           sharedby->atsign, sharedenckeybase64encryptedforus);
+  snprintf(cmdbuffer1, cmdbuffersize1, "update:shared_key.%s%s %s\r\n", sharedwith_atsign_without_at,
+           sharedby_atsign_with_at, sharedenckeybase64encryptedforus);
 
   // 5b. for them (update:shared_key.sharedwith@sharedby <encrypted for them>\r\n)
-  const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby->atsign) +
-                                strlen(sharedwith->atsign) + 1 + sharedenckeybase64encryptedforthemlen;
+  const size_t cmdbuffersize2 = strlen("update::shared_key \r\n") + strlen(sharedby_atsign_with_at) +
+                                strlen(sharedwith_atsign_with_at) + 1 + sharedenckeybase64encryptedforthemlen;
   if ((cmdbuffer2 = (char *)malloc(sizeof(char) * cmdbuffersize2)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer2\n");
     goto exit;
   }
-  snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith->atsign, sharedby->atsign,
-           sharedenckeybase64encryptedforthem);
+  snprintf(cmdbuffer2, cmdbuffersize2, "update:%s:shared_key%s %s\r\n", sharedwith_atsign_with_at,
+           sharedby_atsign_with_at, sharedenckeybase64encryptedforthem);
 
   // 6. put "encrypted for us" into key store
   ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer1, cmdbuffersize1 - 1,
@@ -398,6 +492,10 @@ exit: {
   atchops_rsakey_publickey_free(&publickeystruct);
   free(cmdbuffer1);
   free(cmdbuffer2);
+  free(sharedby_atsign_with_at);
+  free(sharedby_atsign_without_at);
+  free(sharedwith_atsign_with_at);
+  free(sharedwith_atsign_without_at);
   return ret;
 }
 }

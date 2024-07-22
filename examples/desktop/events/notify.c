@@ -23,6 +23,8 @@ int main(int argc, char *argv[]) {
   int ret = 1;
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
+  const char *atsign = "@soccer0";
+
   const size_t valuelen = 1024;
   char value[valuelen];
   memset(value, 0, sizeof(char) * valuelen);
@@ -74,14 +76,7 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign_input: %s\n", atsign_input);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "other_atsign_input: %s\n", other_atsign_input);
 
-  atclient_atsign atsign;
-  ret = atclient_atsign_init(&atsign, atsign_input);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to initialize atsign\n");
-    goto exit;
-  }
-
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
                                                   &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
@@ -101,7 +96,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }

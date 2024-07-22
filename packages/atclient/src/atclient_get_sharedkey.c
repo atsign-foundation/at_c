@@ -12,8 +12,9 @@
 
 #define TAG "atclient_get_sharedkey"
 
-static int atclient_get_sharedkey_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, char *value,
-                                                     const size_t valuesize, size_t *valuelen, char *shared_enc_key) {
+static int atclient_get_sharedkey_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                                     const char *value, const size_t valuesize, const size_t *valuelen,
+                                                     const char *shared_enc_key) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -22,15 +23,15 @@ static int atclient_get_sharedkey_validate_arguments(const atclient *atclient, c
     goto exit;
   }
 
-  if (!atclient->_atserver_connection_started) {
+  if (!atclient_is_atserver_connection_started(atclient)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection was not started\n");
     goto exit;
   }
 
-  if (!atclient->_atsign_is_allocated) {
+  if (!atclient_is_atsign_initialized(atclient)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient->_atsign_is_allocated is false\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_is_atsign_initialized was not set\n");
     goto exit;
   }
 
@@ -114,7 +115,14 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
     return ret;
   }
 
-  if (strcmp(atkey->sharedby, atclient->atsign.atsign) != 0) {
+  char *client_atsign_with_at = NULL;
+
+  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+
+  if (strcmp(atkey->sharedby, client_atsign_with_at) != 0) {
     //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
     ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
     if (ret != 0) {
@@ -131,7 +139,10 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
   }
 
   goto exit;
-exit: { return ret; }
+exit: {
+  free(client_atsign_with_at);
+  return ret;
+}
 }
 
 static int
@@ -145,6 +156,8 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   char *command = NULL;
   char *response_prefix = NULL;
   unsigned char *recv = NULL;
+  char *client_atsign_with_at = NULL;
+  char *client_atsign_without_at = NULL;
 
   const size_t enckeysize = ATCHOPS_AES_256 / 8;
   unsigned char enckey[enckeysize];
@@ -163,17 +176,22 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for enc_key\n");
       goto exit;
     }
-    atclient_atsign recipient;
-    ret = atclient_atsign_init(&recipient, atkey->sharedwith);
-    if (ret != 0) {
-      goto exit;
-    }
-    ret = atclient_get_shared_encryption_key_shared_by_me(atclient, &recipient, enc_key,
-                                                          create_new_encryption_key_shared_by_me_if_not_found);
-    if (ret != 0) {
+    char *recipient = atkey->sharedwith;
+    if ((ret = atclient_get_shared_encryption_key_shared_by_me(
+             atclient, recipient, enc_key, create_new_encryption_key_shared_by_me_if_not_found)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
+  }
+
+  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(atclient->atsign, &client_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    goto exit;
   }
 
   ret = atchops_base64_decode((unsigned char *)enc_key, strlen(enc_key), enckey, enckeysize, &enckeylen);
@@ -214,7 +232,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
   }
 
   char *response = (char *)recv;
-  short atsign_with_at_len = (short)strlen(atclient->atsign.atsign);
+  short atsign_with_at_len = (short)strlen(client_atsign_with_at);
 
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
@@ -225,7 +243,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for response_prefix\n");
     goto exit;
   }
-  snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
+  snprintf(response_prefix, response_prefix_len, "@%s@", client_atsign_without_at);
 
   if (atclient_stringutils_starts_with(response, response_prefix)) {
     response = response + response_prefix_len;
@@ -338,6 +356,8 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   char *command = NULL;
   unsigned char *recv = NULL;
   char *response_prefix = NULL;
+  char *client_atsign_with_at = NULL;
+  char *client_atsign_without_at = NULL;
 
   const size_t enckeysize = ATCHOPS_AES_256 / 8;
   unsigned char enckey[enckeysize];
@@ -367,6 +387,16 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
+  }
+
+  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_stringutils_atsign_without_at(atclient->atsign, &client_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    goto exit;
   }
 
   char *namespace = "";
@@ -401,7 +431,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   }
 
   char *response = (char *)recv;
-  short atsign_with_at_len = (short)strlen(atclient->atsign.atsign);
+  short atsign_with_at_len = (short)strlen(client_atsign_with_at);
 
   // Truncate response: "@" + myatsign + "@"
   int response_prefix_len = atsign_with_at_len + 2;
@@ -411,7 +441,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for response_prefix\n");
     goto exit;
   }
-  snprintf(response_prefix, response_prefix_len, "@%s@", atclient->atsign.without_prefix_str);
+  snprintf(response_prefix, response_prefix_len, "@%s@", client_atsign_without_at);
 
   if (atclient_stringutils_starts_with(response, response_prefix)) {
     response = response + response_prefix_len;
@@ -511,6 +541,7 @@ exit: {
     free(recv);
   if (response_prefix)
     free(response_prefix);
+  free(client_atsign_with_at);
   return ret;
 }
 }

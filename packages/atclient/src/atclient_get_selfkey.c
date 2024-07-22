@@ -199,15 +199,15 @@ static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const 
     goto exit;
   }
 
-  if (!atclient->_atsign_is_allocated) {
+  if (!atclient_is_atsign_initialized(atclient)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient->_atsign_is_allocated is false\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_is_atsign_initialized is false\n");
     goto exit;
   }
 
-  if (!atclient->_atserver_connection_started) {
+  if (!atclient_is_atserver_connection_started(atclient)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_is_atserver_connection_started is false\n");
     goto exit;
   }
 

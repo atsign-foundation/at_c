@@ -181,6 +181,18 @@ static int atclient_get_publickey_validate_arguments(atclient *atclient, atclien
     goto exit;
   }
 
+  if(!atclient_is_atserver_connection_started(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
+    goto exit;
+  }
+
+  if(!atclient_is_atsign_initialized(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign not initialized\n");
+    goto exit;
+  }
+
   ret = 0;
   goto exit;
 exit: { return ret; }

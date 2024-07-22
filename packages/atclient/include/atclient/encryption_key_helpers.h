@@ -11,13 +11,13 @@
  * recipient's atsign.
  *
  * @param ctx Initialized atclient context (required)
- * @param recipient An atclient_atsign struct corresponding to the atsign with whom the key was shared (required)
+ * @param recipient atsign of the recipient with @ symbol (required)
  * @param enc_key_shared_by_me The output shared key in b64 format (required)
  * @param create_new_if_not_found true if in case the symmetric shared key does not exist, you would like it to be
  * created / false if not (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclient_atsign *recipient,
+int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *recipient_atsign,
                                                     char *enc_key_shared_by_me, bool create_new_if_not_found);
 
 /**
@@ -26,25 +26,22 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const atclien
  *
  * @param ctx Initialized atclient context (required)
  * @param root_conn initialized root connection
- * @param recipient An atclient_atsign struct corresponding to the atsign who shared the key with the atclient’s atsign
- * (required)
+ * @param recipient the atsign of the recipient with @ symbol (required)
  * @param enc_key_shared_by_other the output shared key in b64 format (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const atclient_atsign *recipient,
+int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char *recipient,
                                                        char *enc_key_shared_by_other);
 
 /**
  * @brief Retreives the public encryption key of a given atsign.
  *
  * @param ctx Initialized atclient context (required)
- * @param recipient An atclient_atsign struct corresponding to the atsign which public encryption key you would like to
- * obtain. It may receive a NULL value, in which case, the atclient_atsign contained in the ctx parameter will be used
- * (required)
+ * @param recipient the atsign of the recipient with @ symbol (required)
  * @param public_encryption_key The output public key in b64 format (required)
  * @return int 0 on success, error otherwise
  */
-int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *atsign,
+int atclient_get_public_encryption_key(atclient *ctx, const char *atsign,
                                        char *public_encryption_key);
 
 /**
@@ -53,13 +50,13 @@ int atclient_get_public_encryption_key(atclient *ctx, const atclient_atsign *ats
  * (shared_key.other@me and @other:shared_key@me)
  *
  * @param atclient the atclient context (must be initialized and pkam_authenticated)
- * @param sharedby
- * @param sharedwith
- * @param sharedenckeybyme
- * @return int
+ * @param sharedby TODO: documentation
+ * @param sharedwith TODO: documentation
+ * @param sharedenckeybyme TODO: documentation
+ * @return int 0 on success, error otherwise
  */
-int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, const atclient_atsign *sharedby,
-                                                                const atclient_atsign *sharedwith,
+int atclient_create_shared_encryption_key_pair_for_me_and_other(atclient *atclient, const char *sharedby,
+                                                                const char *sharedwith,
                                                                 char *sharedenckeybyme);
 
 #endif // ATCLIENT_ENCRYPTION_KEY_HELPERS_H

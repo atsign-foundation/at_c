@@ -106,28 +106,29 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         return ret;
       }
     } else {
-      atclient_atsign recipient;
+      char *recipient = NULL;
       const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize) + 1;
       unsigned char sharedenckeybase64[sharedenckeybase64size];
       memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-      if ((ret = atclient_atsign_init(&recipient, params->atkey->sharedwith)) != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init failed with code %d\n", ret);
+      if ((ret = atclient_stringutils_atsign_with_at(params->atkey->sharedwith, &recipient)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed with code %d\n",
+                     ret);
         return ret;
       }
-      if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, &recipient, (char *)sharedenckeybase64, true)) !=
+      if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient, (char *)sharedenckeybase64, true)) !=
           0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                      "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", ret);
-        atclient_atsign_free(&recipient);
+        free(recipient);
         return ret;
       }
       if ((ret = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
                                        sharedenckeysize, &sharedenckeylen)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", ret);
-        atclient_atsign_free(&recipient);
+        free(recipient);
         return ret;
       }
-      atclient_atsign_free(&recipient);
+      free(recipient);
     }
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];

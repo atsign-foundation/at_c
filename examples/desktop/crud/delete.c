@@ -29,12 +29,11 @@ int main() {
   int atserver_port = -1;
 
   atclient atclient;
-  atclient_atsign atsign;
   atclient_atkey atkey;
   atclient_atkeys atkeys;
+  const char *atsign = ATSIGN;
 
   atclient_init(&atclient);
-  atclient_atsign_init(&atsign, ATSIGN);
   atclient_atkey_init(&atkey);
   atclient_atkeys_init(&atkeys);
 
@@ -43,18 +42,18 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, atsign.atsign, ATKEY_NAME)) != 0) {
+  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, atsign, ATKEY_NAME)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create selfkey");
     goto exit;
   }
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host,
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
                                                   &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
@@ -69,7 +68,6 @@ int main() {
 exit: {
   atclient_free(&atclient);
   free(atserver_host);
-  atclient_atsign_free(&atsign);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
   return ret;

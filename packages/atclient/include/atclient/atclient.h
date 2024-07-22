@@ -8,22 +8,37 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#define VALUE_INITIALIZED 0b00000001
+
+#define ATCLIENT_ATSIGN_INDEX 0
+#define ATCLIENT_ATSERVER_CONNECTION_INDEX 0
+#define ATCLIENT_ATKEYS_INDEX 0
+
+#define ATCLIENT_ATSIGN_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_ATSERVER_CONNECTION_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_ATKEYS_INITIALIZED (VALUE_INITIALIZED << 2)
+
 /**
  * @brief represents atclient
- *
+ * TODO: more documentation
  */
 typedef struct atclient {
+
+  char *atsign;
   atclient_connection atserver_connection;
-  bool _atserver_connection_started : 1; // internally used for memory management
-
-  atclient_atsign atsign;
-  bool _atsign_is_allocated : 1; // internally used for memory management
-
   atclient_atkeys atkeys;
 
   // Warning! async_read is an experimental feature and not fully implemented.
   // You should leave this set to false unless you know what you are doing.
   bool async_read;
+
+  // used internally to track which fields are ready for use
+  // bit 0 == atsign | true == allocated and populated, false == not allocated.
+  // bit 1 == atserver_connection | true == connection is expected to be fully functional, false == connection was not
+  // started and is expected to be non-functional.
+  // bit 2 == atkeys | true == atkeys are populated with the necessary
+  // keys, false == atkeys are not populated.
+  uint8_t _initializedfields[1];
 } atclient;
 
 /**
@@ -40,6 +55,61 @@ void atclient_init(atclient *ctx);
  * @param ctx the atclient context to free
  */
 void atclient_free(atclient *ctx);
+
+/**
+ * @brief returns true if the atsign is initialized and is ready for use and is allocated
+ *
+ * @param ctx assumed to be initialized using atclient_init
+ * @return true if the atsign is initialized and is ready for use and is allocated
+ * @return false if the atsign is not initialized and is not ready for use and is not allocated
+ */
+bool atclient_is_atsign_initialized(const atclient *ctx);
+
+/**
+ * @brief sets the atsign in the atclient context. This function will allocate memory for the atsign and copy the input
+ * atsign
+ *
+ * @param ctx the atclient context to set the atsign in, assumed to be initialized using atclient_init and non-null
+ * @param atsign the atsign to set in the atclient context, assumed to be NON-NULL
+ * @return int 0 on success
+ */
+int atclient_set_atsign(atclient *ctx, const char *atsign);
+
+/**
+ * @brief unsets the atsign in the atclient context. This function will free the memory allocated for the atsign
+ *
+ * @param ctx the atclient context to unset the atsign in, assumed to be initialized using atclient_init and non-null
+ */
+void atclient_unset_atsign(atclient *ctx);
+
+/**
+ * @brief check if the atserver connection was started and is ready for use. This function will return true if the
+ * connection is expected to be fully functional, it doesn't necessarily mean that the connection is still alive and
+ * connected.
+ *
+ * @param ctx the atclient context, assumed to be initialized using atclient_init and non-null
+ * @return true if the connection is expected to be fully functional and was started at least once
+ * @return false if connection was not started and is expected to be non-functional
+ */
+bool atclient_is_atserver_connection_started(const atclient *ctx);
+
+/**
+ * @brief starts the atserver connection. This function will connect to the atserver host and port. This function will
+ * not pkam authenticate for you
+ *
+ * @param ctx the atclient context, assumed to be initialized using atclient_init
+ * @param secondaryhost the host of the atserver, this string is assumed to be non-null null terminated
+ * @param secondaryport the port of the atserver
+ * @return int
+ */
+int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport);
+
+/**
+ * @brief Stops the atserver connection. This function will disconnect the atserver connection.
+ *
+ * @param ctx assumed to be initialized using atclient_init and non-null
+ */
+void atclient_stop_atserver_connection(atclient *ctx);
 
 /**
  * @brief authenticate with secondary server with RSA pkam private key. it is expected atkeys has been populated with

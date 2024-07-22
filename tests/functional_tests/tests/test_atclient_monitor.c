@@ -311,7 +311,7 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
   const int atserver_port = monitor_conn->atserver_connection.port;
 
   if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atserver_host, atserver_port, &(monitor_conn->atkeys),
-                                                monitor_conn->atsign.atsign)) != 0) {
+                                                monitor_conn->atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }

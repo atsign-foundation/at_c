@@ -14,17 +14,17 @@
 
 #define TAG "atclient_put"
 
-static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value,
-                                         const size_t valuelen, int *commitid);
+static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
+                                      const size_t valuelen, const int *commitid);
 
-int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
+int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid) {
   int ret = 1;
 
   /*
    * 1. Check if valid arguments were passed
    */
-  if ((ret = atclient_put_valid_args_check(atclient, atkey, value, valuelen, commitid)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_valid_args_check: %d\n", ret);
+  if ((ret = atclient_put_validate_args(ctx, atkey, value, valuelen, commitid)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_validate_args: %d\n", ret);
     return ret;
   }
 
@@ -72,9 +72,9 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   const size_t recvsize = 4096; // sufficient buffer size to 1. receive data from a `llookup:shared_key@<>` and 2. to
                                 // receive commmit id from `update:`
   unsigned char *recv = NULL;
-  if (!atclient->async_read) {
+  if (!ctx->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
-    if(recv == NULL) {
+    if (recv == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for recv\n");
       goto exit;
@@ -107,8 +107,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
     memset(selfencryptionkey, 0, sizeof(unsigned char) * selfencryptionkeysize);
     size_t selfencryptionkeylen = 0;
 
-    if ((ret = atchops_base64_decode((const unsigned char *)atclient->atkeys.selfencryptionkeybase64,
-                                     strlen(atclient->atkeys.selfencryptionkeybase64), selfencryptionkey,
+    if ((ret = atchops_base64_decode((const unsigned char *)ctx->atkeys.selfencryptionkeybase64,
+                                     strlen(ctx->atkeys.selfencryptionkeybase64), selfencryptionkey,
                                      selfencryptionkeysize, &selfencryptionkeylen)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
@@ -132,56 +132,46 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
     // if it doesn't exist, create one for us and create one for the other person
     // create one for us -> encrypted with our self encryption key
     // create one for the other person -> encrypted with their public encryption key
-    atclient_atsign recipient;
-    atclient_atsign_init(&recipient, atkey->sharedwith);
+    char *recipient_atsign = atkey->sharedwith;
 
-    if ((ret = atclient_get_shared_encryption_key_shared_by_me(atclient, &recipient, sharedenckeybase64, true)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
-      goto error_cleanup;
+    if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign, sharedenckeybase64, true)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
+      goto exit;
     }
 
     if ((ret = atchops_iv_generate(iv)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate: %d\n", ret);
-      goto error_cleanup;
+      goto exit;
     }
 
     if ((ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, (unsigned char *)ivbase64, ivbase64size,
                                      &ivbase64len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
-      goto error_cleanup;
+      goto exit;
     }
 
     if ((ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce: %d\n", ret);
-      goto error_cleanup;
+      goto exit;
     }
 
     if ((ret = atchops_base64_decode((unsigned char *)sharedenckeybase64, strlen(sharedenckeybase64), sharedenckey,
                                      sizeof(sharedenckey), &sharedenckeylen)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
-      goto error_cleanup;
+      goto exit;
     }
 
     if ((ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertext,
                                       ciphertextsize, &ciphertextlen)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
-      goto error_cleanup;
+      goto exit;
     }
 
     if ((ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *)ciphertextbase64, ciphertextbase64size,
                                      &ciphertextbase64len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
-      goto error_cleanup;
+      goto exit;
     }
-
-    goto non_error_cleanup;
-
-  error_cleanup: {
-    atclient_atsign_free(&recipient);
-    goto exit;
-  }
-
-  non_error_cleanup: { atclient_atsign_free(&recipient); }
   }
 
   // 3b. Build the command
@@ -201,7 +191,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   cmdbuffersize = strlen("update: \r\n") + metadataprotocolstrlen + atkeystrlen + ciphertextbase64len +
                   1; // + 1 for null terminator
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
-  if(cmdbuffer == NULL) {
+  if (cmdbuffer == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
     goto exit;
@@ -213,13 +203,13 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   /*
    * 4. Send the command
    */
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1,
-                                      recv, recvsize, &recvlen)) != 0) {
+  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1, recv,
+                                      recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
-  if (atclient->async_read) {
+  if (ctx->async_read) {
     goto exit;
   }
 
@@ -242,7 +232,7 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
   ret = 0;
   goto exit;
 exit: {
-  if (!atclient->async_read) {
+  if (!ctx->async_read) {
     free(recv);
   }
   free(cmdbuffer);
@@ -252,24 +242,25 @@ exit: {
 }
 }
 
-static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atkey, const char *value,
-                                         const size_t valuelen, int *commitid) {
+
+static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
+                                      const size_t valuelen, const int *commitid) {
   int ret = 1;
-  if (atclient == NULL) {
+  if (ctx == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
     goto exit;
   }
 
-  if(!atclient->_atsign_is_allocated) {
+  if (!atclient_is_atserver_connection_started(ctx)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient's atsign is not allocated\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
     goto exit;
   }
 
-  if(!atclient->_atserver_connection_started) {
+  if (!atclient_is_atsign_initialized(ctx)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient's atserver connection is not started\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not allocated. Make sure to PKAM authenticate first\n");
     goto exit;
   }
 
@@ -291,19 +282,19 @@ static int atclient_put_valid_args_check(atclient *atclient, atclient_atkey *atk
     goto exit;
   }
 
-  if(!atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
+  if (!atclient_atkey_is_sharedby_initialized(atkey) || strlen(atkey->sharedby) <= 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not initialized or is empty\n");
     goto exit;
   }
 
-  if (strcmp(atkey->sharedby, atclient->atsign.atsign) != 0) {
+  if (strcmp(atkey->sharedby, ctx->atsign) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey's sharedby is not atclient's atsign\n");
     goto exit;
   }
 
-  if (atclient->async_read) {
+  if (ctx->async_read) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_put cannot be called from an async_read atclient, it will cause a race condition\n");
     goto exit;

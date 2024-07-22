@@ -21,26 +21,102 @@
 
 #define TAG "atclient"
 
-static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport);
+static void atclient_set_atsign_initialized(atclient *ctx, const bool initialized);
+static void atclient_set_atserver_connection_started(atclient *ctx, const bool started);
 static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, const char *atserver_host,
                                                          const int atserver_port, const atclient_atkeys *atkeys,
                                                          const char *atsign);
 
 void atclient_init(atclient *ctx) {
   memset(ctx, 0, sizeof(atclient));
-  ctx->async_read = false;
-  ctx->_atserver_connection_started = false;
-  ctx->_atsign_is_allocated = false;
 }
 
 void atclient_free(atclient *ctx) {
-  if (ctx->_atserver_connection_started) {
-    atclient_connection_free(&(ctx->atserver_connection));
+  if (atclient_is_atsign_initialized(ctx)) {
+    atclient_unset_atsign(ctx);
   }
 
-  if (ctx->_atsign_is_allocated) {
-    atclient_atsign_free(&(ctx->atsign));
+  if(atclient_is_atserver_connection_started(ctx)) {
+    atclient_stop_atserver_connection(ctx);
   }
+}
+
+int atclient_set_atsign(atclient *ctx, const char *atsign) {
+  int ret = 1;
+
+  if (atclient_is_atsign_initialized(ctx)) {
+    atclient_unset_atsign(ctx);
+  }
+
+  const size_t atsignlen = strlen(atsign);
+  const size_t atsignsize = atsignlen + 1;
+  if ((ctx->atsign = malloc(sizeof(char) * atsignsize)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for atsign\n");
+    goto exit;
+  }
+
+  memcpy(ctx->atsign, atsign, atsignlen);
+  ctx->atsign[atsignlen] = '\0';
+
+  atclient_set_atsign_initialized(ctx, true);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atclient_unset_atsign(atclient *ctx) {
+  if (atclient_is_atsign_initialized(ctx)) {
+    free(ctx->atsign);
+  }
+  ctx->atsign = NULL;
+  atclient_set_atsign_initialized(ctx, false);
+}
+
+bool atclient_is_atserver_connection_started(const atclient *ctx) {
+  return ctx->_initializedfields[ATCLIENT_ATSERVER_CONNECTION_INDEX] & ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
+}
+
+int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
+  int ret = 1; // error by default
+
+  // remove hooks to preserve them across resets
+  atclient_connection_hooks *conn_hooks = ctx->atserver_connection.hooks;
+  ctx->atserver_connection.hooks = NULL;
+
+  // clear the atserver connection
+  atclient_stop_atserver_connection(ctx);
+
+  // (re) initialize the atserver connection
+  atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
+
+  // add back hooks
+  ctx->atserver_connection.hooks = conn_hooks;
+
+  if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondaryhost, secondaryport)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+    goto exit;
+  }
+
+  atclient_set_atserver_connection_started(ctx, true);
+
+  ret = 0;
+  goto exit;
+
+exit: { return ret; }
+}
+
+void atclient_stop_atserver_connection(atclient *ctx) {
+  if (atclient_is_atserver_connection_started(ctx)) {
+    atclient_connection_free(&(ctx->atserver_connection));
+  }
+  memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
+  atclient_set_atserver_connection_started(ctx, false);
+}
+
+bool atclient_is_atsign_initialized(const atclient *ctx) {
+  return ctx->_initializedfields[ATCLIENT_ATSIGN_INDEX] & ATCLIENT_ATSIGN_INITIALIZED;
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
@@ -127,9 +203,10 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
     goto exit;
   }
 
-  if(!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n", (int)recvlen, recv);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                 (int)recvlen, recv);
     goto exit;
   }
 
@@ -190,15 +267,10 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
    */
 
   // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign
-  if (ctx->_atsign_is_allocated) {
-    atclient_atsign_free(&(ctx->atsign));
-    ctx->_atsign_is_allocated = false;
-  }
-  if ((ret = atclient_atsign_init(&(ctx->atsign), atsign_with_at) != 0)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atsign_init: %d\n", ret);
+  if((ret = atclient_set_atsign(ctx, atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_set_atsign: %d\n", ret);
     goto exit;
   }
-  ctx->_atsign_is_allocated = true;
 
   // set atkeys
   ctx->atkeys = *atkeys;
@@ -269,38 +341,20 @@ void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
   mbedtls_ssl_conf_read_timeout(&(ctx->atserver_connection.ssl_config), timeout_ms);
 }
 
-static int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
-  int ret = 1; // error by default
-
-  if (ctx == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
-    goto exit;
+static void atclient_set_atsign_initialized(atclient *ctx, const bool initialized) {
+  if (initialized) {
+    ctx->_initializedfields[ATCLIENT_ATSIGN_INDEX] |= ATCLIENT_ATSIGN_INITIALIZED;
+  } else {
+    ctx->_initializedfields[ATCLIENT_ATSIGN_INDEX] &= ~ATCLIENT_ATSIGN_INITIALIZED;
   }
+}
 
-  // remove hooks to preserve them across resets
-  atclient_connection_hooks *conn_hooks = ctx->atserver_connection.hooks;
-  ctx->atserver_connection.hooks = NULL;
-
-  // clear the atserver connection
-  atclient_connection_free(&(ctx->atserver_connection));
-  ctx->_atserver_connection_started = false;
-  memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
-
-  // (re) initialize the atserver connection
-  atclient_connection_init(&(ctx->atserver_connection), ATCLIENT_CONNECTION_TYPE_ATSERVER);
-  ctx->_atserver_connection_started = true;
-
-  // add back hooks
-  ctx->atserver_connection.hooks = conn_hooks;
-
-  if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondaryhost, secondaryport)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
-    goto exit;
+static void atclient_set_atserver_connection_started(atclient *ctx, const bool started) {
+  if (started) {
+    ctx->_initializedfields[ATCLIENT_ATSERVER_CONNECTION_INDEX] |= ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
+  } else {
+    ctx->_initializedfields[ATCLIENT_ATSERVER_CONNECTION_INDEX] &= ~ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
   }
-
-  goto exit;
-
-exit: { return ret; }
 }
 
 static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, const char *atserver_host,

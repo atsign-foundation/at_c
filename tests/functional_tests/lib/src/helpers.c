@@ -241,9 +241,35 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
 
   atclient_atkey atkeyforthem;
   atclient_atkey_init(&atkeyforthem);
+  
+  char *client_atsign_with_at = NULL;
+  char *client_atsign_without_at = NULL;
+
+  char *recipient_atsign_with_at = NULL;
+  char *recipient_atsign_without_at = NULL;
+
+  if((ret = atclient_stringutils_atsign_with_at(atclient1->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_stringutils_atsign_without_at(atclient1->atsign, &client_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_stringutils_atsign_with_at(recipient, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_stringutils_atsign_without_at(recipient, &recipient_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+    goto exit;
+  }
 
   memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", (recipient + 1), atclient1->atsign.atsign);
+  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", recipient_atsign_without_at, client_atsign_with_at);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
   if ((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
@@ -251,7 +277,7 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   }
 
   memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", recipient, atclient1->atsign.atsign);
+  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "%s:shared_key%s", recipient_atsign_with_at, client_atsign_with_at);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
   if ((ret = atclient_atkey_from_string(&atkeyforthem, atkeystrtemp)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
@@ -276,6 +302,10 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
 exit: {
   atclient_atkey_free(&atkeyforme);
   atclient_atkey_free(&atkeyforthem);
+  free(client_atsign_with_at);
+  free(client_atsign_without_at);
+  free(recipient_atsign_with_at);
+  free(recipient_atsign_without_at);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
   return ret;
 }

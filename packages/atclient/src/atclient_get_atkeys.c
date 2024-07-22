@@ -7,8 +7,8 @@
 
 #define TAG "atclient_get_atkeys"
 
-static int atclient_get_atkeys_validate_arguments(atclient *atclient, const char *regex, const bool showhidden,
-                                                  atclient_atkey **atkey, size_t *output_array_len);
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const char *regex, const bool showhidden,
+                                                  const atclient_atkey **atkey, const size_t *output_array_len);
 
 int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhidden, const size_t recvbuffersize,
                         atclient_atkey **atkey, size_t *output_array_len)
@@ -131,8 +131,8 @@ exit: {
 }
 }
 
-static int atclient_get_atkeys_validate_arguments(atclient *atclient, const char *regex, const bool showhidden,
-                                                  atclient_atkey **atkey, size_t *output_array_len) {
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const char *regex, const bool showhidden,
+                                                  const atclient_atkey **atkey, const size_t *output_array_len) {
   int ret = 1;
 
   // check to make sure null ptr wasn't provided
@@ -149,13 +149,13 @@ static int atclient_get_atkeys_validate_arguments(atclient *atclient, const char
     goto exit;
   }
 
-  if (!atclient->_atserver_connection_started) {
+  if (!atclient_is_atserver_connection_started(atclient)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
     goto exit;
   }
 
-  if (!atclient->_atsign_is_allocated) {
+  if (!atclient_is_atsign_initialized(atclient)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not allocated. Make sure to PKAM authenticate first\n");
     goto exit;
