@@ -1145,8 +1145,7 @@ exit: {
 static int decrypt_notification(atclient *atclient, atclient_atnotification *notification) {
   int ret = 1;
 
-  atclient_atsign atsignfrom;
-  atclient_atsign_init(&atsignfrom, notification->from);
+  char *from_atsign = notification->from;
 
   unsigned char *decryptedvaluetemp = NULL;
 
@@ -1211,7 +1210,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 3. get shared encryption key to decrypt
-  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, (char *)sharedenckeybase64);
+  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, from_atsign, (char *)sharedenckeybase64);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
     goto exit;
@@ -1257,7 +1256,6 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   ret = 0;
   goto exit;
 exit: {
-  atclient_atsign_free(&atsignfrom);
   free(decryptedvaluetemp);
   return ret;
 }

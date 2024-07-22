@@ -116,14 +116,19 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
   }
 
   char *client_atsign_with_at = NULL;
+  char *sharedby_atsign_with_at = NULL;
 
   if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if (strcmp(atkey->sharedby, client_atsign_with_at) != 0) {
-    //  && (!atkey->metadata.iscached && !atkey->metadata.ispublic)
+  if ((ret = atclient_stringutils_atsign_with_at(atkey->sharedby, &sharedby_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+
+  if (strcmp(sharedby_atsign_with_at, client_atsign_with_at) != 0) {
     ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
@@ -141,6 +146,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
   goto exit;
 exit: {
   free(client_atsign_with_at);
+  free(sharedby_atsign_with_at);
   return ret;
 }
 }
@@ -377,13 +383,8 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for enc_key\n");
       goto exit;
     }
-    atclient_atsign recipient;
-    ret = atclient_atsign_init(&recipient, atkey->sharedby);
-    if (ret != 0) {
-      goto exit;
-    }
-    ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &recipient, enc_key);
-    if (ret != 0) {
+    char *recipient = atkey->sharedby;
+    if ((ret = atclient_get_shared_encryption_key_shared_by_other(atclient, recipient, enc_key)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
