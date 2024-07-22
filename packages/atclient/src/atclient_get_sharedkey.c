@@ -195,7 +195,7 @@ atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atke
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_without_at(atclient->atsign, &client_atsign_without_at)) != 0) {
+  if ((ret = atclient_stringutils_atsign_without_at(client_atsign_with_at, &client_atsign_without_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
     goto exit;
   }
@@ -395,7 +395,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_without_at(atclient->atsign, &client_atsign_without_at)) != 0) {
+  if ((ret = atclient_stringutils_atsign_without_at(client_atsign_with_at, &client_atsign_without_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
     goto exit;
   }
