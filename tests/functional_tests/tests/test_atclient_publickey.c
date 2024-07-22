@@ -183,7 +183,7 @@ static int test_3_delete(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_delete\n");
     goto exit;
   }
@@ -340,7 +340,7 @@ static int test_7_delete(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_delete\n");
     goto exit;
   }

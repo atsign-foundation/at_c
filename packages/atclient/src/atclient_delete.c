@@ -8,9 +8,9 @@
 
 #define TAG "atclient_delete"
 
-static int atclient_delete_validate_arguments(atclient *atclient, const atclient_atkey *atkey);
+static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey);
 
-int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit_id) {
   int ret = 1;
 
   /*
@@ -19,20 +19,17 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
   if ((ret = atclient_delete_validate_arguments(atclient, atkey)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_validate_arguments: %d\n", ret);
-    goto exit;
+    return ret;
   }
 
   /*
    * 2. Initialize variables
    */
-  size_t cmdbuffersize;
-  char *cmdbuffer = NULL; // free later
+  char *cmdbuffer = NULL;
+  char *atkeystr = NULL;
 
-  char *atkeystr = NULL; // free later
-  size_t atkeystrlen = 0;
-
-  const size_t recvsize = 4096;
-  unsigned char *recv;
+  const size_t recvsize = 256; // sufficient buffer size to receive response containing commit id
+  unsigned char *recv = NULL;
   if (!atclient->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
     if (recv == NULL) {
@@ -52,16 +49,16 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
-  atkeystrlen = strlen(atkeystr);
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  cmdbuffersize = strlen("delete:") + atkeystrlen + strlen("\r\n") + 1;
+  const size_t cmdbuffersize = strlen("delete:") + atkeystrlen + strlen("\r\n") + 1;
   cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
   if (cmdbuffer == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
     goto exit;
   }
-  snprintf(cmdbuffer, cmdbuffersize, "delete:%.*s\r\n", (int)atkeystrlen, atkeystr);
+  snprintf(cmdbuffer, cmdbuffersize, "delete:%s\r\n", atkeystr);
 
   /*
    * 4. Send command
@@ -76,31 +73,49 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  char *respose = (char *)recv;
+
+  if (!atclient_stringutils_starts_with(respose, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);
     goto exit;
   }
 
+  char *response_without_data = respose + strlen("data:");
+
+  if(commit_id != NULL) {
+    *commit_id = atoi(response_without_data);
+  }
+  
   ret = 0;
   goto exit;
 exit: {
-  if (!atclient->async_read) {
-    free(recv);
-  }
+  free(recv);
   free(atkeystr);
   free(cmdbuffer);
   return ret;
 }
 }
 
-static int atclient_delete_validate_arguments(atclient *atclient, const atclient_atkey *atkey) {
+static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
   if (atclient == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+
+  if (!atclient_is_atsign_initialized(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver_connection is not connected\n");
+    goto exit;
+  }
+
+  if (!atclient_is_atserver_connection_started(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver_connection is not started\n");
     goto exit;
   }
 
@@ -110,7 +125,17 @@ static int atclient_delete_validate_arguments(atclient *atclient, const atclient
     goto exit;
   }
 
-  // TODO use a function in atclient_atkey to check if atkey is complete
+  if (!atclient_atkey_is_key_initialized(atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_is_key_initialized is false\n");
+    goto exit;
+  }
+
+  if (!atclient_atkey_is_sharedby_initialized(atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_is_sharedby_initialized is false\n");
+    goto exit;
+  }
 
   ret = 0;
   goto exit;

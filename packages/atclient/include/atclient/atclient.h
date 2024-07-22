@@ -229,9 +229,10 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to delete from atServer (must satisfy the two conditions stated above)
+ * @param commit_id the output commit_id of the delete operation that the atServer returns, can be set to NULL if you do not need it
  * @return int 0 on success
  */
-int atclient_delete(atclient *atclient, const atclient_atkey *atkey);
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit_id);
 
 /**
  * @brief Runs a scan of the atServer to see what atKeys you have.
