@@ -1,5 +1,5 @@
-#ifndef NOTIFICATION_H
-#define NOTIFICATION_H
+#ifndef ATCLIENT_MONITOR_H
+#define ATCLIENT_MONITOR_H
 
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
