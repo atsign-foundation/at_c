@@ -97,6 +97,8 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   char *value_raw_encrypted = NULL;
   char *value_raw = NULL;
 
+  const cJSON *root = NULL;
+
   /*
    * 3. Format atSigns
    */
@@ -164,7 +166,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
 
   char *response_without_data = response + 5;
 
-  const cJSON *root = cJSON_Parse(response);
+  root = cJSON_Parse(response_without_data);
   if (root == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
@@ -211,7 +213,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   const char *value_raw_encrypted_base64 = data->valuestring;
   const size_t value_raw_encrypted_base64_len = strlen(data->valuestring);
 
-  const size_t value_raw_encrypted_size = atchops_base64_decoded_size(strlen(value_raw_encrypted_base64_len));
+  const size_t value_raw_encrypted_size = atchops_base64_decoded_size(value_raw_encrypted_base64_len);
   if ((value_raw_encrypted = malloc(sizeof(char) * value_raw_encrypted_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value_raw_encrypted\n");
@@ -235,13 +237,18 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   }
   memset(value_raw, 0, sizeof(char) * value_raw_size);
   size_t value_raw_len = 0;
-
   if ((ret = atchops_aesctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv,
                                     (unsigned char *)value_raw_encrypted, value_raw_encrypted_len,
-                                    (unsigned char *)value_raw, value_raw_size, &valuelen)) != 0) {
+                                    (unsigned char *)value_raw, value_raw_size, &value_raw_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;
   }
+
+  /*
+   * 10. Set value
+   */
+  memcpy(value, value_raw, value_raw_len);
+  *valuelen = value_raw_len;
 
   ret = 0;
   goto exit;
@@ -251,7 +258,8 @@ exit: {
   free(value_raw);
   free(atkeystr);
   free(command);
-  free(recv);
+  free(metadatastr);
+  cJSON_Delete(root);
   return ret;
 }
 }
@@ -276,14 +284,15 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   unsigned char recv[recvsize];
 
   char *command = NULL;
+
   cJSON *root = NULL;
+  char *metadatastr = NULL;
 
   const size_t ivsize = ATCHOPS_IV_BUFFER_SIZE;
   unsigned char iv[ivsize];
 
   unsigned char *value_raw_encryted = NULL;
   unsigned char *value_raw = NULL;
-
 
   /*
    * 3. Format atSigns
@@ -316,13 +325,22 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   /*
    * 5. Build lookup: command
    */
-  const size_t commandsize = strlen("lookup:") + strlen(atkey->key) + strlen(sender_atsign_with_at) + ("\r\n") + 1;
-  if ((command = malloc(sizeof(char) * commandsize)) == NULL) {
+  size_t commandsize = strlen("lookup:") + strlen(atkey->key);
+  bool namespace_exists = atclient_atkey_is_namespacestr_initialized(atkey);
+  if (namespace_exists) {
+    commandsize += strlen(".") + strlen(atkey->namespacestr);
+  }
+  commandsize += strlen(sender_atsign_with_at) + strlen("\r\n") + 1;
+  if ((command = (char *)malloc(sizeof(char) * commandsize)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for command\n");
     goto exit;
   }
-  snprintf(command, commandsize, "lookup:%s%s\r\n", atkey->key, sender_atsign_with_at);
+  if (namespace_exists) {
+    snprintf(command, commandsize, "lookup:%s.%s%s\r\n", atkey->key, atkey->namespacestr, sender_atsign_with_at);
+  } else {
+    snprintf(command, commandsize, "lookup:%s%s\r\n", atkey->key, sender_atsign_with_at);
+  }
 
   /*
    * 6. Send lookup: command
@@ -363,7 +381,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
     goto exit;
   }
 
-  char *metadatastr = cJSON_Print(metadata);
+  metadatastr = cJSON_Print(metadata);
 
   if ((ret = atclient_atkey_metadata_from_jsonstr(&(atkey->metadata), metadatastr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr: %d\n", ret);
@@ -422,7 +440,8 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   memset(value_raw, 0, sizeof(unsigned char) * value_raw_size);
   size_t value_raw_len = 0;
   if ((ret = atchops_aesctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv, value_raw_encryted,
-                               value_raw_encryted_len, (unsigned char *)value_raw, value_raw_size, &value_raw_len)) != 0) {
+                                    value_raw_encryted_len, (unsigned char *)value_raw, value_raw_size,
+                                    &value_raw_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;
   }
@@ -431,6 +450,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
    * 10. Set value
    */
   memcpy(value, value_raw, value_raw_len);
+  *valuelen = value_raw_len;
 
   ret = 0;
   goto exit;

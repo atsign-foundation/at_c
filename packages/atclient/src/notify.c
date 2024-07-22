@@ -106,20 +106,25 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         return ret;
       }
     } else {
-      char *recipient = NULL;
-      if ((ret = atclient_stringutils_atsign_with_at(params->atkey->sharedwith, &recipient)) != 0) {
+      char *recipient_atsign_with_at = NULL;
+      if ((ret = atclient_stringutils_atsign_with_at(params->atkey->sharedwith, &recipient_atsign_with_at)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed with code %d\n",
                      ret);
         return ret;
       }
-      if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient, sharedenckey)) !=
-          0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                     "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", ret);
-        free(recipient);
-        return ret;
+      if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign_with_at, sharedenckey)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Creating shared encryption key\n");
+        if ((ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, recipient_atsign_with_at,
+                                                                               sharedenckey)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                       "atclient_create_shared_encryption_key_pair_for_me_and_other: %d\n", ret);
+          free(recipient_atsign_with_at);
+          return ret;
+        }
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared encryption key successfully\n");
       }
-      free(recipient);
+      free(recipient_atsign_with_at);
     }
 
     unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];

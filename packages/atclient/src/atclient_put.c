@@ -132,40 +132,59 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
     // if it doesn't exist, create one for us and create one for the other person
     // create one for us -> encrypted with our self encryption key
     // create one for the other person -> encrypted with their public encryption key
-    char *recipient_atsign = atkey->sharedwith;
+    char *recipient_atsign_with_at = NULL;
 
-    if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign, sharedenckey)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
-      goto exit;
+    if ((ret = atclient_stringutils_atsign_with_at(atkey->sharedwith, &recipient_atsign_with_at)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_concat_at_sign_with_at: %d\n", ret);
+      goto shared_key_exit;
+    }
+
+    if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign_with_at, sharedenckey)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Creating shared encryption key\n");
+      if ((ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, recipient_atsign_with_at,
+                                                                             sharedenckey)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "atclient_create_shared_encryption_key_pair_for_me_and_other: %d\n", ret);
+        goto shared_key_exit;
+      }
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared encryption key successfully\n");
     }
 
     if ((ret = atchops_iv_generate(iv)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate: %d\n", ret);
-      goto exit;
+      goto shared_key_exit;
     }
 
     if ((ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, (unsigned char *)ivbase64, ivbase64size,
                                      &ivbase64len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
-      goto exit;
+      goto shared_key_exit;
     }
 
     if ((ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce: %d\n", ret);
-      goto exit;
+      goto shared_key_exit;
     }
 
     if ((ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)value, valuelen, ciphertext,
                                       ciphertextsize, &ciphertextlen)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
-      goto exit;
+      goto shared_key_exit;
     }
 
     if ((ret = atchops_base64_encode(ciphertext, ciphertextlen, (unsigned char *)ciphertextbase64, ciphertextbase64size,
                                      &ciphertextbase64len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
+      goto shared_key_exit;
+    }
+
+  shared_key_exit: {
+    free(recipient_atsign_with_at);
+    if (ret != 0) {
       goto exit;
     }
+  }
   }
 
   // 3b. Build the command
@@ -235,7 +254,6 @@ exit: {
   return ret;
 }
 }
-
 
 static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
                                       const size_t valuelen, const int *commitid) {

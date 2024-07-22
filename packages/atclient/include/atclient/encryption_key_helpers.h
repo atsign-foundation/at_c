@@ -55,7 +55,6 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
  * (shared_key.other@me and @other:shared_key@me)
  *
  * @param atclient non-null atclient context (must be initialized and pkam_authenticated)
- * @param sharedby non-null atSign (with @ symbol) and null-terminated. Example "@bob"
  * @param sharedwith non-null atSign (with @ symbol) and null-terminated. Example "@bob"
  * @param shared_encryption_key_shared_by_me_with_other holds the output shared encryption key that was created by this
  * function, to be shared with the recipient. Expected to be non-null and has 32 bytes of memory allocated to this
@@ -63,7 +62,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
  * @return int 0 on success, error otherwise
  */
 int atclient_create_shared_encryption_key_pair_for_me_and_other(
-    atclient *atclient, const char *sharedby, const char *sharedwith,
+    atclient *atclient, const char *sharedwith,
     unsigned char *shared_encryption_key_shared_by_me_with_other);
 
 #endif // ATCLIENT_ENCRYPTION_KEY_HELPERS_H

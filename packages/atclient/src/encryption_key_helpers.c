@@ -95,15 +95,16 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
   /*
    * 6. Allocate memory for public_encryption_key and give output to caller
    */
-  const size_t public_encryption_key_size = strlen(response_without_data) + 1;
+  const size_t public_encryption_key_len = strlen(response_without_data);
+  const size_t public_encryption_key_size = public_encryption_key_len + 1;
   if ((*public_encryption_key = (char *)malloc(sizeof(char) * public_encryption_key_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for public_encryption_key\n");
     goto exit;
   }
 
-  memcpy(*public_encryption_key, response_without_data, public_encryption_key_size);
-  *public_encryption_key[public_encryption_key_size - 1] = '\0';
+  memcpy(*public_encryption_key, response_without_data, public_encryption_key_len);
+  (*public_encryption_key)[public_encryption_key_len] = '\0';
 
   ret = 0;
 exit: { return ret; }
@@ -198,7 +199,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
   if (!atclient_stringutils_starts_with(response, "data:")) {
     if (atclient_stringutils_starts_with(response, "error:AT0015-key not found")) {
       ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d; error:AT0015-key not found\n", ret);
       goto exit;
     }
   }
@@ -356,7 +357,7 @@ exit: {
 }
 
 int atclient_create_shared_encryption_key_pair_for_me_and_other(
-    atclient *atclient, const char *sharedby, const char *sharedwith,
+    atclient *atclient, const char *recipient_atsign,
     unsigned char *shared_encryption_key_shared_by_me_with_other) {
 
   int ret = 1;
@@ -369,13 +370,9 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     return ret;
   }
 
-  if (sharedby == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is NULL\n");
-    return ret;
-  }
 
-  if (sharedwith == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is NULL\n");
+  if (recipient_atsign == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recipient_atsign is NULL\n");
     return ret;
   }
 
@@ -438,13 +435,13 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   /*
    * 2. Ensure atSigns start with `@` symbol
    */
-  if ((ret = atclient_stringutils_atsign_with_at(sharedby, &sharedby_atsign_with_at)) != 0) {
+  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &sharedby_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
     goto exit;
   }
   char *sharedby_atsign_without_at = sharedby_atsign_with_at + 1;
 
-  if ((ret = atclient_stringutils_atsign_with_at(sharedwith, &sharedwith_atsign_with_at)) != 0) {
+  if ((ret = atclient_stringutils_atsign_with_at(recipient_atsign, &sharedwith_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
     goto exit;
   }
