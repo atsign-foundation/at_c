@@ -129,15 +129,13 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
   }
 
   if (strcmp(sharedby_atsign_with_at, client_atsign_with_at) != 0) {
-    ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key);
-    if (ret != 0) {
+    if ((ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, valuesize, valuelen, shared_enc_key)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
-    ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, shared_enc_key,
-                                                         false);
-    if (ret != 0) {
+    if ((ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, valuesize, valuelen, shared_enc_key,
+                                                         false)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n", ret);
       goto exit;
     }
