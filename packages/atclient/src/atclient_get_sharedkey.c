@@ -367,7 +367,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
 
   char *response_without_data = response + 5;
 
-  root = cJSON_Parse(response);
+  root = cJSON_Parse(response_without_data);
   if (root == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
