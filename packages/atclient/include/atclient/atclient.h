@@ -1,5 +1,5 @@
-#ifndef ATCLIENT_H
-#define ATCLIENT_H
+#ifndef ATCLIENT_ATCLIENT_H
+#define ATCLIENT_ATCLIENT_H
 
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
