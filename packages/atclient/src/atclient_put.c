@@ -134,7 +134,7 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
     // create one for the other person -> encrypted with their public encryption key
     char *recipient_atsign = atkey->sharedwith;
 
-    if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign, sharedenckeybase64, true)) != 0) {
+    if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign, sharedenckey)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
@@ -152,12 +152,6 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
 
     if ((ret = atclient_atkey_metadata_set_ivnonce(&(atkey->metadata), ivbase64)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce: %d\n", ret);
-      goto exit;
-    }
-
-    if ((ret = atchops_base64_decode((unsigned char *)sharedenckeybase64, strlen(sharedenckeybase64), sharedenckey,
-                                     sizeof(sharedenckey), &sharedenckeylen)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
 

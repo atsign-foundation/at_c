@@ -204,22 +204,17 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
  * associated with your value.
  *
  * @param atclient The atclient context (must satisfy the two conditions stated above)
- * @param root_conn initialized root connection
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value The buffer to hold value gotten from atServer
  * @param valuesize The buffer length allocated for the value
  * @param valuelen The output length of the value gotten from atServer
- * @param shared_enc_key The correct shared encryption key (get_encryption_key_shared_by_me or
- * get_encryption_key_shared_by_other, depending on the case). If NULL is provided, the method will check
- * create_new_encryption_key_shared_by_me_if_not_found parameter.
- * @param create_new_encryption_key_shared_by_me_if_not_found If NULL is provided for the shared_enc_key parameter, the
- * function will attempt to retrieve it from the at_server. This parameter can be used to determine whether the key
- * should be created (if it hasn’t already been) or not.
+ * @param shared_encryption_key The correct shared encryption key (get_encryption_key_shared_by_me or
+ * get_encryption_key_shared_by_other, depending on the case). If NULL is provided, it will get it for you, if it
+ * exists.
  * @return int 0 on success
  */
 int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
-                           size_t *valuelen, char *shared_enc_key,
-                           const bool create_new_encryption_key_shared_by_me_if_not_found);
+                           size_t *valuelen, const unsigned char *shared_encryption_key);
 
 /**
  * @brief Delete an atkey from your atserver

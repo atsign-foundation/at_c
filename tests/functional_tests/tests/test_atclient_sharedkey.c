@@ -161,7 +161,7 @@ static int test_2_get_as_sharedby(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL, false)) != 0) {
+  if ((ret = atclient_get_sharedkey(atclient, &atkey, value, valuesize, &valuelen, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
@@ -217,7 +217,7 @@ static int test_3_get_as_sharedwith(atclient *atclient2) {
     goto exit;
   }
 
-  if ((ret = atclient_get_sharedkey(atclient2, &atkey, value, valuesize, &valuelen, NULL, false)) != 0) {
+  if ((ret = atclient_get_sharedkey(atclient2, &atkey, value, valuesize, &valuelen, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
