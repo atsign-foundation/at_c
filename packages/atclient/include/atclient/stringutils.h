@@ -61,6 +61,6 @@ int atclient_stringutils_atsign_without_at(const char *original_atsign, char **o
  * @param n the long to check the length of
  * @return int the string length
  */
-int long_strlen(long n);
+int atclient_stringutils_long_strlen(long n);
 
 #endif

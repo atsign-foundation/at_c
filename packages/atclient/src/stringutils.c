@@ -130,7 +130,7 @@ int atclient_stringutils_atsign_without_at(const char *original_atsign, char **o
 exit: { return ret; }
 }
 
-int long_strlen(long n) {
+int atclient_stringutils_long_strlen(long n) {
   // could use log10 for this, but it's probably slower...
   size_t len = 0;
 

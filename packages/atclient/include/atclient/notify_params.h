@@ -137,7 +137,7 @@ int atclient_notify_params_set_strategy(atclient_notify_params *params, const en
 int atclient_notify_params_set_latest_n(atclient_notify_params *params, const int latest_n);
 int atclient_notify_params_set_notifier(atclient_notify_params *params, const char *notifier);
 int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const unsigned long notification_expiry);
-int atclient_notify_params_set_shared_encryption_key(atclient_notify_params *params, const unsigned char *shared_encryption_key, const size_t shared_encryption_key_len);
+int atclient_notify_params_set_shared_encryption_key(atclient_notify_params *params, const unsigned char *shared_encryption_key);
 
 void atclient_notify_params_unset_id(atclient_notify_params *params);
 void atclient_notify_params_unset_atkey(atclient_notify_params *params);
