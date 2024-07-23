@@ -22,8 +22,53 @@ void atclient_atkey_init(atclient_atkey *atkey) {
   atclient_atkey_metadata_init(&(atkey->metadata));
 }
 
+int atclient_atkey_clone(atclient_atkey *dst, const atclient_atkey *src) {
+  int ret = 1;
+  if (dst == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "dst is NULL\n");
+    goto exit;
+  }
+  if (src == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "src is NULL\n");
+    goto exit;
+  }
+  if (atclient_atkey_is_key_initialized(src)) {
+    if ((ret = atclient_atkey_set_key(dst, src->key)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
+      goto exit;
+    }
+  }
+  if (atclient_atkey_is_sharedby_initialized(src)) {
+    if ((ret = atclient_atkey_set_sharedby(dst, src->sharedby)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+      goto exit;
+    }
+  }
+  if (atclient_atkey_is_sharedwith_initialized(src)) {
+    if ((ret = atclient_atkey_set_sharedwith(dst, src->sharedwith)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
+      goto exit;
+    }
+  }
+  if (atclient_atkey_is_namespacestr_initialized(src)) {
+    if ((ret = atclient_atkey_set_namespacestr(dst, src->namespacestr)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
+      goto exit;
+    }
+  }
+  if ((ret = atclient_atkey_metadata_clone(&(dst->metadata), &(src->metadata))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_clone failed\n");
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+exit: {
+  return ret;
+}
+}
+
 void atclient_atkey_free(atclient_atkey *atkey) {
-  atclient_atkey_metadata_free(&atkey->metadata);
+  atclient_atkey_metadata_free(&(atkey->metadata));
   memset(atkey, 0, sizeof(atclient_atkey));
 }
 

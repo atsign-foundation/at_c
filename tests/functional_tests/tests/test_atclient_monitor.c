@@ -176,7 +176,26 @@ static int send_notification(atclient *atclient) {
     goto exit;
   }
 
-  atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, ATKEY_VALUE, true);
+  if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE, strlen(ATKEY_VALUE))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set should_encrypt: %d\n", ret);
+    goto exit;
+  }
+
   params.notification_expiry = 1000;
 
   if ((ret = atclient_notify(atclient, &params, NULL)) != 0) {
@@ -206,7 +225,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
       continue;
     }
 
-    if (!atclient_atnotification_decryptedvalue_is_initialized(&(message.notification))) {
+    if (!atclient_atnotification_is_decryptedvalue_initialized(&(message.notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value is not initialized\n");
       tries++;
       continue;

@@ -15,6 +15,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#define TAG "atclient_notify"
+
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 static int generate_cmd(const atclient_notify_params *params, const char *cmdvalue, const size_t cmdvaluelen,
@@ -22,36 +24,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
 static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen,
                                  size_t *medatastrolen);
 
-#define TAG "atclient_notify"
-
-void atclient_notify_params_init(atclient_notify_params *params) {
-  memset(params, 0, sizeof(atclient_notify_params));
-  memset(params->id, 0, sizeof(char) * 37); // uuid v4 + '\0'
-  params->atkey = NULL;
-  params->value = NULL;
-  params->operation = ATCLIENT_NOTIFY_OPERATION_NONE;
-  params->message_type = ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY;
-  params->priority = ATCLIENT_NOTIFY_PRIORITY_LOW;
-  params->strategy = ATCLIENT_NOTIFY_STRATEGY_ALL;
-  params->latest_n = 1;
-  params->notifier = ATCLIENT_DEFAULT_NOTIFIER;
-  params->notification_expiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-  params->shouldencrypt = true;
-  params->sharedenckeybase64 = NULL;
-}
-
-void atclient_notify_params_create(atclient_notify_params *params, enum atclient_notify_operation operation,
-                                   atclient_atkey *atkey, const char *value, bool shouldencrypt) {
-  params->operation = operation;
-  params->atkey = atkey;
-  params->value = (char *)value;
-  params->shouldencrypt = shouldencrypt;
-}
-
-void atclient_notify_params_free(atclient_notify_params *params) { memset(params, 0, sizeof(atclient_notify_params)); }
-
-int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id) {
-
+int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notification_id) {
   int ret = 1;
 
   if (ctx->async_read) {
@@ -70,7 +43,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
   size_t cmdsize = 0;
 
   // Step 1 encrypt the value if needed
-  if (params->value != NULL && params->shouldencrypt) {
+  if (params->value != NULL && params->should_encrypt) {
     const size_t ciphertextsize =
         (size_t)(((strlen(params->value) * 2) + 15) / 16) * 16; // round up to the next multiple of 16
     unsigned char ciphertext[ciphertextsize];
@@ -92,20 +65,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     memset(sharedenckey, 0, sizeof(unsigned char) * sharedenckeysize);
     size_t sharedenckeylen;
 
-    if (params->sharedenckeybase64 != NULL) {
-      ret = atchops_base64_decode((unsigned char *)params->sharedenckeybase64, strlen(params->sharedenckeybase64),
-                                  sharedenckey, sharedenckeysize, &sharedenckeylen);
-      if (ret != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed with code %d\n", ret);
-        return ret;
-      }
-      if (sharedenckeylen != sharedenckeysize) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedenckeybase64 decode failed. Expected %lu but got %lu\n",
-                     sharedenckeysize, sharedenckeylen);
-        ret = 1;
-        return ret;
-      }
-    } else {
+    if (params->shared_encryption_key == NULL) {
       char *recipient_atsign_with_at = NULL;
       if ((ret = atclient_stringutils_atsign_with_at(params->atkey->sharedwith, &recipient_atsign_with_at)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed with code %d\n",
@@ -165,7 +125,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
     memcpy(cmdvalue, ciphertextbase64, ciphertextbase64len);
     cmdvalue[ciphertextbase64len] = '\0';
     cmdvaluelen = ciphertextbase64len;
-  } else if (params->value != NULL && !params->shouldencrypt) {
+  } else if (params->value != NULL && !params->should_encrypt) {
     cmdvaluelen = strlen(params->value);
     cmdvalue = malloc(sizeof(char) * (cmdvaluelen + 1));
     memcpy(cmdvalue, params->value, cmdvaluelen);
@@ -206,8 +166,13 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification id too long\n");
         return 1;
       }
-      strncpy(notification_id, data, datalen);
-      notification_id[datalen] = '\0';
+      *notification_id = malloc(sizeof(char) * (datalen + 1));
+      if (*notification_id == NULL) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+        return 1;
+      }
+      memcpy(*notification_id, data, datalen);
+      (*notification_id)[datalen] = '\0';
     }
     ret = 0;
   } else {
@@ -233,49 +198,53 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
 
   cmdsize += strlen("notify");
 
-  if (strlen(params->id) > 0) {
+  if (atclient_notify_params_is_id_initialized(params) && strlen(params->id) > 0) {
     cmdsize += strlen(":id:") + strlen(params->id); // ":id:" + 36 char uuid
   }
 
-  if (params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
+  if (atclient_notify_params_is_operation_initialized(params) && params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
     cmdsize += strlen(":") + strlen(atclient_notify_operation_str[params->operation]); // ":update" | ":delete"
   }
 
-  if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
+  if (atclient_notify_params_is_message_type_initialized(params) &&
+      params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
     cmdsize += strlen(":messageType:") +
                strlen(atclient_notify_message_type_str[params->message_type]); // ":messageType" + ":text" | ":key"
   }
 
-  if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
+  if (atclient_notify_params_is_priority_initialized(params) && params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
     cmdsize += strlen(":priority:") +
                strlen(atclient_notify_priority_str[params->priority]); // ":priority" + ":low" | ":medium" | ":high"
   }
 
-  if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
+  if (atclient_notify_params_is_strategy_initialized(params) && params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
     cmdsize += strlen(":strategy:") +
                strlen(atclient_notify_strategy_str[params->strategy]); // ":strategy" + ":all" | ":latest"
   }
 
-  if (params->notification_expiry > 0) {
+  if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
     cmdsize += strlen(":ttln:") + long_strlen(params->notification_expiry); // :$ttln
   }
 
-  const size_t metadatastrlen = atclient_atkey_metadata_protocol_strlen(&params->atkey->metadata);
-  cmdsize += strlen(":") + metadatastrlen; // :$metadata
+  if (atclient_notify_params_is_atkey_initialized(params)) {
 
-  const size_t atkeylen = atclient_atkey_strlen(params->atkey);
-  cmdsize += strlen(":") + atkeylen; // :$atkey
+    const size_t metadatastrlen = atclient_atkey_metadata_protocol_strlen(&params->atkey->metadata);
+    cmdsize += strlen(":") + metadatastrlen; // :$metadata
 
-  if (cmdvaluelen > 0) {
-    cmdsize += strlen(":") + cmdvaluelen; // :$value
+    const size_t atkeylen = atclient_atkey_strlen(params->atkey);
+    cmdsize += strlen(":") + atkeylen; // :$atkey
+
+    if (cmdvaluelen > 0) {
+      cmdsize += strlen(":") + cmdvaluelen; // :$value
+    }
+    *atkeyolen = atkeylen;
+    *medatastrolen = metadatastrlen;
   }
 
   cmdsize += strlen("\r\n");
 
   cmdsize += 1; // null terminator
 
-  *atkeyolen = atkeylen;
-  *medatastrolen = metadatastrlen;
 
   return cmdsize;
 }
@@ -317,32 +286,32 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   snprintf(cmd + off, cmdsize - off, "notify");
   off += strlen("notify");
 
-  if (strlen(params->id) > 0) {
+  if (atclient_notify_params_is_id_initialized(params) && strlen(params->id) > 0) {
     snprintf(cmd + off, cmdsize - off, ":id:%s", params->id);
     off += strlen(":id:") + strlen(params->id);
   }
 
-  if (params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
+  if (atclient_notify_params_is_operation_initialized(params) && params->operation != ATCLIENT_NOTIFY_OPERATION_NONE) {
     snprintf(cmd + off, cmdsize - off, ":%s", atclient_notify_operation_str[params->operation]);
     off += strlen(":") + strlen(atclient_notify_operation_str[params->operation]);
   }
 
-  if (params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
+  if (atclient_notify_params_is_message_type_initialized(params) && params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
     snprintf(cmd + off, cmdsize - off, ":messageType:%s", atclient_notify_message_type_str[params->message_type]);
     off += strlen(":messageType:") + strlen(atclient_notify_message_type_str[params->message_type]);
   }
 
-  if (params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
+  if (atclient_notify_params_is_priority_initialized(params) && params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
     snprintf(cmd + off, cmdsize - off, ":priority:%s", atclient_notify_priority_str[params->priority]);
     off += strlen(":priority:") + strlen(atclient_notify_priority_str[params->priority]);
   }
 
-  if (params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
+  if (atclient_notify_params_is_strategy_initialized(params) && params->strategy != ATCLIENT_NOTIFY_STRATEGY_NONE) {
     snprintf(cmd + off, cmdsize - off, ":strategy:%s", atclient_notify_strategy_str[params->strategy]);
     off += strlen(":strategy:") + strlen(atclient_notify_strategy_str[params->strategy]);
   }
 
-  if (params->notification_expiry > 0) {
+  if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
     snprintf(cmd + off, cmdsize - off, ":ttln:%lu", params->notification_expiry);
     off += strlen(":ttln:") + long_strlen(params->notification_expiry);
   }

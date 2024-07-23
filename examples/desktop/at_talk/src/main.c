@@ -258,7 +258,7 @@ static void *monitor_handler(void *xargs) {
         // We received a stats notification. Ignore it.
         break;
       }
-      if (atclient_atnotification_decryptedvalue_is_initialized(&(message.notification))) {
+      if (atclient_atnotification_is_decryptedvalue_initialized(&(message.notification))) {
         const atclient_atnotification *notification = &(message.notification);
         printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
         printf("%s%s%s: ", HBLU, from_atsign, reset);

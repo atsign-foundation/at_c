@@ -1,9 +1,9 @@
 #ifndef ATCLIENT_ATNOTIFICATION_H
 #define ATCLIENT_ATNOTIFICATION_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #define VALUE_INITIALIZED 0b00000001
 
@@ -60,11 +60,11 @@ typedef struct atclient_atnotification {
 
   // _initalizedfields[1]
   bool isEncrypted : 1;
-  char *encKeyName;              // in metaData
-  char *encAlgo;                 // in metaData
-  char *ivNonce;                 // in metaData
-  char *skeEncKeyName;           // in metaData
-  char *skeEncAlgo;              // in metaData
+  char *encKeyName;     // in metaData
+  char *encAlgo;        // in metaData
+  char *ivNonce;        // in metaData
+  char *skeEncKeyName;  // in metaData
+  char *skeEncAlgo;     // in metaData
   char *decryptedvalue; // if isEncrypted, this will be the decrypted value
 
   uint8_t _initializedfields[2];
@@ -92,21 +92,21 @@ void atclient_atnotification_init(atclient_atnotification *notification);
 void atclient_atnotification_free(atclient_atnotification *notification);
 
 // Check if a field is initialized
-bool atclient_atnotification_id_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_from_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_to_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_key_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_value_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_operation_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_epochMillis_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_messageType_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_isEncrypted_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_encKeyName_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_encAlgo_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_ivNonce_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_skeEncKeyName_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_skeEncAlgo_is_initialized(const atclient_atnotification *notification);
-bool atclient_atnotification_decryptedvalue_is_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_id_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_from_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_to_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_key_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_value_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_operation_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_epochmillis_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_messagetype_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_isencrypted_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_enckeyname_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_encalgo_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_ivnonce_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_skeenckeyname_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_skeencalgo_initialized(const atclient_atnotification *notification);
+bool atclient_atnotification_is_decryptedvalue_initialized(const atclient_atnotification *notification);
 
 // Set a field as initialized or not
 void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized);
@@ -115,15 +115,17 @@ void atclient_atnotification_to_set_initialized(atclient_atnotification *notific
 void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized);
 void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, const bool initialized);
 void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_epochMillis_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_messageType_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_isEncrypted_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_encKeyName_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_encAlgo_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_ivNonce_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_skeEncKeyName_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_decryptedvalue_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_epochmillis_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_messagetype_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_isencrypted_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_enckeyname_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_encalgo_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_ivnonce_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_skeenckeyname_set_initialized(atclient_atnotification *notification,
+                                                           const bool initialized);
+void atclient_atnotification_skeencalgo_set_initialized(atclient_atnotification *notification, const bool initialized);
+void atclient_atnotification_decryptedvalue_set_initialized(atclient_atnotification *notification,
+                                                            const bool initialized);
 
 // Free a field, some fields are dynamically allocated when set
 void atclient_atnotification_unset_id(atclient_atnotification *notification);
@@ -132,14 +134,14 @@ void atclient_atnotification_unset_to(atclient_atnotification *notification);
 void atclient_atnotification_unset_key(atclient_atnotification *notification);
 void atclient_atnotification_unset_value(atclient_atnotification *notification);
 void atclient_atnotification_unset_operation(atclient_atnotification *notification);
-void atclient_atnotification_unset_epochMillis(atclient_atnotification *notification);
-void atclient_atnotification_unset_messageType(atclient_atnotification *notification);
-void atclient_atnotification_unset_isEncrypted(atclient_atnotification *notification);
-void atclient_atnotification_unset_encKeyName(atclient_atnotification *notification);
-void atclient_atnotification_unset_encAlgo(atclient_atnotification *notification);
-void atclient_atnotification_unset_ivNonce(atclient_atnotification *notification);
-void atclient_atnotification_unset_skeEncKeyName(atclient_atnotification *notification);
-void atclient_atnotification_unset_skeEncAlgo(atclient_atnotification *notification);
+void atclient_atnotification_unset_epochmillis(atclient_atnotification *notification);
+void atclient_atnotification_unset_messagetype(atclient_atnotification *notification);
+void atclient_atnotification_unset_isencrypted(atclient_atnotification *notification);
+void atclient_atnotification_unset_enckeyname(atclient_atnotification *notification);
+void atclient_atnotification_unset_encalgo(atclient_atnotification *notification);
+void atclient_atnotification_unset_ivnonce(atclient_atnotification *notification);
+void atclient_atnotification_unset_skeenckeyname(atclient_atnotification *notification);
+void atclient_atnotification_unset_skeencalgo(atclient_atnotification *notification);
 void atclient_atnotification_unset_decryptedvalue(atclient_atnotification *notification);
 
 // Setters for the fields, these functions check if the field is initialized before setting the value (and overwrites if
@@ -150,22 +152,22 @@ int atclient_atnotification_set_to(atclient_atnotification *notification, const 
 int atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen);
 int atclient_atnotification_set_value(atclient_atnotification *notification, const char *value, const size_t valuelen);
 int atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
-                                           const size_t operationlen);
-int atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis);
-int atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
-                                             const size_t messageTypelen);
-int atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted);
-int atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
-                                            const size_t encKeyNamelen);
-int atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
-                                         const size_t encAlgolen);
-int atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
-                                         const size_t ivNoncelen);
-int atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
-                                               const size_t skeEncKeyNamelen);
-int atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
-                                            const size_t skeEncAlgolen);
-                                            int atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification, const char *decryptedvalue,
-                                            const size_t decryptedvaluelen);
+                                          const size_t operationlen);
+int atclient_atnotification_set_epochmillis(atclient_atnotification *notification, const size_t epochMillis);
+int atclient_atnotification_set_messagetype(atclient_atnotification *notification, const char *messageType,
+                                            const size_t messageTypelen);
+int atclient_atnotification_set_isencrypted(atclient_atnotification *notification, const bool isEncrypted);
+int atclient_atnotification_set_enckeyname(atclient_atnotification *notification, const char *encKeyName,
+                                           const size_t encKeyNamelen);
+int atclient_atnotification_set_encalgo(atclient_atnotification *notification, const char *encAlgo,
+                                        const size_t encAlgolen);
+int atclient_atnotification_set_ivnonce(atclient_atnotification *notification, const char *ivNonce,
+                                        const size_t ivNoncelen);
+int atclient_atnotification_set_skeenckeyname(atclient_atnotification *notification, const char *skeEncKeyName,
+                                              const size_t skeEncKeyNamelen);
+int atclient_atnotification_set_skeencalgo(atclient_atnotification *notification, const char *skeEncAlgo,
+                                           const size_t skeEncAlgolen);
+int atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification, const char *decryptedvalue,
+                                               const size_t decryptedvaluelen);
 
 #endif // ATCLIENT_ATNOTIFICATION_H

@@ -262,6 +262,18 @@ typedef struct atclient_atkey_metadata {
 void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata);
 
 /**
+ * @brief Will clone the metadata struct from src to dst. New memory will be allocated for the strings in the dst
+ * struct.
+ *
+ * @param dst the destination metadata struct to clone to, this struct should be initialized using
+ * atclient_atkey_metadata_init
+ * @param src the source metadata struct to clone from, this struct should be initialized using
+ * atclient_atkey_metadata_init
+ * @return int 0 on success
+ */
+int atclient_atkey_metadata_clone(atclient_atkey_metadata *dst, const atclient_atkey_metadata *src);
+
+/**
  * @brief Populates the metadata struct from a string. This function is good for debugging.
  *
  * @param metadata the metadata struct to populate

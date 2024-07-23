@@ -44,6 +44,15 @@ typedef struct atclient_atkey {
 void atclient_atkey_init(atclient_atkey *atkey);
 
 /**
+ * @brief Clones an atkey struct. The function will allocate new memory on everything
+ * 
+ * @param dst the atkey struct to clone to, assumed to be already initialized via atclient_atkey_init
+ * @param src the atkey struct to clone from, assumed to be already initialized via atclient_atkey_init
+ * @return int 0 on success
+ */
+int atclient_atkey_clone(atclient_atkey *dst, const atclient_atkey *src);
+
+/**
  * @brief free an atkey struct. This function should be called at the end of an atkey's life
  *
  * @param atkey the atkey struct to free

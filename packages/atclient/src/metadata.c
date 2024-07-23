@@ -129,6 +129,195 @@ void atclient_atkey_metadata_init(atclient_atkey_metadata *metadata) {
   memset(metadata, 0, sizeof(atclient_atkey_metadata));
 }
 
+int atclient_atkey_metadata_clone(atclient_atkey_metadata *dst, const atclient_atkey_metadata *src) {
+  int ret = 1;
+
+  if (dst == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "dst is NULL\n");
+    goto exit;
+  }
+
+  if (src == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "src is NULL\n");
+    goto exit;
+  }
+
+  if (atclient_atkey_metadata_is_createdby_initialized(src)) {
+    if ((ret = set_createdby(dst, src->createdby)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_createdby: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_updatedby_initialized(src)) {
+    if((ret = set_updatedby(dst, src->updatedby)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updatedby: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_status_initialized(src)) {
+    if((ret = set_status(dst, src->status)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_status: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_version_initialized(src)) {
+    set_version(dst, src->version);
+  }
+
+  if(atclient_atkey_metadata_is_expiresat_initialized(src)) {
+    if((ret = set_expiresat(dst, src->expiresat)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_expiresat: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_availableat_initialized(src)) {
+    if((ret = set_availableat(dst, src->availableat)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_availableat: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_refreshat_initialized(src)) {
+    if((ret = set_refreshat(dst, src->refreshat)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_refreshat: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_createdat_initialized(src)) {
+    if((ret = set_createdat(dst, src->createdat)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_createdat: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_updatedat_initialized(src)) {
+    if((ret = set_updatedat(dst, src->updatedat)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updatedat: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_ispublic_initialized(src)) {
+    set_ispublic(dst, src->ispublic);
+  }
+
+  if(atclient_atkey_metadata_is_iscached_initialized(src)) {
+    set_iscached(dst, src->iscached);
+  }
+
+  if(atclient_atkey_metadata_is_ttl_initialized(src)) {
+    set_ttl(dst, src->ttl);
+  }
+
+  if(atclient_atkey_metadata_is_ttb_initialized(src)) {
+    set_ttb(dst, src->ttb);
+  }
+
+  if(atclient_atkey_metadata_is_ttr_initialized(src)) {
+    set_ttr(dst, src->ttr);
+  }
+
+  if(atclient_atkey_metadata_is_ccd_initialized(src)) {
+    set_ccd(dst, src->ccd);
+  }
+
+  if(atclient_atkey_metadata_is_isbinary_initialized(src)) {
+    set_isbinary(dst, src->isbinary);
+  }
+
+  if(atclient_atkey_metadata_is_isencrypted_initialized(src)) {
+    set_isencrypted(dst, src->isencrypted);
+  }
+
+  if(atclient_atkey_metadata_is_datasignature_initialized(src)) {
+    if((ret = set_datasignature(dst, src->datasignature)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_datasignature: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_sharedkeystatus_initialized(src)) {
+    if((ret = set_sharedkeystatus(dst, src->sharedkeystatus)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeystatus: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_sharedkeyenc_initialized(src)) {
+    if((ret = set_sharedkeyenc(dst, src->sharedkeyenc)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_sharedkeyenc: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_pubkeyhash_initialized(src)) {
+    if((ret = set_pubkeyhash(dst, src->pubkeyhash)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyhash: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_pubkeyalgo_initialized(src)) {
+    if((ret = set_pubkeyalgo(dst, src->pubkeyalgo)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyalgo: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_encoding_initialized(src)) {
+    if((ret = set_encoding(dst, src->encoding)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encoding: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_enckeyname_initialized(src)) {
+    if((ret = set_enckeyname(dst, src->enckeyname)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_enckeyname: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_encalgo_initialized(src)) {
+    if((ret = set_encalgo(dst, src->encalgo)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encalgo: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_ivnonce_initialized(src)) {
+    if((ret = set_ivnonce(dst, src->ivnonce)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_ivnonce: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_skeenckeyname_initialized(src)) {
+    if((ret = set_skeenckeyname(dst, src->skeenckeyname)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeenckeyname: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  if(atclient_atkey_metadata_is_skeencalgo_initialized(src)) {
+    if((ret = set_skeencalgo(dst, src->skeencalgo)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_skeencalgo: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  return ret;
+}
+}
+
 int atclient_atkey_metadata_from_jsonstr(atclient_atkey_metadata *metadata, const char *metadatastr) {
   int ret = 1;
 
