@@ -118,10 +118,6 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
                atkeystr);
 
-  notify_params.atkey = &atkey;
-  notify_params.value = ATKEY_VALUE;
-  notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
-
   if((ret = atclient_notify_params_set_atkey(&notify_params, &atkey)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey\n");
     goto exit;
