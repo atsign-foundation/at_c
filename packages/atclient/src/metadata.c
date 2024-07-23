@@ -913,7 +913,7 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
   /*
    * 1. Validate arguments
    */
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
 
@@ -993,21 +993,45 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
 }
 
 size_t atclient_atkey_metadata_ttl_strlen(const atclient_atkey_metadata *metadata) {
+  if (metadata == NULL) {
+    return 0;
+  }
+  if (!atclient_atkey_metadata_is_ttl_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":ttl:") // :ttl:
          + long_strlen(metadata->ttl);
 }
 
 size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_ttb_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":ttb:") // :ttb:
          + long_strlen(metadata->ttb);
 }
 
 size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_ttr_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":ttr:") // :ttr:
          + long_strlen(metadata->ttr);
 }
 
 size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_ccd_initialized(metadata)) {
+    return 0;
+  }
   if (metadata->ccd) {
     return strlen(":ccd:true"); // :ccd:true
   } else {
@@ -1017,6 +1041,12 @@ size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadat
 }
 
 size_t atclient_atkey_metadata_is_binary_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_is_binary_initialized(metadata)) {
+    return 0;
+  }
   if (metadata->is_binary) {
     return strlen(":isBinary:true");
   } else {
@@ -1025,6 +1055,12 @@ size_t atclient_atkey_metadata_is_binary_strlen(const atclient_atkey_metadata *m
 }
 
 size_t atclient_atkey_metadata_is_encrypted_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_is_encrypted_initialized(metadata)) {
+    return 0;
+  }
   if (metadata->is_encrypted) {
     return strlen(":isEncrypted:true");
   } else {
@@ -1033,47 +1069,112 @@ size_t atclient_atkey_metadata_is_encrypted_strlen(const atclient_atkey_metadata
 }
 
 size_t atclient_atkey_metadata_data_signature_strlen(const atclient_atkey_metadata *metadata) {
-  // :dataSignature:<signature>
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_data_signature_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":dataSignature:") + strlen(metadata->data_signature);
 }
 
 size_t atclient_atkey_metadata_shared_key_status_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_shared_key_status_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":sharedKeyStatus:") + strlen(metadata->shared_key_status);
 }
 
 size_t atclient_atkey_metadata_shared_key_enc_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_shared_key_enc_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":sharedKeyEnc:") + strlen(metadata->shared_key_enc);
 }
 
 size_t atclient_atkey_metadata_pub_key_hash_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_pub_key_hash_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":hash:") + strlen(metadata->pub_key_hash);
 }
 
 size_t atclient_atkey_metadata_pub_key_algo_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_pub_key_algo_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":algo:") + strlen(metadata->pub_key_algo);
 }
 
 size_t atclient_atkey_metadata_encoding_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_encoding_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":encoding:") + strlen(metadata->encoding);
 }
 
 size_t atclient_atkey_metadata_enc_key_name_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_enc_key_name_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":encKeyName:") + strlen(metadata->enc_key_name);
 }
 
 size_t atclient_atkey_metadata_enc_algo_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_enc_algo_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":encAlgo:") + strlen(metadata->enc_algo);
 }
 
 size_t atclient_atkey_metadata_iv_nonce_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_iv_nonce_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":ivNonce:") + strlen(metadata->iv_nonce);
 }
 
 size_t atclient_atkey_metadata_ske_enc_key_name_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_ske_enc_key_name_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":skeEncKeyName:") + strlen(metadata->ske_enc_key_name);
 }
 
 size_t atclient_atkey_metadata_ske_enc_algo_strlen(const atclient_atkey_metadata *metadata) {
+  if(metadata == NULL) {
+    return 0;
+  }
+  if(!atclient_atkey_metadata_is_ske_enc_algo_initialized(metadata)) {
+    return 0;
+  }
   return strlen(":skeEncAlgo:") + strlen(metadata->ske_enc_algo);
 }
 
