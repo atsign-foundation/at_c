@@ -122,6 +122,21 @@ int main(int argc, char *argv[]) {
   notify_params.value = ATKEY_VALUE;
   notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
 
+  if((ret = atclient_notify_params_set_atkey(&notify_params, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey\n");
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_value(&notify_params, ATKEY_VALUE, strlen(ATKEY_VALUE))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value\n");
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_operation(&notify_params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation\n");
+    goto exit;
+  }
+
   if ((ret = atclient_notify(&atclient, &notify_params, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify\n");
     goto exit;
