@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_atkey: %d\n", ret);
     }
 
-    if((ret = atclient_notify_params_set_value(&params, line, strlen(line))) != 0) {
+    if((ret = atclient_notify_params_set_value(&params, line)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_value: %d\n", ret);
     }
 
