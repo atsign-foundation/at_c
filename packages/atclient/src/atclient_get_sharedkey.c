@@ -85,8 +85,9 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   char *client_atsign_with_at = NULL;
   char *recipient_atsign_with_at = NULL;
 
-  unsigned char shared_encryption_key_to_use[ATCHOPS_AES_256 / 8];
-  memset(shared_encryption_key_to_use, 0, sizeof(unsigned char) * ATCHOPS_AES_256 / 8);
+  const size_t shared_encryption_key_to_use_size = ATCHOPS_AES_256 / 8;
+  unsigned char shared_encryption_key_to_use[shared_encryption_key_to_use_size];
+  memset(shared_encryption_key_to_use, 0, sizeof(unsigned char) * shared_encryption_key_to_use_size);
 
   char *atkey_str = NULL;
   char *llookup_cmd = NULL;
@@ -98,8 +99,8 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   const size_t iv_size = ATCHOPS_IV_BUFFER_SIZE;
   unsigned char iv[iv_size];
 
-  char *value_raw_encrypted = NULL;
-  char *value_raw = NULL;
+  unsigned char *value_raw_encrypted = NULL;
+  unsigned char *value_raw = NULL;
 
   cJSON *root = NULL;
 
@@ -170,8 +171,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
 
   char *response_without_data = response + 5;
 
-  root = cJSON_Parse(response_without_data);
-  if (root == NULL) {
+  if ((root = cJSON_Parse(response_without_data)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
@@ -184,7 +184,11 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
     goto exit;
   }
 
-  metadata_str = cJSON_Print(metadata);
+  if((metadata_str = cJSON_Print(metadata)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Print: %d\n", ret);
+    goto exit;
+  }
 
   if ((ret = atclient_atkey_metadata_from_json_str(&(atkey->metadata), metadata_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str: %d\n", ret);
@@ -203,12 +207,12 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
    */
   if (atclient_atkey_metadata_is_iv_nonce_initialized(&atkey->metadata)) {
     if ((ret = atchops_base64_decode((unsigned char *)atkey->metadata.iv_nonce, strlen(atkey->metadata.iv_nonce), iv,
-                                     ATCHOPS_IV_BUFFER_SIZE, NULL)) != 0) {
+                                     iv_size, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
   } else {
-    memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+    memset(iv, 0, sizeof(unsigned char) * iv_size);
   }
 
   /*
@@ -218,32 +222,32 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   const size_t value_raw_encrypted_base64_len = strlen(data->valuestring);
 
   const size_t value_raw_encrypted_size = atchops_base64_decoded_size(value_raw_encrypted_base64_len);
-  if ((value_raw_encrypted = malloc(sizeof(char) * value_raw_encrypted_size)) == NULL) {
+  if ((value_raw_encrypted = malloc(sizeof(unsigned char) * value_raw_encrypted_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value_raw_encrypted\n");
     goto exit;
   }
-
-  memset(value_raw_encrypted, 0, sizeof(char) * value_raw_encrypted_size);
+  memset(value_raw_encrypted, 0, sizeof(unsigned char) * value_raw_encrypted_size);
   size_t value_raw_encrypted_len = 0;
   if ((ret = atchops_base64_decode(value_raw_encrypted_base64, value_raw_encrypted_base64_len,
-                                   (unsigned char *)value_raw_encrypted, value_raw_encrypted_size,
+                                   value_raw_encrypted, value_raw_encrypted_size,
                                    &value_raw_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
 
   const size_t value_raw_size = atchops_aesctr_plaintext_size(value_raw_encrypted_len);
-  if ((value_raw = malloc(sizeof(char) * value_raw_size)) == NULL) {
+  if ((value_raw = malloc(sizeof(unsigned char) * value_raw_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value_raw\n");
     goto exit;
   }
-  memset(value_raw, 0, sizeof(char) * value_raw_size);
+  memset(value_raw, 0, sizeof(unsigned char) * value_raw_size);
   size_t value_raw_len = 0;
+
   if ((ret = atchops_aesctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv,
-                                    (unsigned char *)value_raw_encrypted, value_raw_encrypted_len,
-                                    (unsigned char *)value_raw, value_raw_size, &value_raw_len)) != 0) {
+                                    value_raw_encrypted, value_raw_encrypted_len,
+                                    value_raw, value_raw_size, &value_raw_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
     goto exit;
   }

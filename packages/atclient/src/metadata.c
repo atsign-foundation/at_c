@@ -664,7 +664,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     }
   }
 
-  cJSON *enc_key_name = cJSON_GetObjectItem(json, "enc_key_name");
+  cJSON *enc_key_name = cJSON_GetObjectItem(json, "encKeyName");
   if (enc_key_name != NULL) {
     if (enc_key_name->type != cJSON_NULL) {
       if ((ret = set_enc_key_name(metadata, enc_key_name->valuestring)) != 0) {
@@ -679,7 +679,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     }
   }
 
-  cJSON *enc_algo = cJSON_GetObjectItem(json, "enc_algo");
+  cJSON *enc_algo = cJSON_GetObjectItem(json, "encAlgo");
   if (enc_algo != NULL) {
     if (enc_algo->type != cJSON_NULL) {
       if ((ret = set_enc_algo(metadata, enc_algo->valuestring)) != 0) {
@@ -694,7 +694,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     }
   }
 
-  cJSON *iv_nonce = cJSON_GetObjectItem(json, "iv_nonce");
+  cJSON *iv_nonce = cJSON_GetObjectItem(json, "ivNonce");
   if (iv_nonce != NULL) {
     if (iv_nonce->type != cJSON_NULL) {
       if ((ret = set_iv_nonce(metadata, iv_nonce->valuestring)) != 0) {
@@ -709,7 +709,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     }
   }
 
-  cJSON *ske_enc_key_name = cJSON_GetObjectItem(json, "ske_enc_key_name");
+  cJSON *ske_enc_key_name = cJSON_GetObjectItem(json, "skeEncKeyName");
   if (ske_enc_key_name != NULL) {
     if (ske_enc_key_name->type != cJSON_NULL) {
       if ((ret = set_ske_enc_key_name(metadata, ske_enc_key_name->valuestring)) != 0) {
@@ -724,7 +724,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     }
   }
 
-  cJSON *ske_enc_algo = cJSON_GetObjectItem(json, "ske_enc_algo");
+  cJSON *ske_enc_algo = cJSON_GetObjectItem(json, "skeEncAlgo");
   if (ske_enc_algo != NULL) {
     if (ske_enc_algo->type != cJSON_NULL) {
       if ((ret = set_ske_enc_algo(metadata, ske_enc_algo->valuestring)) != 0) {
