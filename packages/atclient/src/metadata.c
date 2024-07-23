@@ -552,7 +552,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     if (ccd->type != cJSON_NULL) {
       set_ccd(metadata, ccd->valueint);
     } else {
-      set_ccd(metadata, 0);
+      set_ccd(metadata, false);
     }
   }
 
@@ -561,7 +561,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     if (is_binary->type != cJSON_NULL) {
       set_is_binary(metadata, is_binary->valueint);
     } else {
-      set_is_binary(metadata, 0);
+      set_is_binary(metadata, false);
     }
   }
 
@@ -570,7 +570,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     if (is_encrypted->type != cJSON_NULL) {
       set_is_encrypted(metadata, is_encrypted->valueint);
     } else {
-      set_is_encrypted(metadata, 0);
+      set_is_encrypted(metadata, false);
     }
   }
 

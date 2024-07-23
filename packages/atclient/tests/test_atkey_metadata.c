@@ -148,7 +148,7 @@ static int test_atkey_metadata_from_jsonstr() {
 
   if (!atclient_atkey_metadata_is_is_binary_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isbinary_initialized failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_is_binary_initialized failed\n");
     goto exit;
   }
 
@@ -160,7 +160,7 @@ static int test_atkey_metadata_from_jsonstr() {
 
   if (!atclient_atkey_metadata_is_is_encrypted_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isencrypted_initialized failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_is_encrypted_initialized failed\n");
     goto exit;
   }
 
