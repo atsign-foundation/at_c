@@ -102,7 +102,7 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for plaintextpadded\n");
     goto exit;
   }
-  memset(plaintextpadded, 0, plaintextpaddedsize);
+  memset(plaintextpadded, 0, sizeof(unsigned char) * plaintextpaddedsize);
   size_t plaintextpaddedlen = 0;
 
   /*
@@ -122,13 +122,18 @@ int atchops_aesctr_decrypt(const unsigned char *key, const enum atchops_aes_size
   // IBM PKCS Padding method states that there is always at least 1 padded value:
   // https://www.ibm.com/docs/en/zos/2.4.0?topic=rules-pkcs-padding-method the value of the padded byte is always the
   // number of padded bytes to expect, padval == num_padded_bytes
-  unsigned char padval = *(plaintextpadded + (plaintextpaddedlen - 1));
+  unsigned char padval = plaintextpadded[plaintextpaddedlen - 1];
+
+  if(padval < 1 || padval > 16) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid padval: %d\n", padval);
+    goto exit;
+  }
 
   *plaintextlen = plaintextpaddedlen - padval;
   memcpy(plaintext, plaintextpadded, *plaintextlen);
 
   goto exit;
-
 exit: {
   free(stream_block);
   free(plaintextpadded);
