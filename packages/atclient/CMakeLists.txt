@@ -16,6 +16,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atnotification.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
   ${CMAKE_CURRENT_LIST_DIR}/src/encryption_key_helpers.c

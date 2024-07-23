@@ -243,7 +243,7 @@ static void *monitor_handler(void *xargs) {
   int tries = 1;
 
   while (true) {
-    atclient_monitor_message message;
+    atclient_monitor_response message;
     atclient_monitor_message_init(&message);
 
     pthread_mutex_lock(&monitor_mutex);

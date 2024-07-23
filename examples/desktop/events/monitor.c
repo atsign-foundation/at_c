@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  atclient_monitor_message message;
+  atclient_monitor_response message;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");

@@ -193,7 +193,7 @@ exit: {
 static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2) {
   int ret = 1;
 
-  atclient_monitor_message message;
+  atclient_monitor_response message;
   atclient_monitor_message_init(&message);
 
   const int max_tries = 10;
@@ -212,14 +212,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
       continue;
     }
 
-    if (!atclient_atnotification_decryptedvaluelen_is_initialized(&(message.notification))) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value length is not initialized\n");
-      tries++;
-      continue;
-    }
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n",
-                 (int)message.notification.decryptedvaluelen, message.notification.decryptedvalue);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value: %s\n",message.notification.decryptedvalue);
 
     // compare the decrypted value with the expected value
     if (strcmp(message.notification.decryptedvalue, ATKEY_VALUE) != 0) {
