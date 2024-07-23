@@ -32,7 +32,7 @@
         \"version\":0,                              \
         \"ttl\":86400,                              \
         \"isBinary\":false,                         \
-        \"is_encrypted\":false                       \
+        \"isEncrypted\":false                       \
     }"
 
 static int test_atkey_metadata_from_jsonstr() {
