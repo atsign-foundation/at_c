@@ -565,7 +565,7 @@ int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, c
     }
   }
 
-  cJSON *is_encrypted = cJSON_GetObjectItem(json, "is_encrypted");
+  cJSON *is_encrypted = cJSON_GetObjectItem(json, "isEncrypted");
   if (is_encrypted != NULL) {
     if (is_encrypted->type != cJSON_NULL) {
       set_is_encrypted(metadata, is_encrypted->valueint);
