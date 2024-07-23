@@ -1,4 +1,5 @@
 #include "atclient/notify_params.h"
+#include "atchops/aes.h"
 #include "atclient/constants.h"
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
@@ -134,7 +135,8 @@ void atclient_notify_params_set_operation_initialized(atclient_notify_params *pa
   if (initialized) {
     params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_OPERATION_INDEX] |= ATCLIENT_NOTIFY_PARAMS_OPERATION_INITIALIZED;
   } else {
-    params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_OPERATION_INDEX] &= ~ATCLIENT_NOTIFY_PARAMS_OPERATION_INITIALIZED;
+    params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_OPERATION_INDEX] &=
+        ~ATCLIENT_NOTIFY_PARAMS_OPERATION_INITIALIZED;
   }
 }
 
@@ -345,23 +347,22 @@ int atclient_notify_params_set_notification_expiry(atclient_notify_params *param
 }
 
 int atclient_notify_params_set_shared_encryption_key(atclient_notify_params *params,
-                                                     const unsigned char *shared_encryption_key,
-                                                     const size_t shared_encryption_key_len) {
+                                                     const unsigned char *shared_encryption_key) {
   int ret = 1;
 
   if (atclient_notify_params_is_shared_encryption_key_initialized(params)) {
     atclient_notify_params_unset_shared_encryption_key(params);
   }
 
-  if ((params->shared_encryption_key = (unsigned char *)malloc(sizeof(unsigned char) * shared_encryption_key_len)) ==
+  const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
+
+  if ((params->shared_encryption_key = (unsigned char *)malloc(sizeof(unsigned char) * shared_encryption_key_size)) ==
       NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for shared_encryption_key\n");
     goto exit;
   }
-
-  memcpy(params->shared_encryption_key, shared_encryption_key, shared_encryption_key_len);
-  params->shared_encryption_key[shared_encryption_key_len] = '\0';
+  memcpy(params->shared_encryption_key, shared_encryption_key, shared_encryption_key_size);
 
   atclient_notify_params_set_shared_encryption_key_initialized(params, true);
 

@@ -223,7 +223,7 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
   }
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
-    cmdsize += strlen(":ttln:") + long_strlen(params->notification_expiry); // :$ttln
+    cmdsize += strlen(":ttln:") + atclient_stringutils_long_strlen(params->notification_expiry); // :$ttln
   }
 
   if (atclient_notify_params_is_atkey_initialized(params)) {
@@ -313,7 +313,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
     snprintf(cmd + off, cmdsize - off, ":ttln:%lu", params->notification_expiry);
-    off += strlen(":ttln:") + long_strlen(params->notification_expiry);
+    off += strlen(":ttln:") + atclient_stringutils_long_strlen(params->notification_expiry);
   }
 
   if ((res = atclient_atkey_metadata_to_protocol_str(&(params->atkey->metadata), &metadata_protocol_str)) != 0) {
