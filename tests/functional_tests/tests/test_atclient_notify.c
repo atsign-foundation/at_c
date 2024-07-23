@@ -174,7 +174,7 @@ static int test_1_notify(atclient *atclient, char *notification_id) {
     goto exit;
   }
 
-  if ((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE, strlen(ATKEY_VALUE))) != 0) {
+  if ((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
     goto exit;
   }
@@ -229,7 +229,7 @@ static int test_2_notify_long_text(atclient *atclient, char *notification_id) {
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_value(&params, VERY_LONG_TEXT, strlen(VERY_LONG_TEXT))) != 0) {
+  if((ret = atclient_notify_params_set_value(&params, VERY_LONG_TEXT)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
     goto exit;
   }

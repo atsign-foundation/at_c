@@ -206,8 +206,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         goto exit;
       }
     } else {
-      atclient_atnotification_set_decrypted_value(&(message->notification), (unsigned char *)message->notification.value,
-                                                 strlen(message->notification.value));
+      atclient_atnotification_set_decrypted_value(&(message->notification), (unsigned char *)message->notification.value);
     }
   } else if (strcmp(messagetype, "data") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
@@ -313,12 +312,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (id != NULL) {
     if (id->type != cJSON_NULL) {
       val = id->valuestring;
-      vallen = strlen(id->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_id(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_id(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification id\n");
       goto exit;
     }
@@ -328,12 +325,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (from != NULL) {
     if (from->type != cJSON_NULL) {
       val = from->valuestring;
-      vallen = strlen(from->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_from(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_from(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification from\n");
       goto exit;
     }
@@ -343,12 +338,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (to != NULL) {
     if (to->type != cJSON_NULL) {
       val = to->valuestring;
-      vallen = strlen(to->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_to(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_to(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification to\n");
       goto exit;
     }
@@ -358,12 +351,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (key != NULL) {
     if (key->type != cJSON_NULL) {
       val = key->valuestring;
-      vallen = strlen(key->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_key(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_key(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification key\n");
       goto exit;
     }
@@ -373,12 +364,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (value != NULL) {
     if (value->type != cJSON_NULL) {
       val = value->valuestring;
-      vallen = strlen(value->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_value(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_value(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification value\n");
       goto exit;
     }
@@ -388,12 +377,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (operation != NULL) {
     if (operation->type != cJSON_NULL) {
       val = operation->valuestring;
-      vallen = strlen(operation->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_operation(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_operation(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification operation\n");
       goto exit;
     }
@@ -411,12 +398,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (message_type != NULL) {
     if (message_type->type != cJSON_NULL) {
       val = message_type->valuestring;
-      vallen = strlen(message_type->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    if((ret = atclient_atnotification_set_message_type(notification, val, vallen)) != 0) {
+    if((ret = atclient_atnotification_set_message_type(notification, val)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification message_type\n");
       goto exit;
     }
@@ -437,12 +422,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
     if (enc_key_name != NULL) {
       if (enc_key_name->type != cJSON_NULL) {
         val = enc_key_name->valuestring;
-        vallen = strlen(enc_key_name->valuestring);
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      if((ret = atclient_atnotification_set_enc_key_name(notification, val, vallen)) != 0) {
+      if((ret = atclient_atnotification_set_enc_key_name(notification, val)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification enc_key_name\n");
         goto exit;
       }
@@ -453,12 +436,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
     if (enc_algo != NULL) {
       if (enc_algo->type != cJSON_NULL) {
         val = enc_algo->valuestring;
-        vallen = strlen(enc_algo->valuestring);
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      if((ret = atclient_atnotification_set_enc_algo(notification, val, vallen)) != 0) {
+      if((ret = atclient_atnotification_set_enc_algo(notification, val)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification enc_algo\n");
         goto exit;
       }
@@ -469,12 +450,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
     if (iv_nonce != NULL) {
       if (iv_nonce->type != cJSON_NULL) {
         val = iv_nonce->valuestring;
-        vallen = strlen(iv_nonce->valuestring);
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      if((ret = atclient_atnotification_set_iv_nonce(notification, val, vallen)) != 0) {
+      if((ret = atclient_atnotification_set_iv_nonce(notification, val)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification iv_nonce\n");
         goto exit;
       }
@@ -485,12 +464,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
     if (ske_enc_key_name != NULL) {
       if (ske_enc_key_name->type != cJSON_NULL) {
         val = ske_enc_key_name->valuestring;
-        vallen = strlen(ske_enc_key_name->valuestring);
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      if((ret = atclient_atnotification_set_ske_enc_key_name(notification, val, vallen)) != 0) {
+      if((ret = atclient_atnotification_set_ske_enc_key_name(notification, val)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ske_enc_key_name\n");
         goto exit;
       }
@@ -501,12 +478,10 @@ static int parse_notification(atclient_atnotification *notification, const char 
     if (ske_enc_algo != NULL) {
       if (ske_enc_algo->type != cJSON_NULL) {
         val = ske_enc_algo->valuestring;
-        vallen = strlen(ske_enc_algo->valuestring);
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      if((ret = atclient_atnotification_set_ske_enc_algo(notification, val, vallen)) != 0) {
+      if((ret = atclient_atnotification_set_ske_enc_algo(notification, val)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ske_enc_algo\n");
         goto exit;
       }
@@ -632,7 +607,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 5. set decrypted value
-  atclient_atnotification_set_decrypted_value(notification, decryptedvaluetemp, decryptedvaluetemplen);
+  atclient_atnotification_set_decrypted_value(notification, decryptedvaluetemp);
 
   ret = 0;
   goto exit;
