@@ -67,7 +67,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notifi
 
     if (params->shared_encryption_key == NULL) {
       char *recipient_atsign_with_at = NULL;
-      if ((ret = atclient_stringutils_atsign_with_at(params->atkey->sharedwith, &recipient_atsign_with_at)) != 0) {
+      if ((ret = atclient_stringutils_atsign_with_at(params->atkey->shared_with, &recipient_atsign_with_at)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed with code %d\n",
                      ret);
         return ret;
@@ -101,9 +101,9 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notifi
       return ret;
     }
 
-    ret = atclient_atkey_metadata_set_ivnonce(&(params->atkey->metadata), (char *)ivbase64);
+    ret = atclient_atkey_metadata_set_iv_nonce(&(params->atkey->metadata), (char *)ivbase64);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ivnonce failed with code %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iv_nonce failed with code %d\n", ret);
       return ret;
     }
 
@@ -193,7 +193,7 @@ exit: {
 static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen,
                                  size_t *medatastrolen) {
   // notify command will look something like this:
-  // "notify[:messageType:<type>][:priority:<priority>][:strategy:<strategy>][:ttln:<ttln>]<:atkey_metadata>:<atkey>[:<value>]\r\n"
+  // "notify[:message_type:<type>][:priority:<priority>][:strategy:<strategy>][:ttln:<ttln>]<:atkey_metadata>:<atkey>[:<value>]\r\n"
   size_t cmdsize = 0;
 
   cmdsize += strlen("notify");
@@ -208,8 +208,8 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
 
   if (atclient_notify_params_is_message_type_initialized(params) &&
       params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
-    cmdsize += strlen(":messageType:") +
-               strlen(atclient_notify_message_type_str[params->message_type]); // ":messageType" + ":text" | ":key"
+    cmdsize += strlen(":message_type:") +
+               strlen(atclient_notify_message_type_str[params->message_type]); // ":message_type" + ":text" | ":key"
   }
 
   if (atclient_notify_params_is_priority_initialized(params) && params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {
@@ -297,8 +297,8 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   if (atclient_notify_params_is_message_type_initialized(params) && params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
-    snprintf(cmd + off, cmdsize - off, ":messageType:%s", atclient_notify_message_type_str[params->message_type]);
-    off += strlen(":messageType:") + strlen(atclient_notify_message_type_str[params->message_type]);
+    snprintf(cmd + off, cmdsize - off, ":message_type:%s", atclient_notify_message_type_str[params->message_type]);
+    off += strlen(":message_type:") + strlen(atclient_notify_message_type_str[params->message_type]);
   }
 
   if (atclient_notify_params_is_priority_initialized(params) && params->priority != ATCLIENT_NOTIFY_PRIORITY_NONE) {

@@ -42,7 +42,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, atsign, ATKEY_NAME)) != 0) {
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, atsign, ATKEY_NAME)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create selfkey");
     goto exit;
   }

@@ -138,13 +138,13 @@ static int test1a_cached_publickey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_1A;
 
-  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
 
-  if((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+  if((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
 
@@ -153,8 +153,8 @@ static int test1a_cached_publickey_without_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@bob")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@bob")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
@@ -190,8 +190,8 @@ static int test1b_publickey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
 
-  if((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+  if((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
 
@@ -200,8 +200,8 @@ static int test1b_publickey_without_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@alice")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@alice")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
@@ -236,8 +236,8 @@ static int test1c_publickey_with_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_1C; // "public:name.wavi@jeremy"
 
-  if ((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+  if ((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
 
@@ -246,13 +246,13 @@ static int test1c_publickey_with_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@jeremy")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@jeremy")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_namespacestr(&(atkey), "wavi")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
+  if ((ret = atclient_atkey_set_namespace_str(&(atkey), "wavi")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespace_str failed\n");
     goto exit;
   }
 
@@ -288,13 +288,13 @@ static int test1d_cached_publickey_with_namespace() {
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
   const size_t expectedlen = strlen(expected);
 
-  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
 
-  if((ret = atclient_atkey_metadata_set_ispublic(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_ispublic failed\n");
+  if((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
 
@@ -303,13 +303,13 @@ static int test1d_cached_publickey_with_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_namespacestr(&(atkey), "wavi")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
+  if ((ret = atclient_atkey_set_namespace_str(&(atkey), "wavi")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespace_str failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@jeremy")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@jeremy")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
@@ -349,18 +349,18 @@ static int test2a_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@bob")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@bob")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_namespacestr(&atkey, "wavi")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
+  if ((ret = atclient_atkey_set_namespace_str(&atkey, "wavi")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespace_str failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedwith(&atkey, "@alice")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
+  if ((ret = atclient_atkey_set_shared_with(&atkey, "@alice")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_with failed\n");
     goto exit;
   }
 
@@ -395,13 +395,13 @@ static int test2b_cached_sharedkey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2B; // "cached:@bob:name@alice"
 
-  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedwith(&atkey, "@bob")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
+  if ((ret = atclient_atkey_set_shared_with(&atkey, "@bob")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_with failed\n");
     goto exit;
   }
 
@@ -410,8 +410,8 @@ static int test2b_cached_sharedkey_without_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@alice")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@alice")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
@@ -447,8 +447,8 @@ static int test2c_sharedkey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2C; // "@bob:name@alice"
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@alice")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@alice")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
@@ -457,8 +457,8 @@ static int test2c_sharedkey_without_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedwith(&atkey, "@bob")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
+  if ((ret = atclient_atkey_set_shared_with(&atkey, "@bob")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_with failed\n");
     goto exit;
   }
 
@@ -469,7 +469,7 @@ static int test2c_sharedkey_without_namespace() {
 
   if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is initialized when it isn't supposed to be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespace_str is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
@@ -499,13 +499,13 @@ static int test2d_cached_sharedkey_with_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2D; // "cached:@bob:name.wavi@alice"
 
-  if((ret = atclient_atkey_metadata_set_iscached(&(atkey.metadata), true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iscached failed\n");
+  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedwith(&atkey, "@bob")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedwith failed\n");
+  if ((ret = atclient_atkey_set_shared_with(&atkey, "@bob")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_with failed\n");
     goto exit;
   }
 
@@ -514,13 +514,13 @@ static int test2d_cached_sharedkey_with_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@alice")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@alice")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_namespacestr(&atkey, "wavi")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
+  if ((ret = atclient_atkey_set_namespace_str(&atkey, "wavi")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespace_str failed\n");
     goto exit;
   }
 
@@ -560,20 +560,20 @@ static int test3a_privatehiddenkey() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@alice123_4😘")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@alice123_4😘")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
+  if (atclient_atkey_is_shared_with_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is initialized when it isn't supposed to be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "shared_with is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
   if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is initialized when it isn't supposed to be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespace_str is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
@@ -614,8 +614,8 @@ static int test4a_selfkey_without_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@alice")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@alice")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
@@ -624,15 +624,15 @@ static int test4a_selfkey_without_namespace() {
     goto exit;
   }
 
-  if (atclient_atkey_is_sharedwith_initialized(&atkey)) {
+  if (atclient_atkey_is_shared_with_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedwith is initialized when it isn't supposed to be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "shared_with is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
   if (atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespacestr is initialized when it isn't supposed to be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespace_str is initialized when it isn't supposed to be\n");
     goto exit;
   }
 
@@ -669,13 +669,13 @@ static int test4b_selfkey_with_namespace() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_sharedby(&atkey, "@jeremy_0")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_sharedby failed\n");
+  if ((ret = atclient_atkey_set_shared_by(&atkey, "@jeremy_0")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_set_namespacestr(&atkey, "wavi")) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespacestr failed\n");
+  if ((ret = atclient_atkey_set_namespace_str(&atkey, "wavi")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_namespace_str failed\n");
     goto exit;
   }
 

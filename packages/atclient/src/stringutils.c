@@ -5,8 +5,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outsize,
-                                         size_t *outlen) {
+int atclient_stringutils_trim_whitespace(const char *string, const size_t string_len, char *out, const size_t out_size,
+                                         size_t *out_len) {
   int ret = 1;
 
   if (string == NULL) {
@@ -14,7 +14,7 @@ int atclient_stringutils_trim_whitespace(const char *string, const size_t string
     goto exit;
   }
 
-  if (stringlen == 0) {
+  if (string_len == 0) {
     ret = 1;
     goto exit;
   }
@@ -25,20 +25,20 @@ int atclient_stringutils_trim_whitespace(const char *string, const size_t string
     start++;
   }
 
-  const char *end = string + stringlen - 1;
+  const char *end = string + string_len - 1;
   while (end > start && (*end == ' ' || *end == '\t' || *end == '\n')) {
     end--;
   }
 
-  *outlen = end - start + 1;
+  *out_len = end - start + 1;
 
-  if (*outlen >= outsize) {
+  if (*out_len >= out_size) {
     ret = 1;
     goto exit;
   }
 
-  strncpy(out, start, *outlen);
-  out[*outlen] = '\0';
+  strncpy(out, start, *out_len);
+  out[*out_len] = '\0';
 
   ret = 0;
   goto exit;

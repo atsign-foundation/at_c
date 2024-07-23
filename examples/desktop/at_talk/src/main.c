@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
     atclient_atkey atkey;
     atclient_atkey_init(&atkey);
 
-    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, from_atsign, to_atsign, ATKEY_NAMESPACE)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+    if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_NAME, from_atsign, to_atsign, ATKEY_NAMESPACE)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_shared_key: %d\n", ret);
     }
 
     if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
@@ -275,9 +275,9 @@ static void *monitor_handler(void *xargs) {
         // We received a stats notification. Ignore it.
         break;
       }
-      if (atclient_atnotification_is_decryptedvalue_initialized(&(message.notification))) {
+      if (atclient_atnotification_is_decrypted_value_initialized(&(message.notification))) {
         const atclient_atnotification *notification = &(message.notification);
-        printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
+        printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decrypted_value);
         printf("%s%s%s: ", HBLU, from_atsign, reset);
         fflush(stdout);
       }

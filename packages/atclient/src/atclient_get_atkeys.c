@@ -31,9 +31,9 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
   /*
    * 2. Variables
    */
-  const size_t scancmdsize = strlen("scan") + (showhidden ? strlen(":showHidden:true") : 0) +
+  const size_t scan_cmd_buf_size = strlen("scan") + (showhidden ? strlen(":showHidden:true") : 0) +
                              (strlen(regex) > 0 ? (strlen(" ") + strlen(regex)) : 0) + strlen("\r\n") + 1;
-  char scancmd[scancmdsize];
+  char scan_cmd[scan_cmd_buf_size];
 
   unsigned char recv[recvbuffersize];
   size_t recvlen = 0;
@@ -43,13 +43,13 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
   /*
    * 3. Build scan command
    */
-  snprintf(scancmd, scancmdsize, "scan%s%s%s\r\n", showhidden ? ":showHidden:true" : "", strlen(regex) > 0 ? " " : "",
+  snprintf(scan_cmd, scan_cmd_buf_size, "scan%s%s%s\r\n", showhidden ? ":showHidden:true" : "", strlen(regex) > 0 ? " " : "",
            regex);
 
   /*
    * 4. Send scan command
    */
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)scancmd, scancmdsize - 1, recv,
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)scan_cmd, scan_cmd_buf_size - 1, recv,
                                       recvbuffersize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;

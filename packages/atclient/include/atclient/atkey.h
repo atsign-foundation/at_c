@@ -7,30 +7,30 @@
 
 #define VALUE_INITIALIZED 0b00000001
 
-#define ATKEY_KEY_INDEX 0
-#define ATKEY_NAMESPACESTR_INDEX 0
-#define ATKEY_SHAREDBY_INDEX 0
-#define ATKEY_SHAREDWITH_INDEX 0
+#define ATCLIENT_ATKEY_KEY_INDEX 0
+#define ATCLIENT_ATKEY_NAMESPACE_STR_INDEX 0
+#define ATCLIENT_ATKEY_SHARED_BY_INDEX 0
+#define ATCLIENT_ATKEY_SHARED_WITH_INDEX 0
 
-#define ATKEY_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
-#define ATKEY_NAMESPACESTR_INITIALIZED (VALUE_INITIALIZED << 1)
-#define ATKEY_SHAREDBY_INITIALIZED (VALUE_INITIALIZED << 2)
-#define ATKEY_SHAREDWITH_INITIALIZED (VALUE_INITIALIZED << 3)
+#define ATCLIENT_ATKEY_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_ATKEY_NAMESPACE_STR_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_ATKEY_SHARED_BY_INITIALIZED (VALUE_INITIALIZED << 2)
+#define ATCLIENT_ATKEY_SHARED_WITH_INITIALIZED (VALUE_INITIALIZED << 3)
 
 typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_UNKNOWN = 0,
-  ATCLIENT_ATKEY_TYPE_PUBLICKEY,
-  ATCLIENT_ATKEY_TYPE_SELFKEY,
-  ATCLIENT_ATKEY_TYPE_SHAREDKEY,
+  ATCLIENT_ATKEY_TYPE_PUBLIC_KEY,
+  ATCLIENT_ATKEY_TYPE_SELF_KEY,
+  ATCLIENT_ATKEY_TYPE_SHARED_KEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
   char *key;
-  char *namespacestr;
-  char *sharedby;
-  char *sharedwith;
+  char *namespace_str;
+  char *shared_by;
+  char *shared_with;
 
-  uint8_t _initializedfields[1]; // internal field to track which fields are allocated
+  uint8_t _initialized_fields[1]; // internal field to track which fields are allocated
 
   atclient_atkey_metadata metadata;
 
@@ -102,34 +102,34 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr);
 bool atclient_atkey_is_key_initialized(const atclient_atkey *atkey);
 
 /**
- * @brief Returns true if atkey->namespacestr is initialized and allocated, and the value is safe for reading
+ * @brief Returns true if atkey->namespace_str is initialized and allocated, and the value is safe for reading
  *
  * @param atkey the atkey struct to read
- * @return true, if the namespacestr is initialized and allocated and is safe for reading
- * @return false, if the namespacestr is not initialized and not allocated and is not safe for reading, high chance that
+ * @return true, if the namespace_str is initialized and allocated and is safe for reading
+ * @return false, if the namespace_str is not initialized and not allocated and is not safe for reading, high chance that
  * it holds garbage
  */
 bool atclient_atkey_is_namespacestr_initialized(const atclient_atkey *atkey);
 
 /**
- * @brief Returns true if atkey->sharedby is initialized and allocated, and the value is safe for reading
+ * @brief Returns true if atkey->shared_by is initialized and allocated, and the value is safe for reading
  *
  * @param atkey the atkey struct to read
- * @return true, if the sharedby is initialized and allocated and is safe for reading
- * @return false, if the sharedby is not initialized and not allocated and is not safe for reading, high chance that it
+ * @return true, if the shared_by is initialized and allocated and is safe for reading
+ * @return false, if the shared_by is not initialized and not allocated and is not safe for reading, high chance that it
  * holds garbage
  */
-bool atclient_atkey_is_sharedby_initialized(const atclient_atkey *atkey);
+bool atclient_atkey_is_shared_by_initialized(const atclient_atkey *atkey);
 
 /**
- * @brief Returns true if atkey->sharedwith is initialized and allocated, and the value is safe for reading
+ * @brief Returns true if atkey->shared_with is initialized and allocated, and the value is safe for reading
  *
  * @param atkey the atkey struct to read
- * @return true, if the sharedwith is initialized and allocated and is safe for reading
- * @return false, if the sharedwith is not initialized and not allocated and is not safe for reading, high chance that
- * it holds garbage
+ * @return true, if the shared_with is initialized and allocated and is safe for reading
+ * @return false, if the shared_with is not initialized and not allocated and is not safe for reading, high chance that
+ * it holds garbage 🤠
  */
-bool atclient_atkey_is_sharedwith_initialized(const atclient_atkey *atkey);
+bool atclient_atkey_is_shared_with_initialized(const atclient_atkey *atkey);
 
 /**
  * @brief Dynamically allocates memory and duplicates key to be stored in the atkey struct. If this is allocated, then
@@ -143,37 +143,37 @@ bool atclient_atkey_is_sharedwith_initialized(const atclient_atkey *atkey);
 int atclient_atkey_set_key(atclient_atkey *atkey, const char *key);
 
 /**
- * @brief Dynamically allocates memory and duplicates namespacestr to be stored in the atkey struct. If this is
+ * @brief Dynamically allocates memory and duplicates namespace_str to be stored in the atkey struct. If this is
  * allocated, then it is freed with atclient_atkey_free by the end of life of your struct
  *
  * @param atkey (mandatory, NON-NULL) The atkey struct to populate, assumed that this was already initialized via
  * atclient_atkey_init
- * @param namespacestr (mandatory, NON-NULL) The namespace of your application, e.g. "banking_app" (NULLABLE)
+ * @param namespace_str (mandatory, NON-NULL) The namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success, otherwise error (most likely malloc error)
  */
-int atclient_atkey_set_namespacestr(atclient_atkey *atkey, const char *namespacestr);
+int atclient_atkey_set_namespace_str(atclient_atkey *atkey, const char *namespace_str);
 
 /**
- * @brief Dynamically allocates memory and duplicates sharedby to be stored in the atkey struct. If this is allocated,
+ * @brief Dynamically allocates memory and duplicates shared_by to be stored in the atkey struct. If this is allocated,
  * then it is freed with atclient_atkey_free by the end of life of your struct
  *
  * @param atkey (mandatory, NON-NULL) The atkey struct to populate, assumed that this was already initialized via
  * atclient_atkey_init
- * @param sharedby (mandatory, NON-NULL) The sharedby (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
+ * @param shared_by (mandatory, NON-NULL) The shared_by (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
  * @return int 0 on success, otherwise error (most likely malloc error)
  */
-int atclient_atkey_set_sharedby(atclient_atkey *atkey, const char *sharedby);
+int atclient_atkey_set_shared_by(atclient_atkey *atkey, const char *shared_by);
 
 /**
- * @brief Dynamically allocates memory and duplicates sharedwith to be stored in the atkey struct. If this is allocated,
+ * @brief Dynamically allocates memory and duplicates shared_with to be stored in the atkey struct. If this is allocated,
  * then it is freed with atclient_atkey_free by the end of life of your struct
  *
  * @param atkey  (mandatory, NON-NULL) The atkey struct to populate, assumed that this was already initialized via
  * atclient_atkey_init
- * @param sharedwith (mandatory, NON-NULL) The sharedwith atsign, atsign you are going to share it with, e.g. "@bob"
+ * @param shared_with (mandatory, NON-NULL) The shared_with atsign, atsign you are going to share it with, e.g. "@bob"
  * @return int 0 on success, otherwise error (most likely malloc error)
  */
-int atclient_atkey_set_sharedwith(atclient_atkey *atkey, const char *sharedwith);
+int atclient_atkey_set_shared_with(atclient_atkey *atkey, const char *shared_with);
 
 /**
  * @brief Frees the memory allocated for the key in the atkey struct. This is already called by atclient_atkey_free and
@@ -184,30 +184,30 @@ int atclient_atkey_set_sharedwith(atclient_atkey *atkey, const char *sharedwith)
 void atclient_atkey_unset_key(atclient_atkey *atkey);
 
 /**
- * @brief Frees the memory allocated for the namespacestr in the atkey struct. This is already called by
- * atclient_atkey_free and should only be used for advanced pruposes, if you want to free the namespacestr before the
+ * @brief Frees the memory allocated for the namespace_str in the atkey struct. This is already called by
+ * atclient_atkey_free and should only be used for advanced pruposes, if you want to free the namespace_str before the
  * end of life of your struct
  *
- * @param atkey the atkey struct that holds the allocated atkey->namespacestr memory
+ * @param atkey the atkey struct that holds the allocated atkey->namespace_str memory
  */
-void atclient_atkey_unset_namespacestr(atclient_atkey *atkey);
+void atclient_atkey_unset_namespace_str(atclient_atkey *atkey);
 
 /**
- * @brief Free the memory allocated for the sharedby in the atkey struct. This is already called by atclient_atkey_free
- * and should only be used for advanced pruposes, if you want to free the sharedby before the end of life of your struct
+ * @brief Free the memory allocated for the shared_by in the atkey struct. This is already called by atclient_atkey_free
+ * and should only be used for advanced pruposes, if you want to free the shared_by before the end of life of your struct
  *
- * @param atkey the atkey struct that holds the allocated atkey->sharedby memory
+ * @param atkey the atkey struct that holds the allocated atkey->shared_by memory
  */
-void atclient_atkey_unset_sharedby(atclient_atkey *atkey);
+void atclient_atkey_unset_shared_by(atclient_atkey *atkey);
 
 /**
- * @brief Frees the memory allocated for the sharedwith in the atkey struct. This is already called by
- * atclient_atkey_free and should only be used for advanced pruposes, if you want to free the sharedwith before the end
+ * @brief Frees the memory allocated for the shared_with in the atkey struct. This is already called by
+ * atclient_atkey_free and should only be used for advanced pruposes, if you want to free the shared_with before the end
  * of life of your struct
  *
- * @param atkey the atkey struct that holds the allocated atkey->sharedwith memory
+ * @param atkey the atkey struct that holds the allocated atkey->shared_with memory
  */
-void atclient_atkey_unset_sharedwith(atclient_atkey *atkey);
+void atclient_atkey_unset_shared_with(atclient_atkey *atkey);
 
 /**
  * @brief Evaluates the type of the atkey struct
@@ -224,39 +224,39 @@ atclient_atkey_type atclient_atkey_get_type(const atclient_atkey *atkey);
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name the name of the atkey, e.g.: "name"
- * @param sharedby the sharedby (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
- * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
+ * @param shared_by the shared_by (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
+ * @param namespace_str the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_publickey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr);
+int atclient_atkey_create_public_key(atclient_atkey *atkey, const char *name, const char *shared_by, const char *namespace_str);
 
 /**
  * @brief Populate an atkey struct representing a SelfKey AtKey with null terminated strings. An example of a SelfKey
- * AtKey would be 'name.namespace@alice'. SelfKeys can only be accessible by the sharedby (creator) atsign. Be sure to
+ * AtKey would be 'name.namespace@alice'. SelfKeys can only be accessible by the shared_by (creator) atsign. Be sure to
  * call the atclient_atkey_init function before calling this function.
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name the name of the atkey, e.g.: "name"
- * @param sharedby the sharedby (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
- * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
+ * @param shared_by the shared_by (creator/pkam authenticated atsign) of the atkey, e.g.: "@alice"
+ * @param namespace_str the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_selfkey(atclient_atkey *atkey, const char *name, const char *sharedby, const char *namespacestr);
+int atclient_atkey_create_self_key(atclient_atkey *atkey, const char *name, const char *shared_by, const char *namespace_str);
 
 /**
  * @brief Populate an atkey struct representing a SharedKey AtKey given null terminated strings. An example of a
- * SharedKey AtKey would be '@sharedwith:name.namesapce@sharedby'. SharedKeys can only be accessible by the sharedwith
- * and sharedby atsigns, as they are encrypted with a shared AES key which is encrypted with the each of their RSA keys.
+ * SharedKey AtKey would be '@shared_with:name.namesapce@shared_by'. SharedKeys can only be accessible by the shared_with
+ * and shared_by atsigns, as they are encrypted with a shared AES key which is encrypted with the each of their RSA keys.
  * Be sure to call the atclient_atkey_init function before calling this function.
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name name of your key, e.g. "name"
- * @param sharedby the shared by atsign, e.g. "@alice"
- * @param sharedwith the sharedwith atsign, atsign you are going to share it with, e.g. "@bob"
- * @param namespacestr the namespace of your application, e.g. "banking_app" (NULLABLE)
+ * @param shared_by the shared by atsign, e.g. "@alice"
+ * @param shared_with the shared_with atsign, atsign you are going to share it with, e.g. "@bob"
+ * @param namespace_str the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_sharedkey(atclient_atkey *atkey, const char *name, const char *sharedby,
-                                    const char *sharedwith, const char *namespacestr);
+int atclient_atkey_create_shared_key(atclient_atkey *atkey, const char *name, const char *shared_by,
+                                    const char *shared_with, const char *namespace_str);
 
 #endif

@@ -38,7 +38,7 @@ typedef struct atclient {
   // started and is expected to be non-functional.
   // bit 2 == atkeys | true == atkeys are populated with the necessary
   // keys, false == atkeys are not populated.
-  uint8_t _initializedfields[1];
+  uint8_t _initialized_fields[1];
 } atclient;
 
 /**
@@ -135,18 +135,18 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want
  * to be associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
  * @param value the value to put into atServer
- * @param valuelen the length of the value (most of the time you will use strlen() on a null-terminated string for
+ * @param value_len the length of the value (most of the time you will use strlen() on a null-terminated string for
  * this value)
- * @param commitid (optional) the output commitid of the put operation that the atServer returns
+ * @param commit_id (optional) the output commit_id of the put operation that the atServer returns
  * @return int 0 on success
  */
-int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t valuelen, int *commitid);
+int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t value_len, int *commit_id);
 
 /**
  * @brief Get a string value from your atServer.
@@ -156,18 +156,18 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
- * @param valuesize the buffer length allocated for the value
- * @param valuelen the output length of the value gotten from atServer
+ * @param value_size the buffer length allocated for the value
+ * @param value_len the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
-                         size_t *valuelen);
+int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+                         size_t *value_len);
 
 /**
  * @brief Get a publickey from your atServer or another atServer
@@ -177,20 +177,20 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value the buffer to hold value gotten from atServer
- * @param valuesize the buffer length allocated for the value
- * @param valuelen the output length of the value gotten from atServer
- * @param bypasscache true if you want to bypass the cached publickey, that might be on your atServer, and get the most
+ * @param value_size the buffer length allocated for the value
+ * @param value_len the output length of the value gotten from atServer
+ * @param bypass_cache true if you want to bypass the cached publickey, that might be on your atServer, and get the most
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
-                           size_t *valuelen, bool bypasscache);
+int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+                           size_t *value_len, bool bypass_cache);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
@@ -200,21 +200,21 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
  * associated with your value.
  *
  * @param atclient The atclient context (must satisfy the two conditions stated above)
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
  * @param value The buffer to hold value gotten from atServer
- * @param valuesize The buffer length allocated for the value
- * @param valuelen The output length of the value gotten from atServer
+ * @param value_size The buffer length allocated for the value
+ * @param value_len The output length of the value gotten from atServer
  * @param shared_encryption_key The correct shared encryption key (get_encryption_key_shared_by_me or
  * get_encryption_key_shared_by_other, depending on the case). If NULL is provided, it will get it for you, if it
  * exists.
  * @return int 0 on success
  */
-int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t valuesize,
-                           size_t *valuelen, const unsigned char *shared_encryption_key);
+int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+                           size_t *value_len, const unsigned char *shared_encryption_key);
 
 /**
  * @brief Delete an atkey from your atserver
@@ -224,7 +224,7 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, sharedby, sharedwith, etc,.) depending on what kind of atkey you want to be
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
  * associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
@@ -239,14 +239,14 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit
  *
  * @param atclient the initialized and pkam_authenticated atclient context
  * @param regex (input): the regex pattern for what keys to filter
- * @param showhidden (input): true to show "hidden" keys (which are keys that begin with an _), false otherwise
- * @param recvbuffersize (input): the size of the buffer to receive the response from the atServer
+ * @param show_hidden (input): true to show "hidden" keys (which are keys that begin with an _), false otherwise
+ * @param recv_buffer_size (input): the size of the buffer to receive the response from the atServer
  * @param atkey (output): a double pointer which will be a pointer to the first atkey in the array. caller of this
  * function is responsible for each individual atkey in the array using `atclient_atkey_free`
  * @param output_array_len (output): the overall size of the array that was allocated
  * @return int 0 on success
  */
-int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhidden, const size_t recvbuffersize,
+int atclient_get_atkeys(atclient *atclient, const char *regex, const bool show_hidden, const size_t recv_buffer_size,
                         atclient_atkey **atkey, size_t *output_array_len);
 
 /**

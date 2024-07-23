@@ -10,12 +10,12 @@
  * @param string string to read from
  * @param stringlen the length of the string (use strlen(string) if it is null-terminated)
  * @param out the output buffer
- * @param outsize the size of the output buffer that you allocated
- * @param outlen the output length of the output buffer that is actually used
+ * @param out_size the size of the output buffer that you allocated
+ * @param out_len the output length of the output buffer that is actually used
  * @return int 0 on success, non-zero on failure
  */
-int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t outsize,
-                                         size_t *outlen);
+int atclient_stringutils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t out_size,
+                                         size_t *out_len);
 
 /**
  * @brief check if string starts with prefix

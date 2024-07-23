@@ -65,7 +65,7 @@ exit: {
 }
 }
 
-int functional_tests_publickey_exists(atclient *atclient, const char *key, const char *sharedby,
+int functional_tests_publickey_exists(atclient *atclient, const char *key, const char *shared_by,
                                       const char *knamespace) {
   int ret = -1;
 
@@ -88,9 +88,9 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
   size_t recvlen = 0;
 
   if (knamespace == NULL) {
-    snprintf(atkeystr, atkeystrsize, "%s%s", key, sharedby);
+    snprintf(atkeystr, atkeystrsize, "%s%s", key, shared_by);
   } else {
-    snprintf(atkeystr, atkeystrsize, "%s.%s%s", key, knamespace, sharedby);
+    snprintf(atkeystr, atkeystrsize, "%s.%s%s", key, knamespace, shared_by);
   }
 
   snprintf(command, commandsize, "plookup:%s\r\n", atkeystr);
@@ -120,7 +120,7 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
 exit: { return ret; }
 }
 
-int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *knamespace) {
+int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *shared_by, const char *knamespace) {
   int ret = -1;
 
   atclient_atkey atkey;
@@ -142,9 +142,9 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
   size_t recvlen = 0;
 
   if (knamespace == NULL) {
-    snprintf(atkeystr, atkeystrsize, "%s%s", key, sharedby);
+    snprintf(atkeystr, atkeystrsize, "%s%s", key, shared_by);
   } else {
-    snprintf(atkeystr, atkeystrsize, "%s.%s%s", key, knamespace, sharedby);
+    snprintf(atkeystr, atkeystrsize, "%s.%s%s", key, knamespace, shared_by);
   }
 
   snprintf(command, commandsize, "llookup:%s\r\n", atkeystr);
@@ -174,7 +174,7 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
 exit: { return ret; }
 }
 
-int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *sharedby, const char *sharedwith,
+int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *shared_by, const char *shared_with,
                                       const char *knamespace) {
   int ret = -1;
 
@@ -197,9 +197,9 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
   size_t recvlen = 0;
 
   if (knamespace == NULL) {
-    snprintf(atkeystr, atkeystrsize, "%s:%s%s", sharedwith, key, sharedby);
+    snprintf(atkeystr, atkeystrsize, "%s:%s%s", shared_with, key, shared_by);
   } else {
-    snprintf(atkeystr, atkeystrsize, "%s:%s.%s%s", sharedwith, key, knamespace, sharedby);
+    snprintf(atkeystr, atkeystrsize, "%s:%s.%s%s", shared_with, key, knamespace, shared_by);
   }
 
   snprintf(command, commandsize, "lookup:%s\r\n", atkeystr);

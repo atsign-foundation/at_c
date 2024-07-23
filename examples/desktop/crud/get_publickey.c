@@ -64,7 +64,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, NULL)) != 0) {
+  if ((ret = atclient_atkey_create_public_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
     goto exit;
   }
@@ -85,7 +85,7 @@ int main() {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Data: \"%.*s\"\n", (int)valueolen, value);
 
-  if ((ret = atclient_atkey_metadata_to_jsonstr(&atkey.metadata, &metadatajsonstr)) != 0) {
+  if ((ret = atclient_atkey_metadata_to_json_str(&atkey.metadata, &metadatajsonstr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert metadata to json string");
     goto exit;
   }

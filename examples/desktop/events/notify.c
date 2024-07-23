@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, atsign_input, other_atsign_input, ATKEY_NAMESPACE)) !=
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, atsign_input, other_atsign_input, ATKEY_NAMESPACE)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
     goto exit;

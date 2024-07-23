@@ -16,8 +16,8 @@ typedef enum atclient_connection_type {
   ATCLIENT_CONNECTION_TYPE_ATSERVER     // uses 'noop:0\r\n' to check if it is connected
 } atclient_connection_type;
 
-typedef int(atclient_connection_send_hook)(const unsigned char *src, const size_t srclen, unsigned char *recv,
-                                           const size_t recvsize, size_t *recvlen);
+typedef int(atclient_connection_send_hook)(const unsigned char *src, const size_t src_len, unsigned char *recv,
+                                           const size_t recv_size, size_t *recv_len);
 
 typedef enum atclient_connection_hook_type {
   ATCLIENT_CONNECTION_HOOK_TYPE_NONE = 0,
@@ -86,16 +86,16 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  *
  * @param ctx the connection which was initialized (via the init function) and connected (via the connect function)
  * @param src the data to send
- * @param srclen the length of the data to send
+ * @param src_len the length of the data to send
  * @param recv the buffer to receive data
- * @param recvsize the length of the buffer to receive data
- * @param recvlen the length of the data received (output)
+ * @param recv_size the length of the buffer to receive data
+ * @param recv_len the length of the data received (output)
  * @return int 0 on success, otherwise error
  *
  * @note if recv is NULL, then this function will skip reading the response
  */
-int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t srclen,
-                             unsigned char *recv, const size_t recvsize, size_t *recvlen);
+int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t src_len,
+                             unsigned char *recv, const size_t recv_size, size_t *recv_len);
 
 /**
  * @brief disconnect a connection

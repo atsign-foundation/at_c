@@ -15,7 +15,7 @@
 //  "version":0,
 //  "ttl":86400,
 //  "isBinary":false,
-//  "isEncrypted":false
+//  "is_encrypted":false
 // }
 
 #define TAG "test_atkey_metadata"
@@ -32,7 +32,7 @@
         \"version\":0,                              \
         \"ttl\":86400,                              \
         \"isBinary\":false,                         \
-        \"isEncrypted\":false                       \
+        \"is_encrypted\":false                       \
     }"
 
 static int test_atkey_metadata_from_jsonstr() {
@@ -41,72 +41,72 @@ static int test_atkey_metadata_from_jsonstr() {
   atclient_atkey_metadata metadata;
   atclient_atkey_metadata_init(&metadata);
 
-  if ((ret = atclient_atkey_metadata_from_jsonstr(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr failed\n");
+  if ((ret = atclient_atkey_metadata_from_json_str(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str failed\n");
     goto exit;
   }
 
-  if (!atclient_atkey_metadata_is_createdby_initialized(&metadata)) {
+  if (!atclient_atkey_metadata_is_created_by_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_createdby_initialized failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_created_by_initialized failed\n");
     goto exit;
   }
 
-  if (strcmp(metadata.createdby, "@qt_thermostat") != 0) {
+  if (strcmp(metadata.created_by, "@qt_thermostat") != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdby != @qt_thermostat: %s", metadata.createdby);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.created_by != @qt_thermostat: %s", metadata.created_by);
     goto exit;
   }
 
-  if (!atclient_atkey_metadata_is_updatedby_initialized(&metadata)) {
+  if (!atclient_atkey_metadata_is_updated_by_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updatedby_initialized failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updated_by_initialized failed\n");
     goto exit;
   }
 
-  if (strcmp(metadata.updatedby, "@qt_thermostat") != 0) {
+  if (strcmp(metadata.updated_by, "@qt_thermostat") != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updatedby.atsign != @qt_thermostat: %s\n",
-                 metadata.updatedby);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updated_by.atsign != @qt_thermostat: %s\n",
+                 metadata.updated_by);
     goto exit;
   }
 
-  if (!atclient_atkey_metadata_is_createdat_initialized(&metadata)) {
+  if (!atclient_atkey_metadata_is_created_at_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_createdat_initialized failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_created_at_initialized failed\n");
     goto exit;
   }
 
-  if (strcmp(metadata.createdat, "2024-02-17 19:54:12.037Z") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.createdat != 2024-02-17 19:54:12.037Z: %s\n",
-                 metadata.createdat);
-    ret = 1;
-    goto exit;
-  }
-
-  if (!atclient_atkey_metadata_is_updatedat_initialized(&metadata)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updatedat_initialized failed\n");
-    goto exit;
-  }
-
-  if (strcmp(metadata.updatedat, "2024-02-17 19:54:12.037Z") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updatedat != 2024-02-17 19:54:12.037Z: %s\n",
-                 metadata.updatedat);
+  if (strcmp(metadata.created_at, "2024-02-17 19:54:12.037Z") != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.created_at != 2024-02-17 19:54:12.037Z: %s\n",
+                 metadata.created_at);
     ret = 1;
     goto exit;
   }
 
-  if (!atclient_atkey_metadata_is_expiresat_initialized(&metadata)) {
+  if (!atclient_atkey_metadata_is_updated_at_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_expiresat_initialized failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_updated_at_initialized failed\n");
     goto exit;
   }
 
-  if (strcmp(metadata.expiresat, "2024-02-17 19:55:38.437Z") != 0) {
+  if (strcmp(metadata.updated_at, "2024-02-17 19:54:12.037Z") != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.updated_at != 2024-02-17 19:54:12.037Z: %s\n",
+                 metadata.updated_at);
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.expiresat != 2024-02-17 19:55:38.437Z: %s\n",
-                 metadata.expiresat);
+    goto exit;
+  }
+
+  if (!atclient_atkey_metadata_is_expires_at_initialized(&metadata)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_is_expires_at_initialized failed\n");
+    goto exit;
+  }
+
+  if (strcmp(metadata.expires_at, "2024-02-17 19:55:38.437Z") != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.expires_at != 2024-02-17 19:55:38.437Z: %s\n",
+                 metadata.expires_at);
     goto exit;
   }
 
@@ -146,76 +146,76 @@ static int test_atkey_metadata_from_jsonstr() {
     goto exit;
   }
 
-  if (!atclient_atkey_metadata_is_isbinary_initialized(&metadata)) {
+  if (!atclient_atkey_metadata_is_is_binary_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isbinary_initialized failed\n");
     goto exit;
   }
 
-  if (metadata.isbinary != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.isbinary != false: %d\n", metadata.isbinary);
+  if (metadata.is_binary != false) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.is_binary != false: %d\n", metadata.is_binary);
     ret = 1;
     goto exit;
   }
 
-  if (!atclient_atkey_metadata_is_isencrypted_initialized(&metadata)) {
+  if (!atclient_atkey_metadata_is_is_encrypted_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isencrypted_initialized failed\n");
     goto exit;
   }
 
-  if (metadata.isencrypted != false) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.isencrypted != false: %d\n", metadata.isencrypted);
+  if (metadata.is_encrypted != false) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.is_encrypted != false: %d\n", metadata.is_encrypted);
     ret = 1;
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_iscached_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_is_cached_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkey_metadata_iscached_initialized was initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_availableat_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_available_at_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isavailableat_initialized is intiialized when it should not be\n");
     goto exit;
   }
 
-  if(atclient_atkey_metadata_is_refreshat_initialized(&metadata)) {
+  if(atclient_atkey_metadata_is_refresh_at_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isrefreshat_initialized is intiialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_datasignature_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_data_signature_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "datasignature is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "data_signature is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_sharedkeystatus_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_shared_key_status_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedby is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "shared_by is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_sharedkeyenc_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_shared_key_enc_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "sharedkeyenc is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "shared_key_enc is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_pubkeyhash_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_pub_key_hash_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pubkeyhash is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pub_key_hash is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_pubkeyalgo_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_pub_key_algo_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pubkeyalgo is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pub_key_algo is initialized when it should not be\n");
     goto exit;
   }
 
@@ -225,33 +225,33 @@ static int test_atkey_metadata_from_jsonstr() {
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_enckeyname_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_enc_key_name_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enckeyname is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enc_key_name is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_encalgo_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_enc_algo_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encalgo is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enc_algo is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_ivnonce_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_iv_nonce_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ivnonce is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "iv_nonce is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_skeenckeyname_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_ske_enc_key_name_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "skeenckeyname is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ske_enc_key_name is initialized when it should not be\n");
     goto exit;
   }
 
-  if (atclient_atkey_metadata_is_skeencalgo_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_ske_enc_algo_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "skeencalgo is initialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ske_enc_algo is initialized when it should not be\n");
     goto exit;
   }
 
@@ -266,17 +266,17 @@ exit: {
 static int test_atkey_metadata_to_protocolstr() {
   int ret = 1;
 
-  const char *expected = ":ttr:-1:isBinary:true:isEncrypted:true:ivNonce:abcdefghijk";
+  const char *expected = ":ttr:-1:isBinary:true:is_encrypted:true:iv_nonce:abcdefghijk";
   const size_t expectedlen = strlen(expected);
 
   atclient_atkey_metadata metadata;
   atclient_atkey_metadata_init(&metadata);
 
   atclient_atkey_metadata_set_ttr(&metadata, -1);
-  atclient_atkey_metadata_set_isbinary(&metadata, true);
-  atclient_atkey_metadata_set_isencrypted(&metadata, true);
-  atclient_atkey_metadata_set_iscached(&metadata, true);
-  atclient_atkey_metadata_set_ivnonce(&metadata, "abcdefghijk");
+  atclient_atkey_metadata_set_is_binary(&metadata, true);
+  atclient_atkey_metadata_set_is_encrypted(&metadata, true);
+  atclient_atkey_metadata_set_is_cached(&metadata, true);
+  atclient_atkey_metadata_set_iv_nonce(&metadata, "abcdefghijk");
 
   char *protocolfragment = NULL;
   const size_t expected_protocolframent_len = atclient_atkey_metadata_protocol_strlen(&metadata);
@@ -326,13 +326,13 @@ static int test_atkey_metadata_to_jsonstr() {
 
   char *jsonstr = NULL;
 
-  if ((ret = atclient_atkey_metadata_from_jsonstr(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_jsonstr failed");
+  if ((ret = atclient_atkey_metadata_from_json_str(&metadata, TEST_ATKEY_METADATA_FROM_JSONSTR)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str failed");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_metadata_to_jsonstr(&metadata, &jsonstr)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_jsonstr failed");
+  if ((ret = atclient_atkey_metadata_to_json_str(&metadata, &jsonstr)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_json_str failed");
     goto exit;
   }
 

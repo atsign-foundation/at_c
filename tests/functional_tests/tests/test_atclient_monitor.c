@@ -170,7 +170,7 @@ static int send_notification(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create atkey: %d\n", ret);
     goto exit;
@@ -225,16 +225,16 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
       continue;
     }
 
-    if (!atclient_atnotification_is_decryptedvalue_initialized(&(message.notification))) {
+    if (!atclient_atnotification_is_decrypted_value_initialized(&(message.notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value is not initialized\n");
       tries++;
       continue;
     }
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value: %s\n",message.notification.decryptedvalue);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value: %s\n",message.notification.decrypted_value);
 
     // compare the decrypted value with the expected value
-    if (strcmp(message.notification.decryptedvalue, ATKEY_VALUE) != 0) {
+    if (strcmp(message.notification.decrypted_value, ATKEY_VALUE) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value does not match expected value\n");
       tries++;
       continue;

@@ -97,10 +97,10 @@ int main(int argc, char *argv[]) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
       }
-      if (atclient_atnotification_is_decryptedvalue_initialized(&message->notification)) {
+      if (atclient_atnotification_is_decrypted_value_initialized(&message->notification)) {
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
-                     message->notification.decryptedvalue);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decrypted_value: \"%s\"\n",
+                     message->notification.decrypted_value);
       }
       tries = 1;
       break;

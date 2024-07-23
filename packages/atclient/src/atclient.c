@@ -48,16 +48,16 @@ int atclient_set_atsign(atclient *ctx, const char *atsign) {
     atclient_unset_atsign(ctx);
   }
 
-  const size_t atsignlen = strlen(atsign);
-  const size_t atsignsize = atsignlen + 1;
-  if ((ctx->atsign = malloc(sizeof(char) * atsignsize)) == NULL) {
+  const size_t atsign_len = strlen(atsign);
+  const size_t atsign_size = atsign_len + 1;
+  if ((ctx->atsign = malloc(sizeof(char) * atsign_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for atsign\n");
     goto exit;
   }
 
-  memcpy(ctx->atsign, atsign, atsignlen);
-  ctx->atsign[atsignlen] = '\0';
+  memcpy(ctx->atsign, atsign, atsign_len);
+  ctx->atsign[atsign_len] = '\0';
 
   atclient_set_atsign_initialized(ctx, true);
 
@@ -75,10 +75,10 @@ void atclient_unset_atsign(atclient *ctx) {
 }
 
 bool atclient_is_atserver_connection_started(const atclient *ctx) {
-  return ctx->_initializedfields[ATCLIENT_ATSERVER_CONNECTION_INDEX] & ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
+  return ctx->_initialized_fields[ATCLIENT_ATSERVER_CONNECTION_INDEX] & ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
 }
 
-int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost, const int secondaryport) {
+int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host, const int secondary_port) {
   int ret = 1; // error by default
 
   // remove hooks to preserve them across resets
@@ -94,7 +94,7 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost,
   // add back hooks
   ctx->atserver_connection.hooks = conn_hooks;
 
-  if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondaryhost, secondaryport)) != 0) {
+  if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondary_host, secondary_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
     goto exit;
   }
@@ -116,7 +116,7 @@ void atclient_stop_atserver_connection(atclient *ctx) {
 }
 
 bool atclient_is_atsign_initialized(const atclient *ctx) {
-  return ctx->_initializedfields[ATCLIENT_ATSIGN_INDEX] & ATCLIENT_ATSIGN_INITIALIZED;
+  return ctx->_initialized_fields[ATCLIENT_ATSIGN_INDEX] & ATCLIENT_ATSIGN_INITIALIZED;
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
@@ -137,30 +137,30 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
    */
 
   // free later
-  char *rootcmd = NULL;
-  char *fromcmd = NULL;
-  char *pkamcmd = NULL;
+  char *root_cmd = NULL;
+  char *from_cmd = NULL;
+  char *pkam_cmd = NULL;
   char *atsign_with_at = NULL;
 
   const size_t recvsize = 1024; // sufficient buffer size to receive 1. host & port from atDirectory, 2. challenge from
-                                // `from:` command, 3. pkam success message from `pkam:` command
+                                // `from:` noop_cmd, 3. pkam success message from `pkam:` noop_cmd
   unsigned char recv[recvsize];
   memset(recv, 0, sizeof(unsigned char) * recvsize);
-  size_t recvlen;
+  size_t recv_len;
 
-  const size_t challengesize = 256; // sufficient buffer size to hold the challenge received from `from:` command
-  char challenge[challengesize];
-  memset(challenge, 0, sizeof(char) * challengesize);
-  size_t challengelen = 0;
+  const size_t challenge_size = 256; // sufficient buffer size to hold the challenge received from `from:` noop_cmd
+  char challenge[challenge_size];
+  memset(challenge, 0, sizeof(char) * challenge_size);
+  size_t challenge_len = 0;
 
-  const size_t signaturesize = 256; // RSA-2048 signature always generates a 256 byte signature
-  unsigned char signature[signaturesize];
-  memset(signature, 0, sizeof(unsigned char) * signaturesize);
+  const size_t signature_size = 256; // RSA-2048 signature always generates a 256 byte signature
+  unsigned char signature[signature_size];
+  memset(signature, 0, sizeof(unsigned char) * signature_size);
 
-  const size_t signaturebase64size = atchops_base64_encoded_size(signaturesize);
-  unsigned char signaturebase64[signaturebase64size];
-  memset(signaturebase64, 0, sizeof(unsigned char) * signaturebase64size);
-  size_t signaturebase64len = 0;
+  const size_t signature_base64_size = atchops_base64_encoded_size(signature_size);
+  unsigned char signature_base64[signature_base64_size];
+  memset(signature_base64, 0, sizeof(unsigned char) * signature_base64_size);
+  size_t signature_base64_len = 0;
 
   /*
    * 3. Ensure that the atsign has the @ symbol.
@@ -183,22 +183,21 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   }
 
   /*
-   * 5a. Build `from:` command
+   * 5a. Build `from:` noop_cmd
    */
-  const size_t fromcmdsize =
+  const size_t from_cmd_size =
       strlen("from:") + strlen(atsign_without_at) + strlen("\r\n") + 1; // "from:" has a length of 5
-  fromcmd = malloc(sizeof(char) * fromcmdsize);
-  if (fromcmd == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for fromcmd\n");
+  if ((from_cmd = malloc(sizeof(char) * from_cmd_size)) == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for from_cmd\n");
     goto exit;
   }
-  snprintf(fromcmd, fromcmdsize, "from:%s\r\n", atsign_without_at);
+  snprintf(from_cmd, from_cmd_size, "from:%s\r\n", atsign_without_at);
 
   /*
-   * 5b. Send `from:` command
+   * 5b. Send `from:` noop_cmd
    */
-  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)fromcmd, fromcmdsize - 1, recv,
-                                      recvsize, &recvlen)) != 0) {
+  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)from_cmd, from_cmd_size - 1, recv,
+                                      recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -206,7 +205,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                 (int)recvlen, recv);
+                 (int)recv_len, recv);
     goto exit;
   }
 
@@ -214,42 +213,41 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
    * 6. We got `data:<challenge>`
    *    Let us sign the challenge with RSA-2048 PKAM Private Key and Base64 Encode it
    */
-  memcpy(challenge, recv, recvlen);
+  memcpy(challenge, recv, recv_len);
   // remove data:
-  memmove(challenge, challenge + 5, recvlen - 5);
-  challengelen = recvlen - 5;
+  memmove(challenge, challenge + 5, recv_len - 5);
+  challenge_len = recv_len - 5;
 
   // sign
-  if ((ret = atchops_rsa_sign(atkeys->pkamprivatekey, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challengelen,
+  if ((ret = atchops_rsa_sign(atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
                               signature)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;
   }
 
   // base64 encode it
-  if ((ret = atchops_base64_encode(signature, signaturesize, signaturebase64, signaturebase64size,
-                                   &signaturebase64len)) != 0) {
+  if ((ret = atchops_base64_encode(signature, signature_size, signature_base64, signature_base64_size,
+                                   &signature_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
   }
 
   /*
-   * 7a. Build `pkam:` command
+   * 7a. Build `pkam:` noop_cmd
    */
-  const size_t pkamcmdsize = strlen("pkam:") + signaturebase64len + strlen("\r\n") + 1;
-  pkamcmd = malloc(sizeof(char) * pkamcmdsize);
-  if (pkamcmd == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for pkamcmd\n");
+  const size_t pkam_cmd_size = strlen("pkam:") + signature_base64_len + strlen("\r\n") + 1;
+  if ((pkam_cmd = malloc(sizeof(char) * pkam_cmd_size)) == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for pkam_cmd\n");
     goto exit;
   }
-  snprintf(pkamcmd, pkamcmdsize, "pkam:%s\r\n", signaturebase64);
+  snprintf(pkam_cmd, pkam_cmd_size, "pkam:%s\r\n", signature_base64);
 
   /*
-   * 7b. Send `pkam:` command
+   * 7b. Send `pkam:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
-  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)pkamcmd, pkamcmdsize - 1, recv,
-                                      recvsize, &recvlen)) != 0) {
+  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)pkam_cmd, pkam_cmd_size - 1, recv,
+                                      recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -258,7 +256,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   if (!atclient_stringutils_starts_with((char *)recv, "data:success")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
-                 (int)recvlen, recv);
+                 (int)recv_len, recv);
     goto exit;
   }
 
@@ -280,9 +278,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   goto exit;
 exit: {
   free(atsign_with_at);
-  free(rootcmd);
-  free(fromcmd);
-  free(pkamcmd);
+  free(root_cmd);
+  free(from_cmd);
+  free(pkam_cmd);
   return ret;
 }
 }
@@ -292,8 +290,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
 
   unsigned char *recv = NULL;
 
-  const char *command = "noop:0\r\n";
-  const size_t commandlen = strlen(command);
+  const char *noop_cmd = "noop:0\r\n";
+  const size_t noop_cmd_len = strlen(noop_cmd);
 
   const size_t recvsize = 64;
   if (!heartbeat_conn->async_read) {
@@ -305,13 +303,13 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
     }
     memset(recv, 0, sizeof(unsigned char) * recvsize);
   }
-  size_t recvlen = 0;
+  size_t recv_len = 0;
   char *ptr = (char *)recv;
 
-  ret = atclient_connection_send(&heartbeat_conn->atserver_connection, (unsigned char *)command, commandlen, recv,
-                                 recvsize, &recvlen);
+  ret = atclient_connection_send(&heartbeat_conn->atserver_connection, (unsigned char *)noop_cmd, noop_cmd_len, recv,
+                                 recvsize, &recv_len);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send noop command: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send noop noop_cmd: %d\n", ret);
     goto exit;
   } else if (heartbeat_conn->async_read) {
     goto exit;
@@ -343,17 +341,17 @@ void atclient_set_read_timeout(atclient *ctx, int timeout_ms) {
 
 static void atclient_set_atsign_initialized(atclient *ctx, const bool initialized) {
   if (initialized) {
-    ctx->_initializedfields[ATCLIENT_ATSIGN_INDEX] |= ATCLIENT_ATSIGN_INITIALIZED;
+    ctx->_initialized_fields[ATCLIENT_ATSIGN_INDEX] |= ATCLIENT_ATSIGN_INITIALIZED;
   } else {
-    ctx->_initializedfields[ATCLIENT_ATSIGN_INDEX] &= ~ATCLIENT_ATSIGN_INITIALIZED;
+    ctx->_initialized_fields[ATCLIENT_ATSIGN_INDEX] &= ~ATCLIENT_ATSIGN_INITIALIZED;
   }
 }
 
 static void atclient_set_atserver_connection_started(atclient *ctx, const bool started) {
   if (started) {
-    ctx->_initializedfields[ATCLIENT_ATSERVER_CONNECTION_INDEX] |= ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
+    ctx->_initialized_fields[ATCLIENT_ATSERVER_CONNECTION_INDEX] |= ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
   } else {
-    ctx->_initializedfields[ATCLIENT_ATSERVER_CONNECTION_INDEX] &= ~ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
+    ctx->_initialized_fields[ATCLIENT_ATSERVER_CONNECTION_INDEX] &= ~ATCLIENT_ATSERVER_CONNECTION_INITIALIZED;
   }
 }
 

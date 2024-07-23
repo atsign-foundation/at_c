@@ -25,46 +25,46 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit
   /*
    * 2. Initialize variables
    */
-  char *cmdbuffer = NULL;
-  char *atkeystr = NULL;
+  char *delete_cmd = NULL;
+  char *atkey_str = NULL;
 
-  const size_t recvsize = 256; // sufficient buffer size to receive response containing commit id
+  const size_t recv_size = 256; // sufficient buffer size to receive response containing commit id
   unsigned char *recv = NULL;
   if (!atclient->async_read) {
-    recv = malloc(sizeof(unsigned char) * recvsize);
+    recv = malloc(sizeof(unsigned char) * recv_size);
     if (recv == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for recv\n");
       goto exit;
     }
-    memset(recv, 0, sizeof(unsigned char) * recvsize);
+    memset(recv, 0, sizeof(unsigned char) * recv_size);
   }
-  size_t recvlen = 0;
+  size_t recv_len = 0;
 
   /*
    * 3. Build delete command
    */
 
-  if ((ret = atclient_atkey_to_string(atkey, &atkeystr)) != 0) {
+  if ((ret = atclient_atkey_to_string(atkey, &atkey_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_to_string: %d\n", ret);
     goto exit;
   }
-  const size_t atkeystrlen = strlen(atkeystr);
+  const size_t atkey_strlen = strlen(atkey_str);
 
-  const size_t cmdbuffersize = strlen("delete:") + atkeystrlen + strlen("\r\n") + 1;
-  cmdbuffer = malloc(sizeof(char) * cmdbuffersize);
-  if (cmdbuffer == NULL) {
+  const size_t delete_cmd_size = strlen("delete:") + atkey_strlen + strlen("\r\n") + 1;
+  delete_cmd = malloc(sizeof(char) * delete_cmd_size);
+  if (delete_cmd == NULL) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cmdbuffer\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for delete_cmd\n");
     goto exit;
   }
-  snprintf(cmdbuffer, cmdbuffersize, "delete:%s\r\n", atkeystr);
+  snprintf(delete_cmd, delete_cmd_size, "delete:%s\r\n", atkey_str);
 
   /*
    * 4. Send command
    */
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)cmdbuffer, cmdbuffersize - 1,
-                                      recv, recvsize, &recvlen)) != 0) {
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)delete_cmd, delete_cmd_size - 1,
+                                      recv, recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -78,7 +78,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit
   if (!atclient_stringutils_starts_with(respose, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                 (int)recvlen, recv);
+                 (int)recv_len, recv);
     goto exit;
   }
 
@@ -87,13 +87,13 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit
   if(commit_id != NULL) {
     *commit_id = atoi(response_without_data);
   }
-  
+
   ret = 0;
   goto exit;
 exit: {
   free(recv);
-  free(atkeystr);
-  free(cmdbuffer);
+  free(atkey_str);
+  free(delete_cmd);
   return ret;
 }
 }
@@ -131,9 +131,9 @@ static int atclient_delete_validate_arguments(const atclient *atclient, const at
     goto exit;
   }
 
-  if (!atclient_atkey_is_sharedby_initialized(atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(atkey)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_is_sharedby_initialized is false\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_is_shared_by_initialized is false\n");
     goto exit;
   }
 
