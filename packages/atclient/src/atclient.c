@@ -4,7 +4,6 @@
 #include "atclient/atclient.h"
 #include "atclient/atclient_utils.h"
 #include "atclient/atkeys.h"
-#include "atclient/atsign.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/stringutils.h"

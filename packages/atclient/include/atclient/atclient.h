@@ -3,7 +3,6 @@
 
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
-#include "atclient/atsign.h"
 #include "atclient/connection.h"
 #include <stdbool.h>
 #include <stddef.h>

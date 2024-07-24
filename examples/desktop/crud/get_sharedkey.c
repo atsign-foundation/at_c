@@ -1,7 +1,6 @@
 #include "atchops/sha.h"
 #include <atclient/atclient.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atlogger/atlogger.h>
