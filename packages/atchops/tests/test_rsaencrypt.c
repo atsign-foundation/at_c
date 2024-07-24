@@ -30,15 +30,15 @@ int main() {
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
   size_t ciphertextlen = 0;
 
-  atchops_rsakey_publickey publickey;
-  atchops_rsakey_publickey_init(&publickey);
+  atchops_rsa_key_public_key publickey;
+  atchops_rsa_key_public_key_init(&publickey);
 
-  ret = atchops_rsakey_populate_publickey(&publickey, publickeybase64, publickeybase64len);
+  ret = atchops_rsa_key_populate_public_key(&publickey, publickeybase64, publickeybase64len);
   if (ret != 0) {
-    printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
+    printf("atchops_rsa_key_populate_public_key (failed): %d\n", ret);
     goto ret;
   }
-  printf("atchops_rsakey_populate_publickey (success): %d\n", ret);
+  printf("atchops_rsa_key_populate_public_key (success): %d\n", ret);
 
   ret = atchops_rsa_encrypt(publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext, ciphertextsize,
                             &ciphertextlen);

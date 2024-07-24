@@ -3,7 +3,7 @@
 #include "atclient/constants.h"
 #include "atclient/stringutils.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/rsa.h>
@@ -159,9 +159,9 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
     goto exit;
   }
 
-  if ((ret = atchops_aesctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value_raw, value_raw_len,
+  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value_raw, value_raw_len,
                                     (unsigned char *)value, value_size, value_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d\n", ret);
     goto exit;
   }
 

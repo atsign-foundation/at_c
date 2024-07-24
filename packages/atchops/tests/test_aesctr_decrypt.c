@@ -1,4 +1,4 @@
-#include "atchops/aesctr.h"
+#include "atchops/aes_ctr.h"
 #include "atchops/iv.h"
 #include "atchops/base64.h"
 #include <stdio.h>
@@ -74,17 +74,17 @@ int main() {
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(key, ATCHOPS_AES_256, iv,
+  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv,
                               ciphertext, ciphertextlen,
                               plaintext, plaintextsize, &plaintextlen);
   if (ret != 0) {
-    printf("atchops_aesctr_decrypt (failed): %d\n", ret);
+    printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
     goto exit;
   }
-  printf("atchops_aesctr_decrypt (success): %d\n", ret);
+  printf("atchops_aes_ctr_decrypt (success): %d\n", ret);
 
   if (plaintextlen <= 0) {
-    printf("atchops_aesctr_decrypt (failed): %d\n", ret);
+    printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
     goto exit;
   }
   printf("decrypted text: %.*s\n", (int)plaintextlen, plaintext);

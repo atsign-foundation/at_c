@@ -4,7 +4,7 @@
 #include "atclient/encryption_key_helpers.h"
 #include "atclient/stringutils.h"
 #include "atlogger/atlogger.h"
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/rsa.h>
@@ -43,7 +43,7 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
   char iv_base64[iv_base64_size];
   memset(iv_base64, 0, sizeof(char) * iv_base64_size);
 
-  const size_t ciphertext_size = atchops_aesctr_ciphertext_size(value_len) + 1;
+  const size_t ciphertext_size = atchops_aes_ctr_ciphertext_size(value_len) + 1;
   unsigned char ciphertext[ciphertext_size];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertext_size);
   size_t ciphertext_len = 0;
@@ -107,9 +107,9 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
       goto exit;
     }
 
-    if ((ret = atchops_aesctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
+    if ((ret = atchops_aes_ctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
                                       ciphertext, ciphertext_size, &ciphertext_len)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
       goto exit;
     }
 
@@ -161,9 +161,9 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
       goto shared_key_exit;
     }
 
-    if ((ret = atchops_aesctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
+    if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
                                       ciphertext, ciphertext_size, &ciphertext_len)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
       goto shared_key_exit;
     }
 

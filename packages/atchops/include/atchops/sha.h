@@ -7,14 +7,14 @@
 /**
  * @brief SHA Hash an input buffer
  *
- * @param mdtype the type of hash to use (e.g. MBEDTLS_MD_SHA256)
+ * @param md_type the type of hash to use (e.g. MBEDTLS_MD_SHA256)
  * @param input the input to hash (in raw bytes)
- * @param inputlen the length of the input buffer (most likely strlen(input))
+ * @param input_len the length of the input buffer (most likely strlen(input))
  * @param output (out) the output buffer to write the hash to. The length of this buffer should correspond to the hash
  * type (e.g. 32 bytes for SHA256 (256 bits = 32 bytes))
  * @return int 0 on success
  */
-int atchops_sha_hash(const atchops_md_type mdtype, const unsigned char *input, const size_t inputlen,
+int atchops_sha_hash(const atchops_md_type md_type, const unsigned char *input, const size_t input_len,
                      unsigned char *output);
 
 #endif

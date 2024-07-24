@@ -4,7 +4,7 @@
 #include "atclient/encryption_key_helpers.h"
 #include "atclient/stringutils.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/uuid.h>
@@ -107,10 +107,10 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notifi
       return ret;
     }
 
-    ret = atchops_aesctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)params->value,
+    ret = atchops_aes_ctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)params->value,
                                  strlen(params->value), ciphertext, ciphertextsize, &ciphertextlen);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_encrypt failed with code %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt failed with code %d\n", ret);
       return ret;
     }
 

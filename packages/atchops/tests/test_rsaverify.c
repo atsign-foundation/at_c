@@ -56,11 +56,11 @@ int main() {
 
   int ret = 1;
 
-  atchops_rsakey_publickey publickey;
-  atchops_rsakey_publickey_init(&publickey);
+  atchops_rsa_key_public_key publickey;
+  atchops_rsa_key_public_key_init(&publickey);
 
-  atchops_rsakey_privatekey privatekey;
-  atchops_rsakey_privatekey_init(&privatekey);
+  atchops_rsa_key_private_key privatekey;
+  atchops_rsa_key_private_key_init(&privatekey);
 
   const char *message = MESSAGE;
   const size_t messagelen = strlen(message);
@@ -75,9 +75,9 @@ int main() {
   memset(signaturebase64, 0, sizeof(char) * SIGNATURE_BASE64_SIZE);
   size_t signaturebase64len = 0;
 
-  ret = atchops_rsakey_populate_privatekey(&privatekey, PRIVATE_KEY_BASE64, strlen(PRIVATE_KEY_BASE64));
+  ret = atchops_rsa_key_populate_private_key(&privatekey, PRIVATE_KEY_BASE64, strlen(PRIVATE_KEY_BASE64));
   if (ret != 0) {
-    printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
+    printf("atchops_rsa_key_populate_private_key (failed): %d\n", ret);
     goto exit;
   }
 
@@ -87,9 +87,9 @@ int main() {
     goto exit;
   }
 
-  ret = atchops_rsakey_populate_publickey(&publickey, PUBLIC_KEY_BASE64, strlen(PUBLIC_KEY_BASE64));
+  ret = atchops_rsa_key_populate_public_key(&publickey, PUBLIC_KEY_BASE64, strlen(PUBLIC_KEY_BASE64));
   if (ret != 0) {
-    printf("atchops_rsakey_populate_publickey (failed): %d\n", ret);
+    printf("atchops_rsa_key_populate_public_key (failed): %d\n", ret);
     goto exit;
   }
 

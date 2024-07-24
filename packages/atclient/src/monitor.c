@@ -7,7 +7,7 @@
 #include "atclient/stringutils.h"
 #include "cJSON.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/uuid.h>
@@ -599,7 +599,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
   size_t decryptedvaluetemplen = 0;
 
-  ret = atchops_aesctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, decryptedvaluetemp,
+  ret = atchops_aes_ctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, decryptedvaluetemp,
                                decryptedvaluetempsize, &decryptedvaluetemplen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt value\n");

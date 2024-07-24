@@ -216,7 +216,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
     goto exit;
   }
 
-  if ((ret = atchops_rsa_decrypt(ctx->atkeys.encrypt_private_key, key_raw_encrypted, key_raw_encrypted_len,
+  if ((ret = atchops_rsa_decrypt(&ctx->atkeys.encrypt_private_key, key_raw_encrypted, key_raw_encrypted_len,
                                  key_raw_decrypted, key_raw_decrypted_size, &key_raw_decrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
     goto exit;
@@ -333,7 +333,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   memset(shared_encryption_key_encrypted, 0, sizeof(unsigned char) * shared_encryption_key_encrypted_size);
   size_t shared_encryption_key_encrypted_len = 0;
 
-  if ((ret = atchops_rsa_decrypt(ctx->atkeys.encrypt_private_key, shared_encryption_key_encrypted_base64,
+  if ((ret = atchops_rsa_decrypt(&ctx->atkeys.encrypt_private_key, shared_encryption_key_encrypted_base64,
                                  shared_encryption_key_encrypted_base64_len, shared_encryption_key_encrypted,
                                  shared_encryption_key_encrypted_size, &shared_encryption_key_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
@@ -393,8 +393,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   char *public_key_base64 = NULL;
 
   // holds their public key in base64 format, non-encrypted (struct)
-  atchops_rsakey_publickey public_key_struct;
-  atchops_rsakey_publickey_init(&public_key_struct);
+  atchops_rsa_key_public_key public_key_struct;
+  atchops_rsa_key_public_key_init(&public_key_struct);
 
   // the original AES-256 key
   const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
@@ -405,7 +405,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   unsigned char shared_encryption_key_base64[shared_encryption_key_base64_size];
 
   // encrypted for us
-  const size_t shared_encryption_key_base64_encrypted_for_us_size = 512;
+  const size_t shared_encryption_key_base64_encrypted_for_us_size = 256; // rsa encryption always outputs 256 bytes (2048 bit key) TODO: constant
   unsigned char shared_encryption_key_base64_encrypted_for_us[shared_encryption_key_base64_encrypted_for_us_size];
 
   // encrypted for us (base64 encoded)
@@ -415,7 +415,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
       shared_encryption_key_base64_encrypted_for_us_base64[shared_encryption_key_base64_encrypted_for_us_base64_size];
 
   // encrypted for them
-  const size_t shared_encryption_key_base64_encrypted_for_them_size = 512;
+  const size_t shared_encryption_key_base64_encrypted_for_them_size = 256; // rsa encryption always outputs 256 bytes (2048 bit key) TODO: constant
   unsigned char shared_encryption_key_base64_encrypted_for_them[shared_encryption_key_base64_encrypted_for_them_size];
 
   // encrypted for them (base64 encoded)
@@ -455,8 +455,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     goto exit;
   }
 
-  if ((ret = atchops_rsakey_populate_publickey(&public_key_struct, public_key_base64, strlen(public_key_base64))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsakey_populate_publickey: %d\n", ret);
+  if ((ret = atchops_rsa_key_populate_public_key(&public_key_struct, public_key_base64, strlen(public_key_base64))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_key_populate_public_key: %d\n", ret);
     goto exit;
   }
 
@@ -484,13 +484,10 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
    */
 
   // 5a. Encrypt for us
-  size_t shared_encryption_key_base64_encrypted_for_us_len = 0;
   memset(shared_encryption_key_base64_encrypted_for_us, 0,
          sizeof(unsigned char) * shared_encryption_key_base64_encrypted_for_us_size);
-  if ((ret = atchops_rsa_encrypt(atclient->atkeys.encrypt_public_key, (unsigned char *)shared_encryption_key_base64,
-                                 shared_encryption_key_base64_len, shared_encryption_key_base64_encrypted_for_us,
-                                 shared_encryption_key_base64_encrypted_for_us_size,
-                                 &shared_encryption_key_base64_encrypted_for_us_len)) != 0) {
+  if ((ret = atchops_rsa_encrypt(&atclient->atkeys.encrypt_public_key, (unsigned char *)shared_encryption_key_base64,
+                                 shared_encryption_key_base64_len, shared_encryption_key_base64_encrypted_for_us)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "failed to encrypt shared enc key for us | atchops_rsa_encrypt: %d\n", ret);
     goto exit;
@@ -500,7 +497,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   memset(shared_encryption_key_base64_encrypted_for_us_base64, 0,
          sizeof(unsigned char) * shared_encryption_key_base64_encrypted_for_us_base64_size);
   if ((ret = atchops_base64_encode(shared_encryption_key_base64_encrypted_for_us,
-                                   shared_encryption_key_base64_encrypted_for_us_len,
+                                   shared_encryption_key_base64_encrypted_for_us_size,
                                    shared_encryption_key_base64_encrypted_for_us_base64,
                                    shared_encryption_key_base64_encrypted_for_us_base64_size,
                                    &shared_encryption_key_base64_encrypted_for_us_base64_len)) != 0) {
@@ -510,13 +507,10 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   }
 
   // 5b. Encrypt for them
-  size_t shared_encryption_key_base64_encrypted_for_them_len = 0;
   memset(shared_encryption_key_base64_encrypted_for_them, 0,
          sizeof(unsigned char) * shared_encryption_key_base64_encrypted_for_them_size);
-  if ((ret = atchops_rsa_encrypt(public_key_struct, shared_encryption_key_base64, shared_encryption_key_base64_len,
-                                 shared_encryption_key_base64_encrypted_for_them,
-                                 shared_encryption_key_base64_encrypted_for_them_size,
-                                 &shared_encryption_key_base64_encrypted_for_them_len)) != 0) {
+  if ((ret = atchops_rsa_encrypt(&public_key_struct, shared_encryption_key_base64, shared_encryption_key_base64_len,
+                                 shared_encryption_key_base64_encrypted_for_them)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
     goto exit;
   }
@@ -525,7 +519,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   memset(shared_encryption_key_base64_encrypted_for_them_base64, 0,
          sizeof(unsigned char) * shared_encryption_key_base64_encrypted_for_them_base64_size);
   if ((ret = atchops_base64_encode(shared_encryption_key_base64_encrypted_for_them,
-                                   shared_encryption_key_base64_encrypted_for_them_len,
+                                   shared_encryption_key_base64_encrypted_for_them_size,
                                    shared_encryption_key_base64_encrypted_for_them_base64,
                                    shared_encryption_key_base64_encrypted_for_them_base64_size,
                                    &shared_encryption_key_base64_encrypted_for_them_base64_len)) != 0) {
@@ -606,7 +600,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
 exit: {
   free(sharedby_atsign_with_at);
   free(sharedwith_atsign_with_at);
-  atchops_rsakey_publickey_free(&public_key_struct);
+  atchops_rsa_key_public_key_free(&public_key_struct);
   free(public_key_base64);
   free(update_cmd_for_us);
   free(update_cmd_for_them);

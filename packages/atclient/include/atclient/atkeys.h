@@ -33,16 +33,16 @@
  */
 typedef struct atclient_atkeys {
   char *pkam_publickey_base64;              // base64 encoded, RSA-2048 key, decrypted
-  atchops_rsakey_publickey pkam_public_key; // contains n, e
+  atchops_rsa_key_public_key pkam_public_key; // contains n, e
 
   char *pkam_private_key_base64;               // base64 encoded, RSA-2048 key, decrypted
-  atchops_rsakey_privatekey pkam_private_key; // conatins n, e, d, p, q
+  atchops_rsa_key_private_key pkam_private_key; // conatins n, e, d, p, q
 
   char *encrypt_public_key_base64;              // base64 encoded, RSA-2048 key, decrypted
-  atchops_rsakey_publickey encrypt_public_key; // contains n, e
+  atchops_rsa_key_public_key encrypt_public_key; // contains n, e
 
   char *encrypt_private_key_base64;               // base64 encoded, RSA-2048 key, decrypted
-  atchops_rsakey_privatekey encrypt_private_key; // conatins n, e, d, p, q
+  atchops_rsa_key_private_key encrypt_private_key; // conatins n, e, d, p, q
 
   char *self_encryption_key_base64; // base64 encoded, AES-256 key, decrypted
 

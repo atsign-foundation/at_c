@@ -2,7 +2,7 @@
 #include "atclient/encryption_key_helpers.h"
 #include "atclient/stringutils.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atlogger/atlogger.h>
@@ -229,14 +229,14 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   }
   memset(value_raw_encrypted, 0, sizeof(unsigned char) * value_raw_encrypted_size);
   size_t value_raw_encrypted_len = 0;
-  if ((ret = atchops_base64_decode(value_raw_encrypted_base64, value_raw_encrypted_base64_len,
+  if ((ret = atchops_base64_decode((unsigned char *) value_raw_encrypted_base64, value_raw_encrypted_base64_len,
                                    value_raw_encrypted, value_raw_encrypted_size,
                                    &value_raw_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
 
-  const size_t value_raw_size = atchops_aesctr_plaintext_size(value_raw_encrypted_len);
+  const size_t value_raw_size = atchops_aes_ctr_plaintext_size(value_raw_encrypted_len);
   if ((value_raw = malloc(sizeof(unsigned char) * value_raw_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value_raw\n");
@@ -245,10 +245,10 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   memset(value_raw, 0, sizeof(unsigned char) * value_raw_size);
   size_t value_raw_len = 0;
 
-  if ((ret = atchops_aesctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv,
+  if ((ret = atchops_aes_ctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv,
                                     value_raw_encrypted, value_raw_encrypted_len,
                                     value_raw, value_raw_size, &value_raw_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d\n", ret);
     goto exit;
   }
 
@@ -439,7 +439,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   }
 
   // 9b. aes decrypt
-  const size_t value_raw_size = atchops_aesctr_plaintext_size(value_raw_encryted_len);
+  const size_t value_raw_size = atchops_aes_ctr_plaintext_size(value_raw_encryted_len);
   if ((value_raw = malloc(sizeof(unsigned char) * value_raw_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value_raw\n");
@@ -447,10 +447,10 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   }
   memset(value_raw, 0, sizeof(unsigned char) * value_raw_size);
   size_t value_raw_len = 0;
-  if ((ret = atchops_aesctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv, value_raw_encryted,
+  if ((ret = atchops_aes_ctr_decrypt(shared_encryption_key_to_use, ATCHOPS_AES_256, iv, value_raw_encryted,
                                     value_raw_encryted_len, (unsigned char *)value_raw, value_raw_size,
                                     &value_raw_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d\n", ret);
     goto exit;
   }
 

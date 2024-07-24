@@ -1,10 +1,10 @@
 #include "atclient/atkeys.h"
 #include "atlogger/atlogger.h"
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/rsa.h>
-#include <atchops/rsakey.h>
+#include <atchops/rsa_key.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,17 +42,17 @@ static int set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *s
 
 void atclient_atkeys_init(atclient_atkeys *atkeys) {
   memset(atkeys, 0, sizeof(atclient_atkeys));
-  atchops_rsakey_publickey_init(&(atkeys->pkam_public_key));
-  atchops_rsakey_privatekey_init(&(atkeys->pkam_private_key));
-  atchops_rsakey_publickey_init(&(atkeys->encrypt_public_key));
-  atchops_rsakey_privatekey_init(&(atkeys->encrypt_private_key));
+  atchops_rsa_key_public_key_init(&(atkeys->pkam_public_key));
+  atchops_rsa_key_private_key_init(&(atkeys->pkam_private_key));
+  atchops_rsa_key_public_key_init(&(atkeys->encrypt_public_key));
+  atchops_rsa_key_private_key_init(&(atkeys->encrypt_private_key));
 }
 
 void atclient_atkeys_free(atclient_atkeys *atkeys) {
-  atchops_rsakey_publickey_free(&(atkeys->pkam_public_key));
-  atchops_rsakey_privatekey_free(&(atkeys->pkam_private_key));
-  atchops_rsakey_publickey_free(&(atkeys->encrypt_public_key));
-  atchops_rsakey_privatekey_free(&(atkeys->encrypt_private_key));
+  atchops_rsa_key_public_key_free(&(atkeys->pkam_public_key));
+  atchops_rsa_key_private_key_free(&(atkeys->pkam_private_key));
+  atchops_rsa_key_public_key_free(&(atkeys->encrypt_public_key));
+  atchops_rsa_key_private_key_free(&(atkeys->encrypt_private_key));
 }
 
 int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
@@ -242,10 +242,10 @@ int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char
     return ret;
   }
 
-  if ((ret = atchops_rsakey_populate_publickey(&(atkeys->pkam_public_key), pkam_publickey_base64, pkam_publickey_base64)) !=
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), pkam_publickey_base64, pkam_publickey_base64)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_publickey: %d | failed to populate pkam_public_key\n", ret);
+                 "atchops_rsa_key_populate_public_key: %d | failed to populate pkam_public_key\n", ret);
     goto exit;
   }
   ret = 0;
@@ -275,10 +275,10 @@ int atclient_atkeys_populate_pkam_private_key(atclient_atkeys *atkeys, const cha
     return ret;
   }
 
-  if ((ret = atchops_rsakey_populate_privatekey(&(atkeys->pkam_private_key), pkam_private_key_base64,
+  if ((ret = atchops_rsa_key_populate_private_key(&(atkeys->pkam_private_key), pkam_private_key_base64,
                                                 pkam_private_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_privatekey: %d | failed to populate pkam_private_key\n", ret);
+                 "atchops_rsa_key_populate_private_key: %d | failed to populate pkam_private_key\n", ret);
     goto exit;
   }
 exit: { return ret; }
@@ -306,10 +306,10 @@ int atclient_atkeys_populate_encrypt_public_key(atclient_atkeys *atkeys, const c
     return ret;
   }
 
-  if ((ret = atchops_rsakey_populate_publickey(&(atkeys->encrypt_public_key), encrypt_public_key_base64,
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->encrypt_public_key), encrypt_public_key_base64,
                                                encrypt_public_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_publickey: %d | failed to populate encrypt_public_key\n", ret);
+                 "atchops_rsa_key_populate_public_key: %d | failed to populate encrypt_public_key\n", ret);
     goto exit;
   }
 
@@ -340,10 +340,10 @@ int atclient_atkeys_populate_encrypt_private_key(atclient_atkeys *atkeys, const 
     return ret;
   }
 
-  if ((ret = atchops_rsakey_populate_privatekey(&(atkeys->encrypt_private_key), encrypt_private_key_base64,
+  if ((ret = atchops_rsa_key_populate_private_key(&(atkeys->encrypt_private_key), encrypt_private_key_base64,
                                                 encrypt_private_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_privatekey: %d | failed to populate encrypt_private_key\n", ret);
+                 "atchops_rsa_key_populate_private_key: %d | failed to populate encrypt_private_key\n", ret);
     goto exit;
   }
 
@@ -506,9 +506,9 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  if ((ret = atchops_aesctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
+  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
                                     rsa_key_decrypted, rsa_key_decrypted_size, &rsa_key_decrypted_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam public key\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d | failed to decrypt pkam public key\n",
                  ret);
     goto exit;
   }
@@ -530,9 +530,9 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  if ((ret = atchops_aesctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
+  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
                                     rsa_key_decrypted, rsa_key_decrypted_size, &rsa_key_decrypted_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aesctr_decrypt: %d | failed to decrypt pkam private key\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d | failed to decrypt pkam private key\n",
                  ret);
     goto exit;
   }
@@ -554,10 +554,10 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  if ((ret = atchops_aesctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
+  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
                                     rsa_key_decrypted, rsa_key_decrypted_size, &rsa_key_decrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_aesctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
+                 "atchops_aes_ctr_decrypt: %d | failed to decrypt encrypt public key\n", ret);
     goto exit;
   }
 
@@ -578,10 +578,10 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  if ((ret = atchops_aesctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
+  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, rsa_key_encrypted, rsa_key_encrypted_len,
                                     rsa_key_decrypted, rsa_key_decrypted_size, &rsa_key_decrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_aesctr_decrypt: %d | failed to decrypt encrypt private key\n", ret);
+                 "atchops_aes_ctr_decrypt: %d | failed to decrypt encrypt private key\n", ret);
     goto exit;
   }
 
@@ -596,34 +596,34 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
    */
 
   // 5a. pkam public key
-  if ((ret = atchops_rsakey_populate_publickey(&(atkeys->pkam_public_key), atkeys->pkam_publickey_base64,
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), atkeys->pkam_publickey_base64,
                                                strlen(atkeys->pkam_publickey_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_publickey: %d | failed to populate pkam public key\n", ret);
+                 "atchops_rsa_key_populate_public_key: %d | failed to populate pkam public key\n", ret);
     goto exit;
   }
 
   // 5b. pkam private key
-  if ((ret = atchops_rsakey_populate_privatekey(&(atkeys->pkam_private_key), atkeys->pkam_private_key_base64,
+  if ((ret = atchops_rsa_key_populate_private_key(&(atkeys->pkam_private_key), atkeys->pkam_private_key_base64,
                                                 strlen(atkeys->pkam_private_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_privatekey: %d | failed to populate pkam private key\n", ret);
+                 "atchops_rsa_key_populate_private_key: %d | failed to populate pkam private key\n", ret);
     goto exit;
   }
 
   // 5c. encrypt public key
-  if ((ret = atchops_rsakey_populate_privatekey(&(atkeys->encrypt_private_key), atkeys->encrypt_private_key_base64,
+  if ((ret = atchops_rsa_key_populate_private_key(&(atkeys->encrypt_private_key), atkeys->encrypt_private_key_base64,
                                                 strlen(atkeys->encrypt_private_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_privatekey: %d | failed to populate encrypt private key\n", ret);
+                 "atchops_rsa_key_populate_private_key: %d | failed to populate encrypt private key\n", ret);
     goto exit;
   }
 
   // 5d. encrypt private key
-  if ((ret = atchops_rsakey_populate_publickey(&(atkeys->encrypt_public_key), atkeys->encrypt_public_key_base64,
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->encrypt_public_key), atkeys->encrypt_public_key_base64,
                                                strlen(atkeys->encrypt_public_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atchops_rsakey_populate_publickey: %d | failed to populate encrypt public key\n", ret);
+                 "atchops_rsa_key_populate_public_key: %d | failed to populate encrypt public key\n", ret);
     goto exit;
   }
 

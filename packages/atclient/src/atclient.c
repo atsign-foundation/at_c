@@ -219,7 +219,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   challenge_len = recv_len - 5;
 
   // sign
-  if ((ret = atchops_rsa_sign(atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
+  if ((ret = atchops_rsa_sign(&atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
                               signature)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_sign: %d\n", ret);
     goto exit;
