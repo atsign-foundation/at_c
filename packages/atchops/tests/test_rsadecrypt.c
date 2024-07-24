@@ -58,7 +58,7 @@ int main() {
   }
   printf("atchops_rsa_key_populate_private_key (success): %d\n", ret);
 
-  ret = atchops_rsa_decrypt(privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextsize,
+  ret = atchops_rsa_decrypt(&privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextsize,
                             &plaintextlen);
   if (ret != 0) {
     printf("atchops_rsa_decrypt (failed): %d\n", ret);

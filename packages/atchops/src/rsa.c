@@ -52,7 +52,7 @@ int atchops_rsa_sign(const atchops_rsa_key_private_key *private_key, const atcho
   size_t hashsize;
 
   if (md_type == ATCHOPS_MD_SHA256) {
-    hashsize = 32;
+    hashsize = 32; // TODO: constant
   }
 
   unsigned char hash[hashsize];
