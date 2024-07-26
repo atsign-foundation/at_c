@@ -46,13 +46,34 @@ void atclient_atkeys_init(atclient_atkeys *atkeys) {
   atchops_rsa_key_private_key_init(&(atkeys->pkam_private_key));
   atchops_rsa_key_public_key_init(&(atkeys->encrypt_public_key));
   atchops_rsa_key_private_key_init(&(atkeys->encrypt_private_key));
+  atkeys->self_encryption_key_base64 = NULL;
 }
 
 void atclient_atkeys_free(atclient_atkeys *atkeys) {
+  if(atkeys == NULL) {
+    return;
+  }
+
   atchops_rsa_key_public_key_free(&(atkeys->pkam_public_key));
   atchops_rsa_key_private_key_free(&(atkeys->pkam_private_key));
   atchops_rsa_key_public_key_free(&(atkeys->encrypt_public_key));
   atchops_rsa_key_private_key_free(&(atkeys->encrypt_private_key));
+  if(atclient_atkeys_is_pkam_public_key_base64_initialized(atkeys)) {
+    unset_pkam_public_key_base64(atkeys);
+  }
+  if(atclient_atkeys_is_pkam_private_key_base64_initialized(atkeys)) {
+    unset_pkam_private_key_base64(atkeys);
+  }
+  if(atclient_atkeys_is_encrypt_public_key_base64_initialized(atkeys)) {
+    unset_encrypt_public_key_base64(atkeys);
+  }
+  if(atclient_atkeys_is_encrypt_private_key_base64_initialized(atkeys)) {
+    unset_encrypt_private_key_base64(atkeys);
+  }
+  if(atclient_atkeys_is_self_encryption_key_base64_initialized(atkeys)) {
+    unset_self_encryption_key_base64(atkeys);
+  }
+
 }
 
 int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
