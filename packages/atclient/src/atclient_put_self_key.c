@@ -91,7 +91,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   if ((ret = atchops_base64_encode(iv, iv_size, iv_base64, iv_base64_size, NULL)) != 0) {
   }
 
-  if ((ret = atclient_atkey_metadata_set_iv_nonce(atkey, iv_base64)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_iv_nonce(&(atkey->metadata), iv_base64)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iv_nonce: %d\n", ret);
     goto exit;
   }

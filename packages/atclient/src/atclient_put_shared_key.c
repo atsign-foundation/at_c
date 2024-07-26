@@ -97,6 +97,9 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
     goto exit;
   }
 
+  /*
+   * 4. Generate IV
+   */
   if((ret = atchops_iv_generate(iv)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate: %d\n", ret);
     goto exit;
@@ -114,7 +117,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
 
   /*
-   * 4. Encrypt value
+   * 5. Encrypt value
    */
   size_t value_encrypted_len = 0;
   memset(value_encrypted, 0, sizeof(unsigned char) * value_encrypted_size);
@@ -132,7 +135,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
 
   /*
-   * 5. Create update command
+   * 6. Create update command
    */
   if ((ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), &metadata_protocol_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str: %d\n", ret);
@@ -158,7 +161,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   const size_t update_cmd_len = update_cmd_size - 1;
 
   /*
-   * 6. Send update command
+   * 7. Send update command
    */
   if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *) update_cmd, update_cmd_len, recv, recv_size,
                                       &recv_len)) != 0) {
@@ -179,8 +182,9 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
 
   char *response_without_data = response + strlen("data:");
+  
   /*
-   * 7. Return commit id
+   * 8. Return commit id
    */
   if (commit_id != NULL) {
     *commit_id = atoi(response_without_data);
