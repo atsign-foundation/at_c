@@ -63,8 +63,8 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
   const size_t atkey_str_len = strlen(atkey_str);
   const size_t metadata_protocol_str_len = strlen(metadata_protocol_str);
 
-  const size_t update_cmd_size =
-      strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len + strlen(" ") + strlen(value) + strlen("\r\n") + 1;
+  const size_t update_cmd_size = strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len +
+                                 strlen(" ") + strlen(value) + strlen("\r\n") + 1;
   if ((update_cmd = malloc(sizeof(char) * update_cmd_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for update_cmd\n");
@@ -76,8 +76,8 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
   /*
    * 4. Send update command
    */
-  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *) update_cmd, update_cmd_len, recv, recv_size,
-                                      &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *)update_cmd, update_cmd_len, recv,
+                                      recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -91,7 +91,7 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
   if (!atclient_string_utils_starts_with(response, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                (int)recv_len, recv);
+                 (int)recv_len, recv);
     goto exit;
   }
 
@@ -106,7 +106,13 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(recv);
+  free(atkey_str);
+  free(metadata_protocol_str);
+  free(update_cmd);
+  return ret;
+}
 }
 
 static int atclient_put_public_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
@@ -177,5 +183,9 @@ static int atclient_put_public_key_validate_arguments(const atclient *ctx, const
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(client_atsign_with_at);
+  free(shared_by_atsign_with_at);
+  return ret;
+}
 }

@@ -2,9 +2,9 @@
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
-#include <atclient/string_utils.h>
 #include <atclient/atkey.h>
 #include <atclient/request_options.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
@@ -146,8 +146,8 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   const size_t atkey_str_len = strlen(atkey_str);
 
   // update: command
-  const size_t update_cmd_size =
-      strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len + strlen(" ") + value_encrypted_base64_len + strlen("\r\n") + 1;
+  const size_t update_cmd_size = strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len +
+                                 strlen(" ") + value_encrypted_base64_len + strlen("\r\n") + 1;
   if ((update_cmd = malloc(sizeof(char) * update_cmd_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for update_cmd\n");
@@ -160,8 +160,8 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   /*
    * 7. Send update command
    */
-  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *) update_cmd, update_cmd_len, recv, recv_size,
-                                      &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *)update_cmd, update_cmd_len, recv,
+                                      recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -175,7 +175,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   if (!atclient_string_utils_starts_with(response, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                (int)recv_len, recv);
+                 (int)recv_len, recv);
     goto exit;
   }
 
@@ -190,7 +190,13 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(recv);
+  free(update_cmd);
+  free(metadata_protocol_str);
+  free(atkey_str);
+  return ret;
+}
 }
 
 static int atclient_put_self_key_validate_arguments(atclient *ctx, atclient_atkey *atkey, const char *value,

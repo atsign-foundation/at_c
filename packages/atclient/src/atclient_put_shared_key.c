@@ -193,7 +193,13 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: { 
+  free(recipient_atsign_with_at);
+  free(update_cmd);
+  free(metadata_protocol_str);
+  free(atkey_str);
+  free(recv);
+  return ret; }
 }
 
 static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
