@@ -40,11 +40,6 @@ jobs:
           cmake -S . -B build
           sudo cmake --build build --target install
 
-      - name: Debug temp
-        working-directory: tests/functional_tests
-        run: |
-          ./tools/run_test.sh test_atclient_sharedkey
-
       - name: Build and Run Functional Tests
         working-directory: tests/functional_tests
         run: |
