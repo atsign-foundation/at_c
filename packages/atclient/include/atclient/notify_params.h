@@ -100,18 +100,18 @@ typedef struct atclient_notify_params {
 void atclient_notify_params_init(atclient_notify_params *params);
 void atclient_notify_params_free(atclient_notify_params *params);
 
-bool atclient_notify_params_is_id_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_atkey_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_value_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_should_encrypt_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_operation_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_message_type_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_priority_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_strategy_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_latest_n_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_notifier_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_notification_expiry_initialized(atclient_notify_params *params);
-bool atclient_notify_params_is_shared_encryption_key_initialized(atclient_notify_params *params);
+bool atclient_notify_params_is_id_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_atkey_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_value_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_should_encrypt_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_operation_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_message_type_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_priority_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_strategy_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_latest_n_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_notifier_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_notification_expiry_initialized(const atclient_notify_params *params);
+bool atclient_notify_params_is_shared_encryption_key_initialized(const atclient_notify_params *params);
 
 void atclient_notify_params_set_id_initialized(atclient_notify_params *params, const bool initialized);
 void atclient_notify_params_set_atkey_initialized(atclient_notify_params *params, const bool initialized);

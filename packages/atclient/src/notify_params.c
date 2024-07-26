@@ -40,34 +40,34 @@ void atclient_notify_params_free(atclient_notify_params *params) {
   memset(params, 0, sizeof(atclient_notify_params));
 }
 
-bool atclient_notify_params_is_id_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_id_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_ID_INDEX] & ATCLIENT_NOTIFY_PARAMS_ID_INITIALIZED;
 }
 
-bool atclient_notify_params_is_atkey_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_atkey_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_ATKEY_INDEX] & ATCLIENT_NOTIFY_PARAMS_ATKEY_INITIALIZED;
 }
 
-bool atclient_notify_params_is_value_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_value_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_VALUE_INDEX] & ATCLIENT_NOTIFY_PARAMS_VALUE_INITIALIZED;
 }
 
-bool atclient_notify_params_is_should_encrypt_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_should_encrypt_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_SHOULD_ENCRYPT_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_SHOULD_ENCRYPT_INITIALIZED;
 }
 
-bool atclient_notify_params_is_operation_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_operation_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_OPERATION_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_OPERATION_INITIALIZED;
 }
 
-bool atclient_notify_params_is_message_type_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_message_type_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_MESSAGE_TYPE_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_MESSAGE_TYPE_INITIALIZED;
 }
 
-bool atclient_notify_params_is_priority_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_priority_initialized(const const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_PRIORITY_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_PRIORITY_INITIALIZED;
 }
@@ -77,22 +77,22 @@ bool atclient_notify_params_is_strategy_initialized(atclient_notify_params *para
          ATCLIENT_NOTIFY_PARAMS_STRATEGY_INITIALIZED;
 }
 
-bool atclient_notify_params_is_latest_n_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_latest_n_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_LATEST_N_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_LATEST_N_INITIALIZED;
 }
 
-bool atclient_notify_params_is_notifier_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_notifier_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_NOTIFIER_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_NOTIFIER_INITIALIZED;
 }
 
-bool atclient_notify_params_is_notification_expiry_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_notification_expiry_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_NOTIFICATION_EXPIRY_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_NOTIFICATION_EXPIRY_INITIALIZED;
 }
 
-bool atclient_notify_params_is_shared_encryption_key_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_shared_encryption_key_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_SHARED_ENCRYPTION_KEY_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_SHARED_ENCRYPTION_KEY_INITIALIZED;
 }
