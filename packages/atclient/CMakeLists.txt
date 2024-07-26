@@ -23,6 +23,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/src/notify.c
   ${CMAKE_CURRENT_LIST_DIR}/src/notify_params.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/request_options.c
   ${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
 )
 
