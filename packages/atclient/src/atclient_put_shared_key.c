@@ -79,22 +79,20 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   if (request_options != NULL &&
       atclient_put_shared_key_request_options_is_shared_encryption_key_initialized(request_options)) {
     memcpy(shared_encryption_key, request_options->shared_encryption_key, shared_encryption_key_size);
-  } else if ((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign_with_at,
+  } else  {
+    if((ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign_with_at,
                                                                     shared_encryption_key)) != 0) {
-    if (ret != ATCLIENT_ERR_AT0015_KEY_NOT_FOUND) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
-      goto exit;
-    }
-    if ((ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, recipient_atsign_with_at,
+                                                                      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
+                                                                      goto exit;
+    } else if (ret == ATCLIENT_ERR_AT0015_KEY_NOT_FOUND) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Did not find shared_encryption_key_shared_by_me.. Creating key pair for me and other...\n");
+      if ((ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, recipient_atsign_with_at,
                                                                            shared_encryption_key)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "atclient_create_shared_encryption_key_pair_for_me_and_other: %d\n", ret);
-      goto exit;
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                    "atclient_create_shared_encryption_key_pair_for_me_and_other: %d\n", ret);
+        goto exit;
+      }
     }
-  } else {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "could not find shared encryption key\n");
-    goto exit;
   }
 
   /*
