@@ -20,8 +20,7 @@ int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, 
   memset(atkeyspath, 0, atkeyspathsize);
   size_t atkeyspathlen = 0;
 
-  ret = functional_tests_get_atkeys_path(atsign, atsignlen, atkeyspath, atkeyspathsize, &atkeyspathlen);
-  if (ret != 0) {
+  if ((ret = functional_tests_get_atkeys_path(atsign, atsignlen, atkeyspath, atkeyspathsize, &atkeyspathlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys_sharedwith path: %d\n", ret);
     goto exit;
   }
@@ -54,6 +53,7 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
+
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
 
   goto exit;
@@ -117,7 +117,10 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
 
   ret = true;
   goto exit;
-exit: { return ret; }
+exit: {
+  atclient_atkey_free(&atkey);
+  return ret;
+}
 }
 
 int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *shared_by,
@@ -172,7 +175,9 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
 
   ret = true;
   goto exit;
-exit: { return ret; }
+exit: { 
+  atclient_atkey_free(&atkey);
+  return ret; }
 }
 
 int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *shared_by,
@@ -227,7 +232,9 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
 
   ret = true;
   goto exit;
-exit: { return ret; }
+exit: { 
+  atclient_atkey_free(&atkey);
+  return ret; }
 }
 
 int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient) {
@@ -247,7 +254,7 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
 
   if (!atclient_is_atsign_initialized(atclient1)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is not initialized\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not initialized\n");
     return ret;
   }
 
@@ -259,10 +266,10 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   atclient_atkey atkeyforthem;
   atclient_atkey_init(&atkeyforthem);
 
-  char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
-
   char *client_atsign_with_at = NULL;
   char *recipient_atsign_with_at = NULL;
+
+  char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
 
