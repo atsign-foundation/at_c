@@ -142,7 +142,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
     goto exit;
   }
   memset(update_cmd, 0, sizeof(char) * update_cmd_size);
-  snprintf(update_cmd, update_cmd_size, "update%s:%s %s\r\n", atkey_str, metadata_protocol_str, value_encrypted_base64);
+  snprintf(update_cmd, update_cmd_size, "update%s:%s %s\r\n", metadata_protocol_str, atkey_str, value_encrypted_base64);
   const size_t update_cmd_len = update_cmd_size - 1;
 
   /*
