@@ -497,3 +497,79 @@ void atclient_connection_hooks_set_readonly_src(atclient_connection *ctx, bool r
   }
   ctx->hooks->readonly_src = readonly_src;
 }
+
+// int atclient_connection_write(atclient_connection *ctx, const unsigned char *value, const size_t value_len) {
+//   int ret = 1;
+
+//   /*
+//    * 1. Validate arguments
+//    */
+//   if(ctx == NULL) {
+//     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+//     goto exit;
+//   }
+
+//   if(value == NULL) {
+//     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
+//     goto exit;
+//   }
+
+//   if(value_len == 0) {
+//     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value_len is 0\n");
+//     goto exit;
+//   }
+
+//   if (!ctx->_should_be_connected) {
+//     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+//                  "ctx->_should_be_connected should be true, but is false, you are trying to write to a non-connected "
+//                  "connection\n");
+//     goto exit;
+//   }
+
+//   /*
+//    * 2. Write the value
+//    */
+//   if ((ret = mbedtls_ssl_write(&(ctx->ssl), value, value_len)) <= 0) {
+//     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
+//     goto exit;
+//   }
+
+//   /*
+//    * 3. Print debug log
+//    */
+//   if(atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+//     unsigned char *valuecopy = malloc(sizeof(unsigned char) * value_len);
+//     if (valuecopy != NULL) {
+//       memcpy(valuecopy, value, value_len);
+//       atlogger_fix_stdout_buffer((char *)valuecopy, value_len);
+//       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, value_len, valuecopy, reset);
+//       free(valuecopy);
+//     } else {
+//       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory to pretty print the network sent transmission\n");
+//     }
+//   }
+
+//   /*
+//    * 4. Call hooks, if they exist
+//    */
+//   bool try_hooks = ctx->hooks != NULL && !ctx->hooks->_is_nested_call;
+//   if (try_hooks && ctx->hooks->post_recv != NULL) {
+//     ctx->hooks->_is_nested_call = true;
+//     ret = ctx->hooks->post_recv(src, srclen, recv, recvsize, recvlen)
+//     if (ctx->hooks != NULL) {
+//       ctx->hooks->_is_nested_call = false;
+//     }
+//     if (ret != 0) {
+//       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_recv hook failed with exit code: %d\n", ret);
+//       goto exit;
+//     }
+//   }
+
+//   ret = 0;
+//   goto exit;
+// exit: {
+//   return ret;
+// }
+// }
+
+// int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len, const size_t value_max_len);

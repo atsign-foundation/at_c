@@ -67,7 +67,6 @@ typedef struct atclient_connection {
  * @param type the type of connection to initialize,
  * if it is ATCLIENT_CONNECTION_TYPE_ROOT, then '\\n' will be used to check if it is connected.
  * if it is ATCLIENT_CONNECTION_TYPE_ATSERVER, then 'noop:0\r\n' will be used to check if it is connected
- *
  */
 void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type);
 
@@ -147,4 +146,26 @@ int atclient_connection_hooks_set(atclient_connection *ctx, atclient_connection_
  * @note For performance, keep readonly_src set to true if you don't need to write access to src
  */
 void atclient_connection_hooks_set_readonly_src(atclient_connection *ctx, bool readonly_src);
+
+/**
+ * @brief Write data to the connection
+ * 
+ * @param ctx connection initialized and connected using atclient_connection_init and atclient_connection_connect
+ * @param value the data to write
+ * @param value_len the length of the data to write
+ * @return int 0 on success
+ */
+int atclient_connection_write(atclient_connection *ctx, const unsigned char *value, const size_t value_len);
+
+/**
+ * @brief Reads data from the connection
+ *
+ * @param ctx the connection initialized and connected using atclient_connection_init and atclient_connection_connect
+ * @param value a double pointer that will be allocated by the function to the data read
+ * @param value_len the length of the data read, will be set by the function
+ * @param value_max_len the maximum length of the data to read, setting this to 0 means no limit
+ * @return int 0 on success
+ */
+int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len, const size_t value_max_len);
+
 #endif
