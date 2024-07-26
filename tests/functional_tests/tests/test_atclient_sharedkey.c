@@ -150,6 +150,9 @@ static int test_2_get_as_sharedby(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
+  atclient_get_shared_key_request_options request_options;
+  atclient_get_shared_key_request_options_init(&request_options);
+
   char *value = NULL;
 
   if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
@@ -158,7 +161,12 @@ static int test_2_get_as_sharedby(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_shared_key(atclient, &atkey, &value, NULL)) != 0) {
+  if((ret = atclient_get_shared_key_request_options_set_store_atkey_metadata(&request_options, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_request_options_set_store_atkey_metadata: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_get_shared_key(atclient, &atkey, &value, &request_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
@@ -190,6 +198,8 @@ static int test_2_get_as_sharedby(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
+  free(value);
+  atclient_get_shared_key_request_options_free(&request_options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_get_as_sharedby End (%d)\n", ret);
   return ret;
 }
@@ -205,13 +215,21 @@ static int test_3_get_as_sharedwith(atclient *atclient2) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
+  atclient_get_shared_key_request_options request_options;
+  atclient_get_shared_key_request_options_init(&request_options);
+
   if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_shared_key: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_get_shared_key(atclient2, &atkey, &value, NULL)) != 0) {
+  if((ret = atclient_get_shared_key_request_options_set_store_atkey_metadata(&request_options, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_request_options_set_store_atkey_metadata: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_get_shared_key(atclient2, &atkey, &value, &request_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
@@ -224,7 +242,7 @@ static int test_3_get_as_sharedwith(atclient *atclient2) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value matched: %s == %s\n", value, ATKEY_VALUE);
 
-  if (atkey.metadata.ttl != ATKEY_TTL) {
+  if (atclient_atkey_metadata_is_ttl_initialized(&atkey.metadata) && atkey.metadata.ttl != ATKEY_TTL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %d\n", ATKEY_TTL,
                  atkey.metadata.ttl);
     ret = 1;
@@ -232,7 +250,7 @@ static int test_3_get_as_sharedwith(atclient *atclient2) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
 
-  if (atkey.metadata.ttr != ATKEY_TTR) {
+  if (atclient_atkey_metadata_is_ttr_initialized(&atkey.metadata) && atkey.metadata.ttr != ATKEY_TTR) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %d\n", ATKEY_TTR,
                  atkey.metadata.ttr);
     ret = 1;
@@ -244,6 +262,7 @@ static int test_3_get_as_sharedwith(atclient *atclient2) {
 exit: {
   free(value);
   atclient_atkey_free(&atkey);
+  atclient_get_shared_key_request_options_free(&request_options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_get_as_sharedwith End (%d)\n", ret);
   return ret;
 }
