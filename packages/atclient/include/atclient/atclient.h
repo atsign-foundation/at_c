@@ -248,16 +248,11 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *val
  *
  * @param atclient The atclient context (must satisfy the two conditions stated above)
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
- * @param value The buffer to hold value gotten from atServer
- * @param value_size The buffer length allocated for the value
- * @param value_len The output length of the value gotten from atServer
- * @param shared_encryption_key The correct shared encryption key (get_encryption_key_shared_by_me or
- * get_encryption_key_shared_by_other, depending on the case). If NULL is provided, it will get it for you, if it
- * exists.
+ * @param request_options The options for the get operation, can be NULL if you don't need to set any options
+ * @param value A pointer that will be allocated for you to hold value gotten from atServer, can be NULL if you don't need the value, if it is non-null, caller is responsible for freeing the memory
  * @return int 0 on success
  */
-int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
-                            size_t *value_len, const unsigned char *shared_encryption_key);
+int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, const atclient_get_shared_key_request_options *request_options, char **value);
 
 /**
  * @brief Delete an atkey from your atserver
