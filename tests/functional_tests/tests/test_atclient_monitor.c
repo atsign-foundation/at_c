@@ -319,8 +319,8 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_re_pkam_auth_and_start_monitor Start\n");
 
-  const char *atserver_host = strdup(monitor_conn->atserver_connection.host);
-  const int atserver_port = monitor_conn->atserver_connection.port;
+  char *atserver_host = strdup(monitor_conn->atserver_connection.host);
+  int atserver_port = monitor_conn->atserver_connection.port;
 
   if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atserver_host, atserver_port, &(monitor_conn->atkeys),
                                                 monitor_conn->atsign)) != 0) {

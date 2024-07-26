@@ -139,17 +139,14 @@ static int test_2_get(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const size_t valuesize = 1024;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
+  char *value = NULL;
 
   if ((ret = atclient_atkey_create_public_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_public_key\n");
     goto exit;
   }
 
-  if ((ret = atclient_get_public_key(atclient, &atkey, value, NULL)) != 0) {
+  if ((ret = atclient_get_public_key(atclient, &atkey, &value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_public_key\n");
     goto exit;
   }
@@ -261,17 +258,14 @@ static int test_6_get_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const size_t valuesize = 1024;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
+  char *value = NULL;
 
   if ((ret = atclient_atkey_create_public_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_atkey_create_public_key\n");
     goto exit;
   }
 
-  if ((ret = atclient_get_public_key(atclient, &atkey, value, NULL)) != 0) {
+  if ((ret = atclient_get_public_key(atclient, &atkey, &value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_public_key\n");
     goto exit;
   }
@@ -321,6 +315,7 @@ static int test_6_get_with_metadata(atclient *atclient) {
 
   goto exit;
 exit: {
+  free(value);
   atclient_atkey_free(&atkey);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_6_get_with_metadata End (%d)\n", ret);
   return ret;
