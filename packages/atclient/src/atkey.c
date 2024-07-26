@@ -1,7 +1,7 @@
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
 #include "atclient/metadata.h"
-#include "atclient/stringutils.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
 #include <stddef.h>

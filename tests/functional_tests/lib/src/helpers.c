@@ -3,7 +3,7 @@
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/constants.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -284,13 +284,13 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient1, &atkeyforme, NULL)) != 0) {
+  if ((ret = atclient_delete(atclient1, &atkeyforme, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "deleted shared enc key for me\n");
 
-  if ((ret = atclient_delete(atclient1, &atkeyforthem, NULL)) != 0) {
+  if ((ret = atclient_delete(atclient1, &atkeyforthem, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }

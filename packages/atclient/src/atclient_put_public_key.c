@@ -55,7 +55,7 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
     goto exit;
   }
 
-  if ((ret = atclient_atkey_metadata_to_protocol_str(atkey, &metadata_protocol_str)) != 0) {
+  if ((ret = atclient_atkey_metadata_to_protocol_str(&(atkey->metadata), &metadata_protocol_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocol_str: %d\n", ret);
     goto exit;
   }
@@ -64,19 +64,19 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
   const size_t metadata_protocol_str_len = strlen(metadata_protocol_str);
 
   const size_t update_cmd_size =
-      strlen("update:") + atkey_str_len + metadata_protocol_str_len + strlen(": ") + strlen(value) + strlen("\r\n") + 1;
+      strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len + strlen(" ") + strlen(value) + strlen("\r\n") + 1;
   if ((update_cmd = malloc(sizeof(char) * update_cmd_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for update_cmd\n");
     goto exit;
   }
-  snprintf(update_cmd, update_cmd_size, "update:%s%s: %s\r\n", atkey_str, metadata_protocol_str, value);
+  snprintf(update_cmd, update_cmd_size, "update%s:%s %s\r\n", metadata_protocol_str, atkey_str, value);
   const size_t update_cmd_len = update_cmd_size - 1;
 
   /*
    * 4. Send update command
    */
-  if ((ret = atclient_connection_send(&ctx->atserver_connection, update_cmd, update_cmd_len, recv, recv_size,
+  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *) update_cmd, update_cmd_len, recv, recv_size,
                                       &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -88,19 +88,19 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
 
   char *response = (char *)recv;
 
+  if (!atclient_string_utils_starts_with(response, "data:")) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                (int)recv_len, recv);
+    goto exit;
+  }
+
+  char *response_without_data = response + strlen("data:");
+
   /*
    * 5. Receive commit id
    */
   if (commit_id != NULL) {
-    if (!atclient_string_utils_starts_with(response, "data:")) {
-      ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                   (int)recv_len, recv);
-      goto exit;
-    }
-
-    char *response_without_data = response + strlen("data:");
-
     *commit_id = atoi(response_without_data);
   }
 
@@ -124,6 +124,8 @@ static int atclient_put_public_key_validate_arguments(const atclient *ctx, const
     goto exit;
   }
 
+  // TODO atclient checks
+
   if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
@@ -133,18 +135,6 @@ static int atclient_put_public_key_validate_arguments(const atclient *ctx, const
   if (value == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
-    goto exit;
-  }
-
-  if (request_options == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "request_options is NULL\n");
-    goto exit;
-  }
-
-  if (commit_id == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "commit_id is NULL\n");
     goto exit;
   }
 

@@ -1,5 +1,5 @@
 #include <atclient/atclient.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdio.h>
 #include <stdlib.h>

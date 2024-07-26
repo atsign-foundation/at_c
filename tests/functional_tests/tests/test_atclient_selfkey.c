@@ -1,7 +1,7 @@
 #include "functional_tests/config.h"
 #include "functional_tests/helpers.h"
 #include <atclient/atclient.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -138,7 +138,7 @@ static int test_2_put(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
+  if ((ret = atclient_put_self_key(atclient, &atkey, ATKEY_VALUE, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
     goto exit;
   }
@@ -207,7 +207,7 @@ static int test_4_delete(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey, NULL)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }
@@ -258,7 +258,7 @@ static int test_6_put_with_metadata(atclient *atclient) {
   atclient_atkey_metadata_set_is_encrypted(&(atkey.metadata), ATKEY_ISENCRYPTED);
   atclient_atkey_metadata_set_is_binary(&(atkey.metadata), ATKEY_ISBINARY);
 
-  if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
+  if ((ret = atclient_put_self_key(atclient, &atkey, ATKEY_VALUE, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
     goto exit;
   }
@@ -349,7 +349,7 @@ static int test_8_delete(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey, NULL)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }

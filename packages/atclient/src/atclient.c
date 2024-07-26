@@ -6,7 +6,7 @@
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
-#include "atclient/stringutils.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
 #include <mbedtls/md.h>

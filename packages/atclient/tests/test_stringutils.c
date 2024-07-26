@@ -1,4 +1,4 @@
-#include "atclient/stringutils.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <stddef.h>
 #include <stdlib.h> // IWYU pragma: keep

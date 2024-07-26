@@ -145,7 +145,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
  * don't care about the commit_id
  * @return int 0 on success
  */
-int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, int **commit_id);
+int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, int *commit_id);
 
 /**
  * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted only for you

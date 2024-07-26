@@ -128,7 +128,7 @@ static int test_1_put(atclient *atclient) {
   atclient_atkey_metadata_set_ttl(&atkey.metadata, ATKEY_TTL);
   atclient_atkey_metadata_set_ttr(&atkey.metadata, ATKEY_TTR);
 
-  if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
+  if ((ret = atclient_put_shared_key(atclient, &atkey, ATKEY_VALUE, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
     goto exit;
   }
@@ -268,7 +268,7 @@ static int test_4_delete(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey, NULL)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }

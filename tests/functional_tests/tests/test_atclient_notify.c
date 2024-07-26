@@ -8,7 +8,7 @@
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
 #include <atclient/notify.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>

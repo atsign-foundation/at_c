@@ -1,7 +1,7 @@
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
-#include "atclient/stringutils.h"
+#include "atclient/string_utils.h"
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
@@ -17,7 +17,7 @@
 static int atclient_get_self_key_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                 const char *value, const size_t value_size, const size_t *value_len);
 
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
                          size_t *value_len) {
   int ret = 1;
 
@@ -204,7 +204,7 @@ static int atclient_get_self_key_valid_arguments(const atclient *atclient, const
 
   if (atclient->async_read) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_selfkey cannot be called from an async_read atclient, it will cause a race condition\n");
+                 "atclient_get_self_key cannot be called from an async_read atclient, it will cause a race condition\n");
     return 1;
   }
 

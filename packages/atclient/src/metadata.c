@@ -1,5 +1,5 @@
 #include "atclient/metadata.h"
-#include "atclient/stringutils.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include "cJSON.h"
 #include <stddef.h>

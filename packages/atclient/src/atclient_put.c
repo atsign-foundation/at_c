@@ -2,7 +2,7 @@
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
-#include "atclient/stringutils.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
