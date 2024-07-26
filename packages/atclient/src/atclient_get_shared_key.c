@@ -25,7 +25,7 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
                                                 const atclient_get_shared_key_request_options *request_options);
 
 int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey,
-                            const atclient_get_shared_key_request_options *request_options, char **value) {
+                            char **value, const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
   if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, request_options, value)) != 0) {
