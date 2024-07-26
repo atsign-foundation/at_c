@@ -248,11 +248,11 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *val
  *
  * @param atclient The atclient context (must satisfy the two conditions stated above)
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
- * @param request_options The options for the get operation, can be NULL if you don't need to set any options
  * @param value A pointer that will be allocated for you to hold value gotten from atServer, can be NULL if you don't need the value, if it is non-null, caller is responsible for freeing the memory
+ * @param request_options The options for the get operation, can be NULL if you don't need to set any options
  * @return int 0 on success
  */
-int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, const atclient_get_shared_key_request_options *request_options, char **value);
+int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char **value, const atclient_get_shared_key_request_options *request_options);
 
 /**
  * @brief Delete an atkey from your atserver

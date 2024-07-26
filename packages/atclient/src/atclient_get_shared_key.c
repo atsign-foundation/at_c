@@ -13,18 +13,16 @@
 #define TAG "atclient_get_sharedkey"
 
 static int atclient_get_shared_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
-                                                      const atclient_get_shared_key_request_options *request_options,
-                                                      const char **value);
+                                                      const char **value,
+                                                      const atclient_get_shared_key_request_options *request_options);
 
 static int
-atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey,
-                                                const atclient_get_shared_key_request_options *request_options,
-                                                char **value);
+atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char **value,
+                                                const atclient_get_shared_key_request_options *request_options);
 
 static int
-atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey,
-                                                const atclient_get_shared_key_request_options *request_options,
-                                                char **value);
+atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char **value,
+                                                const atclient_get_shared_key_request_options *request_options);
 
 int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey,
                             const atclient_get_shared_key_request_options *request_options, char **value) {
@@ -49,12 +47,12 @@ int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey,
   }
 
   if (strcmp(sharedby_atsign_with_at, client_atsign_with_at) != 0) {
-    if ((ret = atclient_get_shared_key_shared_by_other_with_me(atclient, atkey, request_options, value)) != 0) {
+    if ((ret = atclient_get_shared_key_shared_by_other_with_me(atclient, atkey, value, request_options)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
-    if ((ret = atclient_get_shared_key_shared_by_me_with_other(atclient, atkey, request_options, value)) != 0) {
+    if ((ret = atclient_get_shared_key_shared_by_me_with_other(atclient, atkey, value, request_options)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_shared_by_me_with_other: %d\n", ret);
       goto exit;
     }
@@ -69,8 +67,8 @@ exit: {
 }
 
 static int atclient_get_shared_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
-                                                      const atclient_get_shared_key_request_options *request_options,
-                                                      const char **value) {
+                                                      const char **value,
+                                                      const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -133,10 +131,9 @@ static int atclient_get_shared_key_validate_arguments(const atclient *atclient, 
 exit: { return ret; }
 }
 
-static int
-atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey,
-                                                const atclient_get_shared_key_request_options *request_options,
-                                                char **value) {
+static int atclient_get_shared_key_shared_by_me_with_other(
+    atclient *atclient, atclient_atkey *atkey,
+    char **value, const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
   /*
@@ -190,10 +187,12 @@ atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atk
   /*
    * 4. Get shared_encryption_key, if necessary
    */
-  if(request_options != NULL && atclient_get_shared_key_request_options_is_shared_encryption_key_initialized(request_options)) {
+  if (request_options != NULL &&
+      atclient_get_shared_key_request_options_is_shared_encryption_key_initialized(request_options)) {
     memcpy(shared_encryption_key_to_use, request_options->shared_encryption_key, shared_encryption_key_to_use_size);
   } else {
-    if ((ret = atclient_get_shared_encryption_key_shared_by_me(atclient, atkey->shared_with, shared_encryption_key_to_use)) != 0) {
+    if ((ret = atclient_get_shared_encryption_key_shared_by_me(atclient, atkey->shared_with,
+                                                               shared_encryption_key_to_use)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
@@ -273,8 +272,8 @@ atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atk
    * 8. Set IV in the AtKey
    */
   if (atclient_atkey_metadata_is_iv_nonce_initialized(&metadata)) {
-    if ((ret = atchops_base64_decode((unsigned char *)metadata.iv_nonce, strlen(metadata.iv_nonce), iv,
-                                     iv_size, NULL)) != 0) {
+    if ((ret = atchops_base64_decode((unsigned char *)metadata.iv_nonce, strlen(metadata.iv_nonce), iv, iv_size,
+                                     NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
@@ -321,14 +320,16 @@ atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atk
    * 10. Set value
    */
 
-  if(request_options != NULL && atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(request_options) && request_options->store_atkey_metadata) {
-    if((ret = atclient_atkey_metadata_from_json_str(&atkey->metadata, metadata_str)) != 0) {
+  if (request_options != NULL &&
+      atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(request_options) &&
+      request_options->store_atkey_metadata) {
+    if ((ret = atclient_atkey_metadata_from_json_str(&atkey->metadata, metadata_str)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_copy: %d\n", ret);
       goto exit;
     }
   }
 
-  if(value != NULL) {
+  if (value != NULL) {
     if ((*value = malloc(sizeof(char) * (value_raw_len + 1))) == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
@@ -354,9 +355,8 @@ exit: {
 }
 
 static int
-atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey,
-                                                const atclient_get_shared_key_request_options *request_options,
-                                                char **value) {
+atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char **value,
+                                                const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
   /*
@@ -552,7 +552,7 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
     }
   }
 
-  if(value != NULL) {
+  if (value != NULL) {
     if ((*value = malloc(sizeof(char) * (value_raw_len + 1))) == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
