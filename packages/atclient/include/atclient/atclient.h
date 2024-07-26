@@ -292,8 +292,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
  * @param output_array_len (output): the overall size of the array that was allocated
  * @return int 0 on success
  */
-int atclient_get_atkeys(atclient *atclient, const char *regex, const bool show_hidden, const size_t recv_buffer_size,
-                        atclient_atkey **atkey, size_t *output_array_len);
+int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len, const atclient_get_atkeys_request_options *request_options);
 
 /**
  * @brief Send a heartbeat (noop)

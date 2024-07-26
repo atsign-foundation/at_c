@@ -3,8 +3,8 @@
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TAG "request_options"
 
@@ -937,4 +937,238 @@ void atclient_get_public_key_request_options_unset_store_atkey_metadata(
    */
   options->store_atkey_metadata = false;
   atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(options, false);
+}
+
+void atclient_get_atkeys_request_options_init(atclient_get_atkeys_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_request_options_init: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Initialize the options
+   */
+  memset(options, 0, sizeof(atclient_get_atkeys_request_options));
+}
+
+void atclient_get_atkeys_request_options_free(atclient_get_atkeys_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_request_options_free: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Free the options
+   */
+  if (atclient_get_atkeys_request_options_is_regex_initialized(options)) {
+    atclient_get_atkeys_request_options_unset_regex(options);
+  }
+
+  if (atclient_get_atkeys_request_options_is_show_hidden_initialized(options)) {
+    atclient_get_atkeys_request_options_unset_show_hidden(options);
+  }
+}
+
+bool atclient_get_atkeys_request_options_is_regex_initialized(const atclient_get_atkeys_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_is_regex_initialized: Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the regex is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INDEX] &
+         ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED;
+}
+
+void atclient_get_atkeys_request_options_set_regex_initialized(atclient_get_atkeys_request_options *options,
+                                                               const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_set_regex_initialized: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Set the regex initialized
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INDEX] |=
+        ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INDEX] &=
+        ~ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED;
+  }
+}
+
+int atclient_get_atkeys_request_options_set_regex(atclient_get_atkeys_request_options *options, const char *regex) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_set_regex: Invalid arguments\n");
+    return ret;
+  }
+
+  if (regex == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_set_regex: Invalid arguments\n");
+    return ret;
+  }
+
+  /*
+   * 2. Unset the regex, if necessary
+   */
+  if (atclient_get_atkeys_request_options_is_regex_initialized(options)) {
+    atclient_get_atkeys_request_options_unset_regex(options);
+  }
+
+  /*
+   * 3. Set the regex
+   */
+  const size_t regex_len = strlen(regex);
+  const size_t regex_size = regex_len + 1;
+  if ((options->regex = (char *)malloc(sizeof(char) * regex_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_set_regex: Failed to allocate memory for regex\n");
+    return ret;
+  }
+
+  atclient_get_atkeys_request_options_set_regex_initialized(options, true);
+  memcpy(options->regex, regex, regex_len);
+  options->regex[regex_len] = '\0';
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atclient_get_atkeys_request_options_unset_regex(atclient_get_atkeys_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_unset_regex: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset the regex
+   */
+  if (atclient_get_atkeys_request_options_is_regex_initialized(options)) {
+    free(options->regex);
+  }
+  options->regex = NULL;
+  atclient_get_atkeys_request_options_set_regex_initialized(options, false);
+}
+
+bool atclient_get_atkeys_request_options_is_show_hidden_initialized(
+    const atclient_get_atkeys_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_is_show_hidden_initialized: Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the show hidden is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INDEX] &
+         ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED;
+}
+
+void atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
+                                                                     const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_set_show_hidden_initialized: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Set the show hidden initialized
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INDEX] |=
+        ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INDEX] &=
+        ~ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED;
+  }
+}
+
+int atclient_get_atkeys_request_options_set_show_hidden(atclient_get_atkeys_request_options *options,
+                                                        const bool show_hidden) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_set_show_hidden: Invalid arguments\n");
+    return ret;
+  }
+
+  /*
+   * 2. Unset the show hidden, if necessary
+   */
+  if (atclient_get_atkeys_request_options_is_show_hidden_initialized(options)) {
+    atclient_get_atkeys_request_options_unset_show_hidden(options);
+  }
+
+  /*
+   * 3. Set the show hidden
+   */
+  options->show_hidden = show_hidden;
+  atclient_get_atkeys_request_options_set_show_hidden_initialized(options, true);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_atkeys_request_options_unset_show_hidden: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset the show hidden
+   */
+  options->show_hidden = false;
+  atclient_get_atkeys_request_options_set_show_hidden_initialized(options, false);
 }

@@ -34,6 +34,12 @@
 #define ATCLIENT_DELETE_REQUEST_OPTIONS_INDEX 0
 #define ATCLIENT_DELETE_REQUEST_OPTIONS_INITIALIZED (VALUE_INITIALIZED << 0)
 
+#define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INDEX 0
+#define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INDEX 0
+
+#define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED (VALUE_INITIALIZED << 1)
+
 /*
  * 1A. Put SelfKey
  */
@@ -93,6 +99,16 @@ typedef struct atclient_delete_request_options {
   // future proofing
   uint8_t _initialized_fields[1];
 } atclient_delete_request_options;
+
+/*
+ * 4. Get_AtKeys Request Options
+ */
+
+typedef struct atclient_get_atkeys_request_options {
+    char *regex;
+    bool show_hidden;
+    uint8_t _initialized_fields[1];
+} atclient_get_atkeys_request_options;
 
 /*
  * 1A. Put SelfKey
@@ -195,5 +211,27 @@ void atclient_get_public_key_request_options_unset_store_atkey_metadata(
  */
 void atclient_delete_request_options_init(atclient_delete_request_options *options);
 void atclient_delete_request_options_free(atclient_delete_request_options *options);
+
+
+/*
+ * 4. Get_AtKeys Request Options
+ */
+
+void atclient_get_atkeys_request_options_init(atclient_get_atkeys_request_options *options);
+void atclient_get_atkeys_request_options_free(atclient_get_atkeys_request_options *options);
+
+bool atclient_get_atkeys_request_options_is_regex_initialized(
+    const atclient_get_atkeys_request_options *options);
+void atclient_get_atkeys_request_options_set_regex_initialized(atclient_get_atkeys_request_options *options,
+                                                               const bool initialized);
+int atclient_get_atkeys_request_options_set_regex(atclient_get_atkeys_request_options *options, const char *regex);
+void atclient_get_atkeys_request_options_unset_regex(atclient_get_atkeys_request_options *options);
+
+bool atclient_get_atkeys_request_options_is_show_hidden_initialized(
+    const atclient_get_atkeys_request_options *options);
+void atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
+                                                                     const bool initialized);
+int atclient_get_atkeys_request_options_set_show_hidden(atclient_get_atkeys_request_options *options, const bool show_hidden);
+void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_request_options *options);
 
 #endif
