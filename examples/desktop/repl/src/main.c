@@ -181,12 +181,22 @@ int main(int argc, char *argv[]) {
 
       get_end: { atclient_atkey_free(&atkey); }
       } else if (strcmp(command, "/scan") == 0) {
+        atclient_get_atkeys_request_options request_options;
+        atclient_get_atkeys_request_options_init(&request_options);
         char *regex = NULL;
         char *saveptr = NULL;
         regex = strtok_r(NULL, " ", &saveptr);
+        if(regex != NULL) {
+          regex[strcspn(regex, "\n")] = 0;
+
+          if((ret = atclient_get_atkeys_request_options_set_regex(&request_options, regex)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_request_options_set_regex: %d | failed to set regex\n", ret);
+            goto scan_end;
+          }
+        }
         atclient_atkey *arr = NULL;
         size_t arrlen = 0;
-        if ((ret = atclient_get_atkeys(&atclient, regex, true, 8192, &arr, &arrlen)) != 0) {
+        if ((ret = atclient_get_atkeys(&atclient, &arr, &arrlen, &request_options)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
           goto scan_end;
         }
@@ -202,11 +212,12 @@ int main(int argc, char *argv[]) {
           atclient_atkey_free(&arr[i]);
         }
         free(arr);
+        atclient_get_atkeys_request_options_free(&request_options);
       }
       } else if(strcmp(command, "/deleteall") == 0) {
         atclient_atkey *arr = NULL;
         size_t arrlen = 0;
-        if((ret = atclient_get_atkeys(&atclient, NULL, true, 8192, &arr, &arrlen)) != 0) {
+        if((ret = atclient_get_atkeys(&atclient, &arr, &arrlen, NULL)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
           goto deleteall_end;
         }
