@@ -32,7 +32,7 @@
  * 4. (for rsakeys), the rsakey struct used in rsa operations.
  */
 typedef struct atclient_atkeys {
-  char *pkam_publickey_base64;              // base64 encoded, RSA-2048 key, decrypted
+  char *pkam_public_key_base64;              // base64 encoded, RSA-2048 key, decrypted
   atchops_rsa_key_public_key pkam_public_key; // contains n, e
 
   char *pkam_private_key_base64;               // base64 encoded, RSA-2048 key, decrypted
@@ -63,7 +63,7 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
  */
 void atclient_atkeys_free(atclient_atkeys *atkeys);
 
-int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
+int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                             const size_t pkampublickeybase64len);
 
 int atclient_atkeys_set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
@@ -78,7 +78,7 @@ int atclient_atkeys_set_encrypt_private_key_base64(atclient_atkeys *atkeys, cons
 int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *selfencryptionkeybase64,
                                                 const size_t selfencryptionkeybase64len);
 
-int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
+int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                            const size_t pkampublickeybase64len);
 
 int atclient_atkeys_populate_pkam_private_key(atclient_atkeys *atkeys, const char *pkam_private_key_base64,

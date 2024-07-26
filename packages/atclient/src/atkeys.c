@@ -29,7 +29,7 @@ static void unset_encrypt_public_key_base64(atclient_atkeys *atkeys);
 static void unset_encrypt_private_key_base64(atclient_atkeys *atkeys);
 static void unset_self_encryption_key_base64(atclient_atkeys *atkeys);
 
-static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
+static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                    const size_t pkam_public_key_len);
 static int set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
                                     const size_t pkam_private_key_len);
@@ -46,6 +46,10 @@ void atclient_atkeys_init(atclient_atkeys *atkeys) {
   atchops_rsa_key_private_key_init(&(atkeys->pkam_private_key));
   atchops_rsa_key_public_key_init(&(atkeys->encrypt_public_key));
   atchops_rsa_key_private_key_init(&(atkeys->encrypt_private_key));
+  atkeys->pkam_public_key_base64 = NULL;
+  atkeys->pkam_private_key_base64 = NULL;
+  atkeys->encrypt_public_key_base64 = NULL;
+  atkeys->encrypt_private_key_base64 = NULL;
   atkeys->self_encryption_key_base64 = NULL;
 }
 
@@ -76,7 +80,7 @@ void atclient_atkeys_free(atclient_atkeys *atkeys) {
 
 }
 
-int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
+int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                             const size_t pkam_public_key_base64_len) {
   int ret = 1;
 
@@ -86,9 +90,9 @@ int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const ch
     return ret;
   }
 
-  if (pkam_publickey_base64 == NULL) {
+  if (pkam_public_key_base64 == NULL) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam_publickey_base64 is NULL\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam_public_key_base64 is NULL\n");
     return ret;
   }
 
@@ -98,8 +102,8 @@ int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const ch
     return ret;
   }
 
-  if ((ret = set_pkam_public_key_base64(atkeys, pkam_publickey_base64, pkam_public_key_base64_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkam_public_key_base64: %d | failed to set pkam_publickey_base64\n",
+  if ((ret = set_pkam_public_key_base64(atkeys, pkam_public_key_base64, pkam_public_key_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pkam_public_key_base64: %d | failed to set pkam_public_key_base64\n",
                  ret);
     goto exit;
   }
@@ -241,7 +245,7 @@ int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, cons
 exit: { return ret; }
 }
 
-int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
+int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                            const size_t pkam_public_key_base64_len) {
   int ret = 1;
 
@@ -251,9 +255,9 @@ int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char
     return ret;
   }
 
-  if (pkam_publickey_base64 == NULL) {
+  if (pkam_public_key_base64 == NULL) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam_publickey_base64 is NULL\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam_public_key_base64 is NULL\n");
     return ret;
   }
 
@@ -263,7 +267,7 @@ int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char
     return ret;
   }
 
-  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), pkam_publickey_base64, pkam_publickey_base64)) !=
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), pkam_public_key_base64, pkam_public_key_base64)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atchops_rsa_key_populate_public_key: %d | failed to populate pkam_public_key\n", ret);
@@ -617,8 +621,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
    */
 
   // 5a. pkam public key
-  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), atkeys->pkam_publickey_base64,
-                                               strlen(atkeys->pkam_publickey_base64))) != 0) {
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), atkeys->pkam_public_key_base64,
+                                               strlen(atkeys->pkam_public_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atchops_rsa_key_populate_public_key: %d | failed to populate pkam public key\n", ret);
     goto exit;
@@ -763,9 +767,9 @@ static void set_self_encryption_key_base64_initialized(atclient_atkeys *atkeys, 
 
 static void unset_pkam_public_key_base64(atclient_atkeys *atkeys) {
   if (is_pkam_public_key_base64_initialized(atkeys)) {
-    free(atkeys->pkam_publickey_base64);
+    free(atkeys->pkam_public_key_base64);
   }
-  atkeys->pkam_publickey_base64 = NULL;
+  atkeys->pkam_public_key_base64 = NULL;
   set_pkam_public_key_base64_initialized(atkeys, false);
 }
 
@@ -801,7 +805,7 @@ static void unset_self_encryption_key_base64(atclient_atkeys *atkeys) {
   set_self_encryption_key_base64_initialized(atkeys, false);
 }
 
-static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_publickey_base64,
+static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                    const size_t pkam_public_key_len) {
   int ret = 1;
 
@@ -810,16 +814,16 @@ static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_
   }
 
   const size_t pkam_publickey_size = pkam_public_key_len + 1;
-  atkeys->pkam_publickey_base64 = (char *)malloc(sizeof(char) * (pkam_publickey_size));
-  if (atkeys->pkam_publickey_base64 == NULL) {
+  atkeys->pkam_public_key_base64 = (char *)malloc(sizeof(char) * (pkam_publickey_size));
+  if (atkeys->pkam_public_key_base64 == NULL) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc: %d | failed to allocate memory for pkam_publickey_base64\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc: %d | failed to allocate memory for pkam_public_key_base64\n",
                  ret);
     goto exit;
   }
 
-  memcpy(atkeys->pkam_publickey_base64, pkam_publickey_base64, pkam_public_key_len);
-  atkeys->pkam_publickey_base64[pkam_public_key_len] = '\0';
+  memcpy(atkeys->pkam_public_key_base64, pkam_public_key_base64, pkam_public_key_len);
+  atkeys->pkam_public_key_base64[pkam_public_key_len] = '\0';
 
   set_pkam_public_key_base64_initialized(atkeys, true);
 
