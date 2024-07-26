@@ -30,13 +30,13 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   /*
    * 2. Variables
    */
-  const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
-  unsigned char shared_encryption_key[shared_encryption_key_size];
+  const size_t self_encryption_key_size = ATCHOPS_AES_256 / 8;
+  unsigned char self_encryption_key[self_encryption_key_size];
 
   const size_t iv_size = ATCHOPS_IV_BUFFER_SIZE;
   unsigned char iv[iv_size];
 
-  const size_t iv_base64_size = atchops_base64_encoded_size(iv_size);
+  const size_t iv_base64_size = atchops_base64_encoded_size(iv_size) + 1;
   char iv_base64[iv_base64_size];
 
   const size_t value_len = strlen(value);
@@ -44,7 +44,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   const size_t value_encrypted_size = atchops_aes_ctr_ciphertext_size(value_len);
   unsigned char value_encrypted[value_encrypted_size];
 
-  const size_t value_encrypted_base64_size = atchops_base64_encoded_size(value_encrypted_size);
+  const size_t value_encrypted_base64_size = atchops_base64_encoded_size(value_encrypted_size) + 1;
   char value_encrypted_base64[value_encrypted_base64_size];
 
   char *update_cmd = NULL;
@@ -73,8 +73,8 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   }
 
   if ((ret = atchops_base64_decode((unsigned char *)ctx->atkeys.self_encryption_key_base64,
-                                   strlen(ctx->atkeys.self_encryption_key_base64), shared_encryption_key,
-                                   shared_encryption_key_size, NULL)) != 0) {
+                                   strlen(ctx->atkeys.self_encryption_key_base64), self_encryption_key,
+                                   self_encryption_key_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -87,8 +87,10 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
     goto exit;
   }
 
-  memset(iv_base64, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  memset(iv_base64, 0, sizeof(unsigned char) * iv_base64_size);
   if ((ret = atchops_base64_encode(iv, iv_size, iv_base64, iv_base64_size, NULL)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
+    goto exit;
   }
 
   if ((ret = atclient_atkey_metadata_set_iv_nonce(&(atkey->metadata), iv_base64)) != 0) {
@@ -100,12 +102,22 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
    * 5. Encrypt value
    */
   size_t value_encrypted_len = 0;
-  memset(value_encrypted, 0, sizeof(unsigned char) * value_encrypted_size);
-  if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
+  if ((ret = atchops_aes_ctr_encrypt(self_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
                                      value_encrypted, value_encrypted_size, &value_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
     goto exit;
   }
+
+  // log value_encrypted
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_encrypted: ");
+  for (size_t i = 0; i < value_encrypted_len; i++) {
+    printf("%02x ", value_encrypted[i]);
+  }
+  printf("\n");
+
+  // log value_encrypted_len
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_encrypted_len: %zu\n", value_encrypted_len);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_encrypted_size: %zu\n", value_encrypted_size);
 
   size_t value_encrypted_base64_len = 0;
   memset(value_encrypted_base64, 0, sizeof(char) * value_encrypted_base64_size);

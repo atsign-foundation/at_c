@@ -138,7 +138,7 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char *value
 
   if ((ret = atchops_base64_decode((unsigned char *)atclient->atkeys.self_encryption_key_base64,
                                    strlen(atclient->atkeys.self_encryption_key_base64), self_encryption_key,
-                                   self_encryption_size, &self_encryption_key_len)) != 0) {
+                                   self_encryption_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -153,12 +153,45 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char *value
   memset(value_raw, 0, sizeof(char) * value_raw_size);
   size_t value_raw_len = 0;
 
+  // log data->valuestring
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "data->valuestring: %s\n", data->valuestring);
+
+  // log data->valuestring length
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "data->valuestring length: %zu\n", strlen(data->valuestring));
+
   if ((ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring),
                                    (unsigned char *)value_raw, value_raw_size, &value_raw_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
 
+  // log self_encryption_Key
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "self_encryption_key: ");
+  for (size_t i = 0; i < self_encryption_size; i++) {
+    printf("%02x ", self_encryption_key[i]);
+  }
+  printf("\n");
+
+  // log iv
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "iv: ");
+  for (size_t i = 0; i < ATCHOPS_IV_BUFFER_SIZE; i++) {
+    printf("%02x ", iv[i]);
+  }
+  printf("\n");
+
+  // log value_raw
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_raw: ");
+  for (size_t i = 0; i < value_raw_len; i++) {
+    printf("%02x ", value_raw[i]);
+  }
+  printf("\n");
+
+  // log value_raw_len
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_raw_len: %zu\n", value_raw_len);
+
+  // log value %p, value_size, and value_len
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value: %p, value_size: %zu, value_len: %zu\n", value, value_size,
+               *value_len);
   if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value_raw, value_raw_len,
                                     (unsigned char *)value, value_size, value_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d\n", ret);
