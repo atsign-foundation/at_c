@@ -135,14 +135,14 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
 
   // update: command
   const size_t update_cmd_size =
-      strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len + strlen(" ") + value_len + strlen("\r\n") + 1;
+      strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len + strlen(" ") + value_encrypted_base64_len + strlen("\r\n") + 1;
   if ((update_cmd = malloc(sizeof(char) * update_cmd_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for update_cmd\n");
     goto exit;
   }
   memset(update_cmd, 0, sizeof(char) * update_cmd_size);
-  snprintf(update_cmd, update_cmd_size, "update%s:%s %s\r\n", atkey_str, metadata_protocol_str, value);
+  snprintf(update_cmd, update_cmd_size, "update%s:%s %s\r\n", atkey_str, metadata_protocol_str, value_encrypted_base64);
   const size_t update_cmd_len = update_cmd_size - 1;
 
   /*
