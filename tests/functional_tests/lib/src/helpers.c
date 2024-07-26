@@ -232,6 +232,23 @@ exit: { return ret; }
 int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient) {
   int ret = 1;
 
+  if(atclient1 == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+
+  if(recipient == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recipient is NULL\n");
+    goto exit;
+  }
+
+  if(!atclient_is_atsign_initialized(atclient1)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is not initialized\n");
+    goto exit;
+  }
+
+  // TODO check if pkam authenticated
+
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
 
   char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
@@ -243,18 +260,10 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   atclient_atkey_init(&atkeyforthem);
   
   char *client_atsign_with_at = NULL;
-  char *client_atsign_without_at = NULL;
-
   char *recipient_atsign_with_at = NULL;
-  char *recipient_atsign_without_at = NULL;
 
   if((ret = atclient_string_utils_atsign_with_at(atclient1->atsign, &client_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
-    goto exit;
-  }
-
-  if((ret = atclient_string_utils_atsign_without_at(atclient1->atsign, &client_atsign_without_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_without_at: %d\n", ret);
     goto exit;
   }
 
@@ -263,10 +272,8 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
     goto exit;
   }
 
-  if((ret = atclient_string_utils_atsign_without_at(recipient, &recipient_atsign_without_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_without_at: %d\n", ret);
-    goto exit;
-  }
+  char *client_atsign_without_at = client_atsign_with_at + 1;
+  char *recipient_atsign_without_at = recipient_atsign_with_at + 1;
 
   memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
   snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", recipient_atsign_without_at, client_atsign_with_at);
@@ -303,9 +310,7 @@ exit: {
   atclient_atkey_free(&atkeyforme);
   atclient_atkey_free(&atkeyforthem);
   free(client_atsign_with_at);
-  free(client_atsign_without_at);
   free(recipient_atsign_with_at);
-  free(recipient_atsign_without_at);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
   return ret;
 }
