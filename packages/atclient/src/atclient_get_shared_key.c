@@ -28,7 +28,7 @@ int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey,
                             char **value, const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
-  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, request_options, value)) != 0) {
+  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, value, request_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_validate_arguments: %d\n", ret);
     return ret;
   }
