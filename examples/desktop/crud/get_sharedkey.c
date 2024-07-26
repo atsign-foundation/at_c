@@ -93,7 +93,7 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
                atkeystr);
 
-  ret = atclient_get_shared_key(&atclient, &atkey, value, valuesize, valuelen, NULL);
+  ret = atclient_get_shared_key(&atclient, &atkey, value, NULL);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
     goto exit;

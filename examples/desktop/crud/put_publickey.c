@@ -83,7 +83,7 @@ int main() {
   }
 
   // atclient_get_public_key
-  if ((ret = atclient_get_public_key(&atclient, &atkey, value, valuelen, &valueolen, true)) != 0) {
+  if ((ret = atclient_get_public_key(&atclient, &atkey, value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
     goto exit;
   }

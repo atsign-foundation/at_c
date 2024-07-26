@@ -8,17 +8,15 @@
 
 #define TAG "atclient_get_public_key"
 
-static int atclient_get_public_key_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
-                                                     const size_t value_size, size_t *value_len, bool bypass_cache);
+static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value, const atclient_get_public_key_request_options *request_options);
 
-int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
-                           size_t *value_len, bool bypass_cache) {
+int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **value, atclient_get_public_key_request_options *request_options) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, value, value_size, value_len, bypass_cache)) !=
+  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, value, request_options)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key_validate_arguments: %d\n", ret);
     return ret;
@@ -29,7 +27,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *val
    */
   char *atkey_str = NULL;
 
-  const size_t recv_size = value_size;
+  const size_t recv_size = 8192; // TODO use atclient_connection_read to adaptively read for us
   unsigned char recv[recv_size];
   memset(recv, 0, sizeof(unsigned char) * recv_size);
   size_t recv_len = 0;
@@ -56,10 +54,11 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *val
     goto exit;
   }
 
+  const bool bypass_cache = request_options != NULL && atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) && request_options->bypass_cache;
+
   const size_t plookup_cmd_size = strlen("plookup:all:\r\n") + (bypass_cache ? strlen("bypassCache:true:") : 0) +
                                   strlen(atkey_str_without_public) + 1;
-  plookup_cmd = malloc(sizeof(char) * plookup_cmd_size);
-  if (plookup_cmd == NULL) {
+  if ((plookup_cmd = malloc(sizeof(char) * plookup_cmd_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for plookup_cmd\n");
     goto exit;
@@ -91,8 +90,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *val
 
   char *response_without_data = response + 5;
 
-  root = cJSON_Parse(response_without_data);
-  if (root == NULL) {
+  if ((root = cJSON_Parse(response_without_data)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
@@ -108,22 +106,32 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *val
   /*
    * 6. Return data to caller
    */
-  memcpy(value, data->valuestring, strlen(data->valuestring));
-  *value_len = strlen(value);
 
-  // 6b. write to atkey->metadata
-  cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
-  if (metadata == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
-    goto exit;
+  bool write_metadata_to_atkey = request_options != NULL && atclient_get_public_key_request_options_is_store_atkey_metadata_initialized(request_options) && request_options->store_atkey_metadata;
+  if(write_metadata_to_atkey) {
+    cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
+    if (metadata == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetObjectItem: %d\n", ret);
+      goto exit;
+    }
+
+    metadata_str = cJSON_Print(metadata);
+
+    if ((ret = atclient_atkey_metadata_from_json_str(&(atkey->metadata), metadata_str)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str: %d\n", ret);
+      goto exit;
+    }
   }
 
-  metadata_str = cJSON_Print(metadata);
-
-  if ((ret = atclient_atkey_metadata_from_json_str(&(atkey->metadata), metadata_str)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str: %d\n", ret);
-    goto exit;
+  if(value != NULL) {
+    if ((*value = malloc(sizeof(char) * (strlen(data->valuestring) + 1))) == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
+      goto exit;
+    }
+    memcpy(*value, data->valuestring, strlen(data->valuestring));
+    (*value)[strlen(data->valuestring)] = '\0';
   }
 
   ret = 0;
@@ -139,8 +147,7 @@ exit: {
 }
 }
 
-static int atclient_get_public_key_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
-                                                     const size_t value_size, size_t *value_len, bool bypass_cache) {
+static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value, const atclient_get_public_key_request_options *request_options) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -166,18 +173,6 @@ static int atclient_get_public_key_validate_arguments(atclient *atclient, atclie
   if (value == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
-    goto exit;
-  }
-
-  if (value_size == 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value_size is 0\n");
-    goto exit;
-  }
-
-  if (value_len == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value_len is NULL\n");
     goto exit;
   }
 

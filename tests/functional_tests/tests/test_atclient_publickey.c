@@ -149,7 +149,7 @@ static int test_2_get(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_public_key(atclient, &atkey, value, valuesize, &valuelen, false)) != 0) {
+  if ((ret = atclient_get_public_key(atclient, &atkey, value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_public_key\n");
     goto exit;
   }
@@ -271,7 +271,7 @@ static int test_6_get_with_metadata(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_public_key(atclient, &atkey, value, valuesize, &valuelen, true)) != 0) {
+  if ((ret = atclient_get_public_key(atclient, &atkey, value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_public_key\n");
     goto exit;
   }
