@@ -43,7 +43,7 @@ jobs:
       - name: Debug temp
         working-directory: tests/functional_tests
         run: |
-          tests/functional_tests/tools/run_test.sh test_atclient_sharedkey
+          ./tools/run_test.sh test_atclient_sharedkey
 
       - name: Build and Run Functional Tests
         working-directory: tests/functional_tests
