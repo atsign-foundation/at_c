@@ -41,7 +41,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   const size_t iv_size = ATCHOPS_IV_BUFFER_SIZE;
   unsigned char iv[iv_size];
 
-  const size_t iv_base64_size = atchops_base64_encoded_size(iv_size);
+  const size_t iv_base64_size = atchops_base64_encoded_size(iv_size) + 1;
   char iv_base64[iv_base64_size];
 
   const size_t value_len = strlen(value);
@@ -49,7 +49,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   const size_t value_encrypted_size = atchops_aes_ctr_ciphertext_size(value_len);
   unsigned char value_encrypted[value_encrypted_size];
 
-  const size_t value_encrypted_base64_size = atchops_base64_encoded_size(value_encrypted_size);
+  const size_t value_encrypted_base64_size = atchops_base64_encoded_size(value_encrypted_size) + 1;
   char value_encrypted_base64[value_encrypted_base64_size];
 
   char *update_cmd = NULL;
@@ -174,6 +174,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
 
   char *response = (char *)recv;
+  
   if (!atclient_string_utils_starts_with(response, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
@@ -182,7 +183,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
 
   char *response_without_data = response + strlen("data:");
-  
+
   /*
    * 8. Return commit id
    */
