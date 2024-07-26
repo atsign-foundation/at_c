@@ -66,8 +66,8 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notifi
 
     if (params->shared_encryption_key == NULL) {
       char *recipient_atsign_with_at = NULL;
-      if ((ret = atclient_stringutils_atsign_with_at(params->atkey->shared_with, &recipient_atsign_with_at)) != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed with code %d\n",
+      if ((ret = atclient_string_utils_atsign_with_at(params->atkey->shared_with, &recipient_atsign_with_at)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at failed with code %d\n",
                      ret);
         return ret;
       }
@@ -156,7 +156,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notifi
     goto exit;
   }
   // if starts with data:
-  if (atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (atclient_string_utils_starts_with((char *)recv, "data:")) {
     if (notification_id != NULL) { // if not null, then they care about the notification id
       // parse the notification id
       char *data = (char *)recv + strlen("data:");
@@ -222,7 +222,7 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
   }
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
-    cmdsize += strlen(":ttln:") + atclient_stringutils_long_strlen(params->notification_expiry); // :$ttln
+    cmdsize += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry); // :$ttln
   }
 
   if (atclient_notify_params_is_atkey_initialized(params)) {
@@ -312,7 +312,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
     snprintf(cmd + off, cmdsize - off, ":ttln:%lu", params->notification_expiry);
-    off += strlen(":ttln:") + atclient_stringutils_long_strlen(params->notification_expiry);
+    off += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry);
   }
 
   if ((res = atclient_atkey_metadata_to_protocol_str(&(params->atkey->metadata), &metadata_protocol_str)) != 0) {

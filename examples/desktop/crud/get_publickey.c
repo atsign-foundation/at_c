@@ -77,7 +77,7 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
                atkeystr);
 
-  if ((ret = atclient_get_publickey(&atclient, &atkey, value, valuelen, &valueolen, true)) != 0) {
+  if ((ret = atclient_get_public_key(&atclient, &atkey, value, valuelen, &valueolen, true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
     goto exit;
   }

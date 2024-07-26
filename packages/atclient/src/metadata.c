@@ -1000,7 +1000,7 @@ size_t atclient_atkey_metadata_ttl_strlen(const atclient_atkey_metadata *metadat
     return 0;
   }
   return strlen(":ttl:") // :ttl:
-         + atclient_stringutils_long_strlen(metadata->ttl);
+         + atclient_string_utils_long_strlen(metadata->ttl);
 }
 
 size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadata) {
@@ -1011,7 +1011,7 @@ size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadat
     return 0;
   }
   return strlen(":ttb:") // :ttb:
-         + atclient_stringutils_long_strlen(metadata->ttb);
+         + atclient_string_utils_long_strlen(metadata->ttb);
 }
 
 size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadata) {
@@ -1022,7 +1022,7 @@ size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadat
     return 0;
   }
   return strlen(":ttr:") // :ttr:
-         + atclient_stringutils_long_strlen(metadata->ttr);
+         + atclient_string_utils_long_strlen(metadata->ttr);
 }
 
 size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadata) {
@@ -1211,17 +1211,17 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
     sprintf(*metadata_str + pos, ":ttl:%ld", metadata->ttl);
-    pos += 5 + atclient_stringutils_long_strlen(metadata->ttl);
+    pos += 5 + atclient_string_utils_long_strlen(metadata->ttl);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
     sprintf(*metadata_str + pos, ":ttb:%ld", metadata->ttb);
-    pos += 5 + atclient_stringutils_long_strlen(metadata->ttb);
+    pos += 5 + atclient_string_utils_long_strlen(metadata->ttb);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
     sprintf(*metadata_str + pos, ":ttr:%ld", metadata->ttr);
-    pos += 5 + atclient_stringutils_long_strlen(metadata->ttr);
+    pos += 5 + atclient_string_utils_long_strlen(metadata->ttr);
   }
 
   if (atclient_atkey_metadata_is_ccd_initialized(metadata)) {

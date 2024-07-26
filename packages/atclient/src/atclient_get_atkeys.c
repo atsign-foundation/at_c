@@ -60,7 +60,7 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
   /*
    * 5. Parse response
    */
-  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recvlen, recv);

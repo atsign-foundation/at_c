@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
           goto get_end;
         }
         case ATCLIENT_ATKEY_TYPE_PUBLIC_KEY: {
-          if ((ret = atclient_get_publickey(&atclient, &atkey, recv, recvsize, &recvlen, true)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_publickey: %d | failed to get public key\n",
+          if ((ret = atclient_get_public_key(&atclient, &atkey, recv, recvsize, &recvlen, true)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key: %d | failed to get public key\n",
                          ret);
             goto get_end;
           }
@@ -161,16 +161,16 @@ int main(int argc, char *argv[]) {
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SELF_KEY: {
-          if ((ret = atclient_get_selfkey(&atclient, &atkey, recv, recvsize, &recvlen)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_selfkey: %d | failed to get self key\n", ret);
+          if ((ret = atclient_get_self_key(&atclient, &atkey, recv, recvsize, &recvlen)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key: %d | failed to get self key\n", ret);
             goto get_end;
           }
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SHARED_KEY: {
-          if ((ret = atclient_get_sharedkey(&atclient, &atkey, recv, recvsize, &recvlen, NULL)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey: %d | failed to get shared key\n",
+          if ((ret = atclient_get_shared_key(&atclient, &atkey, recv, recvsize, &recvlen, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key: %d | failed to get shared key\n",
                          ret);
             goto get_end;
           }

@@ -78,7 +78,7 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)(atkeystrlen),
                atkeystr);
 
-  ret = atclient_get_selfkey(&atclient, &atkey, value, valuelen, &(valueolen));
+  ret = atclient_get_self_key(&atclient, &atkey, value, valuelen, &(valueolen));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get self key");
     goto exit;

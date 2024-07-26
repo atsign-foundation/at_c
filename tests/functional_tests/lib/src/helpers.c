@@ -102,7 +102,7 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, "data:")) {
+  if (!atclient_string_utils_starts_with(recv, "data:")) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "publickey does not exist: \"%s\"\n", recv);
     goto exit;
@@ -157,7 +157,7 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, "data:")) {
+  if (!atclient_string_utils_starts_with(recv, "data:")) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "selfkey does not exist: \"%s\"\n", recv);
     goto exit;
@@ -212,7 +212,7 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, "data:")) {
+  if (!atclient_string_utils_starts_with(recv, "data:")) {
     ret = false;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "sharedkey does not exist: \"%s\"\n", recv);
     goto exit;
@@ -248,23 +248,23 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   char *recipient_atsign_with_at = NULL;
   char *recipient_atsign_without_at = NULL;
 
-  if((ret = atclient_stringutils_atsign_with_at(atclient1->atsign, &client_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if((ret = atclient_string_utils_atsign_with_at(atclient1->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_stringutils_atsign_without_at(atclient1->atsign, &client_atsign_without_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+  if((ret = atclient_string_utils_atsign_without_at(atclient1->atsign, &client_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_without_at: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_stringutils_atsign_with_at(recipient, &recipient_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if((ret = atclient_string_utils_atsign_with_at(recipient, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_stringutils_atsign_without_at(recipient, &recipient_atsign_without_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+  if((ret = atclient_string_utils_atsign_without_at(recipient, &recipient_atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_without_at: %d\n", ret);
     goto exit;
   }
 

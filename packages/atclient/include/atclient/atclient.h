@@ -4,6 +4,7 @@
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
+#include "atclient/request_options.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -139,13 +140,56 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
- * @param value the value to put into atServer
- * @param value_len the length of the value (most of the time you will use strlen() on a null-terminated string for
- * this value)
- * @param commit_id (optional) the output commit_id of the put operation that the atServer returns
+ * @param value the value to put into atServer, assumed to be non-null and null-terminated
+ * @param commit_id (optional) the output commit_id of the put operation that the atServer returns, can be NULL if you
+ * don't care about the commit_id
  * @return int 0 on success
  */
-int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, const size_t value_len, int *commit_id);
+int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, int **commit_id);
+
+/**
+ * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted only for you
+ *
+ * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via
+ * atclient_pkam_authenticate()
+ * @param atkey the atkey to put the value into, must be initialized with atclient_atkey_init() and have populated
+ * values (sharedby, key and optionally namespace)
+ * @param value the value to put into the atServer, assumed to be non-null and null-terminated
+ * @param request_options the options for the put operation, can be NULL if you don't need to set any options
+ * @param commit_id the output commit_id of the put operation that the atServer returns, can be NULL if you don't care
+ * about the commit_id
+ * @return int 0 on success
+ */
+int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *value,
+                          const atclient_put_self_key_request_options *request_options, int *commit_id);
+
+/**
+ * @brief Put a string value into a shared key into your atServer. Putting a shared key is a shared value and is encrypted for you and the person you shared it with
+ *
+ * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via
+ * atclient_pkam_authenticate()
+ * @param atkey the atkey to put the value into, must be initialized with atclient_atkey_init() and have populated
+ * values (sharedby, key and optionally namespace)
+ * @param value the value to put into the atServer, assumed to be non-null and null-terminated
+ * @param request_options the options for the put operation, can be NULL if you don't need to set any options
+ * @param commit_id the output commit_id of the put operation that the atServer returns, can be NULL if you don't care
+ * about the commit_id
+ * @return int 0 on success
+ */
+int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *value,
+                            const atclient_put_shared_key_request_options *request_options, int *commit_id);
+
+/**
+ * @brief Put a string value into a public key into your atServer. Putting a public key is a public value and not encrypted
+ * 
+ * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via atclient_pkam_authenticate()
+ * @param atkey the atkey to put the value into, must be initialized with atclient_atkey_init() and have populated values (sharedby, key and optionally namespace)
+ * @param value the value to put into the atServer, assumed to be non-null and null-terminated
+ * @param request_options the options for the put operation, can be NULL if you don't need to set any options
+ * @param commit_id the output commit_id of the put operation that the atServer returns, can be NULL if you don't care about the commit_id
+ * @return int 0 on success
+ */
+int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *value, const atclient_put_public_key_request_options *request_options, int *commit_id);
 
 /**
  * @brief Get a string value from your atServer.
@@ -155,8 +199,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
- * associated with your value.
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to
+ * be associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
@@ -165,8 +209,8 @@ int atclient_put(atclient *atclient, atclient_atkey *atkey, const char *value, c
  * @param value_len the output length of the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
-                         size_t *value_len);
+int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+                          size_t *value_len);
 
 /**
  * @brief Get a publickey from your atServer or another atServer
@@ -176,8 +220,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
- * associated with your value.
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to
+ * be associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
@@ -188,8 +232,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
  * up-to-date value straight from the atServer that the publickey sits on, false otherwise
  * @return int 0 on success
  */
-int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
-                           size_t *value_len, bool bypass_cache);
+int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+                            size_t *value_len, bool bypass_cache);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
@@ -212,8 +256,8 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
  * exists.
  * @return int 0 on success
  */
-int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
-                           size_t *value_len, const unsigned char *shared_encryption_key);
+int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+                            size_t *value_len, const unsigned char *shared_encryption_key);
 
 /**
  * @brief Delete an atkey from your atserver
@@ -233,7 +277,8 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  * not need it
  * @return int 0 on success
  */
-int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options, int *commit_id);
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options,
+                    int *commit_id);
 
 /**
  * @brief Runs a scan of the atServer to see what atKeys you have.

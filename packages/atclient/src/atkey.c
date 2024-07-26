@@ -195,7 +195,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
     }
   }
 
-  if (atclient_stringutils_starts_with(token, "public")) {
+  if (atclient_string_utils_starts_with(token, "public")) {
     // it is a public key
     atclient_atkey_metadata_set_is_public(&(atkey->metadata), true);
     // shift tokens array to the left
@@ -205,7 +205,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
       ret = 1;
       goto exit;
     }
-  } else if (atclient_stringutils_starts_with(token, "@")) {
+  } else if (atclient_string_utils_starts_with(token, "@")) {
     // it is a shared key
     // set shared_with
     if ((ret = atclient_atkey_set_shared_with(atkey, token)) != 0) {
@@ -218,7 +218,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "token is NULL. %s atkey is probably incomplete\n", atkeystr);
       goto exit;
     }
-  } else if (atclient_stringutils_starts_with(token, "_")) {
+  } else if (atclient_string_utils_starts_with(token, "_")) {
     // it is an internal key
   } else {
     // it is a self key
@@ -277,7 +277,7 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
   }
   tokenlen = strlen(token);
 
-  if ((ret = atclient_stringutils_atsign_with_at(token, &shared_by_with_at)) != 0) {
+  if ((ret = atclient_string_utils_atsign_with_at(token, &shared_by_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at failed\n");
     goto exit;
   }

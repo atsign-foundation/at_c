@@ -14,7 +14,7 @@
 
 #define TAG "atclient_get_selfkey"
 
-static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
+static int atclient_get_self_key_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                 const char *value, const size_t value_size, const size_t *value_len);
 
 int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
@@ -24,8 +24,8 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_selfkey_valid_arguments(atclient, atkey, value, value_size, value_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_selfkey_valid_arguments: %d\n", ret);
+  if ((ret = atclient_get_self_key_valid_arguments(atclient, atkey, value, value_size, value_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_valid_arguments: %d\n", ret);
     return ret;
   }
 
@@ -86,7 +86,7 @@ int atclient_get_selfkey(atclient *atclient, atclient_atkey *atkey, char *value,
    * 5. Parse response
    */
   char *response = (char *)recv;
-  if (!atclient_stringutils_starts_with(response, "data:")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -180,7 +180,7 @@ exit: {
 }
 }
 
-static int atclient_get_selfkey_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
+static int atclient_get_self_key_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                 const char *value, const size_t value_size, const size_t *value_len) {
   int ret = 1;
 

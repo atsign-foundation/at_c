@@ -149,8 +149,8 @@ static int test_2_get(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_publickey(atclient, &atkey, value, valuesize, &valuelen, false)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey\n");
+  if ((ret = atclient_get_public_key(atclient, &atkey, value, valuesize, &valuelen, false)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_public_key\n");
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
@@ -271,8 +271,8 @@ static int test_6_get_with_metadata(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_publickey(atclient, &atkey, value, valuesize, &valuelen, true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_publickey\n");
+  if ((ret = atclient_get_public_key(atclient, &atkey, value, valuesize, &valuelen, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed atclient_get_public_key\n");
     goto exit;
   }
 
@@ -417,7 +417,7 @@ static int tear_down(atclient *atclient) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, "data:")) {
+  if (!atclient_string_utils_starts_with(recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Failed to delete: \"%.*s\"\n", (int)recvlen, recv);
     goto exit;

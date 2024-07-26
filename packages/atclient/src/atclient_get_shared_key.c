@@ -12,51 +12,51 @@
 
 #define TAG "atclient_get_sharedkey"
 
-static int atclient_get_sharedkey_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+static int atclient_get_shared_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                      const char *value, const size_t value_size, const size_t *value_len,
                                                      const unsigned char *shared_encryption_key);
 
-static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
                                                           const size_t value_size, size_t *value_len,
                                                           const unsigned char *shared_encryption_key);
 
-static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
                                                           const size_t value_size, size_t *value_len,
                                                           const unsigned char *shared_encryption_key);
 
-int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
                            size_t *value_len, const unsigned char *shared_encryption_key) {
   int ret = 1;
 
-  if ((ret = atclient_get_sharedkey_validate_arguments(atclient, atkey, value, value_size, value_len,
+  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, value, value_size, value_len,
                                                        shared_encryption_key)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_validate_arguments: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_validate_arguments: %d\n", ret);
     return ret;
   }
 
   char *client_atsign_with_at = NULL;
   char *sharedby_atsign_with_at = NULL;
 
-  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_with_at(atkey->shared_by, &sharedby_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atkey->shared_by, &sharedby_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
   if (strcmp(sharedby_atsign_with_at, client_atsign_with_at) != 0) {
-    if ((ret = atclient_get_sharedkey_shared_by_other_with_me(atclient, atkey, value, value_size, value_len,
+    if ((ret = atclient_get_shared_key_shared_by_other_with_me(atclient, atkey, value, value_size, value_len,
                                                               shared_encryption_key)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_other_with_me: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_shared_by_other_with_me: %d\n", ret);
       goto exit;
     }
   } else {
-    if ((ret = atclient_get_sharedkey_shared_by_me_with_other(atclient, atkey, value, value_size, value_len,
+    if ((ret = atclient_get_shared_key_shared_by_me_with_other(atclient, atkey, value, value_size, value_len,
                                                               shared_encryption_key)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_sharedkey_shared_by_me_with_other: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_shared_by_me_with_other: %d\n", ret);
       goto exit;
     }
   }
@@ -69,7 +69,7 @@ exit: {
 }
 }
 
-static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char *value,
                                                           const size_t value_size, size_t *value_len,
                                                           const unsigned char *shared_encryption_key) {
   int ret = 1;
@@ -109,13 +109,13 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
   /*
    * 3. Format atSigns
    */
-  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atclient->atsign, &client_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_with_at(atkey->shared_with, &recipient_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atkey->shared_with, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
@@ -163,7 +163,7 @@ static int atclient_get_sharedkey_shared_by_me_with_other(atclient *atclient, at
    */
   char *response = (char *)recv;
 
-  if (!atclient_stringutils_starts_with(response, "data:")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
     ret = 1;
     goto exit;
@@ -272,7 +272,7 @@ exit: {
 }
 }
 
-static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char *value,
                                                           const size_t value_size, size_t *value_len,
                                                           const unsigned char *shared_encryption_key) {
   int ret = 1;
@@ -308,13 +308,13 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   /*
    * 3. Format atSigns
    */
-  if ((ret = atclient_stringutils_atsign_with_at(atkey->shared_by, &sender_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atkey->shared_by, &sender_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_with_at(atkey->shared_with, &recipient_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atkey->shared_with, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
@@ -368,7 +368,7 @@ static int atclient_get_sharedkey_shared_by_other_with_me(atclient *atclient, at
   char *response = (char *)recv;
 
   // Truncate response : "data:"
-  if (!atclient_stringutils_starts_with(response, "data:")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
     ret = 1;
     goto exit;
@@ -474,7 +474,7 @@ exit: {
 }
 }
 
-static int atclient_get_sharedkey_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+static int atclient_get_shared_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                      const char *value, const size_t value_size, const size_t *value_len,
                                                      const unsigned char *shared_encryption_key) {
   int ret = 1;
@@ -501,7 +501,7 @@ static int atclient_get_sharedkey_validate_arguments(const atclient *atclient, c
     ret = 1;
     atlogger_log(
         TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-        "atclient_get_sharedkey cannot be called from an async_read atclient, it will cause a race condition\n");
+        "atclient_get_shared_key cannot be called from an async_read atclient, it will cause a race condition\n");
     goto exit;
   }
 

@@ -171,7 +171,7 @@ static int test_3_get(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_selfkey(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
+  if ((ret = atclient_get_self_key(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
@@ -291,7 +291,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_selfkey(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
+  if ((ret = atclient_get_self_key(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
@@ -420,7 +420,7 @@ static int tear_down(atclient *atclient) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, "data:")) {
+  if (!atclient_string_utils_starts_with(recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;

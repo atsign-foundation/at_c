@@ -164,8 +164,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   /*
    * 3. Ensure that the atsign has the @ symbol.
    */
-  if ((ret = atclient_stringutils_atsign_with_at(atsign, &(atsign_with_at))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atsign, &(atsign_with_at))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
@@ -201,7 +201,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -252,7 +252,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const i
   }
 
   // check for data:success
-  if (!atclient_stringutils_starts_with((char *)recv, "data:success")) {
+  if (!atclient_string_utils_starts_with((char *)recv, "data:success")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
                  (int)recv_len, recv);
@@ -314,8 +314,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((const char *)ptr, "data:ok") &&
-      !atclient_stringutils_ends_with((const char *)ptr, "data:ok")) {
+  if (!atclient_string_utils_starts_with((const char *)ptr, "data:ok") &&
+      !atclient_string_utils_ends_with((const char *)ptr, "data:ok")) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
     ret = -1;
     goto exit;

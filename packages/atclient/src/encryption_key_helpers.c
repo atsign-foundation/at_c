@@ -50,13 +50,13 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
   /*
    * 3. Generate plookup command
    */
-  if ((ret = atclient_stringutils_atsign_with_at(atsign, &atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atsign, &atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_without_at(atsign_with_at, &atsign_without_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_without_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_without_at(atsign_with_at, &atsign_without_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_without_at: %d\n", ret);
     goto exit;
   }
 
@@ -82,8 +82,8 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
    */
   char *response = (char *)recv;
 
-  if (!atclient_stringutils_starts_with(response, "data:")) {
-    if (atclient_stringutils_starts_with((char *)recv, "error:AT0015-key not found")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
+    if (atclient_string_utils_starts_with((char *)recv, "error:AT0015-key not found")) {
       ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n", ret);
       goto exit;
@@ -156,13 +156,13 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
   /*
    * 3. Build llookup: command
    */
-  if ((ret = atclient_stringutils_atsign_with_at(ctx->atsign, &sender_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(ctx->atsign, &sender_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_with_at(recipient_atsign, &recipient_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(recipient_atsign, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
@@ -196,8 +196,8 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
    */
   char *response = (char *)recv;
 
-  if (!atclient_stringutils_starts_with(response, "data:")) {
-    if (atclient_stringutils_starts_with(response, "error:AT0015-key not found")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
+    if (atclient_string_utils_starts_with(response, "error:AT0015-key not found")) {
       ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d; error:AT0015-key not found\n", ret);
       goto exit;
@@ -277,13 +277,13 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   /*
    * 3. Build lookup: command
    */
-  if ((ret = atclient_stringutils_atsign_with_at(ctx->atsign, &sender_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(ctx->atsign, &sender_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_stringutils_atsign_with_at(recipient_atsign, &recipient_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(recipient_atsign, &recipient_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
@@ -312,8 +312,8 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   char *response = (char *)recv;
   char *response_without_data = response + 5; // skip "data:"
 
-  if (!atclient_stringutils_starts_with(response, "data:")) {
-    if (atclient_stringutils_starts_with(response, "error:AT0015-key not found")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
+    if (atclient_string_utils_starts_with(response, "error:AT0015-key not found")) {
       ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key not found\n", ret);
       return ret;
@@ -435,14 +435,14 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   /*
    * 2. Ensure atSigns start with `@` symbol
    */
-  if ((ret = atclient_stringutils_atsign_with_at(atclient->atsign, &sharedby_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(atclient->atsign, &sharedby_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
   char *sharedby_atsign_without_at = sharedby_atsign_with_at + 1;
 
-  if ((ret = atclient_stringutils_atsign_with_at(recipient_atsign, &sharedwith_atsign_with_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_atsign_with_at: %d\n", ret);
+  if ((ret = atclient_string_utils_atsign_with_at(recipient_atsign, &sharedwith_atsign_with_at)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
   char *sharedwith_atsign_without_at = sharedwith_atsign_with_at + 1;
@@ -566,7 +566,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -583,7 +583,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);

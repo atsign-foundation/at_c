@@ -15,15 +15,15 @@
 #define TAG "atclient_put"
 
 static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
-                                      const size_t value_len, const int *commit_id);
+                                      const int **commit_id);
 
-int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const size_t value_len, int *commit_id) {
+int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, int *commit_id) {
   int ret = 1;
 
   /*
    * 1. Check if valid arguments were passed
    */
-  if ((ret = atclient_put_validate_args(ctx, atkey, value, value_len, commit_id)) != 0) {
+  if ((ret = atclient_put_validate_args(ctx, atkey, value, commit_id)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_validate_args: %d\n", ret);
     return ret;
   }
@@ -31,6 +31,8 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
   /*
    * 2. Allocate variables
    */
+  const size_t value_len = strlen(value);
+
   char *atkey_str = NULL;
   char *update_cmd = NULL;
   char *metadata_protocol_str = NULL;
@@ -108,7 +110,7 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
     }
 
     if ((ret = atchops_aes_ctr_encrypt(selfencryptionkey, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
-                                      ciphertext, ciphertext_size, &ciphertext_len)) != 0) {
+                                       ciphertext, ciphertext_size, &ciphertext_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
       goto exit;
     }
@@ -127,7 +129,7 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
     // create one for the other person -> encrypted with their public encryption key
     char *recipient_atsign_with_at = NULL;
 
-    if ((ret = atclient_stringutils_atsign_with_at(atkey->shared_with, &recipient_atsign_with_at)) != 0) {
+    if ((ret = atclient_string_utils_atsign_with_at(atkey->shared_with, &recipient_atsign_with_at)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_concat_at_sign_with_at: %d\n", ret);
       goto shared_key_exit;
     }
@@ -162,7 +164,7 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
     }
 
     if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value, value_len,
-                                      ciphertext, ciphertext_size, &ciphertext_len)) != 0) {
+                                       ciphertext, ciphertext_size, &ciphertext_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
       goto shared_key_exit;
     }
@@ -220,7 +222,7 @@ int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, const 
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with((char *)recv, "data:")) {
+  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -250,7 +252,7 @@ exit: {
 }
 
 static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
-                                      const size_t value_len, const int *commit_id) {
+                                      const int **commit_id) {
   int ret = 1;
   if (ctx == NULL) {
     ret = 1;
@@ -279,12 +281,6 @@ static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey 
   if (value == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
-    goto exit;
-  }
-
-  if (value_len == 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value_len is 0\n");
     goto exit;
   }
 

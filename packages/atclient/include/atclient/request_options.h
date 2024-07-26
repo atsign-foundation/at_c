@@ -38,8 +38,8 @@
  * 1A. Put SelfKey
  */
 typedef struct atclient_put_self_key_request_options {
-  unsigned char *shared_encryption_key;
-  uint8_t _initialized_fields[1];
+  // empty for now
+  // kept for future proofing
 } atclient_put_self_key_request_options;
 
 /*
@@ -47,6 +47,7 @@ typedef struct atclient_put_self_key_request_options {
  */
 typedef struct atclient_put_shared_key_request_options {
   unsigned char *shared_encryption_key;
+  unsigned char *iv;
   bool bypass_cache;
   uint8_t _initialized_fields[1];
 } atclient_put_shared_key_request_options;
@@ -63,7 +64,6 @@ typedef struct atclient_put_public_key_request_options {
  * 2A. Get SelfKey
  */
 typedef struct atclient_get_self_key_request_options {
-  unsigned char *shared_encryption_key;
   bool store_atkey_metadata;
   uint8_t _initialized_fields[1];
 } atclient_get_self_key_request_options;
@@ -99,14 +99,6 @@ typedef struct atclient_delete_request_options {
  */
 void atclient_put_self_key_request_options_init(atclient_put_self_key_request_options *options);
 void atclient_put_self_key_request_options_free(atclient_put_self_key_request_options *options);
-
-bool atclient_put_self_key_request_options_is_shared_encryption_key_initialized(
-    const atclient_put_self_key_request_options *options);
-void atclient_put_self_key_request_options_set_shared_encryption_key_initialized(
-    atclient_put_self_key_request_options *options, const bool initialized);
-int atclient_put_self_key_request_options_set_shared_encryption_key(atclient_put_self_key_request_options *options,
-                                                                    const unsigned char *shared_encryption_key);
-void atclient_put_self_key_request_options_unset_shared_encryption_key(atclient_put_self_key_request_options *options);
 
 /*
  * 1B. Put SharedKey
@@ -151,13 +143,13 @@ void atclient_put_public_key_request_options_unset_bypass_cache(atclient_put_pub
 void atclient_get_self_key_request_options_init(atclient_get_self_key_request_options *options);
 void atclient_get_self_key_request_options_free(atclient_get_self_key_request_options *options);
 
-bool atclient_get_self_key_request_options_is_shared_encryption_key_initialized(
+bool atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(
     const atclient_get_self_key_request_options *options);
-void atclient_get_self_key_request_options_set_shared_encryption_key_initialized(
+void atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(
     atclient_get_self_key_request_options *options, const bool initialized);
-int atclient_get_self_key_request_options_set_shared_encryption_key(atclient_get_self_key_request_options *options,
-                                                                    const unsigned char *shared_encryption_key);
-void atclient_get_self_key_request_options_unset_shared_encryption_key(atclient_get_self_key_request_options *options);
+int atclient_get_self_key_request_options_set_store_atkey_metadata(atclient_get_self_key_request_options *options,
+                                                                   const bool store_atkey_metadata);
+void atclient_get_self_key_request_options_unset_store_atkey_metadata(atclient_get_self_key_request_options *options);
 
 /*
  * 2B. Get SharedKey
@@ -172,6 +164,15 @@ void atclient_get_shared_key_request_options_set_shared_encryption_key_initializ
 int atclient_get_shared_key_request_options_set_shared_encryption_key(atclient_get_shared_key_request_options *options,
                                                                       const unsigned char *shared_encryption_key);
 void atclient_get_shared_key_request_options_unset_shared_encryption_key(
+    atclient_get_shared_key_request_options *options);
+
+bool atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(
+    const atclient_get_shared_key_request_options *options);
+void atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(
+    atclient_get_shared_key_request_options *options, const bool initialized);
+int atclient_get_shared_key_request_options_set_store_atkey_metadata(atclient_get_shared_key_request_options *options,
+                                                                     const bool store_atkey_metadata);
+void atclient_get_shared_key_request_options_unset_store_atkey_metadata(
     atclient_get_shared_key_request_options *options);
 
 /*

@@ -39,112 +39,6 @@ void atclient_put_self_key_request_options_free(atclient_put_self_key_request_op
   /*
    * 2. Free the options
    */
-  if (atclient_put_self_key_request_options_is_shared_encryption_key_initialized(options)) {
-    atclient_put_self_key_request_options_unset_shared_encryption_key(options);
-  }
-}
-
-bool atclient_put_self_key_request_options_is_shared_encryption_key_initialized(
-    const atclient_put_self_key_request_options *options) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put_self_key_request_options_is_shared_encryption_key_initialized: Invalid arguments\n");
-    return false;
-  }
-
-  /*
-   * 2. Check if the shared encryption key is initialized
-   */
-  return options->_initialized_fields[ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX] &
-         ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
-}
-void atclient_put_self_key_request_options_set_shared_encryption_key_initialized(
-    atclient_put_self_key_request_options *options, const bool initialized) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put_self_key_request_options_set_shared_encryption_key_initialized: "
-                 "Invalid arguments\n");
-    return;
-  }
-
-  /*
-   * 2. Set the shared encryption key initialized
-   */
-  if (initialized) {
-    options->_initialized_fields[ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX] |=
-        ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
-  } else {
-    options->_initialized_fields[ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX] &=
-        ~ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
-  }
-}
-
-int atclient_put_self_key_request_options_set_shared_encryption_key(atclient_put_self_key_request_options *options,
-                                                                    const unsigned char *shared_encryption_key) {
-  /*
-   * 1. Validate arguments
-   */
-  int ret = 1;
-  if (options == NULL || shared_encryption_key == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put_self_key_request_options_set_shared_encryption_key: "
-                 "Invalid arguments\n");
-    goto exit;
-  }
-
-  /*
-   * 2. Unset the shared encryption key, if necessary
-   */
-  if (atclient_put_self_key_request_options_is_shared_encryption_key_initialized(options)) {
-    atclient_put_self_key_request_options_unset_shared_encryption_key(options);
-  }
-
-  /*
-   * 3. Set the shared encryption key
-   */
-  const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
-  if ((options->shared_encryption_key = (unsigned char *)malloc(sizeof(unsigned char) * shared_encryption_key_size)) ==
-      NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put_self_key_request_options_set_shared_encryption_key: "
-                 "Failed to allocate memory for shared encryption key\n");
-    goto exit;
-  }
-
-  atclient_put_self_key_request_options_set_shared_encryption_key_initialized(options, true);
-  memcpy(options->shared_encryption_key, shared_encryption_key, shared_encryption_key_size);
-
-  ret = 0;
-  goto exit;
-exit: { return ret; }
-}
-
-void atclient_put_self_key_request_options_unset_shared_encryption_key(atclient_put_self_key_request_options *options) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_put_self_key_request_options_unset_shared_encryption_key: Invalid arguments\n");
-    return;
-  }
-
-  /*
-   * 2. Unset the shared encryption key
-   */
-  if (atclient_put_self_key_request_options_is_shared_encryption_key_initialized(options)) {
-    free(options->shared_encryption_key);
-  }
-  options->shared_encryption_key = NULL;
-  atclient_put_self_key_request_options_set_shared_encryption_key_initialized(options, false);
 }
 
 /*
@@ -567,54 +461,54 @@ void atclient_get_self_key_request_options_free(atclient_get_self_key_request_op
   /*
    * 2. Free the options
    */
-  if (atclient_get_self_key_request_options_is_shared_encryption_key_initialized(options)) {
-    atclient_get_self_key_request_options_unset_shared_encryption_key(options);
+  if (atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(options)) {
+    atclient_get_self_key_request_options_unset_store_atkey_metadata(options);
   }
 }
 
-bool atclient_get_self_key_request_options_is_shared_encryption_key_initialized(
+bool atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(
     const atclient_get_self_key_request_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key_request_options_is_shared_encryption_key_initialized: Invalid arguments\n");
+                 "atclient_get_self_key_request_options_is_store_atkey_metadata_initialized: Invalid arguments\n");
     return false;
   }
 
   /*
-   * 2. Check if the shared encryption key is initialized
+   * 2. Check if the store atkey metadata is initialized
    */
-  return options->_initialized_fields[ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX] &
-         ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX] &
+         ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
 }
 
-void atclient_get_self_key_request_options_set_shared_encryption_key_initialized(
+void atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(
     atclient_get_self_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key_request_options_set_shared_encryption_key_initialized: Invalid arguments\n");
+                 "atclient_get_self_key_request_options_set_store_atkey_metadata_initialized: Invalid arguments\n");
     return;
   }
 
   /*
-   * 2. Set the shared encryption key initialized
+   * 2. Set the store atkey metadata initialized
    */
   if (initialized) {
-    options->_initialized_fields[ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX] |=
-        ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
+    options->_initialized_fields[ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX] |=
+        ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
   } else {
-    options->_initialized_fields[ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX] &=
-        ~ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
+    options->_initialized_fields[ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX] &=
+        ~ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
   }
 }
 
-int atclient_get_self_key_request_options_set_shared_encryption_key(atclient_get_self_key_request_options *options,
-                                                                    const unsigned char *shared_encryption_key) {
+int atclient_get_self_key_request_options_set_store_atkey_metadata(atclient_get_self_key_request_options *options,
+                                                                   const bool store_atkey_metadata) {
   int ret = 1;
 
   /*
@@ -623,63 +517,43 @@ int atclient_get_self_key_request_options_set_shared_encryption_key(atclient_get
   if (options == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key_request_options_set_shared_encryption_key: Invalid arguments\n");
-    goto exit;
-  }
-
-  if (shared_encryption_key == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key_request_options_set_shared_encryption_key: Invalid arguments\n");
-    goto exit;
+                 "atclient_get_self_key_request_options_set_store_atkey_metadata: Invalid arguments\n");
+    return ret;
   }
 
   /*
-   * 2. Unset the shared encryption key, if necessary
+   * 2. Unset the store atkey metadata, if necessary
    */
-  if (atclient_get_self_key_request_options_is_shared_encryption_key_initialized(options)) {
-    atclient_get_self_key_request_options_unset_shared_encryption_key(options);
+  if (atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(options)) {
+    atclient_get_self_key_request_options_unset_store_atkey_metadata(options);
   }
 
   /*
-   * 3. Set the shared encryption key
+   * 3. Set the store atkey metadata
    */
-  const size_t shared_encryption_key_size = ATCHOPS_AES_256 / 8;
-  if ((options->shared_encryption_key = (unsigned char *)malloc(sizeof(unsigned char) * shared_encryption_key_size)) ==
-      NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key_request_options_set_shared_encryption_key: Failed to allocate memory for "
-                 "shared encryption key\n");
-    goto exit;
-  }
-
-  atclient_get_self_key_request_options_set_shared_encryption_key_initialized(options, true);
-  memcpy(options->shared_encryption_key, shared_encryption_key, shared_encryption_key_size);
+  options->store_atkey_metadata = store_atkey_metadata;
+  atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(options, true);
 
   ret = 0;
   goto exit;
 exit: { return ret; }
 }
 
-void atclient_get_self_key_request_options_unset_shared_encryption_key(atclient_get_self_key_request_options *options) {
+void atclient_get_self_key_request_options_unset_store_atkey_metadata(atclient_get_self_key_request_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key_request_options_unset_shared_encryption_key: Invalid arguments\n");
+                 "atclient_get_self_key_request_options_unset_store_atkey_metadata: Invalid arguments\n");
     return;
   }
 
   /*
-   * 2. Unset the shared encryption key
+   * 2. Unset the store atkey metadata
    */
-  if (atclient_get_self_key_request_options_is_shared_encryption_key_initialized(options)) {
-    free(options->shared_encryption_key);
-  }
-  options->shared_encryption_key = NULL;
-  atclient_get_self_key_request_options_set_shared_encryption_key_initialized(options, false);
+  options->store_atkey_metadata = false;
+  atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(options, false);
 }
 
 /*
@@ -833,6 +707,101 @@ void atclient_get_shared_key_request_options_unset_shared_encryption_key(
   }
   options->shared_encryption_key = NULL;
   atclient_get_shared_key_request_options_set_shared_encryption_key_initialized(options, false);
+}
+
+bool atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(
+    const atclient_get_shared_key_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized: "
+                 "Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the store atkey metadata is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX] &
+         ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
+}
+
+void atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(
+    atclient_get_shared_key_request_options *options, const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized: "
+                 "Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Set the store atkey metadata initialized
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX] |=
+        ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX] &=
+        ~ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
+  }
+}
+
+int atclient_get_shared_key_request_options_set_store_atkey_metadata(atclient_get_shared_key_request_options *options,
+                                                                     const bool store_atkey_metadata) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_shared_key_request_options_set_store_atkey_metadata: "
+                 "Invalid arguments\n");
+    goto exit;
+  }
+
+  /*
+   * 2. Unset the store atkey metadata, if necessary
+   */
+  if (atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(options)) {
+    atclient_get_shared_key_request_options_unset_store_atkey_metadata(options);
+  }
+
+  /*
+   * 3. Set the store atkey metadata
+   */
+  options->store_atkey_metadata = store_atkey_metadata;
+  atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(options, true);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atclient_get_shared_key_request_options_unset_store_atkey_metadata(
+    atclient_get_shared_key_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_shared_key_request_options_unset_store_atkey_metadata: "
+                 "Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset the store atkey metadata
+   */
+  options->store_atkey_metadata = false;
+  atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(options, false);
 }
 
 /*

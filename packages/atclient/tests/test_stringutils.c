@@ -43,7 +43,7 @@ static int test_1_starts_with() {
   const char *string = "@bob";
 
   // 1a. @bob starts with @
-  if (atclient_stringutils_starts_with(string, "@") != true) {
+  if (atclient_string_utils_starts_with(string, "@") != true) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret,
                  string, "@");
@@ -51,7 +51,7 @@ static int test_1_starts_with() {
   }
 
   // 1b. @bob does not start with 123
-  if (atclient_stringutils_starts_with(string, "123") != false) {
+  if (atclient_string_utils_starts_with(string, "123") != false) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d | %s starts with %s\n", ret,
                  string, "bob");
     ret = 1;
@@ -74,17 +74,17 @@ static int test_2_ends_with() {
   const char *string = "root.atsign.org:64";
 
   // 2a. root.atsign.org:64 ends with 64
-  if (atclient_stringutils_ends_with(string, "64") != true) {
+  if (atclient_string_utils_ends_with(string, "64") != true) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_ends_with: %d | %s ends with %s\n", ret,
                  string, "64");
     goto exit;
   }
 
   // 2b. root.atsign.org:64 does not end with org
-  if (atclient_stringutils_ends_with(string, "org") != 0) {
+  if (atclient_string_utils_ends_with(string, "org") != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_ends_with: %d | %s ends with %s\n", ret,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_ends_with: %d | %s ends with %s\n", ret,
                  string, "org");
     goto exit;
   }
@@ -109,15 +109,15 @@ static int test_3_trim_whitespace() {
   size_t outlen = 0;
 
   const char *expectedresult = "scan jeremy_0";
-  if ((ret = atclient_stringutils_trim_whitespace(string, strlen(string), out, outsize, &outlen)) != 0) {
+  if ((ret = atclient_string_utils_trim_whitespace(string, strlen(string), out, outsize, &outlen)) != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: %d | %s\n", ret, string);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_trim_whitespace: %d | %s\n", ret, string);
     goto exit;
   }
 
   if (strcmp(out, expectedresult) != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_trim_whitespace: \"%s\" != \"%s\"\n", string,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_trim_whitespace: \"%s\" != \"%s\"\n", string,
                  expectedresult);
     goto exit;
   }

@@ -8,19 +8,19 @@
 
 #define TAG "atclient_get_publickey"
 
-static int atclient_get_publickey_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_public_key_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
                                                      const size_t value_size, size_t *value_len, bool bypass_cache);
 
-int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
+int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
                            size_t *value_len, bool bypass_cache) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_publickey_validate_arguments(atclient, atkey, value, value_size, value_len, bypass_cache)) !=
+  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, value, value_size, value_len, bypass_cache)) !=
       0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_publickey_validate_arguments: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key_validate_arguments: %d\n", ret);
     return ret;
   }
 
@@ -82,7 +82,7 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
    * 5. Parse response
    */
   char *response = (char *)recv;
-  if (!atclient_stringutils_starts_with(response, "data:")) {
+  if (!atclient_string_utils_starts_with(response, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -139,7 +139,7 @@ exit: {
 }
 }
 
-static int atclient_get_publickey_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
+static int atclient_get_public_key_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
                                                      const size_t value_size, size_t *value_len, bool bypass_cache) {
   int ret = 1;
 

@@ -76,7 +76,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
 
   char *respose = (char *)recv;
 
-  if (!atclient_stringutils_starts_with(respose, "data:")) {
+  if (!atclient_string_utils_starts_with(respose, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
