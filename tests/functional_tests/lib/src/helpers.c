@@ -120,7 +120,8 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
 exit: { return ret; }
 }
 
-int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *shared_by, const char *knamespace) {
+int functional_tests_selfkey_exists(atclient *atclient, const char *key, const char *shared_by,
+                                    const char *knamespace) {
   int ret = -1;
 
   atclient_atkey atkey;
@@ -174,8 +175,8 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
 exit: { return ret; }
 }
 
-int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *shared_by, const char *shared_with,
-                                      const char *knamespace) {
+int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *shared_by,
+                                      const char *shared_with, const char *knamespace) {
   int ret = -1;
 
   atclient_atkey atkey;
@@ -232,42 +233,45 @@ exit: { return ret; }
 int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient) {
   int ret = 1;
 
-  if(atclient1 == NULL) {
+  if (atclient1 == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
-    goto exit;
+    return ret;
   }
 
-  if(recipient == NULL) {
+  if (recipient == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recipient is NULL\n");
-    goto exit;
+    return ret;
   }
 
-  if(!atclient_is_atsign_initialized(atclient1)) {
+  if (!atclient_is_atsign_initialized(atclient1)) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is not initialized\n");
-    goto exit;
+    return ret;
   }
 
   // TODO check if pkam authenticated
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
-
-  char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
 
   atclient_atkey atkeyforme;
   atclient_atkey_init(&atkeyforme);
 
   atclient_atkey atkeyforthem;
   atclient_atkey_init(&atkeyforthem);
-  
+
+  char atkeystrtemp[ATCLIENT_ATKEY_FULL_LEN];
+
   char *client_atsign_with_at = NULL;
   char *recipient_atsign_with_at = NULL;
 
-  if((ret = atclient_string_utils_atsign_with_at(atclient1->atsign, &client_atsign_with_at)) != 0) {
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down Begin\n");
+
+  if ((ret = atclient_string_utils_atsign_with_at(atclient1->atsign, &client_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_string_utils_atsign_with_at(recipient, &recipient_atsign_with_at)) != 0) {
+  if ((ret = atclient_string_utils_atsign_with_at(recipient, &recipient_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
@@ -276,7 +280,8 @@ int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *re
   char *recipient_atsign_without_at = recipient_atsign_with_at + 1;
 
   memset(atkeystrtemp, 0, sizeof(char) * ATCLIENT_ATKEY_FULL_LEN);
-  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", recipient_atsign_without_at, client_atsign_with_at);
+  snprintf(atkeystrtemp, ATCLIENT_ATKEY_FULL_LEN, "shared_key.%s%s", recipient_atsign_without_at,
+           client_atsign_with_at);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkeystrtemp: \"%s\"\n", atkeystrtemp);
   if ((ret = atclient_atkey_from_string(&atkeyforme, atkeystrtemp)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d\n", ret);
