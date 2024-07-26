@@ -12,7 +12,6 @@
 #include <mbedtls/threading.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 #include <unistd.h>
 
 #define TAG "atclient_notify"
