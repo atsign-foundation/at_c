@@ -44,7 +44,9 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   const size_t iv_base64_size = atchops_base64_encoded_size(iv_size);
   char iv_base64[iv_base64_size];
 
-  const size_t value_encrypted_size = atchops_aes_ctr_ciphertext_size(strlen(value));
+  const size_t value_len = strlen(value);
+
+  const size_t value_encrypted_size = atchops_aes_ctr_ciphertext_size(value_len);
   unsigned char value_encrypted[value_encrypted_size];
 
   const size_t value_encrypted_base64_size = atchops_base64_encoded_size(value_encrypted_size);
@@ -114,7 +116,6 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   /*
    * 4. Encrypt value
    */
-  const size_t value_len = strlen(value);
   size_t value_encrypted_len = 0;
   memset(value_encrypted, 0, sizeof(unsigned char) * value_encrypted_size);
   if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, value, value_len, value_encrypted,

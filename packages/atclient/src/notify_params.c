@@ -67,12 +67,12 @@ bool atclient_notify_params_is_message_type_initialized(const atclient_notify_pa
          ATCLIENT_NOTIFY_PARAMS_MESSAGE_TYPE_INITIALIZED;
 }
 
-bool atclient_notify_params_is_priority_initialized(const const atclient_notify_params *params) {
+bool atclient_notify_params_is_priority_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_PRIORITY_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_PRIORITY_INITIALIZED;
 }
 
-bool atclient_notify_params_is_strategy_initialized(atclient_notify_params *params) {
+bool atclient_notify_params_is_strategy_initialized(const atclient_notify_params *params) {
   return params->_initialized_fields[ATCLIENT_NOTIFY_PARAMS_STRATEGY_INDEX] &
          ATCLIENT_NOTIFY_PARAMS_STRATEGY_INITIALIZED;
 }
