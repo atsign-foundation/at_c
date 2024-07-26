@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TAG "atclient_get_publickey"
+#define TAG "atclient_get_public_key"
 
 static int atclient_get_public_key_validate_arguments(atclient *atclient, atclient_atkey *atkey, char *value,
                                                      const size_t value_size, size_t *value_len, bool bypass_cache);

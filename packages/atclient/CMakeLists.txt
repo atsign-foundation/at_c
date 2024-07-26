@@ -7,9 +7,12 @@ set(
   ATCLIENT_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_delete.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_atkeys.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_publickey.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_selfkey.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_sharedkey.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_public_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_self_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_shared_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_public_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_self_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_shared_key.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_utils.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
@@ -24,7 +27,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/notify.c
   ${CMAKE_CURRENT_LIST_DIR}/src/notify_params.c
   ${CMAKE_CURRENT_LIST_DIR}/src/request_options.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/string_utils.c
 )
 
 # Project setup
