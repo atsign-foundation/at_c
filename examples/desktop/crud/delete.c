@@ -57,7 +57,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_delete(&atclient, &atkey, NULL)) != 0) {
+  if ((ret = atclient_delete(&atclient, &atkey, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to delete");
     goto exit;
   }

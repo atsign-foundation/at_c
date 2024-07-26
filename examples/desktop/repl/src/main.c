@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
         }
         char *atkeystr = NULL;
         for(size_t i = 0; i < arrlen; i++) {
-          if((ret = atclient_delete(&atclient, &arr[i], NULL)) != 0) {
+          if((ret = atclient_delete(&atclient, &arr[i], NULL, NULL)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d | failed to delete atKey\n", ret);
             continue;
           }
