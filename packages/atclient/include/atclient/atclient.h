@@ -199,8 +199,8 @@ int atclient_get_publickey(atclient *atclient, atclient_atkey *atkey, char *valu
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
- * associated with your value.
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to
+ * be associated with your value.
  *
  * @param atclient The atclient context (must satisfy the two conditions stated above)
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
@@ -223,15 +223,17 @@ int atclient_get_sharedkey(atclient *atclient, atclient_atkey *atkey, char *valu
  *
  * `atkey` must satisfy the following condition before calling this function:
  * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to be
- * associated with your value.
+ * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want to
+ * be associated with your value.
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to delete from atServer (must satisfy the two conditions stated above)
- * @param commit_id the output commit_id of the delete operation that the atServer returns, can be set to NULL if you do not need it
+ * @param options the options for the delete operation
+ * @param commit_id the output commit_id of the delete operation that the atServer returns, can be set to NULL if you do
+ * not need it
  * @return int 0 on success
  */
-int atclient_delete(atclient *atclient, const atclient_atkey *atkey, int *commit_id);
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options, int *commit_id);
 
 /**
  * @brief Runs a scan of the atServer to see what atKeys you have.
