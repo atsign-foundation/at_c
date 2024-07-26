@@ -493,12 +493,12 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
    */
 
   // 4a. self encryption key
-  if ((ret = set_self_encryption_key_base64(atkeys, self_encryption_key_str, self_encryption_key_len)) != 0) {
+  if ((ret = atclient_atkeys_set_self_encryption_key_base64(atkeys, self_encryption_key_str, self_encryption_key_str_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "set_self_encryption_key_base64: %d | failed to set self_encryption_key_str\n", ret);
     goto exit;
   }
-
+ 
   // 4b. pkam public key
   if ((ret = atchops_base64_decode((unsigned char *)aes_pkam_public_key_str, aes_pkam_public_key_len, rsa_key_encrypted,
                                    rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
