@@ -135,6 +135,7 @@ int main(int argc, char *argv[]) {
           continue;
         }
         atkeystr[strcspn(atkeystr, "\n")] = 0;
+        char *value = NULL;
         atclient_atkey atkey;
         atclient_atkey_init(&atkey);
 
@@ -152,7 +153,7 @@ int main(int argc, char *argv[]) {
           goto get_end;
         }
         case ATCLIENT_ATKEY_TYPE_PUBLIC_KEY: {
-          if ((ret = atclient_get_public_key(&atclient, &atkey, recv, recvsize, &recvlen, true)) != 0) {
+          if ((ret = atclient_get_public_key(&atclient, &atkey, &value, NULL)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key: %d | failed to get public key\n",
                          ret);
             goto get_end;
@@ -161,7 +162,7 @@ int main(int argc, char *argv[]) {
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SELF_KEY: {
-          if ((ret = atclient_get_self_key(&atclient, &atkey, recv, recvsize, &recvlen)) != 0) {
+          if ((ret = atclient_get_self_key(&atclient, &atkey, &value, NULL)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key: %d | failed to get self key\n", ret);
             goto get_end;
           }
@@ -169,17 +170,19 @@ int main(int argc, char *argv[]) {
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SHARED_KEY: {
-          if ((ret = atclient_get_shared_key(&atclient, &atkey, recv, recvsize, &recvlen, NULL)) != 0) {
+          if ((ret = atclient_get_shared_key(&atclient, &atkey, &value, NULL)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key: %d | failed to get shared key\n",
                          ret);
             goto get_end;
           }
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", value);
           break;
         }
         }
 
-      get_end: { atclient_atkey_free(&atkey); }
+      get_end: { 
+        free(value);
+        atclient_atkey_free(&atkey); }
       } else if (strcmp(command, "/scan") == 0) {
         atclient_get_atkeys_request_options request_options;
         atclient_get_atkeys_request_options_init(&request_options);
