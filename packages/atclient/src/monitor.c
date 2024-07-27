@@ -206,7 +206,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         goto exit;
       }
     } else {
-      atclient_atnotification_set_decrypted_value(&(message->notification), (unsigned char *)message->notification.value);
+      atclient_atnotification_set_decrypted_value(&(message->notification), message->notification.value);
     }
   } else if (strcmp(messagetype, "data") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
@@ -567,22 +567,8 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 3. get shared encryption key to decrypt
-  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, from_atsign, (char *)sharedenckeybase64);
-  if (ret != 0) {
+  if ((ret = atclient_get_shared_encryption_key_shared_by_other(atclient, from_atsign, sharedenckey)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
-    goto exit;
-  }
-  sharedenckeybase64len = strlen((char *)sharedenckeybase64);
-
-  ret = atchops_base64_decode(sharedenckeybase64, sharedenckeybase64len, sharedenckey, sharedenckeysize,
-                              &sharedenckeylen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode shared encryption key\n");
-    goto exit;
-  }
-
-  if (sharedenckeylen != sharedenckeysize) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid shared encryption key length was decoded.\n");
     goto exit;
   }
 

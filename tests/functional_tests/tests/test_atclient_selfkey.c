@@ -161,21 +161,18 @@ static int test_3_get(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const size_t valuesize = 512;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
+  char *value = NULL;
 
   if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_get_self_key(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
+  if ((ret = atclient_get_self_key(atclient, &atkey, &value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%.*s\"\n", (int)valuelen, value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   if (memcmp(value, ATKEY_VALUE, strlen(ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.value: \"%s\" != \"%s\"\n", value, ATKEY_VALUE);
@@ -281,21 +278,18 @@ static int test_7_get_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const size_t valuesize = 512;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
+  char *value = NULL;
 
   if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_get_self_key(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
+  if ((ret = atclient_get_self_key(atclient, &atkey, &value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%.*s\"\n", (int)valuelen, value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   if (memcmp(value, ATKEY_VALUE, strlen(ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.value: \"%s\" != \"%s\"\n", value, ATKEY_VALUE);

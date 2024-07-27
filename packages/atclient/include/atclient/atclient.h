@@ -204,13 +204,11 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
- * @param value the buffer to hold value gotten from atServer
- * @param value_size the buffer length allocated for the value
- * @param value_len the output length of the value gotten from atServer
+ * @param value double pointer to hold value gotten from atServer, can be NULL if you don't need the value, if it is non-null, caller is responsible for freeing the memory
+ * @param value_len the size of the buffer to hold the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char *value, const size_t value_size,
-                          size_t *value_len);
+int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **value, const atclient_get_self_key_request_options *request_options);
 
 /**
  * @brief Get a publickey from your atServer or another atServer

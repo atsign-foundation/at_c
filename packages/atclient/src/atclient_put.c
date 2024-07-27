@@ -15,7 +15,7 @@
 #define TAG "atclient_put"
 
 static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
-                                      const int **commit_id);
+                                      const int *commit_id);
 
 int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, int *commit_id) {
   int ret = 1;
@@ -252,7 +252,7 @@ exit: {
 }
 
 static int atclient_put_validate_args(const atclient *ctx, const atclient_atkey *atkey, const char *value,
-                                      const int **commit_id) {
+                                      const int *commit_id) {
   int ret = 1;
   if (ctx == NULL) {
     ret = 1;

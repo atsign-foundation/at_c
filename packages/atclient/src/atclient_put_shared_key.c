@@ -120,7 +120,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
    */
   size_t value_encrypted_len = 0;
   memset(value_encrypted, 0, sizeof(unsigned char) * value_encrypted_size);
-  if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, value, value_len, value_encrypted,
+  if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (const unsigned char *) value, value_len, value_encrypted,
                                      value_encrypted_size, &value_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
     goto exit;

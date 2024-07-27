@@ -15,7 +15,7 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_atkeys_validate_arguments(atclient, atkey, output_array_len, request_options)) != 0) {
+  if ((ret = atclient_get_atkeys_validate_arguments(atclient, (const atclient_atkey **) atkey, output_array_len, request_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_validate_arguments: %d\n", ret);
     return ret;
   }

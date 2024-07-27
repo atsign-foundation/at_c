@@ -16,7 +16,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, value, request_options)) !=
+  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, (const char **) value, request_options)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key_validate_arguments: %d\n", ret);
     return ret;
