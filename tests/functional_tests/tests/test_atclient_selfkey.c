@@ -278,6 +278,9 @@ static int test_7_get_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
+  atclient_get_self_key_request_options request_options;
+  atclient_get_self_key_request_options_init(&request_options);
+
   char *value = NULL;
 
   if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
@@ -285,7 +288,12 @@ static int test_7_get_with_metadata(atclient *atclient) {
     goto exit;
   }
 
-  if ((ret = atclient_get_self_key(atclient, &atkey, &value, NULL)) != 0) {
+  if((ret = atclient_get_self_key_request_options_set_store_atkey_metadata(&request_options, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_request_options_set_store_atkey_metadata: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_get_self_key(atclient, &atkey, &value, &request_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
@@ -305,7 +313,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
 
-  if (atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {
+  if (atclient_atkey_metadata_is_is_encrypted_initialized(&atkey.metadata) && atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.is_encrypted: %d != %d\n",
                  atkey.metadata.is_encrypted, true);
     ret = 1;
@@ -313,7 +321,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.is_encrypted: %d\n", atkey.metadata.is_encrypted);
 
-  if (atkey.metadata.is_binary != ATKEY_ISBINARY) {
+  if (atclient_atkey_metadata_is_is_binary_initialized(&atkey.metadata) && atkey.metadata.is_binary != ATKEY_ISBINARY) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.is_binary: %d != %d\n", atkey.metadata.is_binary,
                  false);
     ret = 1;
@@ -325,6 +333,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
+  atclient_get_self_key_request_options_free(&request_options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_get_with_metadata End (%d)\n", ret);
   return ret;
 }
