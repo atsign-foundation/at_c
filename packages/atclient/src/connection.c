@@ -1,7 +1,7 @@
 #include "atclient/connection.h"
-#include "atclient/connection_hooks.h"
 #include "atchops/constants.h"
 #include "atclient/cacerts.h"
+#include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
 #include <mbedtls/ctr_drbg.h>
@@ -200,12 +200,12 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   // now we are guaranteed a blank canvas
 
-  if((ret = atclient_connection_set_host(ctx, host)) != 0) {
+  if ((ret = atclient_connection_set_host(ctx, host)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_set_host failed with exit code: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_connection_set_port(ctx, port)) != 0) {
+  if ((ret = atclient_connection_set_port(ctx, port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_set_port failed with exit code: %d\n", ret);
     goto exit;
   }
@@ -276,7 +276,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   /*
    * 4. Call hooks, if they exist
    */
-  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && !ctx->hooks->_is_nested_call;
+  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && ctx->hooks != NULL && !ctx->hooks->_is_nested_call;
   if (try_hooks && ctx->hooks->post_write != NULL) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
@@ -322,7 +322,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     goto exit;
   }
 
-  if(!atclient_connection_is_connection_enabled(ctx)) {
+  if (!atclient_connection_is_connection_enabled(ctx)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
     goto exit;
   }
@@ -525,12 +525,12 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
   /*
    * 1. Validate arguments
    */
-  if(ctx == NULL) {
+  if (ctx == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
     return ret;
   }
 
-  if(!atclient_connection_is_connection_enabled(ctx)) {
+  if (!atclient_connection_is_connection_enabled(ctx)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
     return ret;
   }
@@ -551,12 +551,12 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
   /*
    * 1. Validate arguments
    */
-  if(ctx == NULL) {
+  if (ctx == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL, of course it's not connected lol\n");
     return false;
   }
 
-  if(!atclient_connection_is_connection_enabled(ctx)) {
+  if (!atclient_connection_is_connection_enabled(ctx)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
     return false;
   }
