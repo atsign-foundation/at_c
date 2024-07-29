@@ -249,6 +249,28 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   }
 
   /*
+   * 2. Call pre_write hook, if it exists
+   */
+  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && ctx->hooks != NULL && !ctx->hooks->_is_nested_call;
+  if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx) && ctx->hooks->pre_write != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    atclient_connection_hook_params params;
+    params.src = (unsigned char *)value;
+    params.src_len = value_len;
+    params.recv = NULL;
+    params.recv_size = 0;
+    params.recv_len = NULL;
+    ret = ctx->hooks->pre_write(&params);
+    if (ctx->hooks != NULL) {
+      ctx->hooks->_is_nested_call = false;
+    }
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_write hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  /*
    * 2. Write the value
    */
   if ((ret = mbedtls_ssl_write(&(ctx->ssl), value, value_len)) <= 0) {
@@ -276,8 +298,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   /*
    * 4. Call hooks, if they exist
    */
-  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && ctx->hooks != NULL && !ctx->hooks->_is_nested_call;
-  if (try_hooks && ctx->hooks->post_write != NULL) {
+  if (try_hooks && atclient_connection_hooks_is_post_write_initialized(ctx) && ctx->hooks->post_write != NULL) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
     params.src = (unsigned char *)value;
@@ -595,6 +616,154 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
 int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len,
                              const size_t value_max_len) {
   int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return ret;
+  }
+
+  if (value == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
+    return ret;
+  }
+
+  if(!atclient_connection_is_connection_enabled(ctx)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
+    return ret;
+  }
+
+  /*
+   * 2. Variables
+   */
+  size_t recv_size;
+  if(value_max_len == 0) {
+    // we read 4 KB at a time
+    recv_size = 2;
+  } else {
+    recv_size = value_max_len;
+  }
+  unsigned char *recv = malloc(sizeof(unsigned char) * recv_size);
+
+  /*
+   * 3. Call pre_read hook, if it exists
+   */
+  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && ctx->hooks != NULL && !ctx->hooks->_is_nested_call;
+  if (try_hooks && atclient_connection_hooks_is_pre_read_initialized(ctx) && ctx->hooks->pre_read != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    atclient_connection_hook_params params;
+    params.src = NULL;
+    params.src_len = 0;
+    params.recv = NULL;
+    params.recv_size = 0;
+    params.recv_len = NULL;
+    ret = ctx->hooks->pre_read(&params);
+    if (ctx->hooks != NULL) {
+      ctx->hooks->_is_nested_call = false;
+    }
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_read hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  /*
+   * 4. Read the value
+   */
+  bool found_end = false;
+  size_t pos = 0;
+  size_t recv_len = 0;
+  do {
+    if((ret = mbedtls_ssl_read(&(ctx->ssl), recv + pos, recv_size - pos)) <= 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
+      goto exit;
+    }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "pos: %d, ret: %d\n", pos, ret);
+    pos += ret;
+
+    // check if we found the end of the message
+    int i = pos;
+    while(!found_end && i-- > 0) {
+      found_end = recv[i] == '\n' || recv[i] == '\r';
+    }
+
+    if(found_end) {
+      recv_len = i;
+    } else {
+      if(value_max_len != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "Message is too long, it exceeds the maximum length of %d\n", value_max_len);
+        recv_len = value_max_len;
+        break;
+      } else {
+        recv = realloc(recv, sizeof(unsigned char) * (pos + recv_size));
+        recv_size += recv_size;
+      }
+    }
+
+  } while(ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found_end);
+
+  /*
+   * 5. Print debug log
+   */
+  if(atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+    unsigned char *recvcopy = NULL;
+    if((recvcopy = malloc(sizeof(unsigned char) * recv_len)) != NULL) {
+      memcpy(recvcopy, recv, recv_len);
+      atlogger_fix_stdout_buffer((char *)recvcopy, recv_len);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, recv_len, recvcopy, reset);
+      free(recvcopy);
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory to pretty print the network received buffer\n");
+    }
+  }
+
+  /*
+   * 6. Set the value and value_len
+   */
+  if(found_end) {
+    if(recv_len != 0 && recv_len < recv_size) {
+      recv[recv_len] = '\0';
+    }
+  }
+  if(value_len != NULL) {
+      *value_len = recv_len;
+    }
+    if(value != NULL) {
+      if((*value = malloc(sizeof(unsigned char) * (recv_len + 1))) == NULL) {
+        ret = 1;
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
+        goto exit;
+      }
+      memcpy(*value, recv, recv_len);
+      (*value)[recv_len] = '\0';
+    }
+
+  /*
+   * 7. Call post_read hook, if it exists
+   */
+  if (try_hooks && atclient_connection_hooks_is_post_read_initialized(ctx) && ctx->hooks->post_read != NULL) {
+    ctx->hooks->_is_nested_call = true;
+    atclient_connection_hook_params params;
+    params.src = NULL;
+    params.src_len = 0;
+    params.recv = recv;
+    params.recv_size = recv_size;
+    params.recv_len = &recv_len;
+    ret = ctx->hooks->post_read(&params);
+    if (ctx->hooks != NULL) {
+      ctx->hooks->_is_nested_call = false;
+    }
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "post_read hook failed with exit code: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
 }
 
 static void my_debug(void *ctx, int level, const char *file, int line, const char *str) {

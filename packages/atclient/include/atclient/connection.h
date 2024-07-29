@@ -72,8 +72,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  * @brief Reads data from the connection
  *
  * @param ctx the connection initialized and connected using atclient_connection_init and atclient_connection_connect
- * @param value a double pointer that will be allocated by the function to the data read
- * @param value_len the length of the data read, will be set by the function
+ * @param value a double pointer that will be allocated by the function to the data read, assumed to be non-null and a null pointer
+ * @param value_len the length of the data read, will be set by the function, setting this to NULL will skip setting the length
  * @param value_max_len the maximum length of the data to read, setting this to 0 means no limit
  * @return int 0 on success
  */
