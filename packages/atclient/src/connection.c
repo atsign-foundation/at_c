@@ -1,4 +1,5 @@
 #include "atclient/connection.h"
+#include "atclient/connection_hooks.h"
 #include "atchops/constants.h"
 #include "atclient/cacerts.h"
 #include "atclient/constants.h"
