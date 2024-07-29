@@ -309,22 +309,22 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
    */
   if (ctx == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
-    goto exit;
+    return ret;
   }
 
   if (src_r == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "src is NULL\n");
-    goto exit;
+    return ret;
   }
 
   if (srclen_r == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "srclen is 0\n");
-    goto exit;
+    return ret;
   }
 
   if (!atclient_connection_is_connection_enabled(ctx)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
-    goto exit;
+    return ret;
   }
 
   /*
