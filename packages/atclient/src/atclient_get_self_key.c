@@ -14,7 +14,7 @@
 
 #define TAG "atclient_get_selfkey"
 
-static int atclient_get_self_key_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
+static int atclient_get_self_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                 const char **value, const atclient_get_self_key_request_options *request_options);
 
 int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **value, const atclient_get_self_key_request_options *request_options) {
@@ -23,8 +23,8 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_self_key_valid_arguments(atclient, atkey, (const char **) value, request_options)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_valid_arguments: %d\n", ret);
+  if ((ret = atclient_get_self_key_validate_arguments(atclient, atkey, (const char **) value, request_options)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_validate_arguments: %d\n", ret);
     return ret;
   }
 
@@ -210,7 +210,7 @@ exit: {
 }
 }
 
-static int atclient_get_self_key_valid_arguments(const atclient *atclient, const atclient_atkey *atkey,
+static int atclient_get_self_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
                                                 const char **value, const atclient_get_self_key_request_options *request_options) {
   int ret = 1;
 
