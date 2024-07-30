@@ -82,7 +82,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
 
 /**
  * @brief Write data to the connection
- * 
+ *
  * @param ctx connection initialized and connected using atclient_connection_init and atclient_connection_connect
  * @param value the data to write
  * @param value_len the length of the data to write

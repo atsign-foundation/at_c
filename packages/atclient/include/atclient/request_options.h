@@ -11,9 +11,7 @@
 #define ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
 
 #define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX 0
-#define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INDEX 0
 #define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
-#define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INITIALIZED (VALUE_INITIALIZED << 1)
 
 #define ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX 0
 #define ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX 0
@@ -21,9 +19,13 @@
 #define ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED (VALUE_INITIALIZED << 1)
 
 #define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX 0
+#define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_IV_INDEX 1
+#define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INDEX 0
 #define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX 0
 #define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
-#define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED (VALUE_INITIALIZED << 2)
+#define ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INITIALIZED (VALUE_INITIALIZED << 3)
 
 #define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INDEX 0
 #define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX 0
@@ -53,7 +55,6 @@ typedef struct atclient_put_self_key_request_options {
 typedef struct atclient_put_shared_key_request_options {
   unsigned char *shared_encryption_key;
   unsigned char *iv;
-  bool bypass_cache;
   uint8_t _initialized_fields[1];
 } atclient_put_shared_key_request_options;
 
@@ -79,6 +80,8 @@ typedef struct atclient_get_self_key_request_options {
  */
 typedef struct atclient_get_shared_key_request_options {
   unsigned char *shared_encryption_key;
+  unsigned char *iv;
+  bool bypass_cache;
   bool store_atkey_metadata;
   uint8_t _initialized_fields[1];
 } atclient_get_shared_key_request_options;
@@ -132,14 +135,6 @@ int atclient_put_shared_key_request_options_set_shared_encryption_key(atclient_p
 void atclient_put_shared_key_request_options_unset_shared_encryption_key(
     atclient_put_shared_key_request_options *options);
 
-bool atclient_put_shared_key_request_options_is_bypass_cache_initialized(
-    const atclient_put_shared_key_request_options *options);
-void atclient_put_shared_key_request_options_set_bypass_cache_initialized(
-    atclient_put_shared_key_request_options *options, const bool initialized);
-int atclient_put_shared_key_request_options_set_bypass_cache(atclient_put_shared_key_request_options *options,
-                                                             const bool bypass_cache);
-void atclient_put_shared_key_request_options_unset_bypass_cache(atclient_put_shared_key_request_options *options);
-
 /*
  * 1C. Put PublicKey
  */
@@ -174,6 +169,20 @@ int atclient_get_shared_key_request_options_set_shared_encryption_key(atclient_g
                                                                       const unsigned char *shared_encryption_key);
 void atclient_get_shared_key_request_options_unset_shared_encryption_key(
     atclient_get_shared_key_request_options *options);
+
+bool atclient_get_shared_key_request_options_is_iv_initialized(const atclient_get_shared_key_request_options *options);
+void atclient_get_shared_key_request_options_set_iv_initialized(atclient_get_shared_key_request_options *options,
+                                                                const bool initialized);
+int atclient_get_shared_key_request_options_set_iv(atclient_get_shared_key_request_options *options, const unsigned char *iv);
+void atclient_get_shared_key_request_options_unset_iv(atclient_get_shared_key_request_options *options);
+
+bool atclient_get_shared_key_request_options_is_bypass_cache_initialized(
+    const atclient_get_shared_key_request_options *options);
+void atclient_get_shared_key_request_options_set_bypass_cache_initialized(
+    atclient_get_shared_key_request_options *options, const bool initialized);
+int atclient_get_shared_key_request_options_set_bypass_cache(atclient_get_shared_key_request_options *options,
+                                                             const bool bypass_cache);
+void atclient_get_shared_key_request_options_unset_bypass_cache(atclient_get_shared_key_request_options *options);
 
 bool atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(
     const atclient_get_shared_key_request_options *options);
