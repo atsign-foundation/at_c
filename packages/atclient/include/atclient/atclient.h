@@ -23,7 +23,6 @@
  * TODO: more documentation
  */
 typedef struct atclient {
-
   char *atsign;
   atclient_connection atserver_connection;
   atclient_atkeys atkeys;
@@ -126,26 +125,6 @@ void atclient_stop_atserver_connection(atclient *ctx);
  */
 int atclient_pkam_authenticate(atclient *ctx, const char *atserver_host, const int atserver_port,
                                const atclient_atkeys *atkeys, const char *atsign);
-
-/**
- * @brief Put a string value into your atServer.
- * `atclient` must satisfy two conditions before calling this function:
- * 1. initialized with atclient_init()
- * 2. authenticated via atclient_pkam_authenticate()
- *
- * `atkey` must satisfy the following condition before calling this function:
- * 1. initialized with atclient_atkey_init()
- * 2. have populated values (such as a name, shared_by, shared_with, etc,.) depending on what kind of atkey you want
- * to be associated with your value.
- *
- * @param atclient the atclient context (must satisfy the two conditions stated above)
- * @param atkey the populated atkey to put the value into (must satisfy the two conditions stated above)
- * @param value the value to put into atServer, assumed to be non-null and null-terminated
- * @param commit_id (optional) the output commit_id of the put operation that the atServer returns, can be NULL if you
- * don't care about the commit_id
- * @return int 0 on success
- */
-int atclient_put(atclient *ctx, atclient_atkey *atkey, const char *value, int *commit_id);
 
 /**
  * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted only for you
