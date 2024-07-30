@@ -11,7 +11,9 @@
 #define ATCLIENT_PUT_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
 
 #define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX 0
+#define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INDEX 1
 #define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED (VALUE_INITIALIZED << 1)
 
 #define ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INDEX 0
 #define ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX 0
@@ -134,6 +136,12 @@ int atclient_put_shared_key_request_options_set_shared_encryption_key(atclient_p
                                                                       const unsigned char *shared_encryption_key);
 void atclient_put_shared_key_request_options_unset_shared_encryption_key(
     atclient_put_shared_key_request_options *options);
+
+bool atclient_put_shared_key_request_options_is_iv_initialized(const atclient_put_shared_key_request_options *options);
+void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options,
+                                                                const bool initialized);
+int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_request_options *options, const unsigned char *iv);
+void atclient_put_shared_key_request_options_unset_iv(atclient_put_shared_key_request_options *options);
 
 /*
  * 1C. Put PublicKey

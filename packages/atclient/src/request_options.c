@@ -81,8 +81,8 @@ void atclient_put_shared_key_request_options_free(atclient_put_shared_key_reques
     atclient_put_shared_key_request_options_unset_shared_encryption_key(options);
   }
 
-  if (atclient_put_shared_key_request_options_is_bypass_cache_initialized(options)) {
-    atclient_put_shared_key_request_options_unset_bypass_cache(options);
+  if(atclient_put_shared_key_request_options_is_iv_initialized(options)) {
+    atclient_put_shared_key_request_options_unset_iv(options);
   }
 }
 
@@ -204,6 +204,113 @@ void atclient_put_shared_key_request_options_unset_shared_encryption_key(
   atclient_put_shared_key_request_options_set_shared_encryption_key_initialized(options, false);
 }
 
+bool atclient_put_shared_key_request_options_is_iv_initialized(const atclient_put_shared_key_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put_shared_key_request_options_is_iv_initialized: Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the IV is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INDEX] &
+         ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED;
+}
+
+void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options, const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put_shared_key_request_options_set_iv_initialized: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Set the IV initialized
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INDEX] |=
+        ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INDEX] &=
+        ~ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED;
+  }
+}
+
+int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_request_options *options, const unsigned char *iv) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put_shared_key_request_options_set_iv: Invalid arguments\n");
+    goto exit;
+  }
+
+  if (iv == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put_shared_key_request_options_set_iv: Invalid arguments\n");
+    goto exit;
+  }
+
+  /*
+   * 2. Unset the IV, if necessary
+   */
+  if (atclient_put_shared_key_request_options_is_iv_initialized(options)) {
+    atclient_put_shared_key_request_options_unset_iv(options);
+  }
+
+  /*
+   * 3. Set the IV
+   */
+  const size_t iv_size = ATCHOPS_AES_256 / 8;
+  if ((options->iv = (unsigned char *)malloc(sizeof(unsigned char) * iv_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put_shared_key_request_options_set_iv: Failed to allocate memory for IV\n");
+    goto exit;
+  }
+
+  atclient_put_shared_key_request_options_set_iv_initialized(options, true);
+  memcpy(options->iv, iv, iv_size);
+
+  ret = 0;
+  goto exit;
+exit: {
+  return ret;
+}
+}
+
+void atclient_put_shared_key_request_options_unset_iv(atclient_put_shared_key_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_put_shared_key_request_options_unset_iv: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset the IV
+   */
+  if (atclient_put_shared_key_request_options_is_iv_initialized(options)) {
+    free(options->iv);
+  }
+  options->iv = NULL;
+  atclient_put_shared_key_request_options_set_iv_initialized(options, false);
+}
+
 /*
  * =================
  * 1C. Put PublicKey
@@ -238,6 +345,7 @@ void atclient_put_public_key_request_options_free(atclient_put_public_key_reques
   /*
    * 2. Free the options
    */
+
 }
 
 /*
@@ -402,6 +510,18 @@ void atclient_get_shared_key_request_options_free(atclient_get_shared_key_reques
    */
   if (atclient_get_shared_key_request_options_is_shared_encryption_key_initialized(options)) {
     atclient_get_shared_key_request_options_unset_shared_encryption_key(options);
+  }
+
+  if (atclient_get_shared_key_request_options_is_iv_initialized(options)) {
+    atclient_get_shared_key_request_options_unset_iv(options);
+  }
+
+  if (atclient_get_shared_key_request_options_is_bypass_cache_initialized(options)) {
+    atclient_get_shared_key_request_options_unset_bypass_cache(options);
+  }
+
+  if (atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized(options)) {
+    atclient_get_shared_key_request_options_unset_store_atkey_metadata(options);
   }
 }
 
@@ -847,6 +967,10 @@ void atclient_get_public_key_request_options_free(atclient_get_public_key_reques
    */
   if (atclient_get_public_key_request_options_is_store_atkey_metadata_initialized(options)) {
     atclient_get_public_key_request_options_unset_store_atkey_metadata(options);
+  }
+
+  if (atclient_get_public_key_request_options_is_bypass_cache_initialized(options)) {
+    atclient_get_public_key_request_options_unset_bypass_cache(options);
   }
 }
 
