@@ -5,6 +5,7 @@
 #include "atclient/atclient_utils.h"
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
+#include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
@@ -82,7 +83,6 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host
 
   // remove hooks to preserve them across resets
   atclient_connection_hooks *conn_hooks = ctx->atserver_connection.hooks;
-  ctx->atserver_connection.hooks = NULL;
 
   // clear the atserver connection
   atclient_stop_atserver_connection(ctx);

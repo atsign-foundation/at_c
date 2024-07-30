@@ -3,6 +3,7 @@
 
 #include "atchops/constants.h"
 #include "atchops/rsa_key.h"
+#include "atchops/sha.h"
 #include <stddef.h>
 
 /**

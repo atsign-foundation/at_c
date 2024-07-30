@@ -8,7 +8,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/aes_ctr.c
   ${CMAKE_CURRENT_LIST_DIR}/src/aes.c
   ${CMAKE_CURRENT_LIST_DIR}/src/base64.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/constants.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/mbedtls.c
   ${CMAKE_CURRENT_LIST_DIR}/src/iv.c
   ${CMAKE_CURRENT_LIST_DIR}/src/rsa_key.c
   ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c

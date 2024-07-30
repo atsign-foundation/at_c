@@ -267,7 +267,7 @@ int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char
     return ret;
   }
 
-  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), pkam_public_key_base64, pkam_public_key_base64)) !=
+  if ((ret = atchops_rsa_key_populate_public_key(&(atkeys->pkam_public_key), pkam_public_key_base64, pkam_public_key_base64_len)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atchops_rsa_key_populate_public_key: %d | failed to populate pkam_public_key\n", ret);

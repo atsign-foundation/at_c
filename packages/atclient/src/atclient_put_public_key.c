@@ -144,7 +144,7 @@ static int atclient_put_public_key_validate_arguments(const atclient *ctx, const
     goto exit;
   }
 
-  const atkey_type = atclient_atkey_get_type(atkey);
+  const atclient_atkey_type atkey_type = atclient_atkey_get_type(atkey);
 
   if (atkey_type != ATCLIENT_ATKEY_TYPE_PUBLIC_KEY) {
     ret = 1;
