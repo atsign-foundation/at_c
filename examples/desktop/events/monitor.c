@@ -1,7 +1,6 @@
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atclient/monitor.h>
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  atclient_monitor_message message;
+  atclient_monitor_response message;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");
@@ -66,7 +65,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_monitor_start(&monitor_conn, ".*", strlen(".*"))) != 0) {
+  if ((ret = atclient_monitor_start(&monitor_conn, ".*")) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
@@ -93,10 +92,10 @@ int main(int argc, char *argv[]) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
       }
-      if (atclient_atnotification_decryptedvalue_is_initialized(&message.notification)) {
+      if (atclient_atnotification_is_decrypted_value_initialized(&message.notification)) {
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
-                     message.notification.decryptedvalue);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decrypted_value: \"%s\"\n",
+                     message.notification.decrypted_value);
       }
       break;
     }
@@ -127,7 +126,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   free(atsign);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_message_free(&message);
+  atclient_monitor_response_free(&message);
   return ret;
 }
 }

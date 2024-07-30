@@ -29,8 +29,8 @@ project(sample_cmake_project)
 find_package(atsdk REQUIRED CONFIG)
 message(STATUS "[atsdk] Found package!")
 
-add_executable(exec ${CMAKE_CURRENT_LIST_DIR}/main.c)
-target_link_libraries(exec PRIVATE atsdk::atclient)
+add_executable(main ${CMAKE_CURRENT_LIST_DIR}/main.c)
+target_link_libraries(main PRIVATE atsdk::atclient)
 ```
 
 Next, you can build your project:
@@ -45,5 +45,5 @@ This will build your project with the atclient library.
 To run the project:
 
 ```bash
-./build/exec
+./build/main
 ```

@@ -1,4 +1,5 @@
-#include "atchops/constants.h"
+#include "atchops/mbedtls.h"
+#include "atchops/sha.h"
 
 const mbedtls_md_type_t atchops_mbedtls_md_map[] = {
     [ATCHOPS_MD_NONE] = MBEDTLS_MD_NONE,           [ATCHOPS_MD_MD5] = MBEDTLS_MD_MD5,

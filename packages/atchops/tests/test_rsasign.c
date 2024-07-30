@@ -55,16 +55,16 @@ int main() {
   memset(signaturebase64, 0, sizeof(char) * SIGNATURE_BASE64_SIZE);
   size_t signaturebase64len = 0;
 
-  atchops_rsakey_privatekey privatekey;
-  atchops_rsakey_privatekey_init(&privatekey);
-  ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
+  atchops_rsa_key_private_key privatekey;
+  atchops_rsa_key_private_key_init(&privatekey);
+  ret = atchops_rsa_key_populate_private_key(&privatekey, privatekeybase64, privatekeybase64len);
   if (ret != 0) {
-    printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
+    printf("atchops_rsa_key_populate_privatekey (failed): %d\n", ret);
     goto exit;
   }
-  printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
+  printf("atchops_rsa_key_populate_privatekey (success): %d\n", ret);
 
-  ret = atchops_rsa_sign(privatekey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
+  ret = atchops_rsa_sign(&privatekey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
   if (ret != 0) {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;

@@ -1,14 +1,14 @@
 #include "functional_tests/config.h"
 #include "functional_tests/helpers.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
 #include <atclient/notify.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -158,14 +158,31 @@ static int test_1_notify(atclient *atclient, char *notification_id) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH),
-                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create atkey: %d\n", ret);
     goto exit;
   }
 
-  atclient_notify_params_create(&params, ATNOTIFICATION_OPERATION, &atkey, ATKEY_VALUE, true);
+  if ((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set should_encrypt: %d\n", ret);
+    goto exit;
+  }
 
   if ((ret = atclient_notify(atclient, &params, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify: %d\n", ret);
@@ -196,14 +213,31 @@ static int test_2_notify_long_text(atclient *atclient, char *notification_id) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH),
-                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create atkey: %d\n", ret);
     goto exit;
   }
 
-  atclient_notify_params_create(&params, ATNOTIFICATION_OPERATION, &atkey, VERY_LONG_TEXT, true);
+  if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_value(&params, VERY_LONG_TEXT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set should_encrypt: %d\n", ret);
+    goto exit;
+  }
 
   if ((ret = atclient_notify(atclient, &params, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify: %d\n", ret);

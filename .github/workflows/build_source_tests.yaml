@@ -29,5 +29,5 @@ jobs:
       - name: Run sample_cmake_project executable
         working-directory: examples/desktop/sample_cmake_project
         run: |
-          ./build/exec
+          ./build/main
  

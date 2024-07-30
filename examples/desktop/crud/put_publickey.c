@@ -1,6 +1,5 @@
 #include <atclient/atclient.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atlogger/atlogger.h>
@@ -39,8 +38,7 @@ int main() {
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  atclient_atsign atsign;
-  atclient_atsign_init(&atsign, ATSIGN);
+  const char *atsign = ATSIGN;
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -49,10 +47,10 @@ int main() {
   atclient_atkeys_init(&atkeys);
   atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH);
 
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
@@ -62,8 +60,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_publickey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATSIGN, strlen(ATSIGN),
-                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_public_key(&atkey, ATKEY_KEY, ATSIGN, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key");
     goto exit;
   }
@@ -71,21 +68,22 @@ int main() {
   atclient_atkey_metadata_set_ttl(&atkey.metadata, 60 * 1000 * 10); // 10 minutes
   atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string");
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
-                        (int)atkeystr.len, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
 
-  if ((ret = atclient_put(&atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL) != 0)) {
+  if ((ret = atclient_put_public_key(&atclient, &atkey, ATKEY_VALUE, NULL, NULL) != 0)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put public key");
     goto exit;
   }
 
-  // atclient_get_publickey
-  if ((ret = atclient_get_publickey(&atclient, &atkey, value, valuelen, &valueolen, true)) != 0) {
+  // atclient_get_public_key
+  if ((ret = atclient_get_public_key(&atclient, &atkey, value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get public key");
     goto exit;
   }
@@ -95,12 +93,11 @@ int main() {
   ret = 0;
   goto exit;
 exit: {
-  atclient_atstr_free(&atkeystr);
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
-  atclient_atsign_free(&atsign);
   atclient_free(&atclient);
   free(atserver_host);
+  free(atkeystr);
   return ret;
 }
 }

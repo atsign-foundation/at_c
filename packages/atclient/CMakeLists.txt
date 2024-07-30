@@ -5,26 +5,29 @@ option(ATCLIENT_BUILD_TESTS "Build tests for atclient" OFF)
 set(ATCLIENT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(
   ATCLIENT_SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/src/atbytes.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_delete.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_atkeys.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_publickey.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_selfkey.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_sharedkey.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_public_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_self_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_get_shared_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_public_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_self_key.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_shared_key.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_utils.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atsign.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atstr.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atnotification.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/connection_hooks.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
   ${CMAKE_CURRENT_LIST_DIR}/src/encryption_key_helpers.c
   ${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
   ${CMAKE_CURRENT_LIST_DIR}/src/monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/src/notify.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/stringutils.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/notify_params.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/request_options.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/string_utils.c
 )
 
 # Project setup

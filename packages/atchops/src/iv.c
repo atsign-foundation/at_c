@@ -1,26 +1,49 @@
 #include "atchops/iv.h"
 #include "atchops/base64.h"
 #include "atchops/constants.h"
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-#include <string.h>
+#include <atlogger/atlogger.h>
+#include "atchops/mbedtls.h"
 #include <stddef.h>
+#include <string.h>
+
+#define TAG "iv"
 
 int atchops_iv_generate(unsigned char *iv) {
   int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (iv == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "iv is NULL\n");
+    return ret;
+  }
+
+  /*
+   * 2. Variables
+   */
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
 
   mbedtls_entropy_init(&entropy);
   mbedtls_ctr_drbg_init(&ctr_drbg);
 
+  /*
+   * 3. Seed the random number generator
+   */
   if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                    (const unsigned char *)ATCHOPS_RNG_PERSONALIZATION,
                                    strlen(ATCHOPS_RNG_PERSONALIZATION))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to seed random number generator\n");
     goto exit;
   }
 
+  /*
+   * 4. Generate the IV
+   */
   if ((ret = mbedtls_ctr_drbg_random(&ctr_drbg, iv, ATCHOPS_IV_BUFFER_SIZE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate random IV\n");
     goto exit;
   }
 
@@ -31,23 +54,4 @@ exit: {
   mbedtls_entropy_free(&entropy);
   return ret;
 }
-}
-
-int atchops_iv_generate_base64(unsigned char *ivbase64, const size_t ivbase64size, size_t *ivbase64len) {
-  int ret = 1;
-
-  unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
-
-  ret = atchops_iv_generate(iv);
-  if (ret != 0) {
-    goto exit;
-  }
-
-  ret = atchops_base64_encode(iv, ATCHOPS_IV_BUFFER_SIZE, ivbase64, ivbase64size, ivbase64len);
-  if (ret != 0) {
-    goto exit;
-  }
-
-  goto exit;
-exit: { return ret; }
 }

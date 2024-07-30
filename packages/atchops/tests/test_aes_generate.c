@@ -1,5 +1,5 @@
 #include "atchops/aes.h"
-#include "atchops/aesctr.h"
+#include "atchops/aes_ctr.h"
 #include "atchops/iv.h"
 #include <stdio.h>
 #include <string.h>
@@ -41,7 +41,7 @@ int main() {
 
 
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  ret = atchops_aesctr_encrypt(key, ATCHOPS_AES_256, iv, (const unsigned char *)PLAINTEXT,
+  ret = atchops_aes_ctr_encrypt(key, ATCHOPS_AES_256, iv, (const unsigned char *)PLAINTEXT,
                                strlen(PLAINTEXT), ciphertext, ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     printf("Error encrypting\n");
@@ -62,7 +62,7 @@ int main() {
   printf("\n");
 
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  ret = atchops_aesctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen,
+  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen,
                                plaintext2, plaintext2size, &plaintext2len);
   if (ret != 0) {
     printf("Error decrypting\n");

@@ -1,6 +1,6 @@
-#ifndef ATCLIENT_VERSIO_H
-#define ATCLIENT_VERSIO_H
+#ifndef ATCLIENT_VERSION_H
+#define ATCLIENT_VERSION_H
 
-#define ATSDK_VERSION "0.0.1"
+#define ATCLIENT_ATSDK_VERSION "0.0.1"
 
 #endif

@@ -1,11 +1,10 @@
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkeysfile.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
@@ -152,14 +151,29 @@ int main(int argc, char *argv[]) {
     atclient_atkey atkey;
     atclient_atkey_init(&atkey);
 
-    if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), from_atsign, strlen(from_atsign),
-                                               to_atsign, strlen(to_atsign), ATKEY_NAMESPACE,
-                                               strlen(ATKEY_NAMESPACE))) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_sharedkey: %d\n", ret);
+    if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_NAME, from_atsign, to_atsign, ATKEY_NAMESPACE)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_shared_key: %d\n", ret);
     }
 
-    atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, line, true);
-    params.notification_expiry = 5000;
+    if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_operation: %d\n", ret);
+    }
+
+    if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_atkey: %d\n", ret);
+    }
+
+    if((ret = atclient_notify_params_set_value(&params, line)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_value: %d\n", ret);
+    }
+
+    if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_should_encrypt: %d\n", ret);
+    }
+
+    if((ret = atclient_notify_params_set_notification_expiry(&params, 5000)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_notification_expiry: %d\n", ret);
+    }
 
     pthread_mutex_lock(&client_mutex);
     if ((ret = atclient_notify(&atclient1, &params, NULL)) != 0) {
@@ -236,7 +250,7 @@ static void *monitor_handler(void *xargs) {
     goto exit;
   }
   atclient_monitor_set_read_timeout(monitor, READ_TIMEOUT); // blocking read takes 1 second to timeout
-  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }
@@ -245,8 +259,8 @@ static void *monitor_handler(void *xargs) {
   int tries = 1;
 
   while (true) {
-    atclient_monitor_message message;
-    atclient_monitor_message_init(&message);
+    atclient_monitor_response message;
+    atclient_monitor_response_init(&message);
 
     pthread_mutex_lock(&monitor_mutex);
     pthread_mutex_lock(&client_mutex);
@@ -260,9 +274,9 @@ static void *monitor_handler(void *xargs) {
         // We received a stats notification. Ignore it.
         break;
       }
-      if (atclient_atnotification_decryptedvalue_is_initialized(&(message.notification))) {
+      if (atclient_atnotification_is_decrypted_value_initialized(&(message.notification))) {
         const atclient_atnotification *notification = &(message.notification);
-        printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decryptedvalue);
+        printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decrypted_value);
         printf("%s%s%s: ", HBLU, from_atsign, reset);
         fflush(stdout);
       }
@@ -320,7 +334,7 @@ static void *monitor_handler(void *xargs) {
     }
     }
 
-    atclient_monitor_message_free(&message);
+    atclient_monitor_response_free(&message);
     usleep(100);
   }
   goto exit;
@@ -358,7 +372,7 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
    * 3. Start monitor
    */
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Restarting monitor...\n");
-  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     return ret;
   }
