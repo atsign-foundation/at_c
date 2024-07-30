@@ -250,7 +250,7 @@ static void *monitor_handler(void *xargs) {
     goto exit;
   }
   atclient_monitor_set_read_timeout(monitor, READ_TIMEOUT); // blocking read takes 1 second to timeout
-  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX) != 0) {
+  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }
