@@ -4,6 +4,8 @@
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 
+#define ATCLIENT_DEFAULT_NOTIFIER "SYSTEM"
+
 #define VALUE_INITIALIZED 0b00000001
 
 #define ATCLIENT_NOTIFY_PARAMS_ID_INDEX 0
