@@ -13,7 +13,6 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_public_key.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_self_key.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put_shared_key.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atclient_put.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_utils.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
