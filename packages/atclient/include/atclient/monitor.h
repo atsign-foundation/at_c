@@ -120,10 +120,9 @@ void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout
  *
  * @param monitor_conn ctx the atclient context for the monitor connection, must be pkam_authenticated already
  * @param regex the regex to monitor for
- * @param regexlen the length of the regex string, most people will typically use strlen(regex)
  * @return int 0 on success, non-zero on error
  */
-int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen);
+int atclient_monitor_start(atclient *monitor_conn, const char *regex);
 
 /**
  * @brief Read a notification from the monitor connection into message

@@ -263,7 +263,7 @@ static int test_1_start_monitor(atclient *monitor_conn) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor Start\n");
 
-  ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX));
+  ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
@@ -328,7 +328,7 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
     goto exit;
   }
 
-  if ((ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+  if ((ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }

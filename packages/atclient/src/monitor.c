@@ -60,11 +60,13 @@ void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout
   mbedtls_ssl_conf_read_timeout(&(monitor_conn->atserver_connection.ssl_config), timeoutms);
 }
 
-int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) {
+int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
   int ret = 1;
 
   size_t cmdsize = 0;
   char *cmd = NULL;
+
+  const size_t regexlen = strlen(regex);
 
   // log building command... (Debug)
   // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
