@@ -159,7 +159,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   free(atserver_host);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_message_free(message);
+  atclient_monitor_response_free(message);
   atclient_free(&atclient2);
   return ret;
 }

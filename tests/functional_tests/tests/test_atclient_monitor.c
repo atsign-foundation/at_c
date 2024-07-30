@@ -213,13 +213,13 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
   int ret = 1;
 
   atclient_monitor_response message;
-  atclient_monitor_message_init(&message);
+  atclient_monitor_response_init(&message);
 
   const int max_tries = 10;
   int tries = 1;
 
   while (tries <= max_tries) {
-    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message, NULL)) != 0) {
+    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       tries++;
       continue;
@@ -253,7 +253,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
   ret = 1;
   goto exit;
 exit: {
-  atclient_monitor_message_free(&message);
+  atclient_monitor_response_free(&message);
   return ret;
 }
 }

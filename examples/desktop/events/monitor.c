@@ -126,7 +126,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   free(atsign);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_message_free(&message);
+  atclient_monitor_response_free(&message);
   return ret;
 }
 }

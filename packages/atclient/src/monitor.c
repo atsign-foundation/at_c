@@ -24,11 +24,11 @@ static int parse_message(char *original, char **message_type, char **message_bod
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
-void atclient_monitor_message_init(atclient_monitor_response *message) {
+void atclient_monitor_response_init(atclient_monitor_response *message) {
   memset(message, 0, sizeof(atclient_monitor_response));
 }
 
-void atclient_monitor_message_free(atclient_monitor_response *message) {
+void atclient_monitor_response_free(atclient_monitor_response *message) {
   if (message->type == ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION) {
     atclient_atnotification_free(&(message->notification));
   } else if (message->type == ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE) {
@@ -104,8 +104,7 @@ exit: {
 }
 }
 
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message,
-                          atclient_monitor_hooks *hooks) {
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message) {
   int ret = -1;
 
   char *buffertemp = NULL;
@@ -181,26 +180,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         ret = 0;
         goto exit;
       }
-      if (hooks != NULL && hooks->pre_decrypt_notification != NULL) {
-        ret = hooks->pre_decrypt_notification();
-        if (ret != 0) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call pre decrypt notification hook\n");
-          goto exit;
-        }
-      }
 
-      int decrypt_ret = decrypt_notification(atclient, &(message->notification));
-
-      if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
-        ret = hooks->post_decrypt_notification(decrypt_ret);
-        if (ret != 0) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call post decrypt notification hook\n");
-          goto exit;
-        }
-      }
-
-      ret = decrypt_ret;
-      if (ret != 0) {
+      if ((ret = decrypt_notification(atclient, &(message->notification))) != 0) {
         message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;

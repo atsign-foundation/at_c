@@ -23,7 +23,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
 static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen,
                                  size_t *medatastrolen);
 
-int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notification_id) {
+int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **notification_id) {
   int ret = 1;
 
   if (ctx->async_read) {

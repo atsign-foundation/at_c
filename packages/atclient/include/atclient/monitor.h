@@ -60,19 +60,19 @@ typedef struct atclient_monitor_hooks {
  *
  * Example:
  * atclient_monitor_response message;
- * atclient_monitor_message_init(&message);
+ * atclient_monitor_response_init(&message);
  *
  * @param message the message to initialize, it is assumed that the memory for this struct has already been allocated
  */
-void atclient_monitor_message_init(atclient_monitor_response *message);
+void atclient_monitor_response_init(atclient_monitor_response *message);
 
 /**
  * @brief Initializes the monitor message to a default state, ready for use in other functions.
  *
  * @param message the message to free, it is assumed that the memory for this struct has already been allocated and was
- * previous called with atclient_monitor_message_init
+ * previous called with atclient_monitor_response_init
  */
-void atclient_monitor_message_free(atclient_monitor_response *message);
+void atclient_monitor_response_free(atclient_monitor_response *message);
 
 /**
  * @brief Initializes the monitor connection. It is recommended that this be called before any other monitor functions.
@@ -133,7 +133,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is
  * initialized and pkam authenticated.
  * @param message A pointer to the initialized atclient_monitor_response. It is up to
- * the caller to allocate memory to this struct, call atclient_monitor_message_init before passing to this function,
+ * the caller to allocate memory to this struct, call atclient_monitor_response_init before passing to this function,
  * then call atclient_monitor_free use. This function populates the message struct with the notification, data response,
  * or error response read from the monitor connection.
  * @return 0 on success, non-zero on error
@@ -141,8 +141,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message,
-                          atclient_monitor_hooks *hooks);
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message);
 
 /**
  * @brief Check if the monitor connection is still established (client is listening for notifications, and the server

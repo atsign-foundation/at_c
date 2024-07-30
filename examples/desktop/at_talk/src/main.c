@@ -260,7 +260,7 @@ static void *monitor_handler(void *xargs) {
 
   while (true) {
     atclient_monitor_response message;
-    atclient_monitor_message_init(&message);
+    atclient_monitor_response_init(&message);
 
     pthread_mutex_lock(&monitor_mutex);
     pthread_mutex_lock(&client_mutex);
@@ -334,7 +334,7 @@ static void *monitor_handler(void *xargs) {
     }
     }
 
-    atclient_monitor_message_free(&message);
+    atclient_monitor_response_free(&message);
     usleep(100);
   }
   goto exit;
