@@ -1,7 +1,7 @@
 #ifndef ATCLIENT_CONNECTION_HOOKS_H
 #define ATCLIENT_CONNECTION_HOOKS_H
 
-#include <atclient/connection.h>
+#include "atclient/connection.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -16,8 +16,6 @@
 #define ATCLIENT_CONNECTION_HOOKS_POST_READ_INITIALIZED (VALUE_INITIALIZED << 1)
 #define ATCLIENT_CONNECTION_HOOKS_PRE_WRITE_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_CONNECTION_HOOKS_POST_WRITE_INITIALIZED (VALUE_INITIALIZED << 3)
-
-typedef struct atclient_connection atclient_connection;
 
 typedef struct atclient_connection_hook_params {
   unsigned char *src;

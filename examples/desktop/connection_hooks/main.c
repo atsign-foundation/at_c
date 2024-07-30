@@ -78,8 +78,8 @@ int main(int argc, char *argv[]) {
   atclient_connection conn;
   atclient_connection_init(&conn, ATCLIENT_CONNECTION_TYPE_ATSERVER);
 
-  const unsigned char *src = "from:12alpaca\r\n";
-  const size_t src_len = strlen(src);
+  const unsigned char *src = (const unsigned char *) "from:12alpaca\r\n";
+  const size_t src_len = strlen((char *) src);
   unsigned char *recv = NULL;
   size_t recv_len = 0;
 

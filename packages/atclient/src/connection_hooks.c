@@ -1,8 +1,8 @@
 #include "atclient/connection.h"
+#include "atclient/connection_hooks.h"
 #include <atlogger/atlogger.h>
 #include <string.h>
 #include <stdlib.h>
-#include "atclient/connection_hooks.h"
 #include <stddef.h>
 
 #define TAG "connection_hooks"

@@ -7,7 +7,8 @@
 #include <mbedtls/ssl.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include "atclient/connection_hooks.h"
+
+typedef struct atclient_connection_hooks atclient_connection_hooks;
 
 // represents the type of connection
 typedef enum atclient_connection_type {

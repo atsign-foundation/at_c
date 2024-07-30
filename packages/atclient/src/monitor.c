@@ -593,7 +593,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 5. set decrypted value
-  atclient_atnotification_set_decrypted_value(notification, decryptedvaluetemp);
+  atclient_atnotification_set_decrypted_value(notification, (const char *) decryptedvaluetemp);
 
   ret = 0;
   goto exit;
