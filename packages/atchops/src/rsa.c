@@ -2,12 +2,7 @@
 #include "atchops/rsa_key.h"
 #include "atchops/sha.h"
 #include "atlogger/atlogger.h"
-#include <mbedtls/asn1.h>
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/md.h>
-#include <mbedtls/md5.h>
-#include <mbedtls/rsa.h>
+#include "atchops/mbedtls.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

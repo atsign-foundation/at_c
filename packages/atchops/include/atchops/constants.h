@@ -1,9 +1,9 @@
 #ifndef ATCHOPS_CONSTANTS_H
 #define ATCHOPS_CONSTANTS_H
 
-#define ATCHOPS_RNG_PERSONALIZATION "@atchops12345"
+#include "atchops/mbedtls.h"
 
-#include "mbedtls/md.h"
+#define ATCHOPS_RNG_PERSONALIZATION "@atchops12345"
 
 typedef enum atchops_md_type {
   ATCHOPS_MD_NONE = 0,

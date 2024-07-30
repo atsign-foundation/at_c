@@ -1,10 +1,7 @@
 #ifndef ATCLIENT_CONNECTION_H
 #define ATCLIENT_CONNECTION_H
 
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/net_sockets.h>
-#include <mbedtls/ssl.h>
+#include "atchops/mbedtls.h"
 #include <stdbool.h>
 #include <stddef.h>
 

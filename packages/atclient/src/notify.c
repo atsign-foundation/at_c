@@ -2,6 +2,7 @@
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
+#include "atclient/mbedtls.h"
 #include "atclient/string_utils.h"
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
@@ -9,7 +10,6 @@
 #include <atchops/iv.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
-#include <mbedtls/threading.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -102,12 +102,13 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char **notifi
 
     ret = atclient_atkey_metadata_set_iv_nonce(&(params->atkey->metadata), (char *)ivbase64);
     if (ret != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iv_nonce failed with code %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iv_nonce failed with code %d\n",
+                   ret);
       return ret;
     }
 
     ret = atchops_aes_ctr_encrypt(sharedenckey, ATCHOPS_AES_256, iv, (unsigned char *)params->value,
-                                 strlen(params->value), ciphertext, ciphertextsize, &ciphertextlen);
+                                  strlen(params->value), ciphertext, ciphertextsize, &ciphertextlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt failed with code %d\n", ret);
       return ret;
@@ -244,7 +245,6 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
 
   cmdsize += 1; // null terminator
 
-
   return cmdsize;
 }
 
@@ -295,7 +295,8 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
     off += strlen(":") + strlen(atclient_notify_operation_str[params->operation]);
   }
 
-  if (atclient_notify_params_is_message_type_initialized(params) && params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
+  if (atclient_notify_params_is_message_type_initialized(params) &&
+      params->message_type != ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE) {
     snprintf(cmd + off, cmdsize - off, ":message_type:%s", atclient_notify_message_type_str[params->message_type]);
     off += strlen(":message_type:") + strlen(atclient_notify_message_type_str[params->message_type]);
   }

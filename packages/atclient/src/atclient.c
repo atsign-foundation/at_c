@@ -9,7 +9,7 @@
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
-#include <mbedtls/md.h>
+#include "atclient/mbedtls.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>

@@ -1,6 +1,6 @@
 #include "atchops/base64.h"
 #include <atlogger/atlogger.h>
-#include <mbedtls/base64.h>
+#include "atchops/mbedtls.h"
 #include <stddef.h>
 
 #define TAG "base64"

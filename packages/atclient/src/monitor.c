@@ -5,14 +5,14 @@
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
 #include "atclient/string_utils.h"
-#include "cJSON.h"
+#include "atclient/cjson.h"
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
-#include <mbedtls/threading.h>
+#include "atclient/mbedtls.h"
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>

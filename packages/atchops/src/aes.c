@@ -1,8 +1,7 @@
 #include "atchops/aes.h"
 #include "atchops/base64.h"
 #include "atchops/constants.h"
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
+#include "atchops/mbedtls.h"
 #include <string.h>
 #include <stddef.h>
 #include <atlogger/atlogger.h>

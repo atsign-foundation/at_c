@@ -4,10 +4,7 @@
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/net_sockets.h>
-#include <mbedtls/ssl.h>
+#include "atclient/mbedtls.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>

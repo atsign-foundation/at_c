@@ -2,7 +2,7 @@
 #ifndef ATCLIENT_METADATA_H
 #define ATCLIENT_METADATA_H
 
-#include "cJSON.h"
+#include "atclient/cjson.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h> // IWYU pragma: keep (for uint8_t)

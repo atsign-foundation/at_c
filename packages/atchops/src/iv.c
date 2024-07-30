@@ -2,8 +2,7 @@
 #include "atchops/base64.h"
 #include "atchops/constants.h"
 #include <atlogger/atlogger.h>
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
+#include "atchops/mbedtls.h"
 #include <stddef.h>
 #include <string.h>
 

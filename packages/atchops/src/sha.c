@@ -1,6 +1,6 @@
 #include "atchops/sha.h"
+#include "atchops/mbedtls.h"
 #include <atlogger/atlogger.h>
-#include <mbedtls/md.h>
 #include <stddef.h>
 
 #define TAG "sha"
