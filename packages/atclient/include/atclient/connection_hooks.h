@@ -39,7 +39,6 @@ typedef enum atclient_connection_hook_type {
 
 typedef struct atclient_connection_hooks {
   bool _is_nested_call;
-  bool readonly_src;
   atclient_connection_hook *pre_read;
   atclient_connection_hook *post_read;
   atclient_connection_hook *pre_write;

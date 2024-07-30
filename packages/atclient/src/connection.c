@@ -255,7 +255,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx) && ctx->hooks->pre_write != NULL) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = (unsigned char *)value;
+    params.src = value;
     params.src_len = value_len;
     params.recv = NULL;
     params.recv_size = 0;
@@ -321,8 +321,8 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
 exit: { return ret; }
 }
 
-int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_r, const size_t src_len_r,
-                             unsigned char *recv, const size_t recv_size_r, size_t *recv_len) {
+int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t src_len,
+                             unsigned char *recv, const size_t recv_size, size_t *recv_len) {
   int ret = 1;
 
   /*
@@ -333,12 +333,12 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     return ret;
   }
 
-  if (src_r == NULL) {
+  if (src == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "src is NULL\n");
     return ret;
   }
 
-  if (src_len_r == 0) {
+  if (src_len == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "srclen is 0\n");
     return ret;
   }
@@ -349,38 +349,16 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   }
 
   /*
-   * 2. Prep hook stuff
-   */
-  // Clone readonly inputs so it is editable by the hooks
-  size_t srclen = src_len_r;
-  size_t recvsize = recv_size_r;
-
-  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && !ctx->hooks->_is_nested_call;
-  bool allocate_src = try_hooks && ctx->hooks->readonly_src == false;
-
-  unsigned char *src = NULL;
-
-  if (allocate_src) {
-    if ((src = malloc(sizeof(unsigned char) * srclen)) == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for src\n");
-      allocate_src = false; // don't try to free since the memory failed to be allocated
-      goto exit;
-    }
-    memcpy(src, src_r, srclen);
-  } else {
-    src = (unsigned char *)src_r;
-  }
-
-  /*
    * 3. Call pre_send hook, if it exists
    */
+  bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && !ctx->hooks->_is_nested_call;
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
     params.src = src;
-    params.src_len = srclen;
+    params.src_len = src_len;
     params.recv = recv;
-    params.recv_size = recvsize;
+    params.recv_size = recv_size;
     params.recv_len = recv_len;
     ret = ctx->hooks->pre_write(&params);
     if (ctx->hooks != NULL) {
@@ -395,7 +373,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   /*
    * 4. Write the value
    */
-  if ((ret = mbedtls_ssl_write(&(ctx->ssl), src, srclen)) <= 0) {
+  if ((ret = mbedtls_ssl_write(&(ctx->ssl), src, src_len)) <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
     goto exit;
   }
@@ -403,11 +381,11 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   /*
    * 5. Print debug log
    */
-  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == srclen) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == src_len) {
     unsigned char *srccopy = NULL;
-    if ((srccopy = malloc(sizeof(unsigned char) * srclen)) != NULL) {
-      memcpy(srccopy, src, srclen);
-      atlogger_fix_stdout_buffer((char *)srccopy, srclen);
+    if ((srccopy = malloc(sizeof(unsigned char) * src_len)) != NULL) {
+      memcpy(srccopy, src, src_len);
+      atlogger_fix_stdout_buffer((char *)srccopy, src_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
                    srccopy, reset);
       free(srccopy);
@@ -424,9 +402,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
     params.src = src;
-    params.src_len = srclen;
+    params.src_len = src_len;
     params.recv = recv;
-    params.recv_size = recvsize;
+    params.recv_size = recv_size;
     params.recv_len = recv_len;
     ret = ctx->hooks->post_write(&params);
     if (ctx->hooks != NULL) {
@@ -449,14 +427,14 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   /*
    * 8. Run pre read hook, if it exists
    */
-  memset(recv, 0, sizeof(unsigned char) * recvsize);
+  memset(recv, 0, sizeof(unsigned char) * recv_size);
   if (try_hooks && atclient_connection_hooks_is_pre_read_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
     params.src = src;
-    params.src_len = srclen;
+    params.src_len = src_len;
     params.recv = recv;
-    params.recv_size = recvsize;
+    params.recv_size = recv_size;
     params.recv_len = recv_len;
     ret = ctx->hooks->pre_read(&params);
     if (ctx->hooks != NULL) {
@@ -475,7 +453,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   bool found = false;
   size_t l = 0;
   do {
-    if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recvsize - l)) <= 0) {
+    if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recv_size - l)) <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
     }
@@ -500,9 +478,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
     params.src = src;
-    params.src_len = srclen;
+    params.src_len = src_len;
     params.recv = recv;
-    params.recv_size = recvsize;
+    params.recv_size = recv_size;
     params.recv_len = recv_len;
     ret = ctx->hooks->post_read(&params);
     if (ctx->hooks != NULL) {
@@ -534,9 +512,6 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src_
   ret = 0;
   goto exit;
 exit: {
-  if (allocate_src) {
-    free(src);
-  }
   return ret;
 }
 }
@@ -641,8 +616,8 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
    */
   size_t recv_size;
   if(value_max_len == 0) {
-    // we read 4 KB at a time
-    recv_size = 2;
+    // we read 4 KB at a time, TODO: make a constant
+    recv_size = 4096;
   } else {
     recv_size = value_max_len;
   }

@@ -65,7 +65,6 @@ int atclient_connection_hooks_enable(atclient_connection *conn) {
   /*
    * 4. Set any defaults
    */
-  conn->hooks->readonly_src = true;
 
   ret = 0;
   goto exit;
