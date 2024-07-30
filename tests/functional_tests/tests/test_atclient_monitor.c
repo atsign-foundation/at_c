@@ -219,7 +219,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
   int tries = 1;
 
   while (tries <= max_tries) {
-    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message)) != 0) {
+    if ((ret = atclient_monitor_read(monitor_conn, atclient2, &message, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       tries++;
       continue;

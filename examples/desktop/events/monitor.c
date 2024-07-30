@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting main monitor loop...\n");
   while (true) {
 
-    ret = atclient_monitor_read(&monitor_conn, &atclient2, &message);
+    ret = atclient_monitor_read(&monitor_conn, &atclient2, &message, NULL);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read monitor message: %d\n", ret);
       continue;

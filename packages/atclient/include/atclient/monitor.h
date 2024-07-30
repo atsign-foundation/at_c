@@ -136,12 +136,13 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size
  * the caller to allocate memory to this struct, call atclient_monitor_response_init before passing to this function,
  * then call atclient_monitor_free use. This function populates the message struct with the notification, data response,
  * or error response read from the monitor connection.
+ * @param hooks the hooks to use for the monitor connection, can be NULL if no hooks are needed
  * @return 0 on success, non-zero on error
  *
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message);
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message, atclient_monitor_hooks *hooks);
 
 /**
  * @brief Check if the monitor connection is still established (client is listening for notifications, and the server

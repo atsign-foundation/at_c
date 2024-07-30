@@ -104,7 +104,7 @@ exit: {
 }
 }
 
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message) {
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message, atclient_monitor_hooks *hooks) {
   int ret = -1;
 
   char *buffertemp = NULL;
@@ -181,7 +181,27 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
         goto exit;
       }
 
-      if ((ret = decrypt_notification(atclient, &(message->notification))) != 0) {
+      if(hooks != NULL && hooks->pre_decrypt_notification != NULL) {
+        ret = hooks->pre_decrypt_notification();
+        if (ret != 0) {
+          message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to run pre_decrypt_notification hook\n");
+          goto exit;
+        }
+      }
+
+      ret = decrypt_notification(atclient, &(message->notification));
+
+      if(hooks != NULL && hooks->post_decrypt_notification != NULL) {
+        ret = hooks->post_decrypt_notification(ret);
+        if (ret != 0) {
+          message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to run post_decrypt_notification hook\n");
+          goto exit;
+        }
+      }
+
+      if (ret != 0) {
         message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
