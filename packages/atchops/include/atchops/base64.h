@@ -10,7 +10,7 @@
  * @param srcsize the length of the src bytes
  * @param dst the buffer where the base64 encoded result will be
  * @param dstsize the buffer size, you can use atchops_base64_encoded_size to calculate the optimal size
- * @param dstlen the length of the result after operation
+ * @param dstlen the length of the result after operation, NULLable if you don't want the length
  * @return int 0 on success
  */
 int atchops_base64_encode(const unsigned char *src, const size_t srcsize, unsigned char *dst,
@@ -23,7 +23,7 @@ int atchops_base64_encode(const unsigned char *src, const size_t srcsize, unsign
  * @param srcsize the length of the src bytes
  * @param dst the buffer where the base64 decoded result will be
  * @param dstsize the buffer size, you may use atchops_base64_decoded_size to calculate the buffer size
- * @param dstlen the length of the result after operation
+ * @param dstlen the length of the result after operation, NULLable if you don't want the length
  * @return int 0 on success
  */
 int atchops_base64_decode(const unsigned char *src, const size_t srcsize, unsigned char *dst,
