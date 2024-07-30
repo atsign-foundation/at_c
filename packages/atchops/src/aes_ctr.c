@@ -56,12 +56,6 @@ int atchops_aes_ctr_encrypt(const unsigned char *key, const enum atchops_aes_siz
     return ret;
   }
 
-  if (ciphertext_len == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ciphertext_len is NULL\n");
-    return ret;
-  }
-
   if (ciphertext_size < plaintext_len) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ciphertext_size is less than plaintext_len\n");
@@ -244,10 +238,17 @@ int atchops_aes_ctr_decrypt(const unsigned char *key, const enum atchops_aes_siz
   /*
    * 5. Return outputs
    */
+  if(plaintext_padded_len - pad_val > plaintext_size) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "plaintext_size is less than (plaintext_padded_len - pad_val). The buffer is too small.\n");
+    goto exit;
+  }
+
   if (plaintext_len != NULL) {
     *plaintext_len = plaintext_padded_len - pad_val;
   }
-  memcpy(plaintext, plaintext_padded, *plaintext_len);
+
+  memcpy(plaintext, plaintext_padded, plaintext_padded_len - pad_val);
 
   goto exit;
 exit: {
