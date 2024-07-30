@@ -2,6 +2,7 @@
 #include <atclient/connection_hooks.h>
 #include <atlogger/atlogger.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define TAG "main"
 
@@ -132,19 +133,40 @@ int main(int argc, char *argv[]) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from %s:%d\n", HOST, PORT);
     goto exit;
   }
+  free(recv);
+  recv = NULL;
 
   if ((ret = atclient_connection_read(&conn, &recv, &recv_len, 20)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from %s:%d\n", HOST, PORT);
     goto exit;
   }
+  free(recv);
+  recv = NULL;
 
   if ((ret = atclient_connection_read(&conn, &recv, &recv_len, 20)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from %s:%d\n", HOST, PORT);
     goto exit;
   }
+  free(recv);
+  recv = NULL;
 
   if ((ret = atclient_connection_read(&conn, &recv, &recv_len, 0)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from %s:%d\n", HOST, PORT);
+    goto exit;
+  }
+  free(recv);
+  recv = NULL;
+
+  size_t recv_size = 4096;
+  recv = malloc(sizeof(unsigned char) * recv_size);
+  if(recv == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to malloc\n");
+    goto exit;
+  }
+
+  if((ret = atclient_connection_send(&conn, src, src_len, recv, recv_size, &recv_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
@@ -157,6 +179,7 @@ int main(int argc, char *argv[]) {
   ret = 0;
   goto exit;
 exit: {
+  free(recv);
   atclient_connection_free(&conn);
   return ret;
 }

@@ -16,7 +16,7 @@ SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
 cd "$SCRIPT_DIRECTORY"
 
 ## CMake configure
-cmake -S . -B build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 ## CMake build
 cmake --build build --target install
