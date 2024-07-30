@@ -372,7 +372,7 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
    * 3. Start monitor
    */
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Restarting monitor...\n");
-  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX) != 0) {
+  if ((ret = atclient_monitor_start(monitor, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     return ret;
   }

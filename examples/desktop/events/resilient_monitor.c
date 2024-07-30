@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
       &monitor_conn, 1 * 1000); // monitor read will wait at most 1 second for a message. As soon bytes are read, it
                                 // will return. If no bytes are read, it will return after 3 seconds.
 
-  if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX) != 0) {
+  if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
