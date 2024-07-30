@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   size_t max_tries = 10;
   while (true) {
 
-    ret = atclient_monitor_read(&monitor_conn, &atclient2, &message, NULL);
+    ret = atclient_monitor_read(&monitor_conn, &atclient2, &message);
 
     switch (message->type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
