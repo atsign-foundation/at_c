@@ -603,7 +603,7 @@ int atclient_atnotification_set_ske_enc_key_name(atclient_atnotification *notifi
   }
   const size_t ske_enc_key_name_len = strlen(ske_enc_key_name);
   const size_t ske_enc_key_name_size = ske_enc_key_name_len + 1;
-  if ((notification->ske_enc_key_name = malloc(sizeof(char) * (ske_enc_key_name_size))) == NULL) {
+  if ((notification->ske_enc_key_name = malloc(sizeof(char) * ske_enc_key_name_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification ske_enc_key_name\n");
     goto exit;
