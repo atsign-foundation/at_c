@@ -25,7 +25,7 @@ typedef struct atclient_connection_hook_params {
   size_t *recv_len;
 } atclient_connection_hook_params;
 
-typedef int(atclient_connection_hook)(atclient_connection_hook_params *params);
+typedef int atclient_connection_hook(atclient_connection_hook_params *params);
 
 typedef enum atclient_connection_hook_type {
   ATCLIENT_CONNECTION_HOOK_TYPE_NONE = 0,

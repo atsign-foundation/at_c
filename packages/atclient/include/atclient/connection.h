@@ -5,11 +5,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#ifndef ATCLIENT_CONNECTION_HOOKS_H
-typedef struct atclient_connection_hooks atclient_connection_hooks;
-#endif
-
-
 // represents the type of connection
 typedef enum atclient_connection_type {
   ATCLIENT_CONNECTION_TYPE_ATDIRECTORY, // uses '\n' to check if it is connected
@@ -39,7 +34,7 @@ typedef struct atclient_connection {
   mbedtls_ctr_drbg_context ctr_drbg;
 
   bool _is_hooks_enabled: 1;
-  atclient_connection_hooks *hooks;
+  struct atclient_connection_hooks *hooks;
 } atclient_connection;
 
 /**
