@@ -1,9 +1,9 @@
 #ifndef ATCLIENT_CONNECTION_HOOKS_H
 #define ATCLIENT_CONNECTION_HOOKS_H
 
-#include "atclient/connection.h"
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define VALUE_INITIALIZED 0b00000001
 
@@ -16,6 +16,8 @@
 #define ATCLIENT_CONNECTION_HOOKS_POST_READ_INITIALIZED (VALUE_INITIALIZED << 1)
 #define ATCLIENT_CONNECTION_HOOKS_PRE_WRITE_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_CONNECTION_HOOKS_POST_WRITE_INITIALIZED (VALUE_INITIALIZED << 3)
+
+struct atclient_connection;
 
 typedef struct atclient_connection_hook_params {
   unsigned char *src;
@@ -44,18 +46,18 @@ typedef struct atclient_connection_hooks {
   uint8_t _initialized_fields[1];
 } atclient_connection_hooks;
 
-bool atclient_connection_hooks_is_enabled(atclient_connection *ctx);
-int atclient_connection_hooks_enable(atclient_connection *conn);
-void atclient_connection_hooks_disable(atclient_connection *conn);
+bool atclient_connection_hooks_is_enabled(struct atclient_connection *ctx);
+int atclient_connection_hooks_enable(struct atclient_connection *conn);
+void atclient_connection_hooks_disable(struct atclient_connection *conn);
 
 // Q. Why is hook a void pointer?
 // A. In case we want to add future hook types which use a different function signature
-int atclient_connection_hooks_set(atclient_connection *ctx, const atclient_connection_hook_type type, void *hook);
+int atclient_connection_hooks_set(struct atclient_connection *ctx, const atclient_connection_hook_type type, void *hook);
 
-bool atclient_connection_hooks_is_pre_read_initialized(const atclient_connection *ctx);
-bool atclient_connection_hooks_is_post_read_initialized(const atclient_connection *ctx);
-bool atclient_connection_hooks_is_pre_write_initialized(const atclient_connection *ctx);
-bool atclient_connection_hooks_is_post_write_initialized(const atclient_connection *ctx);
+bool atclient_connection_hooks_is_pre_read_initialized(const struct atclient_connection *ctx);
+bool atclient_connection_hooks_is_post_read_initialized(const struct atclient_connection *ctx);
+bool atclient_connection_hooks_is_pre_write_initialized(const struct atclient_connection *ctx);
+bool atclient_connection_hooks_is_post_write_initialized(const struct atclient_connection *ctx);
 
 
 #endif

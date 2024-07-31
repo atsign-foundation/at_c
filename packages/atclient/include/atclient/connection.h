@@ -1,6 +1,7 @@
 #ifndef ATCLIENT_CONNECTION_H
 #define ATCLIENT_CONNECTION_H
 
+#include "atclient/connection_hooks.h"
 #include "atchops/mbedtls.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -34,7 +35,7 @@ typedef struct atclient_connection {
   mbedtls_ctr_drbg_context ctr_drbg;
 
   bool _is_hooks_enabled: 1;
-  struct atclient_connection_hooks *hooks;
+  atclient_connection_hooks *hooks;
 } atclient_connection;
 
 /**

@@ -66,7 +66,7 @@ int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) 
     goto exit;
   }
 
-  root = cJSON_Parse(readbuf);
+  root = cJSON_Parse((const char *) readbuf);
   cJSON *aes_pkam_public_key = cJSON_GetObjectItem(root, "aesPkamPublicKey");
   cJSON *aes_pkam_private_key = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
   cJSON *aes_encrypt_public_key = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
