@@ -3,7 +3,7 @@ set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
 option(ATSDK_BUILD_TESTS "Build tests for atsdk" OFF)
 
 # Basic project setup
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.24)
 set(CMAKE_C_STANDARD 99)
 cmake_policy(SET CMP0135 NEW)
 include(GNUInstallDirs)
