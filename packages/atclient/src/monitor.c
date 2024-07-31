@@ -583,7 +583,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     goto exit;
   }
 
-  const size_t decryptedvaluetempsize = ciphertextlen;
+  const size_t decryptedvaluetempsize = ciphertextlen + 1;
   decryptedvaluetemp = malloc(sizeof(unsigned char) * decryptedvaluetempsize);
   memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
   size_t decryptedvaluetemplen = 0;
