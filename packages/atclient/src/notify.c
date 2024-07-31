@@ -323,6 +323,13 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
   snprintf(cmd + off, cmdsize - off, "%s", metadata_protocol_str);
 
+  if (strlen(metadata_protocol_str) != metadatastrlen) {
+    res = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_atkey_metadata_to_protocol_str mismatch. Expected %lu but got %lu\n", metadatastrlen,
+                 strlen(metadata_protocol_str));
+    goto exit;
+  }
   off += strlen(metadata_protocol_str);
 
   if ((res = atclient_atkey_to_string(params->atkey, &atkeystr)) != 0) {
