@@ -389,7 +389,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
   }
 
-  cJSON *epoch_millis = cJSON_GetObjectItem(root, "epoch_millis");
+  cJSON *epoch_millis = cJSON_GetObjectItem(root, "epochMillis");
   if (epoch_millis != NULL) {
     if((ret = atclient_atnotification_set_epoch_millis(notification, epoch_millis->valueint)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification epoch_millis\n");
@@ -397,7 +397,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
   }
 
-  cJSON *message_type = cJSON_GetObjectItem(root, "message_type");
+  cJSON *message_type = cJSON_GetObjectItem(root, "messageType");
   if (message_type != NULL) {
     if (message_type->type != cJSON_NULL) {
       val = message_type->valuestring;
@@ -410,7 +410,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
   }
 
-  cJSON *is_encrypted = cJSON_GetObjectItem(root, "is_encrypted");
+  cJSON *is_encrypted = cJSON_GetObjectItem(root, "isEncrypted");
   if (is_encrypted != NULL) {
     if((ret = atclient_atnotification_set_is_encrypted(notification, is_encrypted->valueint)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification is_encrypted\n");
@@ -421,7 +421,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
   cJSON *metadata = cJSON_GetObjectItem(root, "metadata");
   if (metadata != NULL) {
     // get enc_key_name
-    cJSON *enc_key_name = cJSON_GetObjectItem(metadata, "enc_key_name");
+    cJSON *enc_key_name = cJSON_GetObjectItem(metadata, "encKeyName");
     if (enc_key_name != NULL) {
       if (enc_key_name->type != cJSON_NULL) {
         val = enc_key_name->valuestring;
@@ -435,7 +435,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
 
     // get enc_algo
-    cJSON *enc_algo = cJSON_GetObjectItem(metadata, "enc_algo");
+    cJSON *enc_algo = cJSON_GetObjectItem(metadata, "encAlgo");
     if (enc_algo != NULL) {
       if (enc_algo->type != cJSON_NULL) {
         val = enc_algo->valuestring;
@@ -449,7 +449,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
 
     // get iv_nonce
-    cJSON *iv_nonce = cJSON_GetObjectItem(metadata, "iv_nonce");
+    cJSON *iv_nonce = cJSON_GetObjectItem(metadata, "ivNonce");
     if (iv_nonce != NULL) {
       if (iv_nonce->type != cJSON_NULL) {
         val = iv_nonce->valuestring;
@@ -463,7 +463,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
 
     // get ske_enc_key_name
-    cJSON *ske_enc_key_name = cJSON_GetObjectItem(metadata, "ske_enc_key_name");
+    cJSON *ske_enc_key_name = cJSON_GetObjectItem(metadata, "skeEncKeyName");
     if (ske_enc_key_name != NULL) {
       if (ske_enc_key_name->type != cJSON_NULL) {
         val = ske_enc_key_name->valuestring;
@@ -477,7 +477,7 @@ static int parse_notification(atclient_atnotification *notification, const char 
     }
 
     // get ske_enc_algo
-    cJSON *ske_enc_algo = cJSON_GetObjectItem(metadata, "ske_enc_algo");
+    cJSON *ske_enc_algo = cJSON_GetObjectItem(metadata, "skeEncAlgo");
     if (ske_enc_algo != NULL) {
       if (ske_enc_algo->type != cJSON_NULL) {
         val = ske_enc_algo->valuestring;
@@ -505,7 +505,27 @@ exit: {
 static int decrypt_notification(atclient *atclient, atclient_atnotification *notification) {
   int ret = 1;
 
-  char *from_atsign = notification->from;
+  if(atclient == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    return ret;
+  }
+
+  if(notification == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "notification is NULL\n");
+    return ret;
+  }
+
+  if(!atclient_atnotification_is_from_initialized(notification) && notification->from != NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "From field is not initialized\n");
+    return ret;
+  }
+
+  char *from_atsign = NULL;
+
+  if((ret = atclient_string_utils_atsign_with_at(notification->from, &from_atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign with @\n");
+    goto exit;
+  }
 
   unsigned char *decryptedvaluetemp = NULL;
 
