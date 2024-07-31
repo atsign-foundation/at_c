@@ -449,8 +449,7 @@ int atclient_atnotification_set_key(atclient_atnotification *notification, const
   }
   const size_t key_len = strlen(key);
   const size_t key_size = key_len + 1;
-  notification->key = malloc(sizeof(char) * (key_size));
-  if (notification->key == NULL) {
+  if ((notification->key = malloc(sizeof(char) * key_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification key\n");
     goto exit;
@@ -458,6 +457,7 @@ int atclient_atnotification_set_key(atclient_atnotification *notification, const
   memcpy(notification->key, key, key_len);
   *(notification->key + key_len) = '\0';
   atclient_atnotification_key_set_initialized(notification, true);
+  ret = 0;
   goto exit;
 exit: { return ret; }
 }
