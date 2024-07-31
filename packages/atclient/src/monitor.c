@@ -515,17 +515,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     return ret;
   }
 
-  if(!atclient_atnotification_is_from_initialized(notification) && notification->from != NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "From field is not initialized\n");
-    return ret;
-  }
-
   char *from_atsign = NULL;
-
-  if((ret = atclient_string_utils_atsign_with_at(notification->from, &from_atsign)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign with @\n");
-    goto exit;
-  }
 
   unsigned char *decryptedvaluetemp = NULL;
 
@@ -556,6 +546,11 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
     goto exit;
   }
 
+  if(!atclient_atnotification_is_from_initialized(notification) && notification->from != NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "From field is not initialized\n");
+    goto exit;
+  }
+
   // 1b. some warnings
   if (!atclient_atnotification_is_is_encrypted_initialized(notification)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
@@ -566,6 +561,12 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
                    "is_encrypted is false, we may be trying to decrypt some unencrypted plain text.\n");
     }
+  }
+
+  // 1c. get atsign with @
+  if((ret = atclient_string_utils_atsign_with_at(notification->from, &from_atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign with @\n");
+    goto exit;
   }
 
   // 2. get iv
