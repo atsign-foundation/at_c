@@ -386,8 +386,7 @@ int atclient_atnotification_set_id(atclient_atnotification *notification, const 
   }
   const size_t id_len = strlen(id);
   const size_t id_size = id_len + 1;
-  notification->id = malloc(sizeof(char) * (id_size));
-  if (notification->id == NULL) {
+  if ((notification->id = malloc(sizeof(char) * id_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification id\n");
     goto exit;
@@ -407,8 +406,7 @@ int atclient_atnotification_set_from(atclient_atnotification *notification, cons
   }
   const size_t from_len = strlen(from);
   const size_t from_size = from_len + 1;
-  notification->from = malloc(sizeof(char) * (from_size));
-  if (notification->from == NULL) {
+  if ((notification->from = malloc(sizeof(char) * from_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification from\n");
     goto exit;
@@ -428,8 +426,7 @@ int atclient_atnotification_set_to(atclient_atnotification *notification, const 
   }
   const size_t to_len = strlen(to);
   const size_t to_size = to_len + 1;
-  notification->to = malloc(sizeof(char) * (to_size));
-  if (notification->to == NULL) {
+  if ((notification->to = malloc(sizeof(char) * to_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification to\n");
     goto exit;
@@ -469,8 +466,7 @@ int atclient_atnotification_set_value(atclient_atnotification *notification, con
   }
   const size_t value_len = strlen(value);
   const size_t value_size = value_len + 1;
-  notification->value = malloc(sizeof(char) * (value_size));
-  if (notification->value == NULL) {
+  if ((notification->value = malloc(sizeof(char) * value_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification value\n");
     goto exit;
@@ -490,8 +486,7 @@ int atclient_atnotification_set_operation(atclient_atnotification *notification,
   }
   const size_t operation_len = strlen(operation);
   const size_t operation_size = operation_len + 1;
-  notification->operation = malloc(sizeof(char) * (operation_size));
-  if (notification->operation == NULL) {
+  if ((notification->operation = malloc(sizeof(char) * operation_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification operation\n");
     goto exit;
@@ -520,8 +515,7 @@ int atclient_atnotification_set_message_type(atclient_atnotification *notificati
   }
   const size_t message_type_len = strlen(message_type);
   const size_t message_type_size = message_type_len + 1;
-  notification->message_type = malloc(sizeof(char) * (message_type_size));
-  if (notification->message_type == NULL) {
+  if ((notification->message_type = malloc(sizeof(char) * message_type_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification message_type\n");
     goto exit;
@@ -550,8 +544,7 @@ int atclient_atnotification_set_enc_key_name(atclient_atnotification *notificati
   }
   const size_t enc_key_name_len = strlen(enc_key_name);
   const size_t enc_key_name_size = enc_key_name_len + 1;
-  notification->enc_key_name = malloc(sizeof(char) * (enc_key_name_size));
-  if (notification->enc_key_name == NULL) {
+  if ((notification->enc_key_name = malloc(sizeof(char) * enc_key_name_size)) == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification enc_key_name\n");
     goto exit;
   }
@@ -570,7 +563,11 @@ int atclient_atnotification_set_enc_algo(atclient_atnotification *notification, 
   }
   const size_t enc_algo_len = strlen(enc_algo);
   const size_t enc_algo_size = enc_algo_len + 1;
-  notification->enc_algo = malloc(sizeof(char) * (enc_algo_size));
+  if((notification->enc_algo = malloc(sizeof(char) * enc_algo_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification enc_algo\n");
+    goto exit;
+  }
   memcpy(notification->enc_algo, enc_algo, enc_algo_len);
   *(notification->enc_algo + enc_algo_len) = '\0';
   atclient_atnotification_enc_algo_set_initialized(notification, true);
@@ -586,8 +583,7 @@ int atclient_atnotification_set_iv_nonce(atclient_atnotification *notification, 
   }
   const size_t iv_nonce_size = strlen(iv_nonce);
   const size_t iv_nonce_len = iv_nonce_size + 1;
-  notification->iv_nonce = malloc(sizeof(char) * (iv_nonce_size));
-  if (notification->iv_nonce == NULL) {
+  if ((notification->iv_nonce = malloc(sizeof(char) * iv_nonce_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification iv_nonce\n");
     goto exit;
@@ -607,8 +603,7 @@ int atclient_atnotification_set_ske_enc_key_name(atclient_atnotification *notifi
   }
   const size_t ske_enc_key_name_len = strlen(ske_enc_key_name);
   const size_t ske_enc_key_name_size = ske_enc_key_name_len + 1;
-  notification->ske_enc_key_name = malloc(sizeof(char) * (ske_enc_key_name_size));
-  if (notification->ske_enc_key_name == NULL) {
+  if ((notification->ske_enc_key_name = malloc(sizeof(char) * (ske_enc_key_name_size))) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification ske_enc_key_name\n");
     goto exit;
@@ -628,8 +623,7 @@ int atclient_atnotification_set_ske_enc_algo(atclient_atnotification *notificati
   }
   const size_t ske_enc_algo_len = strlen(ske_enc_algo);
   const size_t ske_enc_algo_size = ske_enc_algo_len + 1;
-  notification->ske_enc_algo = malloc(sizeof(char) * (ske_enc_algo_size));
-  if (notification->ske_enc_algo == NULL) {
+  if ((notification->ske_enc_algo = malloc(sizeof(char) * ske_enc_algo_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification ske_enc_algo\n");
     goto exit;
@@ -649,8 +643,7 @@ int atclient_atnotification_set_decrypted_value(atclient_atnotification *notific
   }
   const size_t decrypted_value_len = strlen(decrypted_value);
   const size_t decrypted_value_size = decrypted_value_len + 1;
-  notification->decrypted_value = malloc(sizeof(unsigned char) * (decrypted_value_size));
-  if (notification->decrypted_value == NULL) {
+  if ((notification->decrypted_value = malloc(sizeof(unsigned char) * decrypted_value_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification decrypted_value\n");
     goto exit;
