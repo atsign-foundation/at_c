@@ -26,7 +26,6 @@ int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size key
     return ret;
   }
 
-
   /*
    * 2. Variables
    */
