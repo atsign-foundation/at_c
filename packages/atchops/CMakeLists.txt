@@ -5,13 +5,13 @@ option(ATCHOPS_BUILD_TESTS "Build tests for atchops" OFF)
 set(ATCHOPS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(
   ATCHOPS_SOURCES
+  ${CMAKE_CURRENT_LIST_DIR}/src/aes_ctr.c
   ${CMAKE_CURRENT_LIST_DIR}/src/aes.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/aesctr.c
   ${CMAKE_CURRENT_LIST_DIR}/src/base64.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/constants.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/mbedtls.c
   ${CMAKE_CURRENT_LIST_DIR}/src/iv.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/rsa_key.c
   ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/rsakey.c
   ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
   ${CMAKE_CURRENT_LIST_DIR}/src/uuid.c
 )

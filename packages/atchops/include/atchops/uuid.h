@@ -13,10 +13,10 @@ int atchops_uuid_init(void);
 /**
  * @brief Generate a UUID-v4 string
  *
- * @param uuidstr the buffer to store the UUID string
- * @param uuidstrlen the length of the buffer
+ * @param uuid_str the buffer to store the UUID string
+ * @param uuid_str_len the length of the buffer
  * @return int 0 on success, 1 on error
  */
-int atchops_uuid_generate(char *uuidstr, const size_t uuidstrlen);
+int atchops_uuid_generate(char *uuid_str, const size_t uuid_str_len);
 
 #endif

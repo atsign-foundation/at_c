@@ -1,6 +1,5 @@
 #include <atclient/atclient.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atlogger/atlogger.h>
@@ -39,8 +38,7 @@ int main() {
   atclient atclient;
   atclient_init(&atclient);
 
-  atclient_atsign atsign;
-  atclient_atsign_init(&atsign, ATSIGN);
+  const char *atsign = ATSIGN;
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -49,57 +47,53 @@ int main() {
   atclient_atkeys_init(&atkeys);
   atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH);
 
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
-  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Successfully authenticated!\n");
   }
-  atclient.atkeys = atkeys;
-  atclient.atsign = atsign;
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), atsign.atsign, strlen(atsign.atsign),
-                                           ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, atsign, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
     goto exit;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created self key\n");
   }
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len,
-                        (int)atkeystr.len, atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)(atkeystrlen),
+               atkeystr);
 
-  ret = atclient_get_selfkey(&atclient, &atkey, value, valuelen, &(valueolen));
+  ret = atclient_get_self_key(&atclient, &atkey, &value, NULL);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get self key");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value.str (%lu): \"%.*s\"\n", valueolen, (int)valueolen,
-                        value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value.str (%lu): \"%.*s\"\n", valueolen, (int)valueolen, value);
 
   ret = 0;
   goto exit;
-exit : {
+exit: {
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
-  atclient_atstr_free(&atkeystr);
-  atclient_atsign_free(&atsign);
   atclient_free(&atclient);
   free(atserver_host);
+  free(atkeystr);
   return ret;
 }
 }

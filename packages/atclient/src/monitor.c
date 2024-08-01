@@ -1,17 +1,18 @@
 #include "atclient/monitor.h"
+#include "atclient/atnotification.h"
 #include "atclient/atclient.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
-#include "atclient/stringutils.h"
-#include "cJSON.h"
+#include "atclient/string_utils.h"
+#include "atclient/cjson.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
-#include <mbedtls/threading.h>
+#include "atclient/mbedtls.h"
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
@@ -23,514 +24,11 @@ static int parse_message(char *original, char **message_type, char **message_bod
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
-void atclient_atnotification_init(atclient_atnotification *notification) {
-  memset(notification, 0, sizeof(atclient_atnotification));
+void atclient_monitor_response_init(atclient_monitor_response *message) {
+  memset(message, 0, sizeof(atclient_monitor_response));
 }
 
-void atclient_atnotification_free(atclient_atnotification *notification) {
-  if (atclient_atnotification_id_is_initialized(notification)) {
-    atclient_atnotification_free_id(notification);
-  }
-  if (atclient_atnotification_from_is_initialized(notification)) {
-    atclient_atnotification_free_from(notification);
-  }
-  if (atclient_atnotification_to_is_initialized(notification)) {
-    atclient_atnotification_free_to(notification);
-  }
-  if (atclient_atnotification_key_is_initialized(notification)) {
-    atclient_atnotification_free_key(notification);
-  }
-  if (atclient_atnotification_value_is_initialized(notification)) {
-    atclient_atnotification_free_value(notification);
-  }
-  if (atclient_atnotification_operation_is_initialized(notification)) {
-    atclient_atnotification_free_operation(notification);
-  }
-  if (atclient_atnotification_epochMillis_is_initialized(notification)) {
-    atclient_atnotification_free_epochMillis(notification);
-  }
-  if (atclient_atnotification_messageType_is_initialized(notification)) {
-    atclient_atnotification_free_messageType(notification);
-  }
-  if (atclient_atnotification_isEncrypted_is_initialized(notification)) {
-    atclient_atnotification_free_isEncrypted(notification);
-  }
-  if (atclient_atnotification_encKeyName_is_initialized(notification)) {
-    atclient_atnotification_free_encKeyName(notification);
-  }
-  if (atclient_atnotification_encAlgo_is_initialized(notification)) {
-    atclient_atnotification_free_encAlgo(notification);
-  }
-  if (atclient_atnotification_ivNonce_is_initialized(notification)) {
-    atclient_atnotification_free_ivNonce(notification);
-  }
-  if (atclient_atnotification_skeEncKeyName_is_initialized(notification)) {
-    atclient_atnotification_free_skeEncKeyName(notification);
-  }
-  if (atclient_atnotification_skeEncAlgo_is_initialized(notification)) {
-    atclient_atnotification_free_skeEncAlgo(notification);
-  }
-  if (atclient_atnotification_decryptedvalue_is_initialized(notification)) {
-    atclient_atnotification_free_decryptedvalue(notification);
-  }
-  if (atclient_atnotification_decryptedvaluelen_is_initialized(notification)) {
-    atclient_atnotification_free_decryptedvaluelen(notification);
-  }
-}
-
-bool atclient_atnotification_id_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_INITIALIZED);
-}
-
-bool atclient_atnotification_from_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_FROM_INITIALIZED);
-}
-
-bool atclient_atnotification_to_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_TO_INITIALIZED);
-}
-
-bool atclient_atnotification_key_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_KEY_INITIALIZED);
-}
-
-bool atclient_atnotification_value_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_VALUE_INITIALIZED);
-}
-
-bool atclient_atnotification_operation_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_OPERATION_INITIALIZED);
-}
-
-bool atclient_atnotification_epochMillis_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_EPOCHMILLIS_INITIALIZED);
-}
-
-bool atclient_atnotification_messageType_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[0] & ATCLIENT_ATNOTIFICATION_MESSAGETYPE_INITIALIZED);
-}
-
-bool atclient_atnotification_isEncrypted_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_ISENCRYPTED_INITIALIZED);
-}
-
-bool atclient_atnotification_encKeyName_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_ENCKEYNAME_INITIALIZED);
-}
-
-bool atclient_atnotification_encAlgo_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_ENCALGO_INITIALIZED);
-}
-
-bool atclient_atnotification_ivNonce_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_IVNONCE_INITIALIZED);
-}
-
-bool atclient_atnotification_skeEncKeyName_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_SKEENCKEYNAME_INITIALIZED);
-}
-
-bool atclient_atnotification_skeEncAlgo_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_SKEENCALGO_INITIALIZED);
-}
-
-bool atclient_atnotification_decryptedvalue_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED);
-}
-
-bool atclient_atnotification_decryptedvaluelen_is_initialized(const atclient_atnotification *notification) {
-  return (notification->initalizedfields[1] & ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED);
-}
-
-void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_ID_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_ID_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_FROM_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_FROM_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_TO_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_TO_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_KEY_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_KEY_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_VALUE_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_VALUE_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_OPERATION_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_OPERATION_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_epochMillis_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_EPOCHMILLIS_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_EPOCHMILLIS_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_messageType_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[0] |= ATCLIENT_ATNOTIFICATION_MESSAGETYPE_INITIALIZED;
-  } else {
-    notification->initalizedfields[0] &= ~ATCLIENT_ATNOTIFICATION_MESSAGETYPE_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_isEncrypted_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_ISENCRYPTED_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_ISENCRYPTED_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_encKeyName_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_ENCKEYNAME_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_ENCKEYNAME_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_encAlgo_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_ENCALGO_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_ENCALGO_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_ivNonce_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_IVNONCE_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_IVNONCE_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_skeEncKeyName_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_SKEENCKEYNAME_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_SKEENCKEYNAME_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_skeEncAlgo_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_SKEENCALGO_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_SKEENCALGO_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_decryptedvalue_set_initialized(atclient_atnotification *notification, bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_decryptedvaluelen_set_initialized(atclient_atnotification *notification,
-                                                               bool initialized) {
-  if (initialized) {
-    notification->initalizedfields[1] |= ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED;
-  } else {
-    notification->initalizedfields[1] &= ~ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUELEN_INITIALIZED;
-  }
-}
-
-void atclient_atnotification_free_id(atclient_atnotification *notification) {
-  free(notification->id);
-  notification->id = NULL;
-  atclient_atnotification_id_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_from(atclient_atnotification *notification) {
-  free(notification->from);
-  notification->from = NULL;
-  atclient_atnotification_from_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_to(atclient_atnotification *notification) {
-  free(notification->to);
-  notification->to = NULL;
-  atclient_atnotification_to_set_initialized(notification, false);
-}
-void atclient_atnotification_free_key(atclient_atnotification *notification) {
-  free(notification->key);
-  notification->key = NULL;
-  atclient_atnotification_key_set_initialized(notification, false);
-}
-void atclient_atnotification_free_value(atclient_atnotification *notification) {
-  if (atclient_atnotification_value_is_initialized(notification)) {
-    free(notification->value);
-    notification->value = NULL;
-  }
-  atclient_atnotification_value_set_initialized(notification, false);
-}
-void atclient_atnotification_free_operation(atclient_atnotification *notification) {
-  free(notification->operation);
-  notification->operation = NULL;
-  atclient_atnotification_operation_set_initialized(notification, false);
-}
-void atclient_atnotification_free_epochMillis(atclient_atnotification *notification) {
-  notification->epochMillis = 0;
-  atclient_atnotification_epochMillis_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_messageType(atclient_atnotification *notification) {
-  free(notification->messageType);
-  notification->messageType = NULL;
-  atclient_atnotification_messageType_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_isEncrypted(atclient_atnotification *notification) {
-  notification->isEncrypted = false;
-  atclient_atnotification_isEncrypted_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_encKeyName(atclient_atnotification *notification) {
-  free(notification->encKeyName);
-  notification->encKeyName = NULL;
-  atclient_atnotification_encKeyName_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_encAlgo(atclient_atnotification *notification) {
-  free(notification->encAlgo);
-  notification->encAlgo = NULL;
-  atclient_atnotification_encAlgo_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_ivNonce(atclient_atnotification *notification) {
-  free(notification->ivNonce);
-  notification->ivNonce = NULL;
-  atclient_atnotification_ivNonce_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_skeEncKeyName(atclient_atnotification *notification) {
-  free(notification->skeEncKeyName);
-  notification->skeEncKeyName = NULL;
-  atclient_atnotification_skeEncKeyName_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_skeEncAlgo(atclient_atnotification *notification) {
-  free(notification->skeEncAlgo);
-  notification->skeEncAlgo = NULL;
-  atclient_atnotification_skeEncAlgo_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_decryptedvalue(atclient_atnotification *notification) {
-  free(notification->decryptedvalue);
-  notification->decryptedvalue = NULL;
-  atclient_atnotification_decryptedvalue_set_initialized(notification, false);
-}
-
-void atclient_atnotification_free_decryptedvaluelen(atclient_atnotification *notification) {
-  notification->decryptedvaluelen = 0;
-  atclient_atnotification_decryptedvaluelen_set_initialized(notification, false);
-}
-
-void atclient_atnotification_set_id(atclient_atnotification *notification, const char *id, const size_t idlen) {
-  if (atclient_atnotification_id_is_initialized(notification)) {
-    atclient_atnotification_free_id(notification);
-  }
-  notification->id = malloc(sizeof(char) * (idlen + 1));
-  memcpy(notification->id, id, idlen);
-  *(notification->id + idlen) = '\0';
-  atclient_atnotification_id_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_from(atclient_atnotification *notification, const char *from, const size_t fromlen) {
-  if (atclient_atnotification_from_is_initialized(notification)) {
-    atclient_atnotification_free_from(notification);
-  }
-  notification->from = malloc(sizeof(char) * (fromlen + 1));
-  memcpy(notification->from, from, fromlen);
-  *(notification->from + fromlen) = '\0';
-  atclient_atnotification_from_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_to(atclient_atnotification *notification, const char *to, const size_t tolen) {
-  if (atclient_atnotification_to_is_initialized(notification)) {
-    atclient_atnotification_free_to(notification);
-  }
-  notification->to = malloc(sizeof(char) * (tolen + 1));
-  memcpy(notification->to, to, tolen);
-  *(notification->to + tolen) = '\0';
-  atclient_atnotification_to_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_key(atclient_atnotification *notification, const char *key, const size_t keylen) {
-  if (atclient_atnotification_key_is_initialized(notification)) {
-    atclient_atnotification_free_key(notification);
-  }
-  notification->key = malloc(sizeof(char) * (keylen + 1));
-  memcpy(notification->key, key, keylen);
-  *(notification->key + keylen) = '\0';
-  atclient_atnotification_key_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_value(atclient_atnotification *notification, const char *value,
-                                       const size_t valuelen) {
-  if (atclient_atnotification_value_is_initialized(notification)) {
-    atclient_atnotification_free_value(notification);
-  }
-  notification->value = malloc(sizeof(char) * (valuelen + 1));
-  memcpy(notification->value, value, valuelen);
-  *(notification->value + valuelen) = '\0';
-  atclient_atnotification_value_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_operation(atclient_atnotification *notification, const char *operation,
-                                           const size_t operationlen) {
-  if (atclient_atnotification_operation_is_initialized(notification)) {
-    atclient_atnotification_free_operation(notification);
-  }
-  notification->operation = malloc(sizeof(char) * (operationlen + 1));
-  memcpy(notification->operation, operation, operationlen);
-  *(notification->operation + operationlen) = '\0';
-  atclient_atnotification_operation_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_epochMillis(atclient_atnotification *notification, const size_t epochMillis) {
-  if (atclient_atnotification_epochMillis_is_initialized(notification)) {
-    atclient_atnotification_free_epochMillis(notification);
-  }
-  notification->epochMillis = epochMillis;
-  atclient_atnotification_epochMillis_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_messageType(atclient_atnotification *notification, const char *messageType,
-                                             const size_t messageTypelen) {
-  if (atclient_atnotification_messageType_is_initialized(notification)) {
-    atclient_atnotification_free_messageType(notification);
-  }
-  notification->messageType = malloc(sizeof(char) * (messageTypelen + 1));
-  memcpy(notification->messageType, messageType, messageTypelen);
-  *(notification->messageType + messageTypelen) = '\0';
-  atclient_atnotification_messageType_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_isEncrypted(atclient_atnotification *notification, const bool isEncrypted) {
-  if (atclient_atnotification_isEncrypted_is_initialized(notification)) {
-    atclient_atnotification_free_isEncrypted(notification);
-  }
-  notification->isEncrypted = isEncrypted;
-  atclient_atnotification_isEncrypted_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_encKeyName(atclient_atnotification *notification, const char *encKeyName,
-                                            const size_t encKeyNamelen) {
-  if (atclient_atnotification_encKeyName_is_initialized(notification)) {
-    atclient_atnotification_free_encKeyName(notification);
-  }
-  notification->encKeyName = malloc(sizeof(char) * (encKeyNamelen + 1));
-  memcpy(notification->encKeyName, encKeyName, encKeyNamelen);
-  *(notification->encKeyName + encKeyNamelen) = '\0';
-  atclient_atnotification_encKeyName_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_encAlgo(atclient_atnotification *notification, const char *encAlgo,
-                                         const size_t encAlgolen) {
-  if (atclient_atnotification_encAlgo_is_initialized(notification)) {
-    atclient_atnotification_free_encAlgo(notification);
-  }
-  notification->encAlgo = malloc(sizeof(char) * (encAlgolen + 1));
-  memcpy(notification->encAlgo, encAlgo, encAlgolen);
-  *(notification->encAlgo + encAlgolen) = '\0';
-  atclient_atnotification_encAlgo_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_ivNonce(atclient_atnotification *notification, const char *ivNonce,
-                                         const size_t ivNoncelen) {
-  if (atclient_atnotification_ivNonce_is_initialized(notification)) {
-    atclient_atnotification_free_ivNonce(notification);
-  }
-  notification->ivNonce = malloc(sizeof(char) * (ivNoncelen + 1));
-  memcpy(notification->ivNonce, ivNonce, ivNoncelen);
-  *(notification->ivNonce + ivNoncelen) = '\0';
-  atclient_atnotification_ivNonce_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_skeEncKeyName(atclient_atnotification *notification, const char *skeEncKeyName,
-                                               const size_t skeEncKeyNamelen) {
-  if (atclient_atnotification_skeEncKeyName_is_initialized(notification)) {
-    atclient_atnotification_free_skeEncKeyName(notification);
-  }
-  notification->skeEncKeyName = malloc(sizeof(char) * (skeEncKeyNamelen + 1));
-  memcpy(notification->skeEncKeyName, skeEncKeyName, skeEncKeyNamelen);
-  *(notification->skeEncKeyName + skeEncKeyNamelen) = '\0';
-  atclient_atnotification_skeEncKeyName_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_skeEncAlgo(atclient_atnotification *notification, const char *skeEncAlgo,
-                                            const size_t skeEncAlgolen) {
-  if (atclient_atnotification_skeEncAlgo_is_initialized(notification)) {
-    atclient_atnotification_free_skeEncAlgo(notification);
-  }
-  notification->skeEncAlgo = malloc(sizeof(char) * (skeEncAlgolen + 1));
-  memcpy(notification->skeEncAlgo, skeEncAlgo, skeEncAlgolen);
-  *(notification->skeEncAlgo + skeEncAlgolen) = '\0';
-  atclient_atnotification_skeEncAlgo_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_decryptedvalue(atclient_atnotification *notification,
-                                                const unsigned char *decryptedvalue, const size_t decryptedvaluelen) {
-  if (atclient_atnotification_decryptedvalue_is_initialized(notification)) {
-    atclient_atnotification_free_decryptedvalue(notification);
-  }
-  notification->decryptedvalue = malloc(sizeof(unsigned char) * (decryptedvaluelen + 1));
-  memcpy(notification->decryptedvalue, decryptedvalue, decryptedvaluelen);
-  notification->decryptedvalue[decryptedvaluelen] = '\0';
-  atclient_atnotification_decryptedvalue_set_initialized(notification, true);
-}
-
-void atclient_atnotification_set_decryptedvaluelen(atclient_atnotification *notification,
-                                                   const size_t decryptedvaluelen) {
-  if (atclient_atnotification_decryptedvaluelen_is_initialized(notification)) {
-    atclient_atnotification_free_decryptedvaluelen(notification);
-  }
-  notification->decryptedvaluelen = decryptedvaluelen;
-  atclient_atnotification_decryptedvaluelen_set_initialized(notification, true);
-}
-
-void atclient_monitor_message_init(atclient_monitor_message *message) {
-  memset(message, 0, sizeof(atclient_monitor_message));
-}
-
-void atclient_monitor_message_free(atclient_monitor_message *message) {
+void atclient_monitor_response_free(atclient_monitor_response *message) {
   if (message->type == ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION) {
     atclient_atnotification_free(&(message->notification));
   } else if (message->type == ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE) {
@@ -562,11 +60,13 @@ void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout
   mbedtls_ssl_conf_read_timeout(&(monitor_conn->atserver_connection.ssl_config), timeoutms);
 }
 
-int atclient_monitor_start(atclient *monitor_conn, const char *regex, const size_t regexlen) {
+int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
   int ret = 1;
 
   size_t cmdsize = 0;
   char *cmd = NULL;
+
+  const size_t regexlen = strlen(regex);
 
   // log building command... (Debug)
   // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
@@ -606,8 +106,7 @@ exit: {
 }
 }
 
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message *message,
-                          atclient_monitor_hooks *hooks) {
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message, atclient_monitor_hooks *hooks) {
   int ret = -1;
 
   char *buffertemp = NULL;
@@ -615,9 +114,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
   size_t chunks = 0;
   const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
-  
+
   buffer = malloc(sizeof(char) * chunksize);
-  if(buffer == NULL) {
+  if (buffer == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for buffer\n");
     goto exit;
   }
@@ -642,7 +141,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
     chunks = chunks + 1;
   }
-  if(ret <= 0) { // you should reconnect...
+  if (ret <= 0) { // you should reconnect...
     message->type = ATCLIENT_MONITOR_ERROR_READ;
     message->error_read.error_code = ret;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
@@ -675,44 +174,42 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
                    messagebody);
       goto exit;
     }
-    if (atclient_atnotification_isEncrypted_is_initialized(&(message->notification)) &&
-        message->notification.isEncrypted == true) {
+    if (atclient_atnotification_is_is_encrypted_initialized(&(message->notification)) &&
+        message->notification.is_encrypted == true) {
       // if key contains \"shared_key\", could be in the middle of string, ignore it
       if (strstr(message->notification.key, "shared_key") != NULL) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Ignoring shared_key\n");
         ret = 0;
         goto exit;
       }
-      if (hooks != NULL && hooks->pre_decrypt_notification != NULL) {
+
+      if(hooks != NULL && hooks->pre_decrypt_notification != NULL) {
         ret = hooks->pre_decrypt_notification();
         if (ret != 0) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call pre decrypt notification hook\n");
+          message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to run pre_decrypt_notification hook\n");
           goto exit;
         }
       }
 
-      int decrypt_ret = decrypt_notification(atclient, &(message->notification));
+      ret = decrypt_notification(atclient, &(message->notification));
 
-      if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
-        ret = hooks->post_decrypt_notification(decrypt_ret);
+      if(hooks != NULL && hooks->post_decrypt_notification != NULL) {
+        ret = hooks->post_decrypt_notification(ret);
         if (ret != 0) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to call post decrypt notification hook\n");
+          message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to run post_decrypt_notification hook\n");
           goto exit;
         }
       }
 
-      ret = decrypt_ret;
       if (ret != 0) {
         message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification\n");
         goto exit;
       }
     } else {
-      atclient_atnotification_set_decryptedvalue(&(message->notification),
-                                                 (unsigned char *)message->notification.value,
-                                                 strlen(message->notification.value));
-      atclient_atnotification_set_decryptedvaluelen(&(message->notification),
-                                                    strlen(message->notification.value));
+      atclient_atnotification_set_decrypted_value(&(message->notification), message->notification.value);
     }
   } else if (strcmp(messagetype, "data") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
@@ -818,161 +315,179 @@ static int parse_notification(atclient_atnotification *notification, const char 
   if (id != NULL) {
     if (id->type != cJSON_NULL) {
       val = id->valuestring;
-      vallen = strlen(id->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_id(notification, val, vallen);
+    if((ret = atclient_atnotification_set_id(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification id\n");
+      goto exit;
+    }
   }
 
   cJSON *from = cJSON_GetObjectItem(root, "from");
   if (from != NULL) {
     if (from->type != cJSON_NULL) {
       val = from->valuestring;
-      vallen = strlen(from->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_from(notification, val, vallen);
+    if((ret = atclient_atnotification_set_from(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification from\n");
+      goto exit;
+    }
   }
 
   cJSON *to = cJSON_GetObjectItem(root, "to");
   if (to != NULL) {
     if (to->type != cJSON_NULL) {
       val = to->valuestring;
-      vallen = strlen(to->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_to(notification, val, vallen);
+    if((ret = atclient_atnotification_set_to(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification to\n");
+      goto exit;
+    }
   }
 
   cJSON *key = cJSON_GetObjectItem(root, "key");
   if (key != NULL) {
     if (key->type != cJSON_NULL) {
       val = key->valuestring;
-      vallen = strlen(key->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_key(notification, val, vallen);
+    if((ret = atclient_atnotification_set_key(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification key\n");
+      goto exit;
+    }
   }
 
   cJSON *value = cJSON_GetObjectItem(root, "value");
   if (value != NULL) {
     if (value->type != cJSON_NULL) {
       val = value->valuestring;
-      vallen = strlen(value->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_value(notification, val, vallen);
+    if((ret = atclient_atnotification_set_value(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification value\n");
+      goto exit;
+    }
   }
 
   cJSON *operation = cJSON_GetObjectItem(root, "operation");
   if (operation != NULL) {
     if (operation->type != cJSON_NULL) {
       val = operation->valuestring;
-      vallen = strlen(operation->valuestring);
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_operation(notification, val, vallen);
+    if((ret = atclient_atnotification_set_operation(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification operation\n");
+      goto exit;
+    }
   }
 
-  cJSON *epochMillis = cJSON_GetObjectItem(root, "epochMillis");
-  if (epochMillis != NULL) {
-    atclient_atnotification_set_epochMillis(notification, epochMillis->valueint);
+  cJSON *epoch_millis = cJSON_GetObjectItem(root, "epoch_millis");
+  if (epoch_millis != NULL) {
+    if((ret = atclient_atnotification_set_epoch_millis(notification, epoch_millis->valueint)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification epoch_millis\n");
+      goto exit;
+    }
   }
 
-  cJSON *messageType = cJSON_GetObjectItem(root, "messageType");
-  if (messageType != NULL) {
-    if (messageType->type != cJSON_NULL) {
-      val = messageType->valuestring;
-      vallen = strlen(messageType->valuestring);
+  cJSON *message_type = cJSON_GetObjectItem(root, "message_type");
+  if (message_type != NULL) {
+    if (message_type->type != cJSON_NULL) {
+      val = message_type->valuestring;
     } else {
       val = "null";
-      vallen = strlen("null");
     }
-    atclient_atnotification_set_messageType(notification, val, vallen);
+    if((ret = atclient_atnotification_set_message_type(notification, val)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification message_type\n");
+      goto exit;
+    }
   }
 
-  cJSON *isEncrypted = cJSON_GetObjectItem(root, "isEncrypted");
-  if (isEncrypted != NULL) {
-    atclient_atnotification_set_isEncrypted(notification, isEncrypted->valueint);
+  cJSON *is_encrypted = cJSON_GetObjectItem(root, "is_encrypted");
+  if (is_encrypted != NULL) {
+    if((ret = atclient_atnotification_set_is_encrypted(notification, is_encrypted->valueint)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification is_encrypted\n");
+      goto exit;
+    }
   }
 
   cJSON *metadata = cJSON_GetObjectItem(root, "metadata");
   if (metadata != NULL) {
-    // get encKeyName
-    cJSON *encKeyName = cJSON_GetObjectItem(metadata, "encKeyName");
-    if (encKeyName != NULL) {
-      if (encKeyName->type != cJSON_NULL) {
-        val = encKeyName->valuestring;
-        vallen = strlen(encKeyName->valuestring);
+    // get enc_key_name
+    cJSON *enc_key_name = cJSON_GetObjectItem(metadata, "enc_key_name");
+    if (enc_key_name != NULL) {
+      if (enc_key_name->type != cJSON_NULL) {
+        val = enc_key_name->valuestring;
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      atclient_atnotification_set_encKeyName(notification, val, vallen);
+      if((ret = atclient_atnotification_set_enc_key_name(notification, val)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification enc_key_name\n");
+        goto exit;
+      }
     }
 
-    // get encAlgo
-    cJSON *encAlgo = cJSON_GetObjectItem(metadata, "encAlgo");
-    if (encAlgo != NULL) {
-      if (encAlgo->type != cJSON_NULL) {
-        val = encAlgo->valuestring;
-        vallen = strlen(encAlgo->valuestring);
+    // get enc_algo
+    cJSON *enc_algo = cJSON_GetObjectItem(metadata, "enc_algo");
+    if (enc_algo != NULL) {
+      if (enc_algo->type != cJSON_NULL) {
+        val = enc_algo->valuestring;
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      atclient_atnotification_set_encAlgo(notification, val, vallen);
+      if((ret = atclient_atnotification_set_enc_algo(notification, val)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification enc_algo\n");
+        goto exit;
+      }
     }
 
-    // get ivNonce
-    cJSON *ivNonce = cJSON_GetObjectItem(metadata, "ivNonce");
-    if (ivNonce != NULL) {
-      if (ivNonce->type != cJSON_NULL) {
-        val = ivNonce->valuestring;
-        vallen = strlen(ivNonce->valuestring);
+    // get iv_nonce
+    cJSON *iv_nonce = cJSON_GetObjectItem(metadata, "iv_nonce");
+    if (iv_nonce != NULL) {
+      if (iv_nonce->type != cJSON_NULL) {
+        val = iv_nonce->valuestring;
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      atclient_atnotification_set_ivNonce(notification, val, vallen);
+      if((ret = atclient_atnotification_set_iv_nonce(notification, val)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification iv_nonce\n");
+        goto exit;
+      }
     }
 
-    // get skeEncKeyName
-    cJSON *skeEncKeyName = cJSON_GetObjectItem(metadata, "skeEncKeyName");
-    if (skeEncKeyName != NULL) {
-      if (skeEncKeyName->type != cJSON_NULL) {
-        val = skeEncKeyName->valuestring;
-        vallen = strlen(skeEncKeyName->valuestring);
+    // get ske_enc_key_name
+    cJSON *ske_enc_key_name = cJSON_GetObjectItem(metadata, "ske_enc_key_name");
+    if (ske_enc_key_name != NULL) {
+      if (ske_enc_key_name->type != cJSON_NULL) {
+        val = ske_enc_key_name->valuestring;
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      atclient_atnotification_set_skeEncKeyName(notification, val, vallen);
+      if((ret = atclient_atnotification_set_ske_enc_key_name(notification, val)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ske_enc_key_name\n");
+        goto exit;
+      }
     }
 
-    // get skeEncAlgo
-    cJSON *skeEncAlgo = cJSON_GetObjectItem(metadata, "skeEncAlgo");
-    if (skeEncAlgo != NULL) {
-      if (skeEncAlgo->type != cJSON_NULL) {
-        val = skeEncAlgo->valuestring;
-        vallen = strlen(skeEncAlgo->valuestring);
+    // get ske_enc_algo
+    cJSON *ske_enc_algo = cJSON_GetObjectItem(metadata, "ske_enc_algo");
+    if (ske_enc_algo != NULL) {
+      if (ske_enc_algo->type != cJSON_NULL) {
+        val = ske_enc_algo->valuestring;
       } else {
         val = "null";
-        vallen = strlen("null");
       }
-      atclient_atnotification_set_skeEncAlgo(notification, val, vallen);
+      if((ret = atclient_atnotification_set_ske_enc_algo(notification, val)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ske_enc_algo\n");
+        goto exit;
+      }
     }
   }
 
@@ -986,12 +501,11 @@ exit: {
 }
 
 // after calling `parse_notification`, the *notification struct will be partially filled, all that is left to do is
-// decrypt notification->value and put the result in notification->decryptedvalue
+// decrypt notification->value and put the result in notification->decrypted_value
 static int decrypt_notification(atclient *atclient, atclient_atnotification *notification) {
   int ret = 1;
 
-  atclient_atsign atsignfrom;
-  atclient_atsign_init(&atsignfrom, notification->from);
+  char *from_atsign = notification->from;
 
   unsigned char *decryptedvaluetemp = NULL;
 
@@ -1017,28 +531,28 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   // 1. make sure everything we need is there
 
   // 1a. check if value is initialized
-  if (!atclient_atnotification_value_is_initialized(notification)) {
+  if (!atclient_atnotification_is_value_initialized(notification)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Value is not initialized. Nothing was found to decrypt.\n");
     goto exit;
   }
 
   // 1b. some warnings
-  if (!atclient_atnotification_isEncrypted_is_initialized(notification)) {
+  if (!atclient_atnotification_is_is_encrypted_initialized(notification)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                 "isEncrypted field was found to be uninitialized, we don't know for sure if we're decrypting "
+                 "is_encrypted field was found to be uninitialized, we don't know for sure if we're decrypting "
                  "something that's even encrypted.\n");
   } else {
-    if (!notification->isEncrypted) {
+    if (!notification->is_encrypted) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                   "isEncrypted is false, we may be trying to decrypt some unencrypted plain text.\n");
+                   "is_encrypted is false, we may be trying to decrypt some unencrypted plain text.\n");
     }
   }
 
   // 2. get iv
-  if (atclient_atnotification_ivNonce_is_initialized(notification) &&
-      !atclient_stringutils_starts_with(notification->ivNonce, strlen(notification->ivNonce), "null", strlen("null"))) {
+  if (atclient_atnotification_is_iv_nonce_initialized(notification) &&
+      !atclient_string_utils_starts_with(notification->iv_nonce, "null")) {
     size_t ivlen;
-    ret = atchops_base64_decode((unsigned char *)notification->ivNonce, strlen(notification->ivNonce), iv,
+    ret = atchops_base64_decode((unsigned char *)notification->iv_nonce, strlen(notification->iv_nonce), iv,
                                 ATCHOPS_IV_BUFFER_SIZE, &ivlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode iv\n");
@@ -1056,22 +570,8 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 3. get shared encryption key to decrypt
-  ret = atclient_get_shared_encryption_key_shared_by_other(atclient, &atsignfrom, (char *)sharedenckeybase64);
-  if (ret != 0) {
+  if ((ret = atclient_get_shared_encryption_key_shared_by_other(atclient, from_atsign, sharedenckey)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared encryption key\n");
-    goto exit;
-  }
-  sharedenckeybase64len = strlen((char *)sharedenckeybase64);
-
-  ret = atchops_base64_decode(sharedenckeybase64, sharedenckeybase64len, sharedenckey, sharedenckeysize,
-                              &sharedenckeylen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode shared encryption key\n");
-    goto exit;
-  }
-
-  if (sharedenckeylen != sharedenckeysize) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid shared encryption key length was decoded.\n");
     goto exit;
   }
 
@@ -1088,7 +588,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
   size_t decryptedvaluetemplen = 0;
 
-  ret = atchops_aesctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, decryptedvaluetemp,
+  ret = atchops_aes_ctr_decrypt(sharedenckey, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, decryptedvaluetemp,
                                decryptedvaluetempsize, &decryptedvaluetemplen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt value\n");
@@ -1096,13 +596,11 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 5. set decrypted value
-  atclient_atnotification_set_decryptedvalue(notification, decryptedvaluetemp, decryptedvaluetemplen);
-  atclient_atnotification_set_decryptedvaluelen(notification, decryptedvaluetemplen);
+  atclient_atnotification_set_decrypted_value(notification, (const char *) decryptedvaluetemp);
 
   ret = 0;
   goto exit;
 exit: {
-  atclient_atsign_free(&atsignfrom);
   free(decryptedvaluetemp);
   return ret;
 }

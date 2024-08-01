@@ -1,4 +1,4 @@
-#include "atchops/rsakey.h"
+#include "atchops/rsa_key.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -30,12 +30,12 @@ int main() {
   const char *privatekeybase64 = PRIVATE_KEY_BASE64;
   const size_t privatekeybase64len = strlen(PRIVATE_KEY_BASE64);
 
-  atchops_rsakey_privatekey privatekey;
-  atchops_rsakey_privatekey_init(&privatekey);
+  atchops_rsa_key_private_key privatekey;
+  atchops_rsa_key_private_key_init(&privatekey);
 
-  ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
+  ret = atchops_rsa_key_populate_private_key(&privatekey, privatekeybase64, privatekeybase64len);
   if (ret != 0) {
-    printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
+    printf("atchops_rsa_key_populate_privatekey (failed): %d\n", ret);
     goto exit;
   }
 

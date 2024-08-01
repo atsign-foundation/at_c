@@ -1,4 +1,4 @@
-#include "atchops/aesctr.h"
+#include "atchops/aes_ctr.h"
 #include "atchops/iv.h"
 #include "atchops/base64.h"
 #include <stdio.h>
@@ -46,9 +46,6 @@ int main() {
   memset(plaintext, 0, plaintextsize);
   size_t plaintextlen = 0;
 
-  unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
-
   const size_t ciphertextsize = 8192;
   unsigned char ciphertext[ciphertextsize];
   memset(ciphertext, 0, sizeof(unsigned char) * ciphertextsize);
@@ -57,6 +54,13 @@ int main() {
   unsigned char key[32];
   memset(key, 0, sizeof(unsigned char) * 32);
   size_t keylen = 0;
+
+  unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
+  if(iv == NULL) {
+    printf("malloc (failed): %d\n", ret);
+    goto exit;
+  }
+  memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
   ret = atchops_base64_decode(CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize, &ciphertextlen);
   if(ret != 0) {
@@ -70,17 +74,17 @@ int main() {
     goto exit;
   }
 
-  ret = atchops_aesctr_decrypt(key, ATCHOPS_AES_256, iv,
+  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv,
                               ciphertext, ciphertextlen,
                               plaintext, plaintextsize, &plaintextlen);
   if (ret != 0) {
-    printf("atchops_aesctr_decrypt (failed): %d\n", ret);
+    printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
     goto exit;
   }
-  printf("atchops_aesctr_decrypt (success): %d\n", ret);
+  printf("atchops_aes_ctr_decrypt (success): %d\n", ret);
 
   if (plaintextlen <= 0) {
-    printf("atchops_aesctr_decrypt (failed): %d\n", ret);
+    printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
     goto exit;
   }
   printf("decrypted text: %.*s\n", (int)plaintextlen, plaintext);

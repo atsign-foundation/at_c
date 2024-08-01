@@ -1,7 +1,6 @@
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atclient/monitor.h>
@@ -41,7 +40,7 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  atclient_monitor_message *message = NULL;
+  atclient_monitor_response *message = NULL;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");
@@ -72,7 +71,7 @@ int main(int argc, char *argv[]) {
       &monitor_conn, 1 * 1000); // monitor read will wait at most 1 second for a message. As soon bytes are read, it
                                 // will return. If no bytes are read, it will return after 3 seconds.
 
-  if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+  if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
     goto exit;
   }
@@ -97,10 +96,10 @@ int main(int argc, char *argv[]) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
       }
-      if (atclient_atnotification_decryptedvalue_is_initialized(&message->notification)) {
+      if (atclient_atnotification_is_decrypted_value_initialized(&message->notification)) {
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decryptedvalue: \"%s\"\n",
-                     message->notification.decryptedvalue);
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decrypted_value: \"%s\"\n",
+                     message->notification.decrypted_value);
       }
       tries = 1;
       break;
@@ -141,7 +140,7 @@ int main(int argc, char *argv[]) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
           continue;
         }
-        if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+        if ((ret = atclient_monitor_start(&monitor_conn, MONITOR_REGEX)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor crashed\n");
           continue;
         }
@@ -160,7 +159,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   free(atserver_host);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_message_free(message);
+  atclient_monitor_response_free(message);
   atclient_free(&atclient2);
   return ret;
 }

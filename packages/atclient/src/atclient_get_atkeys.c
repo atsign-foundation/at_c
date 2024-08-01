@@ -1,75 +1,97 @@
 #include <atclient/atclient.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TAG "atclient_get_atkeys"
 
-int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhidden, const size_t recvbuffersize,
-                        atclient_atkey **atkey, size_t *output_array_len)
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len, const atclient_get_atkeys_request_options *request_options);
 
-{
+int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len, const atclient_get_atkeys_request_options *request_options) {
   int ret = 1;
 
-  // check to make sure null ptr wasn't provided
-  if (atkey == NULL || output_array_len == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey or output_array_len is NULL. These should be pointers\n");
+  /*
+   * 1. Validate arguments
+   */
+  if ((ret = atclient_get_atkeys_validate_arguments(atclient, (const atclient_atkey **) atkey, output_array_len, request_options)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_validate_arguments: %d\n", ret);
     return ret;
   }
 
-  // check to make sure atclient is not null
-  if(atclient == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
-    return ret;
+  if(request_options != NULL) {
+
   }
 
-  if(!atclient->_atserver_connection_started) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
-    return ret;
+  /*
+   * 2. Variables
+   */
+  size_t scan_cmd_size = strlen("scan");
+
+  if(request_options != NULL) {
+    if(atclient_get_atkeys_request_options_is_show_hidden_initialized(request_options)) {
+      if(request_options->show_hidden) {
+        scan_cmd_size += strlen(":showHidden:true");
+      } else {
+        scan_cmd_size += strlen(":showHidden:false");
+      }
+    }
+    if(atclient_get_atkeys_request_options_is_regex_initialized(request_options)) {
+      scan_cmd_size += strlen(" ") + strlen(request_options->regex);
+    }
   }
 
-  if(!atclient->_atsign_is_allocated) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not allocated. Make sure to PKAM authenticate first\n");
-    return ret;
+  scan_cmd_size += strlen("\r\n") + 1;
+
+
+  char scan_cmd[scan_cmd_size];
+
+  const size_t recv_size = 8192; // TODO change using atclient_connection_read which will handle realloc
+  unsigned char recv[recv_size];
+  size_t recv_len = 0;
+
+  cJSON *root = NULL; // free later
+
+  /*
+   * 3. Build scan command
+   */
+  size_t pos = 0;
+  pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, "scan");
+  if(request_options != NULL) {
+    if(atclient_get_atkeys_request_options_is_show_hidden_initialized(request_options)) {
+      if(request_options->show_hidden) {
+        pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, ":showHidden:true");
+      } else {
+        pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, ":showHidden:false");
+      }
+    }
+    if(atclient_get_atkeys_request_options_is_regex_initialized(request_options)) {
+      pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, " %s", request_options->regex);
+    }
   }
+  pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, "\r\n");
 
-  if(regex == NULL) {
-    regex = "";
-  }
+  const size_t scan_cmd_len = pos;
 
-  // scan:showHidden:true <regex>
-  const size_t scan_command_len = strlen("scan") + (showhidden ? strlen(":showHidden:true") : 0) +
-                                  (strlen(regex) > 0 ? (strlen(" ") + strlen(regex)) : 0) + strlen("\r\n") + 1;
-  char scan_command[scan_command_len];
-  snprintf(scan_command, scan_command_len, "scan%s%s%s\r\n", showhidden ? ":showHidden:true" : "",
-           strlen(regex) > 0 ? " " : "", regex);
-
-  const unsigned char recv[recvbuffersize];
-  size_t recvlen = 0;
-
-  cJSON *root = NULL;
-
-  // 1. send scan command
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)scan_command,
-                                      scan_command_len - 1, recv, recvbuffersize, &recvlen)) != 0) {
+  /*
+   * 4. Send scan command
+   */
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)scan_cmd, scan_cmd_len, recv,
+                                      recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
 
-  // log recevied bytes
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv was %lu bytes long\n", recvlen);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv was %lu bytes long\n", recv_len);
 
-  // 2. parse response
-  if (!atclient_stringutils_starts_with((char *)recv, recvlen, "data:", 5)) {
+  /*
+   * 5. Parse response
+   */
+  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                 (int)recvlen, recv);
+                 (int)recv_len, recv);
     goto exit;
   }
 
@@ -82,8 +104,6 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
     goto exit;
   }
 
-  // 3. populate atkey array
-  // root looks likes ["atkey1", "atkey2", ...]
   if (!cJSON_IsArray(root)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "root is not an array\n");
@@ -91,15 +111,15 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
   }
 
   *output_array_len = cJSON_GetArraySize(root);
-  *atkey = malloc(sizeof(atclient_atkey) * *output_array_len);
+  *atkey = malloc(sizeof(atclient_atkey) * (*output_array_len));
   if (*atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
     goto exit;
   }
 
-  for(size_t i = 0; i < *output_array_len; i++) {
-    atclient_atkey_init(&(*atkey)[i]);
+  for (size_t i = 0; i < *output_array_len; i++) {
+    atclient_atkey_init(&((*atkey)[i]));
   }
 
   for (size_t i = 0; i < *output_array_len; i++) {
@@ -107,31 +127,68 @@ int atclient_get_atkeys(atclient *atclient, const char *regex, const bool showhi
     if (!cJSON_IsString(atkey_json)) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey_json is not a string\n");
-      goto exit1;
+      goto atkeys_allocated_error;
     }
 
     const char *atkey_str = cJSON_GetStringValue(atkey_json);
     if (atkey_str == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_GetStringValue failed\n");
-      goto exit1;
+      goto atkeys_allocated_error;
     }
 
-    if ((ret = atclient_atkey_from_string(&(*atkey)[i], atkey_str, strlen(atkey_str))) != 0) {
+    if ((ret = atclient_atkey_from_string(&(*atkey)[i], atkey_str)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string failed: %d\n", ret);
-      goto exit1;
+      goto atkeys_allocated_error;
     }
   }
 
   ret = 0;
   goto exit;
-exit1: {
-  for(size_t i = 0; i < *output_array_len; i++) {
+atkeys_allocated_error: { // error cleanup
+  for (size_t i = 0; i < *output_array_len; i++) {
     atclient_atkey_free(&(*atkey)[i]);
   }
   free(*atkey);
   *atkey = NULL;
   *output_array_len = 0;
 }
+exit: {
+  cJSON_Delete(root);
+  return ret;
+}
+}
+
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len, const atclient_get_atkeys_request_options *request_options) {
+  int ret = 1;
+
+  // check to make sure null ptr wasn't provided
+  if (atkey == NULL || output_array_len == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey or output_array_len is NULL. These should be pointers\n");
+    goto exit;
+  }
+
+  // check to make sure atclient is not null
+  if (atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+
+  if (!atclient_is_atserver_connection_started(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
+    goto exit;
+  }
+
+  if (!atclient_is_atsign_initialized(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not allocated. Make sure to PKAM authenticate first\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
 exit: { return ret; }
 }

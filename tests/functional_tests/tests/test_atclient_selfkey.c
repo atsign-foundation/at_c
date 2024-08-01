@@ -1,7 +1,7 @@
 #include "functional_tests/config.h"
 #include "functional_tests/helpers.h"
 #include <atclient/atclient.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -46,52 +46,52 @@ int main() {
   }
 
   if ((ret = functional_tests_pkam_auth(&atclient, &atkeys, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
 
   if ((ret = test_1_should_not_exist(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_1_should_not_exist");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_1_should_not_exist\n");
     goto exit;
   }
 
   if ((ret = test_2_put(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_2_put");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_2_put\n");
     goto exit;
   }
 
   if ((ret = test_3_get(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_3_get");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_3_get\n");
     goto exit;
   }
 
   if ((ret = test_4_delete(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_4_delete");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_4_delete\n");
     goto exit;
   }
 
   if ((ret = test_5_should_not_exist(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_5_should_not_exist");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_5_should_not_exist\n");
     goto exit;
   }
 
   if ((ret = test_6_put_with_metadata(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_6_put_with_metadata");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_6_put_with_metadata\n");
     goto exit;
   }
 
   if ((ret = test_7_get_with_metadata(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_7_get_with_metadata");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_7_get_with_metadata\n");
     goto exit;
   }
 
   if ((ret = test_8_delete(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_8_delete");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_8_delete\n");
     goto exit;
   }
 
   if ((ret = test_9_should_not_exist(&atclient)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_9_should_not_exist");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed test_9_should_not_exist\n");
     goto exit;
   }
 
@@ -133,13 +133,12 @@ static int test_2_put(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_self_key: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
+  if ((ret = atclient_put_self_key(atclient, &atkey, ATKEY_VALUE, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
     goto exit;
   }
@@ -162,22 +161,18 @@ static int test_3_get(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const size_t valuesize = 512;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
+  char *value = NULL;
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_get_selfkey(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
+  if ((ret = atclient_get_self_key(atclient, &atkey, &value, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%.*s\"\n", (int)valuelen, value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   if (memcmp(value, ATKEY_VALUE, strlen(ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.value: \"%s\" != \"%s\"\n", value, ATKEY_VALUE);
@@ -204,14 +199,12 @@ static int test_4_delete(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                           ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_self_key: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }
@@ -253,17 +246,16 @@ static int test_6_put_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_self_key: %d\n", ret);
     goto exit;
   }
 
   atclient_atkey_metadata_set_ttl(&(atkey.metadata), ATKEY_TTL);
-  atclient_atkey_metadata_set_isencrypted(&(atkey.metadata), ATKEY_ISENCRYPTED);
-  atclient_atkey_metadata_set_isbinary(&(atkey.metadata), ATKEY_ISBINARY);
+  atclient_atkey_metadata_set_is_encrypted(&(atkey.metadata), ATKEY_ISENCRYPTED);
+  atclient_atkey_metadata_set_is_binary(&(atkey.metadata), ATKEY_ISBINARY);
 
-  if ((ret = atclient_put(atclient, &atkey, ATKEY_VALUE, strlen(ATKEY_VALUE), NULL)) != 0) {
+  if ((ret = atclient_put_self_key(atclient, &atkey, ATKEY_VALUE, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put: %d\n", ret);
     goto exit;
   }
@@ -286,22 +278,26 @@ static int test_7_get_with_metadata(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  const size_t valuesize = 512;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen = 0;
+  atclient_get_self_key_request_options request_options;
+  atclient_get_self_key_request_options_init(&request_options);
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  char *value = NULL;
+
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_get_selfkey(atclient, &atkey, value, valuesize, &valuelen)) != 0) {
+  if((ret = atclient_get_self_key_request_options_set_store_atkey_metadata(&request_options, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_request_options_set_store_atkey_metadata: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_get_self_key(atclient, &atkey, &value, &request_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%.*s\"\n", (int)valuelen, value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   if (memcmp(value, ATKEY_VALUE, strlen(ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.value: \"%s\" != \"%s\"\n", value, ATKEY_VALUE);
@@ -317,26 +313,27 @@ static int test_7_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
 
-  if (atkey.metadata.isencrypted != ATKEY_ISENCRYPTED) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.isencrypted: %d != %d\n",
-                 atkey.metadata.isencrypted, true);
+  if (atclient_atkey_metadata_is_is_encrypted_initialized(&atkey.metadata) && atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.is_encrypted: %d != %d\n",
+                 atkey.metadata.is_encrypted, true);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.isencrypted: %d\n", atkey.metadata.isencrypted);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.is_encrypted: %d\n", atkey.metadata.is_encrypted);
 
-  if (atkey.metadata.isbinary != ATKEY_ISBINARY) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.isbinary: %d != %d\n", atkey.metadata.isbinary,
+  if (atclient_atkey_metadata_is_is_binary_initialized(&atkey.metadata) && atkey.metadata.is_binary != ATKEY_ISBINARY) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.is_binary: %d != %d\n", atkey.metadata.is_binary,
                  false);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.isbinary: %d\n", atkey.metadata.isbinary);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.is_binary: %d\n", atkey.metadata.is_binary);
 
   ret = 0;
   goto exit;
 exit: {
   atclient_atkey_free(&atkey);
+  atclient_get_self_key_request_options_free(&request_options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_get_with_metadata End (%d)\n", ret);
   return ret;
 }
@@ -350,14 +347,12 @@ static int test_8_delete(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_selfkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), ATKEY_SHAREDBY,
-                                           strlen(ATKEY_SHAREDBY), ATKEY_NAMESPACE,
-                                           ATKEY_NAMESPACE == NULL ? 0 : strlen(ATKEY_NAMESPACE))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_selfkey: %d\n", ret);
+  if ((ret = atclient_atkey_create_self_key(&atkey, ATKEY_NAME, ATKEY_SHAREDBY, ATKEY_NAMESPACE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_self_key: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_delete(atclient, &atkey)) != 0) {
+  if ((ret = atclient_delete(atclient, &atkey, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d\n", ret);
     goto exit;
   }
@@ -428,7 +423,7 @@ static int tear_down(atclient *atclient) {
     goto exit;
   }
 
-  if (!atclient_stringutils_starts_with(recv, recvlen, "data:", strlen("data:"))) {
+  if (!atclient_string_utils_starts_with(recv, "data:")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;

@@ -1,7 +1,7 @@
 #include "functional_tests/config.h"
 #include "functional_tests/helpers.h"
 #include <atchops/aes.h>
-#include <atchops/aesctr.h>
+#include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
@@ -9,7 +9,7 @@
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
 #include <atclient/notify.h>
-#include <atclient/stringutils.h>
+#include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -170,14 +170,32 @@ static int send_notification(atclient *atclient) {
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), ATKEY_SHAREDBY,
-                                             strlen(ATKEY_SHAREDBY), ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH),
-                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, ATKEY_SHAREDBY, ATKEY_SHAREDWITH, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create atkey: %d\n", ret);
     goto exit;
   }
 
-  atclient_notify_params_create(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE, &atkey, ATKEY_VALUE, true);
+  if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set should_encrypt: %d\n", ret);
+    goto exit;
+  }
+
   params.notification_expiry = 1000;
 
   if ((ret = atclient_notify(atclient, &params, NULL)) != 0) {
@@ -194,8 +212,8 @@ exit: {
 static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2) {
   int ret = 1;
 
-  atclient_monitor_message message;
-  atclient_monitor_message_init(&message);
+  atclient_monitor_response message;
+  atclient_monitor_response_init(&message);
 
   const int max_tries = 10;
   int tries = 1;
@@ -207,23 +225,16 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
       continue;
     }
 
-    if (!atclient_atnotification_decryptedvalue_is_initialized(&(message.notification))) {
+    if (!atclient_atnotification_is_decrypted_value_initialized(&(message.notification))) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value is not initialized\n");
       tries++;
       continue;
     }
 
-    if (!atclient_atnotification_decryptedvaluelen_is_initialized(&(message.notification))) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted value length is not initialized\n");
-      tries++;
-      continue;
-    }
-
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value (%lu): %s\n",
-                 (int)message.notification.decryptedvaluelen, message.notification.decryptedvalue);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value: %s\n",message.notification.decrypted_value);
 
     // compare the decrypted value with the expected value
-    if (strcmp(message.notification.decryptedvalue, ATKEY_VALUE) != 0) {
+    if (strcmp(message.notification.decrypted_value, ATKEY_VALUE) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Decrypted value does not match expected value\n");
       tries++;
       continue;
@@ -242,7 +253,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
   ret = 1;
   goto exit;
 exit: {
-  atclient_monitor_message_free(&message);
+  atclient_monitor_response_free(&message);
   return ret;
 }
 }
@@ -252,7 +263,7 @@ static int test_1_start_monitor(atclient *monitor_conn) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_start_monitor Start\n");
 
-  ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX));
+  ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
@@ -308,16 +319,16 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_re_pkam_auth_and_start_monitor Start\n");
 
-  const char *atserver_host = strdup(monitor_conn->atserver_connection.host);
-  const int atserver_port = monitor_conn->atserver_connection.port;
+  char *atserver_host = strdup(monitor_conn->atserver_connection.host);
+  int atserver_port = monitor_conn->atserver_connection.port;
 
   if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atserver_host, atserver_port, &(monitor_conn->atkeys),
-                                                monitor_conn->atsign.atsign)) != 0) {
+                                                monitor_conn->atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX, strlen(MONITOR_REGEX))) != 0) {
+  if ((ret = atclient_monitor_start(monitor_conn, MONITOR_REGEX)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor: %d\n", ret);
     goto exit;
   }

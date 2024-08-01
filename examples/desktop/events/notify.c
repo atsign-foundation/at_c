@@ -1,7 +1,6 @@
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atclient/notify.h>
@@ -23,6 +22,8 @@ int main(int argc, char *argv[]) {
   int ret = 1;
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
+  const char *atsign = "@soccer0";
+
   const size_t valuelen = 1024;
   char value[valuelen];
   memset(value, 0, sizeof(char) * valuelen);
@@ -43,8 +44,7 @@ int main(int argc, char *argv[]) {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
   atclient_notify_params notify_params;
   atclient_notify_params_init(&notify_params);
@@ -75,15 +75,8 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign_input: %s\n", atsign_input);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "other_atsign_input: %s\n", other_atsign_input);
 
-  atclient_atsign atsign;
-  ret = atclient_atsign_init(&atsign, atsign_input);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to initialize atsign\n");
-    goto exit;
-  }
-
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) !=
-      0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
     goto exit;
   }
@@ -102,31 +95,42 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign.atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
 
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_KEY, strlen(ATKEY_KEY), atsign_input, strlen(atsign_input),
-                                             other_atsign_input, strlen(other_atsign_input), ATKEY_NAMESPACE,
-                                             strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_KEY, atsign_input, other_atsign_input, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
     goto exit;
   }
 
   atclient_atkey_metadata_set_ccd(&atkey.metadata, true);
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
-               atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
 
-  notify_params.atkey = &atkey;
-  notify_params.value = ATKEY_VALUE;
-  notify_params.operation = ATCLIENT_NOTIFY_OPERATION_UPDATE;
+  if((ret = atclient_notify_params_set_atkey(&notify_params, &atkey)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey\n");
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_value(&notify_params, ATKEY_VALUE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value\n");
+    goto exit;
+  }
+
+  if((ret = atclient_notify_params_set_operation(&notify_params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation\n");
+    goto exit;
+  }
 
   if ((ret = atclient_notify(&atclient, &notify_params, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify\n");
@@ -138,11 +142,11 @@ int main(int argc, char *argv[]) {
   ret = 0;
   goto exit;
 exit: {
-  atclient_atstr_free(&atkeystr);
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
   free(atserver_host);
   atclient_free(&atclient);
+  free(atkeystr);
   return ret;
 }
 }

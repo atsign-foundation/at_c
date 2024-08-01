@@ -43,22 +43,22 @@ int main() {
   const char *ciphertext = CIPHERTEXTBASE64;
   const size_t ciphertextlen = strlen(ciphertext);
 
-  atchops_rsakey_privatekey privatekey;
-  atchops_rsakey_privatekey_init(&privatekey);
+  atchops_rsa_key_private_key privatekey;
+  atchops_rsa_key_private_key_init(&privatekey);
 
   const size_t plaintextsize = 4096;
   unsigned char plaintext[plaintextsize];
   memset(plaintext, 0, sizeof(unsigned char) * plaintextsize);
   size_t plaintextlen = 0;
 
-  ret = atchops_rsakey_populate_privatekey(&privatekey, privatekeybase64, privatekeybase64len);
+  ret = atchops_rsa_key_populate_private_key(&privatekey, privatekeybase64, privatekeybase64len);
   if (ret != 0) {
-    printf("atchops_rsakey_populate_privatekey (failed): %d\n", ret);
+    printf("atchops_rsa_key_populate_private_key (failed): %d\n", ret);
     goto ret;
   }
-  printf("atchops_rsakey_populate_privatekey (success): %d\n", ret);
+  printf("atchops_rsa_key_populate_private_key (success): %d\n", ret);
 
-  ret = atchops_rsa_decrypt(privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextsize,
+  ret = atchops_rsa_decrypt(&privatekey, (const unsigned char *)ciphertext, ciphertextlen, plaintext, plaintextsize,
                             &plaintextlen);
   if (ret != 0) {
     printf("atchops_rsa_decrypt (failed): %d\n", ret);

@@ -1,235 +1,377 @@
 #include "atclient/atkeysfile.h"
-#include "atclient/atstr.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// represents the buffer size of an encrypted RSA key in base64 format
-#define BASE64_ENCRYPTED_KEY_BUFFER_SIZE 4096
 
 // represents buffer size of reading the entire atKeys file
 #define FILE_READ_BUFFER_SIZE 8192
 
 #define TAG "atkeysfile"
 
-void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile) {
-  memset(atkeysfile, 0, sizeof(atclient_atkeysfile));
+static bool is_aes_pkam_public_key_str_initialized(atclient_atkeysfile *atkeysfile);
+static bool is_aes_pkam_private_key_str_initialized(atclient_atkeysfile *atkeysfile);
+static bool is_aes_encrypt_public_key_str_initialized(atclient_atkeysfile *atkeysfile);
+static bool is_aes_encrypt_private_key_str_initialized(atclient_atkeysfile *atkeysfile);
+static bool is_self_encryption_key_str_initialized(atclient_atkeysfile *atkeysfile);
 
-  atclient_atstr_init(&(atkeysfile->aespkampublickeystr), BASE64_ENCRYPTED_KEY_BUFFER_SIZE);
-  atclient_atstr_init(&(atkeysfile->aespkamprivatekeystr), BASE64_ENCRYPTED_KEY_BUFFER_SIZE);
-  atclient_atstr_init(&(atkeysfile->aesencryptpublickeystr), BASE64_ENCRYPTED_KEY_BUFFER_SIZE);
-  atclient_atstr_init(&(atkeysfile->aesencryptprivatekeystr), BASE64_ENCRYPTED_KEY_BUFFER_SIZE);
-  atclient_atstr_init(&(atkeysfile->selfencryptionkeystr), BASE64_ENCRYPTED_KEY_BUFFER_SIZE);
-}
+static void set_aes_pkam_public_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized);
+static void set_aes_pkam_private_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized);
+static void set_aes_encrypt_public_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized);
+static void set_aes_encrypt_private_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized);
+static void set_self_encryption_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized);
+
+static void unset_aes_pkam_public_key_str(atclient_atkeysfile *atkeysfile);
+static void unset_aes_pkam_private_key_str(atclient_atkeysfile *atkeysfile);
+static void unset_aes_encrypt_public_key_str(atclient_atkeysfile *atkeysfile);
+static void unset_aes_encrypt_private_key_str(atclient_atkeysfile *atkeysfile);
+static void unset_self_encryption_key_str(atclient_atkeysfile *atkeysfile);
+
+static int set_aes_pkam_public_key_str(atclient_atkeysfile *atkeysfile, const char *aes_pkam_public_key_str,
+                                   const size_t aes_pkam_publickey_str_len);
+static int set_aes_pkam_private_key_str(atclient_atkeysfile *atkeysfile, const char *aes_pkam_private_key_str,
+                                    const size_t aes_pkam_private_key_str_len);
+static int set_aes_encrypt_public_key_str(atclient_atkeysfile *atkeysfile, const char *aes_encrypt_public_key_str,
+                                      const size_t aes_encrypt_public_key_str_len);
+static int set_aes_encrypt_private_key_str(atclient_atkeysfile *atkeysfile, const char *aes_encrypt_private_key_str,
+                                       const size_t aes_encrypt_private_key_str_len);
+static int set_self_encryption_key_str(atclient_atkeysfile *atkeysfile, const char *self_encryption_key_str,
+                                    const size_t self_encryption_key_str_len);
+
+void atclient_atkeysfile_init(atclient_atkeysfile *atkeysfile) { memset(atkeysfile, 0, sizeof(atclient_atkeysfile)); }
 
 int atclient_atkeysfile_read(atclient_atkeysfile *atkeysfile, const char *path) {
   int ret = 1;
+
+  unsigned char readbuf[FILE_READ_BUFFER_SIZE];
+  memset(readbuf, 0, FILE_READ_BUFFER_SIZE);
+
   cJSON *root = NULL;
 
   FILE *file = fopen(path, "r");
-
-  atclient_atstr readbuf;
-  atclient_atstr_init(&readbuf, FILE_READ_BUFFER_SIZE);
-
   if (file == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fopen failed\n");
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fopen failed\n");
     goto exit;
   }
 
-  const size_t bytesread = fread(readbuf.str, 1, FILE_READ_BUFFER_SIZE, file);
+  const size_t bytes_read = fread(readbuf, 1, FILE_READ_BUFFER_SIZE, file);
   fclose(file);
-  if (bytesread == 0) {
+  if (bytes_read == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fread failed\n");
     ret = 1;
     goto exit;
   }
 
-  root = cJSON_Parse(readbuf.str);
-  cJSON *aespkampublickey = cJSON_GetObjectItem(root, "aesPkamPublicKey");
-  cJSON *aespkamprivatekey = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
-  cJSON *aesencryptpublickey = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
-  cJSON *aesencryptprivatekey = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
-  cJSON *selfencryptionkey = cJSON_GetObjectItem(root, "selfEncryptionKey");
+  root = cJSON_Parse(readbuf);
+  cJSON *aes_pkam_public_key = cJSON_GetObjectItem(root, "aesPkamPublicKey");
+  cJSON *aes_pkam_private_key = cJSON_GetObjectItem(root, "aesPkamPrivateKey");
+  cJSON *aes_encrypt_public_key = cJSON_GetObjectItem(root, "aesEncryptPublicKey");
+  cJSON *aes_encrypt_private_key = cJSON_GetObjectItem(root, "aesEncryptPrivateKey");
+  cJSON *self_encryption_key = cJSON_GetObjectItem(root, "selfEncryptionKey");
 
-  if (aespkamprivatekey == NULL) {
+  if (aes_pkam_private_key == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPrivateKey!\n");
-    ret = 1;
     goto exit;
   }
 
-  if (aespkampublickey == NULL) {
+  if (aes_pkam_public_key == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesPkamPublicKey!\n");
-    ret = 1;
     goto exit;
   }
 
-  if (aesencryptprivatekey == NULL) {
+  if (aes_encrypt_private_key == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPrivateKey!\n");
-    ret = 1;
     goto exit;
   }
 
-  if (aesencryptpublickey == NULL) {
+  if (aes_encrypt_public_key == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading aesEncryptPublicKey!\n");
-    ret = 1;
     goto exit;
   }
 
-  if (selfencryptionkey == NULL) {
+  if (self_encryption_key == NULL) {
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error reading selfEncryptionKey!\n");
-    ret = 1;
     goto exit;
   }
 
-  ret = atclient_atstr_set(&(atkeysfile->aespkampublickeystr), aespkampublickey->valuestring,
-                           strlen(aespkampublickey->valuestring));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aespkampublickeystr\n",
+  if ((ret = set_aes_pkam_public_key_str(atkeysfile, aes_pkam_public_key->valuestring,
+                                     strlen(aes_pkam_public_key->valuestring))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_aes_pkam_public_key_str: %d | failed to set aes_pkam_public_key_str\n",
                  ret);
     goto exit;
   }
 
-  ret = atclient_atstr_set(&(atkeysfile->aespkamprivatekeystr), aespkamprivatekey->valuestring,
-                           strlen(aespkamprivatekey->valuestring));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aespkamprivatekeystr\n",
-                 ret);
+  if ((ret = set_aes_pkam_private_key_str(atkeysfile, aes_pkam_private_key->valuestring,
+                                      strlen(aes_pkam_private_key->valuestring))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_aes_pkam_private_key_str: %d | failed to set aes_pkam_private_key_str\n", ret);
     goto exit;
   }
 
-  ret = atclient_atstr_set(&(atkeysfile->aesencryptprivatekeystr), aesencryptprivatekey->valuestring,
-                           strlen(aesencryptprivatekey->valuestring));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aesencryptprivatekeystr\n",
-                 ret);
+  if ((ret = set_aes_encrypt_public_key_str(atkeysfile, aes_encrypt_public_key->valuestring,
+                                        strlen(aes_encrypt_public_key->valuestring))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_aes_encrypt_public_key_str: %d | failed to set aes_encrypt_public_key_str\n", ret);
     goto exit;
   }
 
-  ret = atclient_atstr_set(&(atkeysfile->aesencryptpublickeystr), aesencryptpublickey->valuestring,
-                           strlen(aesencryptpublickey->valuestring));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aesencryptpublickeystr\n",
-                 ret);
+  if ((ret = set_aes_encrypt_private_key_str(atkeysfile, aes_encrypt_private_key->valuestring,
+                                         strlen(aes_encrypt_private_key->valuestring))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_aes_encrypt_private_key_str: %d | failed to set aes_encrypt_private_key_str\n", ret);
     goto exit;
   }
 
-  ret = atclient_atstr_set(&(atkeysfile->selfencryptionkeystr), selfencryptionkey->valuestring,
-                           strlen(selfencryptionkey->valuestring));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n",
-                 ret);
-    goto exit;
-  }
-
-  goto exit;
-
-exit: {
-  if (root != NULL) {
-    cJSON_Delete(root);
-  }
-  atclient_atstr_free(&readbuf);
-  return ret;
-}
-}
-
-int atclient_atkeysfile_write(const atclient_atkeysfile *atkeysfile, const char *path, const char *atsign) {
-  int ret = 1;
-
-  // guarantee that all values are null terminated and are of correct length
-  atclient_atstr aespkampublickey;
-  atclient_atstr_init(&aespkampublickey, atkeysfile->aespkampublickeystr.len + 1);
-
-  atclient_atstr aespkamprivatekey;
-  atclient_atstr_init(&aespkamprivatekey, atkeysfile->aespkamprivatekeystr.len + 1);
-
-  atclient_atstr aesencryptprivatekey;
-  atclient_atstr_init(&aesencryptprivatekey, atkeysfile->aesencryptprivatekeystr.len + 1);
-
-  atclient_atstr aesencryptpublickey;
-  atclient_atstr_init(&aesencryptpublickey, atkeysfile->aesencryptpublickeystr.len + 1);
-
-  atclient_atstr selfencryptionkey;
-  atclient_atstr_init(&selfencryptionkey, atkeysfile->selfencryptionkeystr.len + 1);
-
-  // create cJSON object
-  cJSON *root = cJSON_CreateObject();
-  cJSON_AddStringToObject(root, "aesPkamPrivateKey", aespkamprivatekey.str);
-  cJSON_AddStringToObject(root, "aesPkamPublicKey", aespkampublickey.str);
-  cJSON_AddStringToObject(root, "aesEncryptPrivateKey", aesencryptprivatekey.str);
-  cJSON_AddStringToObject(root, "aesEncryptPublicKey", aesencryptpublickey.str);
-  cJSON_AddStringToObject(root, "selfEncryptionKey", selfencryptionkey.str);
-
-  ret = atclient_atstr_set(&aespkampublickey, atkeysfile->aespkampublickeystr.str, atkeysfile->aespkampublickeystr.len);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aespkampublickeystr\n",
-                 ret);
-    goto exit;
-  }
-
-  ret = atclient_atstr_set(&aespkamprivatekey, atkeysfile->aespkamprivatekeystr.str,
-                           atkeysfile->aespkamprivatekeystr.len);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aespkamprivatekeystr\n",
-                 ret);
-    goto exit;
-  }
-
-  ret = atclient_atstr_set(&aesencryptprivatekey, atkeysfile->aesencryptprivatekeystr.str,
-                           atkeysfile->aesencryptprivatekeystr.len);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aesencryptprivatekeystr\n",
-                 ret);
-    goto exit;
-  }
-
-  ret = atclient_atstr_set(&aesencryptpublickey, atkeysfile->aesencryptpublickeystr.str,
-                           atkeysfile->aesencryptpublickeystr.len);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set aesencryptpublickeystr\n",
-                 ret);
-    goto exit;
-  }
-
-  ret = atclient_atstr_set(&selfencryptionkey, atkeysfile->selfencryptionkeystr.str,
-                           atkeysfile->selfencryptionkeystr.len);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atstr_set: %d | failed to set selfencryptionkeystr\n",
-                 ret);
-    goto exit;
-  }
-
-  // check that atkeysfile has populated values
-  if (atkeysfile->aespkamprivatekeystr.len == 0 || atkeysfile->aespkampublickeystr.len == 0 ||
-      atkeysfile->aesencryptprivatekeystr.len == 0 || atkeysfile->aesencryptpublickeystr.len == 0 ||
-      atkeysfile->selfencryptionkeystr.len == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeysfile has not been populated with values\n");
-    ret = 1;
+  if ((ret = set_self_encryption_key_str(atkeysfile, self_encryption_key->valuestring,
+                                      strlen(self_encryption_key->valuestring))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_self_encryption_key_str: %d | failed to set self_encryption_key_str\n", ret);
     goto exit;
   }
 
   ret = 0;
-
   goto exit;
 
 exit: {
-  atclient_atstr_free(&aespkamprivatekey);
-  atclient_atstr_free(&aespkampublickey);
-  atclient_atstr_free(&aesencryptprivatekey);
-  atclient_atstr_free(&aesencryptpublickey);
-  atclient_atstr_free(&selfencryptionkey);
   cJSON_Delete(root);
   return ret;
 }
 }
 
 void atclient_atkeysfile_free(atclient_atkeysfile *atkeysfile) {
-  atclient_atstr_free(&(atkeysfile->aespkamprivatekeystr));
-  atclient_atstr_free(&(atkeysfile->aespkampublickeystr));
-  atclient_atstr_free(&(atkeysfile->aesencryptprivatekeystr));
-  atclient_atstr_free(&(atkeysfile->aesencryptpublickeystr));
-  atclient_atstr_free(&(atkeysfile->selfencryptionkeystr));
+  unset_aes_pkam_public_key_str(atkeysfile);
+  unset_aes_pkam_private_key_str(atkeysfile);
+  unset_aes_encrypt_public_key_str(atkeysfile);
+  unset_aes_encrypt_private_key_str(atkeysfile);
+  unset_self_encryption_key_str(atkeysfile);
+}
+
+static bool is_aes_pkam_public_key_str_initialized(atclient_atkeysfile *atkeysfile) {
+  return atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_PKAM_PUBLIC_KEY_STR_INDEX] & ATCLIENT_ATKEYSFILE_AES_PKAM_PUBLIC_KEY_STR_INITIALIZED;
+}
+
+static bool is_aes_pkam_private_key_str_initialized(atclient_atkeysfile *atkeysfile) {
+  return atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] & ATCLIENT_ATKEYSFILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
+}
+
+static bool is_aes_encrypt_public_key_str_initialized(atclient_atkeysfile *atkeysfile) {
+  return atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX] & ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED;
+}
+
+static bool is_aes_encrypt_private_key_str_initialized(atclient_atkeysfile *atkeysfile) {
+  return atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX] & ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED;
+}
+
+static bool is_self_encryption_key_str_initialized(atclient_atkeysfile *atkeysfile) {
+  return atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_SELF_ENCRYPTION_KEY_STR_INDEX] & ATCLIENT_ATKEYSFILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED;
+}
+
+static void set_aes_pkam_public_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
+  if (initialized) {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_PKAM_PUBLIC_KEY_STR_INDEX] |= ATCLIENT_ATKEYSFILE_AES_PKAM_PUBLIC_KEY_STR_INITIALIZED;
+  } else {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_PKAM_PUBLIC_KEY_STR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AES_PKAM_PUBLIC_KEY_STR_INITIALIZED;
+  }
+}
+
+static void set_aes_pkam_private_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
+  if (initialized) {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] |= ATCLIENT_ATKEYSFILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
+  } else {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
+  }
+}
+
+static void set_aes_encrypt_public_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
+  if (initialized) {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX] |= ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED;
+  } else {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED;
+  }
+}
+
+static void set_aes_encrypt_private_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
+  if (initialized) {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX] |= ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED;
+  } else {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX] &= ~ATCLIENT_ATKEYSFILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED;
+  }
+}
+
+static void set_self_encryption_key_str_initialized(atclient_atkeysfile *atkeysfile, const bool initialized) {
+  if (initialized) {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_SELF_ENCRYPTION_KEY_STR_INDEX] |= ATCLIENT_ATKEYSFILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED;
+  } else {
+    atkeysfile->_initialized_fields[ATCLIENT_ATKEYSFILE_SELF_ENCRYPTION_KEY_STR_INDEX] &= ~ATCLIENT_ATKEYSFILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED;
+  }
+}
+
+static void unset_aes_pkam_public_key_str(atclient_atkeysfile *atkeysfile) {
+  if (is_aes_pkam_public_key_str_initialized(atkeysfile)) {
+    free(atkeysfile->aes_pkam_public_key_str);
+  }
+  atkeysfile->aes_pkam_public_key_str = NULL;
+  set_aes_pkam_public_key_str_initialized(atkeysfile, false);
+}
+
+static void unset_aes_pkam_private_key_str(atclient_atkeysfile *atkeysfile) {
+  if (is_aes_pkam_private_key_str_initialized(atkeysfile)) {
+    free(atkeysfile->aes_pkam_private_key_str);
+  }
+  atkeysfile->aes_pkam_private_key_str = NULL;
+  set_aes_pkam_private_key_str_initialized(atkeysfile, false);
+}
+
+static void unset_aes_encrypt_public_key_str(atclient_atkeysfile *atkeysfile) {
+  if (is_aes_encrypt_public_key_str_initialized(atkeysfile)) {
+    free(atkeysfile->aes_encrypt_public_key_str);
+  }
+  atkeysfile->aes_encrypt_public_key_str = NULL;
+  set_aes_encrypt_public_key_str_initialized(atkeysfile, false);
+}
+
+static void unset_aes_encrypt_private_key_str(atclient_atkeysfile *atkeysfile) {
+  if (is_aes_encrypt_private_key_str_initialized(atkeysfile)) {
+    free(atkeysfile->aes_encrypt_private_key_str);
+  }
+  atkeysfile->aes_encrypt_private_key_str = NULL;
+  set_aes_encrypt_private_key_str_initialized(atkeysfile, false);
+}
+
+static void unset_self_encryption_key_str(atclient_atkeysfile *atkeysfile) {
+  if (is_self_encryption_key_str_initialized(atkeysfile)) {
+    free(atkeysfile->self_encryption_key_str);
+  }
+  atkeysfile->self_encryption_key_str = NULL;
+  set_self_encryption_key_str_initialized(atkeysfile, false);
+}
+
+static int set_aes_pkam_public_key_str(atclient_atkeysfile *atkeysfile, const char *aes_pkam_public_key_str,
+                                   const size_t aes_pkam_publickey_str_len) {
+  int ret = 1;
+
+  if (is_aes_pkam_public_key_str_initialized(atkeysfile)) {
+    unset_aes_pkam_public_key_str(atkeysfile);
+  }
+
+  const size_t aes_pkam_public_key_str_size = aes_pkam_publickey_str_len + 1;
+  if ((atkeysfile->aes_pkam_public_key_str = (char *)malloc(sizeof(char) * aes_pkam_public_key_str_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+    goto exit;
+  }
+
+  set_aes_pkam_public_key_str_initialized(atkeysfile, true);
+  memcpy(atkeysfile->aes_pkam_public_key_str, aes_pkam_public_key_str, aes_pkam_publickey_str_len);
+  atkeysfile->aes_pkam_public_key_str[aes_pkam_publickey_str_len] = '\0';
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_aes_pkam_private_key_str(atclient_atkeysfile *atkeysfile, const char *aes_pkam_private_key_str,
+                                    const size_t aes_pkam_private_key_str_len) {
+  int ret = 1;
+
+  if (is_aes_pkam_private_key_str_initialized(atkeysfile)) {
+    unset_aes_pkam_private_key_str(atkeysfile);
+  }
+
+  const size_t aes_pkam_private_key_str_size = aes_pkam_private_key_str_len + 1;
+  if ((atkeysfile->aes_pkam_private_key_str = (char *)malloc(sizeof(char) * aes_pkam_private_key_str_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+    goto exit;
+  }
+
+  set_aes_pkam_private_key_str_initialized(atkeysfile, true);
+  memcpy(atkeysfile->aes_pkam_private_key_str, aes_pkam_private_key_str, aes_pkam_private_key_str_len);
+  atkeysfile->aes_pkam_private_key_str[aes_pkam_private_key_str_len] = '\0';
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+static int set_aes_encrypt_public_key_str(atclient_atkeysfile *atkeysfile, const char *aes_encrypt_public_key_str,
+                                      const size_t aes_encrypt_public_key_str_len) {
+  int ret = 1;
+
+  if (is_aes_encrypt_public_key_str_initialized(atkeysfile)) {
+    unset_aes_encrypt_public_key_str(atkeysfile);
+  }
+
+  const size_t aes_encrypt_public_key_str_size = aes_encrypt_public_key_str_len + 1;
+  if ((atkeysfile->aes_encrypt_public_key_str = (char *)malloc(sizeof(char) * aes_encrypt_public_key_str_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+    goto exit;
+  }
+
+  set_aes_encrypt_public_key_str_initialized(atkeysfile, true);
+  memcpy(atkeysfile->aes_encrypt_public_key_str, aes_encrypt_public_key_str, aes_encrypt_public_key_str_len);
+  atkeysfile->aes_encrypt_public_key_str[aes_encrypt_public_key_str_len] = '\0';
+
+  ret = 0;
+  goto exit;
+
+exit: { return ret; }
+}
+
+static int set_aes_encrypt_private_key_str(atclient_atkeysfile *atkeysfile, const char *aes_encrypt_private_key_str,
+                                       const size_t aes_encrypt_private_key_str_len) {
+  int ret = 1;
+
+  if (is_aes_encrypt_private_key_str_initialized(atkeysfile)) {
+    unset_aes_encrypt_private_key_str(atkeysfile);
+  }
+
+  const size_t aes_encrypt_private_key_str_size = aes_encrypt_private_key_str_len + 1;
+  if ((atkeysfile->aes_encrypt_private_key_str = (char *)malloc(sizeof(char) * aes_encrypt_private_key_str_size)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+    goto exit;
+  }
+
+  set_aes_encrypt_private_key_str_initialized(atkeysfile, true);
+  memcpy(atkeysfile->aes_encrypt_private_key_str, aes_encrypt_private_key_str, aes_encrypt_private_key_str_len);
+  atkeysfile->aes_encrypt_private_key_str[aes_encrypt_private_key_str_len] = '\0';
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+static int set_self_encryption_key_str(atclient_atkeysfile *atkeysfile, const char *self_encryption_key_str,
+                                    const size_t self_encryption_key_str_len) {
+  int ret = 1;
+
+  if (is_self_encryption_key_str_initialized(atkeysfile)) {
+    unset_self_encryption_key_str(atkeysfile);
+  }
+
+  const size_t selfencryptionkeystrsize = self_encryption_key_str_len + 1;
+  if ((atkeysfile->self_encryption_key_str = (char *)malloc(sizeof(char) * selfencryptionkeystrsize)) == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "malloc failed\n");
+    goto exit;
+  }
+
+  set_self_encryption_key_str_initialized(atkeysfile, true);
+  memcpy(atkeysfile->self_encryption_key_str, self_encryption_key_str, self_encryption_key_str_len);
+  atkeysfile->self_encryption_key_str[self_encryption_key_str_len] = '\0';
+
+  ret = 0;
+  goto exit;
+
+exit: { return ret; }
 }

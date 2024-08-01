@@ -1,7 +1,6 @@
 #include "atchops/sha.h"
 #include <atclient/atclient.h>
 #include <atclient/atkey.h>
-#include <atclient/atsign.h>
 #include <atclient/constants.h>
 #include <atclient/metadata.h>
 #include <atlogger/atlogger.h>
@@ -42,10 +41,10 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const size_t valuelen = 1024;
-  atclient_atstr value;
-  atclient_atstr_init(&value, valuelen);
-
+  const size_t valuesize = 1024;
+  char value[valuesize];
+  memset(value, 0, sizeof(char) * valuesize);
+  size_t valuelen;
 
   char *atserver_host = NULL;
   int atserver_port = -1;
@@ -53,8 +52,7 @@ int main() {
   atclient atclient;
   atclient_init(&atclient);
 
-  atclient_atsign atsign;
-  atclient_atsign_init(&atsign, ATCLIENT_ATSIGN);
+  const char *atsign = ATCLIENT_ATSIGN;
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -63,55 +61,52 @@ int main() {
   atclient_atkeys_init(&atkeys);
   atclient_atkeys_populate_from_path(&atkeys, ATSIGN_ATKEYS_FILE_PATH);
 
-  atclient_atstr atkeystr;
-  atclient_atstr_init(&atkeystr, ATCLIENT_ATKEY_FULL_LEN);
+  char *atkeystr = NULL;
 
-  if((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign.atsign, &atserver_host, &atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, ATCLIENT_ATSIGN)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
-  atclient.atkeys = atkeys;
-  atclient.atsign = atsign;
-
-  if ((ret = atclient_atkey_create_sharedkey(&atkey, ATKEY_NAME, strlen(ATKEY_NAME), SENDER_ATSIGN,
-                                             strlen(SENDER_ATSIGN), RECIPIENT_ATSIGN, strlen(RECIPIENT_ATSIGN),
-                                             ATKEY_NAMESPACE, strlen(ATKEY_NAMESPACE))) != 0) {
+  if ((ret = atclient_atkey_create_shared_key(&atkey, ATKEY_NAME, SENDER_ATSIGN, RECIPIENT_ATSIGN, ATKEY_NAMESPACE)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
     goto exit;
   } else {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Created shared key\n");
   }
 
-  if ((ret = atclient_atkey_to_string(&atkey, atkeystr.str, atkeystr.size, &atkeystr.len)) != 0) {
+  if ((ret = atclient_atkey_to_string(&atkey, &atkeystr)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert to string\n");
     goto exit;
   }
+  const size_t atkeystrlen = strlen(atkeystr);
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystr.len, (int)atkeystr.len,
-               atkeystr.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
 
-  ret = atclient_get_sharedkey(&atclient, &atkey, value.str, value.size, &value.len, NULL, false);
+  ret = atclient_get_shared_key(&atclient, &atkey, value, NULL);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", value.len, (int)value.len, value.str);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", valuelen, (int)valuelen, value);
 
   const size_t value_hash_len = 32;
   unsigned char *value_hash = calloc(value_hash_len, sizeof(unsigned char));
   memset(value_hash, 0, value_hash_len);
   size_t value_hash_olen = 0;
 
-  ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *)value.str, value.len, value_hash);
+  ret = atchops_sha_hash(ATCHOPS_MD_SHA256, (const unsigned char *)value, valuelen, value_hash);
   if (ret != 0) {
     printf("atchops_sha_hash (failed): %d\n", ret);
     goto exit;
@@ -133,13 +128,11 @@ int main() {
   free(hex_value_hash);
   goto exit;
 exit: {
-  atclient_atstr_free(&value);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
-  atclient_atstr_free(&atkeystr);
-  atclient_atsign_free(&atsign);
   atclient_free(&atclient);
   free(atserver_host);
+  free(atkeystr);
   return ret;
 }
 }
