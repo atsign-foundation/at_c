@@ -2,14 +2,13 @@
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
+#include "atclient/notify_params.h"
 #include "atclient/stringutils.h"
 #include <atchops/aes.h>
 #include <atchops/aesctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
-#include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
-#include <mbedtls/threading.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
@@ -25,18 +24,18 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
 #define TAG "atclient_notify"
 
 void atclient_notify_params_init(atclient_notify_params *params) {
-  memset(params, 0, sizeof(atclient_notify_params));
+  memset(params, 0, ATCLIENT_NOTIFY_PARAMS_SIZE);
   memset(params->id, 0, sizeof(char) * 37); // uuid v4 + '\0'
   params->atkey = NULL;
   params->value = NULL;
-  params->operation = ATCLIENT_NOTIFY_OPERATION_NONE;
-  params->message_type = ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY;
-  params->priority = ATCLIENT_NOTIFY_PRIORITY_LOW;
-  params->strategy = ATCLIENT_NOTIFY_STRATEGY_ALL;
-  params->latest_n = 1;
+  params->operation = ATCLIENT_NOTIFY_PARAMS_DEFAULT_OPERATION;
+  params->message_type = ATCLIENT_NOTIFY_PARAMS_DEFAULT_MESSAGE_TYPE;
+  params->priority = ATCLIENT_NOTIFY_PARAMS_DEFAULT_PRIORITY;
+  params->strategy = ATCLIENT_NOTIFY_PARAMS_DEFAULT_STRATEGY;
+  params->latest_n = ATCLIENT_NOTIFY_PARAMS_DEFAULT_LATEST_N;
   params->notifier = ATCLIENT_DEFAULT_NOTIFIER;
-  params->notification_expiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-  params->shouldencrypt = true;
+  params->notification_expiry = ATCLIENT_NOTIFY_PARAMS_DEFAULT_NOTIFICATION_EXPIRY;
+  params->shouldencrypt = ATCLIENT_NOTIFY_PARAMS_DEFAULT_SHOULD_ENCRYPT;
   params->sharedenckeybase64 = NULL;
 }
 
@@ -48,7 +47,7 @@ void atclient_notify_params_create(atclient_notify_params *params, enum atclient
   params->shouldencrypt = shouldencrypt;
 }
 
-void atclient_notify_params_free(atclient_notify_params *params) { memset(params, 0, sizeof(atclient_notify_params)); }
+void atclient_notify_params_free(atclient_notify_params *params) { memset(params, 0, ATCLIENT_NOTIFY_PARAMS_SIZE); }
 
 int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notification_id) {
 
@@ -118,7 +117,7 @@ int atclient_notify(atclient *ctx, atclient_notify_params *params, char *notific
           0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                      "atclient_get_shared_encryption_key_shared_by_me failed with code %d\n", res);
-                     atclient_atsign_free(&recipient);
+        atclient_atsign_free(&recipient);
         return res;
       }
       if ((res = atchops_base64_decode(sharedenckeybase64, strlen((char *)sharedenckeybase64), sharedenckey,
@@ -385,6 +384,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   snprintf(cmd + off, cmdsize - off, "\r\n");
+
   off += strlen("\r\n");
 
   // add null terminator
