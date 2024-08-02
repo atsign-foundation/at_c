@@ -20,7 +20,7 @@
 
 #define TAG "atclient_monitor"
 
-static int parse_message(char *original, char **message_type, char **message_body);
+static int parse_message(const char *original, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
@@ -242,7 +242,7 @@ bool atclient_monitor_is_connected(atclient *monitor_conn) {
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
 // error, notification) and return the message body which is everything after the prefix (data:, error:, notification:).
 // This function will modify *message_type and *message_body to point to the respective values in *original.
-static int parse_message(char *original, char **message_type, char **message_body) {
+static int parse_message(const char *original, char **message_type, char **message_body) {
   int ret = -1;
 
   char *temp = NULL;
