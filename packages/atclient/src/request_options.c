@@ -8,6 +8,32 @@
 
 #define TAG "request_options"
 
+static void atclient_put_shared_key_request_options_set_shared_encryption_key_initialized(
+    atclient_put_shared_key_request_options *options, const bool initialized);
+static void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options,
+                                                                       const bool initialized);
+static void atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(
+    atclient_get_self_key_request_options *options, const bool initialized);
+static void atclient_get_shared_key_request_options_set_shared_encryption_key_initialized(
+    atclient_get_shared_key_request_options *options, const bool initialized);
+static void atclient_get_shared_key_request_options_set_iv_initialized(atclient_get_shared_key_request_options *options,
+                                                                       const bool initialized);
+static void
+atclient_get_shared_key_request_options_set_bypass_cache_initialized(atclient_get_shared_key_request_options *options,
+                                                                     const bool initialized);
+static void atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(
+    atclient_get_shared_key_request_options *options, const bool initialized);
+static void
+atclient_get_public_key_request_options_set_bypass_cache_initialized(atclient_get_public_key_request_options *options,
+                                                                     const bool initialized);
+static void atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(
+    atclient_get_public_key_request_options *options, const bool initialized);
+static void atclient_get_atkeys_request_options_set_regex_initialized(atclient_get_atkeys_request_options *options,
+                                                                      const bool initialized);
+static void
+atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
+                                                                const bool initialized);
+
 /*
  * =================
  * 1A. Put SelfKey
@@ -81,7 +107,7 @@ void atclient_put_shared_key_request_options_free(atclient_put_shared_key_reques
     atclient_put_shared_key_request_options_unset_shared_encryption_key(options);
   }
 
-  if(atclient_put_shared_key_request_options_is_iv_initialized(options)) {
+  if (atclient_put_shared_key_request_options_is_iv_initialized(options)) {
     atclient_put_shared_key_request_options_unset_iv(options);
   }
 }
@@ -106,7 +132,7 @@ bool atclient_put_shared_key_request_options_is_shared_encryption_key_initialize
          ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
 }
 
-void atclient_put_shared_key_request_options_set_shared_encryption_key_initialized(
+static void atclient_put_shared_key_request_options_set_shared_encryption_key_initialized(
     atclient_put_shared_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
@@ -221,7 +247,8 @@ bool atclient_put_shared_key_request_options_is_iv_initialized(const atclient_pu
          ATCLIENT_PUT_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED;
 }
 
-void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options, const bool initialized) {
+static void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options,
+                                                                const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -243,7 +270,8 @@ void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_sha
   }
 }
 
-int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_request_options *options, const unsigned char *iv) {
+int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_request_options *options,
+                                                   const unsigned char *iv) {
   int ret = 1;
 
   /*
@@ -286,9 +314,7 @@ int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_reque
 
   ret = 0;
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
 
 void atclient_put_shared_key_request_options_unset_iv(atclient_put_shared_key_request_options *options) {
@@ -345,7 +371,6 @@ void atclient_put_public_key_request_options_free(atclient_put_public_key_reques
   /*
    * 2. Free the options
    */
-
 }
 
 /*
@@ -402,7 +427,7 @@ bool atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(
          ATCLIENT_GET_SELF_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
 }
 
-void atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(
+static void atclient_get_self_key_request_options_set_store_atkey_metadata_initialized(
     atclient_get_self_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
@@ -543,7 +568,7 @@ bool atclient_get_shared_key_request_options_is_shared_encryption_key_initialize
          ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_SHARED_ENCRYPTION_KEY_INITIALIZED;
 }
 
-void atclient_get_shared_key_request_options_set_shared_encryption_key_initialized(
+static void atclient_get_shared_key_request_options_set_shared_encryption_key_initialized(
     atclient_get_shared_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
@@ -657,7 +682,8 @@ bool atclient_get_shared_key_request_options_is_iv_initialized(const atclient_ge
          ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_IV_INITIALIZED;
 }
 
-void atclient_get_shared_key_request_options_set_iv_initialized(atclient_get_shared_key_request_options *options, const bool initialized) {
+static void atclient_get_shared_key_request_options_set_iv_initialized(atclient_get_shared_key_request_options *options,
+                                                                const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -679,7 +705,8 @@ void atclient_get_shared_key_request_options_set_iv_initialized(atclient_get_sha
   }
 }
 
-int atclient_get_shared_key_request_options_set_iv(atclient_get_shared_key_request_options *options, const unsigned char *iv) {
+int atclient_get_shared_key_request_options_set_iv(atclient_get_shared_key_request_options *options,
+                                                   const unsigned char *iv) {
   int ret = 1;
 
   /*
@@ -745,7 +772,8 @@ void atclient_get_shared_key_request_options_unset_iv(atclient_get_shared_key_re
   atclient_get_shared_key_request_options_set_iv_initialized(options, false);
 }
 
-bool atclient_get_shared_key_request_options_is_bypass_cache_initialized(const atclient_get_shared_key_request_options *options) {
+bool atclient_get_shared_key_request_options_is_bypass_cache_initialized(
+    const atclient_get_shared_key_request_options *options) {
   /*
    * 1. Validate arguments
    */
@@ -763,7 +791,8 @@ bool atclient_get_shared_key_request_options_is_bypass_cache_initialized(const a
          ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INITIALIZED;
 }
 
-void atclient_get_shared_key_request_options_set_bypass_cache_initialized(atclient_get_shared_key_request_options *options, const bool initialized) {
+static void atclient_get_shared_key_request_options_set_bypass_cache_initialized(
+    atclient_get_shared_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -786,7 +815,8 @@ void atclient_get_shared_key_request_options_set_bypass_cache_initialized(atclie
   }
 }
 
-int atclient_get_shared_key_request_options_set_bypass_cache(atclient_get_shared_key_request_options *options, const bool bypass_cache) {
+int atclient_get_shared_key_request_options_set_bypass_cache(atclient_get_shared_key_request_options *options,
+                                                             const bool bypass_cache) {
   int ret = 1;
 
   /*
@@ -855,7 +885,7 @@ bool atclient_get_shared_key_request_options_is_store_atkey_metadata_initialized
          ATCLIENT_GET_SHARED_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
 }
 
-void atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(
+static void atclient_get_shared_key_request_options_set_store_atkey_metadata_initialized(
     atclient_get_shared_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
@@ -993,7 +1023,8 @@ bool atclient_get_public_key_request_options_is_bypass_cache_initialized(
          ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INITIALIZED;
 }
 
-void atclient_get_public_key_request_options_set_bypass_cache_initialized(atclient_get_public_key_request_options *options, const bool initialized) {
+static void atclient_get_public_key_request_options_set_bypass_cache_initialized(
+    atclient_get_public_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -1016,7 +1047,8 @@ void atclient_get_public_key_request_options_set_bypass_cache_initialized(atclie
   }
 }
 
-int atclient_get_public_key_request_options_set_bypass_cache(atclient_get_public_key_request_options *options, const bool bypass_cache) {
+int atclient_get_public_key_request_options_set_bypass_cache(atclient_get_public_key_request_options *options,
+                                                             const bool bypass_cache) {
   int ret = 1;
 
   /*
@@ -1085,7 +1117,7 @@ bool atclient_get_public_key_request_options_is_store_atkey_metadata_initialized
          ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED;
 }
 
-void atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(
+static void atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(
     atclient_get_public_key_request_options *options, const bool initialized) {
   /*
    * 1. Validate arguments
@@ -1214,7 +1246,7 @@ bool atclient_get_atkeys_request_options_is_regex_initialized(const atclient_get
          ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED;
 }
 
-void atclient_get_atkeys_request_options_set_regex_initialized(atclient_get_atkeys_request_options *options,
+static void atclient_get_atkeys_request_options_set_regex_initialized(atclient_get_atkeys_request_options *options,
                                                                const bool initialized) {
   /*
    * 1. Validate arguments
@@ -1323,7 +1355,7 @@ bool atclient_get_atkeys_request_options_is_show_hidden_initialized(
          ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED;
 }
 
-void atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
+static void atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
                                                                      const bool initialized) {
   /*
    * 1. Validate arguments

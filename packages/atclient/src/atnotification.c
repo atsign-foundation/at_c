@@ -5,6 +5,24 @@
 
 #define TAG "atnotification"
 
+static void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
+                                                           const bool initialized);
+static void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized);
+static void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
+                                                            const bool initialized);
+
 void atclient_atnotification_init(atclient_atnotification *notification) {
   memset(notification, 0, sizeof(atclient_atnotification));
 }
@@ -295,7 +313,7 @@ bool atclient_atnotification_is_decrypted_value_initialized(const atclient_atnot
           ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED);
 }
 
-void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -315,7 +333,7 @@ void atclient_atnotification_id_set_initialized(atclient_atnotification *notific
   }
 }
 
-void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -335,7 +353,7 @@ void atclient_atnotification_from_set_initialized(atclient_atnotification *notif
   }
 }
 
-void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -355,7 +373,7 @@ void atclient_atnotification_to_set_initialized(atclient_atnotification *notific
   }
 }
 
-void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -375,7 +393,7 @@ void atclient_atnotification_key_set_initialized(atclient_atnotification *notifi
   }
 }
 
-void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -396,7 +414,7 @@ void atclient_atnotification_value_set_initialized(atclient_atnotification *noti
   }
 }
 
-void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -418,7 +436,7 @@ void atclient_atnotification_operation_set_initialized(atclient_atnotification *
   }
 }
 
-void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification,
                                                           const bool initialized) {
 
   /*
@@ -441,7 +459,7 @@ void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotificatio
   }
 }
 
-void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification,
                                                           const bool initialized) {
 
   /*
@@ -463,7 +481,7 @@ void atclient_atnotification_message_type_set_initialized(atclient_atnotificatio
   }
 }
 
-void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification,
                                                           const bool initialized) {
 
   /*
@@ -486,7 +504,7 @@ void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotificatio
   }
 }
 
-void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification,
                                                           const bool initialized) {
 
   /*
@@ -508,7 +526,7 @@ void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotificatio
   }
 }
 
-void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -530,7 +548,7 @@ void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *n
   }
 }
 
-void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification, const bool initialized) {
+static void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification, const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -551,7 +569,7 @@ void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *n
   }
 }
 
-void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
                                                               const bool initialized) {
   /*
    * 1. Validate arguments
@@ -573,7 +591,7 @@ void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotific
   }
 }
 
-void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification,
                                                           const bool initialized) {
   /*
    * 1. Validate arguments
@@ -595,7 +613,7 @@ void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotificatio
   }
 }
 
-void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
+static void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
                                                              const bool initialized) {
   /*
    * 1. Validate arguments
