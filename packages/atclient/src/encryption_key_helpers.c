@@ -265,13 +265,13 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   char *recipient_atsign_with_at = NULL;
   char *command = NULL;
 
-  const size_t recv_size = 1024;
+  const size_t recv_size = 2048;
   unsigned char recv[recv_size];
 
-  const size_t shared_encryption_key_encrypted_base64_size = 1024;
+  const size_t shared_encryption_key_encrypted_base64_size = 2048;
   unsigned char shared_encryption_key_encrypted_base64[shared_encryption_key_encrypted_base64_size];
 
-  const size_t shared_encryption_key_encrypted_size = 1024;
+  const size_t shared_encryption_key_encrypted_size = atchops_base64_decoded_size(shared_encryption_key_encrypted_base64_size);
   unsigned char shared_encryption_key_encrypted[shared_encryption_key_encrypted_size];
 
   /*
@@ -333,7 +333,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   memset(shared_encryption_key_encrypted, 0, sizeof(unsigned char) * shared_encryption_key_encrypted_size);
   size_t shared_encryption_key_encrypted_len = 0;
 
-  if ((ret = atchops_rsa_decrypt(&ctx->atkeys.encrypt_private_key, shared_encryption_key_encrypted_base64,
+  if ((ret = atchops_rsa_decrypt(&(ctx->atkeys.encrypt_private_key), shared_encryption_key_encrypted_base64,
                                  shared_encryption_key_encrypted_base64_len, shared_encryption_key_encrypted,
                                  shared_encryption_key_encrypted_size, &shared_encryption_key_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d\n", ret);
