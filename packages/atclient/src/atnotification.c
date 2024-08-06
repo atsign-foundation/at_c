@@ -1760,8 +1760,8 @@ int atclient_atnotification_set_iv_nonce(atclient_atnotification *notification, 
   /*
    * 3. Set the iv_nonce
    */
-  const size_t iv_nonce_size = strlen(iv_nonce);
-  const size_t iv_nonce_len = iv_nonce_size + 1;
+  const size_t iv_nonce_len = strlen(iv_nonce);
+  const size_t iv_nonce_size = iv_nonce_len + 1;
   if ((notification->iv_nonce = malloc(sizeof(char) * iv_nonce_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification iv_nonce\n");
