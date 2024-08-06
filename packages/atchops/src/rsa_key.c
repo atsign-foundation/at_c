@@ -394,6 +394,18 @@ exit: {
 }
 }
 
+bool atchops_rsa_key_is_public_key_populated(const atchops_rsa_key_public_key *public_key) {
+  return atchops_rsa_key_public_key_is_n_initialized(public_key) && atchops_rsa_key_public_key_is_e_initialized(public_key);
+}
+
+bool atchops_rsa_key_is_private_key_populated(const atchops_rsa_key_private_key *private_key) {
+  return atchops_rsa_key_private_key_is_n_initialized(private_key) &&
+         atchops_rsa_key_private_key_is_e_initialized(private_key) &&
+         atchops_rsa_key_private_key_is_d_initialized(private_key) &&
+         atchops_rsa_key_private_key_is_p_initialized(private_key) &&
+         atchops_rsa_key_private_key_is_q_initialized(private_key);
+}
+
 int atchops_rsa_key_public_key_set_ne(atchops_rsa_key_public_key *public_key, const unsigned char *n,
                                       const size_t n_len, const unsigned char *e, const size_t e_len) {
   int ret = 1;

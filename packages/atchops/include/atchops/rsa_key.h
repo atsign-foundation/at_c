@@ -67,6 +67,9 @@ int atchops_rsa_key_populate_public_key(atchops_rsa_key_public_key *public_key_s
 int atchops_rsa_key_populate_private_key(atchops_rsa_key_private_key *private_key_struct, const char *private_key_base64,
                                        const size_t privatekeprivate_key_base64_lenybase64len);
 
+bool atchops_rsa_key_is_public_key_populated(const atchops_rsa_key_public_key *public_key);
+bool atchops_rsa_key_is_private_key_populated(const atchops_rsa_key_private_key *private_key);
+
 int atchops_rsa_key_public_key_set_ne(atchops_rsa_key_public_key *public_key, const unsigned char *n, const size_t n_len,
                                     const unsigned char *e, const size_t e_len);
 
