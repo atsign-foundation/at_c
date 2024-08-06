@@ -43,7 +43,7 @@ int atchops_rsa_sign(const atchops_rsa_key_private_key *private_key, const atcho
 
   if(!atchops_rsa_key_is_private_key_populated(private_key)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is not populated");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is not populated\n");
     return ret;
   }
 
@@ -159,7 +159,7 @@ int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atcho
 
   if(!atchops_rsa_key_is_public_key_populated(public_key)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is not populated");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is not populated\n");
     return ret;
   }
 
@@ -246,7 +246,7 @@ int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsi
 
   if(!atchops_rsa_key_is_public_key_populated(public_key)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is not populated");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is not populated\n");
     return ret;
   }
 
@@ -340,7 +340,7 @@ int atchops_rsa_decrypt(const atchops_rsa_key_private_key *private_key, const un
 
   if(!atchops_rsa_key_is_private_key_populated(private_key)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is not populated");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is not populated\n");
     return ret;
   }
 
