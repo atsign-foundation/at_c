@@ -12,14 +12,14 @@ void atclient_notify_params_init(atclient_notify_params *params) {
   params->id = NULL;
   params->atkey = NULL;
   params->value = NULL;
-  params->operation = ATCLIENT_NOTIFY_OPERATION_NONE;
-  params->message_type = ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY;
-  params->priority = ATCLIENT_NOTIFY_PRIORITY_LOW;
-  params->strategy = ATCLIENT_NOTIFY_STRATEGY_ALL;
-  params->latest_n = 1;
+  params->operation = ATCLIENT_NOTIFY_PARAMS_DEFAULT_OPERATION;
+  params->message_type = ATCLIENT_NOTIFY_PARAMS_DEFAULT_MESSAGE_TYPE;
+  params->priority = ATCLIENT_NOTIFY_PARAMS_DEFAULT_PRIORITY;
+  params->strategy = ATCLIENT_NOTIFY_PARAMS_DEFAULT_STRATEGY;
+  params->latest_n = ATCLIENT_NOTIFY_PARAMS_DEFAULT_LATEST_N;
   params->notifier = ATCLIENT_DEFAULT_NOTIFIER;
-  params->notification_expiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-  params->should_encrypt = true;
+  params->notification_expiry = ATCLIENT_NOTIFY_PARAMS_DEFAULT_NOTIFICATION_EXPIRY;
+  params->should_encrypt = ATCLIENT_NOTIFY_PARAMS_DEFAULT_SHOULD_ENCRYPT;
   params->shared_encryption_key = NULL;
   memset(params->_initialized_fields, 0, sizeof(params->_initialized_fields));
 }

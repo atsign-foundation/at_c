@@ -416,6 +416,10 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
 
   const size_t decryptedvaluetempsize = ciphertextlen + 1;
   decryptedvaluetemp = malloc(sizeof(unsigned char) * decryptedvaluetempsize);
+  if(decryptedvaluetemp == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for decrypted value\n");
+    goto exit;
+  }
   memset(decryptedvaluetemp, 0, sizeof(unsigned char) * decryptedvaluetempsize);
   size_t decryptedvaluetemplen = 0;
 
