@@ -3,16 +3,16 @@
 #include "atclient/connection.h"
 #include "atclient/string_utils.h"
 #include <atlogger/atlogger.h>
+#include <pwd.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <pwd.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 #define TAG "atclient_utils"
 
 int atclient_utils_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
-                                   char **atserver_host, int *atserver_port) {
+                                         char **atserver_host, int *atserver_port) {
   int ret = 1;
 
   atclient_connection atdirectory_conn;
@@ -68,7 +68,7 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
   }
 
   *atserver_host = strdup(host);
-  if(*atserver_host == NULL) {
+  if (*atserver_host == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for atserver_host\n");
     *atserver_host = NULL;
     ret = 1;
@@ -86,14 +86,29 @@ exit: {
 }
 }
 
-int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign)
-{
+int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (atsign == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is NULL\n");
+    return ret;
+  }
 
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;
 
-  const size_t atkeys_path_size = strlen(homedir) + strlen("/.atsign/keys/") + strlen(atsign) + strlen("_key.atKeys") + 1;
+  const size_t atkeys_path_size =
+      strlen(homedir) + strlen("/.atsign/keys/") + strlen(atsign) + strlen("_key.atKeys") + 1;
   char atkeys_path[atkeys_path_size];
 
   snprintf(atkeys_path, atkeys_path_size, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
@@ -103,6 +118,7 @@ int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const c
     goto exit;
   }
 
+  ret = 0;
   goto exit;
 
 exit: { return ret; }

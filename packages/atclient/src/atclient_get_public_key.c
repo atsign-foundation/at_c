@@ -8,7 +8,7 @@
 
 #define TAG "atclient_get_public_key"
 
-static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value, const atclient_get_public_key_request_options *request_options);
+static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value);
 
 int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **value, atclient_get_public_key_request_options *request_options) {
   int ret = 1;
@@ -16,7 +16,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, (const char **) value, request_options)) !=
+  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, (const char **) value)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key_validate_arguments: %d\n", ret);
     return ret;
@@ -147,7 +147,7 @@ exit: {
 }
 }
 
-static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value, const atclient_get_public_key_request_options *request_options) {
+static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -159,6 +159,18 @@ static int atclient_get_public_key_validate_arguments(const atclient *atclient, 
   if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_key_initialized(atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not initialized\n");
+    goto exit;
+  }
+
+  if(!atclient_atkey_is_shared_by_initialized(atkey)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not shared by initialized\n");
     goto exit;
   }
 

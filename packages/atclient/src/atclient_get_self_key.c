@@ -15,15 +15,16 @@
 #define TAG "atclient_get_selfkey"
 
 static int atclient_get_self_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
-                                                const char **value, const atclient_get_self_key_request_options *request_options);
+                                                    const char **value);
 
-int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **value, const atclient_get_self_key_request_options *request_options) {
+int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **value,
+                          const atclient_get_self_key_request_options *request_options) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_self_key_validate_arguments(atclient, atkey, (const char **) value, request_options)) != 0) {
+  if ((ret = atclient_get_self_key_validate_arguments(atclient, atkey, (const char **)value)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -156,7 +157,8 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   size_t value_raw_encrypted_len = 0;
 
   if ((ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring),
-                                   (unsigned char *)value_raw_encrypted, value_raw_encrypted_size, &value_raw_encrypted_len)) != 0) {
+                                   (unsigned char *)value_raw_encrypted, value_raw_encrypted_size,
+                                   &value_raw_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -169,23 +171,26 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   }
   memset(value_raw, 0, sizeof(char) * value_raw_size);
   size_t value_raw_len = 0;
-  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value_raw_encrypted, value_raw_encrypted_len,
-                                    (unsigned char *)value_raw, value_raw_size, &value_raw_len)) != 0) {
+  if ((ret = atchops_aes_ctr_decrypt(self_encryption_key, ATCHOPS_AES_256, iv, (unsigned char *)value_raw_encrypted,
+                                     value_raw_encrypted_len, (unsigned char *)value_raw, value_raw_size,
+                                     &value_raw_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_decrypt: %d\n", ret);
     goto exit;
   }
 
-  if(request_options != NULL && atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(request_options) && request_options->store_atkey_metadata) {
-    if((ret = atclient_atkey_metadata_from_json_str(&atkey->metadata, metadata_str)) != 0) {
+  if (request_options != NULL &&
+      atclient_get_self_key_request_options_is_store_atkey_metadata_initialized(request_options) &&
+      request_options->store_atkey_metadata) {
+    if ((ret = atclient_atkey_metadata_from_json_str(&atkey->metadata, metadata_str)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str: %d\n", ret);
       goto exit;
     }
   }
 
-  if(value != NULL) {
+  if (value != NULL) {
     const size_t value_len = value_raw_len;
     const size_t value_size = value_len + 1;
-    if((*value = (char *)malloc(sizeof(char) * (value_size))) == NULL) {
+    if ((*value = (char *)malloc(sizeof(char) * (value_size))) == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
       goto exit;
@@ -211,7 +216,7 @@ exit: {
 }
 
 static int atclient_get_self_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
-                                                const char **value, const atclient_get_self_key_request_options *request_options) {
+                                                    const char **value) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -233,8 +238,9 @@ static int atclient_get_self_key_validate_arguments(const atclient *atclient, co
   }
 
   if (atclient->async_read) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_get_self_key cannot be called from an async_read atclient, it will cause a race condition\n");
+    atlogger_log(
+        TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+        "atclient_get_self_key cannot be called from an async_read atclient, it will cause a race condition\n");
     return 1;
   }
 
@@ -253,6 +259,12 @@ static int atclient_get_self_key_validate_arguments(const atclient *atclient, co
   if (!atclient_atkey_is_shared_by_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not initialized when it should be\n");
+    goto exit;
+  }
+
+  if (value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
     goto exit;
   }
 
