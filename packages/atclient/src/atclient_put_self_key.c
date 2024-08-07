@@ -206,15 +206,15 @@ static int atclient_put_self_key_validate_arguments(atclient *ctx, atclient_atke
     goto exit;
   }
 
-  if(!atclient_is_atserver_connection_initialized(&(ctx->atserver_connection))) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not initialized\n");
-    goto exit;
-  }
-
   if(!atclient_is_atserver_connection_started(&(ctx->atserver_connection))) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not started\n");
+    goto exit;
+  }
+
+  if(!atclient_is_atsign_initialized(&(ctx->atserver_connection))) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not connected\n");
     goto exit;
   }
 
