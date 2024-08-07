@@ -156,6 +156,18 @@ static int atclient_get_public_key_validate_arguments(const atclient *atclient, 
     goto exit;
   }
 
+  if (!atclient_is_atserver_connection_started(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
+    goto exit;
+  }
+
+  if (!atclient_is_atsign_initialized(atclient)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign not initialized\n");
+    goto exit;
+  }
+
   if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
@@ -185,18 +197,6 @@ static int atclient_get_public_key_validate_arguments(const atclient *atclient, 
   if (value == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
-    goto exit;
-  }
-
-  if (!atclient_is_atserver_connection_started(atclient)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
-    goto exit;
-  }
-
-  if (!atclient_is_atsign_initialized(atclient)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign not initialized\n");
     goto exit;
   }
 

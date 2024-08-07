@@ -370,6 +370,12 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
     return ret;
   }
 
+  if(!atclient_is_atsign_initialized(heartbeat_conn)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not initialized\n");
+    return ret;
+  }
+
   /*
    * 2. Send `noop:` command
    */

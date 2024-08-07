@@ -218,7 +218,7 @@ static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const
     goto exit;
   }
 
-  if(!atclient_is_atserver_connection_started(&(ctx->atserver_connection))) {
+  if(!atclient_is_atserver_connection_started(&ctx)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not started\n");
     goto exit;
