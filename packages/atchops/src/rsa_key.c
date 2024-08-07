@@ -735,12 +735,11 @@ int atchops_rsa_key_private_key_set_n(atchops_rsa_key_private_key *private_key, 
   }
 
   private_key->n.len = n_len;
-  if ((private_key->n.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->n.len + 1))) == NULL) {
+  if ((private_key->n.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->n.len))) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for n value\n");
     goto exit;
   }
-  memset(private_key->n.value, 0, sizeof(unsigned char) * (private_key->n.len + 1));
 
   atchops_rsa_key_private_key_set_n_initialized(private_key, true);
   memcpy(private_key->n.value, n, n_len);
@@ -826,12 +825,11 @@ int atchops_rsa_key_private_key_set_e(atchops_rsa_key_private_key *private_key, 
 
   private_key->e.len = e_len;
 
-  if ((private_key->e.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->e.len + 1))) == NULL) {
+  if ((private_key->e.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->e.len))) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for e value\n");
     goto exit;
   }
-  memset(private_key->e.value, 0, sizeof(unsigned char) * (private_key->e.len + 1));
 
   atchops_rsa_key_private_key_set_e_initialized(private_key, true);
   memcpy(private_key->e.value, e, e_len);
@@ -919,12 +917,11 @@ int atchops_rsa_key_private_key_set_d(atchops_rsa_key_private_key *private_key, 
 
   private_key->d.len = d_len;
 
-  if ((private_key->d.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->d.len + 1))) == NULL) {
+  if ((private_key->d.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->d.len))) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for d value\n");
     goto exit;
   }
-  memset(private_key->d.value, 0, sizeof(unsigned char) * (private_key->d.len + 1));
 
   atchops_rsa_key_private_key_set_d_initialized(private_key, true);
   memcpy(private_key->d.value, d, d_len);
@@ -1012,13 +1009,12 @@ int atchops_rsa_key_private_key_set_p(atchops_rsa_key_private_key *private_key, 
 
   private_key->p.len = p_len;
 
-  private_key->p.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->p.len + 1));
+  private_key->p.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->p.len));
   if (private_key->p.value == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for p value\n");
     goto exit;
   }
-  memset(private_key->p.value, 0, sizeof(unsigned char) * (private_key->p.len + 1));
 
   atchops_rsa_key_private_key_set_p_initialized(private_key, true);
   memcpy(private_key->p.value, p, p_len);
@@ -1105,12 +1101,11 @@ int atchops_rsa_key_private_key_set_q(atchops_rsa_key_private_key *private_key, 
 
   private_key->q.len = q_len;
 
-  if ((private_key->q.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->q.len + 1))) == NULL) {
+  if ((private_key->q.value = (unsigned char *)malloc(sizeof(unsigned char) * (private_key->q.len))) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for q value\n");
     goto exit;
   }
-  memset(private_key->q.value, 0, sizeof(unsigned char) * (private_key->q.len + 1));
 
   atchops_rsa_key_private_key_set_q_initialized(private_key, true);
   memcpy(private_key->q.value, q, q_len);
