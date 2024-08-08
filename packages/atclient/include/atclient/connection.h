@@ -1,14 +1,10 @@
 #ifndef ATCLIENT_CONNECTION_H
 #define ATCLIENT_CONNECTION_H
 
+#include "atclient/connection_hooks.h"
 #include "atchops/mbedtls.h"
 #include <stdbool.h>
 #include <stddef.h>
-
-#ifndef ATCLIENT_CONNECTION_HOOKS_H
-typedef struct atclient_connection_hooks atclient_connection_hooks;
-#endif
-
 
 // represents the type of connection
 typedef enum atclient_connection_type {

@@ -1,6 +1,7 @@
 #ifndef ATCLIENT_ATNOTIFICATION_H
 #define ATCLIENT_ATNOTIFICATION_H
 
+#include "atclient/cjson.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -91,6 +92,9 @@ void atclient_atnotification_init(atclient_atnotification *notification);
  */
 void atclient_atnotification_free(atclient_atnotification *notification);
 
+int atclient_atnotification_from_json_str(atclient_atnotification *notification, const char *json_str);
+int atclient_atnotification_from_cjson_node(atclient_atnotification *notification, const cJSON *root);
+
 // Check if a field is initialized
 bool atclient_atnotification_is_id_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_is_from_initialized(const atclient_atnotification *notification);
@@ -107,25 +111,6 @@ bool atclient_atnotification_is_iv_nonce_initialized(const atclient_atnotificati
 bool atclient_atnotification_is_ske_enc_key_name_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_is_ske_enc_algo_initialized(const atclient_atnotification *notification);
 bool atclient_atnotification_is_decrypted_value_initialized(const atclient_atnotification *notification);
-
-// Set a field as initialized or not
-void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
-                                                           const bool initialized);
-void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized);
-void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
-                                                            const bool initialized);
 
 // Free a field, some fields are dynamically allocated when set
 void atclient_atnotification_unset_id(atclient_atnotification *notification);

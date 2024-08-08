@@ -14,9 +14,7 @@
 #define TAG "atclient_put_shared_key"
 
 static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
-                                                      const char *value,
-                                                      const atclient_put_shared_key_request_options *request_options,
-                                                      const int *commit_id);
+                                                      const char *value);
 
 int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *value,
                             const atclient_put_shared_key_request_options *request_options, int *commit_id) {
@@ -25,7 +23,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_put_shared_key_validate_arguments(ctx, atkey, value, request_options, commit_id)) != 0) {
+  if ((ret = atclient_put_shared_key_validate_arguments(ctx, atkey, value)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_shared_key_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -202,9 +200,7 @@ exit: {
 }
 
 static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
-                                                      const char *value,
-                                                      const atclient_put_shared_key_request_options *request_options,
-                                                      const int *commit_id) {
+                                                      const char *value) {
   int ret = 1;
 
   char *shared_by_formatted = NULL;
@@ -216,17 +212,21 @@ static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const
     goto exit;
   }
 
-  // TODO atclient checks
+  if(!atclient_is_atsign_initialized(ctx)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atsign is not initialized\n");
+    goto exit;
+  }
+
+  if(!atclient_is_atserver_connection_started(ctx)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not started\n");
+    goto exit;
+  }
 
   if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
-    goto exit;
-  }
-
-  if (value == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
     goto exit;
   }
 
@@ -253,6 +253,12 @@ static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const
   if (!atclient_atkey_is_shared_with_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey is_shared_with_initialized is false\n");
+    goto exit;
+  }
+
+  if (value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
     goto exit;
   }
 

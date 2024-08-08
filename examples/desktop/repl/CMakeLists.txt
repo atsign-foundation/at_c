@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.19)
 
 project(repl VERSION 0.0.1 LANGUAGES C HOMEPAGE_URL https://atsign.com)
 
-include(GNUInstallDirs)
 include(FetchContent)
 
 find_package(atsdk REQUIRED CONFIG)

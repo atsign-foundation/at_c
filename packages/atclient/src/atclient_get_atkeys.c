@@ -7,7 +7,7 @@
 
 #define TAG "atclient_get_atkeys"
 
-static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len, const atclient_get_atkeys_request_options *request_options);
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len);
 
 int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len, const atclient_get_atkeys_request_options *request_options) {
   int ret = 1;
@@ -15,13 +15,9 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_atkeys_validate_arguments(atclient, (const atclient_atkey **) atkey, output_array_len, request_options)) != 0) {
+  if ((ret = atclient_get_atkeys_validate_arguments(atclient, (const atclient_atkey **) atkey, output_array_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_validate_arguments: %d\n", ret);
     return ret;
-  }
-
-  if(request_options != NULL) {
-
   }
 
   /*
@@ -159,15 +155,8 @@ exit: {
 }
 }
 
-static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len, const atclient_get_atkeys_request_options *request_options) {
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len) {
   int ret = 1;
-
-  // check to make sure null ptr wasn't provided
-  if (atkey == NULL || output_array_len == NULL) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey or output_array_len is NULL. These should be pointers\n");
-    goto exit;
-  }
 
   // check to make sure atclient is not null
   if (atclient == NULL) {
@@ -185,6 +174,18 @@ static int atclient_get_atkeys_validate_arguments(const atclient *atclient, cons
   if (!atclient_is_atsign_initialized(atclient)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not allocated. Make sure to PKAM authenticate first\n");
+    goto exit;
+  }
+
+  if(atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
+    goto exit;
+  }
+
+  if(output_array_len == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "output_array_len is NULL\n");
     goto exit;
   }
 

@@ -9,7 +9,7 @@
 
 #define TAG "atclient_delete"
 
-static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options, const int *commit_id);
+static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey);
 
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options, int *commit_id) {
   int ret = 1;
@@ -17,7 +17,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   /*
    * 1. Check arguments
    */
-  if ((ret = atclient_delete_validate_arguments(atclient, atkey, options, commit_id)) != 0) {
+  if ((ret = atclient_delete_validate_arguments(atclient, atkey)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_validate_arguments: %d\n", ret);
     return ret;
@@ -99,7 +99,7 @@ exit: {
 }
 }
 
-static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options, const int *commit_id) {
+static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey) {
   int ret = 1;
 
   if (atclient == NULL) {

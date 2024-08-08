@@ -28,10 +28,32 @@ static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, co
                                                          const char *atsign);
 
 void atclient_init(atclient *ctx) {
+  /*
+   * 1. Validate arguments
+   */
+  if(ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return;
+  }
+
+  /*
+   * 2. Initialize
+   */
   memset(ctx, 0, sizeof(atclient));
 }
 
 void atclient_free(atclient *ctx) {
+  /*
+   * 1. Validate arguments
+   */
+  if(ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return;
+  }
+
+  /*
+   * 2. Free
+   */
   if (atclient_is_atsign_initialized(ctx)) {
     atclient_unset_atsign(ctx);
   }
@@ -44,10 +66,25 @@ void atclient_free(atclient *ctx) {
 int atclient_set_atsign(atclient *ctx, const char *atsign) {
   int ret = 1;
 
+  /*
+   * 1. Validate arguments
+   */
+  if(ctx == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return ret;
+  }
+  
+  /*
+   * 2. Unset the atsign if it is already initialized
+   */
   if (atclient_is_atsign_initialized(ctx)) {
     atclient_unset_atsign(ctx);
   }
 
+  /*
+   * 3. Set the atsign
+   */
   const size_t atsign_len = strlen(atsign);
   const size_t atsign_size = atsign_len + 1;
   if ((ctx->atsign = malloc(sizeof(char) * atsign_size)) == NULL) {
@@ -59,6 +96,9 @@ int atclient_set_atsign(atclient *ctx, const char *atsign) {
   memcpy(ctx->atsign, atsign, atsign_len);
   ctx->atsign[atsign_len] = '\0';
 
+  /*
+   * 4. Set the atsign initialized flag
+   */
   atclient_set_atsign_initialized(ctx, true);
 
   ret = 0;
@@ -80,6 +120,15 @@ bool atclient_is_atserver_connection_started(const atclient *ctx) {
 
 int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host, const int secondary_port) {
   int ret = 1; // error by default
+
+  /*
+   * 1. Validate arguments
+   */
+  if(ctx == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return ret;
+  }
 
   // remove hooks to preserve them across resets
   atclient_connection_hooks *conn_hooks = ctx->atserver_connection.hooks;
@@ -107,6 +156,17 @@ exit: { return ret; }
 }
 
 void atclient_stop_atserver_connection(atclient *ctx) {
+  /*
+   * 1. Validate arguments
+   */
+  if(ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return;
+  }
+
+  /*
+   * 2. Stop the atserver connection
+   */
   if (atclient_is_atserver_connection_started(ctx)) {
     atclient_connection_free(&(ctx->atserver_connection));
   }
@@ -115,6 +175,14 @@ void atclient_stop_atserver_connection(atclient *ctx) {
 }
 
 bool atclient_is_atsign_initialized(const atclient *ctx) {
+  /*
+   * 1. Validate arguments
+   */
+  if(ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return false;
+  }
+
   return ctx->_initialized_fields[ATCLIENT_ATSIGN_INDEX] & ATCLIENT_ATSIGN_INITIALIZED;
 }
 
@@ -287,6 +355,30 @@ exit: {
 int atclient_send_heartbeat(atclient *heartbeat_conn) {
   int ret = -1;
 
+  /*
+   * 1. Validate arguments
+   */
+  if (heartbeat_conn == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "heartbeat_conn is NULL\n");
+    return ret;
+  }
+
+  if(!atclient_is_atserver_connection_started(heartbeat_conn)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection is not started\n");
+    return ret;
+  }
+
+  if(!atclient_is_atsign_initialized(heartbeat_conn)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is not initialized\n");
+    return ret;
+  }
+
+  /*
+   * 2. Send `noop:` command
+   */
   unsigned char *recv = NULL;
 
   const char *noop_cmd = "noop:0\r\n";
@@ -305,15 +397,20 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
   size_t recv_len = 0;
   char *ptr = (char *)recv;
 
-  ret = atclient_connection_send(&heartbeat_conn->atserver_connection, (unsigned char *)noop_cmd, noop_cmd_len, recv,
-                                 recvsize, &recv_len);
-  if (ret != 0) {
+  if ((ret = atclient_connection_send(&heartbeat_conn->atserver_connection, (unsigned char *)noop_cmd, noop_cmd_len, recv,
+                                 recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send noop noop_cmd: %d\n", ret);
-    goto exit;
-  } else if (heartbeat_conn->async_read) {
     goto exit;
   }
 
+  if (heartbeat_conn->async_read) {
+    ret = 0;
+    goto exit;
+  }
+
+  /*
+   * 3. Parse response
+   */
   if (!atclient_string_utils_starts_with((const char *)ptr, "data:ok") &&
       !atclient_string_utils_ends_with((const char *)ptr, "data:ok")) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
@@ -323,7 +420,6 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
 
   ret = 0;
   goto exit;
-
 exit: {
   if (!heartbeat_conn->async_read) {
     free(recv);
