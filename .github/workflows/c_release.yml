@@ -18,7 +18,7 @@ jobs:
         run: |
           mkdir tarball
           mkdir at_c-${{ github.ref_name }}
-          cp -R packages/* at_c-${{ github.ref_name }}
+          cp -R . at_c-${{ github.ref_name }}
           tar -cvzf tarball/at_c-${{ github.ref_name }}.tar.gz at_c-${{ github.ref_name }}
       - uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
