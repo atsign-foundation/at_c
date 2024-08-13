@@ -106,17 +106,6 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
     goto exit;
   }
 
-  // log value_encrypted
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_encrypted: ");
-  for (size_t i = 0; i < value_encrypted_len; i++) {
-    printf("%02x ", value_encrypted[i]);
-  }
-  printf("\n");
-
-  // log value_encrypted_len
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_encrypted_len: %zu\n", value_encrypted_len);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value_encrypted_size: %zu\n", value_encrypted_size);
-
   size_t value_encrypted_base64_len = 0;
   memset(value_encrypted_base64, 0, sizeof(char) * value_encrypted_base64_size);
   if ((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, (unsigned char *) value_encrypted_base64,
