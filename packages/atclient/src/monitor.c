@@ -245,10 +245,11 @@ bool atclient_monitor_is_connected(atclient *monitor_conn) {
 static int parse_message(const char *original, char **message_type, char **message_body) {
   int ret = -1;
 
+  char *original_copy = strdup(original);
   char *temp = NULL;
   char *saveptr;
 
-  temp = strtok_r(original, ":", &saveptr);
+  temp = strtok_r(original_copy, ":", &saveptr);
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
     goto exit;
@@ -291,7 +292,10 @@ static int parse_message(const char *original, char **message_type, char **messa
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  free(original_copy);
+  return ret;
+}
 }
 
 // populates *notification given a notification "*messagebody" which has been received from atServer
