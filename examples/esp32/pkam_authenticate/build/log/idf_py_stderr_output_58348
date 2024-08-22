@@ -1,0 +1,28 @@
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient_get_self_key.c: In function 'atclient_get_self_key':
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient_get_self_key.c:45:10: warning: unused variable 'self_encryption_key_len' [-Wunused-variable]
+   45 |   size_t self_encryption_key_len = 0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient.c: In function 'atclient_pkam_authenticate':
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient.c:330:51: warning: passing argument 1 of 'atclient_atkeys_is_enrollment_id_initialized' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  330 |   if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+      |                                                   ^~~~~~
+In file included from /Users/jeremytubongbanua/GitHub/at_c/packages/atclient/include/atclient/atclient.h:5,
+                 from /Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient.c:1:
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/include/atclient/atkeys.h:104:68: note: expected 'atclient_atkeys *' but argument is of type 'const atclient_atkeys *'
+  104 | bool atclient_atkeys_is_enrollment_id_initialized(atclient_atkeys *atkeys);
+      |                                                   ~~~~~~~~~~~~~~~~~^~~~~~
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient.c:339:56: error: too many arguments for format [-Werror=format-extra-args]
+  339 |   pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "pkam:", strlen("pkam:"));
+      |                                                        ^~~~~~~
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/src/atclient.c:341:51: warning: passing argument 1 of 'atclient_atkeys_is_enrollment_id_initialized' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  341 |   if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+      |                                                   ^~~~~~
+/Users/jeremytubongbanua/GitHub/at_c/packages/atclient/include/atclient/atkeys.h:104:68: note: expected 'atclient_atkeys *' but argument is of type 'const atclient_atkeys *'
+  104 | bool atclient_atkeys_is_enrollment_id_initialized(atclient_atkeys *atkeys);
+      |                                                   ~~~~~~~~~~~~~~~~~^~~~~~
+cc1: some warnings being treated as errors
+make[2]: *** [esp-idf/atclient/CMakeFiles/__idf_atclient.dir/src/atclient.c.obj] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [esp-idf/atclient/CMakeFiles/__idf_atclient.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+make: *** [all] Error 2
