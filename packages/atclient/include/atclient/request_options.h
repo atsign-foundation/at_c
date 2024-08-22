@@ -36,6 +36,15 @@
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED (VALUE_INITIALIZED << 1)
 
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_HOST_INDEX 0
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_PORT_INDEX 0
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX 0
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX 0
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 2)
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 3)
+
 /*
  * 1A. Put SelfKey
  */
@@ -57,8 +66,8 @@ typedef struct atclient_put_shared_key_request_options {
  * 1C. Put PublicKey
  */
 typedef struct atclient_put_public_key_request_options {
-    // empty for now
-    // kept for future proofing
+  // empty for now
+  // kept for future proofing
   uint8_t _initialized_fields[1];
 } atclient_put_public_key_request_options;
 
@@ -110,6 +119,18 @@ typedef struct atclient_get_atkeys_request_options {
 } atclient_get_atkeys_request_options;
 
 /*
+ * 5. Pkam auhtenticate Request Options
+ */
+
+typedef struct atclient_pkam_authenticate_options {
+  char *root_server_host;
+  int root_server_port;
+  char *atserver_host;
+  int atserver_port;
+  uint8_t _initialized_fields[1];
+} atclient_pkam_authenticate_options;
+
+/*
  * 1A. Put SelfKey
  */
 void atclient_put_self_key_request_options_init(atclient_put_self_key_request_options *options);
@@ -129,7 +150,8 @@ void atclient_put_shared_key_request_options_unset_shared_encryption_key(
     atclient_put_shared_key_request_options *options);
 
 bool atclient_put_shared_key_request_options_is_iv_initialized(const atclient_put_shared_key_request_options *options);
-int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_request_options *options, const unsigned char *iv);
+int atclient_put_shared_key_request_options_set_iv(atclient_put_shared_key_request_options *options,
+                                                   const unsigned char *iv);
 void atclient_put_shared_key_request_options_unset_iv(atclient_put_shared_key_request_options *options);
 
 /*
@@ -164,7 +186,8 @@ void atclient_get_shared_key_request_options_unset_shared_encryption_key(
     atclient_get_shared_key_request_options *options);
 
 bool atclient_get_shared_key_request_options_is_iv_initialized(const atclient_get_shared_key_request_options *options);
-int atclient_get_shared_key_request_options_set_iv(atclient_get_shared_key_request_options *options, const unsigned char *iv);
+int atclient_get_shared_key_request_options_set_iv(atclient_get_shared_key_request_options *options,
+                                                   const unsigned char *iv);
 void atclient_get_shared_key_request_options_unset_iv(atclient_get_shared_key_request_options *options);
 
 bool atclient_get_shared_key_request_options_is_bypass_cache_initialized(
@@ -220,5 +243,27 @@ bool atclient_get_atkeys_request_options_is_show_hidden_initialized(const atclie
 int atclient_get_atkeys_request_options_set_show_hidden(atclient_get_atkeys_request_options *options,
                                                         const bool show_hidden);
 void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_request_options *options);
+
+/*
+* 5. AtClient_PKAM_Authenticate Options
+*/
+void atclient_pkam_authenticate_options_init(atclient_pkam_authenticate_options *options);
+void atclient_pkam_authenticate_options_free(atclient_pkam_authenticate_options *options);
+
+bool atclient_pkam_authenticate_options_is_root_server_host_initialized(const atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate_options_set_root_server_host(atclient_pkam_authenticate_options *options, char *root_server_host);
+void atclient_pkam_authenticate_options_unset_root_server_host(atclient_pkam_authenticate_options *options);
+
+bool atclient_pkam_authenticate_options_is_root_server_port_initialized(const atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate_options_set_root_server_port(atclient_pkam_authenticate_options *options, int root_server_port);
+void atclient_pkam_authenticate_options_unset_root_server_port(atclient_pkam_authenticate_options *options);
+
+bool atclient_pkam_authenticate_options_is_atserver_host_initialized(const atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate_options_set_atserver_host(atclient_pkam_authenticate_options *options, char *atserver_host);
+void atclient_pkam_authenticate_options_unset_atserver_host(atclient_pkam_authenticate_options *options);
+
+bool atclient_pkam_authenticate_options_is_atserver_port_initialized(const atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate_options_set_atserver_port(atclient_pkam_authenticate_options *options, int atserver_port);
+void atclient_pkam_authenticate_options_unset_atserver_port(atclient_pkam_authenticate_options *options);
 
 #endif
