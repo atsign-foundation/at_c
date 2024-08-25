@@ -36,12 +36,12 @@
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED (VALUE_INITIALIZED << 1)
 
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_HOST_INDEX 0
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_PORT_INDEX 0
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX 0
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX 0
 #define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX 0
 #define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX 0
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ROOT_SERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
 #define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 3)
 
@@ -123,11 +123,11 @@ typedef struct atclient_get_atkeys_request_options {
  */
 
 typedef struct atclient_pkam_authenticate_options {
-  char *root_server_host;
-  int root_server_port;
+  char *at_directory_host;
+  int at_directory_port;
   char *atserver_host;
   int atserver_port;
-  uint8_t _initialized_fields[1];
+  uint16_t _initialized_fields[1];
 } atclient_pkam_authenticate_options;
 
 /*
@@ -250,13 +250,13 @@ void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_r
 void atclient_pkam_authenticate_options_init(atclient_pkam_authenticate_options *options);
 void atclient_pkam_authenticate_options_free(atclient_pkam_authenticate_options *options);
 
-bool atclient_pkam_authenticate_options_is_root_server_host_initialized(const atclient_pkam_authenticate_options *options);
-int atclient_pkam_authenticate_options_set_root_server_host(atclient_pkam_authenticate_options *options, char *root_server_host);
-void atclient_pkam_authenticate_options_unset_root_server_host(atclient_pkam_authenticate_options *options);
+bool atclient_pkam_authenticate_options_is_at_directory_host_initialized(const atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate_options_set_at_directory_host(atclient_pkam_authenticate_options *options, char *at_directory_host);
+void atclient_pkam_authenticate_options_unset_at_directory_host(atclient_pkam_authenticate_options *options);
 
-bool atclient_pkam_authenticate_options_is_root_server_port_initialized(const atclient_pkam_authenticate_options *options);
-int atclient_pkam_authenticate_options_set_root_server_port(atclient_pkam_authenticate_options *options, int root_server_port);
-void atclient_pkam_authenticate_options_unset_root_server_port(atclient_pkam_authenticate_options *options);
+bool atclient_pkam_authenticate_options_is_at_directory_port_initialized(const atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate_options_set_at_directory_port(atclient_pkam_authenticate_options *options, int at_directory_port);
+void atclient_pkam_authenticate_options_unset_at_directory_port(atclient_pkam_authenticate_options *options);
 
 bool atclient_pkam_authenticate_options_is_atserver_host_initialized(const atclient_pkam_authenticate_options *options);
 int atclient_pkam_authenticate_options_set_atserver_host(atclient_pkam_authenticate_options *options, char *atserver_host);

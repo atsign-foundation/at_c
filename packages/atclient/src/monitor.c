@@ -44,7 +44,9 @@ int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atser
                                        const atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
-  ret = atclient_pkam_authenticate(monitor_conn, atkeys, atsign, NULL);
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+  ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, &options);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
