@@ -49,7 +49,9 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(atclient, atsign, atkeys, NULL)) != 0) {
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+  if ((ret = atclient_pkam_authenticate(atclient, atsign, atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
