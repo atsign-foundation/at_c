@@ -10,6 +10,7 @@
 #include "atclient/mbedtls.h"
 #include "atclient/request_options.h"
 #include "atclient/string_utils.h"
+#include "atclient/request_options.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
 #include <stdbool.h>
@@ -190,6 +191,10 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
                                atclient_pkam_authenticate_options *options) {
 
   int ret = 1; // error by default
+  if(options == NULL){
+    atclient_pkam_authenticate_options options;
+    atclient_pkam_authenticate_options_init(&options);  
+  }
 
   /*
    * 1. Validate arguments

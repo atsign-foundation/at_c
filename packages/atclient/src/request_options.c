@@ -9,6 +9,10 @@
 
 #define TAG "request_options"
 
+// default param values for ATCLIENT PKAM AUTHENTICATE OPTIONS
+#define ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_ROOT_SERVER_HOST "root.atsign.org"
+#define ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_ROOT_SERVER_PORT 64
+
 static void atclient_put_shared_key_request_options_set_shared_encryption_key_initialized(
     atclient_put_shared_key_request_options *options, const bool initialized);
 static void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options,
@@ -249,6 +253,7 @@ bool atclient_put_shared_key_request_options_is_iv_initialized(const atclient_pu
 }
 
 static void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options,
+                                                                       const bool initialized) {
                                                                        const bool initialized) {
   /*
    * 1. Validate arguments
