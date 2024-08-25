@@ -254,7 +254,6 @@ bool atclient_put_shared_key_request_options_is_iv_initialized(const atclient_pu
 
 static void atclient_put_shared_key_request_options_set_iv_initialized(atclient_put_shared_key_request_options *options,
                                                                        const bool initialized) {
-                                                                       const bool initialized) {
   /*
    * 1. Validate arguments
    */
