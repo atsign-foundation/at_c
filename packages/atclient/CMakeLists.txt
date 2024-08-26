@@ -49,11 +49,11 @@ if(ESP_PLATFORM)
     TARGET ${COMPONENT_LIB}
     POST_BUILD
     COMMAND
-      ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR}
-      ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
     COMMAND
-      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}>
-      ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
+    ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}>
+    ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
     COMMENT "Copying built archive file and header to lib directory..."
   )
 endif()
@@ -111,9 +111,9 @@ if(NOT ESP_PLATFORM)
   target_include_directories(
     ${PROJECT_NAME}
     PUBLIC
-      $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-      $<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+    $<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 
   # Link dependencies to library targets
