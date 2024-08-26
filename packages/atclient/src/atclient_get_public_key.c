@@ -81,16 +81,17 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
    * 5. Parse response
    */
   char *response = (char *)recv;
-  if (!atclient_string_utils_starts_with(response, "data:")) {
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
     goto exit;
   }
+  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
 
-  char *response_without_data = response + 5;
-
-  if ((root = cJSON_Parse(response_without_data)) == NULL) {
+  if ((root = cJSON_Parse(response_trimmed)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;

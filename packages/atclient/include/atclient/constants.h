@@ -17,6 +17,8 @@
 
 #define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
 
+#define DATA_TOKEN "data:"
+
 #define BLK "\e[0;30m"
 #define RED "\e[0;31m"
 #define GRN "\e[0;32m"

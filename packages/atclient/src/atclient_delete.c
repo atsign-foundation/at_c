@@ -74,19 +74,17 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
     goto exit;
   }
 
-  char *respose = (char *)recv;
-
-  if (!atclient_string_utils_starts_with(respose, "data:")) {
+  char *response = (char *)recv;
+  char *str_with_data_prefix = NULL;
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &str_with_data_prefix) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
     goto exit;
   }
-
-  char *response_without_data = respose + strlen("data:");
-
+  response = str + 5; // +5 to skip the "data:" prefix
   if(commit_id != NULL) {
-    *commit_id = atoi(response_without_data);
+    *commit_id = atoi(response);
   }
 
   ret = 0;
@@ -95,6 +93,7 @@ exit: {
   free(recv);
   free(atkey_str);
   free(delete_cmd);
+  if(response) free(response);
   return ret;
 }
 }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <atclient/constants.h>
 
 #define TAG "atclient_get_atkeys"
 
@@ -88,16 +89,18 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
   /*
    * 5. Parse response
    */
-  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
+  char *response = (char *)recv;
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
     goto exit;
   }
+  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
 
-  char *recvwithoutdata = (char *)recv + 5;
-
-  root = cJSON_Parse(recvwithoutdata);
+  root = cJSON_Parse(response_trimmed);
   if (root == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse failed\n");

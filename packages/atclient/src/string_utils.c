@@ -59,6 +59,26 @@ bool atclient_string_utils_ends_with(const char *string, const char *suffix) {
 
 }
 
+int atclient_string_utils_get_substring_position(const char *string, const char *substring, char **position) {
+  int ret = -1;
+  if(strlen(substring) > strlen(string)) {
+    ret = -1;
+    goto exit;
+  }
+  if(position == NULL) {
+    ret = -1;
+    goto exit;
+  }
+  *position =  strstr(string, substring);
+  if(*position == NULL) {
+    ret = -1;
+    goto exit;
+  }
+  ret = 0;
+  goto exit;
+  exit:{ return ret;}
+}
+
 int atclient_string_utils_atsign_with_at(const char *original_atsign, char **output_atsign_with_at_symbol) {
   int ret = -1;
   if (original_atsign == NULL) {
