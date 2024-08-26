@@ -1,0 +1,1 @@
+# atclient_esp32_static_libraries
