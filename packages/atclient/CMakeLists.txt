@@ -31,7 +31,7 @@ set(
 )
 
 # Project setup
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.24)
 set(CMAKE_C_STANDARD 99)
 cmake_policy(SET CMP0135 NEW)
 
@@ -39,9 +39,9 @@ cmake_policy(SET CMP0135 NEW)
 if(ESP_PLATFORM)
   # Run special CMake commands for ESP32
   idf_component_register(
-  SRCS ${ATCLIENT_SOURCES}
-  INCLUDE_DIRS ${ATCLIENT_INCLUDE_DIR}
-  REQUIRES mbedtls atchops
+    SRCS ${ATCLIENT_SOURCES}
+    INCLUDE_DIRS ${ATCLIENT_INCLUDE_DIR}
+    REQUIRES mbedtls atchops
   )
 
   # Copy header files to include directory and libraries to lib directory
@@ -49,11 +49,11 @@ if(ESP_PLATFORM)
     TARGET ${COMPONENT_LIB}
     POST_BUILD
     COMMAND
-      ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR}
-      ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_COMMAND} -E copy_directory ${ATCLIENT_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
     COMMAND
-      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}>
-      ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
+    ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}>
+    ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
     COMMENT "Copying built archive file and header to lib directory..."
   )
 endif()
@@ -77,6 +77,7 @@ if(NOT ESP_PLATFORM)
       set(ATCLIENT_AS_SUBPROJECT OFF)
     endif()
   endif()
+
   message(STATUS "[ATCLIENT] ATCLIENT_AS_SUBPROJECT: ${ATCLIENT_AS_SUBPROJECT}")
 
   # Import mbedtls
@@ -110,12 +111,12 @@ if(NOT ESP_PLATFORM)
   target_include_directories(
     ${PROJECT_NAME}
     PUBLIC
-      $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
-      $<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<BUILD_INTERFACE:${ATCLIENT_INCLUDE_DIR}>
+    $<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 
-  # Link dependencies to library targets 
+  # Link dependencies to library targets
   set(
     ATCLIENT_INSTALL_TARGETS
     atlogger

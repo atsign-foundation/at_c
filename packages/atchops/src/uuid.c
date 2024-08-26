@@ -1,4 +1,3 @@
-
 #include "atchops/uuid.h"
 #include <atlogger/atlogger.h>
 #include <stddef.h>
