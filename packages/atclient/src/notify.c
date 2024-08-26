@@ -41,6 +41,8 @@ int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **
   char *cmd = NULL;
   size_t cmdsize = 0;
 
+  unsigned char *recv = NULL;
+
   // Step 1 encrypt the value if needed
   if (params->value != NULL && params->should_encrypt) {
     const size_t ciphertextsize =
@@ -142,7 +144,6 @@ int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **
 
   // Step 6 send the encrypted notification
   const size_t recvsize = 64;
-  unsigned char *recv = NULL;
   if (!ctx->async_read) {
     recv = malloc(sizeof(unsigned char) * recvsize);
     memset(recv, 0, sizeof(unsigned char) * recvsize);
@@ -181,9 +182,7 @@ int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **
   }
 
 exit: {
-  if (!ctx->async_read) {
-    free(recv);
-  }
+  free(recv);
   free(cmdvalue);
   free(cmd);
   return ret;

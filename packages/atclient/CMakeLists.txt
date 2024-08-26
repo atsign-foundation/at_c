@@ -41,7 +41,7 @@ if(ESP_PLATFORM)
   idf_component_register(
     SRCS ${ATCLIENT_SOURCES}
     INCLUDE_DIRS ${ATCLIENT_INCLUDE_DIR}
-    REQUIRES mbedtls atchops
+    REQUIRES mbedtls atchops json
   )
 
   # Copy header files to include directory and libraries to lib directory

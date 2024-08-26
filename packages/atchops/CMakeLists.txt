@@ -23,11 +23,14 @@ cmake_policy(SET CMP0135 NEW)
 
 # register as an espidf component
 if(ESP_PLATFORM)
+  set(EXTRA_COMPONENT_DIRS ${EXTRA_COMPONENT_DIRS} ${CMAKE_CURRENT_LIST_DIR}/../../../uuid4)
+  
   idf_component_register(
         SRCS ${ATCHOPS_SOURCES}
         INCLUDE_DIRS ${ATCHOPS_INCLUDE_DIR}
-        REQUIRES mbedtls atlogger
+        REQUIRES mbedtls atlogger uuid4
   )
+
   add_custom_command(
     TARGET ${COMPONENT_LIB}
     POST_BUILD
