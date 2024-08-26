@@ -40,6 +40,9 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+
   atclient_monitor_response *message = NULL;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
@@ -52,12 +55,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
-    goto exit;
-  }
-
-  if ((ret = atclient_pkam_authenticate(&atclient2, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient2, atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
@@ -157,10 +155,10 @@ int main(int argc, char *argv[]) {
   goto exit;
 exit: {
   atclient_atkeys_free(&atkeys);
-  free(atserver_host);
   atclient_monitor_free(&monitor_conn);
   atclient_monitor_response_free(message);
   atclient_free(&atclient2);
+  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }

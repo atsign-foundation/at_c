@@ -35,6 +35,9 @@ int main() {
   atclient_init(&atclient);
   atclient_atkey_init(&atkey);
   atclient_atkeys_init(&atkeys);
+  
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
 
   if ((ret = atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys");
@@ -46,13 +49,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
-                                                  &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address");
-    goto exit;
-  }
-
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }
@@ -66,9 +63,9 @@ int main() {
   goto exit;
 exit: {
   atclient_free(&atclient);
-  free(atserver_host);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
+  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }

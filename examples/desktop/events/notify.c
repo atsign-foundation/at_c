@@ -49,6 +49,9 @@ int main(int argc, char *argv[]) {
   atclient_notify_params notify_params;
   atclient_notify_params_init(&notify_params);
 
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+
   const char *homedir;
 
   char *atsign_input = NULL;
@@ -75,12 +78,6 @@ int main(int argc, char *argv[]) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atsign_input: %s\n", atsign_input);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "other_atsign_input: %s\n", other_atsign_input);
 
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host,
-                                                  &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
-    goto exit;
-  }
-
   if ((homedir = getenv("HOME")) == NULL) {
     printf("HOME not set\n");
     ret = 1;
@@ -95,7 +92,9 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
+
+
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
