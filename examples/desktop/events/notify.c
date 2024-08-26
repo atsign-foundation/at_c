@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   int ret = 1;
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const char *atsign = "@soccer0";
+  const char *atsign = "@actingqualified";
 
   const size_t valuelen = 1024;
   char value[valuelen];
@@ -34,9 +34,6 @@ int main(int argc, char *argv[]) {
 
   atclient atclient;
   atclient_init(&atclient);
-
-  char *atserver_host = NULL;
-  int atserver_port = -1;
 
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
@@ -88,7 +85,6 @@ int main(int argc, char *argv[]) {
   ret = atclient_atkeys_populate_from_path(&atkeys, atkeys_path);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys\n");
-    free(atserver_host);
     goto exit;
   }
 
@@ -143,7 +139,7 @@ int main(int argc, char *argv[]) {
 exit: {
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
-  free(atserver_host);
+  atclient_pkam_authenticate_options_free(&options);
   atclient_free(&atclient);
   free(atkeystr);
   return ret;

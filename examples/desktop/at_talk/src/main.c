@@ -58,9 +58,6 @@ int main(int argc, char *argv[]) {
   char *from_atsign = NULL; // free later
   char *to_atsign = NULL;   // free later
 
-  char *atserver_host = NULL; // free later
-  int atserver_port = 0;
-
   atclient_atkeys atkeys; // free later
   atclient_atkeys_init(&atkeys);
 
@@ -93,15 +90,6 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  /*
-   * 3. Find atserver address
-   */
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, from_atsign, &atserver_host, &atserver_port)) !=
-      0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nFailed to find atserver address: %d\n", ret);
-    goto exit;
-  }
-
   printf("(2/3) .. ");
 
   /*
@@ -120,7 +108,7 @@ int main(int argc, char *argv[]) {
   /*
    * 5. Start at talk receive messages thread
    */
-  pthread_args_1 args = {&monitor, &atclient1, atserver_host, atserver_port, &atkeys, from_atsign};
+  pthread_args_1 args = {&monitor, &atclient1, options.atserver_host, options.atserver_port, &atkeys, from_atsign};
   if ((ret = pthread_create(&tid, NULL, (void *)monitor_handler, &args)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nFailed to create monitor_handler\n");
     return ret;
@@ -196,12 +184,12 @@ exit: {
   atclient_free(&monitor);
   free(from_atsign);
   free(to_atsign);
-  free(atserver_host);
   atclient_atkeys_free(&atkeys);
   pthread_mutex_destroy(&client_mutex);
   pthread_mutex_destroy(&monitor_mutex);
   ret = pthread_cancel(tid);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread exit: %d\n", ret);
+  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }
