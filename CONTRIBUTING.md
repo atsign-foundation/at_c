@@ -678,24 +678,3 @@ is truly 0 beacuse nothing exists and there was nothing to calculate. This is
 why the return type need not be `int` in this scenario. There is *always* an
 answer to the question "what is the length of this atkey?" that fits the return
 type `size_t`.
-
-### Convention 7. Our Attempt At OOP and Easy Memory Management in C
-
-We are following a similar approach to MbedTLS' way of managing memory and their objects.
-
-1. Every struct should have a `_init` and `_free` function.
-
-For example:
-
-```c
-atclient atkey;
-atclient_atkey_init(&atkey);
-
-atclient_atkey_free(&atkey);
-```
-
-2. The `_init` and `_free` functions should be of type `void`.
-
-3. Errors should be impossible in the `_init` and `_free` functions given that the caller has properly used them according to their defined preconditions in their corresponding function signatures.
-
-For example, passing `NULL`, or mistakenly passing the wrong variable are both examples of
