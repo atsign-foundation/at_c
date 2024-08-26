@@ -1,0 +1,7 @@
+version: "0.1.0"
+description: "cryptographich operations tailored for atProtocol"
+url: "https://github.com/atsign-foundation/at_c"
+license: "BSD-3-Clause"
+dependencies:
+  atlogger:
+    version: "0.1.0"

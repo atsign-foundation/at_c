@@ -1,0 +1,4 @@
+version: "0.1.0"
+description: "tiny logging library used by atclient and atchops"
+url: "https://github.com/atsign-foundation/at_c"
+license: "BSD-3-Clause"
