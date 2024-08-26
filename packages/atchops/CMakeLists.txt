@@ -22,9 +22,7 @@ set(CMAKE_C_STANDARD 99)
 cmake_policy(SET CMP0135 NEW)
 
 # register as an espidf component
-if(ESP_PLATFORM)
-  set(EXTRA_COMPONENT_DIRS ${EXTRA_COMPONENT_DIRS} ${CMAKE_CURRENT_LIST_DIR}/../../../uuid4)
-  
+if(ESP_PLATFORM)  
   idf_component_register(
         SRCS ${ATCHOPS_SOURCES}
         INCLUDE_DIRS ${ATCHOPS_INCLUDE_DIR}
