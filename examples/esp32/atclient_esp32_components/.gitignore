@@ -1,2 +1,6 @@
 sdkconfig*
 build/
+lib/
+include/
+managed_components/
+dependencies.lock

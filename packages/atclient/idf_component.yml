@@ -3,7 +3,7 @@ description: "core atclient implementation of the atProtocol"
 url: "https://github.com/atsign-foundation/at_c"
 license: "BSD-3-Clause"
 dependencies:
-  atchops:
+  atsign-foundation/atchops:
     version: "0.1.0"
-  atlogger:
+  atsign-foundation/atlogger:
     version: "0.1.0"

@@ -3,5 +3,7 @@ description: "cryptographich operations tailored for atProtocol"
 url: "https://github.com/atsign-foundation/at_c"
 license: "BSD-3-Clause"
 dependencies:
-  atlogger:
+  atsign-foundation/atlogger:
     version: "0.1.0"
+  atsign-foundation/uuid4:
+    version: "1.0.3"
