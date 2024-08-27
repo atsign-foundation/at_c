@@ -12,7 +12,6 @@ if(ESP_PLATFORM)
   idf_component_register(
         SRCS ${ATLOGGER_SOURCES}
         INCLUDE_DIRS ${ATLOGGER_INCLUDE_DIR}
-        REQUIRES mbedtls
   )
   add_custom_command(
     TARGET ${COMPONENT_LIB}

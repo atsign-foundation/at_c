@@ -17,17 +17,18 @@ set(
 )
 
 # Project setup
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.24)
 set(CMAKE_C_STANDARD 99)
 cmake_policy(SET CMP0135 NEW)
 
 # register as an espidf component
-if(ESP_PLATFORM)
+if(ESP_PLATFORM)  
   idf_component_register(
         SRCS ${ATCHOPS_SOURCES}
         INCLUDE_DIRS ${ATCHOPS_INCLUDE_DIR}
-        REQUIRES mbedtls
+        REQUIRES mbedtls atlogger uuid4
   )
+
   add_custom_command(
     TARGET ${COMPONENT_LIB}
     POST_BUILD
