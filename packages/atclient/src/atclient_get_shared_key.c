@@ -228,17 +228,18 @@ static int atclient_get_shared_key_shared_by_me_with_other(
   /*
    * 7. Parse response
    */
-  char *str_with_data_prefix = NULL; //memory will be allocated inside "atclient_string_utils_get_substring_position()"; needs to be freed later
-  if (atclient_string_utils_get_substring_position((char *)recv, DATA_TOKEN, &str_with_data_prefix) != 0) {
+  char *response = (char *)recv;
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
     goto exit;
   }
+  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
 
-  char *response_without_data = str_with_data_prefix + 5;
-
-  if ((root = cJSON_Parse(response_without_data)) == NULL) {
+  if ((root = cJSON_Parse(response_trimmed)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
