@@ -37,11 +37,11 @@ int main(int argc, char *argv[]) {
   memset(recv, 0, sizeof(unsigned char) * recvsize); // Clear the buffer (for safety
   size_t recvlen = 0;
 
-  char *atserver_host = NULL;
-  int atserver_port = -1;
-
   atclient atclient;
   atclient_init(&atclient);
+
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
 
   char *temp = NULL;
 
@@ -86,13 +86,7 @@ int main(int argc, char *argv[]) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeysfilepath);
 
-  if ((ret = atclient_utils_find_atserver_address(roothost, rootport, atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_utils_find_atserver_address: %d | failed to find atserver address\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign);
+  ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
     goto exit;
@@ -319,10 +313,10 @@ int main(int argc, char *argv[]) {
   goto exit;
 
 exit: {
-  free(atserver_host);
   free(temp);
   atclient_free(&atclient);
   atclient_atkeys_free(&atkeys);
+  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }

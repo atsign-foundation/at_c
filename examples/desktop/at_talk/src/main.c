@@ -58,9 +58,6 @@ int main(int argc, char *argv[]) {
   char *from_atsign = NULL; // free later
   char *to_atsign = NULL;   // free later
 
-  char *atserver_host = NULL; // free later
-  int atserver_port = 0;
-
   atclient_atkeys atkeys; // free later
   atclient_atkeys_init(&atkeys);
 
@@ -93,22 +90,15 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  /*
-   * 3. Find atserver address
-   */
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, from_atsign, &atserver_host, &atserver_port)) !=
-      0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nFailed to find atserver address: %d\n", ret);
-    goto exit;
-  }
-
   printf("(2/3) .. ");
 
   /*
    * 4. Authenticate client connection (for crud operations)
    */
   pthread_mutex_lock(&client_mutex);
-  if ((ret = atclient_pkam_authenticate(&atclient1, atserver_host, atserver_port, &atkeys, from_atsign)) != 0) {
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+  if ((ret = atclient_pkam_authenticate(&atclient1, from_atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -118,7 +108,7 @@ int main(int argc, char *argv[]) {
   /*
    * 5. Start at talk receive messages thread
    */
-  pthread_args_1 args = {&monitor, &atclient1, atserver_host, atserver_port, &atkeys, from_atsign};
+  pthread_args_1 args = {&monitor, &atclient1, options.atserver_host, options.atserver_port, &atkeys, from_atsign};
   if ((ret = pthread_create(&tid, NULL, (void *)monitor_handler, &args)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\nFailed to create monitor_handler\n");
     return ret;
@@ -194,12 +184,12 @@ exit: {
   atclient_free(&monitor);
   free(from_atsign);
   free(to_atsign);
-  free(atserver_host);
   atclient_atkeys_free(&atkeys);
   pthread_mutex_destroy(&client_mutex);
   pthread_mutex_destroy(&monitor_mutex);
   ret = pthread_cancel(tid);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread exit: %d\n", ret);
+  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }
@@ -350,7 +340,9 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
    * 1. Reconnect client connection
    */
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reconnecting client connection...\n");
-  if ((ret = atclient_pkam_authenticate(ctx, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+  if ((ret = atclient_pkam_authenticate(ctx, from_atsign, atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     return ret;
   }
