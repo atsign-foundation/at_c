@@ -1,0 +1,6 @@
+build/
+include/
+lib/
+managed_components/
+sdkconfig.old
+sdkconfig
