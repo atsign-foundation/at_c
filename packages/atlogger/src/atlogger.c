@@ -10,7 +10,7 @@
 #define PREFIX_BUFFER_LEN 64
 #define INFO_PREFIX "\e[0;32m[INFO]\e[0m"
 #define WARN_PREFIX "\e[0;31m[WARN]\e[0m"
-#define ERROR_PREFIX "\e[1;31m[ERRO]\e[0m"
+#define ERROR_PREFIX "\e[1;31m[ERROR]\e[0m"
 #define DEBUG_PREFIX "\e[0;34m[DEBG]\e[0m"
 
 static char prefix[PREFIX_BUFFER_LEN];
