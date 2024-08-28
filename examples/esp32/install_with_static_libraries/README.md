@@ -1,5 +1,15 @@
 # install_with_static_libraries
 
+## Who Is This For
+
+This example is good for those who have access to the static libraries that were generated on your computer.
+
+This is not the recommended way of doing things, but is possible in case you need to do it this way.
+
+If you want to use our components quickly and easily, we have an example named [install_with_remote_components](../install_with_remote_components/README.md).
+
+## How To Install With Static Libraries
+
 Let's say you have access to the following:
 
 - Static libraries
@@ -18,8 +28,6 @@ Let's say you have access to the following:
   - `include/uuid4/`
 
   (All the dependencies such as cjson, mbedtls, and uuid4 are already included in the static libraries)
-
-This article of documentation shows you how to use these static libraries in your Espressif project.
 
 1. Ensure your project structure looks like this:
 
