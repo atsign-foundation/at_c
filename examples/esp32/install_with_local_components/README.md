@@ -1,6 +1,14 @@
 # install_with_components
 
-This example is for developers who are developing on our components locally while debugging on an Espressif device.
+## Who Is This For?
+
+This example is aimed at developers who are developing on our components locally while debugging on an Espressif device.
+
+If you just want to use our components easily and quickly, it is recommended to follow the [`install_with_remote_components/`](../install_with_remote_components/README.md) example.
+
+This example shows you how to import `atclient`, `atlogger`, `uuid4` and `atchops` as IDF components in your project.
+
+## How To Install With Local Components
 
 Let's say you have cloned our components (or are developing on our SDK locally):
 
@@ -8,10 +16,6 @@ Let's say you have cloned our components (or are developing on our SDK locally):
 - [atlogger](https://github.com/atsign-foundation/at_c/tree/trunk/packages/atlogger)
 - [atchops](https://github.com/atsign-foundation/at_c/tree/trunk/packages/atchops)
 - [uuid4](https://github.com/atsign-foundation/uuid4)
-
-This example shows you how to import `atclient`, `atlogger`, `uuid4` and `atchops` as IDF components in your project.
-
-This is the recommended way of importing our component locally.
 
 1. Head over to `atclient/idf_component.yml` and comment out the `dependencies` section:
 
@@ -63,4 +67,10 @@ idf_component_register(
     INCLUDE_DIRS ""
     REQUIRES atclient
 )
+```
+
+5. Build
+
+```bash
+idf.py build
 ```
