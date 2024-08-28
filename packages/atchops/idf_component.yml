@@ -2,8 +2,8 @@ version: "0.1.0"
 description: "cryptographich operations tailored for atProtocol"
 url: "https://github.com/atsign-foundation/at_c"
 license: "BSD-3-Clause"
-dependencies:
-  atsign-foundation/atlogger:
-    version: "0.1.0"
-  atsign-foundation/uuid4:
-    version: "1.0.3"
+# dependencies:
+#   atsign-foundation/atlogger:
+#     version: "0.1.0"
+#   atsign-foundation/uuid4:
+#     version: "1.0.3"

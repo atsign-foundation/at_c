@@ -1,4 +1,4 @@
-# atclient_esp32_static_libraries
+# install_with_static_libraries
 
 Let's say you have access to the following:
 
@@ -44,6 +44,8 @@ This article of documentation shows you how to use these static libraries in you
     └── main.c
 ```
 
+If your project doesn't look like this, then you need to move your files around.
+
 2. Your `main/CMakeLists.txt` should look like this:
 
 ```cmake
@@ -76,4 +78,10 @@ cmake_minimum_required(VERSION 3.24)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 project(atclient_esp32_static_libraries)
+```
+
+4. Build your project:
+
+```bash
+idf.py build
 ```
