@@ -81,21 +81,20 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
    * 5. Parse repsonse
    */
   char *response = (char *)recv;
-
-  if (!atclient_string_utils_starts_with(response, "data:")) {
-    if (atclient_string_utils_starts_with((char *)recv, "error:AT0015-key not found")) {
-      ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_decrypt: %d; error:AT0015-key not found\n", ret);
-      goto exit;
-    }
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                 (int)recv_len, recv);
+    goto exit;
   }
-
-  char *response_without_data = response + 5; // skip "data:"
+  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
 
   /*
    * 6. Allocate memory for public_encryption_key and give output to caller
    */
-  const size_t public_encryption_key_len = strlen(response_without_data);
+  const size_t public_encryption_key_len = strlen(response_trimmed);
   const size_t public_encryption_key_size = public_encryption_key_len + 1;
   if ((*public_encryption_key = (char *)malloc(sizeof(char) * public_encryption_key_size)) == NULL) {
     ret = 1;
@@ -103,7 +102,7 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
     goto exit;
   }
 
-  memcpy(*public_encryption_key, response_without_data, public_encryption_key_len);
+  memcpy(*public_encryption_key, response_trimmed, public_encryption_key_len);
   (*public_encryption_key)[public_encryption_key_len] = '\0';
 
   ret = 0;
