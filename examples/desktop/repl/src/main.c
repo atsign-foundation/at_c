@@ -37,11 +37,11 @@ int main(int argc, char *argv[]) {
   memset(recv, 0, sizeof(unsigned char) * recvsize); // Clear the buffer (for safety
   size_t recvlen = 0;
 
-  char *atserver_host = NULL;
-  int atserver_port = -1;
-
   atclient atclient;
   atclient_init(&atclient);
+
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
 
   char *temp = NULL;
 
@@ -86,13 +86,7 @@ int main(int argc, char *argv[]) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeysfilepath);
 
-  if ((ret = atclient_utils_find_atserver_address(roothost, rootport, atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_utils_find_atserver_address: %d | failed to find atserver address\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, atsign);
+  ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
     goto exit;
@@ -158,7 +152,7 @@ int main(int argc, char *argv[]) {
                          ret);
             goto get_end;
           }
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", value);
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SELF_KEY: {
@@ -166,7 +160,7 @@ int main(int argc, char *argv[]) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key: %d | failed to get self key\n", ret);
             goto get_end;
           }
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", recv);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", value);
           break;
         }
         case ATCLIENT_ATKEY_TYPE_SHARED_KEY: {
@@ -183,6 +177,48 @@ int main(int argc, char *argv[]) {
       get_end: { 
         free(value);
         atclient_atkey_free(&atkey); }
+      } else if(strcmp(command, "/put") == 0) {
+        // /put <atkey> <value>
+        char *atkeystr = strtok(NULL, " ");
+        if(atkeystr == NULL) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No atKey entered\n");
+          continue;
+        }
+        atkeystr[strcspn(atkeystr, "\n")] = 0;
+        char *value = strtok(NULL, "\n");
+        if(value == NULL) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No value entered\n");
+          continue;
+        }
+        atclient_atkey atkey;
+        atclient_atkey_init(&atkey);
+        if((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n", ret);
+          goto put_end;
+        }
+        const atclient_atkey_type atkey_type = atclient_atkey_get_type(&atkey);
+        if(atkey_type == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown atKey type\n");
+          goto put_end;
+        } else if (atkey_type == ATCLIENT_ATKEY_TYPE_PUBLIC_KEY) {
+          if((ret = atclient_put_public_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_public_key: %d | failed to put public key\n", ret);
+            goto put_end;
+          }
+        } else if(atkey_type == ATCLIENT_ATKEY_TYPE_SELF_KEY) {
+          if((ret = atclient_put_self_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_self_key: %d | failed to put self key\n", ret);
+            goto put_end;
+          }
+        } else if(atkey_type == ATCLIENT_ATKEY_TYPE_SHARED_KEY) {
+          if((ret = atclient_put_shared_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_shared_key: %d | failed to put shared key\n", ret);
+            goto put_end;
+          }
+        }
+        put_end: {
+          atclient_atkey_free(&atkey);
+        }
       } else if (strcmp(command, "/scan") == 0) {
         atclient_get_atkeys_request_options request_options;
         atclient_get_atkeys_request_options_init(&request_options);
@@ -216,6 +252,28 @@ int main(int argc, char *argv[]) {
         }
         free(arr);
         atclient_get_atkeys_request_options_free(&request_options);
+      }
+      } else if(strcmp(command, "/delete") == 0) {
+        // /delete <atkey>
+        char *atkeystr = strtok(NULL, " ");
+        if(atkeystr == NULL) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No atKey entered\n");
+          continue;
+        }
+        atkeystr[strcspn(atkeystr, "\n")] = 0; // Remove the newline character
+        atclient_atkey atkey;
+        atclient_atkey_init(&atkey);
+        if((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n", ret);
+          goto delete_end;
+        }
+        if((ret = atclient_delete(&atclient, &atkey, NULL, NULL)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d | failed to delete atKey\n", ret);
+          goto delete_end;
+        }
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Deleted atKey: %s\n", atkeystr);
+      delete_end: {
+        atclient_atkey_free(&atkey);
       }
       } else if(strcmp(command, "/deleteall") == 0) {
         atclient_atkey *arr = NULL;
@@ -255,10 +313,10 @@ int main(int argc, char *argv[]) {
   goto exit;
 
 exit: {
-  free(atserver_host);
   free(temp);
   atclient_free(&atclient);
   atclient_atkeys_free(&atkeys);
+  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }

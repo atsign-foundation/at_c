@@ -1,19 +1,18 @@
 #!/bin/bash
 set -eu
 
-# clean
-rm -f build/CMakeCache.txt
-sudo rm -f bin/repl
-
-# install dependencies
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
+cd "$SCRIPT_DIRECTORY"
+
+# clean
+rm -f build/CMakeCache.txt
+rm -f bin/repl
 
 # 1. Install atsdk
 "$SCRIPT_DIRECTORY/../../../tools/install.sh"
 
 # 2. Build REPL
-cd "$SCRIPT_DIRECTORY"
 
 ## 2a. CMake configure
 cmake -S . -B build

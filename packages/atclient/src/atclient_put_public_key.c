@@ -13,9 +13,7 @@
 #define TAG "atclient_put_public_key"
 
 static int atclient_put_public_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
-                                                      const char *value,
-                                                      const atclient_put_public_key_request_options *request_options,
-                                                      const int *commit_id);
+                                                      const char *value);
 
 int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *value,
                             const atclient_put_public_key_request_options *request_options, int *commit_id) {
@@ -24,7 +22,7 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_put_public_key_validate_arguments(ctx, atkey, value, request_options, commit_id)) != 0) {
+  if ((ret = atclient_put_public_key_validate_arguments(ctx, atkey, value)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_public_key_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -117,9 +115,7 @@ exit: {
 }
 
 static int atclient_put_public_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
-                                                      const char *value,
-                                                      const atclient_put_public_key_request_options *request_options,
-                                                      const int *commit_id) {
+                                                      const char *value) {
   int ret = 1;
 
   char *client_atsign_with_at = NULL;
@@ -131,7 +127,17 @@ static int atclient_put_public_key_validate_arguments(const atclient *ctx, const
     goto exit;
   }
 
-  // TODO atclient checks
+  if(!atclient_is_atserver_connection_started(ctx)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not started\n");
+    goto exit;
+  }
+
+  if(!atclient_is_atsign_initialized(ctx)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->atsign is not intiialized\n");
+    goto exit;
+  }
 
   if (atkey == NULL) {
     ret = 1;

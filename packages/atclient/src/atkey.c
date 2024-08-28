@@ -74,20 +74,20 @@ void atclient_atkey_free(atclient_atkey *atkey) {
 size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
   if (atkey == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
-    return -1;
+    return 0;
   }
   if (!atclient_atkey_is_key_initialized(atkey) || !atclient_atkey_is_shared_by_initialized(atkey)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key or atkey->shared_by is not initialized\n");
-    return -1;
+    return 0;
   }
   if (strlen(atkey->key) <= 0 || strlen(atkey->shared_by) <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key or atkey->shared_by is empty\n");
-    return -1;
+    return 0;
   }
   atclient_atkey_type type = atclient_atkey_get_type(atkey);
   if (type == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey type is unknown\n");
-    return -1;
+    return 0;
   }
   size_t len = 0;
   if (atclient_atkey_metadata_is_is_cached_initialized(&(atkey->metadata)) && atkey->metadata.is_cached) {

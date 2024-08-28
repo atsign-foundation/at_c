@@ -252,7 +252,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx) && ctx->hooks->pre_write != NULL) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = value;
+    params.src = (unsigned char *) value;
     params.src_len = value_len;
     params.recv = NULL;
     params.recv_size = 0;
@@ -352,7 +352,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = src;
+    params.src = (unsigned char *) src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -398,7 +398,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_post_write_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = src;
+    params.src = (unsigned char *) src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -428,7 +428,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_pre_read_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = src;
+    params.src = (unsigned char *) src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -474,7 +474,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_post_read_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = src;
+    params.src = (unsigned char *) src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;

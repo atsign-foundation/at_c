@@ -14,8 +14,7 @@
 #define TAG "atclient_get_sharedkey"
 
 static int atclient_get_shared_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
-                                                      const char **value,
-                                                      const atclient_get_shared_key_request_options *request_options);
+                                                      const char **value);
 
 static int
 atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char **value,
@@ -29,7 +28,7 @@ int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey,
                             char **value, const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
-  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, (const char **) value, request_options)) != 0) {
+  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, (const char **) value)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -68,8 +67,7 @@ exit: {
 }
 
 static int atclient_get_shared_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
-                                                      const char **value,
-                                                      const atclient_get_shared_key_request_options *request_options) {
+                                                      const char **value) {
   int ret = 1;
 
   if (atclient == NULL) {

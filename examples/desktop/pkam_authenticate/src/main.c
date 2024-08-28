@@ -6,8 +6,8 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define ATKEYSFILE_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
-#define ATSIGN "@expensiveferret"
+#define ATKEYSFILE_PATH "/home/sitaram/.atsign/keys/@actingqualified_key.atKeys"
+#define ATSIGN "@actingqualified"
 
 #define TAG "pkam_authenticate"
 
@@ -16,15 +16,11 @@ int main(int argc, char **argv) {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
-  // 1. init atkeys
-  char *atserver_host = NULL;
-  int atserver_port = -1;
-
   // 1a. read `atkeysfile` struct
   atclient_atkeysfile atkeysfile;
   atclient_atkeysfile_init(&atkeysfile);
   ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
-  // printf("atkeysfile_read_code: %d\n", ret);
+ 
   if (ret != 0) {
     goto exit;
   }
@@ -34,7 +30,10 @@ int main(int argc, char **argv) {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
   ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
-  // printf("atkeys_populate_code: %d\n", ret);
+  
+  atclient_pkam_authenticate_options options;
+  atclient_pkam_authenticate_options_init(&options);
+
   if (ret != 0) {
     goto exit;
   }
@@ -45,14 +44,8 @@ int main(int argc, char **argv) {
   atclient_init(&atclient);
 
   const char *atsign = ATSIGN;
-
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) !=
-      0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to find atserver address\n");
-    goto exit;
-  }
-
-  if ((ret = atclient_pkam_authenticate(&atclient, atserver_host, atserver_port, &atkeys, ATSIGN)) != 0) {
+  
+  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
@@ -65,7 +58,7 @@ exit: {
   atclient_atkeysfile_free(&atkeysfile);
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
-  free(atserver_host);
+  atclient_pkam_authenticate_options_free(&options);
   return 0;
 }
 }

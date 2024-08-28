@@ -1229,7 +1229,7 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
       sprintf(*metadata_str + pos, ":ccd:true");
       pos += 9;
     } else {
-      sprintf(metadata_str + pos, ":ccd:false");
+      sprintf(*metadata_str + pos, ":ccd:false");
       pos += 10;
     }
   }
