@@ -420,9 +420,6 @@ static void set_aes_pkam_public_key_str_initialized(atclient_atkeysfile *atkeys_
 
 static void set_aes_pkam_private_key_str_initialized(atclient_atkeysfile *atkeys_file, const bool initialized) {
   if (initialized) {
-    atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] |=
-        ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
-  } else {
     atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &=
         ~ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
   }
@@ -563,6 +560,7 @@ static int set_aes_pkam_private_key_str(atclient_atkeysfile *atkeys_file, const 
   goto exit;
 exit: { return ret; }
 }
+
 static int set_aes_encrypt_public_key_str(atclient_atkeysfile *atkeys_file, const char *aes_encrypt_public_key_str,
                                           const size_t aes_encrypt_public_key_str_len) {
   int ret = 1;

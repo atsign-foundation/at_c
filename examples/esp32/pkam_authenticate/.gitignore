@@ -4,3 +4,4 @@ lib/
 managed_components/
 sdkconfig.old
 sdkconfig
+main/assets/
