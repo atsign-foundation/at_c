@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
 
-  ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, atkeys_file);
+  ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file);
   if (ret != 0) {
     goto exit;
   }
