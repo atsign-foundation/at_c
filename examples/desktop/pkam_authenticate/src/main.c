@@ -16,29 +16,24 @@ int main(int argc, char **argv) {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
-  // 1a. read `atkeys_file` struct
   atclient_atkeys_file atkeys_file;
   atclient_atkeys_file_init(&atkeys_file);
 
-  // 1b. populate `atkeys` struct
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
   atclient_pkam_authenticate_options options;
   atclient_pkam_authenticate_options_init(&options);
 
-  // 2. pkam auth
   atclient atclient;
   atclient_init(&atclient);
 
-  ret = atclient_atkeys_file_read(&atkeys_file, ATKEYS_FILE_PATH);
-  if (ret != 0) {
+  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, ATKEYS_FILE_PATH)) != 0) {
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_read: %d\n", ret);
 
-  ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file);
-  if (ret != 0) {
+  if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file)) != 0) {
     goto exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
