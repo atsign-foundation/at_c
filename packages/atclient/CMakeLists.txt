@@ -17,7 +17,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkey.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atkeys.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atkeysfile.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/atkeys_file.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atnotification.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection_hooks.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection.c

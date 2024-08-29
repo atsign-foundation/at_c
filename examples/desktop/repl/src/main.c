@@ -1,7 +1,7 @@
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkeys.h>
-#include <atclient/atkeysfile.h>
+#include <atclient/atkeys_file.h>
 #include <atclient/connection.h>
 #include <atlogger/atlogger.h>
 #include <pwd.h>
@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const short atkeysfilepathsize = 256;
-  char atkeysfilepath[atkeysfilepathsize];
-  memset(atkeysfilepath, 0, sizeof(char) * atkeysfilepathsize); // Clear the buffer (for safety)
+  const short atkeys_filepathsize = 256;
+  char atkeys_filepath[atkeys_filepathsize];
+  memset(atkeys_filepath, 0, sizeof(char) * atkeys_filepathsize); // Clear the buffer (for safety)
 
   const size_t buffersize = 2048;
   char buffer[buffersize];
@@ -79,12 +79,12 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  sprintf(atkeysfilepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
-  if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeysfilepath)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeysfilepath);
+  sprintf(atkeys_filepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
+  if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeys_filepath)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeys_filepath);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeysfilepath);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeys_filepath);
 
   if ((ret = atclient_utils_find_atserver_address(roothost, rootport, atsign, &atserver_host, &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

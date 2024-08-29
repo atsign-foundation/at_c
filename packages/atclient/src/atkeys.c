@@ -659,15 +659,15 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 exit: { return ret; }
 }
 
-int atclient_atkeys_populate_from_atkeysfile(atclient_atkeys *atkeys, const atclient_atkeysfile *atkeysfile) {
+int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atclient_atkeys_file *atkeys_file) {
   int ret = 1;
 
   ret = atclient_atkeys_populate_from_strings(
-      atkeys, atkeysfile->aes_pkam_public_key_str, strlen(atkeysfile->aes_pkam_public_key_str),
-      atkeysfile->aes_pkam_private_key_str, strlen(atkeysfile->aes_pkam_private_key_str),
-      atkeysfile->aes_encrypt_public_key_str, strlen(atkeysfile->aes_encrypt_public_key_str),
-      atkeysfile->aes_encrypt_private_key_str, strlen(atkeysfile->aes_encrypt_private_key_str),
-      atkeysfile->self_encryption_key_str, strlen(atkeysfile->self_encryption_key_str));
+      atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
+      atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
+      atkeys_file->aes_encrypt_public_key_str, strlen(atkeys_file->aes_encrypt_public_key_str),
+      atkeys_file->aes_encrypt_private_key_str, strlen(atkeys_file->aes_encrypt_private_key_str),
+      atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
@@ -682,26 +682,43 @@ exit: { return ret; }
 int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path) {
   int ret = 1;
 
-  atclient_atkeysfile atkeysfile;
-  atclient_atkeysfile_init(&atkeysfile);
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
 
-  ret = atclient_atkeysfile_read(&atkeysfile, path);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeysfile_read: %d | failed to read file at path: %s\n",
+  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, path)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_from_path: %d | failed to read file at path: %s\n",
                  ret, path);
     goto exit;
   }
 
-  ret = atclient_atkeys_populate_from_atkeysfile(atkeys, &atkeysfile);
-  if (ret != 0) {
+  if ((ret = atclient_atkeys_populate_from_atkeys_file(atkeys, &atkeys_file)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_atkeys_populate_from_atkeysfile: %d | failed to decrypt & populate struct \n", ret);
+                 "atclient_atkeys_populate_from_atkeys_file: %d | failed to decrypt & populate struct \n", ret);
     goto exit;
   }
 
   goto exit;
 exit: {
-  atclient_atkeysfile_free(&atkeysfile);
+  atclient_atkeys_file_free(&atkeys_file);
+  return ret;
+}
+}
+
+int atclient_atkeys_populate_from_string(atclient_atkeys *atkeys, const char *file_string) {
+  int ret = 1;
+
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
+
+  if((ret = atclient_atkeys_file_from_string(&atkeys_file, file_string)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_from_string: %d\n", ret);
+    goto exit;
+  }
+
+  goto exit;
+
+exit: {
+  atclient_atkeys_file_free(&atkeys_file);
   return ret;
 }
 }

@@ -1,12 +1,12 @@
 #include <atclient/atclient.h>
-#include <atclient/atkeysfile.h>
+#include <atclient/atkeys_file.h>
 #include <atlogger/atlogger.h>
 #include <stdio.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define ATKEYSFILE_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
+#define atkeys_file_PATH "/home/realvarx/.atsign/keys/@expensiveferret_key.atKeys"
 #define ATSIGN "@expensiveferret"
 
 #define TAG "pkam_authenticate"
@@ -20,11 +20,11 @@ int main(int argc, char **argv) {
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  // 1a. read `atkeysfile` struct
-  atclient_atkeysfile atkeysfile;
-  atclient_atkeysfile_init(&atkeysfile);
-  ret = atclient_atkeysfile_read(&atkeysfile, ATKEYSFILE_PATH);
-  // printf("atkeysfile_read_code: %d\n", ret);
+  // 1a. read `atkeys_file` struct
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
+  ret = atclient_atkeys_file_from_path(&atkeys_file, atkeys_file_PATH);
+  // printf("atkeys_file_read_code: %d\n", ret);
   if (ret != 0) {
     goto exit;
   }
@@ -33,12 +33,12 @@ int main(int argc, char **argv) {
   // 1b. populate `atkeys` struct
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
-  ret = atclient_atkeys_populate_from_atkeysfile(&atkeys, atkeysfile);
+  ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, atkeys_file);
   // printf("atkeys_populate_code: %d\n", ret);
   if (ret != 0) {
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeysfile: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
   // 2. pkam auth
   atclient atclient;
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
   goto exit;
 
 exit: {
-  atclient_atkeysfile_free(&atkeysfile);
+  atclient_atkeys_file_free(&atkeys_file);
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
   free(atserver_host);
