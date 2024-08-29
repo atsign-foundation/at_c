@@ -692,7 +692,7 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
     goto exit;
   }
 
-  ret = atclient_atkeys_populate_from_atkeysfile(atkeys, atkeysfile);
+  ret = atclient_atkeys_populate_from_atkeysfile(atkeys, &atkeysfile);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_atkeys_populate_from_atkeysfile: %d | failed to decrypt & populate struct \n", ret);
