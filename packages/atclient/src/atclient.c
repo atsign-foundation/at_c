@@ -25,8 +25,7 @@
 
 static void atclient_set_atsign_initialized(atclient *ctx, const bool initialized);
 static void atclient_set_atserver_connection_started(atclient *ctx, const bool started);
-static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, const char *atserver_host,
-                                                         const int atserver_port, const atclient_atkeys *atkeys,
+static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, const atclient_atkeys *atkeys,
                                                          const char *atsign);
 
 void atclient_init(atclient *ctx) {
