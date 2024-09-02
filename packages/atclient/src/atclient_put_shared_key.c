@@ -179,7 +179,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
                  (int)recv_len, recv);
     goto exit;
   }
-  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
   /*
    * 8. Return commit id
    */

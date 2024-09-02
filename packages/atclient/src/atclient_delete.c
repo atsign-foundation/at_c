@@ -83,7 +83,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
                  (int)recv_len, recv);
     goto exit;
   }
-  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
   if(commit_id != NULL) {
     *commit_id = atoi(response_trimmed);

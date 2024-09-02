@@ -303,8 +303,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    *    Let us sign the challenge with RSA-2048 PKAM Private Key and Base64 Encode it
    */
 
-  challenge_len = strlen(str_with_data_prefix) - 5;
-  memcpy(challenge, str_with_data_prefix + 5, challenge_len); // +5 to skip the 'data:' prefix
+  challenge_len = strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
+  memcpy(challenge, str_with_data_prefix + strlen(DATA_TOKEN), challenge_len); // +5 to skip the 'data:' prefix
 
   // sign
   if ((ret = atchops_rsa_sign(&atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
@@ -433,8 +433,7 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
    * 3. Parse response
    */
   // how about just doing ptr == "data:ok" ?
-  if (!atclient_string_utils_starts_with((const char *)ptr, "data:ok") &&
-      !atclient_string_utils_ends_with((const char *)ptr, "data:ok")) {
+  if (strcmp(ptr, "data:ok") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
     ret = -1;
     goto exit;

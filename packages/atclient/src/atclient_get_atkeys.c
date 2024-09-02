@@ -94,7 +94,7 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
                  (int)recv_len, recv);
     goto exit;
   }
-  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
   root = cJSON_Parse(response_trimmed);
   if (root == NULL) {

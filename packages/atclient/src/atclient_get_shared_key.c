@@ -235,7 +235,7 @@ static int atclient_get_shared_key_shared_by_me_with_other(
                  (int)recv_len, recv);
     goto exit;
   }
-  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
   if ((root = cJSON_Parse(response_trimmed)) == NULL) {
     ret = 1;
@@ -461,7 +461,7 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
                  (int)recv_len, recv);
     goto exit;
   }
-  response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
   if ((root = cJSON_Parse(response_trimmed)) == NULL) {
     ret = 1;
