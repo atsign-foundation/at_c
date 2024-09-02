@@ -75,7 +75,6 @@ int atclient_string_utils_get_substring_position(const char* string, const char*
     goto exit;
   }
   ret = 0;
-  goto exit;
   exit:{ return ret;}
 }
 

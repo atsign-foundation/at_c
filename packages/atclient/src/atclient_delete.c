@@ -86,7 +86,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   response_trimmed = response_trimmed + 5; // +5 to skip the "data:" prefix
 
   if(commit_id != NULL) {
-    *commit_id = atoi(response);
+    *commit_id = atoi(response_trimmed);
   }
 
   ret = 0;

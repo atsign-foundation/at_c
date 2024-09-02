@@ -37,6 +37,14 @@ bool atclient_string_utils_starts_with(const char *string, const char *prefix);
  */
 bool atclient_string_utils_ends_with(const char *string, const char *suffix);
 
+/**
+ *@brief locates the position of a subtring in a given string
+ *
+ * @param string the string to check (main-string)
+ * @param substring the substring to look for in the main-string
+ * @param position where the pointer to the position of substring is stored
+ * @return
+ */
 int atclient_string_utils_get_substring_position(const char *string, const char *substring, char **position);
 
 /**
