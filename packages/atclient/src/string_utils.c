@@ -59,7 +59,7 @@ bool atclient_string_utils_ends_with(const char *string, const char *suffix) {
 
 }
 
-int atclient_string_utils_get_substring_position(const char *string, const char *substring, char **position) {
+int atclient_string_utils_get_substring_position(const char* string, const char* substring, char** position) {
   int ret = -1;
   if(strlen(substring) > strlen(string)) {
     ret = -1;

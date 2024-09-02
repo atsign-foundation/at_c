@@ -95,7 +95,6 @@ exit: {
   free(recv);
   free(atkey_str);
   free(delete_cmd);
-  if(response) free(response);
   return ret;
 }
 }
