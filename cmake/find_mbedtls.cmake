@@ -8,9 +8,9 @@ message(STATUS "[MbedTLS] fetching package...")
 include(FetchContent)
 fetchcontent_declare(
   MbedTLS
-  URL https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.1.zip
+  URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.1/mbedtls-3.6.1.tar.bz2
   URL_HASH
-    SHA256=959a492721ba036afc21f04d1836d874f93ac124cf47cf62c9bcd3a753e49bdb # hash for v3.5.1 .zip release source code
+    SHA256=fc8bef0991b43629b7e5319de6f34f13359011105e08e3e16eed3a9fe6ffd3a3 # hash for v3.6.1 .tar.bz2 release source code
   # FIND_PACKAGE_ARGS QUIET CONFIG
 )
 fetchcontent_makeavailable(MbedTLS)
