@@ -15,17 +15,18 @@
 #include <atclient/atclient.h>
 #include <atlogger/atlogger.h>
 
-/* Constants for your Wi-Fi credentials */
-#define WIFI_SSID "Soup"
-#define WIFI_PASS "maya12345"
+#include <string.h>
+#include <esp_spiffs.h>
 
-#define PATH "assets/keys/@soccer99_key.atKeys"
+#include "constants.h"
+
+#define PATH "/spiffs/assets/keys/@soccer99_key.atKeys"
 
 /* Event group for Wi-Fi events */
 static EventGroupHandle_t wifi_event_group;
 const int WIFI_CONNECTED_BIT = BIT0;
 
-static const char *TAG = "pkam_authenticate";
+#define TAG "pkam_authenticate"
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
@@ -38,6 +39,54 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t e
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
     ESP_LOGI(TAG, "got IP: " IPSTR, IP2STR(&event->ip_info.ip));
   }
+}
+
+static char* read_key_file() {
+    // Initialize SPIFFS
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true
+    };
+
+    esp_err_t ret = esp_vfs_spiffs_register(&conf);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to mount or format filesystem: %s", esp_err_to_name(ret));
+        return NULL;
+    }
+
+    // Open the key file for reading
+    FILE* f = fopen(PATH, "r");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open key file for reading");
+        esp_vfs_spiffs_unregister(NULL);
+        return NULL;
+    }
+
+    // Get the file size
+    fseek(f, 0, SEEK_END);
+    size_t file_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    // Allocate memory to hold the file content
+    char* file_string = malloc(file_size + 1);
+    if (file_string == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory for key file content");
+        fclose(f);
+        esp_vfs_spiffs_unregister(NULL);
+        return NULL;
+    }
+
+    // Read the file content into the allocated buffer
+    fread(file_string, 1, file_size, f);
+    file_string[file_size] = '\0'; // Null-terminate the string
+
+    // Close the file and unmount SPIFFS
+    fclose(f);
+    esp_vfs_spiffs_unregister(NULL);
+
+    return file_string;
 }
 
 void wifi_init_sta() {
@@ -70,31 +119,38 @@ void wifi_init_sta() {
 }
 
 void app_main(void) {
-  esp_err_t ret = nvs_flash_init();
-  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    ESP_ERROR_CHECK(nvs_flash_erase());
-    ret = nvs_flash_init();
-  }
-  ESP_ERROR_CHECK(ret);
+  // esp_err_t ret = nvs_flash_init();
+  // if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+  //   ESP_ERROR_CHECK(nvs_flash_erase());
+  //   ret = nvs_flash_init();
+  // }
+  // ESP_ERROR_CHECK(ret);
 
-  wifi_init_sta();
+  // wifi_init_sta();
 
-  atclient atclient1;
-  atclient_init(&atclient1);
+  char *key_file_content = read_key_file();
 
-  atclient_atkeys atkeys;
-  atclient_atkeys_init(&atkeys);
-
-  atclient_atkeys_file atkeys_file;
-  atclient_atkeys_file_from_path()
-
-  if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, atkeys_file)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_path: %d\n", ret);
+  if(key_file_content == NULL) {
+    ESP_LOGE(TAG, "Failed to read key file");
     goto exit;
   }
 
+//   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "key file content: %s\n", key_file_content);
+
+//   atclient atclient1;
+//   atclient_init(&atclient1);
+
+//   atclient_atkeys atkeys;
+//   atclient_atkeys_init(&atkeys);
+
+//   if ((ret = atclient_atkeys_populate_from_string(&atkeys, key_file_content)) != 0) {
+//     ESP_LOGE(TAG, "atclient_atkeys_populate_from_path: %d\n", ret);
+//     goto exit;
+//   }
+
 exit: {
-  atclient_free(&atclient1);
-  atclient_atkeys_free(&atkeys);
+  free(key_file_content);
+//   atclient_free(&atclient1);
+//   atclient_atkeys_free(&atkeys);
 }
 }

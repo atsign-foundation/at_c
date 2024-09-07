@@ -9,4 +9,7 @@ set(EXTRA_COMPONENT_DIRS
     ${CMAKE_CURRENT_LIST_DIR}/../../../../uuid4
 )
 
-project(pkam_authenticate)
+set(PARTITION_TABLE_CUSTOM_FILENAME ${CMAKE_CURRENT_LIST_DIR}/partitions.csv)
+set(PARTITION_TABLE_FILENAME ${PARTITION_TABLE_CUSTOM_FILENAME})
+
+project(read_atkeys)
