@@ -12,7 +12,7 @@ void app_main(void) {
         .base_path = "/storage",
         .partition_label = NULL,
         .max_files = 5,
-        .format_if_mount_failed = true
+        .format_if_mount_failed = false
     };
 
     esp_err_t ret = esp_vfs_spiffs_register(&conf);
