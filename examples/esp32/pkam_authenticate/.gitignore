@@ -5,5 +5,6 @@ managed_components/
 sdkconfig.old
 sdkconfig
 main/assets/
-spiffs_image/assets/keys/*_key.atKeys
 dependencies.lock
+spiffs_image/*_key.atKeys
+spiffs_image.bin
