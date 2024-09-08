@@ -46,9 +46,6 @@ int main(int argc, char *argv[]) {
   atclient_notify_params notify_params;
   atclient_notify_params_init(&notify_params);
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
-
   const char *homedir;
 
   char *atsign_input = NULL;
@@ -90,7 +87,7 @@ int main(int argc, char *argv[]) {
 
 
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
@@ -139,7 +136,6 @@ int main(int argc, char *argv[]) {
 exit: {
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
-  atclient_pkam_authenticate_options_free(&options);
   atclient_free(&atclient);
   free(atkeystr);
   return ret;
