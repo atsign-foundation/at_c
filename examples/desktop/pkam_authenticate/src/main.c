@@ -6,24 +6,21 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-#define ATKEYS_FILE_PATH "/home/sitaram/.atsign/keys/@actingqualified_key.atKeys"
-#define ATSIGN "@actingqualified"
+#define ATKEYS_FILE_PATH "/Users/jeremytubongbanua/.atsign/keys/@smoothalligator_key.atKeys"
+#define ATSIGN "@smoothalligator"
 
 #define TAG "pkam_authenticate"
 
 int main(int argc, char **argv) {
   int ret = 1;
 
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   atclient_atkeys_file atkeys_file;
   atclient_atkeys_file_init(&atkeys_file);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
-
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
 
   atclient atclient;
   atclient_init(&atclient);
@@ -40,7 +37,7 @@ int main(int argc, char **argv) {
 
   const char *atsign = ATSIGN;
 
-  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
@@ -53,7 +50,6 @@ exit: {
   atclient_atkeys_file_free(&atkeys_file);
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
-  atclient_pkam_authenticate_options_free(&options);
   return 0;
 }
 }

@@ -252,9 +252,11 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
       atserver_port = options->atdirectory_port;
     }
   } else {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "options is NULL. Using production atDirectory to find atServer host and port\n");
-    if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST, ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign,
-                                            &atserver_host, &atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
+                 "options is NULL. Using production atDirectory to find atServer host and port\n");
+    if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
+                                                    ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
+                                                    &atserver_port)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
       goto exit;
     }
@@ -324,12 +326,23 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 8a. Build `pkam:` noop_cmd
    */
-  const size_t pkam_cmd_size = strlen("pkam:") + signature_base64_len + strlen("\r\n") + 1;
+  size_t pkam_cmd_size = strlen("pkam:");
+  if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+    pkam_cmd_size += strlen("enrollmentId:") + strlen(atkeys->enrollment_id) + strlen(":");
+  }
+  pkam_cmd_size += signature_base64_len + strlen("\r\n") + 1;
   if ((pkam_cmd = malloc(sizeof(char) * pkam_cmd_size)) == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for pkam_cmd\n");
     goto exit;
   }
-  snprintf(pkam_cmd, pkam_cmd_size, "pkam:%s\r\n", signature_base64);
+  size_t pos = 0;
+  pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "pkam:", strlen("pkam:"));
+
+  if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+    pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "enrollmentId:%s:", atkeys->enrollment_id);
+  }
+
+  pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "%s\r\n", signature_base64);
 
   /*
    * 8b. Send `pkam:` noop_cmd

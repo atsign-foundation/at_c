@@ -130,7 +130,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                           const size_t aes_encrypt_public_key_len,
                                           const char *aes_encrypt_private_key_str,
                                           const size_t aes_encrypt_private_key_len, const char *self_encryption_key_str,
-                                          const size_t self_encryption_key_len);
+                                          const size_t self_encryption_key_len, const char *enrollment_id_str, const size_t enrollment_id_str_len);
 
 /**
  * @brief populates the struct by decrypting the encrypted RSA keys found in a populated atclient_atkeys_file struct

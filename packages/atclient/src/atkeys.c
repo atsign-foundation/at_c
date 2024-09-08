@@ -450,7 +450,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                           const size_t aes_encrypt_public_key_len,
                                           const char *aes_encrypt_private_key_str,
                                           const size_t aes_encrypt_private_key_len, const char *self_encryption_key_str,
-                                          const size_t self_encryption_key_str_len) {
+                                          const size_t self_encryption_key_str_len, const char *enrollment_id_str,
+                                          const size_t enrollment_id_str_len) {
   int ret = 1;
 
   /*
@@ -701,6 +702,14 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
+  // 6. enrollment id, if it exists
+  if (enrollment_id_str != NULL && enrollment_id_str_len > 0) {
+    if ((ret = atclient_atkeys_set_enrollment_id(atkeys, enrollment_id_str, enrollment_id_str_len)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_set_enrollment_id: %d\n", ret);
+      goto exit;
+    }
+  }
+
   ret = 0;
   goto exit;
 
@@ -710,16 +719,41 @@ exit: { return ret; }
 int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atclient_atkeys_file *atkeys_file) {
   int ret = 1;
 
-  ret = atclient_atkeys_populate_from_strings(
-      atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
-      atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
-      atkeys_file->aes_encrypt_public_key_str, strlen(atkeys_file->aes_encrypt_public_key_str),
-      atkeys_file->aes_encrypt_private_key_str, strlen(atkeys_file->aes_encrypt_private_key_str),
-      atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
     goto exit;
+  }
+
+  if (atkeys_file == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys_file is NULL\n");
+    goto exit;
+  }
+
+  if (atclient_atkeys_file_is_enrollment_id_str_initialized(atkeys_file)) {
+    if ((ret = atclient_atkeys_populate_from_strings(
+             atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
+             atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
+             atkeys_file->aes_encrypt_public_key_str, strlen(atkeys_file->aes_encrypt_public_key_str),
+             atkeys_file->aes_encrypt_private_key_str, strlen(atkeys_file->aes_encrypt_private_key_str),
+             atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str),
+             atkeys_file->enrollment_id_str, strlen(atkeys_file->enrollment_id_str))) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
+      goto exit;
+    }
+  } else {
+    if ((ret = atclient_atkeys_populate_from_strings(
+             atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
+             atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
+             atkeys_file->aes_encrypt_public_key_str, strlen(atkeys_file->aes_encrypt_public_key_str),
+             atkeys_file->aes_encrypt_private_key_str, strlen(atkeys_file->aes_encrypt_private_key_str),
+             atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str), NULL, 0)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
+      goto exit;
+    }
   }
 
   goto exit;
