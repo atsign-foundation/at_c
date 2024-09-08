@@ -41,14 +41,6 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth Begin\n");
 
-  char *atserver_host = NULL;
-  int atserver_port = -1;
-
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
-    goto exit;
-  }
-
   if ((ret = atclient_pkam_authenticate(atclient, atsign, atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
@@ -59,7 +51,6 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
   goto exit;
 
 exit: {
-  free(atserver_host);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth End (%d)\n", ret);
   return ret;
 }
