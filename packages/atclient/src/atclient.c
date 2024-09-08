@@ -10,7 +10,6 @@
 #include "atclient/mbedtls.h"
 #include "atclient/request_options.h"
 #include "atclient/string_utils.h"
-#include "atclient/request_options.h"
 #include "atlogger/atlogger.h"
 #include <cJSON.h>
 #include <stdbool.h>
@@ -191,10 +190,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
                                atclient_pkam_authenticate_options *options) {
 
   int ret = 1; // error by default
-  if(options == NULL){
-    atclient_pkam_authenticate_options options;
-    atclient_pkam_authenticate_options_init(&options);  
-  }
 
   /*
    * 1. Validate arguments
@@ -202,16 +197,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   if ((ret = atclient_pkam_authenticate_validate_arguments(ctx, atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_validate_arguments: %d\n", ret);
     return ret;
-  }
-
-  /*
-   * 1.1 If atserver_host and atserver_port are null and 0 respectively, then fetch the server host and port.
-   */
-  if (options->atserver_host == NULL && options->atserver_port == 0) {
-    if (atclient_utils_find_atserver_address(options->at_directory_host, options->at_directory_port, atsign,
-                                             &(options->atserver_host), &(options->atserver_port)) != 0) {
-      return ret;
-    }
   }
 
   /*
@@ -223,6 +208,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   char *from_cmd = NULL;
   char *pkam_cmd = NULL;
   char *atsign_with_at = NULL;
+
+  char *atserver_host = NULL;
+  int atserver_port = 0;
 
   const size_t recvsize = 1024; // sufficient buffer size to receive 1. host & port from atDirectory, 2. challenge from
                                 // `from:` noop_cmd, 3. pkam success message from `pkam:` noop_cmd
@@ -254,24 +242,39 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
 
   const char *atsign_without_at = (atsign_with_at + 1);
 
-  // Now we have two variables that we can use: `atsign_with_at` and `atsign_without_at`
-
-  // Check if the atserver host and atserver port are initialized
-  if (atclient_pkam_authenticate_options_is_atserver_host_initialized(options) != 0 ||
-      atclient_pkam_authenticate_options_is_atserver_port_initialized(options) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver host and port are not set: %d\n", ret);    
-    goto exit;
-  }
   /*
-   * 4. Start atServer connection (kill the existing connection if it exists)
+   * 4. Get atserver_host and atserver_port
    */
-  if ((ret = atclient_start_atserver_connection(ctx, options->atserver_host, options->atserver_port)) != 0) {
+  if (options != NULL) {
+    if (atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options) &&
+        atclient_pkam_authenticate_options_is_atdirectory_port_initialized(options)) {
+      atserver_host = options->atdirectory_host;
+      atserver_port = options->atdirectory_port;
+    }
+  } else {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
+                 "options is NULL. Using production atDirectory to find atServer host and port\n");
+    if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
+                                                    ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
+                                                    &atserver_port)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_host: %s\n", atserver_host);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_port: %d\n", atserver_port);
+
+  /*
+   * 5. Start atServer connection (kill the existing connection if it exists)
+   */
+  if ((ret = atclient_start_atserver_connection(ctx, atserver_host, atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
     goto exit;
   }
 
   /*
-   * 5a. Build `from:` noop_cmd
+   * 6a. Build `from:` cmd
    */
   const size_t from_cmd_size =
       strlen("from:") + strlen(atsign_without_at) + strlen("\r\n") + 1; // "from:" has a length of 5
@@ -282,7 +285,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   snprintf(from_cmd, from_cmd_size, "from:%s\r\n", atsign_without_at);
 
   /*
-   * 5b. Send `from:` noop_cmd
+   * 6b. Send `from:` cmd
    */
   if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)from_cmd, from_cmd_size - 1, recv,
                                       recvsize, &recv_len)) != 0) {
@@ -298,7 +301,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   }
 
   /*
-   * 6. We got `data:<challenge>`
+   * 7. We got `data:<challenge>`
    *    Let us sign the challenge with RSA-2048 PKAM Private Key and Base64 Encode it
    */
   memcpy(challenge, recv, recv_len);
@@ -321,17 +324,28 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   }
 
   /*
-   * 7a. Build `pkam:` noop_cmd
+   * 8a. Build `pkam:` noop_cmd
    */
-  const size_t pkam_cmd_size = strlen("pkam:") + signature_base64_len + strlen("\r\n") + 1;
+  size_t pkam_cmd_size = strlen("pkam:");
+  if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+    pkam_cmd_size += strlen("enrollmentId:") + strlen(atkeys->enrollment_id) + strlen(":");
+  }
+  pkam_cmd_size += signature_base64_len + strlen("\r\n") + 1;
   if ((pkam_cmd = malloc(sizeof(char) * pkam_cmd_size)) == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for pkam_cmd\n");
     goto exit;
   }
-  snprintf(pkam_cmd, pkam_cmd_size, "pkam:%s\r\n", signature_base64);
+  size_t pos = 0;
+  pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "pkam:", strlen("pkam:"));
+
+  if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+    pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "enrollmentId:%s:", atkeys->enrollment_id);
+  }
+
+  pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "%s\r\n", signature_base64);
 
   /*
-   * 7b. Send `pkam:` noop_cmd
+   * 8b. Send `pkam:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)pkam_cmd, pkam_cmd_size - 1, recv,
@@ -349,7 +363,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   }
 
   /*
-   * 8. Set up the atclient context
+   * 9. Set up the atclient context
    */
 
   // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign
@@ -369,6 +383,7 @@ exit: {
   free(root_cmd);
   free(from_cmd);
   free(pkam_cmd);
+  free(atserver_host);
   return ret;
 }
 }
