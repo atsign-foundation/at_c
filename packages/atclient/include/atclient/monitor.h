@@ -100,8 +100,8 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @param options the options to use for the pkam authentication
  * @return int 0 on success
  */
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn,
-                                       const char *atsign, const atclient_atkeys *atkeys, const atclient_pkam_authenticate_options *options);
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
+                                       const atclient_pkam_authenticate_options *options);
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out
@@ -138,7 +138,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex);
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message, atclient_monitor_hooks *hooks);
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message,
+                          atclient_monitor_hooks *hooks);
 
 /**
  * @brief Check if the monitor connection is still established (client is listening for notifications, and the server

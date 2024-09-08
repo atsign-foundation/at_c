@@ -40,9 +40,6 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
-
   atclient_monitor_response *message = NULL;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
@@ -55,12 +52,12 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient2, atsign, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient2, atsign, &atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atsign, &atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
     goto exit;
   }
@@ -133,7 +130,7 @@ int main(int argc, char *argv[]) {
     if (tries >= max_tries) {
       if (!atclient_monitor_is_connected(&monitor_conn)) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are not connected :( attempting reconnection\n");
-        if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atserver_host, atserver_port, &atkeys, atsign)) !=
+        if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atsign, &atkeys, NULL)) !=
             0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
           continue;
@@ -158,7 +155,6 @@ exit: {
   atclient_monitor_free(&monitor_conn);
   atclient_monitor_response_free(message);
   atclient_free(&atclient2);
-  atclient_pkam_authenticate_options_free(&options);
   return ret;
 }
 }

@@ -235,7 +235,7 @@ static void *monitor_handler(void *xargs) {
   const char *from_atsign = args->from_atsign;
 
   pthread_mutex_lock(&monitor_mutex);
-  if ((ret = atclient_monitor_pkam_authenticate(monitor, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor, from_atsign, atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -353,7 +353,7 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
    * 2. Reconnect monitor connection
    */
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reconnecting monitor connection...\n");
-  if ((ret = atclient_monitor_pkam_authenticate(monitor, atserver_host, atserver_port, atkeys, from_atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor, from_atsign, atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     return ret;
   }
