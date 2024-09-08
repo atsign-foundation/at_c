@@ -241,20 +241,20 @@ bool atclient_monitor_is_connected(atclient *monitor_conn) {
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
 // error, notification) and return the message body which is everything after the prefix (data:, error:, notification:).
 // This function will modify *message_type and *message_body to point to the respective values in *original.
-static int parse_message(const char *original, char **message_type, char **message_body) {
+static int parse_message(char *original, char **message_type, char **message_body) {
   int ret = -1;
-
-  char *original_copy = strdup(original);
   char *temp = NULL;
   char *saveptr;
 
-  temp = strtok_r(original_copy, ":", &saveptr);
+  // Parse the message type (everything before ':')
+  temp = strtok_r(original, ":", &saveptr);
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
     goto exit;
   }
   *message_type = temp;
 
+  // Parse the message body (everything after ':')
   temp = strtok_r(NULL, "\n", &saveptr);
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message body\n");
@@ -262,40 +262,38 @@ static int parse_message(const char *original, char **message_type, char **messa
   }
   *message_body = temp;
 
-  // if message_type starts with `@`, then it will follow this format: `@<atsign>@<message_type>`
-  // extract message_type from message_type
+  // If message_type starts with '@', extract the actual message_type
   if ((*message_type)[0] == '@') {
-    char *temp = strtok_r(*message_type, "@", &saveptr);
+    char *inner_saveptr;
+    temp = strtok_r(*message_type, "@", &inner_saveptr);
     if (temp == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
       goto exit;
     }
-    *message_type = strtok_r(NULL, "@", &saveptr);
+    *message_type = strtok_r(NULL, "@", &inner_saveptr);
     if (*message_type == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
       goto exit;
     }
   }
 
-  // if message_body has any leading or trailing white space or new line characters, remove it
-  while ((*message_body)[0] == ' ' || (*message_body)[0] == '\n') {
-    *message_body = *message_body + 1;
+  // Trim leading whitespace or newlines from message_body
+  while (**message_body == ' ' || **message_body == '\n') {
+    (*message_body)++;
   }
-  size_t trail;
-  do {
-    trail = strlen(*message_body) - 1;
-    if ((*message_body)[trail] == ' ' || (*message_body)[trail] == '\n') {
-      (*message_body)[trail] = '\0';
-    }
-  } while ((*message_body)[trail] == ' ' || (*message_body)[trail] == '\n');
+
+  // Trim trailing whitespace or newlines from message_body
+  size_t trail = strlen(*message_body);
+  while (trail > 0 && ((*message_body)[trail - 1] == ' ' || (*message_body)[trail - 1] == '\n')) {
+    (*message_body)[--trail] = '\0';
+  }
 
   ret = 0;
-  goto exit;
-exit: {
-  free(original_copy);
+
+exit:
   return ret;
 }
-}
+
 
 // populates *notification given a notification "*messagebody" which has been received from atServer
 static int parse_notification(atclient_atnotification *notification, const char *messagebody) {
