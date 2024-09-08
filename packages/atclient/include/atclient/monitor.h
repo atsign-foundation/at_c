@@ -95,16 +95,13 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @brief pkam authenticates the monitor connection
  *
  * @param monitor_conn the atclient context for the monitor connection, assumed that it is already initialized
- * @param atserver_host the atserver host to use for the pkam authentication, see atclient_find_secondary_address for
- * typical method to find this value.
- * @param atserver_port the atserver port to use for the pkam authentication, see atclient_find_secondary_address for
- * typical method to find this value.
- * @param atkeys the atkeys to use for the pkam authentication
  * @param atsign the atsign to use for the pkam authentication
+ * @param atkeys the atkeys to use for the pkam authentication
+ * @param options the options to use for the pkam authentication
  * @return int 0 on success
  */
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
-                                       const atclient_atkeys *atkeys, const char *atsign);
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn,
+                                       const char *atsign, const atclient_atkeys *atkeys, const atclient_pkam_authenticate_options *options);
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out

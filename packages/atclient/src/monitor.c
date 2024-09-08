@@ -40,14 +40,11 @@ void atclient_monitor_response_free(atclient_monitor_response *message) {
 void atclient_monitor_init(atclient *monitor_conn) { atclient_init(monitor_conn); }
 void atclient_monitor_free(atclient *monitor_conn) { atclient_free(monitor_conn); }
 
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
-                                       const atclient_atkeys *atkeys, const char *atsign) {
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
+                                       const atclient_pkam_authenticate_options *options) {
   int ret = 1;
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
-  ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, &options);
-  if (ret != 0) {
+  if ((ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
