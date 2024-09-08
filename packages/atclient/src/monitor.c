@@ -150,11 +150,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen(buffer), buffer,
                reset);
 
-  int i = 0;
-  while (buffer[i] != ':') {
-    i++;
-  }
-
   char *messagetype = NULL;
   char *messagebody = NULL;
   ret = parse_message(buffer, &messagetype, &messagebody);
