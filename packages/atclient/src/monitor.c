@@ -147,6 +147,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     goto exit;
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen(buffer), buffer,
+               reset);
+
   int i = 0;
   while (buffer[i] != ':') {
     i++;
@@ -160,9 +163,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
-               reset);
 
   if (strcmp(messagetype, "notification") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
