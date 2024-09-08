@@ -19,7 +19,7 @@
 
 #define TAG "atclient_monitor"
 
-static int parse_message(const char *original, char **message_type, char **message_body);
+static int parse_message(char *original, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
