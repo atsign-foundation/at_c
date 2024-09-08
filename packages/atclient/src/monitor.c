@@ -254,28 +254,13 @@ static int parse_message(char *original, char **message_type, char **message_bod
   }
   *message_type = temp;
 
-  // Parse the message body (everything after ':')
-  temp = strtok_r(NULL, "\n", &saveptr);
+  // The rest of the string is the message body (JSON in this case)
+  temp = strtok_r(NULL, "", &saveptr);  // Use an empty delimiter to get the rest of the string
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message body\n");
     goto exit;
   }
   *message_body = temp;
-
-  // If message_type starts with '@', extract the actual message_type
-  if ((*message_type)[0] == '@') {
-    char *inner_saveptr;
-    temp = strtok_r(*message_type, "@", &inner_saveptr);
-    if (temp == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
-      goto exit;
-    }
-    *message_type = strtok_r(NULL, "@", &inner_saveptr);
-    if (*message_type == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
-      goto exit;
-    }
-  }
 
   // Trim leading whitespace or newlines from message_body
   while (**message_body == ' ' || **message_body == '\n') {
@@ -293,7 +278,6 @@ static int parse_message(char *original, char **message_type, char **message_bod
 exit:
   return ret;
 }
-
 
 // populates *notification given a notification "*messagebody" which has been received from atServer
 static int parse_notification(atclient_atnotification *notification, const char *messagebody) {
