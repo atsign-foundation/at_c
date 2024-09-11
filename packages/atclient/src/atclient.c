@@ -59,7 +59,7 @@ void atclient_free(atclient *ctx) {
     atclient_unset_atsign(ctx);
   }
 
-  if (atclient_is_atserver_connection_started(ctx)) {
+  if(atclient_is_atserver_connection_started(ctx)) {
     atclient_stop_atserver_connection(ctx);
   }
 }
@@ -193,7 +193,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   int ret = 1; // error by default
   if(options == NULL){
     atclient_pkam_authenticate_options options;
-    atclient_pkam_authenticate_options_init(&options);  
+    atclient_pkam_authenticate_options_init(&options);
   }
 
   /*
@@ -259,7 +259,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   // Check if the atserver host and atserver port are initialized
   if (atclient_pkam_authenticate_options_is_atserver_host_initialized(options) != 0 ||
       atclient_pkam_authenticate_options_is_atserver_port_initialized(options) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver host and port are not set: %d\n", ret);    
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver host and port are not set: %d\n", ret);
     goto exit;
   }
   /*
@@ -290,7 +290,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     goto exit;
   }
 
-  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
+  char *str_with_data_prefix = NULL;
+  if (atclient_string_utils_get_substring_position((char *)recv, DATA_TOKEN, &str_with_data_prefix) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -301,10 +302,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    * 6. We got `data:<challenge>`
    *    Let us sign the challenge with RSA-2048 PKAM Private Key and Base64 Encode it
    */
-  memcpy(challenge, recv, recv_len);
-  // remove data:
-  memmove(challenge, challenge + 5, recv_len - 5);
-  challenge_len = recv_len - 5;
+
+  challenge_len = strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
+  memcpy(challenge, str_with_data_prefix + strlen(DATA_TOKEN), challenge_len); // +5 to skip the 'data:' prefix
 
   // sign
   if ((ret = atchops_rsa_sign(&atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
@@ -432,8 +432,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
   /*
    * 3. Parse response
    */
-  if (!atclient_string_utils_starts_with((const char *)ptr, "data:ok") &&
-      !atclient_string_utils_ends_with((const char *)ptr, "data:ok")) {
+  // how about just doing ptr == "data:ok" ?
+  if (strcmp(ptr, "data:ok") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
     ret = -1;
     goto exit;

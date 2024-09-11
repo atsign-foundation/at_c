@@ -8,6 +8,7 @@
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
+#include <atclient/constants.h>
 
 #define TAG "atclient_put_public_key"
 
@@ -85,21 +86,21 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
 
   char *response = (char *)recv;
-
-  if (!atclient_string_utils_starts_with(response, "data:")) {
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
     goto exit;
   }
-
-  char *response_without_data = response + strlen("data:");
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
   /*
    * 5. Receive commit id
    */
   if (commit_id != NULL) {
-    *commit_id = atoi(response_without_data);
+    *commit_id = atoi(response_trimmed);
   }
 
   ret = 0;
