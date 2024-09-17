@@ -293,7 +293,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     goto exit;
   }
 
-  if (!atclient_string_utils_starts_with((char *)recv, "data:")) {
+  char *str_with_data_prefix = NULL;
+  if (atclient_string_utils_get_substring_position((char *)recv, DATA_TOKEN, &str_with_data_prefix) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -304,10 +305,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    * 7. We got `data:<challenge>`
    *    Let us sign the challenge with RSA-2048 PKAM Private Key and Base64 Encode it
    */
-  memcpy(challenge, recv, recv_len);
-  // remove data:
-  memmove(challenge, challenge + 5, recv_len - 5);
-  challenge_len = recv_len - 5;
+
+  challenge_len = strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
+  memcpy(challenge, str_with_data_prefix + strlen(DATA_TOKEN), challenge_len); // +5 to skip the 'data:' prefix
 
   // sign
   if ((ret = atchops_rsa_sign(&atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
@@ -327,7 +327,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    * 8a. Build `pkam:` noop_cmd
    */
   size_t pkam_cmd_size = strlen("pkam:");
-  if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+  if (atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
     pkam_cmd_size += strlen("enrollmentId:") + strlen(atkeys->enrollment_id) + strlen(":");
   }
   pkam_cmd_size += signature_base64_len + strlen("\r\n") + 1;
@@ -338,7 +338,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   size_t pos = 0;
   pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "pkam:", strlen("pkam:"));
 
-  if(atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+  if (atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
     pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "enrollmentId:%s:", atkeys->enrollment_id);
   }
 
@@ -447,8 +447,8 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
   /*
    * 3. Parse response
    */
-  if (!atclient_string_utils_starts_with((const char *)ptr, "data:ok") &&
-      !atclient_string_utils_ends_with((const char *)ptr, "data:ok")) {
+  // how about just doing ptr == "data:ok" ?
+  if (strcmp(ptr, "data:ok") != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to receive heartbeat response\n");
     ret = -1;
     goto exit;
@@ -501,4 +501,3 @@ static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, co
 
   ret = 0;
 exit: { return ret; }
-}
