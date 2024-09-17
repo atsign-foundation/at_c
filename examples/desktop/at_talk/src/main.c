@@ -4,7 +4,7 @@
 #include <atchops/iv.h>
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
-#include <atclient/atkeysfile.h>
+#include <atclient/atkeys_file.h>
 #include <atclient/constants.h>
 #include <atclient/encryption_key_helpers.h>
 #include <atclient/monitor.h>
@@ -145,23 +145,23 @@ int main(int argc, char *argv[]) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_create_shared_key: %d\n", ret);
     }
 
-    if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+    if ((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_operation: %d\n", ret);
     }
 
-    if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+    if ((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_atkey: %d\n", ret);
     }
 
-    if((ret = atclient_notify_params_set_value(&params, line)) != 0) {
+    if ((ret = atclient_notify_params_set_value(&params, line)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_value: %d\n", ret);
     }
 
-    if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+    if ((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_should_encrypt: %d\n", ret);
     }
 
-    if((ret = atclient_notify_params_set_notification_expiry(&params, 5000)) != 0) {
+    if ((ret = atclient_notify_params_set_notification_expiry(&params, 5000)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_notify_params_set_notification_expiry: %d\n", ret);
     }
 
