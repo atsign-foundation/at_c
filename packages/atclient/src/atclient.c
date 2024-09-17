@@ -244,6 +244,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 4. Get atserver_host and atserver_port
    */
+  bool should_free_atserver_host = false;
   if (options != NULL) {
     if (atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options) &&
         atclient_pkam_authenticate_options_is_atdirectory_port_initialized(options)) {
@@ -259,6 +260,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
       goto exit;
     }
+    // only free this memory if it was allocated internally (by atclient_utils_find_atserver_address)
+    should_free_atserver_host = true;
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_host: %s\n", atserver_host);
@@ -382,7 +385,9 @@ exit: {
   free(root_cmd);
   free(from_cmd);
   free(pkam_cmd);
-  free(atserver_host);
+  if (should_free_atserver_host) {
+    free(atserver_host);
+  }
   return ret;
 }
 }
