@@ -2,7 +2,6 @@
 #define ATCLIENT_MONITOR_H
 
 #include "atclient/atclient.h"
-#include "atclient/atkey.h"
 #include "atclient/atnotification.h"
 #include <stdbool.h>
 
@@ -101,7 +100,7 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @return int 0 on success
  */
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
-                                       const atclient_pkam_authenticate_options *options);
+                                       atclient_pkam_authenticate_options *options);
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out

@@ -1,5 +1,4 @@
 #include "atclient/atkey.h"
-#include "atclient/constants.h"
 #include "atclient/metadata.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
@@ -61,9 +60,7 @@ int atclient_atkey_clone(atclient_atkey *dst, const atclient_atkey *src) {
   }
   ret = 0;
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
 
 void atclient_atkey_free(atclient_atkey *atkey) {
@@ -353,9 +350,10 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     index_pos += strlen("public:");
   } else if (atkey_type == ATCLIENT_ATKEY_TYPE_SHARED_KEY) {
     if (!atclient_atkey_is_shared_with_initialized(atkey)) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                   "atkey's shared_with is not initialized, even though it was deemed a ATCLIENT_ATKEY_TYPE_SHARED_KEY by "
-                   "atclient_atkey_get_type\n");
+      atlogger_log(
+          TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+          "atkey's shared_with is not initialized, even though it was deemed a ATCLIENT_ATKEY_TYPE_SHARED_KEY by "
+          "atclient_atkey_get_type\n");
     }
     snprintf(*atkeystr + index_pos, atkey_str_size - index_pos, "%s:", atkey->shared_with);
     index_pos += strlen(atkey->shared_with) + strlen(":");
@@ -571,7 +569,7 @@ atclient_atkey_type atclient_atkey_get_type(const atclient_atkey *atkey) {
 }
 
 int atclient_atkey_create_public_key(atclient_atkey *atkey, const char *key, const char *shared_by,
-                                    const char *namespace_str) {
+                                     const char *namespace_str) {
   int ret = 1;
 
   if (atkey == NULL) {
@@ -625,7 +623,7 @@ exit: { return ret; }
 }
 
 int atclient_atkey_create_self_key(atclient_atkey *atkey, const char *key, const char *shared_by,
-                                  const char *namespace_str) {
+                                   const char *namespace_str) {
   int ret = 1;
 
   if (atkey == NULL) {
@@ -681,7 +679,7 @@ exit: { return ret; }
 }
 
 int atclient_atkey_create_shared_key(atclient_atkey *atkey, const char *key, const char *shared_by,
-                                    const char *shared_with, const char *namespace_str) {
+                                     const char *shared_with, const char *namespace_str) {
   int ret = 1;
 
   if (atkey == NULL) {

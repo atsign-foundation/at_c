@@ -4,7 +4,6 @@
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
-#include "atclient/mbedtls.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -252,7 +251,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx) && ctx->hooks->pre_write != NULL) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = (unsigned char *) value;
+    params.src = (unsigned char *)value;
     params.src_len = value_len;
     params.recv = NULL;
     params.recv_size = 0;
@@ -352,7 +351,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = (unsigned char *) src;
+    params.src = (unsigned char *)src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -398,7 +397,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_post_write_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = (unsigned char *) src;
+    params.src = (unsigned char *)src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -428,7 +427,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_pre_read_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = (unsigned char *) src;
+    params.src = (unsigned char *)src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -474,7 +473,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (try_hooks && atclient_connection_hooks_is_post_read_initialized(ctx)) {
     ctx->hooks->_is_nested_call = true;
     atclient_connection_hook_params params;
-    params.src = (unsigned char *) src;
+    params.src = (unsigned char *)src;
     params.src_len = src_len;
     params.recv = recv;
     params.recv_size = recv_size;
@@ -508,9 +507,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   ret = 0;
   goto exit;
-exit: {
-  return ret;
-}
+exit: { return ret; }
 }
 
 int atclient_connection_disconnect(atclient_connection *ctx) {
@@ -579,7 +576,8 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
   }
 
   if (recv_len <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv_len is <= 0, connection did not respond to \"%s\"\n", command);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv_len is <= 0, connection did not respond to \"%s\"\n",
+                 command);
     return false;
   }
 
@@ -603,7 +601,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
     return ret;
   }
 
-  if(!atclient_connection_is_connection_enabled(ctx)) {
+  if (!atclient_connection_is_connection_enabled(ctx)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
     return ret;
   }
@@ -612,7 +610,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
    * 2. Variables
    */
   size_t recv_size;
-  if(value_max_len == 0) {
+  if (value_max_len == 0) {
     // we read 4 KB at a time, TODO: make a constant
     recv_size = 4096;
   } else {
@@ -649,7 +647,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
   size_t pos = 0;
   size_t recv_len = 0;
   do {
-    if((ret = mbedtls_ssl_read(&(ctx->ssl), recv + pos, recv_size - pos)) <= 0) {
+    if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + pos, recv_size - pos)) <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
     }
@@ -658,15 +656,16 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
 
     // check if we found the end of the message
     int i = pos;
-    while(!found_end && i-- > 0) {
+    while (!found_end && i-- > 0) {
       found_end = recv[i] == '\n' || recv[i] == '\r';
     }
 
-    if(found_end) {
+    if (found_end) {
       recv_len = i;
     } else {
-      if(value_max_len != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "Message is too long, it exceeds the maximum length of %d\n", value_max_len);
+      if (value_max_len != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "Message is too long, it exceeds the maximum length of %d\n",
+                     value_max_len);
         recv_len = value_max_len;
         break;
       } else {
@@ -675,43 +674,45 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
       }
     }
 
-  } while(ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found_end);
+  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found_end);
 
   /*
    * 5. Print debug log
    */
-  if(atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char *recvcopy = NULL;
-    if((recvcopy = malloc(sizeof(unsigned char) * recv_len)) != NULL) {
+    if ((recvcopy = malloc(sizeof(unsigned char) * recv_len)) != NULL) {
       memcpy(recvcopy, recv, recv_len);
       atlogger_fix_stdout_buffer((char *)recvcopy, recv_len);
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, recv_len, recvcopy, reset);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, recv_len, recvcopy,
+                   reset);
       free(recvcopy);
     } else {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory to pretty print the network received buffer\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed to allocate memory to pretty print the network received buffer\n");
     }
   }
 
   /*
    * 6. Set the value and value_len
    */
-  if(found_end) {
-    if(recv_len != 0 && recv_len < recv_size) {
+  if (found_end) {
+    if (recv_len != 0 && recv_len < recv_size) {
       recv[recv_len] = '\0';
     }
   }
-  if(value_len != NULL) {
-      *value_len = recv_len;
+  if (value_len != NULL) {
+    *value_len = recv_len;
+  }
+  if (value != NULL) {
+    if ((*value = malloc(sizeof(unsigned char) * (recv_len + 1))) == NULL) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
+      goto exit;
     }
-    if(value != NULL) {
-      if((*value = malloc(sizeof(unsigned char) * (recv_len + 1))) == NULL) {
-        ret = 1;
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
-        goto exit;
-      }
-      memcpy(*value, recv, recv_len);
-      (*value)[recv_len] = '\0';
-    }
+    memcpy(*value, recv, recv_len);
+    (*value)[recv_len] = '\0';
+  }
 
   /*
    * 7. Call post_read hook, if it exists

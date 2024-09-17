@@ -1,11 +1,9 @@
 #include "atclient/monitor.h"
 #include "atclient/atclient.h"
 #include "atclient/atnotification.h"
-#include "atclient/cjson.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
-#include "atclient/mbedtls.h"
 #include "atclient/string_utils.h"
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
@@ -41,7 +39,7 @@ void atclient_monitor_init(atclient *monitor_conn) { atclient_init(monitor_conn)
 void atclient_monitor_free(atclient *monitor_conn) { atclient_free(monitor_conn); }
 
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
-                                       const atclient_pkam_authenticate_options *options) {
+                                       atclient_pkam_authenticate_options *options) {
   int ret = 1;
 
   if ((ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, options)) != 0) {
@@ -250,7 +248,7 @@ static int parse_message(char *original, char **message_type, char **message_bod
   *message_type = temp;
 
   // The rest of the string is the message body (JSON in this case)
-  temp = strtok_r(NULL, "", &saveptr);  // Use an empty delimiter to get the rest of the string
+  temp = strtok_r(NULL, "", &saveptr); // Use an empty delimiter to get the rest of the string
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message body\n");
     goto exit;

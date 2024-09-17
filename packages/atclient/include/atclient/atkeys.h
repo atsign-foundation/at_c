@@ -133,13 +133,13 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                           const size_t self_encryption_key_len, const char *enrollment_id_str, const size_t enrollment_id_str_len);
 
 /**
- * @brief populates the struct by decrypting the encrypted RSA keys found in a populated atclient_atkeys_file struct
+ * @brief populates the struct by decrypting the encrypted RSA keys found in a populated atclient_atkeysfile struct
  *
  * @param atkeys The struct to populate, assumed to be NON-NULL and initialized with atclient_atkeys_init
  * @param atkeys_file the struct containing the encrypted RSA keys, typically already read from the *.atKeys file
  * @return int 0 on success, non-zero on failure
  */
-int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atclient_atkeys_file *atkeys_file);
+int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atclient_atkeysfile *atkeys_file);
 
 /**
  * @brief populates the atkeys struct by reading the *.atKeys file,

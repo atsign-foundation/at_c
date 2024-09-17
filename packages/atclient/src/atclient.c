@@ -326,7 +326,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    * 8a. Build `pkam:` noop_cmd
    */
   size_t pkam_cmd_size = strlen("pkam:");
-  if (atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+  if (atclient_atkeys_is_enrollment_id_initialized((atclient_atkeys *)atkeys) && atkeys->enrollment_id != NULL) {
     pkam_cmd_size += strlen("enrollmentId:") + strlen(atkeys->enrollment_id) + strlen(":");
   }
   pkam_cmd_size += signature_base64_len + strlen("\r\n") + 1;
@@ -335,9 +335,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     goto exit;
   }
   size_t pos = 0;
-  pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "pkam:", strlen("pkam:"));
+  pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "pkam:");
 
-  if (atclient_atkeys_is_enrollment_id_initialized(atkeys) && atkeys->enrollment_id != NULL) {
+  if (atclient_atkeys_is_enrollment_id_initialized((atclient_atkeys *)atkeys) && atkeys->enrollment_id != NULL) {
     pos += snprintf(pkam_cmd + pos, pkam_cmd_size - pos, "enrollmentId:%s:", atkeys->enrollment_id);
   }
 
@@ -500,3 +500,4 @@ static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, co
 
   ret = 0;
 exit: { return ret; }
+}
