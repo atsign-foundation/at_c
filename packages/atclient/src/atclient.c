@@ -251,9 +251,11 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
       atserver_host = options->atdirectory_host;
       atserver_port = options->atdirectory_port;
     }
-  } else {
+  }
+
+  if (atserver_host == NULL || atserver_port == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                 "options is NULL. Using production atDirectory to find atServer host and port\n");
+                 "Missing atServer host or port. Using production atDirectory to look up atServer host and port\n");
     if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
                                                     ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
                                                     &atserver_port)) != 0) {
