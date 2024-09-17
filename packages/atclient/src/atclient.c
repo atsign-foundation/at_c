@@ -7,7 +7,6 @@
 #include "atclient/connection.h"
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
-#include "atclient/mbedtls.h"
 #include "atclient/request_options.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
