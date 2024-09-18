@@ -1,11 +1,9 @@
 #include "atclient/monitor.h"
 #include "atclient/atclient.h"
 #include "atclient/atnotification.h"
-#include "atclient/cjson.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
 #include "atclient/encryption_key_helpers.h"
-#include "atclient/mbedtls.h"
 #include "atclient/string_utils.h"
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
@@ -19,7 +17,7 @@
 
 #define TAG "atclient_monitor"
 
-static int parse_message(const char *original, char **message_type, char **message_body);
+static int parse_message(char *original, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
@@ -40,14 +38,11 @@ void atclient_monitor_response_free(atclient_monitor_response *message) {
 void atclient_monitor_init(atclient *monitor_conn) { atclient_init(monitor_conn); }
 void atclient_monitor_free(atclient *monitor_conn) { atclient_free(monitor_conn); }
 
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
-                                       const atclient_atkeys *atkeys, const char *atsign) {
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
+                                       atclient_pkam_authenticate_options *options) {
   int ret = 1;
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
-  ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, &options);
-  if (ret != 0) {
+  if ((ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM\n");
     goto exit;
   }
@@ -150,10 +145,8 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     goto exit;
   }
 
-  int i = 0;
-  while (buffer[i] != ':') {
-    i++;
-  }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen(buffer), buffer,
+               reset);
 
   char *messagetype = NULL;
   char *messagebody = NULL;
@@ -163,9 +156,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, messagetype, messagebody,
-               reset);
 
   if (strcmp(messagetype, "notification") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
@@ -244,60 +234,42 @@ bool atclient_monitor_is_connected(atclient *monitor_conn) {
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
 // error, notification) and return the message body which is everything after the prefix (data:, error:, notification:).
 // This function will modify *message_type and *message_body to point to the respective values in *original.
-static int parse_message(const char *original, char **message_type, char **message_body) {
+static int parse_message(char *original, char **message_type, char **message_body) {
   int ret = -1;
-
-  char *original_copy = strdup(original);
   char *temp = NULL;
   char *saveptr;
 
-  temp = strtok_r(original_copy, ":", &saveptr);
+  // Parse the message type (everything before ':')
+  temp = strtok_r(original, ":", &saveptr);
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
     goto exit;
   }
   *message_type = temp;
 
-  temp = strtok_r(NULL, "\n", &saveptr);
+  // The rest of the string is the message body (JSON in this case)
+  temp = strtok_r(NULL, "", &saveptr); // Use an empty delimiter to get the rest of the string
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message body\n");
     goto exit;
   }
   *message_body = temp;
 
-  // if message_type starts with `@`, then it will follow this format: `@<atsign>@<message_type>`
-  // extract message_type from message_type
-  if ((*message_type)[0] == '@') {
-    char *temp = strtok_r(*message_type, "@", &saveptr);
-    if (temp == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
-      goto exit;
-    }
-    *message_type = strtok_r(NULL, "@", &saveptr);
-    if (*message_type == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
-      goto exit;
-    }
+  // Trim leading whitespace or newlines from message_body
+  while (**message_body == ' ' || **message_body == '\n') {
+    (*message_body)++;
   }
 
-  // if message_body has any leading or trailing white space or new line characters, remove it
-  while ((*message_body)[0] == ' ' || (*message_body)[0] == '\n') {
-    *message_body = *message_body + 1;
+  // Trim trailing whitespace or newlines from message_body
+  size_t trail = strlen(*message_body);
+  while (trail > 0 && ((*message_body)[trail - 1] == ' ' || (*message_body)[trail - 1] == '\n')) {
+    (*message_body)[--trail] = '\0';
   }
-  size_t trail;
-  do {
-    trail = strlen(*message_body) - 1;
-    if ((*message_body)[trail] == ' ' || (*message_body)[trail] == '\n') {
-      (*message_body)[trail] = '\0';
-    }
-  } while ((*message_body)[trail] == ' ' || (*message_body)[trail] == '\n');
 
   ret = 0;
-  goto exit;
-exit: {
-  free(original_copy);
+
+exit:
   return ret;
-}
 }
 
 // populates *notification given a notification "*messagebody" which has been received from atServer

@@ -1,5 +1,4 @@
 #include "atclient/atnotification.h"
-#include "atclient/cjson.h"
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
@@ -155,7 +154,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
   cJSON *id = cJSON_GetObjectItem(root, "id");
   if (id != NULL) {
     if (id->type != cJSON_NULL) {
-      if(id->type != cJSON_String) {
+      if (id->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification id is not a string\n");
         goto exit;
       }
@@ -191,7 +190,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
   cJSON *to = cJSON_GetObjectItem(root, "to");
   if (to != NULL) {
     if (to->type != cJSON_NULL) {
-      if((to->type != cJSON_String)) {
+      if ((to->type != cJSON_String)) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification to is not a string\n");
         goto exit;
       }
@@ -209,7 +208,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
   cJSON *key = cJSON_GetObjectItem(root, "key");
   if (key != NULL) {
     if (key->type != cJSON_NULL) {
-      if(key->type != cJSON_String) {
+      if (key->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification key is not a string\n");
         goto exit;
       }
@@ -294,7 +293,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
 
   cJSON *is_encrypted = cJSON_GetObjectItem(root, "isEncrypted");
   if (is_encrypted != NULL) {
-    if(is_encrypted->type == cJSON_True) {
+    if (is_encrypted->type == cJSON_True) {
       if ((ret = atclient_atnotification_set_is_encrypted(notification, true)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification is_encrypted\n");
         goto exit;
@@ -315,7 +314,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
     // get enc_key_name
     cJSON *enc_key_name = cJSON_GetObjectItem(metadata, "encKeyName");
     if (enc_key_name != NULL) {
-      if(enc_key_name->type != cJSON_NULL) {
+      if (enc_key_name->type != cJSON_NULL) {
         if (enc_key_name->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification enc_key_name is not a string\n");
           goto exit;
@@ -326,7 +325,8 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
         }
       } else {
         atclient_atnotification_unset_enc_key_name(notification);
-        atclient_atnotification_enc_key_name_set_initialized(notification, true); // set it to initialized, but it is kept null
+        atclient_atnotification_enc_key_name_set_initialized(notification,
+                                                             true); // set it to initialized, but it is kept null
         notification->enc_key_name = NULL;
       }
     }
@@ -334,7 +334,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
     // get enc_algo
     cJSON *enc_algo = cJSON_GetObjectItem(metadata, "encAlgo");
     if (enc_algo != NULL) {
-      if(enc_algo->type != cJSON_NULL) {
+      if (enc_algo->type != cJSON_NULL) {
         if (enc_algo->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification enc_algo is not a string\n");
           goto exit;
@@ -345,7 +345,8 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
         }
       } else {
         atclient_atnotification_unset_enc_algo(notification);
-        atclient_atnotification_enc_algo_set_initialized(notification, true); // set it to initialized, but it is kept null
+        atclient_atnotification_enc_algo_set_initialized(notification,
+                                                         true); // set it to initialized, but it is kept null
         notification->enc_algo = NULL;
       }
     }
@@ -353,7 +354,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
     // get iv_nonce
     cJSON *iv_nonce = cJSON_GetObjectItem(metadata, "ivNonce");
     if (iv_nonce != NULL) {
-      if(iv_nonce->type != cJSON_NULL) {
+      if (iv_nonce->type != cJSON_NULL) {
         if (iv_nonce->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification iv_nonce is not a string\n");
           goto exit;
@@ -364,7 +365,8 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
         }
       } else {
         atclient_atnotification_unset_iv_nonce(notification);
-        atclient_atnotification_iv_nonce_set_initialized(notification, true); // set it to initialized, but it is kept null
+        atclient_atnotification_iv_nonce_set_initialized(notification,
+                                                         true); // set it to initialized, but it is kept null
         notification->iv_nonce = NULL;
       }
     }
@@ -372,7 +374,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
     // get ske_enc_key_name
     cJSON *ske_enc_key_name = cJSON_GetObjectItem(metadata, "skeEncKeyName");
     if (ske_enc_key_name != NULL) {
-      if(ske_enc_key_name->type != cJSON_NULL) {
+      if (ske_enc_key_name->type != cJSON_NULL) {
         if (ske_enc_key_name->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification ske_enc_key_name is not a string\n");
           goto exit;
@@ -383,7 +385,8 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
         }
       } else {
         atclient_atnotification_unset_ske_enc_key_name(notification);
-        atclient_atnotification_ske_enc_key_name_set_initialized(notification, true); // set it to initialized, but it is kept null
+        atclient_atnotification_ske_enc_key_name_set_initialized(notification,
+                                                                 true); // set it to initialized, but it is kept null
         notification->ske_enc_key_name = NULL;
       }
     }
@@ -391,7 +394,7 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
     // get ske_enc_algo
     cJSON *ske_enc_algo = cJSON_GetObjectItem(metadata, "skeEncAlgo");
     if (ske_enc_algo != NULL) {
-      if(ske_enc_algo->type != cJSON_NULL) {
+      if (ske_enc_algo->type != cJSON_NULL) {
         if (ske_enc_algo->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification ske_enc_algo is not a string\n");
           goto exit;
@@ -402,7 +405,8 @@ int atclient_atnotification_from_cjson_node(atclient_atnotification *notificatio
         }
       } else {
         atclient_atnotification_unset_ske_enc_algo(notification);
-        atclient_atnotification_ske_enc_algo_set_initialized(notification, true); // set it to initialized, but it is kept null
+        atclient_atnotification_ske_enc_algo_set_initialized(notification,
+                                                             true); // set it to initialized, but it is kept null
         notification->ske_enc_algo = NULL;
       }
     }
