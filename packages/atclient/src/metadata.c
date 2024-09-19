@@ -1004,10 +1004,10 @@ size_t atclient_atkey_metadata_ttl_strlen(const atclient_atkey_metadata *metadat
 }
 
 size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_ttb_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_ttb_initialized(metadata)) {
     return 0;
   }
   return strlen(":ttb:") // :ttb:
@@ -1015,10 +1015,10 @@ size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadat
 }
 
 size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_ttr_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_ttr_initialized(metadata)) {
     return 0;
   }
   return strlen(":ttr:") // :ttr:
@@ -1026,10 +1026,10 @@ size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadat
 }
 
 size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_ccd_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_ccd_initialized(metadata)) {
     return 0;
   }
   if (metadata->ccd) {
@@ -1041,10 +1041,10 @@ size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadat
 }
 
 size_t atclient_atkey_metadata_is_binary_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_is_binary_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_is_binary_initialized(metadata)) {
     return 0;
   }
   if (metadata->is_binary) {
@@ -1055,10 +1055,10 @@ size_t atclient_atkey_metadata_is_binary_strlen(const atclient_atkey_metadata *m
 }
 
 size_t atclient_atkey_metadata_is_encrypted_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_is_encrypted_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_is_encrypted_initialized(metadata)) {
     return 0;
   }
   if (metadata->is_encrypted) {
@@ -1069,110 +1069,110 @@ size_t atclient_atkey_metadata_is_encrypted_strlen(const atclient_atkey_metadata
 }
 
 size_t atclient_atkey_metadata_data_signature_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_data_signature_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_data_signature_initialized(metadata)) {
     return 0;
   }
   return strlen(":dataSignature:") + strlen(metadata->data_signature);
 }
 
 size_t atclient_atkey_metadata_shared_key_status_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_shared_key_status_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_shared_key_status_initialized(metadata)) {
     return 0;
   }
   return strlen(":sharedKeyStatus:") + strlen(metadata->shared_key_status);
 }
 
 size_t atclient_atkey_metadata_shared_key_enc_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_shared_key_enc_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_shared_key_enc_initialized(metadata)) {
     return 0;
   }
   return strlen(":sharedKeyEnc:") + strlen(metadata->shared_key_enc);
 }
 
 size_t atclient_atkey_metadata_pub_key_hash_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_pub_key_hash_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_pub_key_hash_initialized(metadata)) {
     return 0;
   }
   return strlen(":hash:") + strlen(metadata->pub_key_hash);
 }
 
 size_t atclient_atkey_metadata_pub_key_algo_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_pub_key_algo_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_pub_key_algo_initialized(metadata)) {
     return 0;
   }
   return strlen(":algo:") + strlen(metadata->pub_key_algo);
 }
 
 size_t atclient_atkey_metadata_encoding_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_encoding_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_encoding_initialized(metadata)) {
     return 0;
   }
   return strlen(":encoding:") + strlen(metadata->encoding);
 }
 
 size_t atclient_atkey_metadata_enc_key_name_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_enc_key_name_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_enc_key_name_initialized(metadata)) {
     return 0;
   }
   return strlen(":encKeyName:") + strlen(metadata->enc_key_name);
 }
 
 size_t atclient_atkey_metadata_enc_algo_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_enc_algo_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_enc_algo_initialized(metadata)) {
     return 0;
   }
   return strlen(":encAlgo:") + strlen(metadata->enc_algo);
 }
 
 size_t atclient_atkey_metadata_iv_nonce_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_iv_nonce_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_iv_nonce_initialized(metadata)) {
     return 0;
   }
   return strlen(":ivNonce:") + strlen(metadata->iv_nonce);
 }
 
 size_t atclient_atkey_metadata_ske_enc_key_name_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_ske_enc_key_name_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_ske_enc_key_name_initialized(metadata)) {
     return 0;
   }
   return strlen(":skeEncKeyName:") + strlen(metadata->ske_enc_key_name);
 }
 
 size_t atclient_atkey_metadata_ske_enc_algo_strlen(const atclient_atkey_metadata *metadata) {
-  if(metadata == NULL) {
+  if (metadata == NULL) {
     return 0;
   }
-  if(!atclient_atkey_metadata_is_ske_enc_algo_initialized(metadata)) {
+  if (!atclient_atkey_metadata_is_ske_enc_algo_initialized(metadata)) {
     return 0;
   }
   return strlen(":skeEncAlgo:") + strlen(metadata->ske_enc_algo);
@@ -1199,8 +1199,9 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   /*
    * 2. Create protocol string
    */
-  const size_t metadata_str_size = atclient_atkey_metadata_protocol_strlen(metadata) + 1;
-  const size_t expected_metadatastr_len = metadata_str_size - 1;
+  const size_t expected_metadatastr_len = atclient_atkey_metadata_protocol_strlen(metadata);
+  const size_t metadata_str_size = expected_metadatastr_len + 1;
+
   size_t pos = 0;
 
   if ((*metadata_str = malloc(sizeof(char) * metadata_str_size)) == NULL) {
@@ -1210,109 +1211,106 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   memset(*metadata_str, 0, sizeof(char) * metadata_str_size);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":ttl:%ld", metadata->ttl);
-    pos += 5 + atclient_string_utils_long_strlen(metadata->ttl);
+    sprintf((*metadata_str) + pos, ":ttl:%ld", metadata->ttl);
+    pos += atclient_atkey_metadata_ttl_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":ttb:%ld", metadata->ttb);
-    pos += 5 + atclient_string_utils_long_strlen(metadata->ttb);
+    sprintf((*metadata_str) + pos, ":ttb:%ld", metadata->ttb);
+    pos += atclient_atkey_metadata_ttb_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":ttr:%ld", metadata->ttr);
-    pos += 5 + atclient_string_utils_long_strlen(metadata->ttr);
+    sprintf((*metadata_str) + pos, ":ttr:%ld", metadata->ttr);
+    pos += atclient_atkey_metadata_ttr_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ccd_initialized(metadata)) {
     if (metadata->ccd) {
-      sprintf(*metadata_str + pos, ":ccd:true");
-      pos += 9;
+      sprintf((*metadata_str) + pos, ":ccd:true");
     } else {
-      sprintf(*metadata_str + pos, ":ccd:false");
-      pos += 10;
+      sprintf((*metadata_str) + pos, ":ccd:false");
     }
+    pos += atclient_atkey_metadata_ccd_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_is_binary_initialized(metadata)) {
     if (metadata->is_binary) {
-      sprintf(*metadata_str + pos, ":isBinary:true");
-      pos += 14;
+      sprintf((*metadata_str) + pos, ":isBinary:true");
     } else {
-      sprintf(*metadata_str + pos, ":isBinary:false");
-      pos += 15;
+      sprintf((*metadata_str) + pos, ":isBinary:false");
     }
+    pos += atclient_atkey_metadata_data_signature_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_is_encrypted_initialized(metadata)) {
     if (metadata->is_encrypted) {
-      sprintf(*metadata_str + pos, ":isEncrypted:true");
-      pos += 17;
+      sprintf((*metadata_str) + pos, ":isEncrypted:true");
     } else {
-      sprintf(*metadata_str + pos, ":isEncrypted:false");
-      pos += 18;
+      sprintf((*metadata_str) + pos, ":isEncrypted:false");
     }
+    pos += atclient_atkey_metadata_is_encrypted_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_data_signature_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":dataSignature:%s", metadata->data_signature);
-    pos += strlen(":dataSignature:") + strlen(metadata->data_signature);
+    sprintf((*metadata_str) + pos, ":dataSignature:%s", metadata->data_signature);
+    pos += atclient_atkey_metadata_data_signature_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_shared_key_status_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":sharedKeyStatus:%s", metadata->shared_key_status);
-    pos += strlen(":sharedKeyStatus:") + strlen(metadata->shared_key_status);
+    sprintf((*metadata_str) + pos, ":sharedKeyStatus:%s", metadata->shared_key_status);
+    pos += atclient_atkey_metadata_shared_key_status_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_shared_key_enc_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":sharedKeyEnc:%s", metadata->shared_key_enc);
-    pos += strlen(":sharedKeyEnc:") + strlen(metadata->shared_key_enc);
+    sprintf((*metadata_str) + pos, ":sharedKeyEnc:%s", metadata->shared_key_enc);
+    pos += atclient_atkey_metadata_shared_key_enc_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_pub_key_hash_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":hash:%s", metadata->pub_key_hash);
-    pos += strlen(":hash:") + strlen(metadata->pub_key_hash);
+    sprintf((*metadata_str) + pos, ":hash:%s", metadata->pub_key_hash);
+    pos += atclient_atkey_metadata_pub_key_hash_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_pub_key_algo_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":algo:%s", metadata->pub_key_algo);
-    pos += strlen(":algo:") + strlen(metadata->pub_key_algo);
+    sprintf((*metadata_str) + pos, ":algo:%s", metadata->pub_key_algo);
+    pos += atclient_atkey_metadata_pub_key_algo_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_encoding_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":encoding:%s", metadata->encoding);
-    pos += strlen(":encoding:") + strlen(metadata->encoding);
+    sprintf((*metadata_str) + pos, ":encoding:%s", metadata->encoding);
+    pos += atclient_atkey_metadata_encoding_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_enc_key_name_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":encKeyName:%s", metadata->enc_key_name);
-    pos += strlen(":encKeyName:") + strlen(metadata->enc_key_name);
+    sprintf((*metadata_str) + pos, ":encKeyName:%s", metadata->enc_key_name);
+    pos += atclient_atkey_metadata_enc_key_name_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_enc_algo_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":encAlgo:%s", metadata->enc_algo);
-    pos += strlen(":encAlgo:") + strlen(metadata->enc_algo);
+    sprintf((*metadata_str) + pos, ":encAlgo:%s", metadata->enc_algo);
+    pos += atclient_atkey_metadata_enc_key_name_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_iv_nonce_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":ivNonce:%s", metadata->iv_nonce);
-    pos += strlen(":ivNonce:") + strlen(metadata->iv_nonce);
+    sprintf((*metadata_str) + pos, ":ivNonce:%s", metadata->iv_nonce);
+    pos += atclient_atkey_metadata_iv_nonce_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ske_enc_key_name_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":skeEncKeyName:%s", metadata->ske_enc_key_name);
-    pos += strlen(":skeEncKeyName:") + strlen(metadata->ske_enc_key_name);
+    sprintf((*metadata_str) + pos, ":skeEncKeyName:%s", metadata->ske_enc_key_name);
+    pos += atclient_atkey_metadata_ske_enc_key_name_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ske_enc_algo_initialized(metadata)) {
-    sprintf(*metadata_str + pos, ":skeEncAlgo:%s", metadata->ske_enc_algo);
-    pos += strlen(":skeEncAlgo:") + strlen(metadata->ske_enc_algo);
+    sprintf((*metadata_str) + pos, ":skeEncAlgo:%s", metadata->ske_enc_algo);
+    pos += atclient_atkey_metadata_ske_enc_algo_strlen(metadata);
   }
-
   /*
    * 3. Do a sanity check
    */
-  if (strlen(*metadata_str) != (expected_metadatastr_len)) {
+
+  if (strlen(*metadata_str) != expected_metadatastr_len) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata_str length mismatch: %lu != %lu\n", strlen(*metadata_str),
                  (expected_metadatastr_len));
