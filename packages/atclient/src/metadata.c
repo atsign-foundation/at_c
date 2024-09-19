@@ -1240,7 +1240,7 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
     } else {
       sprintf((*metadata_str) + pos, ":isBinary:false");
     }
-    pos += atclient_atkey_metadata_data_signature_strlen(metadata);
+    pos += atclient_atkey_metadata_is_binary_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_is_encrypted_initialized(metadata)) {
@@ -1289,7 +1289,7 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
 
   if (atclient_atkey_metadata_is_enc_algo_initialized(metadata)) {
     sprintf((*metadata_str) + pos, ":encAlgo:%s", metadata->enc_algo);
-    pos += atclient_atkey_metadata_enc_key_name_strlen(metadata);
+    pos += atclient_atkey_metadata_enc_algo_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_iv_nonce_initialized(metadata)) {
@@ -1310,10 +1310,15 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
    * 3. Do a sanity check
    */
 
+  printf("pos: %lu\nstrlen(*metadata_str): %lu\nexpected_metadatastr_len: %lu\n", pos, strlen(*metadata_str),
+         expected_metadatastr_len);
   if (strlen(*metadata_str) != expected_metadatastr_len) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata_str length mismatch: %lu != %lu\n", strlen(*metadata_str),
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "metadata_str length mismatch: %lu != %lu\nmetadata:", strlen(*metadata_str),
                  (expected_metadatastr_len));
+
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata_str: %s\n", (*metadata_str));
     goto exit;
   }
 
