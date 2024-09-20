@@ -180,14 +180,14 @@ static int test_atkey_metadata_from_jsonstr() {
   if (atclient_atkey_metadata_is_available_at_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_atkey_metadata_isavailableat_initialized is intiialized when it should not be\n");
+                 "atclient_atkey_metadata_isavailableat_initialized is intialized when it should not be\n");
     goto exit;
   }
 
   if (atclient_atkey_metadata_is_refresh_at_initialized(&metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_atkey_metadata_isrefreshat_initialized is intiialized when it should not be\n");
+                 "atclient_atkey_metadata_isrefreshat_initialized is intialized when it should not be\n");
     goto exit;
   }
 
