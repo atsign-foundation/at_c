@@ -1,7 +1,6 @@
 #include "atclient/metadata.h"
 #include "atlogger/atlogger.h"
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
