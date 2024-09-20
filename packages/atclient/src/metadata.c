@@ -1310,8 +1310,6 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
    * 3. Do a sanity check
    */
 
-  printf("pos: %lu\nstrlen(*metadata_str): %lu\nexpected_metadatastr_len: %lu\n", pos, strlen(*metadata_str),
-         expected_metadatastr_len);
   if (strlen(*metadata_str) != expected_metadatastr_len) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
