@@ -1,8 +1,8 @@
 #include "atclient/metadata.h"
 #include "atlogger/atlogger.h"
 #include <stddef.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 // example:
 // "metaData":{
@@ -179,13 +179,15 @@ static int test_atkey_metadata_from_jsonstr() {
 
   if (atclient_atkey_metadata_is_available_at_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isavailableat_initialized is intiialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_atkey_metadata_isavailableat_initialized is initialized when it should not be\n");
     goto exit;
   }
 
-  if(atclient_atkey_metadata_is_refresh_at_initialized(&metadata)) {
+  if (atclient_atkey_metadata_is_refresh_at_initialized(&metadata)) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_isrefreshat_initialized is intiialized when it should not be\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_atkey_metadata_isrefreshat_initialized is initialized when it should not be\n");
     goto exit;
   }
 
@@ -318,6 +320,63 @@ exit: {
 }
 }
 
+// This tests the parameters used to generate device info keys in noports
+static int test_atkey_metadata_to_protocolstr2() {
+  int ret = 1;
+
+  const char *expected = ":ttl:2592000000:ttr:-1:ccd:true:isEncrypted:true:ivNonce:abcdefghijk";
+  const size_t expectedlen = strlen(expected);
+
+  atclient_atkey_metadata metadata;
+  atclient_atkey_metadata_init(&metadata);
+
+  atclient_atkey_metadata_set_is_public(&metadata, false);
+  atclient_atkey_metadata_set_is_encrypted(&metadata, true);
+  atclient_atkey_metadata_set_ttr(&metadata, -1);
+  atclient_atkey_metadata_set_ccd(&metadata, true);
+  atclient_atkey_metadata_set_ttl(&metadata, (long)30 * 24 * 60 * 60 * 1000); // 30 days in ms
+  atclient_atkey_metadata_set_iv_nonce(&metadata, "abcdefghijk");
+
+  char *protocolfragment = NULL;
+  const size_t expected_protocolframent_len = atclient_atkey_metadata_protocol_strlen(&metadata);
+
+  if ((ret = atclient_atkey_metadata_to_protocol_str(&metadata, &protocolfragment)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_to_protocolstr failed");
+    goto exit;
+  }
+
+  const size_t actual_protocolfragment_len = strlen(protocolfragment);
+
+  if (actual_protocolfragment_len != expected_protocolframent_len) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "actual_protocolfragment_len != expected_protocolframent_len: %lu != %lu", actual_protocolfragment_len,
+                 expected_protocolframent_len);
+    ret = 1;
+    goto exit;
+  }
+
+  if (actual_protocolfragment_len != expectedlen) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "actual_protocolfragment_len != expectedlen: %lu != %lu",
+                 actual_protocolfragment_len, expectedlen);
+    ret = 1;
+    goto exit;
+  }
+
+  if (strcmp(protocolfragment, expected) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strncmp(protocolfragment, expected) != 0: %s != %s",
+                 protocolfragment, expected);
+    ret = 1;
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: {
+  atclient_atkey_metadata_free(&metadata);
+  return ret;
+}
+}
+
 static int test_atkey_metadata_to_jsonstr() {
   int ret = 1;
 
@@ -359,6 +418,10 @@ int main() {
   }
 
   if ((ret = test_atkey_metadata_to_protocolstr()) != 0) {
+    goto exit;
+  }
+
+  if ((ret = test_atkey_metadata_to_protocolstr2()) != 0) {
     goto exit;
   }
 
