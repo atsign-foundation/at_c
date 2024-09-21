@@ -153,6 +153,7 @@ exit: {
 }
 
 void atclient_atkeysfile_free(atclient_atkeys_file *atkeys_file) {
+  // log initializedfields
   unset_aes_pkam_public_key_str(atkeys_file);
   unset_aes_pkam_private_key_str(atkeys_file);
   unset_aes_encrypt_public_key_str(atkeys_file);
@@ -422,6 +423,9 @@ static void set_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkey
   if (initialized) {
     atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &=
         ~ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
+  } else {
+    atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] |=
+        ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
   }
 }
 
