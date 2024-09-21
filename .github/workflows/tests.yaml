@@ -90,13 +90,13 @@ jobs:
         working-directory: examples/desktop/repl
         run: |
           cmake -S . -B build
-          cmake --build build --target install
+          cmake --build build
 
       - name: Build reconnection example
         working-directory: examples/desktop/reconnection
         run: |
           cmake -S . -B build
-          cmake --build build --target install
+          cmake --build build
 
       - name: Build sample cmake project
         working-directory: examples/desktop/sample_cmake_project
