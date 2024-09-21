@@ -154,6 +154,21 @@ exit: {
 
 void atclient_atkeysfile_free(atclient_atkeys_file *atkeys_file) {
   // log initializedfields
+  if (is_aes_pkam_public_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesPkamPublicKey initialized\n");
+  }
+  if (is_aes_pkam_private_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesPkamPrivateKey initialized\n");
+  }
+  if (is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesEncryptPublicKey initialized\n");
+  }
+  if (is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesEncryptPrivateKey initialized\n");
+  }
+  if (is_self_encryption_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "selfEncryptionKey initialized\n");
+  }
   unset_aes_pkam_public_key_str(atkeys_file);
   unset_aes_pkam_private_key_str(atkeys_file);
   unset_aes_encrypt_public_key_str(atkeys_file);
@@ -421,11 +436,11 @@ static void set_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys
 
 static void set_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized) {
   if (initialized) {
-    atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &=
-        ~ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
-  } else {
     atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] |=
         ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
+  } else {
+    atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &=
+        ~ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
   }
 }
 
