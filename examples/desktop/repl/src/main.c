@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
   atclient_pkam_authenticate_options options;
   atclient_pkam_authenticate_options_init(&options);
 
+  char *rooturlcopy = NULL;
+
   char *temp = NULL;
 
   if (argc < 2 || argc > 3) {
@@ -53,7 +55,7 @@ int main(int argc, char *argv[]) {
 
   const char *atsign = argv[1];
   const char *rooturl = argc == 3 ? argv[2] : "root.atsign.org:64";
-  char *rooturlcopy = strdup(rooturl); // Create a copy of rootUrl because strtok modifies the original string
+  rooturlcopy = strdup(rooturl); // Create a copy of rootUrl because strtok modifies the original string
   char *roothost = strtok(rooturlcopy, ":");
   char *portstr = strtok(NULL, ":");
   int rootport =
@@ -314,6 +316,7 @@ int main(int argc, char *argv[]) {
 
 exit: {
   free(temp);
+  free(rooturlcopy);
   atclient_free(&atclient);
   atclient_atkeys_free(&atkeys);
   atclient_pkam_authenticate_options_free(&options);
