@@ -46,7 +46,7 @@ static int test1_pkam_no_options() {
   const char *tag = "test1_pkam_no_options";
   int ret = 0;
 
-  atclient_atkeysfile atkeys_file;
+  atclient_atkeys_file atkeys_file;
   atclient_atkeysfile_init(&atkeys_file);
 
   atclient_atkeys atkeys;
@@ -79,7 +79,7 @@ static int test2_pkam_with_options() {
   const char *tag = "test2_pkam_with_options";
   int ret = 0;
 
-  atclient_atkeysfile atkeys_file;
+  atclient_atkeys_file atkeys_file;
   atclient_atkeysfile_init(&atkeys_file);
 
   atclient_atkeys atkeys;

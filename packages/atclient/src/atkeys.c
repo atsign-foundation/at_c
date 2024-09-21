@@ -716,7 +716,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 exit: { return ret; }
 }
 
-int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atclient_atkeysfile *atkeys_file) {
+int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atclient_atkeys_file *atkeys_file) {
   int ret = 1;
 
   if (atkeys == NULL) {
@@ -731,7 +731,7 @@ int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atc
     goto exit;
   }
 
-  if (atclient_atkeysfile_is_enrollment_id_str_initialized((atclient_atkeysfile *)atkeys_file)) {
+  if (atclient_atkeysfile_is_enrollment_id_str_initialized((atclient_atkeys_file *)atkeys_file)) {
     if ((ret = atclient_atkeys_populate_from_strings(
              atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
              atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
@@ -764,7 +764,7 @@ exit: { return ret; }
 int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path) {
   int ret = 1;
 
-  atclient_atkeysfile atkeys_file;
+  atclient_atkeys_file atkeys_file;
   atclient_atkeysfile_init(&atkeys_file);
 
   if ((ret = atclient_atkeysfile_from_path(&atkeys_file, path)) != 0) {
@@ -789,7 +789,7 @@ exit: {
 int atclient_atkeys_populate_from_string(atclient_atkeys *atkeys, const char *file_string) {
   int ret = 1;
 
-  atclient_atkeysfile atkeys_file;
+  atclient_atkeys_file atkeys_file;
   atclient_atkeysfile_init(&atkeys_file);
 
   if ((ret = atclient_atkeysfile_from_string(&atkeys_file, file_string)) != 0) {

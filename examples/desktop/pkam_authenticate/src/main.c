@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  atclient_atkeysfile atkeys_file;
+  atclient_atkeys_file atkeys_file;
   atclient_atkeysfile_init(&atkeys_file);
 
   atclient_atkeys atkeys;

@@ -231,6 +231,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   memset(signature_base64, 0, sizeof(unsigned char) * signature_base64_size);
   size_t signature_base64_len = 0;
 
+  bool should_free_atserver_host = false;
+
   /*
    * 3. Ensure that the atsign has the @ symbol.
    */
@@ -244,7 +246,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 4. Get atserver_host and atserver_port
    */
-  bool should_free_atserver_host = false;
   if (options != NULL) {
     if (atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options) &&
         atclient_pkam_authenticate_options_is_atdirectory_port_initialized(options)) {
