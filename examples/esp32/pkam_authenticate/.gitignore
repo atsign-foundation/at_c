@@ -8,3 +8,4 @@ main/assets/
 dependencies.lock
 spiffs_image/*_key.atKeys
 spiffs_image.bin
+*_key.atKeys
