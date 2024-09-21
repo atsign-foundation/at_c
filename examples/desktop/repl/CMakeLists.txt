@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(repl VERSION 0.0.1 LANGUAGES C HOMEPAGE_URL https://atsign.com)
+project(repl)
 
 include(FetchContent)
 
-find_package(atsdk REQUIRED CONFIG)
+FetchContent_Declare(
+    atsdk
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../..
+)
 
-message(STATUS "atsdk was found")
+FetchContent_MakeAvailable(atsdk)
 
-add_executable(repl)
+add_executable(repl ${CMAKE_CURRENT_LIST_DIR}/src/main.c)
 
-target_sources(repl PRIVATE src/main.c)
-target_link_libraries(repl PRIVATE atsdk::atclient)
+target_link_libraries(repl PRIVATE atclient)
 
-# the target executable will be delivered to the packages/repl/bin directory, when building the `install` target.
 install(TARGETS repl DESTINATION ${CMAKE_CURRENT_LIST_DIR}/bin)
