@@ -1,6 +1,0 @@
-#ifndef ATCHOPS_CONSTANTS_H
-#define ATCHOPS_CONSTANTS_H
-
-#define ATCHOPS_RNG_PERSONALIZATION "@atchops12345"
-
-#endif
