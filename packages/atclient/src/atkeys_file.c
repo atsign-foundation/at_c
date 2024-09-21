@@ -46,9 +46,9 @@ static int set_self_encryption_key_str(atclient_atkeys_file *atkeys_file, const 
 static int set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str,
                                  const size_t enrollment_id_str_len);
 
-void atclient_atkeysfile_init(atclient_atkeys_file *atkeys_file) { memset(atkeys_file, 0, sizeof(atclient_atkeys_file)); }
+void atclient_atkeys_file_init(atclient_atkeys_file *atkeys_file) { memset(atkeys_file, 0, sizeof(atclient_atkeys_file)); }
 
-int atclient_atkeysfile_from_path(atclient_atkeys_file *atkeys_file, const char *path) {
+int atclient_atkeys_file_from_path(atclient_atkeys_file *atkeys_file, const char *path) {
   int ret = 1;
   unsigned char readbuf[FILE_READ_BUFFER_SIZE];
   memset(readbuf, 0, FILE_READ_BUFFER_SIZE);
@@ -66,11 +66,11 @@ int atclient_atkeysfile_from_path(atclient_atkeys_file *atkeys_file, const char 
     return ret;
   }
 
-  ret = atclient_atkeysfile_from_string(atkeys_file, (const char *)readbuf);
+  ret = atclient_atkeys_file_from_string(atkeys_file, (const char *)readbuf);
   return ret;
 }
 
-int atclient_atkeysfile_from_string(atclient_atkeys_file *atkeys_file, const char *file_string) {
+int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const char *file_string) {
   int ret = 1;
 
   cJSON *root = cJSON_Parse(file_string);
@@ -152,23 +152,7 @@ exit: {
 }
 }
 
-void atclient_atkeysfile_free(atclient_atkeys_file *atkeys_file) {
-  // log initializedfields
-  if (is_aes_pkam_public_key_str_initialized(atkeys_file)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesPkamPublicKey initialized\n");
-  }
-  if (is_aes_pkam_private_key_str_initialized(atkeys_file)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesPkamPrivateKey initialized\n");
-  }
-  if (is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesEncryptPublicKey initialized\n");
-  }
-  if (is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "aesEncryptPrivateKey initialized\n");
-  }
-  if (is_self_encryption_key_str_initialized(atkeys_file)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "selfEncryptionKey initialized\n");
-  }
+void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file) {
   unset_aes_pkam_public_key_str(atkeys_file);
   unset_aes_pkam_private_key_str(atkeys_file);
   unset_aes_encrypt_public_key_str(atkeys_file);
@@ -177,31 +161,31 @@ void atclient_atkeysfile_free(atclient_atkeys_file *atkeys_file) {
   unset_enrollment_id_str(atkeys_file);
 }
 
-bool atclient_atkeysfile_is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
   return is_aes_pkam_public_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeysfile_is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
   return is_aes_pkam_private_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeysfile_is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
   return is_aes_encrypt_public_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeysfile_is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
   return is_aes_encrypt_private_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeysfile_is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file) {
   return is_self_encryption_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeysfile_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
   return is_enrollment_id_str_initialized(atkeys_file);
 }
 
-int atclient_atkeysfile_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
+int atclient_atkeys_file_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
                                                     const char *aes_pkam_public_key_str,
                                                     const size_t aes_pkam_public_key_str_len) {
   int ret = 1;
@@ -233,7 +217,7 @@ int atclient_atkeysfile_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys
 exit: { return ret; }
 }
 
-int atclient_atkeysfile_set_aes_pkam_private_key_str(atclient_atkeys_file *atkeys_file,
+int atclient_atkeys_file_set_aes_pkam_private_key_str(atclient_atkeys_file *atkeys_file,
                                                      const char *aes_pkam_private_key_str,
                                                      const size_t aes_pkam_private_key_str_len) {
   int ret = 1;
@@ -265,7 +249,7 @@ int atclient_atkeysfile_set_aes_pkam_private_key_str(atclient_atkeys_file *atkey
 exit: { return ret; }
 }
 
-int atclient_atkeysfile_set_aes_encrypt_public_key_str(atclient_atkeys_file *atkeys_file,
+int atclient_atkeys_file_set_aes_encrypt_public_key_str(atclient_atkeys_file *atkeys_file,
                                                        const char *aes_encrypt_public_key_str,
                                                        const size_t aes_encrypt_public_key_str_len) {
   int ret = 1;
@@ -298,7 +282,7 @@ int atclient_atkeysfile_set_aes_encrypt_public_key_str(atclient_atkeys_file *atk
 exit: { return ret; }
 }
 
-int atclient_atkeysfile_set_aes_encrypt_private_key_str(atclient_atkeys_file *atkeys_file,
+int atclient_atkeys_file_set_aes_encrypt_private_key_str(atclient_atkeys_file *atkeys_file,
                                                         const char *aes_encrypt_private_key_str,
                                                         const size_t aes_encrypt_private_key_str_len) {
   int ret = 1;
@@ -331,7 +315,7 @@ int atclient_atkeysfile_set_aes_encrypt_private_key_str(atclient_atkeys_file *at
 exit: { return ret; }
 }
 
-int atclient_atkeysfile_set_self_encryption_key_str(atclient_atkeys_file *atkeys_file,
+int atclient_atkeys_file_set_self_encryption_key_str(atclient_atkeys_file *atkeys_file,
                                                     const char *self_encryption_key_str,
                                                     const size_t self_encryption_key_str_len) {
   int ret = 1;
@@ -363,7 +347,7 @@ int atclient_atkeysfile_set_self_encryption_key_str(atclient_atkeys_file *atkeys
 exit: { return ret; }
 }
 
-int atclient_atkeysfile_set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str,
+int atclient_atkeys_file_set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str,
                                               const size_t enrollment_id_str_len) {
   int ret = 1;
 
