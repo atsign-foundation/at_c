@@ -12,12 +12,12 @@
 
 #define TAG "atkeys_file"
 
-static bool is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file);
+static bool is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file);
 
 static void set_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
 static void set_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
@@ -170,27 +170,27 @@ void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file) {
   unset_enrollment_id_str(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_pkam_public_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_pkam_private_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_encrypt_public_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_encrypt_private_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_self_encryption_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_enrollment_id_str_initialized(atkeys_file);
 }
 
@@ -387,32 +387,32 @@ int atclient_atkeys_file_set_enrollment_id_str(atclient_atkeys_file *atkeys_file
 exit: { return ret; }
 }
 
-static bool is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PUBLIC_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_PKAM_PUBLIC_KEY_STR_INITIALIZED;
 }
 
-static bool is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
 }
 
-static bool is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED;
 }
 
-static bool is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED;
 }
 
-static bool is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED;
 }
 
-static bool is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INITIALIZED;
 }
