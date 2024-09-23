@@ -251,20 +251,19 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     goto exit;
   }
   // log temp buf
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf: %s\n", temp_buf);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf (public key): %s\n", temp_buf);
 
   size_t public_key_base64_len = 0;
   char *begin = strstr((char *)temp_buf, "-----BEGIN PUBLIC KEY-----");
   char *end = strstr((char *)temp_buf, "-----END PUBLIC KEY-----");
   if (begin != NULL && end != NULL) {
-    // Move begin pointer to start of base64 content
+
     begin += strlen("-----BEGIN PUBLIC KEY-----");
     while (*begin == '\n' || *begin == '\r' || *begin == ' ')
-      begin++; // Skip newlines, carriage returns, and spaces
+      begin++;
 
-    // Copy base64 content
     for (char *src = begin, *dest = public_key_base64; src < end; ++src) {
-      if (*src != '\n' && *src != '\r') { // Skip newlines and carriage returns
+      if (*src != '\n' && *src != '\r') {
         *dest++ = *src;
         public_key_base64_len++;
       }
@@ -272,28 +271,26 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   }
 
   /*
-   * 6. Write to private_key_base64 buffer
+   * 6. Write to private_key_base64 buffer (PKCS#8 format)
    */
   memset(temp_buf, 0, sizeof(temp_buf));
   if ((ret = mbedtls_pk_write_key_pem(&pk, temp_buf, temp_buf_size)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key (PKCS#8 format)\n");
     goto exit;
   }
   // log temp buf
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf: %s\n", temp_buf);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf (private key): %s\n", temp_buf);
 
   size_t private_key_base64_len = 0;
   begin = strstr((char *)temp_buf, "-----BEGIN RSA PRIVATE KEY-----");
   end = strstr((char *)temp_buf, "-----END RSA PRIVATE KEY-----");
   if (begin != NULL && end != NULL) {
-    // Move begin pointer to start of base64 content
     begin += strlen("-----BEGIN RSA PRIVATE KEY-----");
     while (*begin == '\n' || *begin == '\r' || *begin == ' ')
-      begin++; // Skip newlines, carriage returns, and spaces
+      begin++;
 
-    // Copy base64 content
     for (char *src = begin, *dest = private_key_base64; src < end; ++src) {
-      if (*src != '\n' && *src != '\r') { // Skip newlines and carriage returns
+      if (*src != '\n' && *src != '\r') {
         *dest++ = *src;
         private_key_base64_len++;
       }
