@@ -35,13 +35,13 @@ static void unset_enrollment_id(atclient_atkeys *atkeys);
 static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                       const size_t pkam_public_key_len);
 static int set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
-                                       const size_t pkam_private_key_len);
+                                       const size_t pkam_private_key_base64_len);
 static int set_encrypt_public_key_base64(atclient_atkeys *atkeys, const char *encrypt_public_key_base64,
-                                         const size_t encrypt_public_key_len);
+                                         const size_t encrypt_public_key_base64_len);
 static int set_encrypt_private_key_base64(atclient_atkeys *atkeys, const char *encrypt_private_key_base64,
-                                          const size_t encrypt_private_key_len);
+                                          const size_t encrypt_private_key_base64_len);
 static int set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *self_encryption_key_base64,
-                                          const size_t self_encryption_key_len);
+                                          const size_t self_encryption_key_base64_len);
 static int set_enrollment_id(atclient_atkeys *atkeys, const char *enrollment_id, const size_t enrollment_id_len);
 
 void atclient_atkeys_init(atclient_atkeys *atkeys) {
@@ -539,7 +539,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   const size_t self_encryption_key_size = ATCHOPS_AES_256 / 8;
   unsigned char self_encryption_key[self_encryption_key_size];
   memset(self_encryption_key, 0, sizeof(unsigned char) * self_encryption_key_size);
-  size_t self_encryption_key_len = 0;
+  size_t self_encryption_key_base64_len = 0;
 
   // temporarily holds the base64-encoded encrypted RSA key for decryption
   const size_t rsa_key_encrypted_size = 4096;
@@ -557,7 +557,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
    * 3. Prepare self encryption key for use
    */
   if ((ret = atchops_base64_decode((unsigned char *)self_encryption_key_str, self_encryption_key_str_len,
-                                   self_encryption_key, self_encryption_key_size, &self_encryption_key_len)) != 0) {
+                                   self_encryption_key, self_encryption_key_size, &self_encryption_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding selfencryption key: %d\n", ret);
     goto exit;
   }
@@ -722,16 +722,16 @@ int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atc
   if (atkeys == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
-    goto exit;
+    return ret;
   }
 
   if (atkeys_file == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys_file is NULL\n");
-    goto exit;
+    return ret;
   }
 
-  if (atclient_atkeys_file_is_enrollment_id_str_initialized((atclient_atkeys_file *)atkeys_file)) {
+  if (atclient_atkeys_file_is_enrollment_id_str_initialized(atkeys_file)) {
     if ((ret = atclient_atkeys_populate_from_strings(
              atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
              atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
@@ -755,8 +755,6 @@ int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atc
       goto exit;
     }
   }
-
-  goto exit;
 
 exit: { return ret; }
 }
@@ -973,15 +971,15 @@ exit: { return ret; }
 }
 
 static int set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
-                                       const size_t pkam_private_key_len) {
+                                       const size_t pkam_private_key_base64_len) {
   int ret = 1;
 
   if (is_pkam_private_key_base64_initialized(atkeys)) {
     unset_pkam_private_key_base64(atkeys);
   }
 
-  const size_t pkam_private_key_size = pkam_private_key_len + 1;
-  atkeys->pkam_private_key_base64 = (char *)malloc(sizeof(char) * (pkam_private_key_size));
+  const size_t pkam_private_key_base64_size = pkam_private_key_base64_len + 1;
+  atkeys->pkam_private_key_base64 = (char *)malloc(sizeof(char) * (pkam_private_key_base64_size));
   if (atkeys->pkam_private_key_base64 == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -989,8 +987,8 @@ static int set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam
     goto exit;
   }
 
-  memcpy(atkeys->pkam_private_key_base64, pkam_private_key_base64, pkam_private_key_len);
-  atkeys->pkam_private_key_base64[pkam_private_key_len] = '\0';
+  memcpy(atkeys->pkam_private_key_base64, pkam_private_key_base64, pkam_private_key_base64_len);
+  atkeys->pkam_private_key_base64[pkam_private_key_base64_len] = '\0';
 
   set_pkam_private_key_base64_initialized(atkeys, true);
 
@@ -1000,14 +998,14 @@ exit: { return ret; }
 }
 
 static int set_encrypt_public_key_base64(atclient_atkeys *atkeys, const char *encrypt_public_key_base64,
-                                         const size_t encrypt_public_key_len) {
+                                         const size_t encrypt_public_key_base64_len) {
   int ret = 1;
 
   if (is_encrypt_public_key_base64_initialized(atkeys)) {
     unset_encrypt_public_key_base64(atkeys);
   }
 
-  const size_t encrypt_public_key_size = encrypt_public_key_len + 1;
+  const size_t encrypt_public_key_size = encrypt_public_key_base64_len + 1;
   atkeys->encrypt_public_key_base64 = (char *)malloc(sizeof(char) * (encrypt_public_key_size));
   if (atkeys->encrypt_public_key_base64 == NULL) {
     ret = 1;
@@ -1016,8 +1014,8 @@ static int set_encrypt_public_key_base64(atclient_atkeys *atkeys, const char *en
     goto exit;
   }
 
-  memcpy(atkeys->encrypt_public_key_base64, encrypt_public_key_base64, encrypt_public_key_len);
-  atkeys->encrypt_public_key_base64[encrypt_public_key_len] = '\0';
+  memcpy(atkeys->encrypt_public_key_base64, encrypt_public_key_base64, encrypt_public_key_base64_len);
+  atkeys->encrypt_public_key_base64[encrypt_public_key_base64_len] = '\0';
 
   set_encrypt_public_key_base64_initialized(atkeys, true);
 
@@ -1027,14 +1025,14 @@ exit: { return ret; }
 }
 
 static int set_encrypt_private_key_base64(atclient_atkeys *atkeys, const char *encrypt_private_key_base64,
-                                          const size_t encrypt_private_key_len) {
+                                          const size_t encrypt_private_key_base64_len) {
   int ret = 1;
 
   if (is_encrypt_private_key_base64_initialized(atkeys)) {
     unset_encrypt_private_key_base64(atkeys);
   }
 
-  const size_t encrypt_private_key_size = encrypt_private_key_len + 1;
+  const size_t encrypt_private_key_size = encrypt_private_key_base64_len + 1;
   atkeys->encrypt_private_key_base64 = (char *)malloc(sizeof(char) * (encrypt_private_key_size));
   if (atkeys->encrypt_private_key_base64 == NULL) {
     ret = 1;
@@ -1043,8 +1041,8 @@ static int set_encrypt_private_key_base64(atclient_atkeys *atkeys, const char *e
     goto exit;
   }
 
-  memcpy(atkeys->encrypt_private_key_base64, encrypt_private_key_base64, encrypt_private_key_len);
-  atkeys->encrypt_private_key_base64[encrypt_private_key_len] = '\0';
+  memcpy(atkeys->encrypt_private_key_base64, encrypt_private_key_base64, encrypt_private_key_base64_len);
+  atkeys->encrypt_private_key_base64[encrypt_private_key_base64_len] = '\0';
 
   set_encrypt_privatekey_base64_initialized(atkeys, true);
 
@@ -1054,10 +1052,10 @@ exit: { return ret; }
 }
 
 static int set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *self_encryption_key_base64,
-                                          const size_t self_encryption_key_len) {
+                                          const size_t self_encryption_key_base64_len) {
   int ret = 1;
 
-  if (self_encryption_key_base64 == NULL || self_encryption_key_len == 0) {
+  if (self_encryption_key_base64 == NULL || self_encryption_key_base64_len == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid self encryption key or key length\n");
     return 1;
   }
@@ -1066,15 +1064,15 @@ static int set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *s
     unset_self_encryption_key_base64(atkeys);
   }
 
-  const size_t self_encryption_key_size = self_encryption_key_len + 1;
+  const size_t self_encryption_key_size = self_encryption_key_base64_len + 1;
   atkeys->self_encryption_key_base64 = (char *)malloc(self_encryption_key_size);
   if (atkeys->self_encryption_key_base64 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for self_encryption_key_base64\n");
     return 1;
   }
 
-  memcpy(atkeys->self_encryption_key_base64, self_encryption_key_base64, self_encryption_key_len);
-  atkeys->self_encryption_key_base64[self_encryption_key_len] = '\0'; // Null-terminate the string
+  memcpy(atkeys->self_encryption_key_base64, self_encryption_key_base64, self_encryption_key_base64_len);
+  atkeys->self_encryption_key_base64[self_encryption_key_base64_len] = '\0'; // Null-terminate the string
 
   set_self_encryption_key_base64_initialized(atkeys, true);
 
