@@ -48,24 +48,21 @@ typedef struct {
 static void pkam_authenticate_task(void *pvParameters) {
     pkam_authenticate_params_t *params = (pkam_authenticate_params_t *)pvParameters;
 
-    // Ensure parameters are not NULL
     if (params == NULL || params->client == NULL || params->keys == NULL) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid parameters for PKAM authentication task\n");
         vTaskDelete(NULL);
         return;
     }
 
-    // Add debug log for client and keys
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "PKAM task started: client=%p, keys=%p\n", params->client, params->keys);
 
-    // Perform authentication
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Attempting PKAM authentication...\n");
     if (atclient_pkam_authenticate(params->client, "@soccer99", params->keys, NULL) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with secondary server\n");
     } else {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully authenticated with secondary server\n");
     }
 
-    // Notify the calling task that this task has finished
     xTaskNotifyGive(xTaskGetCurrentTaskHandle());
 
     free(params);  // Free the allocated structure after task completion
@@ -187,10 +184,14 @@ void app_main(void) {
         goto exit;
     }
 
+    // log heap memory left
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Heap memory left: %d\n", esp_get_free_heap_size());
     if ((ret = atclient_atkeys_populate_from_string(atkeys1, key_file_content)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys from string: %d\n", ret);
         goto exit;
     }
+    // log heap memory left
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Heap memory left: %d\n", esp_get_free_heap_size());
 
     // Allocate and populate the structure to pass to the task
     pkam_authenticate_params_t *params = (pkam_authenticate_params_t *)malloc(sizeof(pkam_authenticate_params_t));
