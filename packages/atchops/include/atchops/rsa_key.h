@@ -46,6 +46,14 @@ int atchops_rsa_key_public_key_clone(const atchops_rsa_key_public_key *src, atch
 int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, atchops_rsa_key_private_key *dst);
 
 /**
+ * @brief Generate a new RSA 2048 key pair (public and private)
+ * 
+ * @param public_key the public key struct to populate, assumed to be allocated and initialized. initialized via atchops_rsa_key_public_key_init
+ * @param private_key the private key struct to populate, assumed to be allocated and initialized. initialized via atchops_rsa_key_private_key_init
+ */
+int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key);
+
+/**
  * @brief Populate a public key struct from a base64 string
  *
  * @param public_key_struct the public key struct to populate

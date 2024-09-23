@@ -1,5 +1,6 @@
 #include "atchops/rsa_key.h"
 #include "atchops/base64.h"
+#include "atchops/constants.h"
 #include "atchops/mbedtls.h"
 #include <atlogger/atlogger.h>
 #include <stddef.h>
@@ -175,6 +176,155 @@ int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, at
   ret = 0;
   goto exit;
 exit: { return ret; }
+}
+
+int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (public_key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is null\n");
+    return ret;
+  }
+
+  if (private_key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is null\n");
+    return ret;
+  }
+
+  /*
+   * 2. Variables
+   */
+  mbedtls_entropy_context entropy;
+  mbedtls_entropy_init(&entropy);
+
+  mbedtls_ctr_drbg_context ctr_drbg;
+  mbedtls_ctr_drbg_init(&ctr_drbg);
+
+  mbedtls_pk_context pk;
+  mbedtls_pk_init(&pk);
+
+  const size_t public_key_base64_size = 1024; // 1024 bytes is sufficient size for a 2048 bit RSA key base64 encoded
+  char public_key_base64[public_key_base64_size];
+  memset(public_key_base64, 0, sizeof(char) * public_key_base64_size);
+
+  const size_t private_key_base64_size = 2048; // 2048 bytes is sufficient size for a 2048 bit RSA key base64 encoded
+  char private_key_base64[private_key_base64_size];
+  memset(private_key_base64, 0, sizeof(char) * private_key_base64_size);
+
+  const size_t temp_buf_size = 8192;
+  unsigned char temp_buf[temp_buf_size]; // temporary buffer for formatting purposes
+
+  /*
+   * 3. Seed RNG
+   */
+  if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
+                                   (const unsigned char *)ATCHOPS_RNG_PERSONALIZATION,
+                                   strlen(ATCHOPS_RNG_PERSONALIZATION))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to seed random number generator\n");
+    goto exit;
+  }
+
+  /*
+   * 4. Use MbedTLS to generate RSA key pair
+   */
+  if ((ret = mbedtls_pk_setup(&pk, mbedtls_pk_info_from_type(MBEDTLS_PK_RSA))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to setup RSA key\n");
+    goto exit;
+  }
+
+  if ((ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(pk), mbedtls_ctr_drbg_random, &ctr_drbg, 2048, 65537)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate RSA key\n");
+    goto exit;
+  }
+
+  /*
+   * 5. Write to public_key_base64 buffer
+   */
+  memset(temp_buf, 0, sizeof(temp_buf));
+  if ((ret = mbedtls_pk_write_pubkey_pem(&pk, temp_buf, temp_buf_size)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write public key\n");
+    goto exit;
+  }
+  // log temp buf
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf: %s\n", temp_buf);
+
+  size_t public_key_base64_len = 0;
+  char *begin = strstr((char *)temp_buf, "-----BEGIN PUBLIC KEY-----");
+  char *end = strstr((char *)temp_buf, "-----END PUBLIC KEY-----");
+  if (begin != NULL && end != NULL) {
+    // Move begin pointer to start of base64 content
+    begin += strlen("-----BEGIN PUBLIC KEY-----");
+    while (*begin == '\n' || *begin == '\r' || *begin == ' ')
+      begin++; // Skip newlines, carriage returns, and spaces
+
+    // Copy base64 content
+    for (char *src = begin, *dest = public_key_base64; src < end; ++src) {
+      if (*src != '\n' && *src != '\r') { // Skip newlines and carriage returns
+        *dest++ = *src;
+        public_key_base64_len++;
+      }
+    }
+  }
+
+  /*
+   * 6. Write to private_key_base64 buffer
+   */
+  memset(temp_buf, 0, sizeof(temp_buf));
+  if ((ret = mbedtls_pk_write_key_pem(&pk, temp_buf, temp_buf_size)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key\n");
+    goto exit;
+  }
+  // log temp buf
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf: %s\n", temp_buf);
+
+  size_t private_key_base64_len = 0;
+  begin = strstr((char *)temp_buf, "-----BEGIN RSA PRIVATE KEY-----");
+  end = strstr((char *)temp_buf, "-----END RSA PRIVATE KEY-----");
+  if (begin != NULL && end != NULL) {
+    // Move begin pointer to start of base64 content
+    begin += strlen("-----BEGIN RSA PRIVATE KEY-----");
+    while (*begin == '\n' || *begin == '\r' || *begin == ' ')
+      begin++; // Skip newlines, carriage returns, and spaces
+
+    // Copy base64 content
+    for (char *src = begin, *dest = private_key_base64; src < end; ++src) {
+      if (*src != '\n' && *src != '\r') { // Skip newlines and carriage returns
+        *dest++ = *src;
+        private_key_base64_len++;
+      }
+    }
+  }
+
+  /*
+   * 7. Populate the atchops_rsa_key_public_key and atchops_rsa_key_private_key structs
+   */
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Public Key (%lu): %s\n", public_key_base64_len, public_key_base64);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Private Key (%lu): %s\n", private_key_base64_len,
+               private_key_base64);
+
+  if ((ret = atchops_rsa_key_populate_public_key(public_key, (const char *)public_key_base64, public_key_base64_len)) !=
+      0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate public key\n");
+    goto exit;
+  }
+
+  if ((ret = atchops_rsa_key_populate_private_key(private_key, (const char *)private_key_base64,
+                                                  private_key_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate private key\n");
+    goto exit;
+  }
+
+exit: {
+  mbedtls_pk_free(&pk);
+  mbedtls_ctr_drbg_free(&ctr_drbg);
+  mbedtls_entropy_free(&entropy);
+  return ret;
+}
 }
 
 int atchops_rsa_key_populate_public_key(atchops_rsa_key_public_key *public_key, const char *public_key_base64,
@@ -395,7 +545,8 @@ exit: {
 }
 
 bool atchops_rsa_key_is_public_key_populated(const atchops_rsa_key_public_key *public_key) {
-  return atchops_rsa_key_public_key_is_n_initialized(public_key) && atchops_rsa_key_public_key_is_e_initialized(public_key);
+  return atchops_rsa_key_public_key_is_n_initialized(public_key) &&
+         atchops_rsa_key_public_key_is_e_initialized(public_key);
 }
 
 bool atchops_rsa_key_is_private_key_populated(const atchops_rsa_key_private_key *private_key) {
@@ -1058,7 +1209,8 @@ bool atchops_rsa_key_private_key_is_q_initialized(const atchops_rsa_key_private_
   return private_key->q._is_value_initialized;
 }
 
-void atchops_rsa_key_private_key_set_q_initialized(atchops_rsa_key_private_key *private_key, const bool is_initialized) {
+void atchops_rsa_key_private_key_set_q_initialized(atchops_rsa_key_private_key *private_key,
+                                                   const bool is_initialized) {
   /*
    * 1. Validate arguments
    */
@@ -1074,7 +1226,7 @@ void atchops_rsa_key_private_key_set_q_initialized(atchops_rsa_key_private_key *
 }
 
 int atchops_rsa_key_private_key_set_q(atchops_rsa_key_private_key *private_key, const unsigned char *q,
-                                    const size_t q_len) {
+                                      const size_t q_len) {
   int ret = 1;
 
   /*
