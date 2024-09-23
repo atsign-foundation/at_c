@@ -1,7 +1,7 @@
-#include <atclient/atkeys.h>
+#include <atclient/atkeys_file.h>
 #include <atlogger/atlogger.h>
 
-#define TAG "test_atkeys_from_string"
+#define TAG "test_atkeys_file_from_string"
 
 #define ATKEYS                                                                                                         \
   "{\"aesPkamPublicKey\":\"r/"                                                                                         \
@@ -110,73 +110,37 @@
   "fA6XfIE4yfz9JDYs5G2oIudw+YOPf6PnPETG004qUpCyyrBlqu4ezFVJSyfNZ/b90e2QfzI8pZNRVYNNAMTPuXiui88XsxHPiTYq6Er"
 #define SELF_ENCRYPTION_KEY_VALUE "REqkIcl9HPekt0T7+rZhkrBvpysaPOeC2QL1PVuWlus="
 
-static int test_1_atkeys_from_string();
+static int test_1_atkeys_file_from_string() {
+    int ret = 1;
 
-int main() {
-  int ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_atkeys_file_from_string Begin\n");
 
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+    atclient_atkeys_file atkeys_file;
+    atclient_atkeys_file_init(&atkeys_file);
 
-  if ((ret = test_1_atkeys_from_string()) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_atkeys_from_string: %d\n", ret);
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_atkeys_from_string: %d\n", ret);
-
-exit: { return ret; }
-}
-
-static int test_1_atkeys_from_string() {
-  int ret = 1;
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_atkeys_from_string Begin\n");
-
-  atclient_atkeys atkeys;
-  atclient_atkeys_init(&atkeys);
-
-  if ((ret = atclient_atkeys_populate_from_string(&atkeys, ATKEYS)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_populate_from_string: %d\n", ret);
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_string: %d\n", ret);
-
-  if (!atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_is_pkam_public_key_base64_initialized: %d\n", ret);
-    goto exit;
-  }
-
-  if (!atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_is_pkam_private_key_base64_initialized: %d\n",
-                 ret);
-    goto exit;
-  }
-
-  if (!atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_is_encrypt_public_key_base64_initialized: %d\n",
-                 ret);
-    goto exit;
-  }
-
-  if (!atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_is_encrypt_private_key_base64_initialized: %d\n",
-                 ret);
-    goto exit;
-  }
-
-  if (!atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_is_self_encryption_key_base64_initialized: %d\n",
-                 ret);
-    goto exit;
-  }
+    if((ret = atclient_atkeys_file_from_string(&atkeys_file, ATKEYS)) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_from_string failed\n");
+        goto exit;
+    }
 
 exit: {
-  atclient_atkeys_free(&atkeys);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_atkeys_from_string End: %d\n", ret);
-  return ret;
+    atclient_atkeys_file_free(&atkeys_file);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_atkeys_file_from_string End: %d\n", ret);
+    return ret;
+}
+}
+
+int main() {
+    int ret = 1;
+
+    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+
+    if((ret = test_1_atkeys_file_from_string()) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_atkeys_file_from_string failed\n");
+        goto exit;
+    }
+
+exit: {
+    return ret;
 }
 }
