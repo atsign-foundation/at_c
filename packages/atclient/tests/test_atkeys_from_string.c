@@ -119,6 +119,7 @@ int main() {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_atkeys_from_string: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_atkeys_from_string: %d\n", ret);
 
 exit: { return ret; }
 }
