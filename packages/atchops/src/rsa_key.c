@@ -250,8 +250,6 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write public key\n");
     goto exit;
   }
-  // log temp buf
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf (public key): %s\n", temp_buf);
 
   size_t public_key_base64_len = 0;
   char *begin = strstr((char *)temp_buf, "-----BEGIN PUBLIC KEY-----");
@@ -278,8 +276,6 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key (PKCS#8 format)\n");
     goto exit;
   }
-  // log temp buf
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "temp_buf (private key): %s\n", temp_buf);
 
   size_t private_key_base64_len = 0;
   begin = strstr((char *)temp_buf, "-----BEGIN RSA PRIVATE KEY-----");
@@ -300,9 +296,6 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   /*
    * 7. Populate the atchops_rsa_key_public_key and atchops_rsa_key_private_key structs
    */
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Public Key (%lu): %s\n", public_key_base64_len, public_key_base64);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Private Key (%lu): %s\n", private_key_base64_len,
-               private_key_base64);
 
   if ((ret = atchops_rsa_key_populate_public_key(public_key, (const char *)public_key_base64, public_key_base64_len)) !=
       0) {
