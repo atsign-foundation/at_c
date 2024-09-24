@@ -1,5 +1,0 @@
-## IDF Component Manager Manifest File
-dependencies:
-  atsign-foundation/atclient: "^0.1.0"
-  idf:
-    version: ">=4.1.0"

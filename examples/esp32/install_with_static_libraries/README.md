@@ -1,4 +1,14 @@
-# atclient_esp32_static_libraries
+# install_with_static_libraries
+
+## Who Is This For
+
+This example is good for those who have access to the static libraries that were generated on your computer.
+
+This is not the recommended way of doing things, but is possible in case you need to do it this way.
+
+If you want to use our components quickly and easily, we have an example named [install_with_remote_components](../install_with_remote_components/README.md).
+
+## How To Install With Static Libraries
 
 Let's say you have access to the following:
 
@@ -18,8 +28,6 @@ Let's say you have access to the following:
   - `include/uuid4/`
 
   (All the dependencies such as cjson, mbedtls, and uuid4 are already included in the static libraries)
-
-This article of documentation shows you how to use these static libraries in your Espressif project.
 
 1. Ensure your project structure looks like this:
 
@@ -43,6 +51,8 @@ This article of documentation shows you how to use these static libraries in you
 └── main
     └── main.c
 ```
+
+If your project doesn't look like this, then you need to move your files around.
 
 2. Your `main/CMakeLists.txt` should look like this:
 
@@ -76,4 +86,10 @@ cmake_minimum_required(VERSION 3.24)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 project(atclient_esp32_static_libraries)
+```
+
+4. Build your project:
+
+```bash
+idf.py build
 ```
