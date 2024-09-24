@@ -16,8 +16,8 @@ int main(int argc, char **argv) {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  atclient_atkeysfile atkeys_file;
-  atclient_atkeysfile_init(&atkeys_file);
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
@@ -25,10 +25,10 @@ int main(int argc, char **argv) {
   atclient atclient;
   atclient_init(&atclient);
 
-  if ((ret = atclient_atkeysfile_from_path(&atkeys_file, ATKEYS_FILE_PATH)) != 0) {
+  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, ATKEYS_FILE_PATH)) != 0) {
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeysfile_read: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_from_path: %d\n", ret);
 
   if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file)) != 0) {
     goto exit;
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   goto exit;
 
 exit: {
-  atclient_atkeysfile_free(&atkeys_file);
+  atclient_atkeys_file_free(&atkeys_file);
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
   return 0;

@@ -46,8 +46,8 @@ static int test1_pkam_no_options() {
   const char *tag = "test1_pkam_no_options";
   int ret = 0;
 
-  atclient_atkeysfile atkeys_file;
-  atclient_atkeysfile_init(&atkeys_file);
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
@@ -55,10 +55,10 @@ static int test1_pkam_no_options() {
   atclient atclient;
   atclient_init(&atclient);
 
-  if ((ret = atclient_atkeysfile_from_path(&atkeys_file, atkeyspath)) != 0) {
+  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, atkeyspath)) != 0) {
     return ret;
   }
-  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeysfile_from_string: %d\n", ret);
+  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_from_string: %d\n", ret);
 
   if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file)) != 0) {
     return ret;
@@ -79,8 +79,8 @@ static int test2_pkam_with_options() {
   const char *tag = "test2_pkam_with_options";
   int ret = 0;
 
-  atclient_atkeysfile atkeys_file;
-  atclient_atkeysfile_init(&atkeys_file);
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
@@ -88,10 +88,10 @@ static int test2_pkam_with_options() {
   atclient atclient;
   atclient_init(&atclient);
 
-  if ((ret = atclient_atkeysfile_from_path(&atkeys_file, atkeyspath)) != 0) {
+  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, atkeyspath)) != 0) {
     return ret;
   }
-  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeysfile_from_string: %d\n", ret);
+  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_from_string: %d\n", ret);
 
   if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file)) != 0) {
     return ret;
