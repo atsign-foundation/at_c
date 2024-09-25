@@ -14,6 +14,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
   ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
   ${CMAKE_CURRENT_LIST_DIR}/src/uuid.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/hex_utils.c
 )
 
 # Project setup

@@ -170,6 +170,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,"Connected\n");
 
   // ===============
   // after connect
