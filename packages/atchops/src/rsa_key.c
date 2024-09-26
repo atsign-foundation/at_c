@@ -9,8 +9,6 @@
 
 #define TAG "rsa_key"
 
-#define BASE64_DECODED_KEY_BUFFER_SIZE 8192 // the max buffer size of a decoded RSA key
-
 void atchops_rsa_key_public_key_init(atchops_rsa_key_public_key *public_key) {
   /*
    * 1. Validate arguments
@@ -216,12 +214,14 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   char private_key_base64[private_key_base64_size];
   memset(private_key_base64, 0, sizeof(char) * private_key_base64_size);
 
-  unsigned char *private_key_non_base64 = NULL;
-  unsigned char *private_key_pkcs8 = NULL;
-  char *private_key_pkcs8_base64 = NULL;
+  unsigned char *private_key_non_base64 =
+      NULL; // holds the raw bytes of the 9 element SEQUENCE of the numbers (0, N, E, D, P, Q, DP, DQ, QP), free later
 
-  const size_t temp_buf_size = 8192;
-  unsigned char temp_buf[temp_buf_size]; // temporary buffer for formatting purposes
+  unsigned char *private_key_pkcs8 = NULL; // buffer for building the pkcs_8 formatted private key, free later
+  char *private_key_pkcs8_base64 = NULL;   // to hold the base64-encoded pkcs 8 formatted private key, free later
+
+  const size_t temp_buf_size = 4096; // sufficient to hold a private RSA Key in format ----BEGIN ....
+  unsigned char temp_buf[temp_buf_size];
 
   /*
    * 3. Seed RNG
@@ -275,7 +275,7 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   /*
    * 6. Write to private_key_base64 buffer (PKCS#8 format)
    */
-  memset(temp_buf, 0, sizeof(temp_buf));
+  memset(temp_buf, 0, sizeof(unsigned char) * temp_buf_size);
   if ((ret = mbedtls_pk_write_key_pem(&pk, temp_buf, temp_buf_size)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key (PKCS#8 format)\n");
     goto exit;
@@ -299,28 +299,31 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
 
   const size_t private_key_non_base64_size = atchops_base64_decoded_size(private_key_base64_len);
   private_key_non_base64 = (unsigned char *)malloc(private_key_non_base64_size);
-  if(private_key_non_base64 == NULL) {
+  if (private_key_non_base64 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_non_base64\n");
     goto exit;
   }
 
   size_t private_key_non_base64_len = 0;
-  if((ret = atchops_base64_decode((const unsigned char *)private_key_base64, private_key_base64_len, private_key_non_base64,
-                                  private_key_non_base64_size, &private_key_non_base64_len)) != 0) {
+  if ((ret = atchops_base64_decode((const unsigned char *)private_key_base64, private_key_base64_len,
+                                   private_key_non_base64, private_key_non_base64_size, &private_key_non_base64_len)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode private key\n");
     goto exit;
   }
 
   const size_t private_key_pkcs8_size = private_key_non_base64_len + 22;
   private_key_pkcs8 = (unsigned char *)malloc(private_key_pkcs8_size);
-  if(private_key_pkcs8 == NULL) {
+  if (private_key_pkcs8 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_pkcs8\n");
     goto exit;
   }
   memset(private_key_pkcs8, 0, sizeof(unsigned char) * private_key_pkcs8_size);
+  
   // PrivateKeyInfo SEQUENCE (3 elements)
   private_key_pkcs8[0] = 0x30; // constructed sequence tag
-  private_key_pkcs8[1] = 0x82; // 8 --> 1000 0000 (1 in MSB means that it is long form) and 2 --> 0010 0000 (the next 2 bytes are the length of data)
+  private_key_pkcs8[1] = 0x82; // 8 --> 1000 0000 (1 in MSB means that it is long form) and 2 --> 0010 0000 (the next 2
+                               // bytes are the length of data)
   private_key_pkcs8[2] = (unsigned char)((private_key_pkcs8_size >> 8) & 0xFF);
   private_key_pkcs8[3] = (unsigned char)(private_key_pkcs8_size & 0xFF);
 
@@ -348,15 +351,16 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
 
   // PrivateKey OCTET STRING
   private_key_pkcs8[22] = 0x04; // octet string tag
-  private_key_pkcs8[23] = 0x82; // 8 --> 1000 0000 (1 in MSB means that it is long form) and 2 --> 0010 0000 (the next 2 bytes are the length of data)
+  private_key_pkcs8[23] = 0x82; // 8 --> 1000 0000 (1 in MSB means that it is long form) and 2 --> 0010 0000 (the next 2
+                                // bytes are the length of data)
   private_key_pkcs8[24] = (unsigned char)((private_key_non_base64_len >> 8) & 0xFF); // length of data
-  private_key_pkcs8[25] = (unsigned char)(private_key_non_base64_len & 0xFF); // length of data
+  private_key_pkcs8[25] = (unsigned char)(private_key_non_base64_len & 0xFF);        // length of data
 
   memcpy(private_key_pkcs8 + 26, private_key_non_base64, private_key_non_base64_len);
 
   const size_t private_key_base64_pkcs8_size = atchops_base64_encoded_size(private_key_non_base64_len);
   private_key_pkcs8_base64 = (char *)malloc(private_key_base64_pkcs8_size);
-  if(private_key_pkcs8_base64 == NULL) {
+  if (private_key_pkcs8_base64 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_pkcs8_base64\n");
     goto exit;
   }
@@ -364,7 +368,7 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
 
   size_t private_key_base64_pkcs8_len = 0;
   if ((ret = atchops_base64_encode(private_key_pkcs8, 26 + private_key_non_base64_len, private_key_pkcs8_base64,
-                                  private_key_base64_pkcs8_size, &private_key_base64_pkcs8_len)) != 0) {
+                                   private_key_base64_pkcs8_size, &private_key_base64_pkcs8_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encode private key\n");
     goto exit;
   }
@@ -389,15 +393,9 @@ exit: {
   mbedtls_pk_free(&pk);
   mbedtls_ctr_drbg_free(&ctr_drbg);
   mbedtls_entropy_free(&entropy);
-  if(private_key_non_base64 != NULL) {
-    free(private_key_non_base64);
-  }
-  if(private_key_pkcs8_base64 != NULL) {
-    free(private_key_pkcs8_base64);
-  }
-  if(private_key_pkcs8 != NULL) {
-    free(private_key_pkcs8);
-  }
+  free(private_key_non_base64);
+  free(private_key_pkcs8_base64);
+  free(private_key_pkcs8);
   return ret;
 }
 }
@@ -432,7 +430,7 @@ int atchops_rsa_key_populate_public_key(atchops_rsa_key_public_key *public_key, 
    */
   mbedtls_asn1_sequence *seq = NULL; // free later
 
-  const size_t dst_size = BASE64_DECODED_KEY_BUFFER_SIZE;
+  const size_t dst_size = 2048; // sufficient size for a 2048 bit RSA key
   unsigned char dst[dst_size];
   memset(dst, 0, sizeof(unsigned char) * dst_size);
   size_t dst_len = 0;
@@ -530,7 +528,7 @@ int atchops_rsa_key_populate_private_key(atchops_rsa_key_private_key *private_ke
    */
   mbedtls_asn1_sequence *seq = NULL; // free later
 
-  const size_t dst_size = BASE64_DECODED_KEY_BUFFER_SIZE;
+  const size_t dst_size = 4096; // sufficient size for a 2048 bit RSA private key
   unsigned char dst[dst_size];
   memset(dst, 0, sizeof(unsigned char) * dst_size);
   size_t dst_len = 0;
@@ -555,7 +553,6 @@ int atchops_rsa_key_populate_private_key(atchops_rsa_key_private_key *private_ke
     goto exit;
   }
   p = p + lengthread2;
-
 
   size_t lengthread3 = 0;
   if ((ret = mbedtls_asn1_get_tag(&p, end, &lengthread3, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE)) != 0) {
