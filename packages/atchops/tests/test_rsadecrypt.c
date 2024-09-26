@@ -1,9 +1,14 @@
 #include "atchops/rsa.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
+// a pkcs8 formatted key in base64 from C SDK generation
+// #define PRIVATEKEYBASE64
+// "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCzn72C2fNOzP3Uwy3gkSQiYPQalzMIJnyM51amjYzsaP20CNo5y2NQV6Nx1bwcpn1MBoPx4AK26hD7d9ijjOS2lU5glPiSf0ZA68e24zi7NsyRgvD1jhYH2H8coNc7eRlukfy/7BbJsf2H33CBcjLPXEdp46kdABqP6iudbXzG33HQKGnfjaaQWWHePdNU3T1btTQJ8Mv+sH+caJ6DdRu95ZdKuoiVip7qHCZ2jlNHn46BJjSL9r2MiYF2i4G/pkdmSVvC15xnp/x13f+GDKIMAerj62I0UyGasTJQlfEn1wYBNlghKlIyyMSsFpv9Ugi/R06gK3GGTaeL7kZmNQ8JAgMBAAECggEAESCVKGnxyjy/o07tC/Gq+WA3RmXOZuOMkr7oQz9SBaTJNCZ38HTVRm7k1dDke/LgFaS1ZhXPDHPrJJ871/RyRnqcG5d40Dc0krIou+aUnT1PajyLD076CMt661bmzvPwGdvvtrkjPx4qp48FokIqWB1bbdxYXryIy9ovSHaNJEU3IYpuUA0BW3798rshwQK1UlrK0BdStfXPpmN7sCdbymb4atJynFqoZph0BobC4hXgXaxSeNhY5pIGfuQd97etFq9v3sFcn6ZjwDJzRormff4E7TbRHQ9Yl2b0tb1kz2cpUFqAr7ap32Re6LZ8TD32GVTRYVriFAn6v2OmwuXU5QKBgQDdgLiBEE07RUqwLPNR8CmnIiJxopxMld7lJFWcwNOE4fxsOZzLnz2Xwl21f/Xyo33RxAMNuW9PvqIoTfVRT0AfnDINp4GU7GlvFdtWWQ7kJLAAqklzEyU/57g9s3m34fpzIOOTxABucUGgfonfm2EdJ07FdEUoGIUaNvONAVJhiwKBgQDPmVFat8PIOcvRiO+KMgHHQmBdGR6NiAOOvpJ93OOMN6+JInNXKxiE1Iv8agw20hCtOx9LewgoACw12UqSHC+4BJHasjTUrrKiklmdDMjFSC9XrZ6PuTpugu/wM6h4fhwf3K9PEVx1mDlAZoSfwhQ4MGkqKbewqvGw9S7oz5Q8OwKBgQCmcFuzd2lhGR8XJJ+tOTZDRQ32r0ac8ZysN9Iw2F/YIOtI8z2Tb9ObXkyF3mIT8a/QWGYnAOjYVhmJCZNFhrRbTEX8JprjKYXMF/NZfdAHtF2gElTgqEk8LMUvb9YNSzujGNqIpSXh1y6GB69YG2wsuOWiz0xL5ajWWuZFVPHvIwKBgDrbuEIlOeAJ6uyki22+Ed0Bx7p9hbkQ6BlPlM8UkntNynnyB4ueT1xRusK8+muMkWfcDFplLoHQ0rgNvGPClBDzUrsTrYDjawhGwBuT5VRxy+Jq+jq7hIKSox6SNuC6uJScCCQ9wt4gY5MLvexhpUPtDdQDce4n+VB3o24kdF3DAoGAc4q30FsexTKZNMUekkDm3ZYdGCYoRDF5+A2JOSTqlSKubb1dfSxGPvBe55dSfO1G0yR7Z8rZcG0+6gdv6tqi+ndRVyVApGuetMK7jhiuyzYEv9dJWdvVBg5T7+ElaKUxzAEapEaLvVplg8XBjq3c1BwFFj08T+6LXd3gy1eu92g="
+
+// a pkcs8 formatted key in base64 from Dart SDK generation
 #define PRIVATEKEYBASE64                                                                                               \
   "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCDc/"                                                             \
   "uZ5+pmDYY1A+IQdiKeZNhRxttbYCv1aLksIP+5Fk1GJAnKlsBBum+"                                                              \
@@ -69,7 +74,5 @@ int main() {
 
   goto ret;
 
-ret: {
-  return ret;
-}
+ret: { return ret; }
 }
