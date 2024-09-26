@@ -319,7 +319,9 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     goto exit;
   }
   memset(private_key_pkcs8, 0, sizeof(unsigned char) * private_key_pkcs8_size);
-  
+
+
+  // https://lapo.it/asn1js/ use this to debug
   // PrivateKeyInfo SEQUENCE (3 elements)
   private_key_pkcs8[0] = 0x30; // constructed sequence tag
   private_key_pkcs8[1] = 0x82; // 8 --> 1000 0000 (1 in MSB means that it is long form) and 2 --> 0010 0000 (the next 2
