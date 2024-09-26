@@ -1,23 +1,21 @@
 #include "atcommons/enroll_params.h"
 
 #include <stddef.h>
-#include <stdio.h>
 
 #include "../../../../_deps/cjson-src/cJSON.h"
 
-void init_enroll_params(EnrollParams *ep) {
-    ep->enrollment_id = NULL;
-    ep->app_name = NULL;
-    ep->device_name = NULL;
-    ep->otp = NULL;
-    ep->ns_list = NULL;
-    ep->apkam_public_key = NULL;
-    ep->encrypted_default_encryption_private_key = NULL;
-    ep->encrypted_default_self_encryption_key = NULL;
-    ep->encrypted_apkam_symmetric_key = NULL;
-}
+#define ENROLLMENT_ID "enrollmentId"
+#define APP_NAME "appName"
+#define DEVICE_NAME "deviceName"
+#define OTP "otp"
+#define NAMESPACES "namespaces"
+#define APKAM_PUBLIC_KEY "apkamPublicKey"
+#define ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY "encryptedDefaultEncryptionPrivateKey"
+#define ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY "encryptedDefaultSelfEncryptionKey"
+#define ENCRYPTED_APKAM_SYMMETRIC_KEY "encryptedAPKAMSymmetricKey"
+#define APKAM_KEYS_EXPIRY "apkamKeysExpiryInMillis" // in milliseconds
 
-int enroll_params_to_json(const char **json_string, const EnrollParams *ep) {
+int enroll_params_to_json(char **json_string, const EnrollParams *ep) {
     int ret = 0;
     if (json_string == NULL) {
         ret = -1;
@@ -28,47 +26,44 @@ int enroll_params_to_json(const char **json_string, const EnrollParams *ep) {
 
     // Add each parameter to JSON only if it is not NULL
     if (ep->enrollment_id) {
-        cJSON_AddStringToObject(json, "enrollmentId", ep->enrollment_id);
+        cJSON_AddStringToObject(json, ENROLLMENT_ID, ep->enrollment_id);
     }
 
     if (ep->app_name) {
-        cJSON_AddStringToObject(json, "appName", ep->app_name);
+        cJSON_AddStringToObject(json, APP_NAME, ep->app_name);
     }
 
     if (ep->device_name) {
-        cJSON_AddStringToObject(json, "deviceName", ep->device_name);
+        cJSON_AddStringToObject(json, DEVICE_NAME, ep->device_name);
     }
 
     if (ep->otp) {
-        cJSON_AddStringToObject(json, "otp", ep->otp);
+        cJSON_AddStringToObject(json, OTP, ep->otp);
     }
 
-    puts(cJSON_Print(json));
-
-    // Ensure at least one namespace is provided
     if (ep->ns_list->namespaces[0]) {
         char *ns_json;
         ret = enroll_namespace_list_to_json(&ns_json, ep->ns_list);
-        cJSON_AddStringToObject(json, "namespaces", ns_json);
+        cJSON_AddRawToObject(json, NAMESPACES, ns_json);
     }
 
     // Add Base64-encoded strings directly to JSON
     if (ep->apkam_public_key) {
-        cJSON_AddStringToObject(json, "apkamPublicKey", (char *)ep->apkam_public_key);
+        cJSON_AddStringToObject(json, APKAM_PUBLIC_KEY, (char *)ep->apkam_public_key);
     }
 
     if (ep->encrypted_default_encryption_private_key) {
-        cJSON_AddStringToObject(json, "encryptedDefaultEncryptionPrivateKey",
+        cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY,
                                 (char *)ep->encrypted_default_encryption_private_key);
     }
 
     if (ep->encrypted_default_self_encryption_key) {
-        cJSON_AddStringToObject(json, "encryptedDefaultSelfEncryptionKey",
+        cJSON_AddStringToObject(json,ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY ,
                                 (char *)ep->encrypted_default_self_encryption_key);
     }
 
     if (ep->encrypted_apkam_symmetric_key) {
-        cJSON_AddStringToObject(json, "encryptedAPKAMSymmetricKey",
+        cJSON_AddStringToObject(json, ENCRYPTED_APKAM_SYMMETRIC_KEY,
                                 (char *)ep->encrypted_apkam_symmetric_key);
     }
 
@@ -76,7 +71,7 @@ int enroll_params_to_json(const char **json_string, const EnrollParams *ep) {
 
 exit:
     if (json) {
-        cJSON_Delete(json);  // Use cJSON_Delete to properly free the cJSON object
+        cJSON_Delete(json);  // free the cJSON object
     }
     return ret;
 }

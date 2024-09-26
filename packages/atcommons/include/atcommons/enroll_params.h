@@ -1,7 +1,7 @@
 #ifndef ENROLL_PARAMS_H
 #define ENROLL_PARAMS_H
 
-#include "enroll_namespace_struct.h"
+#include "enroll_namespace.h"
 
 typedef struct {
     char *enrollment_id;
@@ -14,10 +14,9 @@ typedef struct {
     unsigned char *encrypted_default_encryption_private_key;
     unsigned char *encrypted_default_self_encryption_key;
     unsigned char *encrypted_apkam_symmetric_key;
+    int apkam_keys_expiry_in_millis;
 } EnrollParams;
 
-void init_enroll_params(EnrollParams *ep);
-
-int enroll_params_to_json(const char **json_string, const EnrollParams *ep);
+int enroll_params_to_json(char **json_string, const EnrollParams *ep);
 
 #endif

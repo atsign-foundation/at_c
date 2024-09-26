@@ -10,10 +10,10 @@
 #define ENROLL_COMMAND_MAX_LENGTH 1500
 
 int enroll_verb_build_command(char *command, enum EnrollOperation operation, EnrollParams *params) {
-  int ret = -1;
-
+  int ret = 0;
   if (command == NULL) {
-    return ret;
+    ret = -1;
+    goto exit;
   }
 
   // Write the enroll prefix into command
@@ -33,7 +33,8 @@ int enroll_verb_build_command(char *command, enum EnrollOperation operation, Enr
   if ((ret = enroll_params_to_json(&params_json, params)) != 0) {
     goto exit;
   }
-  cur_len += snprintf(command + cur_len, ENROLL_COMMAND_MAX_LENGTH, "%s\n", params_json); //note that \n has been appended
+  cur_len += snprintf(command + cur_len, ENROLL_COMMAND_MAX_LENGTH, "%s", params_json);
+  snprintf(command + cur_len, ENROLL_COMMAND_MAX_LENGTH, "\n"); //note that \n has been appended
 
   exit:
       return ret;

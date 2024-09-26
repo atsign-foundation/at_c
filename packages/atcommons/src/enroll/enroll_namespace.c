@@ -1,4 +1,4 @@
-#include "atcommons/enroll_namespace_struct.h"
+#include "atcommons/enroll_namespace.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +51,7 @@ int enroll_namespace_list_to_json(char **ns_list_string, EnrollNamespaceList *ns
     *ns_list_string = cJSON_PrintUnformatted(json_obj);
 
     if (json_obj) {
-        cJSON_Delete(json_obj);
+        cJSON_Delete(json_obj); // free the cJSON object
     }
 
     return ret;
