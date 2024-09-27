@@ -145,12 +145,14 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
   }
 
   cJSON *apkam_symmetric_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_JSON_KEY);
-  if (apkam_symmetric_key != NULL) {
-    if ((ret = set_apkam_symmetric_key_str(atkeys_file, apkam_symmetric_key->valuestring,
-                                          strlen(apkam_symmetric_key->valuestring))) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_apkam_symmetric_key_str: %d\n", ret);
-      goto exit;
-    }
+  if (apkam_symmetric_key == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read apkamSymmetricKey from JSON\n");
+    goto exit;
+  }
+  if ((ret = set_apkam_symmetric_key_str(atkeys_file, apkam_symmetric_key->valuestring,
+                                         strlen(apkam_symmetric_key->valuestring))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_apkam_symmetric_key_str: %d\n", ret);
+    goto exit;
   }
 
   cJSON *enrollment_id = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_ENROLLMENT_ID_JSON_KEY);
@@ -319,6 +321,10 @@ bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(const atclient_
 
 bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_enrollment_id_str_initialized(atkeys_file);
+}
+
+bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
+  return is_apkam_symmetric_key_str_initialized(atkeys_file);
 }
 
 int atclient_atkeys_file_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
