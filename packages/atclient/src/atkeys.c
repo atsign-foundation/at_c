@@ -1,5 +1,4 @@
 #include "atclient/atkeys.h"
-#include "atclient/atkeys_file.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
@@ -284,7 +283,7 @@ int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, cons
     return ret;
   }
 
-  if(atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atkeys)) {
+  if (atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atkeys)) {
     unset_apkam_symmetric_key_base64(atkeys);
   }
 
@@ -779,7 +778,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
 
   /*
    * 6. enrollment id, if it exists
-   */ 
+   */
   if (enrollment_id_str != NULL && enrollment_id_str_len > 0) {
     if ((ret = atclient_atkeys_set_enrollment_id(atkeys, enrollment_id_str, enrollment_id_str_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_set_enrollment_id: %d\n", ret);
