@@ -407,9 +407,3 @@ exit: {
   return ret;
 }
 }
-
-int atchops_rsa_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key,
-                         const unsigned int key_size) {
-  // TODO maybe also introduce `enum atchops_rsa_key_size` ?
-  return 1; // TODO: implement
-}

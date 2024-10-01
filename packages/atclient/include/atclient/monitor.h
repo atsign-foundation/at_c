@@ -2,7 +2,6 @@
 #define ATCLIENT_MONITOR_H
 
 #include "atclient/atclient.h"
-#include "atclient/atkey.h"
 #include "atclient/atnotification.h"
 #include <stdbool.h>
 
@@ -95,16 +94,13 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @brief pkam authenticates the monitor connection
  *
  * @param monitor_conn the atclient context for the monitor connection, assumed that it is already initialized
- * @param atserver_host the atserver host to use for the pkam authentication, see atclient_find_secondary_address for
- * typical method to find this value.
- * @param atserver_port the atserver port to use for the pkam authentication, see atclient_find_secondary_address for
- * typical method to find this value.
- * @param atkeys the atkeys to use for the pkam authentication
  * @param atsign the atsign to use for the pkam authentication
+ * @param atkeys the atkeys to use for the pkam authentication
+ * @param options the options to use for the pkam authentication
  * @return int 0 on success
  */
-int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atserver_host, const int atserver_port,
-                                       const atclient_atkeys *atkeys, const char *atsign);
+int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
+                                       atclient_pkam_authenticate_options *options);
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out
@@ -141,7 +137,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex);
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message, atclient_monitor_hooks *hooks);
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message,
+                          atclient_monitor_hooks *hooks);
 
 /**
  * @brief Check if the monitor connection is still established (client is listening for notifications, and the server

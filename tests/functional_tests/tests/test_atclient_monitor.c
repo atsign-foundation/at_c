@@ -148,7 +148,7 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
   // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Host: %s\n", atserver_host);
   // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Port: %d\n", atserver_port);
 
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atserver_host, atserver_port, atkeys, atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atsign, atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -322,8 +322,8 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
   char *atserver_host = strdup(monitor_conn->atserver_connection.host);
   int atserver_port = monitor_conn->atserver_connection.port;
 
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atserver_host, atserver_port, &(monitor_conn->atkeys),
-                                                monitor_conn->atsign)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys),
+                                                NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }

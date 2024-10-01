@@ -21,6 +21,8 @@
 #define ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_AT_DIRECTORY_HOST "root.atsign.org"
 #define ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_AT_DIRECTORY_PORT 64
 
+#define DATA_TOKEN "data:"
+
 #define BLK "\e[0;30m"
 #define RED "\e[0;31m"
 #define GRN "\e[0;32m"

@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <atclient/constants.h>
 
 #define TAG "atclient_get_sharedkey"
 
@@ -226,16 +227,17 @@ static int atclient_get_shared_key_shared_by_me_with_other(
    * 7. Parse response
    */
   char *response = (char *)recv;
-
-  if (!atclient_string_utils_starts_with(response, "data:")) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                 (int)recv_len, recv);
     goto exit;
   }
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
-  char *response_without_data = response + 5;
-
-  if ((root = cJSON_Parse(response_without_data)) == NULL) {
+  if ((root = cJSON_Parse(response_trimmed)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
@@ -451,17 +453,17 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
    * 7. Parse response
    */
   char *response = (char *)recv;
-
-  // Truncate response : "data:"
-  if (!atclient_string_utils_starts_with(response, "data:")) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "response does not start with 'data:'\n");
+  char *response_trimmed = NULL;
+  // below method points the response_trimmed variable to the position of 'data:' substring
+  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
+                 (int)recv_len, recv);
     goto exit;
   }
+  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
-  char *response_without_data = response + 5;
-
-  if ((root = cJSON_Parse(response_without_data)) == NULL) {
+  if ((root = cJSON_Parse(response_trimmed)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Parse: %d\n", ret);
     goto exit;
