@@ -1,8 +1,8 @@
 #ifndef ENROLL_VERB_BUILDER_H
 #define ENROLL_VERB_BUILDER_H
 
-#define MAX_COMMAND_LENGTH 1500
+#define ENROLL_COMMAND_MAX_LENGTH 1500
 
-int enroll_verb_build_command(char *command, enum EnrollOperation operation, EnrollParams *params);
+int build_enroll_command(char *command, const enum ENROLL_OPERATION operation, const enroll_params *params);
 
 #endif

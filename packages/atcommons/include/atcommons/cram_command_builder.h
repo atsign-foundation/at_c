@@ -1,6 +1,7 @@
 #ifndef CRAM_COMMAND_BUILDER_H
 #define CRAM_COMMAND_BUILDER_H
+#include <stddef.h>
 
-int build_cram_command(char *command, unsigned char *digest);
+int atcommons_build_cram_command(char **cmd, size_t *cmd_len, const char *digest, size_t digest_len);
 
 #endif //CRAM_COMMAND_BUILDER_H

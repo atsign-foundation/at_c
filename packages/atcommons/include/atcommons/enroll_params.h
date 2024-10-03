@@ -9,14 +9,14 @@ typedef struct {
     char *device_name;
     char *otp;
     ///ToDo: what would be the ideal number of allowed namespaces ?
-    EnrollNamespaceList *ns_list;
+    enroll_namespace_list *ns_list;
     unsigned char *apkam_public_key;
     unsigned char *encrypted_default_encryption_private_key;
     unsigned char *encrypted_default_self_encryption_key;
     unsigned char *encrypted_apkam_symmetric_key;
     int apkam_keys_expiry_in_millis;
-} EnrollParams;
+} enroll_params;
 
-int enroll_params_to_json(char **json_string, const EnrollParams *ep);
+int enroll_params_to_json(char **json_string, const enroll_params *ep);
 
 #endif

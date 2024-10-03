@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-int enroll_status_to_string(char *status, const enum EnrollStatus es) {
+int enroll_status_to_string(char *status, const enum ENROLL_STATUS es) {
   int ret = 0;
   if (status == NULL) {
     ret = -1;

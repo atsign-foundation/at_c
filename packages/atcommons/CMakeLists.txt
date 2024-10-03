@@ -5,14 +5,13 @@ option(ATCOMMONS_BUILD_TESTS "Build tests for atauth" OFF)
 set(ATCOMMONS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(
         ATCOMMONS_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/src/verb_builders/enroll_command_builder.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_operation.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_status.c
-        ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_namespace_struct.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_namespace.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_params.c
         ${CMAKE_CURRENT_LIST_DIR}/src/test.c
-        src/verb_builders/cram_command_builder.c
-        include/atcommons/cram_command_builder.h)
+        ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/enroll_command_builder.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/cram_command_builder.c)
 
 # Project setup
 cmake_minimum_required(VERSION 3.24)
@@ -35,23 +34,15 @@ if (NOT ESP_PLATFORM)
     # Determine if atchops is being built as a subproject using add_subdirectory()
     if (NOT DEFINED ATCOMMONS_AS_SUBPROJECT)
         set(ATCOMMONS_AS_SUBPROJECT ON)
-
-        if (CMAKE_CURRENT_SOURCES_DIR STREQUAL CMAKE_SOURCE_DIR)
+        if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
             set(ATCOMMONS_AS_SUBPROJECT OFF)
         endif ()
     endif ()
-
     message(STATUS "[ATCOMMONS] ATCOMMONS_AS_SUBPROJECT: ${ATCOMMONS_AS_SUBPROJECT}")
 
     # Import cjson
     if (NOT TARGET cjson)
         include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_cjson.cmake)
-    endif ()
-
-    # Import atlogger
-    if (NOT TARGET atlogger)
-        set(atlogger_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atlogger)
-        include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atlogger.cmake)
     endif ()
 
     # Create library targets
@@ -68,24 +59,25 @@ if (NOT ESP_PLATFORM)
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 
-    set(
-            ATCOMMONS_INSTALL_TARGETS
-            atlogger
-            cjson)
+    # Link dependencies to library targets
+    set(ATCOMMONS_INSTALL_TARGETS cjson)
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCOMMONS_INSTALL_TARGETS})
 
+    # INSTALL
+    # Install the include headers
     install(
             DIRECTORY ${ATCOMMONS_INCLUDE_DIR}/${PROJECT_NAME}
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
     install(
-            FILES ${cjson_SOURCE_DIR}/cJSON.h
+            FILES ${cJSON_SOURCE_DIR}/cJSON.h
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
     # Install libraries to config target
     install(
-            TARGETS ${PROJECT_NAME}
+            TARGETS ${ATCOMMONS_INSTALL_TARGETS}
             EXPORT ${PROJECT_NAME}-config
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
@@ -95,11 +87,10 @@ if (NOT ESP_PLATFORM)
         message("[ATCOMMONS] NOT as SUBPROJECT")
         # Export the library
         export(PACKAGE ${PROJECT_NAME})
-
         # Install as a config.make
         install(
                 EXPORT ${PROJECT_NAME}-config
-                NAMESPACE ${PROJECT_NAME}-config.cmake
+                NAMESPACE ${PROJECT_NAME}::
                 DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
                 FILE ${PROJECT_NAME}-config.cmake
         )

@@ -11,7 +11,7 @@
 #define ENROLL_OPERATION_DELETE "delete"
 
 
-int enroll_operation_to_string(char **op_name, const enum EnrollOperation e_op) {
+int enroll_operation_to_string(char **op_name, const enum ENROLL_OPERATION e_op) {
     int ret = 0;
     if (op_name == NULL) {
         ret = -1;

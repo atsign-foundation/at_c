@@ -1,9 +1,10 @@
 if(NOT TARGET atcommons)
+  include(FetchContent)
   message(
     STATUS
-    "[ATCOMMONS] package not found, fetching from local repository.."
+    "[ATCOMMONS] package not found, fetching from local repository.. [PATH: ${atcommons_DIR}]"
   )
-  fetchcontent_declare(atcommons SOURCE_DIR ${atcommons_DIR})
-  fetchcontent_makeavailable(atcommons)
+  FetchContent_Declare(atcommons SOURCE_DIR ${atcommons_DIR})
+  FetchContent_MakeAvailable(atcommons)
   install(TARGETS atcommons)
 endif()

@@ -15,7 +15,7 @@
 #define ENCRYPTED_APKAM_SYMMETRIC_KEY "encryptedAPKAMSymmetricKey"
 #define APKAM_KEYS_EXPIRY "apkamKeysExpiryInMillis" // in milliseconds
 
-int enroll_params_to_json(char **json_string, const EnrollParams *ep) {
+int enroll_params_to_json(char **json_string, const enroll_params *ep) {
     int ret = 0;
     if (json_string == NULL) {
         ret = -1;

@@ -1,15 +1,14 @@
-#include "atcommons/enroll_operation.h"
-#include "atcommons/enroll_params.h"
+#include <atcommons/enroll_operation.h>
+#include <atcommons/enroll_params.h>
+#include <atcommons/enroll_command_builder.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define TAG "enroll_verb_builder"
 #define ENROLL_PREFIX "enroll:"
-#define ENROLL_COMMAND_MAX_LENGTH 1500
 
-int enroll_verb_build_command(char *command, enum EnrollOperation operation, EnrollParams *params) {
+int build_enroll_command(char *command, const enum ENROLL_OPERATION operation, const enroll_params *params) {
   int ret = 0;
   if (command == NULL) {
     ret = -1;

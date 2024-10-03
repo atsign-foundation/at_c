@@ -6,7 +6,7 @@
 
 #include "../../../../_deps/cjson-src/cJSON.h"
 
-int enroll_namespace_list_append(EnrollNamespaceList *ns_list, EnrollNamespace *ns) {
+int enroll_namespace_list_append(enroll_namespace_list *ns_list, enroll_namespace *ns) {
     int ret = 0;
     if (ns_list->length >= MAX_NAMESPACES) {
         ret = -1;
@@ -19,7 +19,7 @@ int enroll_namespace_list_append(EnrollNamespaceList *ns_list, EnrollNamespace *
     return ret;
 }
 
-int enroll_namespace_to_json(char *ns_str, EnrollNamespace *ns) {
+int enroll_namespace_to_json(char *ns_str, enroll_namespace *ns) {
     int ret = 0;
     if (ns_str == NULL) {
         ret = -1;
@@ -31,7 +31,7 @@ int enroll_namespace_to_json(char *ns_str, EnrollNamespace *ns) {
     return ret;
 }
 
-int enroll_namespace_list_to_json(char **ns_list_string, EnrollNamespaceList *ns_list) {
+int enroll_namespace_list_to_json(char **ns_list_string, enroll_namespace_list *ns_list) {
     int ret = 0;
     if (ns_list_string == NULL || *ns_list_string == NULL) {
         ret = -1;
