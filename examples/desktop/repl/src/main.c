@@ -11,37 +11,25 @@
 #include <string.h>
 #include <unistd.h>
 
-#define TAG "REPL"
-
-static char *get_home_dir() {
-  struct passwd *pw = getpwuid(getuid());
-  return pw->pw_dir;
-}
+#define TAG "repl"
 
 int main(int argc, char *argv[]) {
   int ret = 1;
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const short atkeys_filepathsize = 256;
-  char atkeys_filepath[atkeys_filepathsize];
-  memset(atkeys_filepath, 0, sizeof(char) * atkeys_filepathsize); // Clear the buffer (for safety)
-
   const size_t buffersize = 2048;
   char buffer[buffersize];
-  memset(buffer, 0, sizeof(char) * buffersize); // Clear the buffer (for safety
+  memset(buffer, 0, sizeof(char) * buffersize);
   size_t bufferlen = 0;
 
   const size_t recvsize = 8192 * 4;
   unsigned char recv[recvsize];
-  memset(recv, 0, sizeof(unsigned char) * recvsize); // Clear the buffer (for safety
+  memset(recv, 0, sizeof(unsigned char) * recvsize);
   size_t recvlen = 0;
 
   atclient atclient;
   atclient_init(&atclient);
-
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
 
   char *temp = NULL;
 
@@ -72,22 +60,8 @@ int main(int argc, char *argv[]) {
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
-  char *homedir = get_home_dir();
-  if (homedir == NULL || strlen(homedir) == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get home directory\n");
-    ret = 1;
-    goto exit;
-  }
 
-  sprintf(atkeys_filepath, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
-  if ((ret = atclient_atkeys_populate_from_path(&atkeys, atkeys_filepath)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read atKeys file at path \"%s\"\n", atkeys_filepath);
-    goto exit;
-  }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully read atKeys file at path %s\n", atkeys_filepath);
-
-  ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options);
-  if (ret != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d | failed to authenticate\n", ret);
     goto exit;
   }
@@ -157,7 +131,8 @@ int main(int argc, char *argv[]) {
         }
         case ATCLIENT_ATKEY_TYPE_SELF_KEY: {
           if ((ret = atclient_get_self_key(&atclient, &atkey, &value, NULL)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key: %d | failed to get self key\n", ret);
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key: %d | failed to get self key\n",
+                         ret);
             goto get_end;
           }
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Value: \"%s\"\n", value);
@@ -174,62 +149,66 @@ int main(int argc, char *argv[]) {
         }
         }
 
-      get_end: { 
+      get_end: {
         free(value);
-        atclient_atkey_free(&atkey); }
-      } else if(strcmp(command, "/put") == 0) {
+        atclient_atkey_free(&atkey);
+      }
+      } else if (strcmp(command, "/put") == 0) {
         // /put <atkey> <value>
         char *atkeystr = strtok(NULL, " ");
-        if(atkeystr == NULL) {
+        if (atkeystr == NULL) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No atKey entered\n");
           continue;
         }
         atkeystr[strcspn(atkeystr, "\n")] = 0;
         char *value = strtok(NULL, "\n");
-        if(value == NULL) {
+        if (value == NULL) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No value entered\n");
           continue;
         }
         atclient_atkey atkey;
         atclient_atkey_init(&atkey);
-        if((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n", ret);
+        if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n",
+                       ret);
           goto put_end;
         }
         const atclient_atkey_type atkey_type = atclient_atkey_get_type(&atkey);
-        if(atkey_type == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
+        if (atkey_type == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown atKey type\n");
           goto put_end;
         } else if (atkey_type == ATCLIENT_ATKEY_TYPE_PUBLIC_KEY) {
-          if((ret = atclient_put_public_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_public_key: %d | failed to put public key\n", ret);
+          if ((ret = atclient_put_public_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_public_key: %d | failed to put public key\n",
+                         ret);
             goto put_end;
           }
-        } else if(atkey_type == ATCLIENT_ATKEY_TYPE_SELF_KEY) {
-          if((ret = atclient_put_self_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_self_key: %d | failed to put self key\n", ret);
+        } else if (atkey_type == ATCLIENT_ATKEY_TYPE_SELF_KEY) {
+          if ((ret = atclient_put_self_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_self_key: %d | failed to put self key\n",
+                         ret);
             goto put_end;
           }
-        } else if(atkey_type == ATCLIENT_ATKEY_TYPE_SHARED_KEY) {
-          if((ret = atclient_put_shared_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_shared_key: %d | failed to put shared key\n", ret);
+        } else if (atkey_type == ATCLIENT_ATKEY_TYPE_SHARED_KEY) {
+          if ((ret = atclient_put_shared_key(&atclient, &atkey, value, NULL, NULL)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_put_shared_key: %d | failed to put shared key\n",
+                         ret);
             goto put_end;
           }
         }
-        put_end: {
-          atclient_atkey_free(&atkey);
-        }
+      put_end: { atclient_atkey_free(&atkey); }
       } else if (strcmp(command, "/scan") == 0) {
         atclient_get_atkeys_request_options request_options;
         atclient_get_atkeys_request_options_init(&request_options);
         char *regex = NULL;
         char *saveptr = NULL;
         regex = strtok_r(NULL, " ", &saveptr);
-        if(regex != NULL) {
+        if (regex != NULL) {
           regex[strcspn(regex, "\n")] = 0;
 
-          if((ret = atclient_get_atkeys_request_options_set_regex(&request_options, regex)) != 0) {
-            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_request_options_set_regex: %d | failed to set regex\n", ret);
+          if ((ret = atclient_get_atkeys_request_options_set_regex(&request_options, regex)) != 0) {
+            atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                         "atclient_get_atkeys_request_options_set_regex: %d | failed to set regex\n", ret);
             goto scan_end;
           }
         }
@@ -253,38 +232,37 @@ int main(int argc, char *argv[]) {
         free(arr);
         atclient_get_atkeys_request_options_free(&request_options);
       }
-      } else if(strcmp(command, "/delete") == 0) {
+      } else if (strcmp(command, "/delete") == 0) {
         // /delete <atkey>
         char *atkeystr = strtok(NULL, " ");
-        if(atkeystr == NULL) {
+        if (atkeystr == NULL) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "No atKey entered\n");
           continue;
         }
         atkeystr[strcspn(atkeystr, "\n")] = 0; // Remove the newline character
         atclient_atkey atkey;
         atclient_atkey_init(&atkey);
-        if((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n", ret);
+        if ((ret = atclient_atkey_from_string(&atkey, atkeystr)) != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_from_string: %d | failed to parse atKey\n",
+                       ret);
           goto delete_end;
         }
-        if((ret = atclient_delete(&atclient, &atkey, NULL, NULL)) != 0) {
+        if ((ret = atclient_delete(&atclient, &atkey, NULL, NULL)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d | failed to delete atKey\n", ret);
           goto delete_end;
         }
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Deleted atKey: %s\n", atkeystr);
-      delete_end: {
-        atclient_atkey_free(&atkey);
-      }
-      } else if(strcmp(command, "/deleteall") == 0) {
+      delete_end: { atclient_atkey_free(&atkey); }
+      } else if (strcmp(command, "/deleteall") == 0) {
         atclient_atkey *arr = NULL;
         size_t arrlen = 0;
-        if((ret = atclient_get_atkeys(&atclient, &arr, &arrlen, NULL)) != 0) {
+        if ((ret = atclient_get_atkeys(&atclient, &arr, &arrlen, NULL)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys: %d | failed to get atKeys\n", ret);
           goto deleteall_end;
         }
         char *atkeystr = NULL;
-        for(size_t i = 0; i < arrlen; i++) {
-          if((ret = atclient_delete(&atclient, &arr[i], NULL, NULL)) != 0) {
+        for (size_t i = 0; i < arrlen; i++) {
+          if ((ret = atclient_delete(&atclient, &arr[i], NULL, NULL)) != 0) {
             atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete: %d | failed to delete atKey\n", ret);
             continue;
           }
