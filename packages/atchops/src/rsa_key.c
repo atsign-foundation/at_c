@@ -176,19 +176,19 @@ int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, at
 exit: { return ret; }
 }
 
-int atchops_rsa_key_generate_base64(unsigned char **public_key_base64, unsigned char **private_key_base64) {
+int atchops_rsa_key_generate_base64(unsigned char **public_key_base64_output, unsigned char **private_key_base64_output) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if (public_key_base64 == NULL) {
+  if (public_key_base64_output == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is null\n");
     return ret;
   }
 
-  if (private_key_base64 == NULL) {
+  if (private_key_base64_output == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is null\n");
     return ret;
@@ -383,21 +383,21 @@ int atchops_rsa_key_generate_base64(unsigned char **public_key_base64, unsigned 
   /*
    * 9. Set the output variables
    */
-  *public_key_base64 = (unsigned char *)malloc(public_key_base64_len + 1);
-  if (*public_key_base64 == NULL) {
+  *public_key_base64_output = (unsigned char *)malloc(public_key_base64_len + 1);
+  if (*public_key_base64_output == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for public_key_base64\n");
     goto exit;
   }
-  memcpy(*public_key_base64, public_key_base64, public_key_base64_len);
-  (*public_key_base64)[public_key_base64_len] = '\0';
+  memcpy(*public_key_base64_output, public_key_base64, public_key_base64_len);
+  (*public_key_base64_output)[public_key_base64_len] = '\0';
 
-  *private_key_base64 = (unsigned char *)malloc(private_key_base64_pkcs8_len + 1);
-  if (*private_key_base64 == NULL) {
+  *private_key_base64_output = (unsigned char *)malloc(private_key_base64_pkcs8_len + 1);
+  if (*private_key_base64_output == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_base64\n");
     goto exit;
   }
-  memcpy(*private_key_base64, private_key_pkcs8_base64, private_key_base64_pkcs8_len);
-  (*private_key_base64)[private_key_base64_pkcs8_len] = '\0';
+  memcpy(*private_key_base64_output, private_key_pkcs8_base64, private_key_base64_pkcs8_len);
+  (*private_key_base64_output)[private_key_base64_pkcs8_len] = '\0';
 
 exit: {
   free(private_key_non_base64);
