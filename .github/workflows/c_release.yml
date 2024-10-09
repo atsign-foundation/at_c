@@ -20,7 +20,7 @@ jobs:
           mkdir at_c-${{ github.ref_name }}
           cp -R packages/* at_c-${{ github.ref_name }}
           tar -cvzf tarball/at_c-${{ github.ref_name }}.tar.gz at_c-${{ github.ref_name }}
-      - uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
+      - uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: csshnpd-src-${{github.ref_name}}-${{github.run_number}}-${{github.run_attempt}}
           path: ./tarball/at_c-${{ github.ref_name }}.tar.gz
