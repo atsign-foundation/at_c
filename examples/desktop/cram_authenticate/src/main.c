@@ -7,11 +7,8 @@
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
-//#define CRAM_SECRET "27ec6d2bd2c18cbb0f1a2aa2a12666a87c5bd4af4b89f591c37dc0fd75217909adf0950e0f3c2d87cf50de2891d70b94bdf079b671a34275d02bfc06a4c7b723"
-//#define ATSIGN "@25distinctivethe"
-
-#define CRAM_SECRET "66e026167a79cb7e9d190afe7b01b3fc4f31bc3866a08cdcec06d82a7296e9febcac5d4f4a081728fb0ec9d08f27d4f866bd6570f3fe20c65464ace76643becb"
-#define ATSIGN "@disciplinarygemini"
+#define CRAM_SECRET "27ec6d2bd2c18cbb0f1a2aa2a12666a87c5bd4af4b89f591c37dc0fd75217909adf0950e0f3c2d87cf50de2891d70b94bdf079b671a34275d02bfc06a4c7b723"
+#define ATSIGN "@25distinctivethe"
 
 #define TAG "cram_authenticate"
 

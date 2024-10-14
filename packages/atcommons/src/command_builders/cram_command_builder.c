@@ -1,31 +1,36 @@
 #include "atcommons/cram_command_builder.h"
 
+#include <atlogger/atlogger.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define CRAM_PREFIX "cram"
+#define TAG "cram_command_builder"
 
-int atcommons_build_cram_command(char **cmd, size_t *cmd_len, const char *digest, size_t digest_len) {
+int atcommons_build_cram_command(char **cmd, size_t *cmd_len, size_t cmd_buffer_size, const char *digest,
+                                 size_t digest_len) {
   int ret = 0;
-  *cmd_len = strlen(CRAM_PREFIX) + digest_len + strlen("\r\n") + 1;
 
-  *cmd = malloc(sizeof(char) * *cmd_len);
-  if (*cmd == NULL) {
+  if(digest == NULL || digest_len <=0) {
     ret = -1;
     goto exit;
   }
-  memset(*cmd, 0, sizeof(char) * *cmd_len);
-
-  int len = snprintf(*cmd, sizeof(char) * *cmd_len, "%s:%s\r\n", CRAM_PREFIX, digest);
-
-  if (len <= 0){ //|| (size_t)len >= *cmd_len) {
+  if (cmd == NULL) {
+    *cmd_len = snprintf(NULL, 0, "%s:%s\r\n", CRAM_PREFIX, digest);
     ret = 1;
-    printf("len: %d \ncmd_len: %lu\n", len, *cmd_len);
-    free(*cmd);
     goto exit;
   }
-  printf("cram command len: %d\n", len);
+
+  *cmd_len = snprintf(*cmd, sizeof(char) * *cmd_len, "%s:%s\r\n", CRAM_PREFIX, digest);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "cram_cmd_len: %lu | cram_cmd_size: %lu\n", *cmd_len, cmd_buffer_size);
+
+  if(*cmd_len > cmd_buffer_size) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Buffer overflow in atcommons_build_cram_command\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cram_cmd_len: %lu | cram_cmd_size: %lu\n", cmd_len, cmd_buffer_size);
+    ret = 1;
+    goto exit;
+  }
 
   exit:
       return ret;

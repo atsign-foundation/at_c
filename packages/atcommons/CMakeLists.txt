@@ -45,6 +45,12 @@ if (NOT ESP_PLATFORM)
         include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_cjson.cmake)
     endif ()
 
+    # Import atlogger
+    if(NOT TARGET atlogger)
+        set(atlogger_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atlogger)
+        include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atlogger.cmake)
+    endif()
+
     # Create library targets
     add_library(${PROJECT_NAME} STATIC ${ATCOMMONS_SOURCES})
     add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -60,8 +66,20 @@ if (NOT ESP_PLATFORM)
     )
 
     # Link dependencies to library targets
-    set(ATCOMMONS_INSTALL_TARGETS cjson)
+    set(ATCOMMONS_INSTALL_TARGETS cjson atlogger)
     target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCOMMONS_INSTALL_TARGETS})
+
+    add_executable(command src/test.c)
+    target_link_libraries(command PUBLIC atcommons)
+
+    # Set the build type to Debug by default (optional)
+    set(CMAKE_BUILD_TYPE Debug)
+
+    # Add compiler flags specifically for debugging
+    target_compile_options(command PUBLIC
+            $<$<CONFIG:Debug>:-g>            # Enable debugging symbols with -g flag
+            $<$<CONFIG:Debug>:-O0>           # Disable optimizations for easier debugging (optional)
+    )
 
     # INSTALL
     # Install the include headers
@@ -74,6 +92,7 @@ if (NOT ESP_PLATFORM)
             FILES ${cJSON_SOURCE_DIR}/cJSON.h
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
+    message("cjson source dir ${cjson_SOURCE_DIR}")
 
     # Install libraries to config target
     install(

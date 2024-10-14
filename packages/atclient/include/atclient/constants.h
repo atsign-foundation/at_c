@@ -12,6 +12,7 @@
 
 #define ATCLIENT_CONNECTION_MAX_READ_TRIES                                                                             \
   50 // if 0 bytes are read after 10 consecutive retries, the read is unsuccessful. See connection.c
+#define ATCLIENT_CONNECTION_MAX_RECURSIVE_WRITE_ATTEMPTS 10
 
 #define ATCLIENT_MONITOR_BUFFER_LEN 4096 // max chunk size monitor can read at once
 

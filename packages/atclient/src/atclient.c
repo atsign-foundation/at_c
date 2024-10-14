@@ -32,22 +32,6 @@ static int atclient_pkam_authenticate_validate_arguments(const atclient *ctx, co
 static int atclient_cram_authenticate_validate_arguments(const atclient *ctx, const unsigned char *secret,
                                                          const char *atsign);
 
-void unsigned_char_arr_print(unsigned char* arr) {
-  size_t length = sizeof(arr) / sizeof(arr[0]); // Calculate the length of the array
-
-  printf("Unsigned char array in hexadecimal: ");
-  for (size_t i = 0; i < length; i++) {
-    printf("%02X ", arr[i]); // Print each byte in hexadecimal format
-  }
-  printf("\n");
-
-  printf("Unsigned char array as characters: ");
-  for (size_t i = 0; i < length; i++) {
-    printf("%c", arr[i]); // Print each byte as a character
-  }
-  printf("\n");
-}
-
 void atclient_init(atclient *ctx) {
   /*
    * 1. Validate arguments
@@ -553,13 +537,13 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
 
   /*
    * 4. Move cram secret to digest_input
-   * CRAM digest-input will be of the form "CRAM secret + challenge from server"
+   *    CRAM digest-input will be of the form "CRAM secret + challenge from server"
    */
   memcpy(digest_input, cram_secret, CRAM_SECRET_LENGTH);
   digest_input_len = CRAM_SECRET_LENGTH;
 
   /*
-   * 5. We got `data:<challenge>`, move this into digest_input
+   * 5. We got `data:<challenge>`, move this challenge into digest_input
    *
    */
   memcpy(digest_input + digest_input_len, str_with_data_prefix + strlen(DATA_TOKEN), recv_len - strlen(DATA_TOKEN)); // +5 to skip the 'data:' prefix
@@ -601,8 +585,14 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   /*
    * 7a. Build `cram:` noop_cmd
    */
-  size_t cram_cmd_len = (size_t)malloc(sizeof(size_t));
-  if ((ret = atcommons_build_cram_command(&cram_cmd, &cram_cmd_len, digest_hex_encoded, digest_hex_encoded_len)) != 0) {
+  size_t cram_cmd_len = 0, cram_cmd_size = 0;
+  atcommons_build_cram_command(NULL, &cram_cmd_len, NULL, digest_hex_encoded,
+                               digest_hex_encoded_len); // fetch command len
+  cram_cmd_size = cram_cmd_len + 1;
+  cram_cmd = malloc(sizeof(char) * cram_cmd_size); // free later
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cram command len is %lu\n", cram_cmd_len);
+  if ((ret = atcommons_build_cram_command(&cram_cmd, &cram_cmd_len, cram_cmd_size, digest_hex_encoded,
+                                          digest_hex_encoded_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_build_cram_command: %d\n", ret);
     goto exit;
   }
@@ -611,9 +601,8 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    * 7b. Send `cram:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
-  strcat(cram_cmd, "\n");
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "build cram command: %s", cram_cmd);
-  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, cram_cmd_len - 1, recv,
+  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, cram_cmd_size, recv,
                                       recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
