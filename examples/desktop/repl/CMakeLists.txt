@@ -18,5 +18,13 @@ FetchContent_MakeAvailable(atclient argparse)
 
 add_executable(repl)
 
-target_sources(repl PRIVATE src/main.c)
-target_link_libraries(repl PRIVATE atclient argparse)
+target_sources(repl PRIVATE 
+  src/main.c
+  src/args.c
+)
+
+target_include_directories(repl PRIVATE 
+  ${CMAKE_CURRENT_LIST_DIR}/include
+)
+
+target_link_libraries(repl PRIVATE atclient argparse-static)
