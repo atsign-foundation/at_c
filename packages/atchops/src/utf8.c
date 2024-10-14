@@ -1,43 +1,7 @@
-#include "atchops/hex_utils.h"
-
-#include <locale.h>
-#include <stdio.h>
+#include <atchops/utf8.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <wchar.h>
-
-int atchops_hex_to_bytes(const char *hex, unsigned char *bytes, size_t byte_len) {
-  int ret = 0;
-  if (hex == NULL || bytes == NULL || byte_len <= 0) {
-    ret = -1;
-    return ret;
-  }
-
-  for (size_t i = 0; i < byte_len; i++) {
-    if (sscanf(hex + (i * 2), "%2hhx", &bytes[i]) != 1) {
-      ret = -1; // Error in conversion
-      return ret;
-    }
-  }
-
-  return ret;
-}
-
-int atchops_bytes_to_hex_string(const unsigned char *input, size_t len, char *output) {
-  int ret = 0;
-  if (input == NULL || output == NULL || len <= 0) {
-    ret = -1;
-    return ret;
-  }
-
-  // Iterate over each byte in the input array
-  for (size_t i = 0; i < len; i++) {
-    // Convert each unsigned char to a 2-character hex string and append it to the output
-    sprintf(output + (i * 2), "%02x", input[i]);
-  }
-  output[len * 2] = '\0'; // Null-terminate the string
-
-  return ret;
-}
 
 int atchops_utf8_encode(const char *input, unsigned char **output, size_t *output_length) {
   int ret = 1;
@@ -76,8 +40,8 @@ int atchops_utf8_encode(const char *input, unsigned char **output, size_t *outpu
   }
 
   ret = 0;
-exit: {
-  free(wstr);
-  return ret;
-}
+  exit: {
+    free(wstr);
+    return ret;
+  }
 }
