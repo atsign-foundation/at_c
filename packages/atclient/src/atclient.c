@@ -266,9 +266,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     should_free_atserver_host = true;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_host: %s\n", atserver_host);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_port: %d\n", atserver_port);
-
   /*
    * 5. Start atServer connection (kill the existing connection if it exists)
    */
