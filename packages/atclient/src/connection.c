@@ -651,7 +651,6 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
       goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "pos: %d, ret: %d\n", pos, ret);
     pos += ret;
 
     // check if we found the end of the message
