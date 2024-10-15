@@ -15,7 +15,6 @@
 #define TAG "repl"
 
 #define STDIN_BUFFER_SIZE 8192
-#define RECV_BUFFER_SIZE 8192
 
 /*
  * Usage:
