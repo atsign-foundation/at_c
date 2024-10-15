@@ -669,8 +669,14 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
         recv_len = value_max_len;
         break;
       } else {
-        recv = realloc(recv, sizeof(unsigned char) * (pos + recv_size));
-        recv_size += recv_size;
+        recv_size *= 2; // double the buffer size
+        unsigned char *temp = realloc(recv, sizeof(unsigned char) * recv_size);
+        if (temp == NULL) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reallocate memory\n");
+          free(recv);
+          goto exit;
+        }
+        recv = temp;
       }
     }
 
