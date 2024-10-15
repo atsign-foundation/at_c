@@ -172,6 +172,115 @@ exit: {
 }
 }
 
+int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const char *path) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (atkeys_file == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys_file is NULL\n");
+    return ret;
+  }
+
+  if (!atclient_atkeysfile_is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_encrypt_private_key_str is not initialized\n");
+    return ret;
+  }
+
+  if (!atclient_atkeysfile_is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_encrypt_public_key_str is not initialized\n");
+    return ret;
+  }
+
+  if (!atclient_atkeysfile_is_aes_pkam_private_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_pkam_private_key_str is not initialized\n");
+    return ret;
+  }
+
+  if (!atclient_atkeysfile_is_aes_pkam_public_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_pkam_public_key_str is not initialized\n");
+    return ret;
+  }
+
+  if (!atclient_atkeysfile_is_self_encryption_key_str_initialized(atkeys_file)) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "self_encryption_key_str is not initialized\n");
+    return ret;
+  }
+
+  if (path == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "path is NULL\n");
+    return ret;
+  }
+
+  /*
+   * 2. Variables
+   */
+
+  cJSON *root = NULL; // free later
+  char *json_str = NULL; // free later
+
+  root = cJSON_CreateObject();
+  if (root == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_CreateObject failed\n");
+    goto exit;
+  }
+
+  if (is_aes_pkam_public_key_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "aesPkamPublicKey", atkeys_file->aes_pkam_public_key_str);
+  }
+
+  if (is_aes_pkam_private_key_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "aesPkamPrivateKey", atkeys_file->aes_pkam_private_key_str);
+  }
+
+  if (is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "aesEncryptPublicKey", atkeys_file->aes_encrypt_public_key_str);
+  }
+
+  if (is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "aesEncryptPrivateKey", atkeys_file->aes_encrypt_private_key_str);
+  }
+
+  if (is_self_encryption_key_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "selfEncryptionKey", atkeys_file->self_encryption_key_str);
+  }
+
+  if (is_enrollment_id_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "enrollmentId", atkeys_file->enrollment_id_str);
+  }
+
+  json_str = cJSON_Print(root);
+  if (json_str == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Print failed\n");
+    goto exit;
+  }
+
+  FILE *file = fopen(path, "w");
+  if (file == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fopen failed\n");
+    goto exit;
+  }
+
+  const size_t bytes_written = fwrite(json_str, 1, strlen(json_str), file);
+  fclose(file);
+  if (bytes_written == 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fwrite failed\n");
+    goto exit;
+  }
+
+  ret = 0;
+exit: {
+  if(json_str != NULL) {
+    free(json_str);
+  }
+  if(root != NULL) {
+    cJSON_Delete(root);
+  }
+  return ret;
+}
+}
+
 void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file) {
   unset_aes_pkam_public_key_str(atkeys_file);
   unset_aes_pkam_private_key_str(atkeys_file);

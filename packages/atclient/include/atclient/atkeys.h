@@ -176,4 +176,8 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
  */
 int atclient_atkeys_populate_from_string(atclient_atkeys *atkeys, const char *file_string);
 
+int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkeys_file *atkeys_file);
+
+int atclient_atkeys_write_to_path(atclient_atkeys *atkeys, const char *path);
+
 #endif
