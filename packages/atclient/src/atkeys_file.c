@@ -183,27 +183,27 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
     return ret;
   }
 
-  if (!atclient_atkeysfile_is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
+  if (!atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_encrypt_private_key_str is not initialized\n");
     return ret;
   }
 
-  if (!atclient_atkeysfile_is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
+  if (!atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_encrypt_public_key_str is not initialized\n");
     return ret;
   }
 
-  if (!atclient_atkeysfile_is_aes_pkam_private_key_str_initialized(atkeys_file)) {
+  if (!atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(atkeys_file)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_pkam_private_key_str is not initialized\n");
     return ret;
   }
 
-  if (!atclient_atkeysfile_is_aes_pkam_public_key_str_initialized(atkeys_file)) {
+  if (!atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(atkeys_file)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "aes_pkam_public_key_str is not initialized\n");
     return ret;
   }
 
-  if (!atclient_atkeysfile_is_self_encryption_key_str_initialized(atkeys_file)) {
+  if (!atclient_atkeys_file_is_self_encryption_key_str_initialized(atkeys_file)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "self_encryption_key_str is not initialized\n");
     return ret;
   }
