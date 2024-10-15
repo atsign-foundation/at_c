@@ -82,6 +82,8 @@
 int main(int argc, char *argv[]) {
   int ret = 1;
 
+    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
@@ -101,7 +103,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_populate_from_path(&atkeys, ATKEYS_8INCANTEATER_1_FILE_PATH))) {
+  if ((ret = atclient_atkeys_populate_from_path(&atkeys1, ATKEYS_8INCANTEATER_1_FILE_PATH))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to populate from path\n");
     goto exit;
   }
@@ -111,5 +113,9 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-exit: { return ret; }
+exit: { 
+    atclient_atkeys_free(&atkeys);
+    atclient_atkeys_free(&atkeys1);
+    atclient_free(&atclient1);
+    return ret; }
 }
