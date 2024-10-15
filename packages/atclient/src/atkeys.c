@@ -880,6 +880,10 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
   unsigned char rsa_key_encrypted[rsa_key_encrypted_size];
   size_t rsa_key_encrypted_len = 0;
 
+  const size_t rsa_key_encrypted_base64_size  = atchops_base64_encoded_size(rsa_key_encrypted_size);
+  unsigned char rsa_key_encrypted_base64[rsa_key_encrypted_base64_size];
+  size_t rsa_key_encrypted_base64_len = 0;
+
   /*
    * 3. Prepare self encryption key for use
    */
@@ -905,8 +909,13 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_file_set_aes_pkam_public_key_str(atkeys_file, (const char *)rsa_key_encrypted,
-                                                              rsa_key_encrypted_len)) != 0) {
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode pkam public key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_pkam_public_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                              rsa_key_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes pkam public key str: %d\n", ret);
     goto exit;
   }
@@ -922,8 +931,13 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_file_set_aes_pkam_private_key_str(atkeys_file, (const char *)rsa_key_encrypted,
-                                                               rsa_key_encrypted_len)) != 0) {
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode pkam private key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_pkam_private_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                               rsa_key_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes pkam private key str: %d\n", ret);
     goto exit;
   }
@@ -939,8 +953,13 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_file_set_aes_encrypt_public_key_str(atkeys_file, (const char *)rsa_key_encrypted,
-                                                                 rsa_key_encrypted_len)) != 0) {
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode encrypt public key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_encrypt_public_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                                 rsa_key_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes encrypt public key str: %d\n", ret);
     goto exit;
   }
@@ -956,8 +975,13 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_file_set_aes_encrypt_private_key_str(atkeys_file, (const char *)rsa_key_encrypted,
-                                                                  rsa_key_encrypted_len)) != 0) {
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode encrypt private key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_encrypt_private_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                                  rsa_key_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes encrypt private key str: %d\n", ret);
     goto exit;
   }
