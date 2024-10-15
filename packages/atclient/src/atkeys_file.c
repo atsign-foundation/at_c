@@ -250,7 +250,7 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
     cJSON_AddStringToObject(root, "enrollmentId", atkeys_file->enrollment_id_str);
   }
 
-  json_str = cJSON_Print(root);
+  json_str = cJSON_PrintUnformatted(root);
   if (json_str == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "cJSON_Print failed\n");
     goto exit;
