@@ -1033,14 +1033,14 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
   }
 
   // 4e. self encryption key
-  if ((ret = atclient_atkeys_file_set_self_encryption_key_str(atkeys_file, atkeys->self_encryption_key_base64)) != 0) {
+  if ((ret = atclient_atkeys_file_set_self_encryption_key_str(atkeys_file, atkeys->self_encryption_key_base64, strlen(atkeys->self_encryption_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set self encryption key str: %d\n", ret);
     goto exit;
   }
 
   // 4f. enrollment id (optional)
   if (atclient_atkeys_is_enrollment_id_initialized(atkeys)) {
-    if ((ret = atclient_atkeys_file_set_enrollment_id_str(atkeys_file, atkeys->enrollment_id)) != 0) {
+    if ((ret = atclient_atkeys_file_set_enrollment_id_str(atkeys_file, atkeys->enrollment_id, strlen(atkeys->enrollment_id))) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set enrollment id str: %d\n", ret);
       goto exit;
     }
