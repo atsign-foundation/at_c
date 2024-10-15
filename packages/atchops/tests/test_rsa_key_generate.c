@@ -1,4 +1,6 @@
-
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include <atchops/rsa.h>
 #include <atchops/rsa_key.h>
 #include <atchops/base64.h>
