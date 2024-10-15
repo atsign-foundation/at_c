@@ -4,14 +4,27 @@ project(repl VERSION 0.0.1 LANGUAGES C HOMEPAGE_URL https://atsign.com)
 
 include(FetchContent)
 
-find_package(atsdk REQUIRED CONFIG)
+FetchContent_Declare(
+  atclient
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../packages/atclient
+)
 
-message(STATUS "atsdk was found")
+FetchContent_Declare(
+  argparse
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/3rdparty/argparse
+)
+
+FetchContent_MakeAvailable(atclient argparse)
 
 add_executable(repl)
 
-target_sources(repl PRIVATE src/main.c)
-target_link_libraries(repl PRIVATE atsdk::atclient)
+target_sources(repl PRIVATE 
+  src/main.c
+  src/args.c
+)
 
-# the target executable will be delivered to the packages/repl/bin directory, when building the `install` target.
-install(TARGETS repl DESTINATION ${CMAKE_CURRENT_LIST_DIR}/bin)
+target_include_directories(repl PRIVATE 
+  ${CMAKE_CURRENT_LIST_DIR}/include
+)
+
+target_link_libraries(repl PRIVATE atclient argparse-static)
