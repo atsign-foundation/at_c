@@ -82,7 +82,7 @@
 int main(int argc, char *argv[]) {
   int ret = 1;
 
-    atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
@@ -108,14 +108,15 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if((ret = atclient_pkam_authenticate(&atclient1, "@8incanteater", &atkeys1, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient1, "@8incanteater", &atkeys1, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to pkam auth\n");
     goto exit;
   }
 
-exit: { 
-    atclient_atkeys_free(&atkeys);
-    atclient_atkeys_free(&atkeys1);
-    atclient_free(&atclient1);
-    return ret; }
+exit: {
+  atclient_atkeys_free(&atkeys);
+  atclient_atkeys_free(&atkeys1);
+  atclient_free(&atclient1);
+  return ret;
+}
 }
