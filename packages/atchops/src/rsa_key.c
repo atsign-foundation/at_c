@@ -176,19 +176,20 @@ int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, at
 exit: { return ret; }
 }
 
-int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key) {
+int atchops_rsa_key_generate_base64(unsigned char **public_key_base64_output,
+                                    unsigned char **private_key_base64_output) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if (public_key == NULL) {
+  if (public_key_base64_output == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is null\n");
     return ret;
   }
 
-  if (private_key == NULL) {
+  if (private_key_base64_output == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is null\n");
     return ret;
@@ -210,18 +211,18 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   char public_key_base64[public_key_base64_size];
   memset(public_key_base64, 0, sizeof(char) * public_key_base64_size);
 
-  const size_t private_key_base64_size = 2048; // 2048 bytes is sufficient size for a 2048 bit RSA key base64 encoded
+  const size_t private_key_base64_size =
+      2048; // 2048 bytes is sufficient size for a 2048 bit RSA key base64 encoded pkcs 1 formatted
   char private_key_base64[private_key_base64_size];
   memset(private_key_base64, 0, sizeof(char) * private_key_base64_size);
 
-  unsigned char *private_key_non_base64 =
-      NULL; // holds the raw bytes of the 9 element SEQUENCE of the numbers (0, N, E, D, P, Q, DP, DQ, QP), free later
-
-  unsigned char *private_key_pkcs8 = NULL; // buffer for building the pkcs_8 formatted private key, free later
-  char *private_key_pkcs8_base64 = NULL;   // to hold the base64-encoded pkcs 8 formatted private key, free later
-
   const size_t temp_buf_size = 4096; // sufficient to hold a private RSA Key in format ----BEGIN ....
   unsigned char temp_buf[temp_buf_size];
+  memset(temp_buf, 0, sizeof(unsigned char) * temp_buf_size);
+
+  unsigned char *private_key_non_base64 = NULL; // buffer for holding the private key in non-base64 format, free later
+  unsigned char *private_key_pkcs8 = NULL;      // buffer for building the pkcs_8 formatted private key, free later
+  char *private_key_pkcs8_base64 = NULL;        // to hold the base64-encoded pkcs 8 formatted private key, free later
 
   /*
    * 3. Seed RNG
@@ -232,7 +233,6 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to seed random number generator\n");
     goto exit;
   }
-
   /*
    * 4. Use MbedTLS to generate RSA key pair
    */
@@ -240,30 +240,25 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to setup RSA key\n");
     goto exit;
   }
-
   if ((ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(pk), mbedtls_ctr_drbg_random, &ctr_drbg, 2048, 65537)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate RSA key\n");
     goto exit;
   }
-
   /*
-   * 5. Write to public_key_base64 buffer
+   * 5. Write RSA public key to public_key_base64 buffer
    */
   memset(temp_buf, 0, sizeof(temp_buf));
   if ((ret = mbedtls_pk_write_pubkey_pem(&pk, temp_buf, temp_buf_size)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write public key\n");
     goto exit;
   }
-
   size_t public_key_base64_len = 0;
   char *begin = strstr((char *)temp_buf, "-----BEGIN PUBLIC KEY-----");
   char *end = strstr((char *)temp_buf, "-----END PUBLIC KEY-----");
   if (begin != NULL && end != NULL) {
-
     begin += strlen("-----BEGIN PUBLIC KEY-----");
     while (*begin == '\n' || *begin == '\r' || *begin == ' ')
       begin++;
-
     for (char *src = begin, *dest = public_key_base64; src < end; ++src) {
       if (*src != '\n' && *src != '\r') {
         *dest++ = *src;
@@ -271,16 +266,19 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
       }
     }
   }
-
   /*
-   * 6. Write to private_key_base64 buffer (PKCS#8 format)
+   * 6. Write RSA private key to private_key_base64 buffer
+   * `private_key_base64` will be in PKCS#1 format and needs to be converted to PKCS#8 format
    */
+
+  // 6a. write the PEM formatted private key to temp_buf
   memset(temp_buf, 0, sizeof(unsigned char) * temp_buf_size);
   if ((ret = mbedtls_pk_write_key_pem(&pk, temp_buf, temp_buf_size)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key (PKCS#8 format)\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write private key (PKCS#1 format)\n");
     goto exit;
   }
 
+  // 6b. extract the -----BEGIN RSA, -----END RSA tags and any newlines and whitespace
   size_t private_key_base64_len = 0;
   begin = strstr((char *)temp_buf, "-----BEGIN RSA PRIVATE KEY-----");
   end = strstr((char *)temp_buf, "-----END RSA PRIVATE KEY-----");
@@ -288,7 +286,6 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     begin += strlen("-----BEGIN RSA PRIVATE KEY-----");
     while (*begin == '\n' || *begin == '\r' || *begin == ' ')
       begin++;
-
     for (char *src = begin, *dest = private_key_base64; src < end; ++src) {
       if (*src != '\n' && *src != '\r') {
         *dest++ = *src;
@@ -297,14 +294,22 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     }
   }
 
+  /*
+   * 7. Convert PKCS#1 formatted private key to PKCS#8 format
+   */
+
+  // 7a. First, we need to decode the PKCS#1 formatted private key
+
+  /// 7a.1 Allocate memory for the decoded private key
   const size_t private_key_non_base64_size = atchops_base64_decoded_size(private_key_base64_len);
   private_key_non_base64 = (unsigned char *)malloc(private_key_non_base64_size);
   if (private_key_non_base64 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_non_base64\n");
     goto exit;
   }
-
   size_t private_key_non_base64_len = 0;
+
+  /// 7a.2 Decode the PKCS#1 formatted private key
   if ((ret = atchops_base64_decode((const unsigned char *)private_key_base64, private_key_base64_len,
                                    private_key_non_base64, private_key_non_base64_size, &private_key_non_base64_len)) !=
       0) {
@@ -312,6 +317,7 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     goto exit;
   }
 
+  // 7b. Second, we need to add headers to the PKCS#1 formatted private key to make it PKCS#8 formatted
   const size_t private_key_pkcs8_size = private_key_non_base64_len + 22;
   private_key_pkcs8 = (unsigned char *)malloc(private_key_pkcs8_size);
   if (private_key_pkcs8 == NULL) {
@@ -319,8 +325,6 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     goto exit;
   }
   memset(private_key_pkcs8, 0, sizeof(unsigned char) * private_key_pkcs8_size);
-
-
   // https://lapo.it/asn1js/ use this to debug
   // PrivateKeyInfo SEQUENCE (3 elements)
   private_key_pkcs8[0] = 0x30; // constructed sequence tag
@@ -328,12 +332,10 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
                                // bytes are the length of data)
   private_key_pkcs8[2] = (unsigned char)((private_key_pkcs8_size >> 8) & 0xFF);
   private_key_pkcs8[3] = (unsigned char)(private_key_pkcs8_size & 0xFF);
-
   // version INTEGER 0
   private_key_pkcs8[4] = 0x02; // integer tag
   private_key_pkcs8[5] = 0x01; // length of data
   private_key_pkcs8[6] = 0x00; // data
-
   // private key algorithm identifier
   private_key_pkcs8[7] = 0x30; // constructed sequence tag
   private_key_pkcs8[8] = 0x0D; // there are 2 elements in the sequence
@@ -350,16 +352,19 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   private_key_pkcs8[19] = 0x01;
   private_key_pkcs8[20] = 0x05;
   private_key_pkcs8[21] = 0x00;
-
   // PrivateKey OCTET STRING
   private_key_pkcs8[22] = 0x04; // octet string tag
   private_key_pkcs8[23] = 0x82; // 8 --> 1000 0000 (1 in MSB means that it is long form) and 2 --> 0010 0000 (the next 2
                                 // bytes are the length of data)
   private_key_pkcs8[24] = (unsigned char)((private_key_non_base64_len >> 8) & 0xFF); // length of data
   private_key_pkcs8[25] = (unsigned char)(private_key_non_base64_len & 0xFF);        // length of data
-
   memcpy(private_key_pkcs8 + 26, private_key_non_base64, private_key_non_base64_len);
 
+  /*
+   * 8. Base64 encode the PKCS#8 formatted private key bytes to get the final private key in base64 format
+   */
+
+  // 8a. First, calculate the size of the base64 encoded private key and allocate memory
   const size_t private_key_base64_pkcs8_size = atchops_base64_encoded_size(private_key_non_base64_len);
   private_key_pkcs8_base64 = (char *)malloc(private_key_base64_pkcs8_size);
   if (private_key_pkcs8_base64 == NULL) {
@@ -367,8 +372,9 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
     goto exit;
   }
   memset(private_key_pkcs8_base64, 0, sizeof(char) * private_key_base64_pkcs8_size);
-
   size_t private_key_base64_pkcs8_len = 0;
+
+  // 8b. Encode the PKCS#8 formatted private key
   if ((ret = atchops_base64_encode(private_key_pkcs8, 26 + private_key_non_base64_len, private_key_pkcs8_base64,
                                    private_key_base64_pkcs8_size, &private_key_base64_pkcs8_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encode private key\n");
@@ -376,28 +382,80 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
   }
 
   /*
-   * 7. Populate the atchops_rsa_key_public_key and atchops_rsa_key_private_key structs
+   * 9. Set the output variables
+   */
+  *public_key_base64_output = (unsigned char *)malloc(public_key_base64_len + 1);
+  if (*public_key_base64_output == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for public_key_base64\n");
+    goto exit;
+  }
+  memcpy(*public_key_base64_output, public_key_base64, public_key_base64_len);
+  (*public_key_base64_output)[public_key_base64_len] = '\0';
+
+  *private_key_base64_output = (unsigned char *)malloc(private_key_base64_pkcs8_len + 1);
+  if (*private_key_base64_output == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_base64\n");
+    goto exit;
+  }
+  memcpy(*private_key_base64_output, private_key_pkcs8_base64, private_key_base64_pkcs8_len);
+  (*private_key_base64_output)[private_key_base64_pkcs8_len] = '\0';
+
+exit: {
+  free(private_key_non_base64);
+  free(private_key_pkcs8);
+  free(private_key_pkcs8_base64);
+  return ret;
+}
+}
+
+int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (public_key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is null\n");
+    return ret;
+  }
+
+  if (private_key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "private_key is null\n");
+    return ret;
+  }
+
+  /*
+   * 2. Variables
+   */
+  unsigned char *public_key_base64 = NULL;
+  unsigned char *private_key_base64 = NULL;
+
+  if ((ret = atchops_rsa_key_generate_base64(&public_key_base64, &private_key_base64)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate base64 keys\n");
+    goto exit;
+  }
+
+  /*
+   * 3. Populate the atchops_rsa_key_public_key and atchops_rsa_key_private_key structs
    */
 
-  if ((ret = atchops_rsa_key_populate_public_key(public_key, (const char *)public_key_base64, public_key_base64_len)) !=
-      0) {
+  if ((ret = atchops_rsa_key_populate_public_key(public_key, (const char *)public_key_base64,
+                                                 strlen((const char *)public_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate public key\n");
     goto exit;
   }
 
-  if ((ret = atchops_rsa_key_populate_private_key(private_key, (const char *)private_key_pkcs8_base64,
-                                                  private_key_base64_pkcs8_len)) != 0) {
+  if ((ret = atchops_rsa_key_populate_private_key(private_key, (const char *)private_key_base64,
+                                                  strlen((const char *)private_key_base64))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate private key\n");
     goto exit;
   }
 
 exit: {
-  mbedtls_pk_free(&pk);
-  mbedtls_ctr_drbg_free(&ctr_drbg);
-  mbedtls_entropy_free(&entropy);
-  free(private_key_non_base64);
-  free(private_key_pkcs8_base64);
-  free(private_key_pkcs8);
+  free(public_key_base64);
+  free(private_key_base64);
   return ret;
 }
 }
