@@ -170,6 +170,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,"Connected");
 
   // ===============
   // after connect
@@ -180,6 +181,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
   }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,"passed pre-write read");
 
   // press enter
   if ((ret = mbedtls_ssl_write(&(ctx->ssl), (const unsigned char *)"\r\n", strlen("\r\n"))) <= 0) {
@@ -193,6 +196,8 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
     goto exit;
   }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,"passed pre-write read-2");
 
   // now we are guaranteed a blank canvas
 

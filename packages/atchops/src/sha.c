@@ -13,7 +13,7 @@ int atchops_sha_hash(const atchops_md_type md_type, const unsigned char *input, 
    * 1. Validate arguments
    */
 
-  if (md_type != ATCHOPS_MD_SHA256) {
+  if (md_type != ATCHOPS_MD_SHA256 && md_type != ATCHOPS_MD_SHA512) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unsupported md_type\n");
     return ret;
@@ -46,10 +46,13 @@ int atchops_sha_hash(const atchops_md_type md_type, const unsigned char *input, 
   /*
    * 3. Prepare the hash context
    */
+  // Setup the hash context based on the hash type
   if ((ret = mbedtls_md_setup(&md_ctx, mbedtls_md_info_from_type(atchops_mbedtls_md_map[md_type]), 0)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to setup the hash context\n");
     goto exit;
   }
+
+  printf("out is %p", output);
 
   /*
    * 4. Hash

@@ -100,7 +100,7 @@ void atclient_monitor_free(atclient *monitor_conn);
  * @return int 0 on success
  */
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
-                                       atclient_pkam_authenticate_options *options);
+                                       atclient_authenticate_options *options);
 
 /**
  * @brief Set how long `atclient_monitor_read` should wait for a message before timing out

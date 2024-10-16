@@ -16,6 +16,7 @@ static bool is_pkam_private_key_base64_initialized(atclient_atkeys *atkeys);
 static bool is_encrypt_public_key_base64_initialized(atclient_atkeys *atkeys);
 static bool is_encrypt_private_key_base64_initialized(atclient_atkeys *atkeys);
 static bool is_self_encryption_key_base64_initialized(atclient_atkeys *atkeys);
+static bool is_apkam_symmetric_key_base64_initialized(atclient_atkeys *atkeys);
 static bool is_enrollment_id_initialized(atclient_atkeys *atkeys);
 
 static void set_pkam_public_key_base64_initialized(atclient_atkeys *atkeys, const bool initialized);
@@ -23,6 +24,7 @@ static void set_pkam_private_key_base64_initialized(atclient_atkeys *atkeys, con
 static void set_encrypt_public_key_base64_initialized(atclient_atkeys *atkeys, const bool initialized);
 static void set_encrypt_privatekey_base64_initialized(atclient_atkeys *atkeys, const bool initialized);
 static void set_self_encryption_key_base64_initialized(atclient_atkeys *atkeys, const bool initialized);
+static void set_apkam_symmetric_key_base64_initialized(atclient_atkeys *atkeys, const bool initialized);
 static void set_enrollment_id_initialized(atclient_atkeys *atkeys, const bool initialized);
 
 static void unset_pkam_public_key_base64(atclient_atkeys *atkeys);
@@ -30,6 +32,7 @@ static void unset_pkam_private_key_base64(atclient_atkeys *atkeys);
 static void unset_encrypt_public_key_base64(atclient_atkeys *atkeys);
 static void unset_encrypt_private_key_base64(atclient_atkeys *atkeys);
 static void unset_self_encryption_key_base64(atclient_atkeys *atkeys);
+static void unset_apkam_symmetric_key_base64(atclient_atkeys *atkeys);
 static void unset_enrollment_id(atclient_atkeys *atkeys);
 
 static int set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
@@ -42,6 +45,8 @@ static int set_encrypt_private_key_base64(atclient_atkeys *atkeys, const char *e
                                           const size_t encrypt_private_key_len);
 static int set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *self_encryption_key_base64,
                                           const size_t self_encryption_key_len);
+static int set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkam_symmetric_key_base64,
+                                          const size_t apkam_symmetric_key_len);
 static int set_enrollment_id(atclient_atkeys *atkeys, const char *enrollment_id, const size_t enrollment_id_len);
 
 void atclient_atkeys_init(atclient_atkeys *atkeys) {
@@ -55,6 +60,7 @@ void atclient_atkeys_init(atclient_atkeys *atkeys) {
   atkeys->encrypt_public_key_base64 = NULL;
   atkeys->encrypt_private_key_base64 = NULL;
   atkeys->self_encryption_key_base64 = NULL;
+  atkeys->apkam_symmetric_key_base64 = NULL;
   atkeys->enrollment_id = NULL;
 }
 
@@ -81,6 +87,9 @@ void atclient_atkeys_free(atclient_atkeys *atkeys) {
   }
   if (atclient_atkeys_is_self_encryption_key_base64_initialized(atkeys)) {
     unset_self_encryption_key_base64(atkeys);
+  }
+  if (atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atkeys)) {
+    unset_apkam_symmetric_key_base64(atkeys);
   }
   if (atclient_atkeys_is_enrollment_id_initialized(atkeys)) {
     unset_enrollment_id(atkeys);
@@ -244,6 +253,39 @@ int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, cons
   if ((ret = set_self_encryption_key_base64(atkeys, self_encryption_key_base64, self_encryption_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "set_self_encryption_key_base64: %d | failed to set self_encryption_key_base64\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkam_symmetric_key_base64,
+                                                   const size_t apkam_symmetric_key_base64_len) {
+  int ret = 1;
+
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if (apkam_symmetric_key_base64 == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "apkam_symmetric_key_base64 is NULL\n");
+    return ret;
+  }
+
+  if (apkam_symmetric_key_base64_len == 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "apkam_symmetric_key_base64_len is 0\n");
+    return ret;
+  }
+
+  if ((ret = set_apkam_symmetric_key_base64(atkeys, apkam_symmetric_key_base64, apkam_symmetric_key_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "set_apkam_symmetric_key_base64: %d | failed to set apkam_symmetric_key_base64\n", ret);
     goto exit;
   }
 
@@ -440,6 +482,10 @@ bool atclient_atkeys_is_self_encryption_key_base64_initialized(atclient_atkeys *
   return is_self_encryption_key_base64_initialized(atkeys);
 }
 
+bool atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atclient_atkeys *atkeys) {
+  return is_apkam_symmetric_key_base64_initialized(atkeys);
+}
+
 bool atclient_atkeys_is_enrollment_id_initialized(atclient_atkeys *atkeys) {
   return is_enrollment_id_initialized(atkeys);
 }
@@ -450,7 +496,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                           const size_t aes_encrypt_public_key_len,
                                           const char *aes_encrypt_private_key_str,
                                           const size_t aes_encrypt_private_key_len, const char *self_encryption_key_str,
-                                          const size_t self_encryption_key_str_len, const char *enrollment_id_str,
+                                          const size_t self_encryption_key_str_len, const char *apkam_symmetric_key_str,
+                                          const size_t apkam_symmetric_key_str_len, const char *enrollment_id_str,
                                           const size_t enrollment_id_str_len) {
   int ret = 1;
 
@@ -552,6 +599,12 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   unsigned char rsa_key_decrypted[rsa_key_decrypted_size];
   memset(rsa_key_decrypted, 0, sizeof(unsigned char) * rsa_key_decrypted_size);
   size_t rsa_key_decrypted_len = 0;
+
+  // temporarily holds the base64-encoded non-encrypted apkam symmetric key
+  const size_t apkam_symmetric_key_size = ATCHOPS_AES_256 / 8;
+  unsigned char apkam_symmetric_key[apkam_symmetric_key_size];
+  memset(apkam_symmetric_key, 0, sizeof(unsigned char) * apkam_symmetric_key_size);
+  size_t apkam_symmetric_key_len = 0;
 
   /*
    * 3. Prepare self encryption key for use
@@ -702,7 +755,22 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  // 6. enrollment id, if it exists
+  // 6. apkam symmetric key, if it exists
+  if (apkam_symmetric_key_str != NULL && apkam_symmetric_key_str_len > 0) {
+    if ((ret = atchops_base64_decode((unsigned char *)apkam_symmetric_key_str, apkam_symmetric_key_str_len,
+                                     apkam_symmetric_key, apkam_symmetric_key_size, &apkam_symmetric_key_len)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding apkamsymmetric key: %d\n", ret);
+      goto exit;
+    }
+    if ((ret = atclient_atkeys_set_apkam_symmetric_key_base64(atkeys, apkam_symmetric_key_str,
+                                                              apkam_symmetric_key_str_len)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "set_apkam_symmetric_key_base64: %d | failed to set apkam_symmetric_key_str\n", ret);
+      goto exit;
+    }
+  }
+
+  // 7. enrollment id, if it exists
   if (enrollment_id_str != NULL && enrollment_id_str_len > 0) {
     if ((ret = atclient_atkeys_set_enrollment_id(atkeys, enrollment_id_str, enrollment_id_str_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_set_enrollment_id: %d\n", ret);
@@ -738,6 +806,7 @@ int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atc
              atkeys_file->aes_encrypt_public_key_str, strlen(atkeys_file->aes_encrypt_public_key_str),
              atkeys_file->aes_encrypt_private_key_str, strlen(atkeys_file->aes_encrypt_private_key_str),
              atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str),
+             atkeys_file->apkam_symmetric_key_str, strlen(atkeys_file->apkam_symmetric_key_str),
              atkeys_file->enrollment_id_str, strlen(atkeys_file->enrollment_id_str))) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                    "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
@@ -749,7 +818,8 @@ int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atc
              atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
              atkeys_file->aes_encrypt_public_key_str, strlen(atkeys_file->aes_encrypt_public_key_str),
              atkeys_file->aes_encrypt_private_key_str, strlen(atkeys_file->aes_encrypt_private_key_str),
-             atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str), NULL, 0)) != 0) {
+             atkeys_file->self_encryption_key_str, strlen(atkeys_file->self_encryption_key_str), NULL, 0, NULL, 0)) !=
+        0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                    "atclient_atkeys_populate_from_strings: %d | failed to populate from strings\n", ret);
       goto exit;
@@ -837,6 +907,11 @@ static bool is_self_encryption_key_base64_initialized(atclient_atkeys *atkeys) {
          ATCLIENT_ATKEYS_SELF_ENCRYPTION_KEY_INITIALIZED;
 }
 
+static bool is_apkam_symmetric_key_base64_initialized(atclient_atkeys *atkeys) {
+  return atkeys->_initialized_fields[ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INDEX] &
+         ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INITIALIZED;
+}
+
 static bool is_enrollment_id_initialized(atclient_atkeys *atkeys) {
   return atkeys->_initialized_fields[ATCLIENT_ATKEYS_ENROLLMENT_ID_INDEX] & ATCLIENT_ATKEYS_ENROLLMENT_ID_INITIALIZED;
 }
@@ -888,6 +963,16 @@ static void set_self_encryption_key_base64_initialized(atclient_atkeys *atkeys, 
   }
 }
 
+static void set_apkam_symmetric_key_base64_initialized(atclient_atkeys *atkeys, const bool initialized) {
+  if (initialized) {
+    atkeys->_initialized_fields[ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INDEX] |=
+        ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INITIALIZED;
+  } else {
+    atkeys->_initialized_fields[ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INDEX] &=
+        ~ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INITIALIZED;
+  }
+}
+
 static void set_enrollment_id_initialized(atclient_atkeys *atkeys, const bool initialized) {
   if (initialized) {
     atkeys->_initialized_fields[ATCLIENT_ATKEYS_ENROLLMENT_ID_INDEX] |= ATCLIENT_ATKEYS_ENROLLMENT_ID_INITIALIZED;
@@ -934,6 +1019,14 @@ static void unset_self_encryption_key_base64(atclient_atkeys *atkeys) {
   }
   atkeys->self_encryption_key_base64 = NULL;
   set_self_encryption_key_base64_initialized(atkeys, false);
+}
+
+static void unset_apkam_symmetric_key_base64(atclient_atkeys *atkeys) {
+  if (is_apkam_symmetric_key_base64_initialized(atkeys) && atkeys->apkam_symmetric_key_base64 != NULL) {
+    free(atkeys->apkam_symmetric_key_base64);
+  }
+  atkeys->apkam_symmetric_key_base64 = NULL;
+  set_apkam_symmetric_key_base64_initialized(atkeys, false);
 }
 
 static void unset_enrollment_id(atclient_atkeys *atkeys) {
@@ -1077,6 +1170,35 @@ static int set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *s
   atkeys->self_encryption_key_base64[self_encryption_key_len] = '\0'; // Null-terminate the string
 
   set_self_encryption_key_base64_initialized(atkeys, true);
+
+  ret = 0;
+  return ret;
+}
+
+static int set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkam_symmetric_key_base64,
+                                          const size_t apkam_symmetric_key_len) {
+  int ret = 1;
+
+  if (apkam_symmetric_key_base64 == NULL || apkam_symmetric_key_len == 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid apkam symmetric key or key length\n");
+    return 1;
+  }
+
+  if (is_apkam_symmetric_key_base64_initialized(atkeys)) {
+    unset_apkam_symmetric_key_base64(atkeys);
+  }
+
+  const size_t apkam_symmetric_key_size = apkam_symmetric_key_len + 1;
+  atkeys->apkam_symmetric_key_base64 = (char *)malloc(apkam_symmetric_key_size);
+  if (atkeys->apkam_symmetric_key_base64 == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for apkam_symmetric_key_base64\n");
+    return 1;
+  }
+
+  memcpy(atkeys->apkam_symmetric_key_base64, apkam_symmetric_key_base64, apkam_symmetric_key_len);
+  atkeys->apkam_symmetric_key_base64[apkam_symmetric_key_len] = '\0'; // Null-terminate the string
+
+  set_apkam_symmetric_key_base64_initialized(atkeys, true);
 
   ret = 0;
   return ret;
