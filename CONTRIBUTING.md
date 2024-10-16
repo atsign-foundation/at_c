@@ -678,3 +678,52 @@ is truly 0 beacuse nothing exists and there was nothing to calculate. This is
 why the return type need not be `int` in this scenario. There is *always* an
 answer to the question "what is the length of this atkey?" that fits the return
 type `size_t`.
+
+#### Rule 5: `void` functions with no error code should be immune to run-time errors
+
+If a function is returning `void`, then it should be immune to run-time errors. This is because the caller of the function is not expecting an error code and the function is not responsible for returning an error code.
+
+Example
+
+```c
+void atclient_free(atclient *ctx) {
+    if(ctx == NULL) {
+        // precondition failed to be met by caller
+        return;
+    }
+    free(ctx);
+}
+```
+
+Another example
+
+```c
+void mystruct_init(mystruct *ctx) {
+    if(ctx == NULL) {
+        // precondition failed to be met by caller
+        return;
+    }
+
+    // set any default values for ctx
+    memset(ctx, 0, sizeof(mystruct));
+    ctx->value = -1;
+}
+```
+
+Example of what not to do
+
+```c
+void mystruct_init(mystruct *ctx) {
+    ctx->value = malloc(sizeof(char) * 4096); // can cause run-time error that is not the caller's fault, there is no way of the caller to know that this function could potentially cause an error, which would be an error that is completely out of their control
+}
+```
+
+### Convention 7. OOP approach in C
+
+We follow MbedTLS' OOP approach in C.
+
+Our modified convention of this approach will state that:
+
+- for every _init function, a _free function should be called at the end of the struct's lifetime for future proofing and clean memory management.
+- _init and _free functions should of type void (this raises the question of "what happens if an error happens in the function" and this is answered in Convention 6 Rule 5).
+- _init and _free function bodies should be immune to run-time errors and any error that is of no fault of the caller. Preconditions should be defined in the function docs and if the caller of the function does not follow those preconditions, then it is of no fault of the function itself, and it is not the function's responsibility to return an error code, hence why we allow ourselves to set the function type to void. This also means that malloc cannot be used in _init because malloc is prone to run-time errors.
