@@ -128,10 +128,35 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
 
     size_t off = chunksize * chunks;
-    for (int i = 0; i < chunksize; i++) {
+    int i = 0;
+    while (i < chunksize) {
       ret = mbedtls_ssl_read(&(monitor_conn->atserver_connection.ssl), (unsigned char *)buffer + off + i, 1);
-      if (ret <= 0 || buffer[off + i] == '\n') {
+      // successfully read
+      if (buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
+        done_reading = true;
+        break;
+      }
+      // successfully read something, continue
+      if (ret > 0) {
+        i++;
+        continue;
+      }
+
+      // Handle errors
+      switch (ret) {
+        // Special error cases where we should try reading again
+      case MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS:  // async operation in progress
+      case MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS: // crypto operation in progress
+      case MBEDTLS_ERR_SSL_WANT_READ:          // handshake incomplete
+      case MBEDTLS_ERR_SSL_WANT_WRITE:         // handshake incomplete
+        usleep(10000);                         // Try again in 10 milliseconds
+        break;
+
+        // Monitor connection bad, must be discarded
+      case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY: // transport closed with close notify
+      case 0:                                 // transport closed without close notify
+      default:                                // Other errors
         done_reading = true;
         break;
       }
