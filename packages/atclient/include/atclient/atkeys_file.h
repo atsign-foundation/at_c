@@ -76,6 +76,14 @@ int atclient_atkeys_file_from_path(atclient_atkeys_file *atkeys_file, const char
 int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const char *file_string);
 
 /**
+ * @brief Write the struct to a file.
+ * 
+ * @param atkeys_file the struct to be written to the file, assumed to be NON-NULL and initialized with atclient_atkeys_file_init
+ * @param path  Example "$HOME/.atsign/keys/@alice_key.atKeys"
+ */
+int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const char *path);
+
+/**
  * @brief Free the struct of any memory that was allocated during its lifetime
  *
  * @param atkeys_file the struct to be populated, assumed to be NON-NULL and initialized with atclient_atkeys_file_init
