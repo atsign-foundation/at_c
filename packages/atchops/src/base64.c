@@ -21,19 +21,19 @@ int atchops_base64_encode(const unsigned char *src, const size_t src_len, unsign
   }
 
   if (src_len <= 0) {
-    ret = 1;
+    ret = 2;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: src_len is less than or equal to 0\n");
     return ret;
   }
 
   if (dst == NULL) {
-    ret = 1;
+    ret = 3;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: dst is NULL\n");
     return ret;
   }
 
   if (dst_size <= 0) {
-    ret = 1;
+    ret = 4;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: dst_size is less than or equal to 0\n");
     return ret;
   }
