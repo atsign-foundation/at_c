@@ -14,6 +14,7 @@
 #define ATCLIENT_ATKEYS_ENCRYPT_PRIVATE_KEY_INDEX 0
 #define ATCLIENT_ATKEYS_SELF_ENCRYPTION_KEY_INDEX 0
 #define ATCLIENT_ATKEYS_ENROLLMENT_ID_INDEX 0
+#define ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INDEX 0
 
 #define ATCLIENT_ATKEYS_PKAM_PUBLIC_KEY_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_ATKEYS_PKAM_PRIVATE_KEY_INITIALIZED (VALUE_INITIALIZED << 1)
@@ -21,6 +22,7 @@
 #define ATCLIENT_ATKEYS_ENCRYPT_PRIVATE_KEY_INITIALIZED (VALUE_INITIALIZED << 3)
 #define ATCLIENT_ATKEYS_SELF_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 4)
 #define ATCLIENT_ATKEYS_ENROLLMENT_ID_INITIALIZED (VALUE_INITIALIZED << 5)
+#define ATCLIENT_ATKEYS_APKAM_SYMMETRIC_KEY_INITIALIZED (VALUE_INITIALIZED << 6)
 
 /**
  * @brief represents the atkeys file
@@ -48,6 +50,7 @@ typedef struct atclient_atkeys {
 
   char *self_encryption_key_base64; // base64 encoded, AES-256 key, decrypted
 
+  char *apkam_symmetric_key_base64;
   char *enrollment_id;
 
   uint8_t _initialized_fields[1]; // used to track which fields have been initialized
@@ -82,7 +85,11 @@ int atclient_atkeys_set_encrypt_private_key_base64(atclient_atkeys *atkeys, cons
 int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *selfencryptionkeybase64,
                                                    const size_t selfencryptionkeybase64len);
 
-int atclient_atkeys_set_enrollment_id(atclient_atkeys *atkeys, const char *enrollment_id, const size_t enrollment_id_len);
+int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkamsymmetrickeybase64,
+                                                   const size_t apkamsymmetrickeybase64len);
+
+int atclient_atkeys_set_enrollment_id(atclient_atkeys *atkeys, const char *enrollment_id,
+                                      const size_t enrollment_id_len);
 
 int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
                                              const size_t pkampublickeybase64len);
@@ -101,6 +108,7 @@ bool atclient_atkeys_is_pkam_private_key_base64_initialized(atclient_atkeys *atk
 bool atclient_atkeys_is_encrypt_public_key_base64_initialized(atclient_atkeys *atkeys);
 bool atclient_atkeys_is_encrypt_private_key_base64_initialized(atclient_atkeys *atkeys);
 bool atclient_atkeys_is_self_encryption_key_base64_initialized(atclient_atkeys *atkeys);
+bool atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atclient_atkeys *atkeys);
 bool atclient_atkeys_is_enrollment_id_initialized(atclient_atkeys *atkeys);
 
 /**
@@ -122,6 +130,10 @@ bool atclient_atkeys_is_enrollment_id_initialized(atclient_atkeys *atkeys);
  * @param aes_encrypt_private_key_len the length of the aes_encrypt_private_key_str buffer
  * @param self_encryption_key_str the (decrypted) AES-256 selfencryptionkey in base64 format
  * @param self_encryption_key_len the length of the self_encryption_key_str buffer
+ * @param apkam_symmetric_key_str the (decrypted) AES-256 apkamsymmetrickey in base64 format, if this is an apkam key
+ * @param apkam_symmetric_key_str_len the length of the apkam_symmetric_key_str buffer, if this is an apkam key
+ * @param enrollment_id_str the enrollment id, if this is an apkam key
+ * @param enrollment_id_str_length the length of enrollment_id_str, if this is an apkam key
  * @return int 0 on success, non-zero on failure
  */
 int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *aes_pkam_public_key_str,
@@ -130,7 +142,9 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
                                           const size_t aes_encrypt_public_key_len,
                                           const char *aes_encrypt_private_key_str,
                                           const size_t aes_encrypt_private_key_len, const char *self_encryption_key_str,
-                                          const size_t self_encryption_key_len, const char *enrollment_id_str, const size_t enrollment_id_str_len);
+                                          const size_t self_encryption_key_str_len, const char *apkam_symmetric_key_str,
+                                          const size_t apkam_symmetric_key_str_len, const char *enrollment_id_str,
+                                          const size_t enrollment_id_str_len);
 
 /**
  * @brief populates the struct by decrypting the encrypted RSA keys found in a populated atclient_atkeys_file struct
