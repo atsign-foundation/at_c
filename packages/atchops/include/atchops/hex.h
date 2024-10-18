@@ -5,7 +5,7 @@
 
 int atchops_hex_to_bytes(const char *hex, unsigned char *bytes, size_t byte_len);
 
-int atchops_bytes_to_hex_string(const unsigned char *input, size_t len, char *output);
+int atchops_bytes_to_hex (char *hex_str, size_t hex_str_len, const unsigned char *bytes, size_t byte_len);
 
 int atchops_utf8_encode(const char *input, unsigned char **output, size_t *output_length);
 

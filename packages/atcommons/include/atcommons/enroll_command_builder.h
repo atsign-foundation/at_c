@@ -7,6 +7,6 @@
 #include <stddef.h>
 
 int atcommons_build_enroll_command(char *command, size_t *cmd_len, size_t cmd_size, enroll_operation_t operation,
-                                   const enroll_params *params);
+                                   const enroll_params_t *params);
 
 #endif

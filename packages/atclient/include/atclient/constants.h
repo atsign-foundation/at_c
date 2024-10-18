@@ -24,6 +24,9 @@
 
 #define DATA_TOKEN "data:"
 
+#define CRAM_PREFIX "cram"
+#define CRAM_COMMAND_LEN 135
+
 #define BLK "\e[0;30m"
 #define RED "\e[0;31m"
 #define GRN "\e[0;32m"

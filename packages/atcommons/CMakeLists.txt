@@ -11,7 +11,7 @@ set(
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_params.c
         ${CMAKE_CURRENT_LIST_DIR}/src/test.c
         ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/enroll_command_builder.c
-        ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/cram_command_builder.c)
+)
 
 # Project setup
 cmake_minimum_required(VERSION 3.24)

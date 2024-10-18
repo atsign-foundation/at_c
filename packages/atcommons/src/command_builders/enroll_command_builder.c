@@ -13,7 +13,7 @@
 #define TAG "enroll command builder"
 
 int atcommons_build_enroll_command(char *command, size_t *cmd_len, size_t cmd_size, enroll_operation_t operation,
-                                   const enroll_params *params) {
+                                   const enroll_params_t *params) {
   int ret = 0;
   int cur_len = 0;
 
@@ -40,7 +40,7 @@ int atcommons_build_enroll_command(char *command, size_t *cmd_len, size_t cmd_si
     /*
      * 3. Calculate enroll params json len
      */
-    size_t params_json_len = 0;
+    size_t params_json_len = 0; //malloc(sizeof(size_t));
     enroll_params_to_json(NULL, &params_json_len, NULL, params); // fetch 'enroll_params_json' length
     cur_len += params_json_len + 1;                              // +1 for null terminator
     /*

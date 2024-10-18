@@ -1,10 +1,9 @@
 #include "atclient/atclient.h"
 #include "atchops/base64.h"
 #include "atchops/rsa.h"
+#include "atchops/hex.h"
 #include "atclient/atclient.h"
 
-#include "../../atcommons/include/atcommons/cram_command_builder.h"
-#include "atchops/hex_utils.h"
 #include "atclient/atclient_utils.h"
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
@@ -20,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define HOST_BUFFER_SIZE 1024 // the size of the buffer for the host name for root and secondary
+#define HOST_BUFFER_SIZE 1024  // the size of the buffer for the host name for root and secondary
 #define CRAM_SECRET_LENGTH 128 // hex encoded string
 #define SHA_512_DIGEST_SIZE 64 // standard SHA-512 digest len in bytes
 #define TAG "atclient"
@@ -401,12 +400,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
                                atclient_authenticate_options *options) {
   int ret = 1; // error by default
 
-  // atclient_authenticate_options local_options;
-  // if (options == NULL) {
-  //   atclient_authenticate_options_init(&local_options);
-  //   options = &local_options;
-  // }
-
   /*
    * 1. Validate arguments
    */
@@ -414,16 +407,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_cram_authenticate_validate_arguments: %d\n", ret);
     return ret;
   }
-
-  /*
-   * 1.1 If atserver_host and atserver_port are null and 0 respectively, then fetch the server host and port.
-   */
-  // if (options->atserver_host == NULL && options->atserver_port == 0) {
-  //   if (atclient_utils_find_atserver_address(options->atdirectory_host, options->atdirectory_port, atsign,
-  //                                            &(options->atserver_host), &(options->atserver_port)) != 0) {
-  //     return ret;
-  //   }
-  // }
 
   /*
    * 2. Initialize variables
@@ -478,7 +461,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
         atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
       atserver_host = options->atdirectory_host;
       atserver_port = options->atdirectory_port;
-        }
+    }
   }
 
   if (atserver_host == NULL || atserver_port == 0) {
@@ -489,7 +472,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
                                                     &atserver_port)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
       goto exit;
-                                                    }
+    }
     // only free this memory if it was allocated internally (by atclient_utils_find_atserver_address)
     should_free_atserver_host = true;
   }
@@ -543,11 +526,12 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    * 5. We got `data:<challenge>`, move this challenge into digest_input
    *
    */
-  memcpy(digest_input + digest_input_len, str_with_data_prefix + strlen(DATA_TOKEN), recv_len - strlen(DATA_TOKEN)); // +5 to skip the 'data:' prefix
+  memcpy(digest_input + digest_input_len, str_with_data_prefix + strlen(DATA_TOKEN),
+         recv_len - strlen(DATA_TOKEN)); // trims 'data:' from the response and copy the challenge into 'digest_input'
   digest_input_len += strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
 
   /*
-   * 6a. convert the digest_input to bytes using utf-8 encode
+   * 6a. convert 'digest_input' to bytes using utf-8 encode
    */
   unsigned char *digest_input_bytes = NULL;
   size_t digest_input_bytes_len = 0;
@@ -564,42 +548,33 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_sha_hash: %d\n", ret);
     goto exit;
   }
-
   /*
    * 6b. hex encode the digest generated in the previous step
    */
   size_t digest_hex_encoded_len = (SHA_512_DIGEST_SIZE * 2) + 1; // hex represents each byte with 2 characters + /0
-  if ((digest_hex_encoded = malloc(sizeof(char *) * digest_hex_encoded_len)) == NULL) {
+  digest_hex_encoded = malloc(sizeof(char) * digest_hex_encoded_len);
+  if (digest_hex_encoded == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for digest_hex_encoded\n");
     goto exit;
   }
 
-  if ((ret = atchops_bytes_to_hex_string(digest, digest_input_bytes_len, digest_hex_encoded)) != 0) {
+  if ((ret = atchops_bytes_to_hex(digest_hex_encoded, digest_hex_encoded_len, digest, sizeof(digest))) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_bytes_to_hex_string: %d\n", ret);
     goto exit;
   }
-
   /*
    * 7a. Build `cram:` noop_cmd
    */
-  size_t cram_cmd_len = 0, cram_cmd_size = 0;
-  atcommons_build_cram_command(NULL, &cram_cmd_len, NULL, digest_hex_encoded,
-                               digest_hex_encoded_len); // fetch command len
-  cram_cmd_size = cram_cmd_len + 1;
-  cram_cmd = malloc(sizeof(char) * cram_cmd_size); // free later
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "cram command len is %lu\n", cram_cmd_len);
-  if ((ret = atcommons_build_cram_command(&cram_cmd, &cram_cmd_len, cram_cmd_size, digest_hex_encoded,
-                                          digest_hex_encoded_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_build_cram_command: %d\n", ret);
-    goto exit;
-  }
+  cram_cmd = malloc(sizeof(char) * CRAM_COMMAND_LEN + 1); // free later
+  ret = snprintf(cram_cmd, CRAM_COMMAND_LEN + 1, "%s:%s\r\n", CRAM_PREFIX, digest_hex_encoded);
+  cram_cmd[CRAM_COMMAND_LEN] = '\n';
 
   /*
    * 7b. Send `cram:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "build cram command: %s", cram_cmd);
-  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, cram_cmd_size, recv,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "build cram command: %s\n", cram_cmd);
+  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, CRAM_COMMAND_LEN, recv,
                                       recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -612,6 +587,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
                  (int)recv_len, recv);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "CRAM auth successful\n");
 
   /*
    * 8. Set up the atclient context
