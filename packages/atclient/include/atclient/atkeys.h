@@ -26,14 +26,11 @@
 
 /**
  * @brief represents the atkeys file
- * contains 5 keys: pkam public/private keypair, encrypt public/private keypair, and the aes-256 self encryption key.
- * each key contains
- * 1. the length of the buffer,
- * 2. the string that holds the decrypted base64 representation of the key with buffer length specified previously in
- * (1.)
- * 3. the evaluated length of the key (after population), you can imagine this as the *true* length of the key as
- * opposed to the buffer size used during memory allocation,
- * 4. (for rsakeys), the rsakey struct used in rsa operations.
+ * - PKAM public/private keypair used for PKAM authentication
+ * - Encrypt public/private keypair used for encrypting/decrypting messages
+ * - Self encryption key used for decrypting the above keys and for encrypting/decrypting self data
+ * - apkam symmetric key used for APKAM authentication
+ * - enrollment id used for APKAM authentication
  */
 typedef struct atclient_atkeys {
   char *pkam_public_key_base64;               // base64 encoded, RSA-2048 key, decrypted
