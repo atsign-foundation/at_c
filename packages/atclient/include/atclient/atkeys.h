@@ -71,37 +71,37 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
 void atclient_atkeys_free(atclient_atkeys *atkeys);
 
 int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
-                                               const size_t pkampublickeybase64len);
+                                               const size_t pkam_public_key_base64_len);
 
 int atclient_atkeys_set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
-                                                const size_t pkamprivatekeybase64len);
+                                                const size_t pkam_private_key_base64_len);
 
 int atclient_atkeys_set_encrypt_public_key_base64(atclient_atkeys *atkeys, const char *encrypt_public_key_base64,
-                                                  const size_t encryptpublickeybase64len);
+                                                  const size_t encrypt_public_key_base64_len);
 
 int atclient_atkeys_set_encrypt_private_key_base64(atclient_atkeys *atkeys, const char *encrypt_private_key_base64,
-                                                   const size_t encryptprivatekeybase64len);
+                                                   const size_t encrypt_private_key_base64_len);
 
-int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *selfencryptionkeybase64,
-                                                   const size_t selfencryptionkeybase64len);
+int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *self_encryption_key_base64,
+                                                   const size_t self_encryption_key_base64_len);
 
-int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkamsymmetrickeybase64,
-                                                   const size_t apkamsymmetrickeybase64len);
+int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkam_symmetric_key_base64,
+                                                   const size_t apkam_symmetric_key_base64_len);
 
 int atclient_atkeys_set_enrollment_id(atclient_atkeys *atkeys, const char *enrollment_id,
                                       const size_t enrollment_id_len);
 
 int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
-                                             const size_t pkampublickeybase64len);
+                                             const size_t pkam_public_key_base64_len);
 
 int atclient_atkeys_populate_pkam_private_key(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
-                                              const size_t pkamprivatekeybase64len);
+                                              const size_t pkam_private_key_base64_len);
 
 int atclient_atkeys_populate_encrypt_public_key(atclient_atkeys *atkeys, const char *encrypt_public_key_base64,
-                                                const size_t encryptpublickeybase64len);
+                                                const size_t encrypt_public_key_base64_len);
 
 int atclient_atkeys_populate_encrypt_private_key(atclient_atkeys *atkeys, const char *encrypt_private_key_base64,
-                                                 const size_t encryptprivatekeybase64len);
+                                                 const size_t encrypt_private_key_base64_len);
 
 bool atclient_atkeys_is_pkam_public_key_base64_initialized(atclient_atkeys *atkeys);
 bool atclient_atkeys_is_pkam_private_key_base64_initialized(atclient_atkeys *atkeys);

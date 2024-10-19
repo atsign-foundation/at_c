@@ -91,13 +91,13 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
  */
 void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file);
 
-bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file);
 
 int atclient_atkeys_file_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
                                                      const char *aes_pkam_public_key_str,
