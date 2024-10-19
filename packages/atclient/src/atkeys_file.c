@@ -12,13 +12,13 @@
 
 #define TAG "atkeys_file"
 
-static bool is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_apkam_symmetric_key_str_initialized(atclient_atkeys_file *atkeys_file);
-static bool is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file);
+static bool is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file);
 
 static void set_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
 static void set_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
@@ -145,14 +145,12 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
   }
 
   cJSON *apkam_symmetric_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_JSON_KEY);
-  if (apkam_symmetric_key == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read apkamSymmetricKey from JSON\n");
-    goto exit;
-  }
-  if ((ret = set_apkam_symmetric_key_str(atkeys_file, apkam_symmetric_key->valuestring,
-                                         strlen(apkam_symmetric_key->valuestring))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_apkam_symmetric_key_str: %d\n", ret);
-    goto exit;
+  if (apkam_symmetric_key != NULL) {
+    if ((ret = set_apkam_symmetric_key_str(atkeys_file, apkam_symmetric_key->valuestring,
+                                          strlen(apkam_symmetric_key->valuestring))) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_apkam_symmetric_key_str: %d\n", ret);
+      goto exit;
+    }
   }
 
   cJSON *enrollment_id = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_ENROLLMENT_ID_JSON_KEY);
@@ -246,6 +244,10 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
     cJSON_AddStringToObject(root, "selfEncryptionKey", atkeys_file->self_encryption_key_str);
   }
 
+  if(is_apkam_symmetric_key_str_initialized(atkeys_file)) {
+    cJSON_AddStringToObject(root, "apkamSymmetricKey", atkeys_file->apkam_symmetric_key_str);
+  }
+
   if (is_enrollment_id_str_initialized(atkeys_file)) {
     cJSON_AddStringToObject(root, "enrollmentId", atkeys_file->enrollment_id_str);
   }
@@ -291,32 +293,32 @@ void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file) {
   unset_enrollment_id_str(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_pkam_public_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_pkam_private_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_encrypt_public_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_aes_encrypt_private_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+bool atclient_atkeys_file_is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return is_self_encryption_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(atclient_atkeys_file *atkeys_file) {
-  return is_enrollment_id_str_initialized(atkeys_file);
+bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
+  return is_apkam_symmetric_key_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
-  return is_apkam_symmetric_key_str_initialized(atkeys_file);
+bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file) {
+  return is_enrollment_id_str_initialized(atkeys_file);
 }
 
 int atclient_atkeys_file_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
@@ -544,37 +546,37 @@ int atclient_atkeys_file_set_enrollment_id_str(atclient_atkeys_file *atkeys_file
 exit: { return ret; }
 }
 
-static bool is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PUBLIC_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_PKAM_PUBLIC_KEY_STR_INITIALIZED;
 }
 
-static bool is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED;
 }
 
-static bool is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED;
 }
 
-static bool is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED;
 }
 
-static bool is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED;
 }
 
-static bool is_apkam_symmetric_key_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INITIALIZED;
 }
 
-static bool is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
+static bool is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file) {
   return atkeys_file->_initialized_fields[ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INDEX] &
          ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INITIALIZED;
 }
