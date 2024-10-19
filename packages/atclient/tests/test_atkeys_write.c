@@ -5,41 +5,13 @@
 #define TAG "test_atkeys_write"
 
 #define ATKEYS_8INCANTEATER                                                                                            \
-  "{\"aesPkamPublicKey\":\"+Jp1VdQuMANVkktasZhnZ9UStUMW0JMnNNYAqXWhyMHDB1PQMpCMWDzAQwEkI8/UVCY33Xot6BUTvTjMqJj/"       \
-  "qbwCTbth+HE32qL6dKSiub6gs+5zYhWPN7x4O+QSBxiNrXgWjvy3Gz74B9EnOZsOKUHnxRFkMpxGlL0T7zRoV/"                             \
-  "P4IInXj9vBtLDV0EGawJEUiDhY7OLpTeYUxH0pGSlh8sjNhG1FW9DSA9eMruhLnWdMdZsJ0fdd3QGT2hReHOpcAxWcV7oFe3N5l7/"              \
-  "IGEQi7NcoWSl8gIn+7gcqiRAaBueQKlgV3XmkcrgUeVifWtlJPMcB7HbBiYggPKUnus2k+f+"                                           \
-  "bvNnvCBgjsfFCiyDPijTdL7S3lo9dO9bzG22c90yIDgIo78Zb7HSHVhFs4QGmtNLQSKCp/"                                             \
-  "39RTopHPMh+zFnRsj+YFBknsHUYss+LsLql+UfA7kEb3L8PM4FRd/"                                                              \
-  "XF5BfiI9S+ETvwF0DdJA8jo3F744YT2hMdG8r384keSxd7Y2Vm8S7UEtTU6Fo9w9Dn0Q==\",\"aesPkamPrivateKey\":\"+"                 \
-  "Jp1UusFOA9WsWFlm5RlUYQO7EZu9uYjNMYKrHWxo8PMBUPlFpCUcjz2QwFTO7PsLUcL7Uc78Bciqxy0htHQq8QgEaZ8hTQjsrviaKufvY6DkrJPMSu" \
-  "lMoZLYbIVcT2S7xwd186mAhaFQPdlaJULFTjXy2wxBqxGvp4lqHV7JcbjQb6Qr8n4p8LJnFCvu/"                                        \
-  "1O+SB0k4zAQqtQygUOPygHwfqm0GhvFtezEdij4+l1m39ZEY8h/Pos1iivkQYzYMkLFhK/Fbh3GUhU55yJfVoA7/Qhdg88/"                    \
-  "tPtxw477khFP+yfWkMdiX2WNOEyP1arNtd8FPE0jmeCkaITcZIF+YaY+f+"                                                         \
-  "unr7tCEw3ltkMuhfAhSiCBbuLoKdAD978bS3d3XmBKFdo5OVVvnHRDGx3uTKTtNLrS6KJ8nNpX50mBrFFwFbPojiPJy0gzVFAmP2Qi8a3mC/"       \
-  "wxxcjm7BNG7dOA+zWqzmiAMTECwLeDn7RU3cwhnZs7vkOjGQUZcm8jc1eUiZGQXhN8hvWasKdhx93ipmqmj5TTwIK6B2ivWeE9XX7Ep/C3an/"      \
-  "SjkM5LDPZdVM/"                                                                                                      \
-  "hsOL2wWaCud+"                                                                                                       \
-  "sMrbuiouO2eogAr0sINp5thItlWw7Fu8Owpt3XlT5bpFjdRrJVKQ6EldLwqXITolOmqvwO70yDq4eMc977gwUlKTN80IetSN4k3SIlBK5/"         \
-  "EzXMa3odO7OF0oRteVvAg7upaH1tvyOppsGLg+3+sOMkcREAralsN++DIHUK6peYRZ0K4IWICXQRw8Q+w7ZwacWdfvHQe9y1MZi5/"              \
-  "lPfEfaKc6+9MupOSgNNQE38mVYQkf5IQAofe7YFxgZMqT/DiX7dwnTknBVlzjNzDP/QnPECFbJZFNpb3G/I7I1Vf/"                          \
-  "7iRAUN0zcjFuK4WfEN98k7jLZySENV2+S+nZc6Jjq330gPomH9MTbfYZl8ooYCy+"                                                   \
-  "sWfVi11l5ifHT50vGZL8mPYwHh1Mi272hHfv7sVbg67Wxe0HZQk5UElo233pxSj/XEEHTBeG2JqnuUWUd6hL1wZ77TPi7r641KjgB4H7/"          \
-  "lD6l4SnheQJkSyjMrkd537ApY+uW1SVw4DYifTnplCyVmDSRpbhKfANvmczdzBX+2VGAICcSpMJW86p3m7YotEk/lRhxfC/gHY1sE/"             \
-  "zptdE4rd16JjWPZFpWBAqceM6tz0pomM4K8B81u/"                                                                           \
-  "8yAFWAWZmvbR4hXSUl4xGawvmIQGgfNUair5EGJcLJkHgA2B8Hz8bJJsxlRmWbxStu85d6heqi4HGxB1eNqVaS/A+Fe2NhNMAFGc1ZN/"           \
-  "ROb0dlegcI2jukh61xS9/UkPi5E6grVcX2/F+oX9wR2/bTMrrY3goC9mKrQbRmuuVQkMGWXnCYfBik2DCX0/NT0jyRl/"                       \
-  "uIIWc+A75RY8LOiHEFs+AuM0wyJVBF3rKy3UenOLxckkciE6BuPBFAqcAsgUZF+eEICyg9EUQpSHvGHKTRp2U/Wiw/"                         \
-  "JEWAPEdey5pdhaWoKkx+HXotd5wPQ0l6wx5logDib8g3KMS8xvjqyyJXZs67zhXZ2Qjlbb1T2yUnUUDvi1KRQRtlQlSpQkzymxcF1I/"            \
-  "Y1xAGpQB3MZ86rYNH0a97y6mkosRYYMAU0MiJQtHgGfKiNksxmf8nXaHNB8LDiPAB/"                                                 \
-  "l08Kj1IkesqRB2wngCYPDVLmvoNPBNCHhbQUBn7035nAAJosGUdTy7pGUF4KLOMXkM4+imPAd1eQmiYMuYZsm7gxKi8IEmTCu+"                 \
-  "WjJkRp5IlJiExeWOTXSxuDq+RO5yjEAKHltdIbJ4SBaxK97VsO5fcB76re+0czyM3ry939bGSmliFimHs+PkTcaAfCYk0+"                     \
-  "mNskjkkyFjbHaObSrTflJManufdMKNhd/tMA39X00yaGAsSk7Up/"                                                               \
-  "kOZrS1Sw+"                                                                                                          \
-  "sOUvMFBXdBeLqnof03UkWSmj7seVMdcMFtzo3vAXvux7q8xb7dSFlN4x8mSXwpuBuJv5aCrXhAO8P7fwtpUm2ehXu808X364cfK7hHbAEW4x7W+"    \
-  "8gOErRGtom+jWBQDw8rsZ/Bf9KTPco3wnGKb6PGBtFPSfSSVK+nZOnSXt3PL0TYxNh/"                                                \
-  "hYAnBxeBEyAuT4B52mbD38zKy6bPTcIb2HMGYxo4s6FaHTsKJNUaKucKVKECeeH1K8cDvIHkRlIHofkKPIZyUD3N9TW2W/"                     \
-  "SAoU\",\"aesEncryptPublicKey\":\"+"                                                                                 \
+  "{\"aesPkamPublicKey\":\"+Jp1VdQuMANVkktasZhnZ9UStUMW0JMnNNYAqXWhyMHDB1PQMpCMWDzAQwF+IdXlJ10Hx2Q6iz0bgDOi6PKj+"      \
+  "uxPIcYejBsHrKLNQsWru6eCj+ZmGG35K+BePqowbReP0FNp7eWlOxP8Ee9WEK0QDUPqhAZwN6dzqYoqsmdsfJbISqfj4sD+"                    \
+  "iunJ5l6zmMRguXpe9IOPLKsR42kqQCkV3uibw0xhNNarAeSZwbBstiJCUJAu59ks7DyL/HdWQcQnCFaLPZIZZGh6iLzJHUpf5dY2JTln/4vs/"      \
+  "DFxnhRKfM+TU2UzoESHKvcyJ1aAF9t1LeNc9nuEyqg+ZP5/"                                                                    \
+  "iIW81KKdioXFDxsrktpdlQDKrCGqA9+FtLRwHaf7FT2v+DHbLUwq4OFGymyrIhIl1DG9ktqvaJTX8W8LE+sRPsRUx2z1/"                      \
+  "hGSLQEDtiMakNKBhMr4pVv88jsdzqxdZ7MTEoa63Q//"                                                                        \
+  "L82SWBvOElbGUnQevVRj2cgLu1AhAK+y3PciChs0AGVm8S7UEtTU6Fo9w9Dn0Q==\",\"aesEncryptPublicKey\":\"+"                     \
   "Jp1VdQuMANVkktasZhnZ9UStUMW0JMnNNYAqXWhyMHDB1PQMpCMWDzAQwF8Ear5HWcA7mkC1j403yOvl4K53LkLM8MCugsRmIDZQJWYssSvkpJ8Pmy" \
   "LS7NCJ74OcC+mz1xF7/iBEDiRXPpOCKdSEW3v7GR/LY0WoJ4epj9GSc+zI9/P+OL7p+fplXKkxeNchUEbsP/"                               \
   "3KI4L2n0GIB15xcGX5m9DJc31PfeC861qknVKScMDx8V0/GilzhZQRucjElq3VoNrCQ50kpe2XmIA/"                                     \
@@ -75,7 +47,38 @@
   "MNxh6UlKOfmOHyEiHTrgPpVrbw7psQ5vREtrBUHDK2efqS4lStFjEsxyXZse8ebjJ2mdytPTD0jLps6izyTA+"                              \
   "ariIFEOfhAFUyPPGfHl5wpkhMklfSh6Xsdb4Ru9t6eU4QcFQoO7/ZQKu6cyrt4a+zS6r7K4CMG3EN/"                                     \
   "qItGp3XlZdWcICVRr13CgSAZFvudjvTADA+GgpviKbja0Z33N9TW2W/SAoU\",\"selfEncryptionKey\":\"ErES7LlWlIJAUEEwfvwqhjyi/"    \
-  "NvTQ964uojS8KYcHvI=\",\"@8incanteater\":\"ErES7LlWlIJAUEEwfvwqhjyi/NvTQ964uojS8KYcHvI=\"}"
+  "NvTQ964uojS8KYcHvI=\",\"@8incanteater\":\"ErES7LlWlIJAUEEwfvwqhjyi/"                                                \
+  "NvTQ964uojS8KYcHvI=\",\"apkamSymmetricKey\":\"Z7LAVzBhtBpkZHleFmINyPW2jTofBOph3oqaTipJWCE=\",\"enrollmentId\":"     \
+  "\"865839ed-856a-4c97-b475-7a8ead295f17\",\"aesPkamPrivateKey\":\"+"                                                 \
+  "Jp1UusjOA9WsWFlm5RlUYQO7EZu9uYjNMYKrHWxo8PMBX3lFpCUcDz2QwFTO7PsLUcMyDRtzwIZijG7qYO9/+o6FsYDpXM/"                    \
+  "lrrvfaGdjsWFtbBlFzPmVp5gOasMUEGu/0Vt//GtckGMJdNTHqQPLnzK6iZMJslNzuYznmlnR57qMYvulNf9h/PH7VqQpvpEhlx2iJ/"            \
+  "jTOIa5F4cGwRZ6MO24VJiXdzPCsGf0+kq6nAKRpwO2PlI9j2S/"                                                                 \
+  "3EucPddL2u3PJkvOnUO9aOWQzIi46klcj1M2PnyyiE7ukhcJOaqf1ghkH7TLbh2BEuGWMtYF8BY6UWKw60+"                                \
+  "PfB7gq65xbyti5jDMxw3iMpCqgPMrSedAoupvo5JDe7OGxm3hVXaBlxfztp5/"                                                      \
+  "EWMBBwf0Ri7qfiqU52siUhCRq4VGvdC7XbytjC0JwEcryceuun8rZnPg0vC9Bp4mrN2A98XCvHK0jXZLPSWHgW7ZUSBFmktljZKpvAtokgQCqD04Ow" \
+  "xAA5/Ripc5QvvYOSdhx93ipmqmj5TTwIq6Rzjv1+6yXHPNZ/"                                                                   \
+  "D8NjrbWde+avcYvRcwUwCQAFIFzed6YtyFMWJsc3vjnRwy4Iq3tUTGd9Et4w6vtgBlF6nCb/vFhIWk+ZdZt8kZrhkcsD2idaDpg617k23+cY98Yq6/" \
+  "mpKStkqcOR6BZtUfpFrD//D8QZswLxC9pRouw9yI8BstdJ4TBIK1ew23nHloQjTN+kyf2p/KiAWuaXeKjyXgfsEfRuKEx8GGgBS/"               \
+  "m2QuOwOdhtlnQcynwtHWwRumtbJT5Pd47023sTq/"                                                                           \
+  "6IsLkpcU8kabsEbMafr1K1ygs5be+"                                                                                      \
+  "3eOKZUwhh1MkxvsJO0SM8GCmCOV6gDbazCLtkPF31F99PAckNV08rIuPRGD2tx1y3oPaeMfuNB9zuwWZCTpri34EO5xnkELrSFBloo8JG8ye7eU28j" \
+  "kryXMjNFjUAd8HWD5GYJBAHlwxjcw75vXiixVnGRGZQk5UElownH/jimyjZcSCxAAGt4tfs6VPygUwhwwL/r7JziuGmNxSgPu9dC/UsLg2icKyLTk/" \
+  "7Ff63kZbQs2xJQflEARRCmpPN/"                                                                                         \
+  "oR2Lew89jaToHbSJiKToTN+"                                                                                            \
+  "geS4MVmwkIFgxnQ2EcLx0heQWpRmougCY1Ndo0fdQFrTA1Js7SMoytCN9t6GQ87vJq5m10q4v60Gt2kJEREmkko3v3BCSFFwJa9dO7b1dnMtKSQeUN" \
+  "mJcLJkAxTOh+QLRfLt0wXJNZ5lXl+ssX5sBixIlAk9iKs+7Txb+kGnNEB45X06N0eRSZIa+D07CZ5no4FJiqkvu9TE/idVjsbVVRXL/"            \
+  "3d3q3wiwRDta0aruxStvSs0pWWObXkweEW3UYqPvkWi0G14hLTQ/"                                                               \
+  "yw5ZraJYTvQJ7W1oUvfib1ESK8Mw2D1RI3nHKUjzc3W7xddTKDg7POfME1XmHMlFeB/"                                                \
+  "0Pfaxm+spSrChvGHKXyhvUuCay809fhnDc9GGt+83aNvU+7PJnNg/"                                                              \
+  "+89skbAizHJWZ3jl+"                                                                                                  \
+  "VLsbNMQifTMJl5dm5WxeoWu43Hi4WuMdG0tcN2rOyIdk3dfeJIJx3HkYTNK3fFhSXt6VkwjkIa5MGgv97rKkBt8Ho0MR0wo6MQVKHuMKVIkrh209kv" \
+  "fP8B8XiSie3+6/8iN+qd/trRKqWfKJtjdXIWcqd7pCwGnfkIzvZs65GZzG/"                                                        \
+  "gycur+7ZWQG4T5OPHEVILkzYoJsJIusJh1L45d0BFoleRKphGe90LEnxt3Pjl5PDjsBmuC2+ij+m+"                                      \
+  "7yi5cSGdoY5yf6C0gyrxjQvq7Yb8F3erHkO6obWPdiGFjEzeGjCKpcfGKyUcJWtiNkESsCPorvmfwkvWhDfCOTIEmI/"                        \
+  "m+H4kENxVVuLMb81UN9Lq2qwR5cI79BIzY1UVkmLwAPRdiYDG7oEIJzW1bdyCBrN/xbeYGHtbZ/"                                        \
+  "NcUtOQg69lD07OFs6sewWSih8H1p96cbBrgnQfDGIfB44IFzPlDi81XZSukQ9et4UqiJmQJuB39ldEhc0ho3Ne4ICOw/P99ygvsMhDg/"           \
+  "3UEBaT1IVQ6M8+HHg9KjA5ZlwDH3K7rLKxKoK17F0AMZBsSYa73eoGGKVWw7u+"                                                     \
+  "oCunTPuaSC2g5proxG4DwuspUdZLTc4V3FhiNJF3McjOKL0t4DHoWv5qAVAZQo99TW2W/SAoU\"}"
 
 #define ATKEYS_8INCANTEATER_1_FILE_PATH "@8incanteater_key1.atKeys"
 
@@ -98,6 +101,15 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
+  // log what fields are initializwed
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_public_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_private_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_public_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_private_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_self_encryption_key_base64_initialized: %d\n", atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_apkam_symmetric_key_base64_initialized: %d\n", atclient_atkeys_is_apkam_symmetric_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_enrollment_id_initialized: %d\n", atclient_atkeys_is_enrollment_id_initialized(&atkeys));
+
   if ((ret = atclient_atkeys_write_to_path(&atkeys, ATKEYS_8INCANTEATER_1_FILE_PATH))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to write to path\n");
     goto exit;
@@ -105,6 +117,51 @@ int main(int argc, char *argv[]) {
 
   if ((ret = atclient_atkeys_populate_from_path(&atkeys1, ATKEYS_8INCANTEATER_1_FILE_PATH))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to populate from path\n");
+    goto exit;
+  }
+
+  // log what fields are initializwed
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_public_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_private_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_public_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_private_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_self_encryption_key_base64_initialized: %d\n", atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_apkam_symmetric_key_base64_initialized: %d\n", atclient_atkeys_is_apkam_symmetric_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_enrollment_id_initialized: %d\n", atclient_atkeys_is_enrollment_id_initialized(&atkeys1));
+
+  // compare the two atkeys
+  if (strcmp(atkeys.pkam_public_key_base64, atkeys1.pkam_public_key_base64) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam_public_key_base64 mismatch\n");
+    goto exit;
+  }
+
+  if (strcmp(atkeys.pkam_private_key_base64, atkeys1.pkam_private_key_base64) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam_private_key_base64 mismatch\n");
+    goto exit;
+  }
+
+  if (strcmp(atkeys.encrypt_public_key_base64, atkeys1.encrypt_public_key_base64) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt_public_key_base64 mismatch\n");
+    goto exit;
+  }
+
+  if (strcmp(atkeys.encrypt_private_key_base64, atkeys1.encrypt_private_key_base64) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt_private_key_base64 mismatch\n");
+    goto exit;
+  }
+
+  if (strcmp(atkeys.self_encryption_key_base64, atkeys1.self_encryption_key_base64) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "self_encryption_key_base64 mismatch\n");
+    goto exit;
+  }
+
+  if (strcmp(atkeys.apkam_symmetric_key_base64, atkeys1.apkam_symmetric_key_base64) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "apkam_symmetric_key_base64 mismatch\n");
+    goto exit;
+  }
+
+  if (strcmp(atkeys.enrollment_id, atkeys1.enrollment_id) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enrollment_id mismatch\n");
     goto exit;
   }
 
