@@ -234,7 +234,7 @@ void main(int argc, char *argv[]) {
    * 5. Free existing atclient and re-initialize atclient
    */
   atclient_free(&atclient);
-
+  // should be re-allocated ?
   atclient_init(&atclient);
   atclient_set_atsign(&atclient, atsign);
 
@@ -245,23 +245,63 @@ void main(int argc, char *argv[]) {
    * 6. Perform APKAM auth
    */
   if((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &auth_opts)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "APKAM auth failed | atclient_pkam_authenticate: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "PKAM auth failed | atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "APKAM auth success\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "PKAM auth success\n");
 
   /*
    * 7. Update Default Encryption Public Key to server
    */
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+  char *atkeystr = NULL;
+
+  if((ret = atclient_atkey_create_public_key(&atkey, "publickey", atsign, NULL))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
+    goto exit;
+  }
+
+  atclient_atkey_metadata_set_is_public(&atkey.metadata, true);
+
+  // remove the debug logs and string conversion after testing
+  atclient_atkey_to_string(&atkey, &atkeystr);
+  size_t atkeystrlen = strlen(atkeystr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
+  if((ret = atclient_put_public_key(&atclient, &atkey, atkeys.encrypt_private_key_base64, NULL, NULL)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to updating enc_public_key to server | atclient_put_public_key: %d\n", ret);
+    goto exit;
+  }
 
   /*
    * 8. Delete CRAM secret from the server
    */
+  atclient_atkey_free(&atkey);
+  atclient_atkey_init(&atkey);
+
+  if((ret = atclient_atkey_create_self_key(&atkey, "privatekey:at_secret", NULL, NULL))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed creating self key: at_secret");
+    goto exit;
+  }
+
+  // remove the debug logs and string conversion after testing
+  atclient_atkey_to_string(&atkey, &atkeystr);
+  atkeystrlen = strlen(atkeystr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
+               atkeystr);
+
+  if((ret = atclient_delete(&atclient, &atkey, NULL, NULL))) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed deleting CRAM Secret\n");
+    goto exit;
+  }
 
   /*
    * 8. Write the keys to the .atKeys file
    */
 exit: {
+  if(ret != 0) printf("Aborting\n");
+
   // should free the atkeys mem
   // then free the char buffers used to gen aes keys
   atclient_authenticate_options_free(&options);
