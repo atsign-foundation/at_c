@@ -1,5 +1,5 @@
-#ifndef ATCLIENT_atkeys_file_H
-#define ATCLIENT_atkeys_file_H
+#ifndef ATCLIENT_ATKEYS_FILE_H
+#define ATCLIENT_ATKEYS_FILE_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -12,6 +12,7 @@
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INDEX 0
+#define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INDEX 0
 
@@ -20,8 +21,8 @@
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 3)
 #define ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 4)
-#define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INITIALIZED (VALUE_INITIALIZED << 5)
-#define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 6)
+#define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 5)
+#define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INITIALIZED (VALUE_INITIALIZED << 6)
 
 #define ATCLIENT_ATKEYS_FILE_APKAM_PUBLIC_KEY_JSON_KEY "aesPkamPublicKey"
 #define ATCLIENT_ATKEYS_FILE_APKAM_PRIVATE_KEY_JSON_KEY "aesPkamPrivateKey"
@@ -76,19 +77,27 @@ int atclient_atkeys_file_from_path(atclient_atkeys_file *atkeys_file, const char
 int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const char *file_string);
 
 /**
+ * @brief Write the struct to a file.
+ * 
+ * @param atkeys_file the struct to be written to the file, assumed to be NON-NULL and initialized with atclient_atkeys_file_init
+ * @param path  Example "$HOME/.atsign/keys/@alice_key.atKeys"
+ */
+int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const char *path);
+
+/**
  * @brief Free the struct of any memory that was allocated during its lifetime
  *
  * @param atkeys_file the struct to be populated, assumed to be NON-NULL and initialized with atclient_atkeys_file_init
  */
 void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file);
 
-bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(atclient_atkeys_file *atkeys_file);
-bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_pkam_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file);
 
 int atclient_atkeys_file_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
                                                      const char *aes_pkam_public_key_str,

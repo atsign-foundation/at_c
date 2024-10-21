@@ -26,14 +26,11 @@
 
 /**
  * @brief represents the atkeys file
- * contains 5 keys: pkam public/private keypair, encrypt public/private keypair, and the aes-256 self encryption key.
- * each key contains
- * 1. the length of the buffer,
- * 2. the string that holds the decrypted base64 representation of the key with buffer length specified previously in
- * (1.)
- * 3. the evaluated length of the key (after population), you can imagine this as the *true* length of the key as
- * opposed to the buffer size used during memory allocation,
- * 4. (for rsakeys), the rsakey struct used in rsa operations.
+ * - PKAM public/private keypair used for PKAM authentication
+ * - Encrypt public/private keypair used for encrypting/decrypting messages
+ * - Self encryption key used for decrypting the above keys and for encrypting/decrypting self data
+ * - apkam symmetric key used for APKAM authentication
+ * - enrollment id used for APKAM authentication
  */
 typedef struct atclient_atkeys {
   char *pkam_public_key_base64;               // base64 encoded, RSA-2048 key, decrypted
@@ -71,37 +68,37 @@ void atclient_atkeys_init(atclient_atkeys *atkeys);
 void atclient_atkeys_free(atclient_atkeys *atkeys);
 
 int atclient_atkeys_set_pkam_public_key_base64(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
-                                               const size_t pkampublickeybase64len);
+                                               const size_t pkam_public_key_base64_len);
 
 int atclient_atkeys_set_pkam_private_key_base64(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
-                                                const size_t pkamprivatekeybase64len);
+                                                const size_t pkam_private_key_base64_len);
 
 int atclient_atkeys_set_encrypt_public_key_base64(atclient_atkeys *atkeys, const char *encrypt_public_key_base64,
-                                                  const size_t encryptpublickeybase64len);
+                                                  const size_t encrypt_public_key_base64_len);
 
 int atclient_atkeys_set_encrypt_private_key_base64(atclient_atkeys *atkeys, const char *encrypt_private_key_base64,
-                                                   const size_t encryptprivatekeybase64len);
+                                                   const size_t encrypt_private_key_base64_len);
 
-int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *selfencryptionkeybase64,
-                                                   const size_t selfencryptionkeybase64len);
+int atclient_atkeys_set_self_encryption_key_base64(atclient_atkeys *atkeys, const char *self_encryption_key_base64,
+                                                   const size_t self_encryption_key_base64_len);
 
-int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkamsymmetrickeybase64,
-                                                   const size_t apkamsymmetrickeybase64len);
+int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, const char *apkam_symmetric_key_base64,
+                                                   const size_t apkam_symmetric_key_base64_len);
 
 int atclient_atkeys_set_enrollment_id(atclient_atkeys *atkeys, const char *enrollment_id,
                                       const size_t enrollment_id_len);
 
 int atclient_atkeys_populate_pkam_public_key(atclient_atkeys *atkeys, const char *pkam_public_key_base64,
-                                             const size_t pkampublickeybase64len);
+                                             const size_t pkam_public_key_base64_len);
 
 int atclient_atkeys_populate_pkam_private_key(atclient_atkeys *atkeys, const char *pkam_private_key_base64,
-                                              const size_t pkamprivatekeybase64len);
+                                              const size_t pkam_private_key_base64_len);
 
 int atclient_atkeys_populate_encrypt_public_key(atclient_atkeys *atkeys, const char *encrypt_public_key_base64,
-                                                const size_t encryptpublickeybase64len);
+                                                const size_t encrypt_public_key_base64_len);
 
 int atclient_atkeys_populate_encrypt_private_key(atclient_atkeys *atkeys, const char *encrypt_private_key_base64,
-                                                 const size_t encryptprivatekeybase64len);
+                                                 const size_t encrypt_private_key_base64_len);
 
 bool atclient_atkeys_is_pkam_public_key_base64_initialized(atclient_atkeys *atkeys);
 bool atclient_atkeys_is_pkam_private_key_base64_initialized(atclient_atkeys *atkeys);
@@ -175,5 +172,9 @@ int atclient_atkeys_populate_from_path(atclient_atkeys *atkeys, const char *path
  * @return int 0 on success
  */
 int atclient_atkeys_populate_from_string(atclient_atkeys *atkeys, const char *file_string);
+
+int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkeys_file *atkeys_file);
+
+int atclient_atkeys_write_to_path(atclient_atkeys *atkeys, const char *path);
 
 #endif
