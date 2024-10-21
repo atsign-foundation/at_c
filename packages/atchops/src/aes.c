@@ -45,8 +45,7 @@ int atchops_aes_generate_key(unsigned char *key, const enum atchops_aes_size key
   /*
    * 3. Seed the random number generator
    */
-  if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (unsigned char *)personlization, strlen(personlization))) !=
-      0) {
+  if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (unsigned char *)personlization, strlen(personlization))) != 0) {
     goto exit;
   }
 

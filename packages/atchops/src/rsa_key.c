@@ -363,7 +363,6 @@ int atchops_rsa_key_generate_base64(unsigned char **public_key_base64_output,
   /*
    * 8. Base64 encode the PKCS#8 formatted private key bytes to get the final private key in base64 format
    */
-
   // 8a. First, calculate the size of the base64 encoded private key and allocate memory
   const size_t private_key_base64_pkcs8_size = atchops_base64_encoded_size(private_key_non_base64_len);
   private_key_pkcs8_base64 = (char *)malloc(private_key_base64_pkcs8_size);

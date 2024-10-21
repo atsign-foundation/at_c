@@ -73,19 +73,22 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
     return 0;
   }
-  if (!atclient_atkey_is_key_initialized(atkey) || !atclient_atkey_is_shared_by_initialized(atkey)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key or atkey->shared_by is not initialized\n");
+  if (!atclient_atkey_is_key_initialized(atkey) || strlen(atkey->key) <= 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key is not initialized\n");
     return 0;
   }
-  if (strlen(atkey->key) <= 0 || strlen(atkey->shared_by) <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->key or atkey->shared_by is empty\n");
+
+  atclient_atkey_type type = atclient_atkey_get_type(atkey); 
+
+  if((!atclient_atkey_is_shared_by_initialized(atkey) || strlen(atkey->shared_by) <= 0) && type != ATCLIENT_ATKEY_TYPE_RESERVED_KEY){
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->shared_by is not initialized\n");
     return 0;
   }
-  atclient_atkey_type type = atclient_atkey_get_type(atkey);
   if (type == ATCLIENT_ATKEY_TYPE_UNKNOWN) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey type is unknown\n");
     return 0;
   }
+
   size_t len = 0;
   if (atclient_atkey_metadata_is_is_cached_initialized(&(atkey->metadata)) && atkey->metadata.is_cached) {
     len += strlen("cached:");
@@ -100,7 +103,9 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
   if (atclient_atkey_is_namespacestr_initialized(atkey) && strlen(atkey->namespace_str) > 0) {
     len += strlen(".") + strlen(atkey->namespace_str);
   }
-  len += strlen(atkey->shared_by);
+  if(atclient_atkey_is_shared_by_initialized(atkey)){
+   len += strlen(atkey->shared_by);
+  }
   return len;
 }
 
@@ -315,7 +320,9 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     return ret;
   }
 
-  if (!atclient_atkey_is_shared_by_initialized(atkey) || strlen(atkey->shared_by) <= 0) {
+  // ensure all key types have shared_by set. Except, reserved keys can sometimes not have shared by
+  if (atkey_type != ATCLIENT_ATKEY_TYPE_RESERVED_KEY &&
+      (!atclient_atkey_is_shared_by_initialized(atkey) || strlen(atkey->shared_by)) <= 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atkey->shared_by is not initialized or strlen(atkey->shared_by) <= 0. AtKey is incomplete.\n");
     return ret;
@@ -367,8 +374,10 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
     index_pos += strlen(".") + strlen(atkey->namespace_str);
   }
 
-  snprintf(*atkeystr + index_pos, atkey_str_size - index_pos, "%s", atkey->shared_by);
-  index_pos += strlen(atkey->shared_by);
+  if (atclient_atkey_is_shared_by_initialized(atkey)) {
+    snprintf(*atkeystr + index_pos, atkey_str_size - index_pos, "%s", atkey->shared_by);
+    index_pos += strlen(atkey->shared_by);
+  }
 
   if (index_pos != atkey_str_size - 1) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
@@ -552,7 +561,7 @@ void atclient_atkey_unset_shared_with(atclient_atkey *atkey) {
 
 atclient_atkey_type atclient_atkey_get_type(const atclient_atkey *atkey) {
   if (atclient_atkey_metadata_is_is_public_initialized(&(atkey->metadata)) && atkey->metadata.is_public &&
-      !atclient_atkey_is_shared_with_initialized(atkey)) {
+      !atclient_atkey_is_shared_with_initialized(atkey) && atclient_atkey_is_shared_by_initialized(atkey)) {
     return ATCLIENT_ATKEY_TYPE_PUBLIC_KEY;
   }
   if (atclient_atkey_is_shared_by_initialized(atkey) && atclient_atkey_is_shared_with_initialized(atkey)) {
@@ -564,6 +573,9 @@ atclient_atkey_type atclient_atkey_get_type(const atclient_atkey *atkey) {
 
   if (atclient_atkey_is_shared_by_initialized(atkey) && !atclient_atkey_is_shared_with_initialized(atkey)) {
     return ATCLIENT_ATKEY_TYPE_SELF_KEY;
+  }
+  if (!atclient_atkey_is_shared_by_initialized(atkey) && !atclient_atkey_is_shared_with_initialized(atkey)) {
+    return ATCLIENT_ATKEY_TYPE_RESERVED_KEY;
   }
   return ATCLIENT_ATKEY_TYPE_UNKNOWN;
 }
@@ -743,6 +755,37 @@ int atclient_atkey_create_shared_key(atclient_atkey *atkey, const char *key, con
 
   if ((ret = atclient_atkey_set_shared_by(atkey, shared_by)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_shared_by failed\n");
+    goto exit;
+  }
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+int atclient_atkey_create_reserved_key(atclient_atkey *atkey, const char *key) {
+  int ret = 1;
+
+  if (atkey == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL. This is a required argument.\n");
+    goto exit;
+  }
+
+  if (key == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is NULL. This is a required argument.\n");
+    goto exit;
+  }
+
+  if (strlen(key) <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key is empty. This is a required argument.\n");
+    goto exit;
+  }
+
+  if ((ret = atclient_atkey_set_key(atkey, key)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_set_key failed\n");
     goto exit;
   }
 

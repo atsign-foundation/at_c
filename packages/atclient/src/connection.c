@@ -413,7 +413,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
 
   /*
    * 4 a. In some cases, mbedtls_ssl_write returns a non-zero value. When only part of the data written.
-   * Repeat mbedtls_ssl_write until the ret is equal to remaining_length (which is the condition for equal)
+   * Repeat mbedtls_ssl_write until the ret is equal to remaining_length (which is the condition for successful write)
    */
   if (ret != src_len) {
     int length_written = ret;
@@ -423,7 +423,6 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
                  "Partial write successful. Performing recursive write. Current ret: %d\n", ret);
 
     while (attempt < ATCLIENT_CONNECTION_MAX_RECURSIVE_WRITE_ATTEMPTS) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Recursive write attempt #: %d\n", attempt + 1);
       ret = mbedtls_ssl_write(&(ctx->ssl), src + length_written, remaining_length);
 
       if (ret <= 0) {
@@ -440,6 +439,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       }
 
       attempt++;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Recursive write attempt #: %d\tmbedtls_ssl_write:%d\n", attempt, ret);
     }
 
     if (remaining_length == 0) {
@@ -449,8 +449,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       ret = 1;  // Indicate failure
       goto exit;
     }
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Write successful\n");
   }
-
 
   /*
    * 5. Print debug log
@@ -532,7 +532,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     // - see the improved implementation in atclient_monitor_read
     if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recv_size - l)) <= 0) {
       mbedtls_strerror(ret, error_buf, sizeof(error_buf));
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read returned -0x%x: %s\n", -ret, error_buf);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read returned err: -0x%x: %s\n", -ret, error_buf);
       goto exit;
     }
     l = l + ret;

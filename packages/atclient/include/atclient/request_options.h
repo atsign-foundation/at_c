@@ -48,6 +48,9 @@ extern "C" {
 #define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 3)
 
+#define ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX 0
+#define ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED (VALUE_INITIALIZED << 0)
+
 /*
  * 1A. Put SelfKey
  */
@@ -106,8 +109,7 @@ typedef struct atclient_get_public_key_request_options {
  * 3. Delete
  */
 typedef struct atclient_delete_request_options {
-  // empty
-  // future proofing
+  bool skip_shared_by_check;
   uint8_t _initialized_fields[1];
 } atclient_delete_request_options;
 
@@ -229,6 +231,10 @@ void atclient_get_public_key_request_options_unset_store_atkey_metadata(
  */
 void atclient_delete_request_options_init(atclient_delete_request_options *options);
 void atclient_delete_request_options_free(atclient_delete_request_options *options);
+
+bool atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(atclient_delete_request_options *options);
+void atclient_delete_request_options_set_skip_shared_by_check(atclient_delete_request_options *options, const bool option);
+void atclient_delete_request_options_unset_skip_shared_by_check(atclient_delete_request_options *options);
 
 /*
  * 4. Get_AtKeys Request Options

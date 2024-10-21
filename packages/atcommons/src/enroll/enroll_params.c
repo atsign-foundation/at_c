@@ -84,14 +84,14 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
     size_t ns_list_str_len = 0;
     atcommons_enroll_namespace_list_to_json(NULL, &ns_list_str_len, ep->ns_list); // get string length
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enroll_namespace_list_to_string len is %lu\n", ns_list_str_len);
+
     ns_json = malloc(sizeof(char) * (ns_list_str_len + 1)); // to be freed
     if (!ns_json || (ret = atcommons_enroll_namespace_list_to_json(ns_json, &ns_list_str_len, ep->ns_list)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not convert enroll_namespace_list to json. atcommons_enroll_namespace_list_to_json: %d\n", ret);
-      cJSON_Delete(json); // Clean up the JSON object in case of an error
       ret = 1;
       goto exit;
     }
-    ns_json[ns_list_str_len] = '\0'; // Null-terminate
+    ns_json[ns_list_str_len] = '\0';
     cJSON_AddRawToObject(json, NAMESPACES, ns_json);
   }
 
@@ -112,19 +112,17 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
     cJSON_AddStringToObject(json, ENCRYPTED_APKAM_SYMMETRIC_KEY, ep->encrypted_apkam_symmetric_key);
   }
 
-  // If only length is required
-  if (json_string == NULL) {
+  if (json_string == NULL) { // used to calculate string length
     *json_string_len = strlen(cJSON_PrintUnformatted(json));
     ret = 1; // Return non-zero to indicate json_string was NULL
     goto exit;
   }
 
   // Populate json_string and calculate its length
-  snprintf(*json_string, json_string_size, "%s", cJSON_PrintUnformatted(json));
-  *json_string_len = strlen(*json_string);
+  *json_string_len = snprintf(*json_string, json_string_size, "%s", cJSON_PrintUnformatted(json));
 
 exit:
   cJSON_Delete(json);
-  if (ns_json) free(ns_json); // Properly free ns_json
+  if (ns_json) free(ns_json);
   return ret;
 }

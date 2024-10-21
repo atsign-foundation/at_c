@@ -102,8 +102,8 @@ if(NOT ESP_PLATFORM)
     p256m
     uuid4-static
   )
-
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCHOPS_INSTALL_TARGETS})
+
   # INSTALL
   # Install the include headers
   install(

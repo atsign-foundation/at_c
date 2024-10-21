@@ -32,6 +32,7 @@ typedef enum atclient_atkey_type {
   ATCLIENT_ATKEY_TYPE_PUBLIC_KEY,
   ATCLIENT_ATKEY_TYPE_SELF_KEY,
   ATCLIENT_ATKEY_TYPE_SHARED_KEY,
+  ATCLIENT_ATKEY_TYPE_RESERVED_KEY,
 } atclient_atkey_type;
 
 typedef struct atclient_atkey {
@@ -271,6 +272,16 @@ int atclient_atkey_create_self_key(atclient_atkey *atkey, const char *name, cons
  */
 int atclient_atkey_create_shared_key(atclient_atkey *atkey, const char *name, const char *shared_by,
                                      const char *shared_with, const char *namespace_str);
+
+/**
+ * @brief //ToDO: add docs
+ *
+ *
+ * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
+ * @param name name of your key, e.g. "name"
+ * @return  int 0 on success
+ */
+int atclient_atkey_create_reserved_key(atclient_atkey *atkey, const char *name);
 
 #ifdef __cplusplus
 }

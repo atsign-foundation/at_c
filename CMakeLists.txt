@@ -59,7 +59,8 @@ if(NOT ESP_PLATFORM)
     cjson
     atlogger
     atclient
-          atcommons
+    atcommons
+    atauth
   )
 
   install(

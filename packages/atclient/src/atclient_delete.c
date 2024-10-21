@@ -3,21 +3,23 @@
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
-#include <stdlib.h>
 #include <atclient/request_options.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define TAG "atclient_delete"
 
-static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey);
+static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                              atclient_delete_request_options *options);
 
-int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options, int *commit_id) {
+int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options,
+                    int *commit_id) {
   int ret = 1;
-
+  if(options)
   /*
    * 1. Check arguments
    */
-  if ((ret = atclient_delete_validate_arguments(atclient, atkey)) != 0) {
+  if ((ret = atclient_delete_validate_arguments(atclient, atkey, options)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_validate_arguments: %d\n", ret);
     return ret;
@@ -64,8 +66,8 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   /*
    * 4. Send command
    */
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)delete_cmd, delete_cmd_size - 1,
-                                      recv, recv_size, &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)delete_cmd,
+                                      delete_cmd_size - 1, recv, recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -77,7 +79,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -85,7 +87,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   }
   response_trimmed = response_trimmed + strlen(DATA_TOKEN);
 
-  if(commit_id != NULL) {
+  if (commit_id != NULL) {
     *commit_id = atoi(response_trimmed);
   }
 
@@ -99,7 +101,8 @@ exit: {
 }
 }
 
-static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey) {
+static int atclient_delete_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                              atclient_delete_request_options *options) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -129,6 +132,12 @@ static int atclient_delete_validate_arguments(const atclient *atclient, const at
   if (!atclient_atkey_is_key_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_is_key_initialized is false\n");
+    goto exit;
+  }
+
+  // skip atclient_atkey_is_shared_by_initialized() if atclient_delete_request_options->skip_shared_by_check is true
+  if(atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options) && options->skip_shared_by_check) {
+    ret = 0;
     goto exit;
   }
 

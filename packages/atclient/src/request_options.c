@@ -38,7 +38,9 @@ static void atclient_get_atkeys_request_options_set_regex_initialized(atclient_g
 static void
 atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
                                                                 const bool initialized);
-
+static void
+atclient_delete_request_options_skip_shared_by_check_set_intitialized(atclient_delete_request_options *options,
+                                                                      const bool initialized);
 /*
  * =================
  * 1A. Put SelfKey
@@ -1200,6 +1202,123 @@ void atclient_get_public_key_request_options_unset_store_atkey_metadata(
   atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(options, false);
 }
 
+void atclient_delete_request_options_init(atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_request_options_init: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Initialize the options
+   */
+  memset(options, 0, sizeof(atclient_delete_request_options));
+}
+
+void atclient_delete_request_options_free(atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_request_options_free: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Free the options
+   */
+  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
+    atclient_delete_request_options_unset_skip_shared_by_check(options);
+  }
+}
+
+bool atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(
+    atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_is_skip_shared_by_check_initialized: Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the skip_shared_by_check is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX] &
+         ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED;
+}
+
+static void
+atclient_delete_request_options_skip_shared_by_check_set_intitialized(atclient_delete_request_options *options,
+                                                                      const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_set_skip_shared_by_check_flag: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. set initialized state
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX] |=
+        ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX] &=
+        ~ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED;
+  }
+}
+
+void atclient_delete_request_options_set_skip_shared_by_check(atclient_delete_request_options *options,
+                                                              const bool option) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_unset_skip_shared_by_check_flag: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset pre-exsting value (if exists)
+   */
+  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
+    atclient_delete_request_options_unset_skip_shared_by_check(options);
+  }
+
+  /*
+   * 3. Set value and set intiliazed to true
+   */
+   memcpy(&(options->skip_shared_by_check), &option, sizeof(option));
+  atclient_delete_request_options_skip_shared_by_check_set_intitialized(options, true);
+}
+
+void atclient_delete_request_options_unset_skip_shared_by_check(atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_unset_skip_shared_by_check_flag: Invalid arguments\n");
+    return;
+  }
+
+  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
+    free(&(options->skip_shared_by_check));
+  }
+
+  options->skip_shared_by_check = NULL;
+  atclient_delete_request_options_skip_shared_by_check_set_intitialized(options, false);
+}
+
 void atclient_get_atkeys_request_options_init(atclient_get_atkeys_request_options *options) {
   /*
    * 1. Validate arguments
@@ -1473,8 +1592,7 @@ void atclient_authenticate_options_free(atclient_authenticate_options *options) 
   }
 }
 
-bool atclient_authenticate_options_is_atdirectory_host_initialized(
-    const atclient_authenticate_options *options) {
+bool atclient_authenticate_options_is_atdirectory_host_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
@@ -1492,8 +1610,7 @@ bool atclient_authenticate_options_is_atdirectory_host_initialized(
          ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED;
 }
 
-bool atclient_authenticate_options_is_atdirectory_port_initialized(
-    const atclient_authenticate_options *options) {
+bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
@@ -1511,8 +1628,7 @@ bool atclient_authenticate_options_is_atdirectory_port_initialized(
          ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED;
 }
 
-bool atclient_authenticate_options_is_atserver_host_initialized(
-    const atclient_authenticate_options *options) {
+bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
@@ -1530,8 +1646,7 @@ bool atclient_authenticate_options_is_atserver_host_initialized(
          ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
 }
 
-bool atclient_authenticate_options_is_atserver_port_initialized(
-    const atclient_authenticate_options *options) {
+bool atclient_authenticate_options_is_atserver_port_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
@@ -1611,7 +1726,7 @@ void atclient_authenticate_options_unset_atserver_port(atclient_authenticate_opt
 }
 
 int atclient_authenticate_options_set_at_directory_host(atclient_authenticate_options *options,
-                                                             char *atdirectory_host) {
+                                                        char *atdirectory_host) {
   int ret = 1;
 
   /*
@@ -1640,8 +1755,7 @@ int atclient_authenticate_options_set_at_directory_host(atclient_authenticate_op
 exit: { return ret; }
 }
 
-int atclient_authenticate_options_set_at_directory_port(atclient_authenticate_options *options,
-                                                             int atdirectory_port) {
+int atclient_authenticate_options_set_at_directory_port(atclient_authenticate_options *options, int atdirectory_port) {
   int ret = 1;
 
   /*
@@ -1670,8 +1784,7 @@ int atclient_authenticate_options_set_at_directory_port(atclient_authenticate_op
 exit: { return ret; }
 }
 
-int atclient_authenticate_options_set_atserver_host(atclient_authenticate_options *options,
-                                                         char *atserver_host) {
+int atclient_authenticate_options_set_atserver_host(atclient_authenticate_options *options, char *atserver_host) {
   int ret = 1;
 
   /*
@@ -1702,8 +1815,7 @@ int atclient_authenticate_options_set_atserver_host(atclient_authenticate_option
 exit: { return ret; }
 }
 
-int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options,
-                                                         int atserver_port) {
+int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options, int atserver_port) {
   int ret = 1;
 
   /*
