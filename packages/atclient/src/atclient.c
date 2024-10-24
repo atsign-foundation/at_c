@@ -12,6 +12,7 @@
 #include "atclient/request_options.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
+#include <atchops/utf8.h>
 #include <cJSON.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -411,13 +412,10 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   /*
    * 2. Initialize variables
    */
-
-  // free later
   char *root_cmd = NULL;
   char *from_cmd = NULL;
   char *cram_cmd = NULL;
   char *atsign_with_at = NULL;
-
   char *atserver_host = NULL;
   int atserver_port = 0;
 
@@ -438,7 +436,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
 
   unsigned char digest[SHA_512_DIGEST_SIZE];
   memset(digest, 0, sizeof(unsigned char) * SHA_512_DIGEST_SIZE);
-
   char *digest_hex_encoded;
 
   /*
@@ -448,7 +445,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
-
   const char *atsign_without_at = atsign_with_at + 1;
   // Now we have two variables that we can use: `atsign_with_at` and `atsign_without_at`
 
@@ -573,7 +569,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    * 7b. Send `cram:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "build cram command: %s\n", cram_cmd);
   if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, CRAM_COMMAND_LEN, recv,
                                       recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);

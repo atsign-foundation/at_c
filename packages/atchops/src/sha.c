@@ -52,8 +52,6 @@ int atchops_sha_hash(const atchops_md_type md_type, const unsigned char *input, 
     goto exit;
   }
 
-  printf("out is %p", output);
-
   /*
    * 4. Hash
    */

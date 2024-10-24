@@ -9,8 +9,9 @@ set(
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_status.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_namespace.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_params.c
-        ${CMAKE_CURRENT_LIST_DIR}/src/test.c
         ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/enroll_command_builder.c
+        src/atcommons_fetch_home_dir.c
+        include/atcommons/atcommons_fetch_home_dir.h
 )
 
 # Project setup
@@ -23,7 +24,7 @@ cmake_policy(SET CMP0135 NEW)
 project(
         atcommons
         VERSION 0.0.1
-        DESCRIPTION "atcommons - common at_platform utilities and implementations"
+        DESCRIPTION "Atsign technology common utilities and implementations"
         HOMEPAGE_URL https://atsign.com
         LANGUAGES C
 )
@@ -34,10 +35,12 @@ if (NOT ESP_PLATFORM)
     # Determine if atchops is being built as a subproject using add_subdirectory()
     if (NOT DEFINED ATCOMMONS_AS_SUBPROJECT)
         set(ATCOMMONS_AS_SUBPROJECT ON)
+
         if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
             set(ATCOMMONS_AS_SUBPROJECT OFF)
         endif ()
     endif ()
+
     message(STATUS "[ATCOMMONS] ATCOMMONS_AS_SUBPROJECT: ${ATCOMMONS_AS_SUBPROJECT}")
 
     # Import cjson
@@ -52,8 +55,10 @@ if (NOT ESP_PLATFORM)
     endif()
 
     # Create library targets
-    add_library(${PROJECT_NAME} STATIC ${ATCOMMONS_SOURCES})
-    add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+    if(NOT TARGET atcommons)
+        add_library(${PROJECT_NAME} STATIC ${ATCOMMONS_SOURCES})
+        add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+    endif()
 
     # LINK
     # Link include headers to library targets
@@ -69,18 +74,6 @@ if (NOT ESP_PLATFORM)
     set(ATCOMMONS_INSTALL_TARGETS cjson atlogger)
     target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCOMMONS_INSTALL_TARGETS})
 
-    add_executable(command src/test.c)
-    target_link_libraries(command PUBLIC atcommons)
-
-    # Set the build type to Debug by default (optional)
-    set(CMAKE_BUILD_TYPE Debug)
-
-    # Add compiler flags specifically for debugging
-    target_compile_options(command PUBLIC
-            $<$<CONFIG:Debug>:-g>            # Enable debugging symbols with -g flag
-            $<$<CONFIG:Debug>:-O0>           # Disable optimizations for easier debugging (optional)
-    )
-
     # INSTALL
     # Install the include headers
     install(
@@ -92,18 +85,16 @@ if (NOT ESP_PLATFORM)
             FILES ${cJSON_SOURCE_DIR}/cJSON.h
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
-    message("cjson source dir ${cjson_SOURCE_DIR}")
 
     # Install libraries to config target
     install(
-            TARGETS ${ATCOMMONS_INSTALL_TARGETS}
+            TARGETS ${PROJECT_NAME} ${ATCOMMONS_INSTALL_TARGETS}
             EXPORT ${PROJECT_NAME}-config
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
     # EXPORT
-    if (NOT ATCOMMONS_AS_SUBPROJECT)
-        message("[ATCOMMONS] NOT as SUBPROJECT")
+    if (NOT ATCOMMONS_AS_SUBPROJECT AND ATCOMMONS_EXPORT)
         # Export the library
         export(PACKAGE ${PROJECT_NAME})
         # Install as a config.make

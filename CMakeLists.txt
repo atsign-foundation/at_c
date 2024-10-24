@@ -69,10 +69,6 @@ if(NOT ESP_PLATFORM)
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 
-  add_executable(atactivate ${CMAKE_CURRENT_LIST_DIR}/packages/atauth/src/atactivate.c)
-  find_package(atsdk CONFIG REQUIRED)
-  target_link_libraries(atactivate PRIVATE atsdk::atlogger atsdk::atchops atsdk::atcommons atsdk::atclient atsdk::atauth)
-
   # export dependencies
   if(NOT ATSDK_AS_SUBPROJECT)
     export(PACKAGE ${PROJECT_NAME})

@@ -27,7 +27,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
   printf("command len is %lu\n", cmd_len);
   cmd_size = cmd_len + 1;
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "fetched enroll commmand length: %lu\n", cmd_len);
-  char *command = malloc(sizeof(char) * cmd_size + 1); // +1 for the null-terminator
+  char *command = malloc(sizeof(char) * cmd_size);
   if (command == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Memory allocation failed for command\n");
     ret = -1;
@@ -43,7 +43,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
     ret = -1;
     goto exit;
   }
-  if (cmd_len > cmd_size) {
+  if (cmd_len >= cmd_size) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "buffer overflow in enroll command buffer");
     ret = -1;
     goto exit;
@@ -70,6 +70,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
     goto exit;
   }
   recv_trimmed += strlen(DATA_TOKEN);
+  recv_trimmed[recv_len - strlen(DATA_TOKEN)] = '\0'; // Ensure string is null-terminated.
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "recv: %s\n", recv_trimmed);
 
   cJSON *recv_json_decoded = cJSON_ParseWithLength(recv_trimmed, recv_len - strlen(DATA_TOKEN));
@@ -93,10 +94,10 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
     goto exit;
   }
   strncpy(enroll_id, enroll_id_cjson->valuestring, strlen(enroll_id_cjson->valuestring));
-  enroll_id[strlen(enroll_id_cjson->valuestring)] = '\0';
+  enroll_id[strlen(enroll_id_cjson->valuestring) - 1] = '\0';
 
   strncpy(enroll_status, enroll_status_cjson->valuestring, strlen(enroll_status_cjson->valuestring));
-  enroll_status[strlen(enroll_status_cjson->valuestring)] = '\0';
+  enroll_status[strlen(enroll_status_cjson->valuestring) - 1] = '\0';
 
   ret = 0;
 

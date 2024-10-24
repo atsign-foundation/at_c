@@ -171,7 +171,7 @@ if(NOT ESP_PLATFORM)
     export(
       EXPORT ${PROJECT_NAME}-config
       NAMESPACE ${PROJECT_NAME}::
-      FILE "cmake/${PROJECT_NAME}-config.cmake"
+      FILE ${PROJECT_NAME}-config.cmake
     )
   endif()
 
