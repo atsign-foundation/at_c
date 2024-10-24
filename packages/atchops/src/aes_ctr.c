@@ -56,11 +56,11 @@ int atchops_aes_ctr_encrypt(const unsigned char *key, const enum atchops_aes_siz
     return ret;
   }
 
-  if (ciphertext_size < plaintext_len) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ciphertext_size is less than plaintext_len\n");
-    return ret;
-  }
+  // if (ciphertext_size < plaintext_len) {
+  //   ret = 1;
+  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ciphertext_size is less than plaintext_len\n");
+  //   return ret;
+  // }
 
   /*
    * 2. Variables

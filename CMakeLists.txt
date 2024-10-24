@@ -37,6 +37,14 @@ message(STATUS "Building atclient")
 set(ATCLIENT_BUILD_TESTS ${ATSDK_BUILD_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atclient)
 
+message(STATUS "Building atcommons")
+set(ATCOMMONS_BUILD_TESTS ${ATSDK_BUILD_TESTS})
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atcommons)
+
+message(STATUS "Building atauth")
+set(ATAUTH_BUILD_TESTS ${ATSDK_BUILD_TESTS})
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atauth)
+
 if(NOT ESP_PLATFORM)
   # install dependencies
   set(
@@ -51,6 +59,8 @@ if(NOT ESP_PLATFORM)
     cjson
     atlogger
     atclient
+    atcommons
+    atauth
   )
 
   install(
