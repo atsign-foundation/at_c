@@ -1,4 +1,5 @@
 #include "atclient/atkeys.h"
+#include "atclient/atkeys_file.h"
 #include "atlogger/atlogger.h"
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
@@ -281,6 +282,10 @@ int atclient_atkeys_set_apkam_symmetric_key_base64(atclient_atkeys *atkeys, cons
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "apkam_symmetric_key_base64_len is 0\n");
     return ret;
+  }
+
+  if(atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atkeys)) {
+    unset_apkam_symmetric_key_base64(atkeys);
   }
 
   if ((ret = set_apkam_symmetric_key_base64(atkeys, apkam_symmetric_key_base64, apkam_symmetric_key_base64_len)) != 0) {
@@ -755,7 +760,9 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     goto exit;
   }
 
-  // 6. apkam symmetric key, if it exists
+  /*
+   * 5. apkam symmetric key, if it exists
+   */
   if (apkam_symmetric_key_str != NULL && apkam_symmetric_key_str_len > 0) {
     if ((ret = atchops_base64_decode((unsigned char *)apkam_symmetric_key_str, apkam_symmetric_key_str_len,
                                      apkam_symmetric_key, apkam_symmetric_key_size, &apkam_symmetric_key_len)) != 0) {
@@ -770,7 +777,9 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
     }
   }
 
-  // 7. enrollment id, if it exists
+  /*
+   * 6. enrollment id, if it exists
+   */ 
   if (enrollment_id_str != NULL && enrollment_id_str_len > 0) {
     if ((ret = atclient_atkeys_set_enrollment_id(atkeys, enrollment_id_str, enrollment_id_str_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_set_enrollment_id: %d\n", ret);
@@ -799,7 +808,7 @@ int atclient_atkeys_populate_from_atkeys_file(atclient_atkeys *atkeys, const atc
     goto exit;
   }
 
-  if (atclient_atkeys_file_is_enrollment_id_str_initialized((atclient_atkeys_file *)atkeys_file)) {
+  if (atclient_atkeys_file_is_enrollment_id_str_initialized(atkeys_file) && atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(atkeys_file)) {
     if ((ret = atclient_atkeys_populate_from_strings(
              atkeys, atkeys_file->aes_pkam_public_key_str, strlen(atkeys_file->aes_pkam_public_key_str),
              atkeys_file->aes_pkam_private_key_str, strlen(atkeys_file->aes_pkam_private_key_str),
@@ -876,6 +885,229 @@ int atclient_atkeys_populate_from_string(atclient_atkeys *atkeys, const char *fi
   ret = 0;
   goto exit;
 
+exit: {
+  atclient_atkeys_file_free(&atkeys_file);
+  return ret;
+}
+}
+
+int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkeys_file *atkeys_file) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  // mandatory field that constitutes an atSign's atkeys
+  if (!atclient_atkeys_is_encrypt_private_key_base64_initialized(atkeys)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt private key is not initialized\n");
+    return ret;
+  }
+
+  // mandatory field that constitutes an atSign's atkeys
+  if (!atclient_atkeys_is_encrypt_public_key_base64_initialized(atkeys)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt public key is not initialized\n");
+    return ret;
+  }
+
+  // mandatory field that constitutes an atSign's atkeys
+  if (!atclient_atkeys_is_pkam_private_key_base64_initialized(atkeys)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam private key is not initialized\n");
+    return ret;
+  }
+
+  // mandatory field that constitutes an atSign's atkeys
+  if (!atclient_atkeys_is_pkam_public_key_base64_initialized(atkeys)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pkam public key is not initialized\n");
+    return ret;
+  }
+
+  // mandatory field that constitutes an atSign's atkeys
+  if (!atclient_atkeys_is_self_encryption_key_base64_initialized(atkeys)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "self encryption key is not initialized\n");
+    return ret;
+  }
+
+  if (atkeys_file == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys_file is NULL\n");
+    return ret;
+  }
+
+  /*
+   * 2. Variables
+   */
+  const size_t iv_size = ATCHOPS_IV_BUFFER_SIZE;
+  unsigned char iv[iv_size];
+
+  const size_t self_encryption_key_size = ATCHOPS_AES_256 / 8;
+  unsigned char self_encryption_key[self_encryption_key_size];
+
+  const size_t rsa_key_encrypted_size = atchops_base64_encoded_size(
+      strlen(atkeys->pkam_private_key_base64)); // use private key as the largest buffer size
+  unsigned char rsa_key_encrypted[rsa_key_encrypted_size];
+  size_t rsa_key_encrypted_len = 0;
+
+  const size_t rsa_key_encrypted_base64_size  = atchops_base64_encoded_size(rsa_key_encrypted_size);
+  unsigned char rsa_key_encrypted_base64[rsa_key_encrypted_base64_size];
+  size_t rsa_key_encrypted_base64_len = 0;
+
+  /*
+   * 3. Prepare self encryption key for use
+   */
+  if ((ret = atchops_base64_decode((unsigned char *)atkeys->self_encryption_key_base64,
+                                   strlen(atkeys->self_encryption_key_base64), self_encryption_key,
+                                   self_encryption_key_size, NULL)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 decode self encryption key: %d\n", ret);
+    goto exit;
+  }
+
+  /*
+   * 4. Encrypt and write to atkeys file
+   */
+
+  // 4a. pkam public key
+  memset(iv, 0, sizeof(unsigned char) * iv_size); // Use legacy IV
+  memset(rsa_key_encrypted, 0, sizeof(unsigned char) * rsa_key_encrypted_size);
+  if ((ret = atchops_aes_ctr_encrypt(self_encryption_key, ATCHOPS_AES_256, iv,
+                                     (unsigned char *)atkeys->pkam_public_key_base64,
+                                     strlen(atkeys->pkam_public_key_base64), rsa_key_encrypted, rsa_key_encrypted_size,
+                                     &rsa_key_encrypted_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt pkam public key: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode pkam public key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_pkam_public_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                              rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes pkam public key str: %d\n", ret);
+    goto exit;
+  }
+
+  // 4b. pkam private key
+  memset(iv, 0, sizeof(unsigned char) * iv_size); // Use legacy IV
+  memset(rsa_key_encrypted, 0, sizeof(unsigned char) * rsa_key_encrypted_size);
+  if ((ret = atchops_aes_ctr_encrypt(self_encryption_key, ATCHOPS_AES_256, iv,
+                                     (unsigned char *)atkeys->pkam_private_key_base64,
+                                     strlen(atkeys->pkam_private_key_base64), rsa_key_encrypted, rsa_key_encrypted_size,
+                                     &rsa_key_encrypted_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt pkam private key: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode pkam private key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_pkam_private_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                               rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes pkam private key str: %d\n", ret);
+    goto exit;
+  }
+
+  // 4c. encrypt public key
+  memset(iv, 0, sizeof(unsigned char) * iv_size); // Use legacy IV
+  memset(rsa_key_encrypted, 0, sizeof(unsigned char) * rsa_key_encrypted_size);
+  if ((ret = atchops_aes_ctr_encrypt(self_encryption_key, ATCHOPS_AES_256, iv,
+                                     (unsigned char *)atkeys->encrypt_public_key_base64,
+                                     strlen(atkeys->encrypt_public_key_base64), rsa_key_encrypted,
+                                     rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt encrypt public key: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode encrypt public key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_encrypt_public_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                                 rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes encrypt public key str: %d\n", ret);
+    goto exit;
+  }
+
+  // 4d. encrypt private key
+  memset(iv, 0, sizeof(unsigned char) * iv_size); // Use legacy IV
+  memset(rsa_key_encrypted, 0, sizeof(unsigned char) * rsa_key_encrypted_size);
+  if ((ret = atchops_aes_ctr_encrypt(self_encryption_key, ATCHOPS_AES_256, iv,
+                                     (unsigned char *)atkeys->encrypt_private_key_base64,
+                                     strlen(atkeys->encrypt_private_key_base64), rsa_key_encrypted,
+                                     rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "encrypt encrypt private key: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atchops_base64_encode(rsa_key_encrypted, rsa_key_encrypted_len, rsa_key_encrypted_base64, rsa_key_encrypted_base64_size, &rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 encode encrypt private key: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_set_aes_encrypt_private_key_str(atkeys_file, (const char *)rsa_key_encrypted_base64,
+                                                                  rsa_key_encrypted_base64_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set aes encrypt private key str: %d\n", ret);
+    goto exit;
+  }
+
+  // 4e. self encryption key
+  if ((ret = atclient_atkeys_file_set_self_encryption_key_str(atkeys_file, atkeys->self_encryption_key_base64, strlen(atkeys->self_encryption_key_base64))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set self encryption key str: %d\n", ret);
+    goto exit;
+  }
+
+  // 4f. apkam symmetric key (optional)
+  if (atclient_atkeys_is_apkam_symmetric_key_base64_initialized(atkeys)) {
+    if ((ret = atclient_atkeys_file_set_apkam_symmetric_key_str(atkeys_file, atkeys->apkam_symmetric_key_base64, strlen(atkeys->apkam_symmetric_key_base64))) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set apkam symmetric key str: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  // 4h. enrollment id (optional)
+  if (atclient_atkeys_is_enrollment_id_initialized(atkeys)) {
+    if ((ret = atclient_atkeys_file_set_enrollment_id_str(atkeys_file, atkeys->enrollment_id, strlen(atkeys->enrollment_id))) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set enrollment id str: %d\n", ret);
+      goto exit;
+    }
+  }
+
+  ret = 0;
+
+exit: { return ret; }
+}
+
+int atclient_atkeys_write_to_path(atclient_atkeys *atkeys, const char *path) {
+  int ret = 1;
+
+  atclient_atkeys_file atkeys_file;
+  atclient_atkeys_file_init(&atkeys_file);
+
+  if ((ret = atclient_atkeys_write_to_atkeys_file(atkeys, &atkeys_file)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_write_to_atkeys_file: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_atkeys_file_write_to_path(&atkeys_file, path)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_file_to_path: %d\n", ret);
+    goto exit;
+  }
+
+  ret = 0;
 exit: {
   atclient_atkeys_file_free(&atkeys_file);
   return ret;
