@@ -136,8 +136,8 @@ void atlogger_log_stream(const char *tag, const enum atlogger_logging_level leve
   va_start(args, format);
   if (tag != NULL) {
     atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
-    printf("%.*s ", (int)strlen(prefix), prefix);
-    printf("%.*s | ", (int)strlen(tag), tag);
+    fprintf(stream, "%.*s ", (int)strlen(prefix), prefix);
+    fprintf(stream, "%.*s | ", (int)strlen(tag), tag);
   }
   vfprintf(stream, format, args);
   va_end(args);
