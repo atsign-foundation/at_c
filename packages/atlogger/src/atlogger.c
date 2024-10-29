@@ -115,13 +115,22 @@ void atlogger_set_stream(FILE *stream) {
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...) {
   atlogger_ctx *ctx = atlogger_get_instance();
 
-  va_list args;
-  va_start(args, format);
-  atlogger_log_stream(tag, level, ctx->stream, format, args);
   if (level > ctx->level) {
     return;
-    va_end(args);
   }
+
+  // I tried to simplify this function by calling atlogger_log_stream and passing down the arguments
+  // but integers were not printing correctly, don't try to refactor this... you will only suffer my pain
+  FILE *stream = ctx->stream;
+  va_list args;
+  va_start(args, format);
+  if (tag != NULL) {
+    atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
+    fprintf(stream, "%.*s ", (int)strlen(prefix), prefix);
+    fprintf(stream, "%.*s | ", (int)strlen(tag), tag);
+  }
+  vfprintf(stream, format, args);
+  va_end(args);
 }
 
 void atlogger_log_stream(const char *tag, const enum atlogger_logging_level level, FILE *stream, const char *format,
@@ -139,7 +148,7 @@ void atlogger_log_stream(const char *tag, const enum atlogger_logging_level leve
     fprintf(stream, "%.*s ", (int)strlen(prefix), prefix);
     fprintf(stream, "%.*s | ", (int)strlen(tag), tag);
   }
-  fprintf(stream, format, args);
+  vfprintf(stream, format, args);
   va_end(args);
 }
 
