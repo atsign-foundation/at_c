@@ -19,6 +19,7 @@ static struct timespec timespec;
 typedef struct atlogger_ctx {
   enum atlogger_logging_level level;
   int opts;
+  FILE *stream;
 } atlogger_ctx;
 
 static atlogger_ctx ctx;
@@ -29,6 +30,7 @@ static atlogger_ctx *atlogger_get_instance() {
     memset(prefix, 0, sizeof(char) * PREFIX_BUFFER_LEN);
     ctx.opts = ATLOGGER_ENABLE_TIMESTAMPS;
 
+    ctx.stream = stdout;
     is_ctx_initalized = 1;
   }
 
@@ -105,7 +107,25 @@ void atlogger_set_opts(int opts) {
   ctx->opts = opts;
 }
 
+void atlogger_set_stream(FILE *stream) {
+  atlogger_ctx *ctx = atlogger_get_instance();
+  ctx->stream = stream;
+}
+
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...) {
+  atlogger_ctx *ctx = atlogger_get_instance();
+
+  va_list args;
+  va_start(args, format);
+  atlogger_log_stream(tag, level, ctx->stream, format, args);
+  if (level > ctx->level) {
+    return;
+    va_end(args);
+  }
+}
+
+void atlogger_log_stream(const char *tag, const enum atlogger_logging_level level, FILE *stream, const char *format,
+                         ...) {
   atlogger_ctx *ctx = atlogger_get_instance();
 
   if (level > ctx->level) {
@@ -119,7 +139,7 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
     printf("%.*s ", (int)strlen(prefix), prefix);
     printf("%.*s | ", (int)strlen(tag), tag);
   }
-  vprintf(format, args);
+  vfprintf(stream, format, args);
   va_end(args);
 }
 

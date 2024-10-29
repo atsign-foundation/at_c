@@ -2,6 +2,7 @@
 #define ATCLIENT_ATLOGGER_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 enum atlogger_logging_level {
   ATLOGGER_LOGGING_LEVEL_NONE = 0,   // literally nothing, not verbose at all
@@ -17,8 +18,19 @@ enum atlogger_logging_level {
 
 enum atlogger_logging_level atlogger_get_logging_level();
 void atlogger_set_logging_level(const enum atlogger_logging_level level);
+
 void atlogger_set_opts(int opts);
+void atlogger_set_stream(FILE *);
+/*
+ * @brief log to the configured stream
+ */
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...);
+
+/*
+ * @brief log to the specified stream
+ */
+void atlogger_log_stream(const char *tag, const enum atlogger_logging_level level, FILE *stream, const char *format,
+                         ...);
 void atlogger_fix_stdout_buffer(char *str, const size_t strlen);
 
 #endif
