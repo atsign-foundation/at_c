@@ -139,7 +139,7 @@ void atlogger_log_stream(const char *tag, const enum atlogger_logging_level leve
     fprintf(stream, "%.*s ", (int)strlen(prefix), prefix);
     fprintf(stream, "%.*s | ", (int)strlen(tag), tag);
   }
-  vfprintf(stream, format, args);
+  fprintf(stream, format, args);
   va_end(args);
 }
 
