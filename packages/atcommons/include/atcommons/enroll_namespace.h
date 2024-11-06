@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-typedef struct{
+typedef struct {
   char *name;
   char *access;
 } enroll_namespace_t;

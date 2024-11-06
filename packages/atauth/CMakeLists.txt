@@ -7,7 +7,6 @@ set (ATAUTH_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/send_enroll_request.c
         ${CMAKE_CURRENT_LIST_DIR}/src/atactivate_arg_parser.c
         ${CMAKE_CURRENT_LIST_DIR}/src/atactivate.c
-        ${CMAKE_CURRENT_LIST_DIR}/src/atauth-test.c
         ${CMAKE_CURRENT_LIST_DIR}/src/atauth_build_atkeys_file_path.c
         ${CMAKE_CURRENT_LIST_DIR}/src/atauth_fetch_home_dir.c
 )

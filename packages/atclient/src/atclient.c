@@ -445,7 +445,8 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
-  const char *atsign_without_at = atsign_with_at + 1;
+  char *atsign_without_at = malloc(sizeof(char) * strlen(atsign_with_at) + 1);
+  strcpy(atsign_without_at, atsign_with_at + 1);
   // Now we have two variables that we can use: `atsign_with_at` and `atsign_without_at`
 
   /*
@@ -472,9 +473,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     // only free this memory if it was allocated internally (by atclient_utils_find_atserver_address)
     should_free_atserver_host = true;
   }
-
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_host: %s\n", atserver_host);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_port: %d\n", atserver_port);
 
   /*
    * 2. Start atServer connection (kill the existing connection if it exists)
@@ -597,7 +595,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   ret = 0;
 
 exit: {
-  // free(atsign_with_at);
+  free(atsign_without_at);
   free(root_cmd);
   free(from_cmd);
   free(cram_cmd);

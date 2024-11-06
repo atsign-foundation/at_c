@@ -11,17 +11,25 @@
 #include <string.h>
 #include <sys/socket.h>
 
-int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *client, enroll_params_t *ep) {
+#define TAG "send_enroll_request"
+
+int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enroll_id, char *enroll_status) {
   int ret = 0;
   size_t recv_size = 100; // to hold the response for enroll request
   unsigned char recv[recv_size];
   char *recv_trimmed = NULL;
   size_t recv_len;
 
+  if(enroll_id == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,"enroll_id is unallocated\n");
+    ret = -1;
+    goto exit;
+  }
+
   /*
    * 1. Fetch enroll:request command length and allocate memory
    */
-  enroll_operation_t e_op = REQUEST;
+  enroll_operation_t e_op = apkam_request;
   size_t cmd_len = 0;
   atcommons_build_enroll_command(NULL, NULL, &cmd_len, e_op, ep); // fetch enroll_command length
   const size_t cmd_size = cmd_len;
@@ -39,12 +47,12 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
   if ((ret = atcommons_build_enroll_command(command, cmd_size, &cmd_len, e_op, ep)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not build enroll:request command\n");
     ret = -1;
-    goto exit;
+    goto free_command_exit;
   }
   if (cmd_len >= cmd_size) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "buffer overflow in enroll command buffer");
     ret = -1;
-    goto exit;
+    goto free_command_exit;
   }
 
   /*
@@ -54,7 +62,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     ret = 1;
-    goto exit;
+    goto free_command_exit;
   }
 
   /*
@@ -63,7 +71,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
   if ((ret = atclient_string_utils_get_substring_position(recv, DATA_TOKEN, &recv_trimmed)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv did not have prefix \"data:\"\n", (int)recv_len, recv);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s\n", recv); // log error from server
-    goto exit;
+    goto free_command_exit;
   }
   recv_trimmed += strlen(DATA_TOKEN);
   recv_trimmed[recv_len - strlen(DATA_TOKEN)] = '\0';
@@ -72,7 +80,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
   if (recv_json_decoded == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse JSON response");
     ret = 1;
-    goto exit;
+    goto cjson_delete_exit;
   }
 
   // parse and populate the enrollment id from server response
@@ -80,7 +88,7 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
   if (!cJSON_IsString(enroll_id_cjson) || (enroll_id_cjson->valuestring == NULL)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract enrollment_id\n");
     ret = 1;
-    goto exit;
+    goto cjson_delete_exit;
   }
   strncpy(enroll_id, enroll_id_cjson->valuestring, strlen(enroll_id_cjson->valuestring));
   enroll_id[strlen(enroll_id_cjson->valuestring)] = '\0';
@@ -90,19 +98,14 @@ int atauth_send_enroll_request(char *enroll_id, char *enroll_status, atclient *c
   if (!cJSON_IsString(enroll_status_cjson) || (enroll_status_cjson->valuestring == NULL)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract enroll status\n");
     ret = 1;
-    goto exit;
+    goto cjson_delete_exit;
   }
   strncpy(enroll_status, enroll_status_cjson->valuestring, strlen(enroll_status_cjson->valuestring));
   enroll_status[strlen(enroll_status_cjson->valuestring)] = '\0';
 
   ret = 0;
 
-exit:
-  if (command) {
-    free(command);
-  }
-  if (recv_json_decoded) {
-    cJSON_Delete(recv_json_decoded);
-  }
-  return ret;
+cjson_delete_exit: cJSON_Delete(recv_json_decoded);
+free_command_exit: free(command);
+exit: return ret;
 }

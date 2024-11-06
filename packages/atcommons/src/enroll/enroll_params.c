@@ -78,20 +78,26 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
     cJSON_AddStringToObject(json, OTP, ep->otp);
   }
 
-  // Ensure ns_list is not NULL before accessing namespaces
   char *ns_json = NULL;
+  // Ensure ns_list is not NULL before accessing namespaces
   if (ep->ns_list && ep->ns_list->length > 0) {
     size_t ns_list_str_len = 0;
     atcommons_enroll_namespace_list_to_json(NULL, &ns_list_str_len, ep->ns_list); // get string length
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enroll_namespace_list_to_string len is %lu\n", ns_list_str_len);
 
-    ns_json = malloc(sizeof(char) * (ns_list_str_len + 1)); // to be freed
-    if (!ns_json || (ret = atcommons_enroll_namespace_list_to_json(ns_json, &ns_list_str_len, ep->ns_list)) != 0) {
+    ns_json = malloc(sizeof(char) * (ns_list_str_len + 1));
+    memset(ns_json, 0, sizeof(ns_json));
+    if(ns_json = NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for ns_json\n");
+      ret = -1;
+      goto exit;
+    }
+    if ((ret = atcommons_enroll_namespace_list_to_json(ns_json, &ns_list_str_len, ep->ns_list)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not convert enroll_namespace_list to json. atcommons_enroll_namespace_list_to_json: %d\n", ret);
       ret = 1;
       goto exit;
     }
-    ns_json[ns_list_str_len] = '\0';
+    // ns_json[ns_list_str_len] = '\0';
     cJSON_AddRawToObject(json, NAMESPACES, ns_json);
   }
 

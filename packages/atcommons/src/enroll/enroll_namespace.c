@@ -1,17 +1,18 @@
 #include "atcommons/enroll_namespace.h"
 
+#include "cJSON.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../../../../_deps/cjson-src/cJSON.h"
 
 #include <atlogger/atlogger.h>
 
 #define TAG "enroll_namespace"
 
 int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, enroll_namespace_t *ns) {
-  enroll_namespace_list_t *temp = realloc(*ns_list, sizeof(enroll_namespace_list_t) + sizeof(enroll_namespace_t*) * ((*ns_list)->length + 1));
+  enroll_namespace_list_t *temp =
+      realloc(*ns_list, sizeof(enroll_namespace_list_t) + sizeof(enroll_namespace_t *) * ((*ns_list)->length + 1));
 
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to realloc memory for enroll namespace list\n");
@@ -40,8 +41,16 @@ int atcommons_enroll_namespace_to_json(char *ns_str, enroll_namespace_t *ns) {
 
 int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t *ns_list_str_len,
                                             enroll_namespace_list_t *ns_list) {
+  int ret = 0;
   if (ns_list == NULL) {
-    return -1;
+    ret = -1;
+    goto exit;
+  }
+
+  if (ns_list_str_len == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list_str_len is null\n");
+    ret = 1;
+    goto exit;
   }
 
   cJSON *json_obj = cJSON_CreateObject();
@@ -49,22 +58,13 @@ int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t *ns_lis
     cJSON_AddStringToObject(json_obj, ns_list->namespaces[ns_elmnt]->name, ns_list->namespaces[ns_elmnt]->access);
   }
 
-  // Calculate the string length if requested
-  if (ns_list_str_len != NULL) {
-    *ns_list_str_len = strlen(cJSON_PrintUnformatted(json_obj)) + 1; // +1 for null-terminator
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "ns list length is %lu\n", *ns_list_str_len);
-  }
+  *ns_list_str_len = strlen(cJSON_PrintUnformatted(json_obj)) + 1; // +1 for null-terminator
 
   if (ns_list_string != NULL) {
-    char *temp_json_str = cJSON_PrintUnformatted(json_obj);
-    if (temp_json_str) {
-      strncpy(ns_list_string, temp_json_str, *ns_list_str_len);
-    }
+    const char *temp_json_str = cJSON_PrintUnformatted(json_obj);
+    strncpy(ns_list_string, temp_json_str, *ns_list_str_len);
   }
 
-  if (json_obj) {
-    cJSON_Delete(json_obj);
-  }
-
-  return 0;
+free_cjson_exit: { cJSON_Delete(json_obj); }
+exit: { return ret; }
 }

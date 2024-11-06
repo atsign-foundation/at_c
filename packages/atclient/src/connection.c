@@ -405,6 +405,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   // if return value is positive and less than src_len
   // we should continue to write from the appropriate offset
   // (multiple writes must be summed to determine total data written)
+  if (src[src_len - 1] != '\n') {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "command does not have a trailing \\n character:\t%s\n", src);
+  }
   if ((ret = mbedtls_ssl_write(&(ctx->ssl), src, src_len)) <= 0) { // error only when the returned value is negative
     mbedtls_strerror(ret, error_buf, sizeof(error_buf));
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write returned -0x%x: %s\n", -ret, error_buf);
@@ -446,7 +449,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Write successful\n");
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Write failed after multiple attempts\n");
-      ret = 1;  // Indicate failure
+      ret = 1;
       goto exit;
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Write successful\n");

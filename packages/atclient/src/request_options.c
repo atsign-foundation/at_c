@@ -1227,8 +1227,8 @@ void atclient_delete_request_options_free(atclient_delete_request_options *optio
   }
 
   /*
-   * 2. Free the options
-   */
+  * 2. Reset the value
+  */
   if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
     atclient_delete_request_options_unset_skip_shared_by_check(options);
   }
@@ -1311,11 +1311,7 @@ void atclient_delete_request_options_unset_skip_shared_by_check(atclient_delete_
     return;
   }
 
-  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
-    free(&(options->skip_shared_by_check));
-  }
-
-  options->skip_shared_by_check = NULL;
+  options->skip_shared_by_check = false;
   atclient_delete_request_options_skip_shared_by_check_set_intitialized(options, false);
 }
 
