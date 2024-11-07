@@ -15,7 +15,6 @@ static int atclient_delete_validate_arguments(const atclient *atclient, const at
 int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atclient_delete_request_options *options,
                     int *commit_id) {
   int ret = 1;
-  if(options)
   /*
    * 1. Check arguments
    */

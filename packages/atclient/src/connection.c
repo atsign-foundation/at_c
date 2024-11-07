@@ -445,14 +445,12 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Recursive write attempt #: %d\tmbedtls_ssl_write:%d\n", attempt, ret);
     }
 
-    if (remaining_length == 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Write successful\n");
-    } else {
+    if (remaining_length != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Write failed after multiple attempts\n");
       ret = 1;
       goto exit;
     }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Write successful\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Write successful after %d attempts\n", attempt);
   }
 
   /*

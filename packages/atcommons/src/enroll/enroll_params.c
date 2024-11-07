@@ -1,11 +1,12 @@
 #include "atcommons/enroll_params.h"
+
+#include "cJSON.h"
+
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../../../../_deps/cjson-src/cJSON.h"
 
 #define ENROLLMENT_ID "enrollmentId"
 #define APP_NAME "appName"

@@ -8,6 +8,6 @@
  * @param atsign Pointer to atsign string
  * @return int 0 on success, non-zero on error
  */
-int atauth_build_atkeys_file_path(char *atkeys_path, const char *atsign);
+int atauth_build_atkeys_file_path(char **atkeys_path, const char *atsign);
 
 #endif //ATAUTH_BUILD_ATKEYS_FILE_PATH_H

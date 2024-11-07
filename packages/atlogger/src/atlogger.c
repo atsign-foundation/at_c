@@ -78,13 +78,6 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
       off += strlen(prefix + off);
     }
 
-    // clock_t t;
-    // t = clock();
-    // double time = ((double)t) / CLOCKS_PER_SEC;
-    // snprintf(prefix + off, PREFIX_BUFFER_LEN - off, "%.0lf", time);
-    // snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%09lu", timespec.tv_nsec);
-    // off += strlen(prefix + off);
-
     off -= 3;
     snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " |");
     off += 2;
