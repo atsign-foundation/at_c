@@ -1,6 +1,8 @@
 #include <atclient/atclient.h>
 #include <atclient/atkeys.h>
+#include <atclient/atkeys_file.h>
 #include <atlogger/atlogger.h>
+#include <string.h>
 
 #define TAG "test_atkeys_write"
 
@@ -102,13 +104,20 @@ int main(int argc, char *argv[]) {
   }
 
   // log what fields are initializwed
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_public_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_private_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_public_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_private_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_self_encryption_key_base64_initialized: %d\n", atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_apkam_symmetric_key_base64_initialized: %d\n", atclient_atkeys_is_apkam_symmetric_key_base64_initialized(&atkeys));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_enrollment_id_initialized: %d\n", atclient_atkeys_is_enrollment_id_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_public_key_base64_initialized: %d\n",
+               atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_private_key_base64_initialized: %d\n",
+               atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_public_key_base64_initialized: %d\n",
+               atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_private_key_base64_initialized: %d\n",
+               atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_self_encryption_key_base64_initialized: %d\n",
+               atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_apkam_symmetric_key_base64_initialized: %d\n",
+               atclient_atkeys_is_apkam_symmetric_key_base64_initialized(&atkeys));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_enrollment_id_initialized: %d\n",
+               atclient_atkeys_is_enrollment_id_initialized(&atkeys));
 
   if ((ret = atclient_atkeys_write_to_path(&atkeys, ATKEYS_8INCANTEATER_1_FILE_PATH))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to write to path\n");
@@ -121,13 +130,20 @@ int main(int argc, char *argv[]) {
   }
 
   // log what fields are initializwed
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_public_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys1));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_private_key_base64_initialized: %d\n", atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys1));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_public_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys1));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_private_key_base64_initialized: %d\n", atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys1));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_self_encryption_key_base64_initialized: %d\n", atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys1));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_apkam_symmetric_key_base64_initialized: %d\n", atclient_atkeys_is_apkam_symmetric_key_base64_initialized(&atkeys1));
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_enrollment_id_initialized: %d\n", atclient_atkeys_is_enrollment_id_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_public_key_base64_initialized: %d\n",
+               atclient_atkeys_is_pkam_public_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_pkam_private_key_base64_initialized: %d\n",
+               atclient_atkeys_is_pkam_private_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_public_key_base64_initialized: %d\n",
+               atclient_atkeys_is_encrypt_public_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_encrypt_private_key_base64_initialized: %d\n",
+               atclient_atkeys_is_encrypt_private_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_self_encryption_key_base64_initialized: %d\n",
+               atclient_atkeys_is_self_encryption_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_apkam_symmetric_key_base64_initialized: %d\n",
+               atclient_atkeys_is_apkam_symmetric_key_base64_initialized(&atkeys1));
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "is_enrollment_id_initialized: %d\n",
+               atclient_atkeys_is_enrollment_id_initialized(&atkeys1));
 
   // compare the two atkeys
   if (strcmp(atkeys.pkam_public_key_base64, atkeys1.pkam_public_key_base64) != 0) {

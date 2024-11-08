@@ -375,8 +375,9 @@ int atchops_rsa_key_generate_base64(unsigned char **public_key_base64_output,
   size_t private_key_base64_pkcs8_len = 0;
 
   // 8b. Encode the PKCS#8 formatted private key
-  if ((ret = atchops_base64_encode(private_key_pkcs8, 26 + private_key_non_base64_len, private_key_pkcs8_base64,
-                                   private_key_base64_pkcs8_size, &private_key_base64_pkcs8_len)) != 0) {
+  if ((ret = atchops_base64_encode(private_key_pkcs8, 26 + private_key_non_base64_len,
+                                   (unsigned char *)private_key_pkcs8_base64, private_key_base64_pkcs8_size,
+                                   &private_key_base64_pkcs8_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encode private key\n");
     goto exit;
   }

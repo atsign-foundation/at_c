@@ -134,8 +134,8 @@ typedef struct atclient_atkey_metadata {
   // This field is not written to the protocol string by the SDK. It is a strictly client-side metadata.
   bool is_public : 1;
 
-  // is_cached=true means the key contains 'cached:', written and used by client SDK only, not written to protocol string
-  // is_cached=false means the key does not contain 'cached:'
+  // is_cached=true means the key contains 'cached:', written and used by client SDK only, not written to protocol
+  // string is_cached=false means the key does not contain 'cached:'
   bool is_cached : 1;
   // This field is not written to the protocol string by the SDK. It is a strictly client-side metadata.
 
@@ -144,7 +144,7 @@ typedef struct atclient_atkey_metadata {
   // Example ttl=86400 means the atkey will live for a day.
   // This field is read from protocol string and and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  long ttl;
+  uint64_t ttl;
 
   // Time to birth in milliseconds
   // Represents the amount of time it takes for atkey to exist.
@@ -152,7 +152,7 @@ typedef struct atclient_atkey_metadata {
   // and received by the atServer
   // This field is read from protocol string and and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  long ttb;
+  uint64_t ttb;
 
   // Time to refresh in milliseconds
   // Represents the amount of time the cached shared atkey will refresh and update to the latest data stored by the
@@ -161,7 +161,7 @@ typedef struct atclient_atkey_metadata {
   // a ttr is not applicable to this type of atkey (because it may be a selfkey), which has the same effect as 0.
   // This field is read from protocol string and and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  long ttr;
+  uint64_t ttr;
 
   // Cascade Delete
   // ccd=1 means this cached keys will be deleted upon the deletion of the original copy
@@ -221,11 +221,10 @@ typedef struct atclient_atkey_metadata {
   char *encoding;
 
   // The name of the key used to encrypt the value. If not provided, use sharedKeyEnc in the metadata. If sharedKeyEnc
-  // is not provided, use the default shared key. If enc_key_name is provided, just the key name must be provided example
-  // without the sharedWith suffix and sharedBy prefix, nor visibility prefix. Example '@bob:shared_key.wavi@alice',
-  // must be only be 'shared_key.wavi'
-  // This field is read from protocol string and set by the developer.
-  // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
+  // is not provided, use the default shared key. If enc_key_name is provided, just the key name must be provided
+  // example without the sharedWith suffix and sharedBy prefix, nor visibility prefix. Example
+  // '@bob:shared_key.wavi@alice', must be only be 'shared_key.wavi' This field is read from protocol string and set by
+  // the developer. This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
   char *enc_key_name;
 
   // The name of the algorithm used to encrypt the value. For data, the default algorithm is 'AES/SIC/PKCS7Padding', for
@@ -292,6 +291,7 @@ int atclient_atkey_metadata_from_json_str(atclient_atkey_metadata *metadata, con
  * @param json the json object to populate from
  * @return int 0 on success
  */
+
 int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json);
 
 /**
@@ -387,9 +387,9 @@ bool atclient_atkey_metadata_is_ske_enc_algo_initialized(const atclient_atkey_me
 
 int atclient_atkey_metadata_set_is_public(atclient_atkey_metadata *metadata, const bool is_public);
 int atclient_atkey_metadata_set_is_cached(atclient_atkey_metadata *metadata, const bool is_cached);
-int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl);
-int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb);
-int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr);
+int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const int64_t ttl);
+int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const int64_t ttb);
+int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const int64_t ttr);
 int atclient_atkey_metadata_set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
 int atclient_atkey_metadata_set_is_binary(atclient_atkey_metadata *metadata, const bool is_binary);
 int atclient_atkey_metadata_set_is_encrypted(atclient_atkey_metadata *metadata, const bool is_encrypted);

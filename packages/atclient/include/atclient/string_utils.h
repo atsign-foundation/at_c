@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /**
  * @brief trims leading/trailing whitespace/newline
@@ -15,7 +16,7 @@
  * @return int 0 on success, non-zero on failure
  */
 int atclient_string_utils_trim_whitespace(const char *string, const size_t stringlen, char *out, const size_t out_size,
-                                         size_t *out_len);
+                                          size_t *out_len);
 
 /**
  * @brief check if string starts with prefix
@@ -72,5 +73,13 @@ int atclient_string_utils_atsign_without_at(const char *original_atsign, char **
  * @return int the string length
  */
 int atclient_string_utils_long_strlen(long n);
+
+/**
+ * @brief get the length of an int64_t if it were converted to a string
+ *
+ * @param n the int64_t to check the length of
+ * @return int the string length
+ */
+int atclient_string_utils_int64_strlen(int64_t n);
 
 #endif

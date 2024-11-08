@@ -1,5 +1,5 @@
 #include "atclient/atkey.h"
-#include "atclient/constants.h"
+#include "atclient/metadata.h"
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -138,12 +138,12 @@ static int test1a_cached_publickey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_1A;
 
-  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
 
-  if((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
@@ -190,7 +190,7 @@ static int test1b_publickey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_1B; // "public:publickey@alice"
 
-  if((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
@@ -288,12 +288,12 @@ static int test1d_cached_publickey_with_namespace() {
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
   const size_t expectedlen = strlen(expected);
 
-  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
 
-  if((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_public(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_public failed\n");
     goto exit;
   }
@@ -395,7 +395,7 @@ static int test2b_cached_sharedkey_without_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2B; // "cached:@bob:name@alice"
 
-  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }
@@ -499,7 +499,7 @@ static int test2d_cached_sharedkey_with_namespace() {
 
   const char *expected = TEST_ATKEY_TO_STRING_2D; // "cached:@bob:name.wavi@alice"
 
-  if((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");
     goto exit;
   }

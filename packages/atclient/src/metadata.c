@@ -3,6 +3,7 @@
 #include "atlogger/atlogger.h"
 #include "cJSON.h"
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -107,9 +108,9 @@ static int set_created_at(atclient_atkey_metadata *metadata, const char *created
 static int set_updated_at(atclient_atkey_metadata *metadata, const char *updated_at);
 static void set_is_public(atclient_atkey_metadata *metadata, const bool is_public);
 static void set_is_cached(atclient_atkey_metadata *metadata, const bool is_cached);
-static void set_ttl(atclient_atkey_metadata *metadata, const long ttl);
-static void set_ttb(atclient_atkey_metadata *metadata, const long ttb);
-static void set_ttr(atclient_atkey_metadata *metadata, const long ttr);
+static void set_ttl(atclient_atkey_metadata *metadata, const int64_t ttl);
+static void set_ttb(atclient_atkey_metadata *metadata, const int64_t ttb);
+static void set_ttr(atclient_atkey_metadata *metadata, const int64_t ttr);
 static void set_ccd(atclient_atkey_metadata *metadata, const bool ccd);
 static void set_is_binary(atclient_atkey_metadata *metadata, const bool is_binary);
 static void set_is_encrypted(atclient_atkey_metadata *metadata, const bool is_encrypted);
@@ -920,7 +921,7 @@ size_t atclient_atkey_metadata_protocol_strlen(const atclient_atkey_metadata *me
   /*
    * 2. Calculate length
    */
-  long len = 0;
+  int64_t len = 0;
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
     len += atclient_atkey_metadata_ttl_strlen(metadata);
   }
@@ -1000,7 +1001,7 @@ size_t atclient_atkey_metadata_ttl_strlen(const atclient_atkey_metadata *metadat
     return 0;
   }
   return strlen(":ttl:") // :ttl:
-         + atclient_string_utils_long_strlen(metadata->ttl);
+         + atclient_string_utils_int64_strlen(metadata->ttl);
 }
 
 size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadata) {
@@ -1011,7 +1012,7 @@ size_t atclient_atkey_metadata_ttb_strlen(const atclient_atkey_metadata *metadat
     return 0;
   }
   return strlen(":ttb:") // :ttb:
-         + atclient_string_utils_long_strlen(metadata->ttb);
+         + atclient_string_utils_int64_strlen(metadata->ttb);
 }
 
 size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadata) {
@@ -1022,7 +1023,7 @@ size_t atclient_atkey_metadata_ttr_strlen(const atclient_atkey_metadata *metadat
     return 0;
   }
   return strlen(":ttr:") // :ttr:
-         + atclient_string_utils_long_strlen(metadata->ttr);
+         + atclient_string_utils_int64_strlen(metadata->ttr);
 }
 
 size_t atclient_atkey_metadata_ccd_strlen(const atclient_atkey_metadata *metadata) {
@@ -1211,17 +1212,17 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   memset(*metadata_str, 0, sizeof(char) * metadata_str_size);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
-    sprintf((*metadata_str) + pos, ":ttl:%ld", metadata->ttl);
+    sprintf((*metadata_str) + pos, ":ttl:%lld", metadata->ttl);
     pos += atclient_atkey_metadata_ttl_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
-    sprintf((*metadata_str) + pos, ":ttb:%ld", metadata->ttb);
+    sprintf((*metadata_str) + pos, ":ttb:%lld", metadata->ttb);
     pos += atclient_atkey_metadata_ttb_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
-    sprintf((*metadata_str) + pos, ":ttr:%ld", metadata->ttr);
+    sprintf((*metadata_str) + pos, ":ttr:%lld", metadata->ttr);
     pos += atclient_atkey_metadata_ttr_strlen(metadata);
   }
 
@@ -1453,7 +1454,7 @@ int atclient_atkey_metadata_set_is_cached(atclient_atkey_metadata *metadata, con
   return 0;
 }
 
-int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
+int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const int64_t ttl) {
   if (is_ttl_initialized(metadata)) {
     unset_ttl(metadata);
   }
@@ -1461,7 +1462,7 @@ int atclient_atkey_metadata_set_ttl(atclient_atkey_metadata *metadata, const lon
   return 0;
 }
 
-int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
+int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const int64_t ttb) {
   if (is_ttb_initialized(metadata)) {
     unset_ttb(metadata);
   }
@@ -1469,7 +1470,7 @@ int atclient_atkey_metadata_set_ttb(atclient_atkey_metadata *metadata, const lon
   return 0;
 }
 
-int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
+int atclient_atkey_metadata_set_ttr(atclient_atkey_metadata *metadata, const int64_t ttr) {
   if (is_ttr_initialized(metadata)) {
     unset_ttr(metadata);
   }
@@ -2438,17 +2439,17 @@ static void set_is_cached(atclient_atkey_metadata *metadata, const bool is_cache
   set_is_is_cached_initialized(metadata, true);
 }
 
-static void set_ttl(atclient_atkey_metadata *metadata, const long ttl) {
+static void set_ttl(atclient_atkey_metadata *metadata, const int64_t ttl) {
   metadata->ttl = ttl;
   set_is_ttl_initialized(metadata, true);
 }
 
-static void set_ttb(atclient_atkey_metadata *metadata, const long ttb) {
+static void set_ttb(atclient_atkey_metadata *metadata, const int64_t ttb) {
   metadata->ttb = ttb;
   set_is_ttb_initialized(metadata, true);
 }
 
-static void set_ttr(atclient_atkey_metadata *metadata, const long ttr) {
+static void set_ttr(atclient_atkey_metadata *metadata, const int64_t ttr) {
   metadata->ttr = ttr;
   set_is_ttr_initialized(metadata, true);
 }

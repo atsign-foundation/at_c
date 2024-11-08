@@ -1,4 +1,5 @@
 #include "atclient/atkey.h"
+#include "atclient/metadata.h"
 #include "atlogger/atlogger.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -192,8 +193,7 @@ static int test1b_publickey_without_namespace() {
     goto exit;
   }
 
-
-  if(!atclient_atkey_metadata_is_is_public_initialized(&atkey.metadata)) {
+  if (!atclient_atkey_metadata_is_is_public_initialized(&atkey.metadata)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.is_public is not initialized\n");
     goto exit;
@@ -496,7 +496,8 @@ static int test2a_sharedkey_with_namespace() {
   }
 
   if (strcmp(atkey.shared_with, "@alice") != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_with is not @alice, it is \"%s\"\n", atkey.shared_with);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_with is not @alice, it is \"%s\"\n",
+                 atkey.shared_with);
     ret = 1;
     goto exit;
   }
@@ -782,7 +783,7 @@ static int test2e_sharedkey_with_compounding_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_shared_by_initialized(&atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not initialized when it should be\n");
     goto exit;
@@ -941,7 +942,7 @@ static int test3a_privatehiddenkey_without_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(&atkey)) {
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
@@ -953,7 +954,7 @@ static int test3a_privatehiddenkey_without_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_shared_by_initialized(&atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not initialized, when it should be\n");
     goto exit;
@@ -1009,7 +1010,7 @@ static int test4a_selfkey_without_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(&atkey)) {
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
@@ -1021,7 +1022,7 @@ static int test4a_selfkey_without_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_shared_by_initialized(&atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not initialized, when it should be\n");
     goto exit;
@@ -1033,7 +1034,7 @@ static int test4a_selfkey_without_namespace() {
     goto exit;
   }
 
-  if(atclient_atkey_is_shared_with_initialized(&atkey)) {
+  if (atclient_atkey_is_shared_with_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_with is initialized when it should not be\n");
     goto exit;
@@ -1074,7 +1075,7 @@ static int test4b_selfkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(&atkey)) {
+  if (!atclient_atkey_is_key_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.key is not initialized, when it should be\n");
     goto exit;
@@ -1086,7 +1087,7 @@ static int test4b_selfkey_with_namespace() {
     goto exit;
   }
 
-  if(!atclient_atkey_is_shared_by_initialized(&atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not initialized, when it should be\n");
     goto exit;
@@ -1094,11 +1095,12 @@ static int test4b_selfkey_with_namespace() {
 
   if (strcmp(atkey.shared_by, "@jeremy_0") != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not @jeremy_0, it is \"%s\"\n", atkey.shared_by);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not @jeremy_0, it is \"%s\"\n",
+                 atkey.shared_by);
     goto exit;
   }
 
-  if(!atclient_atkey_is_namespacestr_initialized(&atkey)) {
+  if (!atclient_atkey_is_namespacestr_initialized(&atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.namespace_str is not initialized, when it should be\n");
     goto exit;

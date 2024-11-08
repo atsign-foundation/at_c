@@ -1,8 +1,8 @@
 #ifndef ATCLIENT_NOTIFY_PARAMS_H
 #define ATCLIENT_NOTIFY_PARAMS_H
 
-#include "atclient/atclient.h"
 #include "atclient/atkey.h"
+#include <stdint.h>
 
 #define ATCLIENT_DEFAULT_NOTIFIER "SYSTEM"
 
@@ -37,7 +37,7 @@
 #define ATCLIENT_NOTIFY_PARAMS_SHARED_ENCRYPTION_KEY_INITIALIZED (VALUE_INITIALIZED << 3)
 
 // default param values for atclient_notify_params
-#define ATCLIENT_NOTIFY_PARAMS_DEFAULT_NOTIFICATION_EXPIRY 24 * 60 * 60 * 1000 //24 Hours in Milliseconds
+#define ATCLIENT_NOTIFY_PARAMS_DEFAULT_NOTIFICATION_EXPIRY 24 * 60 * 60 * 1000 // 24 Hours in Milliseconds
 #define ATCLIENT_NOTIFY_PARAMS_DEFAULT_LATEST_N 1
 #define ATCLIENT_NOTIFY_PARAMS_DEFAULT_SHOULD_ENCRYPT true
 #define ATCLIENT_NOTIFY_PARAMS_DEFAULT_OPERATION ATCLIENT_NOTIFY_OPERATION_NONE
@@ -100,9 +100,9 @@ typedef struct atclient_notify_params {
   enum atclient_notify_message_type message_type;
   enum atclient_notify_priority priority;
   enum atclient_notify_strategy strategy;
-  int latest_n;
+  int64_t latest_n;
   char *notifier;
-  unsigned long notification_expiry;
+  uint64_t notification_expiry;
   unsigned char *shared_encryption_key;
 
   uint8_t _initialized_fields[2];
@@ -135,20 +135,24 @@ void atclient_notify_params_set_strategy_initialized(atclient_notify_params *par
 void atclient_notify_params_set_latest_n_initialized(atclient_notify_params *params, const bool initialized);
 void atclient_notify_params_set_notifier_initialized(atclient_notify_params *params, const bool initialized);
 void atclient_notify_params_set_notification_expiry_initialized(atclient_notify_params *params, const bool initialized);
-void atclient_notify_params_set_shared_encryption_key_initialized(atclient_notify_params *params, const bool initialized);
+void atclient_notify_params_set_shared_encryption_key_initialized(atclient_notify_params *params,
+                                                                  const bool initialized);
 
 int atclient_notify_params_set_id(atclient_notify_params *params, const char *id);
 int atclient_notify_params_set_atkey(atclient_notify_params *params, const atclient_atkey *atkey);
 int atclient_notify_params_set_value(atclient_notify_params *params, const char *value);
 int atclient_notify_params_set_should_encrypt(atclient_notify_params *params, const bool should_encrypt);
-int atclient_notify_params_set_operation(atclient_notify_params *params, const enum atclient_notify_operation operation);
-int atclient_notify_params_set_message_type(atclient_notify_params *params, const enum atclient_notify_message_type message_type);
+int atclient_notify_params_set_operation(atclient_notify_params *params,
+                                         const enum atclient_notify_operation operation);
+int atclient_notify_params_set_message_type(atclient_notify_params *params,
+                                            const enum atclient_notify_message_type message_type);
 int atclient_notify_params_set_priority(atclient_notify_params *params, const enum atclient_notify_priority priority);
 int atclient_notify_params_set_strategy(atclient_notify_params *params, const enum atclient_notify_strategy strategy);
-int atclient_notify_params_set_latest_n(atclient_notify_params *params, const int latest_n);
+int atclient_notify_params_set_latest_n(atclient_notify_params *params, const int64_t latest_n);
 int atclient_notify_params_set_notifier(atclient_notify_params *params, const char *notifier);
-int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const unsigned long notification_expiry);
-int atclient_notify_params_set_shared_encryption_key(atclient_notify_params *params, const unsigned char *shared_encryption_key);
+int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const uint64_t notification_expiry);
+int atclient_notify_params_set_shared_encryption_key(atclient_notify_params *params,
+                                                     const unsigned char *shared_encryption_key);
 
 void atclient_notify_params_unset_id(atclient_notify_params *params);
 void atclient_notify_params_unset_atkey(atclient_notify_params *params);
@@ -163,4 +167,4 @@ void atclient_notify_params_unset_notifier(atclient_notify_params *params);
 void atclient_notify_params_unset_notification_expiry(atclient_notify_params *params);
 void atclient_notify_params_unset_shared_encryption_key(atclient_notify_params *params);
 
-#endif //ATCLIENT_NOTIFY_PARAMS_H
+#endif // ATCLIENT_NOTIFY_PARAMS_H

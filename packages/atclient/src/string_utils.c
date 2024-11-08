@@ -1,12 +1,13 @@
 #include "atclient/string_utils.h"
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 int atclient_string_utils_trim_whitespace(const char *string, const size_t string_len, char *out, const size_t out_size,
-                                         size_t *out_len) {
+                                          size_t *out_len) {
   int ret = 1;
 
   if (string == NULL) {
@@ -56,26 +57,25 @@ bool atclient_string_utils_ends_with(const char *string, const char *suffix) {
     return false;
   }
   return strncmp(string + string_len - suffix_len, suffix, suffix_len) == 0;
-
 }
 
-int atclient_string_utils_get_substring_position(const char* string, const char* substring, char** position) {
+int atclient_string_utils_get_substring_position(const char *string, const char *substring, char **position) {
   int ret = -1;
-  if(strlen(substring) > strlen(string)) {
+  if (strlen(substring) > strlen(string)) {
     ret = -1;
     goto exit;
   }
-  if(position == NULL) {
+  if (position == NULL) {
     ret = -1;
     goto exit;
   }
-  *position =  strstr(string, substring);
-  if(*position == NULL) {
+  *position = strstr(string, substring);
+  if (*position == NULL) {
     ret = -1;
     goto exit;
   }
   ret = 0;
-  exit:{ return ret;}
+exit: { return ret; }
 }
 
 int atclient_string_utils_atsign_with_at(const char *original_atsign, char **output_atsign_with_at_symbol) {
@@ -163,6 +163,26 @@ int atclient_string_utils_long_strlen(long n) {
   }
 
   for (long i = 1; i <= n; i *= 10) {
+    len++;
+  }
+
+  return len;
+}
+
+int atclient_string_utils_int64_strlen(int64_t n) {
+  // could use log10 for this, but it's probably slower...
+  size_t len = 0;
+
+  if (n == 0) {
+    return 1;
+  }
+
+  if (n < 0) {
+    n *= -1;
+    len++; // for the minus sign
+  }
+
+  for (int64_t i = 1; i <= n; i *= 10) {
     len++;
   }
 

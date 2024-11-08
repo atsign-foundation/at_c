@@ -1,6 +1,9 @@
 #include "atclient/notify.h"
+#include "atclient/atclient.h"
 #include "atclient/connection.h"
 #include "atclient/encryption_key_helpers.h"
+#include "atclient/metadata.h"
+#include "atclient/notify_params.h"
 #include "atclient/string_utils.h"
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
@@ -8,6 +11,7 @@
 #include <atchops/iv.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -309,7 +313,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
-    snprintf(cmd + off, cmdsize - off, ":ttln:%lu", params->notification_expiry);
+    snprintf(cmd + off, cmdsize - off, ":ttln:%llu", params->notification_expiry);
     off += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry);
   }
 
