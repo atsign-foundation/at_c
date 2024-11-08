@@ -340,7 +340,7 @@ int atclient_notify_params_set_notifier(atclient_notify_params *params, const ch
 exit: { return ret; }
 }
 
-int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const uint64_t notification_expiry) {
+int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const int64_t notification_expiry) {
   params->notification_expiry = notification_expiry;
   atclient_notify_params_set_notification_expiry_initialized(params, true);
   return 0;

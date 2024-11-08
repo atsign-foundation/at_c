@@ -1,7 +1,8 @@
 #include "atclient/metadata.h"
+#include "atclient/cjson.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
-#include "cJSON.h"
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -1212,17 +1213,17 @@ int atclient_atkey_metadata_to_protocol_str(const atclient_atkey_metadata *metad
   memset(*metadata_str, 0, sizeof(char) * metadata_str_size);
 
   if (atclient_atkey_metadata_is_ttl_initialized(metadata)) {
-    sprintf((*metadata_str) + pos, ":ttl:%lld", metadata->ttl);
+    sprintf((*metadata_str) + pos, ":ttl:" PRId64, metadata->ttl); // NOLINT(*format-extra-args)
     pos += atclient_atkey_metadata_ttl_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttb_initialized(metadata)) {
-    sprintf((*metadata_str) + pos, ":ttb:%lld", metadata->ttb);
+    sprintf((*metadata_str) + pos, ":ttb:" PRId64, metadata->ttb); // NOLINT(*format-extra-args)
     pos += atclient_atkey_metadata_ttb_strlen(metadata);
   }
 
   if (atclient_atkey_metadata_is_ttr_initialized(metadata)) {
-    sprintf((*metadata_str) + pos, ":ttr:%lld", metadata->ttr);
+    sprintf((*metadata_str) + pos, ":ttr:" PRId64, metadata->ttr); // NOLINT(*format-extra-args)
     pos += atclient_atkey_metadata_ttr_strlen(metadata);
   }
 

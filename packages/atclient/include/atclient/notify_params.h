@@ -102,7 +102,7 @@ typedef struct atclient_notify_params {
   enum atclient_notify_strategy strategy;
   int64_t latest_n;
   char *notifier;
-  uint64_t notification_expiry;
+  int64_t notification_expiry;
   unsigned char *shared_encryption_key;
 
   uint8_t _initialized_fields[2];
@@ -150,7 +150,7 @@ int atclient_notify_params_set_priority(atclient_notify_params *params, const en
 int atclient_notify_params_set_strategy(atclient_notify_params *params, const enum atclient_notify_strategy strategy);
 int atclient_notify_params_set_latest_n(atclient_notify_params *params, const int64_t latest_n);
 int atclient_notify_params_set_notifier(atclient_notify_params *params, const char *notifier);
-int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const uint64_t notification_expiry);
+int atclient_notify_params_set_notification_expiry(atclient_notify_params *params, const int64_t notification_expiry);
 int atclient_notify_params_set_shared_encryption_key(atclient_notify_params *params,
                                                      const unsigned char *shared_encryption_key);
 

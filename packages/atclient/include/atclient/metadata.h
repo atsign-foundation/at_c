@@ -144,7 +144,7 @@ typedef struct atclient_atkey_metadata {
   // Example ttl=86400 means the atkey will live for a day.
   // This field is read from protocol string and and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  uint64_t ttl;
+  int64_t ttl;
 
   // Time to birth in milliseconds
   // Represents the amount of time it takes for atkey to exist.
@@ -152,7 +152,7 @@ typedef struct atclient_atkey_metadata {
   // and received by the atServer
   // This field is read from protocol string and and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  uint64_t ttb;
+  int64_t ttb;
 
   // Time to refresh in milliseconds
   // Represents the amount of time the cached shared atkey will refresh and update to the latest data stored by the
@@ -161,7 +161,7 @@ typedef struct atclient_atkey_metadata {
   // a ttr is not applicable to this type of atkey (because it may be a selfkey), which has the same effect as 0.
   // This field is read from protocol string and and set by the developer.
   // This field is written to protocol string by the SDK. (See atclient_atkey_metadata_to_protocolstr)
-  uint64_t ttr;
+  int64_t ttr;
 
   // Cascade Delete
   // ccd=1 means this cached keys will be deleted upon the deletion of the original copy
