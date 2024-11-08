@@ -59,29 +59,29 @@ int main() {
   atclient_atkeys atkeys_sharedwith;
   atclient_atkeys_init(&atkeys_sharedwith);
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys_sharedby, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys_sharedby, ATKEY_SHAREDBY)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys_sharedby: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys_sharedby, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys_sharedby, ATKEY_SHAREDBY)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys_sharedwith, ATKEY_SHAREDWITH) != 0)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys_sharedby: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = monitor_pkam_auth(&monitor_conn, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) != 0) {
+  if ((ret = functional_tests_monitor_pkam_auth(&monitor_conn, &atkeys_sharedwith, ATKEY_SHAREDWITH)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
 
   atclient_monitor_set_read_timeout(&monitor_conn, 5);
 
-  if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys_sharedwith, ATKEY_SHAREDWITH, strlen(ATKEY_SHAREDWITH))) !=
+  if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys_sharedwith, ATKEY_SHAREDWITH)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
@@ -128,35 +128,6 @@ exit: {
   atclient_free(&atclient1);
   atclient_free(&atclient2);
   atclient_free(&monitor_conn);
-  return ret;
-}
-}
-
-static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atkeys, const char *atsign,
-                             const size_t atsignlen) {
-  int ret = 1;
-
-  char *atserver_host = NULL;
-  int atserver_port = -1;
-
-  if ((ret = atclient_utils_find_atserver_address(ROOT_HOST, ROOT_PORT, atsign, &atserver_host, &atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
-    goto exit;
-  }
-
-  // log atserver_host and atserver_port
-  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Host: %s\n", atserver_host);
-  // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Port: %d\n", atserver_port);
-
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atsign, atkeys, NULL)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_pkam_authenticate: %d\n", ret);
-    goto exit;
-  }
-
-  ret = 0;
-  goto exit;
-exit: {
-  free(atserver_host);
   return ret;
 }
 }

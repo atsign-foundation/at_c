@@ -1,5 +1,6 @@
 #include "atclient/request_options.h"
 #include "functional_tests/config.h"
+#include "functional_tests/helpers.h"
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkeys_file.h>
@@ -9,12 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const size_t atkeyspathsize = 1024;
-static char atkeyspath[1024];
-static char *atsign;
+#define ATSIGN FIRST_ATSIGN
 
-static int test1_pkam_no_options();
-static int test2_pkam_with_options();
+static int test_1_pkam_with_null_options();
+static int test_2_pkam_with_options();
 // TODO: add apkam enrollment
 // - can't do this as a unit test until we have at_activate in C
 // static int test3_apkam_enrollment();
@@ -22,29 +21,18 @@ static int test2_pkam_with_options();
 int main() {
   int ret = 0;
 
-  atsign = FIRST_ATSIGN;
-
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  memset(atkeyspath, 0, atkeyspathsize);
-  size_t atkeyspathlen = 0;
+  ret += test_1_pkam_with_null_options();
+  ret += test_2_pkam_with_options();
 
-  if ((ret = functional_tests_get_atkeys_path(atsign, strlen(atsign), atkeyspath, atkeyspathsize, &atkeyspathlen)) !=
-      0) {
-    atlogger_log("pkam_authenticate main", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys_sharedwith path: %d\n",
-                 ret);
-    return ret;
-  }
-
-  ret += test1_pkam_no_options();
-  ret += test2_pkam_with_options();
-
-  return ret;
+exit: { return ret; }
 }
 
-static int test1_pkam_no_options() {
-  const char *tag = "test1_pkam_no_options";
-  int ret = 0;
+static int test_1_pkam_with_null_options() {
+  int ret = 1;
+
+  const char *tag = "test_1_pkam_with_null_options";
 
   atclient_atkeys_file atkeys_file;
   atclient_atkeys_file_init(&atkeys_file);
@@ -55,64 +43,76 @@ static int test1_pkam_no_options() {
   atclient atclient;
   atclient_init(&atclient);
 
-  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, atkeyspath)) != 0) {
-    return ret;
+  if ((ret = functional_tests_set_up_atkeys(&atkeys, ATSIGN)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys_sharedwith path: %d\n", ret);
+    goto exit;
   }
-  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_from_string: %d\n", ret);
 
-  if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file)) != 0) {
-    return ret;
-  }
-  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
-
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, NULL)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
-    return ret;
+    goto exit;
   } else {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
-  return ret;
+  ret = 0;
+exit: { return ret; }
 }
 
-static int test2_pkam_with_options() {
-  const char *tag = "test2_pkam_with_options";
-  int ret = 0;
+static int test_2_pkam_with_options() {
+  int ret = 1;
 
-  atclient_atkeys_file atkeys_file;
-  atclient_atkeys_file_init(&atkeys_file);
+
+  const char *tag = "test_2_pkam_with_options";
+
+  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "Begin test_2_pkam_with_options\n");
 
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
   atclient atclient;
   atclient_init(&atclient);
-
-  if ((ret = atclient_atkeys_file_from_path(&atkeys_file, atkeyspath)) != 0) {
-    return ret;
-  }
-  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_file_from_string: %d\n", ret);
-
-  if ((ret = atclient_atkeys_populate_from_atkeys_file(&atkeys, &atkeys_file)) != 0) {
-    return ret;
-  }
-  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
   atclient_pkam_authenticate_options options;
   atclient_pkam_authenticate_options_init(&options);
 
-  if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
-                                                  ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &options.atserver_host,
-                                                  &options.atserver_port)) != 0) {
-    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
-    return ret;
+  char *atserver_host = NULL;
+  int atserver_port = 0;
+
+  if ((ret = functional_tests_set_up_atkeys(&atkeys, ATSIGN)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys_sharedwith from path: %d\n", ret);
+    goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL)) != 0) {
-    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
-    return ret;
-  } else {
-    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
+  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, ATSIGN, &atserver_host,
+                                                  &atserver_port)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
+    goto exit;
   }
-  return ret;
+
+  if ((ret = atclient_pkam_authenticate_options_set_atserver_host(&options, atserver_host)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_host: %d\n",
+                 ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate_options_set_atserver_port(&options, atserver_port)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_port: %d\n",
+                 ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate(&atclient, &atkeys, ATSIGN, &options) != 0)) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
+    goto exit;
+  }
+
+  ret = 0;
+
+exit: { 
+  atclient_pkam_authenticate_options_free(&options);
+  atclient_atkeys_free(&atkeys);
+  atclient_free(&atclient);
+  atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "End test_2_pkam_with_options: %d\n", ret);
+  return ret; }
 }

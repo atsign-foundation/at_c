@@ -9,7 +9,14 @@ project(
     LANGUAGES C
 )
 
-find_package(atsdk CONFIG REQUIRED)
+include(FetchContent)
+
+FetchContent_Declare(
+    atsdk
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../
+)
+
+FetchContent_MakeAvailable(atsdk)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib)
 
@@ -24,7 +31,7 @@ foreach(file ${files})
 
     add_executable(${filename} ${file})
     target_include_directories(${filename} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/tests/)
-    target_link_libraries(${filename} PRIVATE atsdk::atclient atsdk::functional_tests_lib)
+    target_link_libraries(${filename} PRIVATE atclient functional_tests_lib)
     add_test(
         NAME ${filename}
         COMMAND ${filename}

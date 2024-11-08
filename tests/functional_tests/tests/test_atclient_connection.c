@@ -1,12 +1,10 @@
 #include <atclient/connection.h>
-#include <atlogger/atlogger.h>
 #include <functional_tests/helpers.h>
+#include <functional_tests/config.h>
+#include <atlogger/atlogger.h>
 #include <string.h>
 
 #define TAG "test_atclient_connection"
-
-#define ROOT_HOST "root.atsign.org"
-#define ROOT_PORT 64
 
 static int assert_equals(bool actual, bool expected);
 
@@ -160,7 +158,7 @@ static int test_2_connect(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_connect(conn, ROOT_HOST, ROOT_PORT);
+  ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     goto exit;
@@ -203,15 +201,14 @@ static int test_4_send(atclient_connection *conn) {
 
   int ret = 1;
 
-  const unsigned char *send_data = (const unsigned char *)"12alpaca\r\n";
+  const unsigned char *send_data = (const unsigned char *)(FIRST_ATSIGN "\r\n");
   const size_t send_data_len = strlen((const char *)send_data);
 
   const size_t recvsize = 1024;
   unsigned char recv[1024];
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(conn, send_data, send_data_len, recv, recvsize, &recvlen);
-  if (ret != 0) {
+  if ((ret = atclient_connection_send(conn, send_data, send_data_len, recv, recvsize, &recvlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send: %d\n", ret);
     goto exit;
   }
@@ -220,7 +217,10 @@ static int test_4_send(atclient_connection *conn) {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: { 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_send End: %d\n", ret);
+  return ret;
+}
 }
 
 static int test_5_disconnect(atclient_connection *conn) {
@@ -302,7 +302,7 @@ static int test_8_reconnect(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_connect(conn, ROOT_HOST, ROOT_PORT);
+  ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect: %d\n", ret);
     goto exit;
@@ -381,7 +381,7 @@ static int test_12_connect(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_connect(conn, ROOT_HOST, ROOT_PORT);
+  ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     goto exit;

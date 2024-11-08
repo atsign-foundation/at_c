@@ -25,7 +25,5 @@ target_include_directories(functional_tests_lib
 
 target_link_libraries(functional_tests_lib
     PUBLIC
-    atsdk::atclient
+    atclient
 )
-
-add_library(atsdk::functional_tests_lib ALIAS functional_tests_lib)

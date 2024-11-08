@@ -1,13 +1,20 @@
 #!/bin/bash
+
+# 
+# Example usage
+# tools/build.sh && tools/run_ctest.sh
+#
+
 set -eu
 FULL_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$FULL_PATH_TO_SCRIPT")"
-cd "$SCRIPT_DIRECTORY/.."
+cd "$SCRIPT_DIRECTORY"
 
-# 1. Install atSDK
-../../tools/install.sh
+cd ..
 
-# 2. Run tests
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
+if [ ! -d "build" ] || [ -z "$(ls -A build)" ]; then
+    echo "No build directory found, run ./tools/build.sh"
+    exit 1
+fi
+
 ctest --test-dir build -VV --timeout 60

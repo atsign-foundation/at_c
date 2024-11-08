@@ -3,11 +3,11 @@
 
 #include <stddef.h>
 
-#define ROOT_HOST "root.atsign.org"
-#define ROOT_PORT 64
+#define ATDIRECTORY_HOST "vip.ve.atsign.zone"
+#define ATDIRECTORY_PORT 64
 
-#define FIRST_ATSIGN "@12alpaca"
-#define SECOND_ATSIGN "@12snowboating"
+#define FIRST_ATSIGN "@purnima🛠"
+#define SECOND_ATSIGN "@bob🛠"
 
 /**
  * @brief Get the atkeys file path for the given atSign.

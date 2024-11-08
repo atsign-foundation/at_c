@@ -1,17 +1,16 @@
 #include <atclient/atclient_utils.h>
 #include <atlogger/atlogger.h>
+#include <functional_tests/config.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define ATDIRECTORY_HOST "root.atsign.org"
-#define ATDIRECTORY_PORT 64
-
-#define ATSIGN "@12alpaca"
+#define ATSIGN FIRST_ATSIGN
 
 #define TAG "test_atclient_find_atserver_address"
 
-#define EXPECTED_HOST "228aafb0-94d3-5aa2-a3b3-e36af115480d.swarm0002.atsign.zone"
-#define EXPECTED_PORT 6943
+// purnima
+#define EXPECTED_HOST "vip.ve.atsign.zone"
+#define EXPECTED_PORT 25015
 
 static int test_1_find_atserver_address_should_pass();
 static int test_2_find_atserver_address_should_fail();
