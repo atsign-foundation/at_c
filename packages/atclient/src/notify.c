@@ -313,7 +313,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
-    snprintf(cmd + off, cmdsize - off, ":ttln:" PRIu64, params->notification_expiry); // NOLINT(*format-extra-args)
+    snprintf(cmd + off, cmdsize - off, ":ttln:%" PRIu64, params->notification_expiry);
     off += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry);
   }
 
