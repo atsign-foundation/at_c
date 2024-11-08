@@ -1,21 +1,13 @@
 #ifndef FUNCTIONAL_TESTS_CONFIG_H
 #define FUNCTIONAL_TESTS_CONFIG_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <stddef.h>
 
-#define ROOT_HOST "root.atsign.org"
-#define ROOT_PORT 64
+#define ATDIRECTORY_HOST "vip.ve.atsign.zone"
+#define ATDIRECTORY_PORT 64
 
-#ifndef FIRST_ATSIGN
-#define FIRST_ATSIGN "@12alpaca"
-#endif
-
-#ifndef SECOND_ATSIGN
-#define SECOND_ATSIGN "@12snowboating"
-#endif
+#define FIRST_ATSIGN "@purnima🛠"
+#define SECOND_ATSIGN "@bob🛠"
 
 /**
  * @brief Get the atkeys file path for the given atSign.
@@ -27,10 +19,6 @@ extern "C" {
  * @param pathlen the output length of the path
  * @return int, 0 on success
  */
-int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize,
-                                     size_t *pathlen);
+int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen);
 
-#ifdef __cplusplus
-}
-#endif
 #endif

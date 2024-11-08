@@ -249,8 +249,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 4. Get atdirectory_host and atdirectory_port
    */
-  if(options != NULL && atclient_authenticate_options_is_atdirectory_host_initialized(options) && options->atdirectory_host != NULL &&
-     atclient_authenticate_options_is_atdirectory_port_initialized(options) && options->atdirectory_port != 0) {
+  if(options != NULL && atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options) && options->atdirectory_host != NULL &&
+     atclient_pkam_authenticate_options_is_atdirectory_port_initialized(options) && options->atdirectory_port != 0) {
     atdirectory_host = options->atdirectory_host;
     atdirectory_port = options->atdirectory_port;
   } else {
@@ -262,8 +262,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    * 5. Get atserver_host and atserver_port
    */
   bool should_free_atserver_host;
-  if (options != NULL && atclient_authenticate_options_is_atserver_host_initialized(options) &&
-      options->atserver_host != NULL && atclient_authenticate_options_is_atserver_port_initialized(options) &&
+  if (options != NULL && atclient_pkam_authenticate_options_is_atserver_host_initialized(options) &&
+      options->atserver_host != NULL && atclient_pkam_authenticate_options_is_atserver_port_initialized(options) &&
       options->atserver_port != 0) {
     atserver_host = options->atserver_host;
     atserver_port = options->atserver_port;
