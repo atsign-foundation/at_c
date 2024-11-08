@@ -13,9 +13,9 @@
 
 #define TAG "send_enroll_request"
 
-int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enroll_id, char *enroll_status) {
+int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char *enroll_id, char *enroll_status) {
   int ret = 0;
-  size_t recv_size = 100; // to hold the response for enroll request
+  const size_t recv_size = 100; // to hold the response for enroll request
   unsigned char recv[recv_size];
   char *recv_trimmed = NULL;
   size_t recv_len;
@@ -29,9 +29,9 @@ int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enro
   /*
    * 1. Fetch enroll:request command length and allocate memory
    */
-  enroll_operation_t e_op = apkam_request;
+  const enroll_operation_t e_op = apkam_request;
   size_t cmd_len = 0;
-  atcommons_build_enroll_command(NULL, NULL, &cmd_len, e_op, ep); // fetch enroll_command length
+  atcommons_build_enroll_command(NULL, 0, &cmd_len, e_op, ep); // fetch enroll_command length
   const size_t cmd_size = cmd_len;
   char *command = malloc(sizeof(char) * cmd_size);
   if (command == NULL) {
@@ -58,7 +58,7 @@ int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enro
   /*
    * 3. Send enroll:request command to server
    */
-  if ((ret = atclient_connection_send(&(client->atserver_connection), command, cmd_len, &recv, recv_size, &recv_len)) !=
+  if ((ret = atclient_connection_send(&(client->atserver_connection), (const unsigned char *)command, cmd_len, recv, recv_size, &recv_len)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     ret = 1;
@@ -68,7 +68,7 @@ int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enro
   /*
    * 4. Trim + json-decode + read enrollment-id and enrollment status from the server response
    */
-  if ((ret = atclient_string_utils_get_substring_position(recv, DATA_TOKEN, &recv_trimmed)) != 0) {
+  if ((ret = atclient_string_utils_get_substring_position((const char *)recv, DATA_TOKEN, &recv_trimmed)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv did not have prefix \"data:\"\n", (int)recv_len, recv);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s\n", recv); // log error from server
     goto free_command_exit;
@@ -84,7 +84,7 @@ int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enro
   }
 
   // parse and populate the enrollment id from server response
-  cJSON *enroll_id_cjson = cJSON_GetObjectItemCaseSensitive(recv_json_decoded, "enrollmentId");
+  const cJSON *enroll_id_cjson = cJSON_GetObjectItemCaseSensitive(recv_json_decoded, "enrollmentId");
   if (!cJSON_IsString(enroll_id_cjson) || (enroll_id_cjson->valuestring == NULL)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract enrollment_id\n");
     ret = 1;
@@ -94,7 +94,7 @@ int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enro
   enroll_id[strlen(enroll_id_cjson->valuestring)] = '\0';
 
   // parse and populate enrollment status from server response
-  cJSON *enroll_status_cjson = cJSON_GetObjectItemCaseSensitive(recv_json_decoded, "status");
+  const cJSON *enroll_status_cjson = cJSON_GetObjectItemCaseSensitive(recv_json_decoded, "status");
   if (!cJSON_IsString(enroll_status_cjson) || (enroll_status_cjson->valuestring == NULL)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract enroll status\n");
     ret = 1;

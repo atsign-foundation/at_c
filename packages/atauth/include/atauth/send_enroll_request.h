@@ -20,6 +20,6 @@
  *
  * @returns 0 on success, non-zero error code on failure.
  */
-int atauth_send_enroll_request(atclient *client, enroll_params_t *ep, char *enroll_id, char *enroll_status);
+int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char *enroll_id, char *enroll_status);
 
 #endif

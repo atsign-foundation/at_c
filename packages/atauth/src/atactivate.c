@@ -11,19 +11,18 @@
 #include <atcommons/enroll_status.h>
 #include <atlogger/atlogger.h>
 
-#include <malloc/_malloc.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define TAG "atactivate"
-#define FIRST_APP_NAME "firstApp"
-#define FIRST_DEVICE_NAME "firstDevice"
+#define FIRST_APP_NAME "firstApp1"
+#define FIRST_DEVICE_NAME "firstDevice1"
 #define AES_256_KEY_BYTES 32
 #define RSA_2048_PRIVKEY_BYTES 1300 // in PKCS#8 format includes padding
 
 int main(int argc, char *argv[]) {
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
-  atlogger_set_opts(0); // disabling timestamps for now due to a bug
+  atlogger_set_opts(0); // disabling timestamps for now due to a potential bug in atlogger.c
   int ret = 0;
   char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL;
   int *root_port = NULL;

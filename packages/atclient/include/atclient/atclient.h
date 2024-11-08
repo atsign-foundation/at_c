@@ -126,9 +126,17 @@ void atclient_stop_atserver_connection(atclient *ctx);
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
  * @return int 0 on success, non-zero on error
  */
-int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys, atclient_authenticate_options *options);
+int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys, const atclient_authenticate_options *options);
 
-int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cram_secret, atclient_authenticate_options *options);
+/**
+ *
+ * @param ctx
+ * @param atsign
+ * @param cram_secret
+ * @param options
+ * @return
+ */
+int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cram_secret, const atclient_authenticate_options *options);
 
 /**
  * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted

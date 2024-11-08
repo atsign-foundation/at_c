@@ -87,8 +87,8 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enroll_namespace_list_to_string len is %lu\n", ns_list_str_len);
 
     ns_json = malloc(sizeof(char) * (ns_list_str_len + 1));
-    memset(ns_json, 0, sizeof(ns_json));
-    if(ns_json = NULL) {
+    memset(ns_json, 0, sizeof(char) * (ns_list_str_len + 1));
+    if(ns_json == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for ns_json\n");
       ret = -1;
       goto exit;
@@ -104,19 +104,19 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
 
   // Add Base64-encoded strings directly to JSON
   if (ep->apkam_public_key) {
-    cJSON_AddStringToObject(json, APKAM_PUBLIC_KEY, ep->apkam_public_key);
+    cJSON_AddStringToObject(json, APKAM_PUBLIC_KEY, (const char *)ep->apkam_public_key);
   }
 
   if (ep->encrypted_default_encryption_private_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY, ep->encrypted_default_encryption_private_key);
+    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY, (const char *)ep->encrypted_default_encryption_private_key);
   }
 
   if (ep->encrypted_self_encryption_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY, ep->encrypted_self_encryption_key);
+    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY, (const char *)ep->encrypted_self_encryption_key);
   }
 
   if (ep->encrypted_apkam_symmetric_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_APKAM_SYMMETRIC_KEY, ep->encrypted_apkam_symmetric_key);
+    cJSON_AddStringToObject(json, ENCRYPTED_APKAM_SYMMETRIC_KEY, (const char *)ep->encrypted_apkam_symmetric_key);
   }
 
   if (json_string == NULL) { // used to calculate string length

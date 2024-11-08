@@ -1,5 +1,4 @@
 #include "atauth/atactivate_arg_parser.h"
-#include <malloc/_malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

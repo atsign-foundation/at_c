@@ -18,7 +18,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   /*
    * 1. Check arguments
    */
-  if ((ret = atclient_delete_validate_arguments(atclient, atkey, options)) != 0) {
+  if ((ret = atclient_delete_validate_arguments(atclient, atkey, (atclient_delete_request_options*)options)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_validate_arguments: %d\n", ret);
     return ret;
@@ -65,7 +65,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   /*
    * 4. Send command
    */
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)delete_cmd,
+  if ((ret = atclient_connection_send(&atclient->atserver_connection, (unsigned char *)delete_cmd,
                                       delete_cmd_size - 1, recv, recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
@@ -75,7 +75,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
     goto exit;
   }
 
-  char *response = (char *)recv;
+  const char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
   if (atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
@@ -91,7 +91,6 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   }
 
   ret = 0;
-  goto exit;
 exit: {
   free(recv);
   free(atkey_str);
@@ -147,6 +146,5 @@ static int atclient_delete_validate_arguments(const atclient *atclient, const at
   }
 
   ret = 0;
-  goto exit;
 exit: { return ret; }
 }

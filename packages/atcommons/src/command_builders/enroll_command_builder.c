@@ -19,23 +19,23 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   size_t params_json_len = 0, params_json_size = 0;
 
   // fetch length of params json string
-  enroll_params_to_json(NULL, &params_json_len, NULL, params);
-  params_json_size = params_json_len + 1;                      // specify the size of the buffer
+  enroll_params_to_json(NULL, &params_json_len, 0, params);
+  params_json_size = params_json_len + 1; // specify the size of the buffer
   params_json = malloc(sizeof(char) * params_json_size);
   if (params_json == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for params_json\n");
     ret = -1;
     return ret;
   }
-  memset(params_json, 0, sizeof(params_json));
+  memset(params_json, 0, sizeof(char) * params_json_size);
 
   e_op = malloc(sizeof(char) * MAX_ENROLL_OPERATION_STRING_LEN);
-  if(e_op == NULL) {
+  if (e_op == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for enroll op string\n");
     ret = -1;
     goto free_params_json;
   }
-  memset(e_op, 0, sizeof(e_op));
+  memset(e_op, 0, sizeof(char) * MAX_ENROLL_OPERATION_STRING_LEN);
 
   if (command == NULL) { // Calculate the expected command length
     /*
@@ -55,8 +55,8 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
     /*
      * 3. Calculate enroll params json len
      */
-    enroll_params_to_json(NULL, &params_json_len, NULL, params); // fetch 'enroll_params_json' length
-    cur_len += params_json_len + 3;                              // +2 for \r\n\0
+    enroll_params_to_json(NULL, &params_json_len, 0, params); // fetch 'enroll_params_json' length
+    cur_len += params_json_len + 3;                           // +2 for \r\n\0
 
     /*
      * 4. Populate 'cmd_len' with the calculated commmand length

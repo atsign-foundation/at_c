@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/_types/_size_t.h>
 #include <sys/syslimits.h>
 
 #define DEFAULT_ATKEYS_DIR ".atsign/keys/"
@@ -23,7 +22,7 @@ int atauth_build_atkeys_file_path(char **atkeys_path, const char *atsign) {
   }
 
   // Calculate path length and allocate memory
-  const int path_len = snprintf(NULL, NULL, "%s%s%s_key%s\0", home_dir, DEFAULT_ATKEYS_DIR, atsign, ATKEYS_EXTENSION);
+  const int path_len = snprintf(NULL, 0, "%s%s%s_key%s", home_dir, DEFAULT_ATKEYS_DIR, atsign, ATKEYS_EXTENSION) + 1; // +1 for \0
   *atkeys_path = malloc(sizeof(char) * path_len);
   if(*atkeys_path == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for atkeys_fp\n");
