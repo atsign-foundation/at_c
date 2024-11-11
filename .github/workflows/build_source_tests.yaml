@@ -24,6 +24,9 @@ jobs:
           -DCMAKE_COMPILE_WARNING_AS_ERROR="on"
 
       - name: Build atsdk
+        run: cmake --build build
+
+      - name: Install atsdk
         run: sudo cmake --build build --target install
 
       - name: Build sample_cmake_project
