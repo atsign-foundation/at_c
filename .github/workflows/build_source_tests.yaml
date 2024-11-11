@@ -18,7 +18,7 @@ jobs:
       - name: Install atsdk
         run: cmake -S . -B build -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_C_FLAGS="-Wall -Wextra -Werror-implicit-function-declaration" \
-          -DCMAKE_COMPILE_WARNING_AS_ERROR=true
+          -DCMAKE_COMPILE_WARNING_AS_ERROR="on"
 
       - name: Build atsdk
         run: sudo cmake --build build --target install
