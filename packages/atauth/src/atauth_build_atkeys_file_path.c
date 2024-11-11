@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/syslimits.h>
+#include <limits.h>
 
 #define DEFAULT_ATKEYS_DIR ".atsign/keys/"
 #define ATKEYS_EXTENSION ".atKeys"
@@ -13,8 +13,7 @@
 
 int atauth_build_atkeys_file_path(char **atkeys_path, const char *atsign) {
   int ret = 0;
-  char home_dir[PATH_MAX];
-  memset(home_dir, 0, sizeof(home_dir));
+  char *home_dir = NULL;
 
   if ((ret = atauth_get_home_directory(home_dir)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atauth_get_home_directory: %d/n", ret);

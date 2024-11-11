@@ -3,22 +3,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/syslimits.h>
 
+// imports for windows
 #if defined(_WIN32) || defined(_WIN64)
 #include <shlobj.h> // For SHGetFolderPathA
 #include <windows.h>
 #define PATH_SEPARATOR '\\'
+// imports for linux
+#elif defined(__linux__)
+#include <linux/limits.h>
+#include <unistd.h>
+#include <pwd.h>
+#define PATH_SEPARATOR '/'
+// imports for all other platforms
 #else
 #include <pwd.h>
 #include <unistd.h>
+#include<limits.h>
 #define PATH_SEPARATOR '/'
 #endif
 
+
 int atauth_get_home_directory(char *home_dir) {
-    if (home_dir == NULL) {
-        return -1;
-    }
+    home_dir = malloc(sizeof(char) * PATH_MAX);
 
 #if defined(_WIN32) || defined(_WIN64)
     char *home = getenv("USERPROFILE");
