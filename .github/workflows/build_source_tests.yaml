@@ -23,6 +23,9 @@ jobs:
           -DCMAKE_C_FLAGS="-Wall -Wextra -Werror-implicit-function-declaration" \
           -DCMAKE_COMPILE_WARNING_AS_ERROR="on"
 
+      - name: Show CMake Cache Variables
+        run: cmake -L -N
+
       - name: Build atsdk
         run: cmake --build build
 
