@@ -24,7 +24,7 @@ jobs:
           -DCMAKE_COMPILE_WARNING_AS_ERROR="on"
 
       - name: Show CMake Cache Variables
-        run: cmake -L -N
+        run: cmake -L -N -S . -B build
 
       - name: Build atsdk
         run: cmake --build build
