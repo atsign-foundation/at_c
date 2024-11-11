@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [trunk]
 
-permissions:  # added using https://github.com/step-security/secure-repo
+permissions: # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
@@ -23,11 +23,10 @@ jobs:
       - name: Build sample_cmake_project
         working-directory: examples/desktop/sample_cmake_project
         run: |
-          cmake -S . -B build -Datsdk="/usr/local/bin/cmake/atsdk"
+          cmake -S . -B build -Datsdk="/usr/local/bin/cmake/atsdk" -DCMAKE_C_COMPILER=gcc -DCMAKE_C_FLAGS="-Wall -Wextra -Werror-implicit-function-declaration"
           cmake --build build
 
       - name: Run sample_cmake_project executable
         working-directory: examples/desktop/sample_cmake_project
         run: |
           ./build/main
- 
