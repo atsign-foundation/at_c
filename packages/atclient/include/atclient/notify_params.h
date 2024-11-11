@@ -51,20 +51,10 @@ enum atclient_notify_operation {
   ATCLIENT_NOTIFY_OPERATION_DELETE
 };
 
-static const char *atclient_notify_operation_str[] = {
-    [ATCLIENT_NOTIFY_OPERATION_UPDATE] = "update",
-    [ATCLIENT_NOTIFY_OPERATION_DELETE] = "delete",
-};
-
 enum atclient_notify_message_type {
   ATCLIENT_NOTIFY_MESSAGE_TYPE_NONE,
   ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY,
   ATCLIENT_NOTIFY_MESSAGE_TYPE_TEXT
-};
-
-static const char *atclient_notify_message_type_str[] = {
-    [ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY] = "key",
-    [ATCLIENT_NOTIFY_MESSAGE_TYPE_TEXT] = "text", // legacy
 };
 
 enum atclient_notify_priority {
@@ -74,21 +64,10 @@ enum atclient_notify_priority {
   ATCLIENT_NOTIFY_PRIORITY_HIGH
 };
 
-static const char *atclient_notify_priority_str[] = {
-    [ATCLIENT_NOTIFY_PRIORITY_LOW] = "low",
-    [ATCLIENT_NOTIFY_PRIORITY_MEDIUM] = "medium",
-    [ATCLIENT_NOTIFY_PRIORITY_HIGH] = "high",
-};
-
 enum atclient_notify_strategy {
   ATCLIENT_NOTIFY_STRATEGY_NONE,
   ATCLIENT_NOTIFY_STRATEGY_ALL,
   ATCLIENT_NOTIFY_STRATEGY_LATEST
-};
-
-static const char *atclient_notify_strategy_str[] = {
-    [ATCLIENT_NOTIFY_STRATEGY_ALL] = "all",
-    [ATCLIENT_NOTIFY_STRATEGY_LATEST] = "latest",
 };
 
 typedef struct atclient_notify_params {

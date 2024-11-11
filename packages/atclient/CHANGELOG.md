@@ -1,3 +1,7 @@
+## 0.3.2
+
+- Fix unused include warnings in notify
+
 ## 0.3.1
 
 - **Breaking changes** to `atclient_atkey_metadata` and `atclient_notify_params`

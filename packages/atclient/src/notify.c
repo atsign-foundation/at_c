@@ -20,6 +20,27 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+static const char *atclient_notify_operation_str[] = {
+    [ATCLIENT_NOTIFY_OPERATION_UPDATE] = "update",
+    [ATCLIENT_NOTIFY_OPERATION_DELETE] = "delete",
+};
+
+static const char *atclient_notify_message_type_str[] = {
+    [ATCLIENT_NOTIFY_MESSAGE_TYPE_KEY] = "key",
+    [ATCLIENT_NOTIFY_MESSAGE_TYPE_TEXT] = "text", // legacy
+};
+
+static const char *atclient_notify_priority_str[] = {
+    [ATCLIENT_NOTIFY_PRIORITY_LOW] = "low",
+    [ATCLIENT_NOTIFY_PRIORITY_MEDIUM] = "medium",
+    [ATCLIENT_NOTIFY_PRIORITY_HIGH] = "high",
+};
+
+static const char *atclient_notify_strategy_str[] = {
+    [ATCLIENT_NOTIFY_STRATEGY_ALL] = "all",
+    [ATCLIENT_NOTIFY_STRATEGY_LATEST] = "latest",
+};
+
 static int generate_cmd(const atclient_notify_params *params, const char *cmdvalue, const size_t cmdvaluelen,
                         char **ocmd, size_t *ocmdolen);
 static size_t calculate_cmd_size(const atclient_notify_params *params, const size_t cmdvaluelen, size_t *atkeyolen,
