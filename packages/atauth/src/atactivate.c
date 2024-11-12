@@ -15,13 +15,13 @@
 #include <string.h>
 
 #define TAG "atactivate"
-#define FIRST_APP_NAME "firstApp1"
-#define FIRST_DEVICE_NAME "firstDevice1"
+#define FIRST_APP_NAME "firstApp3"
+#define FIRST_DEVICE_NAME "firstDevice3"
 #define AES_256_KEY_BYTES 32
 #define RSA_2048_PRIVKEY_BYTES 1300 // in PKCS#8 format includes padding
 
 int main(int argc, char *argv[]) {
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
   atlogger_set_opts(0); // disabling timestamps for now due to a potential bug in atlogger.c
   int ret = 0;
   char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL;
@@ -177,11 +177,12 @@ int main(int argc, char *argv[]) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed APKAM Keypair Generation\n");
     goto atkeys_free_exit;
   }
+  // sets base64 public and private key in the atkeys struct
   atclient_atkeys_set_pkam_public_key_base64(&atkeys, (const char *)pkam_public_key_base64,
                                              strlen((const char *)pkam_public_key_base64));
   atclient_atkeys_set_pkam_private_key_base64(&atkeys, (const char *)pkam_private_key_base64,
                                               strlen((const char *)pkam_private_key_base64));
-  // populate the pkam keypair into the atclient_keys from the above generated base64 format
+  // populate the pkam public/private key bytes in the atkeys struct from base64 format
   atclient_atkeys_populate_pkam_public_key(&atkeys, (const char *)pkam_public_key_base64,
                                            strlen((const char *)pkam_public_key_base64));
   atclient_atkeys_populate_pkam_private_key(&atkeys, (const char *)pkam_private_key_base64,
@@ -193,11 +194,12 @@ int main(int argc, char *argv[]) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed Default Encryption Keypair Generation\n");
     goto pkam_keypair_free_exit;
   }
+  // sets base64 public and private key in the atkeys struct
   atclient_atkeys_set_encrypt_public_key_base64(&atkeys, (const char *)encrypt_public_key_base64,
                                                 strlen((const char *)encrypt_public_key_base64));
   atclient_atkeys_set_encrypt_private_key_base64(&atkeys, (const char *)encrypt_private_key_base64,
                                                  strlen((const char *)encrypt_private_key_base64));
-  // populate the encryption keypair into the atclient_keys from the above generated base64 format
+  // populate the encryption public/private key bytes in the atkeys struct from base64 format
   atclient_atkeys_populate_encrypt_public_key(&atkeys, (const char *)encrypt_public_key_base64,
                                               strlen((const char *)encrypt_public_key_base64));
   atclient_atkeys_populate_encrypt_private_key(&atkeys, (const char *)encrypt_private_key_base64,
@@ -306,11 +308,11 @@ int main(int argc, char *argv[]) {
    * 5. Close existing atclient connection
    */
   atclient_connection_disconnect(&at_client.atserver_connection);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "terminated existing atserver connection\n");
-
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Terminated existing atserver connection\n");
   /*
    * 6. Perform PKAM auth
    */
+  printf("atisgm: %s\n", atsign);
   if ((ret = atclient_pkam_authenticate(&at_client, atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "PKAM auth failed | atclient_pkam_authenticate: %d\n", ret);
     goto atclient_exit;

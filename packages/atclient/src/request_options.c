@@ -1602,8 +1602,8 @@ bool atclient_authenticate_options_is_atdirectory_host_initialized(const atclien
   /*
    * 2. Check if the at directory host is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED;
 }
 
 bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclient_authenticate_options *options) {
@@ -1620,8 +1620,8 @@ bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclien
   /*
    * Check if the at directory port is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED;
 }
 
 bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_authenticate_options *options) {
@@ -1638,8 +1638,8 @@ bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_a
   /*
    * Check if the atserver host is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
 }
 
 bool atclient_authenticate_options_is_atserver_port_initialized(const atclient_authenticate_options *options) {
@@ -1656,8 +1656,8 @@ bool atclient_authenticate_options_is_atserver_port_initialized(const atclient_a
   /*
    * Check if the atserver port is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
 }
 
 void atclient_authenticate_options_unset_at_directory_host(atclient_authenticate_options *options) {

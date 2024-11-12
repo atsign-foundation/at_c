@@ -98,8 +98,8 @@ static int test2_pkam_with_options() {
   }
   atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
 
   if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
                                                   ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &options.atserver_host,

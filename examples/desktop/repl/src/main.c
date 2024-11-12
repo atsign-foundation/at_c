@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
-  atclient_pkam_authenticate_options pkam_authenticate_options;
-  atclient_pkam_authenticate_options_init(&pkam_authenticate_options);
+  atclient_authenticate_options pkam_authenticate_options;
+  atclient_authenticate_options_init(&pkam_authenticate_options);
 
   atclient atclient;
   atclient_init(&atclient);
@@ -91,13 +91,13 @@ int main(int argc, char *argv[]) {
 exit: {
   repl_args_free(&repl_args);
   atclient_atkeys_free(&atkeys);
-  atclient_pkam_authenticate_options_free(&pkam_authenticate_options);
+  atclient_authenticate_options_free(&pkam_authenticate_options);
   atclient_free(&atclient);
   return ret;
 }
 }
 
-static int set_up_pkam_auth_options(atclient_pkam_authenticate_options *pkam_authenticate_options,
+static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenticate_options,
                                     const char *root_url) {
   int ret = 1;
 

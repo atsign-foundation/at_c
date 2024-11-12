@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <bits/getopt_core.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
@@ -96,8 +97,8 @@ int main(int argc, char *argv[]) {
    * 4. Authenticate client connection (for crud operations)
    */
   pthread_mutex_lock(&client_mutex);
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
   if ((ret = atclient_pkam_authenticate(&atclient1, from_atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "\natclient_pkam_authenticate: %d\n", ret);
     goto exit;
@@ -189,7 +190,7 @@ exit: {
   pthread_mutex_destroy(&monitor_mutex);
   ret = pthread_cancel(tid);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pthread exit: %d\n", ret);
-  atclient_pkam_authenticate_options_free(&options);
+  atclient_authenticate_options_free(&options);
   return ret;
 }
 }
@@ -340,8 +341,8 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
    * 1. Reconnect client connection
    */
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Reconnecting client connection...\n");
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
   if ((ret = atclient_pkam_authenticate(ctx, from_atsign, atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     return ret;

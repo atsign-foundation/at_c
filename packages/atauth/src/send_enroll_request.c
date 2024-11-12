@@ -20,8 +20,8 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   char *recv_trimmed = NULL;
   size_t recv_len;
 
-  if(enroll_id == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,"enroll_id is unallocated\n");
+  if (enroll_id == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll_id is unallocated\n");
     ret = -1;
     goto exit;
   }
@@ -58,8 +58,8 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   /*
    * 3. Send enroll:request command to server
    */
-  if ((ret = atclient_connection_send(&(client->atserver_connection), (const unsigned char *)command, cmd_len, recv, recv_size, &recv_len)) !=
-      0) {
+  if ((ret = atclient_connection_send(&(client->atserver_connection), (const unsigned char *)command, cmd_len, recv,
+                                      recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     ret = 1;
     goto free_command_exit;
@@ -105,7 +105,10 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
 
   ret = 0;
 
-cjson_delete_exit: cJSON_Delete(recv_json_decoded);
-free_command_exit: free(command);
-exit: return ret;
+cjson_delete_exit:
+  cJSON_Delete(recv_json_decoded);
+free_command_exit:
+  free(command);
+exit:
+  return ret;
 }

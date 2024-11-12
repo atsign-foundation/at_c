@@ -2,7 +2,6 @@
 #include "atchops/base64.h"
 #include "atchops/hex.h"
 #include "atchops/rsa.h"
-#include "atclient/atclient.h"
 
 #include "atclient/atclient_utils.h"
 #include "atclient/atkeys.h"
@@ -13,10 +12,8 @@
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <atchops/utf8.h>
-#include <cJSON.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -191,7 +188,7 @@ bool atclient_is_atsign_initialized(const atclient *ctx) {
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
-                               const atclient_authenticate_options *options) {
+                               atclient_authenticate_options *options) {
 
   int ret = 1; // error by default
 
@@ -244,7 +241,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     goto exit;
   }
 
-  const char *atsign_without_at = (atsign_with_at + 1);
+  const char *atsign_without_at = atsign_with_at + 1;
 
   /*
    * 4. Get atserver_host and atserver_port
@@ -397,7 +394,7 @@ exit: {
 }
 
 int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cram_secret,
-                               const atclient_authenticate_options *options) {
+                               atclient_authenticate_options *options) {
   int ret = 1; // error by default
 
   /*
@@ -526,7 +523,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    */
   unsigned char *digest_input_bytes = NULL;
   size_t digest_input_bytes_len = 0;
-  if ((ret = atchops_utf8_encode(digest_input, &digest_input_bytes, &digest_input_bytes_len))) {
+  if ((ret = atchops_utf8_encode((const char *)digest_input, &digest_input_bytes, &digest_input_bytes_len))) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_utf8_encode: %d\n", ret);
     ret = 1;
     goto exit;

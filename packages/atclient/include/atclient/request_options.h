@@ -39,14 +39,14 @@ extern "C" {
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED (VALUE_INITIALIZED << 1)
 
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX 0
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX 0
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX 0
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX 0
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 2)
-#define ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 3)
+#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX 0
+#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX 0
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX 0
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX 0
+#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 2)
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 3)
 
 #define ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX 0
 #define ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED (VALUE_INITIALIZED << 0)
@@ -233,7 +233,8 @@ void atclient_delete_request_options_init(atclient_delete_request_options *optio
 void atclient_delete_request_options_free(atclient_delete_request_options *options);
 
 bool atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(atclient_delete_request_options *options);
-void atclient_delete_request_options_set_skip_shared_by_check(atclient_delete_request_options *options, const bool option);
+void atclient_delete_request_options_set_skip_shared_by_check(atclient_delete_request_options *options,
+                                                              const bool option);
 void atclient_delete_request_options_unset_skip_shared_by_check(atclient_delete_request_options *options);
 
 /*
@@ -253,8 +254,8 @@ int atclient_get_atkeys_request_options_set_show_hidden(atclient_get_atkeys_requ
 void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_request_options *options);
 
 /*
-* 5. AtClient_PKAM_Authenticate Options
-*/
+ * 5. AtClient_PKAM_Authenticate Options
+ */
 void atclient_authenticate_options_init(atclient_authenticate_options *options);
 void atclient_authenticate_options_free(atclient_authenticate_options *options);
 

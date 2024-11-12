@@ -616,7 +616,6 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
   atclient_connection_disable_connection(ctx);
 
   ret = 0;
-  goto exit;
 exit: { return ret; }
 }
 

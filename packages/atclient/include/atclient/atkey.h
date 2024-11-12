@@ -274,12 +274,12 @@ int atclient_atkey_create_shared_key(atclient_atkey *atkey, const char *name, co
                                      const char *shared_with, const char *namespace_str);
 
 /**
- * @brief //ToDO: add docs
- *
+ * @brief Populates the atclient_key struct with the reserved key name provided. Reserved keys are usually restricted keys
+ * that are required the server for proper functioning and sometimes might not follow the standard atkey fomrmat
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
- * @param name name of your key, e.g. "name"
- * @return  int 0 on success
+ * @param name name of your key, e.g. "privatekey:at_secret"
+ * @return  int 0 on success, non-zero int on failure
  */
 int atclient_atkey_create_reserved_key(atclient_atkey *atkey, const char *name);
 
