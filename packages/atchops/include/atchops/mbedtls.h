@@ -1,5 +1,8 @@
 #ifndef ATCHOPS_MBEDTLS_H
 #define ATCHOPS_MBEDTLS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <mbedtls/aes.h>         // IWYU pragma: export
 #include <mbedtls/asn1.h>        // IWYU pragma: export
@@ -15,4 +18,7 @@
 
 extern const mbedtls_md_type_t atchops_mbedtls_md_map[];
 
+#ifdef __cplusplus
+}
+#endif
 #endif

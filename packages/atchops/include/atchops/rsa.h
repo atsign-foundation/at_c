@@ -1,5 +1,8 @@
 #ifndef ATCHOPS_RSA_H
 #define ATCHOPS_RSA_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atchops/constants.h"
 #include "atchops/rsa_key.h"
@@ -10,8 +13,8 @@
  * @brief Sign a hashed message with an RSA private key
  *
  * @param private_key the private key struct to use for signing, see atchops_rsa_key_populate_private_key
- * @param md_type the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256. The message will be hashed with this
- * algorithm before signing
+ * @param md_type the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256. The message will be hashed with
+ * this algorithm before signing
  * @param message the message to sign
  * @param message_len the length of the message, most people use strlen() to find this length
  * @param signature the signature buffer to populate, must be pre-allocated. Signature size will correspond to the
@@ -74,4 +77,7 @@ int atchops_rsa_decrypt(const atchops_rsa_key_private_key *private_key, const un
 int atchops_rsa_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key,
                          const atchops_md_type md_type);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,11 +1,14 @@
 #ifndef ATCHOPS_RSA_KEY_H
 #define ATCHOPS_RSA_KEY_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdbool.h>
 #include <stddef.h>
 
 typedef struct atchops_rsa_key_param {
-  size_t len;                    // length of the number in bytes
+  size_t len;                     // length of the number in bytes
   unsigned char *value;           // hex byte array of the number
   bool _is_value_initialized : 1; // whether the value is allocated
 } atchops_rsa_key_param;
@@ -47,17 +50,21 @@ int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, at
 
 /**
  * Generate a new RSA-2048 key pair (public and private)
- * 
- * @param public_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function. this buffer will be null-terminated for you.  this will hold the public key in raw bytes.
- * @param private_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function. this buffer will be null-terminated for you. this will hold the private key in base64 encoding.
+ *
+ * @param public_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function.
+ * this buffer will be null-terminated for you.  this will hold the public key in raw bytes.
+ * @param private_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function.
+ * this buffer will be null-terminated for you. this will hold the private key in base64 encoding.
  */
 int atchops_rsa_key_generate_base64(unsigned char **public_key_base64, unsigned char **private_key_base64);
 
 /**
  * @brief Generate a new RSA 2048 key pair (public and private)
- * 
- * @param public_key the public key struct to populate, assumed to be allocated and initialized. initialized via atchops_rsa_key_public_key_init
- * @param private_key the private key struct to populate, assumed to be allocated and initialized. initialized via atchops_rsa_key_private_key_init
+ *
+ * @param public_key the public key struct to populate, assumed to be allocated and initialized. initialized via
+ * atchops_rsa_key_public_key_init
+ * @param private_key the private key struct to populate, assumed to be allocated and initialized. initialized via
+ * atchops_rsa_key_private_key_init
  */
 int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key);
 
@@ -70,7 +77,7 @@ int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa
  * @return int 0 on success
  */
 int atchops_rsa_key_populate_public_key(atchops_rsa_key_public_key *public_key_struct, const char *public_key_base64,
-                                      const size_t public_key_base64_len);
+                                        const size_t public_key_base64_len);
 
 /**
  * @brief Populate a private key struct from a base64 string
@@ -80,53 +87,64 @@ int atchops_rsa_key_populate_public_key(atchops_rsa_key_public_key *public_key_s
  * @param private_key_base64_len the length of the base64 string
  * @return int 0 on success
  */
-int atchops_rsa_key_populate_private_key(atchops_rsa_key_private_key *private_key_struct, const char *private_key_base64,
-                                       const size_t privatekeprivate_key_base64_lenybase64len);
+int atchops_rsa_key_populate_private_key(atchops_rsa_key_private_key *private_key_struct,
+                                         const char *private_key_base64,
+                                         const size_t privatekeprivate_key_base64_lenybase64len);
 
 bool atchops_rsa_key_is_public_key_populated(const atchops_rsa_key_public_key *public_key);
 bool atchops_rsa_key_is_private_key_populated(const atchops_rsa_key_private_key *private_key);
 
-int atchops_rsa_key_public_key_set_ne(atchops_rsa_key_public_key *public_key, const unsigned char *n, const size_t n_len,
-                                    const unsigned char *e, const size_t e_len);
+int atchops_rsa_key_public_key_set_ne(atchops_rsa_key_public_key *public_key, const unsigned char *n,
+                                      const size_t n_len, const unsigned char *e, const size_t e_len);
 
 bool atchops_rsa_key_public_key_is_n_initialized(const atchops_rsa_key_public_key *public_key);
 void atchops_rsa_key_public_key_set_n_initialized(atchops_rsa_key_public_key *public_key, const bool initialized);
-int atchops_rsa_key_public_key_set_n(atchops_rsa_key_public_key *public_key, const unsigned char *n, const size_t n_len);
+int atchops_rsa_key_public_key_set_n(atchops_rsa_key_public_key *public_key, const unsigned char *n,
+                                     const size_t n_len);
 void atchops_rsa_key_public_key_unset_n(atchops_rsa_key_public_key *public_key);
 
 bool atchops_rsa_key_public_key_is_e_initialized(const atchops_rsa_key_public_key *public_key);
 void atchops_rsa_key_public_key_set_e_initialized(atchops_rsa_key_public_key *public_key, const bool initialized);
-int atchops_rsa_key_public_key_set_e(atchops_rsa_key_public_key *public_key, const unsigned char *e, const size_t e_len);
+int atchops_rsa_key_public_key_set_e(atchops_rsa_key_public_key *public_key, const unsigned char *e,
+                                     const size_t e_len);
 void atchops_rsa_key_public_key_unset_e(atchops_rsa_key_public_key *public_key);
 
 int atchops_rsa_key_private_key_set_nedpq(atchops_rsa_key_private_key *private_key, const unsigned char *n,
-                                        const size_t n_len, const unsigned char *e, const size_t e_len,
-                                        const unsigned char *d, const size_t d_len, const unsigned char *p,
-                                        const size_t p_len, const unsigned char *q, const size_t q_len);
+                                          const size_t n_len, const unsigned char *e, const size_t e_len,
+                                          const unsigned char *d, const size_t d_len, const unsigned char *p,
+                                          const size_t p_len, const unsigned char *q, const size_t q_len);
 
 bool atchops_rsa_key_private_key_is_n_initialized(const atchops_rsa_key_private_key *private_key);
 void atchops_rsa_key_private_key_set_n_initialized(atchops_rsa_key_private_key *private_key, const bool initialized);
-int atchops_rsa_key_private_key_set_n(atchops_rsa_key_private_key *private_key, const unsigned char *n, const size_t n_len);
+int atchops_rsa_key_private_key_set_n(atchops_rsa_key_private_key *private_key, const unsigned char *n,
+                                      const size_t n_len);
 void atchops_rsa_key_private_key_unset_n(atchops_rsa_key_private_key *private_key);
 
 bool atchops_rsa_key_private_key_is_e_initialized(const atchops_rsa_key_private_key *private_key);
 void atchops_rsa_key_private_key_set_e_initialized(atchops_rsa_key_private_key *private_key, const bool initialized);
-int atchops_rsa_key_private_key_set_e(atchops_rsa_key_private_key *private_key, const unsigned char *e, const size_t e_len);
+int atchops_rsa_key_private_key_set_e(atchops_rsa_key_private_key *private_key, const unsigned char *e,
+                                      const size_t e_len);
 void atchops_rsa_key_private_key_unset_e(atchops_rsa_key_private_key *private_key);
 
 bool atchops_rsa_key_private_key_is_d_initialized(const atchops_rsa_key_private_key *private_key);
 void atchops_rsa_key_private_key_set_d_initialized(atchops_rsa_key_private_key *private_key, const bool initialized);
-int atchops_rsa_key_private_key_set_d(atchops_rsa_key_private_key *private_key, const unsigned char *d, const size_t d_len);
+int atchops_rsa_key_private_key_set_d(atchops_rsa_key_private_key *private_key, const unsigned char *d,
+                                      const size_t d_len);
 void atchops_rsa_key_private_key_unset_d(atchops_rsa_key_private_key *private_key);
 
 bool atchops_rsa_key_private_key_is_p_initialized(const atchops_rsa_key_private_key *private_key);
 void atchops_rsa_key_private_key_set_p_initialized(atchops_rsa_key_private_key *private_key, const bool initialized);
-int atchops_rsa_key_private_key_set_p(atchops_rsa_key_private_key *private_key, const unsigned char *p, const size_t p_len);
+int atchops_rsa_key_private_key_set_p(atchops_rsa_key_private_key *private_key, const unsigned char *p,
+                                      const size_t p_len);
 void atchops_rsa_key_private_key_unset_p(atchops_rsa_key_private_key *private_key);
 
 bool atchops_rsa_key_private_key_is_q_initialized(const atchops_rsa_key_private_key *private_key);
 void atchops_rsa_key_private_key_set_q_initialized(atchops_rsa_key_private_key *private_key, const bool initialized);
-int atchops_rsa_key_private_key_set_q(atchops_rsa_key_private_key *private_key, const unsigned char *q, const size_t q_len);
+int atchops_rsa_key_private_key_set_q(atchops_rsa_key_private_key *private_key, const unsigned char *q,
+                                      const size_t q_len);
 void atchops_rsa_key_private_key_unset_q(atchops_rsa_key_private_key *private_key);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

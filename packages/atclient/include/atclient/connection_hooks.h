@@ -1,9 +1,12 @@
 #ifndef ATCLIENT_CONNECTION_HOOKS_H
 #define ATCLIENT_CONNECTION_HOOKS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #define VALUE_INITIALIZED 0b00000001
 
@@ -52,12 +55,15 @@ void atclient_connection_hooks_disable(struct atclient_connection *conn);
 
 // Q. Why is hook a void pointer?
 // A. In case we want to add future hook types which use a different function signature
-int atclient_connection_hooks_set(struct atclient_connection *ctx, const atclient_connection_hook_type type, void *hook);
+int atclient_connection_hooks_set(struct atclient_connection *ctx, const atclient_connection_hook_type type,
+                                  void *hook);
 
 bool atclient_connection_hooks_is_pre_read_initialized(const struct atclient_connection *ctx);
 bool atclient_connection_hooks_is_post_read_initialized(const struct atclient_connection *ctx);
 bool atclient_connection_hooks_is_pre_write_initialized(const struct atclient_connection *ctx);
 bool atclient_connection_hooks_is_post_write_initialized(const struct atclient_connection *ctx);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif

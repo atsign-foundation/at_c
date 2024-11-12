@@ -10,6 +10,9 @@
 
 #ifndef ATCLIENT_CACERTS_H
 #define ATCLIENT_CACERTS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // ISRG Root X1
 // ============
@@ -209,4 +212,7 @@
   "S9VWqHB73Q+OyIVvIbKYcSc2w/aSuFKGSA==\r\n"                                                                           \
   "-----END CERTIFICATE-----\r\n"
 
+#ifdef __cplusplus
+}
+#endif
 #endif

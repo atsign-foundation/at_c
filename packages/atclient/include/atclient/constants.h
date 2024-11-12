@@ -1,11 +1,14 @@
 #ifndef ATCLIENT_CONSTANTS_H
 #define ATCLIENT_CONSTANTS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define ATCLIENT_ATDIRECTORY_PRODUCTION_HOST "root.atsign.org"
 #define ATCLIENT_ATDIRECTORY_PRODUCTION_PORT 64
 
-#define ATCLIENT_ATSIGN_INNER_LEN 55                                                             // 55 utf7 chars
-#define ATCLIENT_ATSIGN_FULL_LEN (1 + ATCLIENT_ATSIGN_INNER_LEN)                                 // '@' + 55 utf7 chars
+#define ATCLIENT_ATSIGN_INNER_LEN 55                             // 55 utf7 chars
+#define ATCLIENT_ATSIGN_FULL_LEN (1 + ATCLIENT_ATSIGN_INNER_LEN) // '@' + 55 utf7 chars
 
 #define ATCLIENT_CLIENT_READ_TIMEOUT_MS 3 * 1000  // 3 seconds to time out if no data is available
 #define ATCLIENT_MONITOR_READ_TIMEOUT_MS 3 * 1000 // 3 seconds to time out if no data is available
@@ -97,4 +100,7 @@
 #define CRESET "\e[0m"
 #define COLOR_RESET "\e[0m"
 
+#ifdef __cplusplus
+}
+#endif
 #endif

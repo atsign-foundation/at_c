@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_NOTIFY_PARAMS_H
 #define ATCLIENT_NOTIFY_PARAMS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/atkey.h"
 #include <stdint.h>
@@ -146,4 +149,7 @@ void atclient_notify_params_unset_notifier(atclient_notify_params *params);
 void atclient_notify_params_unset_notification_expiry(atclient_notify_params *params);
 void atclient_notify_params_unset_shared_encryption_key(atclient_notify_params *params);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // ATCLIENT_NOTIFY_PARAMS_H

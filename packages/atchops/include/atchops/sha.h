@@ -1,5 +1,8 @@
 #ifndef ATCHOPS_SHA_H
 #define ATCHOPS_SHA_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <atchops/constants.h>
 #include <stddef.h>
@@ -32,4 +35,7 @@ typedef enum atchops_md_type {
 int atchops_sha_hash(const atchops_md_type md_type, const unsigned char *input, const size_t input_len,
                      unsigned char *output);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,5 +1,8 @@
 #ifndef ATCHOPS_UUID_H
 #define ATCHOPS_UUID_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stddef.h>
 
@@ -19,4 +22,7 @@ int atchops_uuid_init(void);
  */
 int atchops_uuid_generate(char *uuid_str, const size_t uuid_str_len);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

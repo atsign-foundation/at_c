@@ -1,5 +1,8 @@
 #ifndef ATCHOPS_AES_CTR_H
 #define ATCHOPS_AES_CTR_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atchops/aes.h"
 #include <stddef.h>
@@ -18,9 +21,9 @@
  * @return int 0 on success
  */
 int atchops_aes_ctr_encrypt(const unsigned char *key, const enum atchops_aes_size key_bits,
-                           unsigned char *iv, // always 16 bytes long
-                           const unsigned char *plaintext, const size_t plaintext_len, unsigned char *ciphertext,
-                           const size_t ciphertext_size, size_t *ciphertext_len);
+                            unsigned char *iv, // always 16 bytes long
+                            const unsigned char *plaintext, const size_t plaintext_len, unsigned char *ciphertext,
+                            const size_t ciphertext_size, size_t *ciphertext_len);
 
 /**
  * @brief AES CTR decrypt ciphertextbase64 to plaintext
@@ -36,12 +39,13 @@ int atchops_aes_ctr_encrypt(const unsigned char *key, const enum atchops_aes_siz
  * @return int 0 on success
  */
 int atchops_aes_ctr_decrypt(const unsigned char *key, const enum atchops_aes_size key_bits,
-                           unsigned char *iv, // always 16 bytes long
-                           const unsigned char *ciphertext, const size_t ciphertext_len, unsigned char *plaintext,
-                           const size_t plaintextsize, size_t *plaintext_len);
+                            unsigned char *iv, // always 16 bytes long
+                            const unsigned char *ciphertext, const size_t ciphertext_len, unsigned char *plaintext,
+                            const size_t plaintextsize, size_t *plaintext_len);
 
 /**
- * @brief Used to calculate the length of the ciphertext buffer given the plaintext length. This is used when encrypting.
+ * @brief Used to calculate the length of the ciphertext buffer given the plaintext length. This is used when
+ * encrypting.
  *
  * @param plaintext_len the length of the plaintext string
  * @return a sufficient length of the ciphertext buffer
@@ -49,11 +53,15 @@ int atchops_aes_ctr_decrypt(const unsigned char *key, const enum atchops_aes_siz
 size_t atchops_aes_ctr_ciphertext_size(const size_t plaintext_len);
 
 /**
- * @brief Used to calculate the a sufficient buffer size of the plaintext buffer given the ciphertext length. This is used when decrypting.
+ * @brief Used to calculate the a sufficient buffer size of the plaintext buffer given the ciphertext length. This is
+ * used when decrypting.
  *
  * @param ciphertext_len the length of the ciphertext string
  * @return a sufficient length of the plaintext buffer
  */
 size_t atchops_aes_ctr_plaintext_size(const size_t ciphertext_len);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

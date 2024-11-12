@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATLOGGER_H
 #define ATCLIENT_ATLOGGER_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stddef.h>
 
@@ -21,4 +24,7 @@ void atlogger_set_opts(int opts);
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...);
 void atlogger_fix_stdout_buffer(char *str, const size_t strlen);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATKEYS_H
 #define ATCLIENT_ATKEYS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atchops/rsa_key.h"
 #include "atclient/atkeys_file.h"
@@ -178,4 +181,7 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
 
 int atclient_atkeys_write_to_path(atclient_atkeys *atkeys, const char *path);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

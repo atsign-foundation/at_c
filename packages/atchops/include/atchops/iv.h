@@ -1,5 +1,8 @@
 #ifndef ATCHOPS_IV_H
 #define ATCHOPS_IV_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stddef.h>
 
@@ -13,4 +16,7 @@
  */
 int atchops_iv_generate(unsigned char *iv);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

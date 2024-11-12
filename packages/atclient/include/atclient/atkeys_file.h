@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATKEYS_FILE_H
 #define ATCLIENT_ATKEYS_FILE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -78,8 +81,9 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
 
 /**
  * @brief Write the struct to a file.
- * 
- * @param atkeys_file the struct to be written to the file, assumed to be NON-NULL and initialized with atclient_atkeys_file_init
+ *
+ * @param atkeys_file the struct to be written to the file, assumed to be NON-NULL and initialized with
+ * atclient_atkeys_file_init
  * @param path  Example "$HOME/.atsign/keys/@alice_key.atKeys"
  */
 int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const char *path);
@@ -120,4 +124,7 @@ int atclient_atkeys_file_set_apkam_symmetric_key_str(atclient_atkeys_file *atkey
 int atclient_atkeys_file_set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str,
                                                const size_t enrollment_id_str_len);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

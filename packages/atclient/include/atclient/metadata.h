@@ -1,6 +1,8 @@
-
 #ifndef ATCLIENT_METADATA_H
 #define ATCLIENT_METADATA_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/cjson.h"
 #include <stdbool.h>
@@ -412,4 +414,7 @@ int atclient_atkey_metadata_set_ske_enc_algo(atclient_atkey_metadata *metadata, 
  */
 void atclient_atkey_metadata_free(atclient_atkey_metadata *metadata);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATCLIENT_UTILS_H
 #define ATCLIENT_ATCLIENT_UTILS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/atkeys.h"
 
@@ -26,4 +29,7 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
  */
 int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // ATCLIENT_UTILS_H

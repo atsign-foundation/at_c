@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ENCRYPTION_KEY_HELPERS_H
 #define ATCLIENT_ENCRYPTION_KEY_HELPERS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
@@ -62,7 +65,9 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
  * @return int 0 on success, error otherwise
  */
 int atclient_create_shared_encryption_key_pair_for_me_and_other(
-    atclient *atclient, const char *shared_with,
-    unsigned char *shared_encryption_key_shared_by_me_with_other);
+    atclient *atclient, const char *shared_with, unsigned char *shared_encryption_key_shared_by_me_with_other);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // ATCLIENT_ENCRYPTION_KEY_HELPERS_H

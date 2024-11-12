@@ -1,5 +1,8 @@
 #ifndef FUNCTIONAL_TESTS_CONFIG_H
 #define FUNCTIONAL_TESTS_CONFIG_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stddef.h>
 
@@ -19,6 +22,10 @@
  * @param pathlen the output length of the path
  * @return int, 0 on success
  */
-int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen);
+int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize,
+                                     size_t *pathlen);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATCLIENT_H
 #define ATCLIENT_ATCLIENT_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
@@ -123,10 +126,12 @@ void atclient_stop_atserver_connection(atclient *ctx);
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
  * @return int 0 on success, non-zero on error
  */
-int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys, atclient_pkam_authenticate_options *options);
+int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
+                               atclient_pkam_authenticate_options *options);
 
 /**
- * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted only for you
+ * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted
+ * only for you
  *
  * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via
  * atclient_pkam_authenticate()
@@ -142,7 +147,8 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
                           const atclient_put_self_key_request_options *request_options, int *commit_id);
 
 /**
- * @brief Put a string value into a shared key into your atServer. Putting a shared key is a shared value and is encrypted for you and the person you shared it with
+ * @brief Put a string value into a shared key into your atServer. Putting a shared key is a shared value and is
+ * encrypted for you and the person you shared it with
  *
  * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via
  * atclient_pkam_authenticate()
@@ -158,16 +164,21 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
                             const atclient_put_shared_key_request_options *request_options, int *commit_id);
 
 /**
- * @brief Put a string value into a public key into your atServer. Putting a public key is a public value and not encrypted
- * 
- * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via atclient_pkam_authenticate()
- * @param atkey the atkey to put the value into, must be initialized with atclient_atkey_init() and have populated values (sharedby, key and optionally namespace)
+ * @brief Put a string value into a public key into your atServer. Putting a public key is a public value and not
+ * encrypted
+ *
+ * @param ctx the atclient context, must be initialized with atclient_init() and authenticated via
+ * atclient_pkam_authenticate()
+ * @param atkey the atkey to put the value into, must be initialized with atclient_atkey_init() and have populated
+ * values (sharedby, key and optionally namespace)
  * @param value the value to put into the atServer, assumed to be non-null and null-terminated
  * @param request_options the options for the put operation, can be NULL if you don't need to set any options
- * @param commit_id the output commit_id of the put operation that the atServer returns, can be NULL if you don't care about the commit_id
+ * @param commit_id the output commit_id of the put operation that the atServer returns, can be NULL if you don't care
+ * about the commit_id
  * @return int 0 on success
  */
-int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *value, const atclient_put_public_key_request_options *request_options, int *commit_id);
+int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *value,
+                            const atclient_put_public_key_request_options *request_options, int *commit_id);
 
 /**
  * @brief Get a string value from your atServer.
@@ -182,11 +193,13 @@ int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *va
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
- * @param value double pointer to hold value gotten from atServer, can be NULL if you don't need the value, if it is non-null, caller is responsible for freeing the memory
+ * @param value double pointer to hold value gotten from atServer, can be NULL if you don't need the value, if it is
+ * non-null, caller is responsible for freeing the memory
  * @param value_len the size of the buffer to hold the value gotten from atServer
  * @return int 0 on success
  */
-int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **value, const atclient_get_self_key_request_options *request_options);
+int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **value,
+                          const atclient_get_self_key_request_options *request_options);
 
 /**
  * @brief Get a publickey from your atServer or another atServer
@@ -201,11 +214,13 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
  *
  * @param atclient the atclient context (must satisfy the two conditions stated above)
  * @param atkey the populated atkey to get the value from (must satisfy the two conditions stated above)
- * @param value double pointer to hold value gotten from atServer, can be NULL if you don't need the value, if it is non-null, caller is responsible for freeing the memory
+ * @param value double pointer to hold value gotten from atServer, can be NULL if you don't need the value, if it is
+ * non-null, caller is responsible for freeing the memory
  * @param request_options the options for the get operation, can be NULL if you don't need to set any options
  * @return int 0 on success
  */
-int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **value, atclient_get_public_key_request_options *request_options);
+int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **value,
+                            atclient_get_public_key_request_options *request_options);
 
 /**
  * @brief Get a sharedkey either shared by you or shared with you and receive the decrypted plaintext value.
@@ -220,11 +235,13 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
  *
  * @param atclient The atclient context (must satisfy the two conditions stated above)
  * @param atkey The populated atkey to get the value from (must satisfy the two conditions stated above)
- * @param value A pointer that will be allocated for you to hold value gotten from atServer, can be NULL if you don't need the value, if it is non-null, caller is responsible for freeing the memory
+ * @param value A pointer that will be allocated for you to hold value gotten from atServer, can be NULL if you don't
+ * need the value, if it is non-null, caller is responsible for freeing the memory
  * @param request_options The options for the get operation, can be NULL if you don't need to set any options
  * @return int 0 on success
  */
-int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char **value, const atclient_get_shared_key_request_options *request_options);
+int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char **value,
+                            const atclient_get_shared_key_request_options *request_options);
 
 /**
  * @brief Delete an atkey from your atserver
@@ -259,7 +276,8 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
  * @param output_array_len (output): the overall size of the array that was allocated
  * @return int 0 on success
  */
-int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len, const atclient_get_atkeys_request_options *request_options);
+int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len,
+                        const atclient_get_atkeys_request_options *request_options);
 
 /**
  * @brief Send a heartbeat (noop)
@@ -291,4 +309,7 @@ bool atclient_is_connected(atclient *ctx);
  */
 void atclient_set_read_timeout(atclient *ctx, int timeout_ms);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

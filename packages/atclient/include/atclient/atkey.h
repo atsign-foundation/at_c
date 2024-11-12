@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATKEY_H
 #define ATCLIENT_ATKEY_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/metadata.h"
 #include <stddef.h>
@@ -52,7 +55,7 @@ void atclient_atkey_init(atclient_atkey *atkey);
 
 /**
  * @brief Clones an atkey struct. The function will allocate new memory on everything
- * 
+ *
  * @param dst the atkey struct to clone to, assumed to be already initialized via atclient_atkey_init
  * @param src the atkey struct to clone from, assumed to be already initialized via atclient_atkey_init
  * @return int 0 on success
@@ -113,8 +116,8 @@ bool atclient_atkey_is_key_initialized(const atclient_atkey *atkey);
  *
  * @param atkey the atkey struct to read
  * @return true, if the namespace_str is initialized and allocated and is safe for reading
- * @return false, if the namespace_str is not initialized and not allocated and is not safe for reading, high chance that
- * it holds garbage
+ * @return false, if the namespace_str is not initialized and not allocated and is not safe for reading, high chance
+ * that it holds garbage
  */
 bool atclient_atkey_is_namespacestr_initialized(const atclient_atkey *atkey);
 
@@ -172,8 +175,8 @@ int atclient_atkey_set_namespace_str(atclient_atkey *atkey, const char *namespac
 int atclient_atkey_set_shared_by(atclient_atkey *atkey, const char *shared_by);
 
 /**
- * @brief Dynamically allocates memory and duplicates shared_with to be stored in the atkey struct. If this is allocated,
- * then it is freed with atclient_atkey_free by the end of life of your struct
+ * @brief Dynamically allocates memory and duplicates shared_with to be stored in the atkey struct. If this is
+ * allocated, then it is freed with atclient_atkey_free by the end of life of your struct
  *
  * @param atkey  (mandatory, NON-NULL) The atkey struct to populate, assumed that this was already initialized via
  * atclient_atkey_init
@@ -201,7 +204,8 @@ void atclient_atkey_unset_namespace_str(atclient_atkey *atkey);
 
 /**
  * @brief Free the memory allocated for the shared_by in the atkey struct. This is already called by atclient_atkey_free
- * and should only be used for advanced pruposes, if you want to free the shared_by before the end of life of your struct
+ * and should only be used for advanced pruposes, if you want to free the shared_by before the end of life of your
+ * struct
  *
  * @param atkey the atkey struct that holds the allocated atkey->shared_by memory
  */
@@ -235,7 +239,8 @@ atclient_atkey_type atclient_atkey_get_type(const atclient_atkey *atkey);
  * @param namespace_str the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_public_key(atclient_atkey *atkey, const char *name, const char *shared_by, const char *namespace_str);
+int atclient_atkey_create_public_key(atclient_atkey *atkey, const char *name, const char *shared_by,
+                                     const char *namespace_str);
 
 /**
  * @brief Populate an atkey struct representing a SelfKey AtKey with null terminated strings. An example of a SelfKey
@@ -248,13 +253,14 @@ int atclient_atkey_create_public_key(atclient_atkey *atkey, const char *name, co
  * @param namespace_str the namespace of your application, e.g. "banking_app" (NULLABLE)
  * @return int 0 on success
  */
-int atclient_atkey_create_self_key(atclient_atkey *atkey, const char *name, const char *shared_by, const char *namespace_str);
+int atclient_atkey_create_self_key(atclient_atkey *atkey, const char *name, const char *shared_by,
+                                   const char *namespace_str);
 
 /**
  * @brief Populate an atkey struct representing a SharedKey AtKey given null terminated strings. An example of a
- * SharedKey AtKey would be '@shared_with:name.namesapce@shared_by'. SharedKeys can only be accessible by the shared_with
- * and shared_by atsigns, as they are encrypted with a shared AES key which is encrypted with the each of their RSA keys.
- * Be sure to call the atclient_atkey_init function before calling this function.
+ * SharedKey AtKey would be '@shared_with:name.namesapce@shared_by'. SharedKeys can only be accessible by the
+ * shared_with and shared_by atsigns, as they are encrypted with a shared AES key which is encrypted with the each of
+ * their RSA keys. Be sure to call the atclient_atkey_init function before calling this function.
  *
  * @param atkey the atkey struct to populate, assumed that this was already initialized via atclient_atkey_init
  * @param name name of your key, e.g. "name"
@@ -264,6 +270,9 @@ int atclient_atkey_create_self_key(atclient_atkey *atkey, const char *name, cons
  * @return int 0 on success
  */
 int atclient_atkey_create_shared_key(atclient_atkey *atkey, const char *name, const char *shared_by,
-                                    const char *shared_with, const char *namespace_str);
+                                     const char *shared_with, const char *namespace_str);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

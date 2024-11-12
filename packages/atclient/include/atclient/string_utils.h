@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_STRINGUTILS_H
 #define ATCLIENT_STRINGUTILS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -82,4 +85,7 @@ int atclient_string_utils_long_strlen(long n);
  */
 int atclient_string_utils_int64_strlen(int64_t n);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

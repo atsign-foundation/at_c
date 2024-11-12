@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_MONITOR_H
 #define ATCLIENT_MONITOR_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/atclient.h"
 #include "atclient/atnotification.h"
@@ -149,4 +152,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
  */
 bool atclient_monitor_is_connected(atclient *monitor_conn);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

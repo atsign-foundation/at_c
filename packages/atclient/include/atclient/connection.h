@@ -1,8 +1,11 @@
 #ifndef ATCLIENT_CONNECTION_H
 #define ATCLIENT_CONNECTION_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "atclient/connection_hooks.h"
 #include "atchops/mbedtls.h"
+#include "atclient/connection_hooks.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -15,10 +18,10 @@ typedef enum atclient_connection_type {
 typedef struct atclient_connection {
   atclient_connection_type type; // set in atclient_connection_init
 
-  bool _is_host_initialized: 1;
+  bool _is_host_initialized : 1;
   char *host; // example: "root.atsign.org"
 
-  bool _is_port_initialized: 1;
+  bool _is_port_initialized : 1;
   uint16_t port; // example: 64
 
   // atclient_connection_connect sets this to true and atclient_connection_disconnect sets this to false
@@ -26,7 +29,7 @@ typedef struct atclient_connection {
   // once, at some  point, check atclient_connection_is_connected for a live status on the connection
   // _is_connection_enabled also serves as an internal boolean to check if the following mbedlts contexts have been
   // initialized and need to be freed at the end
-  bool _is_connection_enabled: 1;
+  bool _is_connection_enabled : 1;
   mbedtls_net_context net;
   mbedtls_ssl_context ssl;
   mbedtls_ssl_config ssl_config;
@@ -34,7 +37,7 @@ typedef struct atclient_connection {
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
 
-  bool _is_hooks_enabled: 1;
+  bool _is_hooks_enabled : 1;
   atclient_connection_hooks *hooks;
 } atclient_connection;
 
@@ -69,12 +72,15 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  * @brief Reads data from the connection
  *
  * @param ctx the connection initialized and connected using atclient_connection_init and atclient_connection_connect
- * @param value a double pointer that will be allocated by the function to the data read, assumed to be non-null and a null pointer
- * @param value_len the length of the data read, will be set by the function, setting this to NULL will skip setting the length
+ * @param value a double pointer that will be allocated by the function to the data read, assumed to be non-null and a
+ * null pointer
+ * @param value_len the length of the data read, will be set by the function, setting this to NULL will skip setting the
+ * length
  * @param value_max_len the maximum length of the data to read, setting this to 0 means no limit
  * @return int 0 on success
  */
-int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len, const size_t value_max_len);
+int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len,
+                             const size_t value_max_len);
 
 /**
  * @brief Write data to the connection
@@ -118,4 +124,7 @@ int atclient_connection_disconnect(atclient_connection *ctx);
  */
 bool atclient_connection_is_connected(atclient_connection *ctx);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

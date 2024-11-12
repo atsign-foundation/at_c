@@ -1,5 +1,8 @@
 #ifndef ATCLIENT_ATNOTIFICATION_H
 #define ATCLIENT_ATNOTIFICATION_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "atclient/cjson.h"
 #include <stdbool.h>
@@ -49,24 +52,24 @@
  */
 typedef struct atclient_atnotification {
   // _initalizedfields[0]
-  char *id;           // holds notification id, typically a 36 + 1 null terminated string
-  char *from;         // holds the from atSign (who sent the notification)
-  char *to;           // holds the to atSign (who the notification is for)
-  char *key;          // holds the key of the notification (e.g. "@bob:location.app@alice")
-  char *value;        // holds the value that is read from the notification, this would typically be base64 encoded and
-                      // encrypted, see decrypted_value for the decrypted value
-  char *operation;    // holds the operation of the notification (e.g. "update", "delete")
+  char *id;            // holds notification id, typically a 36 + 1 null terminated string
+  char *from;          // holds the from atSign (who sent the notification)
+  char *to;            // holds the to atSign (who the notification is for)
+  char *key;           // holds the key of the notification (e.g. "@bob:location.app@alice")
+  char *value;         // holds the value that is read from the notification, this would typically be base64 encoded and
+                       // encrypted, see decrypted_value for the decrypted value
+  char *operation;     // holds the operation of the notification (e.g. "update", "delete")
   size_t epoch_millis; // holds the epoch time in milliseconds when the notification was sent
   char *message_type;  // holds the message type of the notification (e.g. "data", "error")
 
   // _initalizedfields[1]
   bool is_encrypted : 1;
   char *enc_key_name;     // in metaData
-  char *enc_algo;        // in metaData
-  char *iv_nonce;        // in metaData
-  char *ske_enc_key_name;  // in metaData
+  char *enc_algo;         // in metaData
+  char *iv_nonce;         // in metaData
+  char *ske_enc_key_name; // in metaData
   char *ske_enc_algo;     // in metaData
-  char *decrypted_value; // if is_encrypted, this will be the decrypted value
+  char *decrypted_value;  // if is_encrypted, this will be the decrypted value
 
   uint8_t _initialized_fields[2];
 } atclient_atnotification;
@@ -147,4 +150,7 @@ int atclient_atnotification_set_ske_enc_key_name(atclient_atnotification *notifi
 int atclient_atnotification_set_ske_enc_algo(atclient_atnotification *notification, const char *ske_enc_algo);
 int atclient_atnotification_set_decrypted_value(atclient_atnotification *notification, const char *decrypted_value);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // ATCLIENT_ATNOTIFICATION_H
