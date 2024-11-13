@@ -24,7 +24,7 @@
  *     --key-file [~/.atsign/keys/@atsign_key.atKeys]
  */
 
-static int set_up_pkam_auth_options(atclient_pkam_authenticate_options *pkam_authenticate_options,
+static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenticate_options,
                                     const char *root_url);
 static int start_repl_loop(atclient *atclient, repl_args *repl_args);
 
@@ -133,12 +133,12 @@ static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenti
       goto exit;
     }
 
-    if ((ret = atclient_pkam_authenticate_options_set_at_directory_host(pkam_authenticate_options, root_host)) != 0) {
+    if ((ret = atclient_authenticate_options_set_at_directory_host(pkam_authenticate_options, root_host)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set at directory host\n");
       goto exit;
     }
 
-    if ((ret = atclient_pkam_authenticate_options_set_at_directory_port(pkam_authenticate_options, root_port)) != 0) {
+    if ((ret = atclient_authenticate_options_set_at_directory_port(pkam_authenticate_options, root_port)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set at directory port\n");
       goto exit;
     }

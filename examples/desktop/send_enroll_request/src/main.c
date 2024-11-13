@@ -10,10 +10,7 @@
 
 int main() {
     atclient client;
-    if (atclient_init(&client) != 0) {
-        atlogger_log("TEST", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to initialize client");
-        return -1;
-    }
+    atclient_init(&client);
 
     enroll_namespace_t namespace1 = {"kingslanding", "rw"};
     enroll_namespace_t namespace2 = {"winterfell", "r"};

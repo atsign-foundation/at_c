@@ -94,7 +94,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   atclient_atkey_free(&atkey);
   atclient_free(&atclient);
-  atclient_pkam_options_free(&options);
+  atclient_authenticate_options_free(&options);
   free(atkeystr);
   return ret;
 }
