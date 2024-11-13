@@ -323,10 +323,6 @@ bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys
   return is_enrollment_id_str_initialized(atkeys_file);
 }
 
-bool atclient_atkeys_file_is_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file) {
-  return is_apkam_symmetric_key_str_initialized(atkeys_file);
-}
-
 int atclient_atkeys_file_set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file,
                                                      const char *aes_pkam_public_key_str,
                                                      const size_t aes_pkam_public_key_str_len) {
