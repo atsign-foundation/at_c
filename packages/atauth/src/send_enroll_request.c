@@ -58,7 +58,7 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   /*
    * 3. Send enroll:request command to server
    */
-  if ((ret = atclient_connection_send(&(client->atserver_connection), (const unsigned char *)command, cmd_len, recv,
+  if ((ret = atclient_connection_send(&client->atserver_connection, (const unsigned char *)command, cmd_len, recv,
                                       recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     ret = 1;

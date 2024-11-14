@@ -19,7 +19,7 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   size_t params_json_len = 0, params_json_size = 0;
 
   // fetch length of params json string
-  enroll_params_to_json(NULL, &params_json_len, 0, params);
+  atcommons_enroll_params_to_json(NULL, 0, &params_json_len, params);
   params_json_size = params_json_len + 1; // specify the size of the buffer
   params_json = malloc(sizeof(char) * params_json_size);
   if (params_json == NULL) {
@@ -37,14 +37,15 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   }
   memset(e_op, 0, sizeof(char) * MAX_ENROLL_OPERATION_STRING_LEN);
 
-  if (command == NULL) { // Calculate the expected command length
+  // Calculate the expected command length
+  if (command == NULL && cmd_size == 0) {
     /*
-     * 1. Caclculate enroll prefix len
+     * A. Caclculate enroll prefix len
      */
     cur_len += snprintf(NULL, 0, "%s", ENROLL_PREFIX);
 
     /*
-     * 2. Calculate enroll operation len
+     * B. Calculate enroll operation len
      */
     if ((ret = enroll_operation_to_string(&e_op, operation)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll_operation_to_string: %d\n", ret);
@@ -53,13 +54,13 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
     cur_len += snprintf(NULL, 0, "%s:", e_op);
 
     /*
-     * 3. Calculate enroll params json len
+     * C. Calculate enroll params json len
      */
-    enroll_params_to_json(NULL, &params_json_len, 0, params); // fetch 'enroll_params_json' length
+    atcommons_enroll_params_to_json(NULL, 0, &params_json_len, params); // fetch 'enroll_params_json' length
     cur_len += params_json_len + 3;                           // +2 for \r\n\0
 
     /*
-     * 4. Populate 'cmd_len' with the calculated commmand length
+     * D. Populate 'cmd_len' with the calculated commmand length
      */
     *cmd_len = cur_len;
     ret = 1; // setting a non-zero exit code to ensure this if-clause is only used for commadn len calculation
@@ -89,8 +90,8 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
     ret = -1;
     goto exit;
   }
-  if ((ret = enroll_params_to_json(&params_json, &params_json_len, params_json_size, params)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll_params_to_json: %d\n", ret);
+  if ((ret = atcommons_enroll_params_to_json(&params_json, params_json_size, &params_json_len, params)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_params_to_json: %d\n", ret);
     ret = 1;
     goto exit;
   }

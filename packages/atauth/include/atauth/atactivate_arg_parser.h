@@ -2,10 +2,12 @@
 #define ATACTIVATE_ARG_PARSER_H
 
 /**
- * @brief Parses command-line arguments to initialize the atactivate configuration
+ * @brief Parses command-line arguments to initialize the atactivate
+ * configuration
  *
- * Note: Memory need not be preallocated for atsign, cram_secret, atkeys_fp, root_host and root_port.
- * Caller needs to free the above mentioned variables after use
+ * Note: Memory need not be preallocated for atsign, cram_secret, atkeys_fp, first_app_name, first_device_name,
+ * root_host and root_port. Caller needs to free the above mentioned variables
+ * after use
  *
  * @param argc The number of arguments
  * @param argv The array of arguments
@@ -19,4 +21,4 @@
 int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_secret, char **atkeys_fp, char **root_host,
                           int *root_port);
 
-#endif //ATACTIVATE_ARG_PARSER_H
+#endif // ATACTIVATE_ARG_PARSER_H

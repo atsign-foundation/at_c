@@ -406,7 +406,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   }
 
   /*
-   * 2. Initialize variables
+   * 2. Initialize variables and memory
    */
   char *root_cmd = NULL;
   char *from_cmd = NULL;
@@ -434,7 +434,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   memset(digest, 0, sizeof(unsigned char) * SHA_512_DIGEST_SIZE);
 
   /*
-   * 1. Ensure that the atsign has the @ symbol.
+   * 3. Ensure that the atsign has the @ symbol.
    */
   if ((ret = atclient_string_utils_atsign_with_at(atsign, &atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
@@ -469,7 +469,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   }
 
   /*
-   * 2. Start atServer connection (kill the existing connection if it exists)
+   * 5. Start atServer connection (kill the existing connection if it exists)
    */
   if ((ret = atclient_start_atserver_connection(ctx, atserver_host, atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
@@ -477,7 +477,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   }
 
   /*
-   * 3a. Build `from:` noop_cmd
+   * 6a. Build `from:` noop_cmd
    */
   const size_t from_cmd_size =
       strlen("from:") + strlen(atsign_without_at) + strlen("\r\n") + 1; // "from:" has a length of 5
@@ -488,7 +488,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   snprintf(from_cmd, from_cmd_size, "from:%s\r\n", atsign_without_at);
 
   /*
-   * 3b. Send `from:` noop_cmd
+   * 6b. Send `from:` noop_cmd
    */
   if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)from_cmd, from_cmd_size - 1, recv,
                                       recvsize, &recv_len)) != 0) {
@@ -504,14 +504,14 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   }
 
   /*
-   * 4. Move cram secret to digest_input
+   * 7. Move cram secret to digest_input
    *    CRAM digest-input will be of the form "CRAM secret + challenge from server"
    */
   memcpy(digest_input, cram_secret, CRAM_SECRET_LENGTH);
   digest_input_len = CRAM_SECRET_LENGTH;
 
   /*
-   * 5. We got `data:<challenge>`, move this challenge into digest_input
+   * 8. We got `data:<challenge>`, move this challenge into digest_input
    *
    */
   memcpy(digest_input + digest_input_len, str_with_data_prefix + strlen(DATA_TOKEN),
@@ -519,7 +519,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   digest_input_len += strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
 
   /*
-   * 6a. convert 'digest_input' to bytes using utf-8 encode
+   * 9a. convert 'digest_input' to bytes using utf-8 encode
    */
   unsigned char *digest_input_bytes = NULL;
   size_t digest_input_bytes_len = 0;
@@ -530,14 +530,14 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   }
 
   /*
-   * 6b. generate SHA512 digest using the utf8-encoded bytes
+   * 9b. generate SHA512 digest using the utf8-encoded bytes
    */
   if ((ret = atchops_sha_hash(ATCHOPS_MD_SHA512, digest_input_bytes, digest_input_bytes_len, digest)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_sha_hash: %d\n", ret);
     goto exit;
   }
   /*
-   * 6b. hex encode the digest generated in the previous step
+   * 9b. hex encode the digest generated in the previous step
    */
   const size_t digest_hex_encoded_len = SHA_512_DIGEST_SIZE * 2 + 1; // hex represents each byte with 2 characters + /0
   char *digest_hex_encoded = malloc(sizeof(char) * digest_hex_encoded_len);
@@ -551,14 +551,14 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     goto exit;
   }
   /*
-   * 7a. Build `cram:` noop_cmd
+   * 10a. Build `cram:` noop_cmd
    */
   cram_cmd = malloc(sizeof(char) * CRAM_COMMAND_LEN + 1); // free later
   ret = snprintf(cram_cmd, CRAM_COMMAND_LEN + 1, "%s:%s\r\n", CRAM_PREFIX, digest_hex_encoded);
   cram_cmd[CRAM_COMMAND_LEN] = '\n';
 
   /*
-   * 7b. Send `cram:` noop_cmd
+   * 10b. Send `cram:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
   if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, CRAM_COMMAND_LEN, recv,
@@ -566,8 +566,9 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
-
-  // check for data:success
+  /*
+  * 10c. check for data:success
+  */
   if (!atclient_string_utils_starts_with((char *)recv, "data:success")) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
@@ -577,7 +578,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "CRAM auth successful\n");
 
   /*
-   * 8. Set up the atclient context
+   * 11. Set up the atclient context
    */
 
   // initialize ctx->atsign.atsign and ctx->atsign.withour_prefix_str to the newly authenticated atSign

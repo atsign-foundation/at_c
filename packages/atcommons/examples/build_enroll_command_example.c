@@ -8,27 +8,29 @@
 
 int main() {
     // create an enroll_namespace
-    EnrollNamespace namespace;
+    enroll_namespace_t namespace;
     namespace.name = "namespace1";
     namespace.access = "rw";
 
     // another way to create an enroll namespace
-    EnrollNamespace namespace2 = {"namespace2", "r"};
+    enroll_namespace_t namespace2 = {"namespace2", "r"};
 
-    EnrollNamespaceList *ns_list = malloc(sizeof(EnrollNamespaceList));
-    enroll_namespace_list_append(ns_list, &namespace);
-    enroll_namespace_list_append(ns_list, &namespace2);
+    enroll_namespace_list_t *ns_list = malloc(sizeof(enroll_namespace_list_t));
+    atcommons_enroll_namespace_list_append(&ns_list, &namespace);
+    atcommons_enroll_namespace_list_append(&ns_list, &namespace2);
 
-    EnrollParams *params;
-    params->app_name = "test-app";
-    params->device_name = "test-device";
-    params->otp = "XYZABC";
-    params->ns_list = ns_list;
+    enroll_params_t params;
+    atcommons_enroll_params_init(&params);
+    params.app_name = "test-app";
+    params.device_name = "test-device";
+    params.otp = "XYZABC";
+    params.ns_list = ns_list;
 
-    char *command = malloc(sizeof(char) * 1500);
+    char *command = malloc(sizeof(char) * ENROLL_COMMAND_MAX_LENGTH);
+    size_t cmd_len = 0;
 
     int ret = 0;
-    ret = enroll_verb_build_command(command, request, params);
+    ret = atcommons_build_enroll_command(command, sizeof(char) * ENROLL_COMMAND_MAX_LENGTH, &cmd_len, apkam_request, &params);
 
     printf("command: %s", command);
 

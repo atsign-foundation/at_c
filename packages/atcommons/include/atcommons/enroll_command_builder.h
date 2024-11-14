@@ -10,8 +10,7 @@
 /**
  * @brief Constructs an enroll command based on the args provided. Currently only supports enroll:request
  *
- * @param command A pointer to populate the constructed enroll command. Should be allocated of size
- * ENROLL_COMMAND_MAX_LENGTH
+ * @param command A pointer to store the constructed enroll command. Should be allocated of size ENROLL_COMMAND_MAX_LENGTH
  * @param cmd_size Size of the command buffer
  * @param cmd_len A pointer to populate the length of the enroll command written into the command buffer
  * @param operation Specifies the type of enroll operation (request/approve/deny/revoke/revoke/list/delete)

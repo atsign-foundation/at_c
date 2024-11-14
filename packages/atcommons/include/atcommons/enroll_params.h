@@ -22,20 +22,20 @@ typedef struct {
  * @param ep pointer to the enroll params struct that is to be initialized
  * @return int 0 on success, non-zero int on failure
  */
-int enroll_params_init(enroll_params_t *ep);
+int atcommons_enroll_params_init(enroll_params_t *ep);
 
 /**
  * @brief Converts the parameters in an enroll_params_t struct to a json encoded string
  *
- * Note: Can be used with json_string set to null to calculate the expected size of the json string
+ * Note: To calculate expected string len, use method with json_string set to NULL and json_string_size set to 0
  *
  * @param json_string Double pointer to store the json encoded string of provided enroll params
- * @param json_string_len Actual string length written into json_string buffer
  * @param json_string_size Allocated memory size for json_string buffer
+ * @param json_string_len Actual string length written into json_string buffer
  * @param ep Pointer to the enroll_params_t struct whose values need to be converted to a json string
  * @return int 0 for success, non-zero int for failure
  */
-int enroll_params_to_json(char **json_string, size_t *json_string_len, size_t json_string_size,
+int atcommons_enroll_params_to_json(char **json_string, size_t json_string_size, size_t *json_string_len,
                           const enroll_params_t *ep);
 
 #endif

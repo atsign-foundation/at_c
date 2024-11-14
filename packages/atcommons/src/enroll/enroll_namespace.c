@@ -29,28 +29,31 @@ int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, en
   return 0;
 }
 
-int atcommons_enroll_namespace_to_json(char *ns_str, enroll_namespace_t *ns) {
-  if (ns_str == NULL || ns == NULL) {
+int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, size_t *ns_str_len,
+                                       const enroll_namespace_t *ns) {
+  if (ns == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns(namespace) cannot be null\n");
     return -1;
   }
+  if (ns_str == NULL && ns_str_size == 0) {
+    *ns_str_len = snprintf(NULL, 0, "{\"%s\":\"%s\"}", ns->name, ns->access);
+  }
 
-  snprintf(ns_str, strlen(ns->name) + strlen(ns->access) + 10, "{\"%s\":\"%s\"}", ns->name, ns->access);
+  *ns_str_len = snprintf(ns_str, ns_str_size, "{\"%s\":\"%s\"}", ns->name, ns->access);
 
   return 0;
 }
 
 int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t *ns_list_str_len,
-                                            enroll_namespace_list_t *ns_list) {
-  int ret = 0;
+                                            const enroll_namespace_list_t *ns_list) {
   if (ns_list == NULL) {
-    ret = -1;
-    goto exit;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list(namespace list) cannot be null\n");
+    return -1;
   }
 
   if (ns_list_str_len == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list_str_len is null\n");
-    ret = 1;
-    goto exit;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list_str_len(namespace_list string length) cannot be null\n");
+    return 1;
   }
 
   cJSON *json_obj = cJSON_CreateObject();
@@ -66,5 +69,5 @@ int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t *ns_lis
   }
 
 free_cjson_exit: { cJSON_Delete(json_obj); }
-exit: { return ret; }
+  return 0;
 }

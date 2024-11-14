@@ -1,6 +1,6 @@
 # Configurable options
 set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
-option(ATSDK_BUILD_TESTS "Build tests for atsdk" ON)
+option(ATSDK_BUILD_TESTS "Build tests for atsdk" OFF)
 
 # Basic project setup
 cmake_minimum_required(VERSION 3.24)
@@ -68,6 +68,11 @@ if(NOT ESP_PLATFORM)
     EXPORT ${PROJECT_NAME}-config
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -g")
+  endif()
 
   # export dependencies
   if(NOT ATSDK_AS_SUBPROJECT)

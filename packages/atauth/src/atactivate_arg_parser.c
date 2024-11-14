@@ -13,7 +13,7 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
   int opt;
 
   // Initialize defaults
-  *root_host = malloc(strlen(DEFAULT_ROOT_SERVER) + 1);
+  *root_host = malloc(sizeof(char) * strlen(DEFAULT_ROOT_SERVER) + 1);
   if (*root_host == NULL) {
     fprintf(stderr, "Memory allocation failed for root_host\n");
     return -1;
@@ -30,7 +30,7 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
   while ((opt = getopt(argc, argv, "a:c:k:r:p:")) != -1) {
     switch (opt) {
     case 'a':
-      *atsign = malloc(strlen(optarg) + 1);
+      *atsign = malloc(sizeof(char) * strlen(optarg) + 1);
       if (*atsign == NULL) {
         fprintf(stderr, "Memory allocation failed for atsign\n");
         ret = -1;
@@ -39,7 +39,7 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
       strcpy(*atsign, optarg);
       break;
     case 'c':
-      *cram_secret = malloc(strlen(optarg) + 1);
+      *cram_secret = malloc(sizeof(char) * strlen(optarg) + 1);
       if (*cram_secret == NULL) {
         fprintf(stderr, "Memory allocation failed for cram_secret\n");
         ret = -1;
@@ -48,7 +48,7 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
       strcpy(*cram_secret, optarg);
       break;
     case 'k':
-      *atkeys_fp = malloc(strlen(optarg) + 1);
+      *atkeys_fp = malloc(sizeof(char) * strlen(optarg) + 1);
       if (*atkeys_fp == NULL) {
         fprintf(stderr, "Memory allocation failed for atkeys file path\n");
         ret = -1;
@@ -57,7 +57,7 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
       strcpy(*atkeys_fp, optarg);
       break;
     case 'r':
-      *root_host = realloc(*root_host, strlen(optarg) + 1);
+      *root_host = realloc(*root_host, sizeof(char) * strlen(optarg) + 1);
       if (*root_host == NULL) {
         fprintf(stderr, "Memory reallocation failed for root_host\n");
         ret = -1;

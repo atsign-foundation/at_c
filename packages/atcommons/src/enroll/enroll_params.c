@@ -21,7 +21,7 @@
 
 #define TAG "enroll_params"
 
-int enroll_params_init(enroll_params_t *ep) {
+int atcommons_enroll_params_init(enroll_params_t *ep) {
   /*
    * 1. Validate arguments
    */
@@ -46,11 +46,12 @@ int enroll_params_init(enroll_params_t *ep) {
   return 0; // Ensure return for successful initialization
 }
 
-int enroll_params_to_json(char **json_string, size_t *json_string_len, const size_t json_string_size, const enroll_params_t *ep) {
+int atcommons_enroll_params_to_json(char **json_string, const size_t json_string_size, size_t *json_string_len,
+                          const enroll_params_t *ep) {
   int ret = 0;
 
   if (ep == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll params cannot be null for enroll_params_to_json\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll params cannot be null for atcommons_enroll_params_to_json\n");
     ret = -1;
     return ret;
   }
@@ -83,18 +84,23 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
   // Ensure ns_list is not NULL before accessing namespaces
   if (ep->ns_list && ep->ns_list->length > 0) {
     size_t ns_list_str_len = 0;
-    atcommons_enroll_namespace_list_to_json(NULL, &ns_list_str_len, ep->ns_list); // get string length
+    atcommons_enroll_namespace_list_to_json(NULL, &ns_list_str_len,
+                                            ep->ns_list); // get string length
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enroll_namespace_list_to_string len is %lu\n", ns_list_str_len);
 
     ns_json = malloc(sizeof(char) * (ns_list_str_len + 1));
+    if (ns_json == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for namespace json string\n");
+    }
     memset(ns_json, 0, sizeof(char) * (ns_list_str_len + 1));
-    if(ns_json == NULL) {
+    if (ns_json == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for ns_json\n");
       ret = -1;
       goto exit;
     }
     if ((ret = atcommons_enroll_namespace_list_to_json(ns_json, &ns_list_str_len, ep->ns_list)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not convert enroll_namespace_list to json. atcommons_enroll_namespace_list_to_json: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "enroll_namespace_list serialization failed. atcommons_enroll_namespace_list_to_json: %d\n", ret);
       ret = 1;
       goto exit;
     }
@@ -108,11 +114,13 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
   }
 
   if (ep->encrypted_default_encryption_private_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY, (const char *)ep->encrypted_default_encryption_private_key);
+    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY,
+                            (const char *)ep->encrypted_default_encryption_private_key);
   }
 
   if (ep->encrypted_self_encryption_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY, (const char *)ep->encrypted_self_encryption_key);
+    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY,
+                            (const char *)ep->encrypted_self_encryption_key);
   }
 
   if (ep->encrypted_apkam_symmetric_key) {
@@ -130,6 +138,7 @@ int enroll_params_to_json(char **json_string, size_t *json_string_len, const siz
 
 exit:
   cJSON_Delete(json);
-  if (ns_json) free(ns_json);
+  if (ns_json)
+    free(ns_json);
   return ret;
 }
