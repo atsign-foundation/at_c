@@ -11,8 +11,9 @@
 #define TAG "enroll_namespace"
 
 int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, enroll_namespace_t *ns) {
+  // allocate enough memory for enroll_namespace_list struct, and the number of enroll_namespace_t structs that are in the list
   enroll_namespace_list_t *temp =
-      realloc(*ns_list, sizeof(enroll_namespace_list_t) + sizeof(enroll_namespace_t *) * ((*ns_list)->length + 1));
+      realloc(*ns_list, sizeof(enroll_namespace_list_t) + sizeof(enroll_namespace_t) * ((*ns_list)->length + 1));
 
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to realloc memory for enroll namespace list\n");
@@ -36,7 +37,7 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, s
     return -1;
   }
   if (ns_str == NULL && ns_str_size == 0) {
-    *ns_str_len = snprintf(NULL, 0, "{\"%s\":\"%s\"}", ns->name, ns->access);
+    *ns_str_len = snprintf(NULL, 0, "{\"%s\":\"%s\"}", ns->name, ns->access) + 1; // +1 for \0
   }
 
   *ns_str_len = snprintf(ns_str, ns_str_size, "{\"%s\":\"%s\"}", ns->name, ns->access);
@@ -44,7 +45,7 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, s
   return 0;
 }
 
-int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t *ns_list_str_len,
+int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t ns_list_str_size, size_t *ns_list_str_len,
                                             const enroll_namespace_list_t *ns_list) {
   if (ns_list == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list(namespace list) cannot be null\n");
@@ -65,7 +66,7 @@ int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t *ns_lis
 
   if (ns_list_string != NULL) {
     const char *temp_json_str = cJSON_PrintUnformatted(json_obj);
-    strncpy(ns_list_string, temp_json_str, *ns_list_str_len);
+    strncpy(ns_list_string, temp_json_str, ns_list_str_size);
   }
 
 free_cjson_exit: { cJSON_Delete(json_obj); }

@@ -14,3 +14,4 @@ run_test() {
 
 run_test 'packages/atchops/tests'
 run_test 'packages/atclient/tests'
+run_test 'packages/atcommons/tests'
