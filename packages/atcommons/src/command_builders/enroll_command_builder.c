@@ -57,7 +57,7 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
      * C. Calculate enroll params json len
      */
     atcommons_enroll_params_to_json(NULL, 0, &params_json_len, params); // fetch 'enroll_params_json' length
-    cur_len += params_json_len + 3;                           // +2 for \r\n\0
+    cur_len += params_json_len + 3;                                     // +2 for \r\n\0
 
     /*
      * D. Populate 'cmd_len' with the calculated commmand length

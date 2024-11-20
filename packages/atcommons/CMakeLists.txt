@@ -1,5 +1,5 @@
 # Configurable options
-option(ATCOMMONS_BUILD_TESTS "Build tests for atauth" OFF)
+option(ATCOMMONS_BUILD_TESTS "Build tests for atcommons" ON)
 
 # Set include directory and file sources
 set(ATCOMMONS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -10,6 +10,7 @@ set(
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_namespace.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_params.c
         ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/enroll_command_builder.c
+        ${CMAKE_CURRENT_LIST_DIR}/tests/at_expect.c
 )
 
 # Project setup
@@ -47,16 +48,16 @@ if (NOT ESP_PLATFORM)
     endif ()
 
     # Import atlogger
-    if(NOT TARGET atlogger)
+    if (NOT TARGET atlogger)
         set(atlogger_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atlogger)
         include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atlogger.cmake)
-    endif()
+    endif ()
 
     # Create library targets
-    if(NOT TARGET atcommons)
+    if (NOT TARGET atcommons)
         add_library(${PROJECT_NAME} STATIC ${ATCOMMONS_SOURCES})
         add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-    endif()
+    endif ()
 
     # LINK
     # Link include headers to library targets
@@ -111,9 +112,9 @@ if (NOT ESP_PLATFORM)
         )
     endif ()
 
-    # Build the tests - No tests for ATCOMMONS yet
-    # if(ATCOMMONS_BUILD_TESTS)
-    #   enable_testing()
-    #   add_subdirectory(tests)
-    # endif()
+    if (ATCOMMONS_BUILD_TESTS)
+        message("[ATCOMMONS] Building tests")
+        enable_testing()
+        add_subdirectory(tests)
+    endif ()
 endif ()

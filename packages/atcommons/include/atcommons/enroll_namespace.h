@@ -34,15 +34,15 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size,
  *
  * @param ns_list_string pointer to the string buffer where the JSON string
  * should be stored
+ * @param ns_list_str_size
  * @param ns_list_str_len pointer to store the length of the generated
  * enroll_namepace_list JSON string
  * @param ns_list pointer to the enroll_namespace_list struct that needs to be
  * serialized
  * @return int 0 on success, non-zero int on failure
  */
-int atcommons_enroll_namespace_list_to_json(
-    char *ns_list_string, size_t *ns_list_str_len,
-    const enroll_namespace_list_t *ns_list);
+int atcommons_enroll_namespace_list_to_json(char *ns_list_string, size_t ns_list_str_size, size_t *ns_list_str_len,
+                                            const enroll_namespace_list_t *ns_list);
 
 /**
  * @brief appends an enroll_namespace struct to an enroll_namespace_list struct.

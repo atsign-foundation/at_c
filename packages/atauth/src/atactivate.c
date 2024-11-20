@@ -15,8 +15,8 @@
 #include <string.h>
 
 #define TAG "atactivate"
-#define DEFAULT_FIRST_APP_NAME "firstApp3"
-#define DEFAULT_FIRST_DEVICE_NAME "firstDevice3"
+#define DEFAULT_FIRST_APP_NAME "firstApp"
+#define DEFAULT_FIRST_DEVICE_NAME "firstDevice"
 #define AES_256_KEY_BYTES 32
 #define RSA_2048_PRIVKEY_BYTES 1300 // in PKCS#8 format includes padding
 
@@ -24,7 +24,8 @@ int main(int argc, char *argv[]) {
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
   atlogger_set_opts(0); // disabling timestamps for now due to a potential bug in atlogger.c
   int ret = 0;
-  char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *firstAppName = NULL, *firstDeviceName = NULL;
+  char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *firstAppName = NULL,
+       *firstDeviceName = NULL;
   int *root_port = NULL;
   char enrollment_id[ENROLL_ID_MAX_LEN];
   char status[ENROLL_STATUS_STRING_MAX_LEN];
