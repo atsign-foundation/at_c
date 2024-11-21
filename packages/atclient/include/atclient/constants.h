@@ -15,7 +15,6 @@ extern "C" {
 
 #define ATCLIENT_CONNECTION_MAX_READ_TRIES                                                                             \
   50 // if 0 bytes are read after 10 consecutive retries, the read is unsuccessful. See connection.c
-#define ATCLIENT_CONNECTION_MAX_RECURSIVE_WRITE_ATTEMPTS 10
 
 #define ATCLIENT_MONITOR_BUFFER_LEN 4096 // max chunk size monitor can read at once
 
@@ -25,10 +24,10 @@ extern "C" {
 #define ATCLIENT_DEFAULT_AT_DIRECTORY_HOST "root.atsign.org"
 #define ATCLIENT_DEFAULT_AT_DIRECTORY_PORT 64
 
-#define DATA_TOKEN "data:"
+#define ATCLIENT_DATA_TOKEN "data:"
 
-#define CRAM_PREFIX "cram"
-#define CRAM_COMMAND_LEN 135
+#define ATCLIENT_CRAM_PREFIX "cram"
+#define ATCLIENT_CRAM_COMMAND_LEN 135
 
 #define BLK "\e[0;30m"
 #define RED "\e[0;31m"

@@ -297,7 +297,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   }
 
   char *str_with_data_prefix = NULL;
-  if (atclient_string_utils_get_substring_position((char *)recv, DATA_TOKEN, &str_with_data_prefix) != 0) {
+  if (atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &str_with_data_prefix) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -309,8 +309,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    *    Let us sign the challenge with RSA-2048 PKAM Private Key and Base64 Encode it
    */
 
-  challenge_len = strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
-  memcpy(challenge, str_with_data_prefix + strlen(DATA_TOKEN), challenge_len); // +5 to skip the 'data:' prefix
+  challenge_len = strlen(str_with_data_prefix) - strlen(ATCLIENT_DATA_TOKEN);
+  memcpy(challenge, str_with_data_prefix + strlen(ATCLIENT_DATA_TOKEN), challenge_len); // +5 to skip the 'data:' prefix
 
   // sign
   if ((ret = atchops_rsa_sign(&atkeys->pkam_private_key, ATCHOPS_MD_SHA256, (unsigned char *)challenge, challenge_len,
@@ -496,7 +496,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     goto exit;
   }
   char *str_with_data_prefix = NULL;
-  if (atclient_string_utils_get_substring_position((char *)recv, DATA_TOKEN, &str_with_data_prefix) != 0) {
+  if (atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &str_with_data_prefix) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -514,9 +514,9 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    * 8. We got `data:<challenge>`, move this challenge into digest_input
    *
    */
-  memcpy(digest_input + digest_input_len, str_with_data_prefix + strlen(DATA_TOKEN),
-         recv_len - strlen(DATA_TOKEN)); // trims 'data:' from the response and copy the challenge into 'digest_input'
-  digest_input_len += strlen(str_with_data_prefix) - strlen(DATA_TOKEN);
+  memcpy(digest_input + digest_input_len, str_with_data_prefix + strlen(ATCLIENT_DATA_TOKEN),
+         recv_len - strlen(ATCLIENT_DATA_TOKEN)); // trims 'data:' from the response and copy the challenge into 'digest_input'
+  digest_input_len += strlen(str_with_data_prefix) - strlen(ATCLIENT_DATA_TOKEN);
 
   /*
    * 9a. convert 'digest_input' to bytes using utf-8 encode
@@ -553,15 +553,15 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   /*
    * 10a. Build `cram:` noop_cmd
    */
-  cram_cmd = malloc(sizeof(char) * CRAM_COMMAND_LEN + 1); // free later
-  ret = snprintf(cram_cmd, CRAM_COMMAND_LEN + 1, "%s:%s\r\n", CRAM_PREFIX, digest_hex_encoded);
-  cram_cmd[CRAM_COMMAND_LEN] = '\n';
+  cram_cmd = malloc(sizeof(char) * ATCLIENT_CRAM_COMMAND_LEN + 1); // free later
+  ret = snprintf(cram_cmd, ATCLIENT_CRAM_COMMAND_LEN + 1, "%s:%s\r\n", ATCLIENT_CRAM_PREFIX, digest_hex_encoded);
+  cram_cmd[ATCLIENT_CRAM_COMMAND_LEN] = '\n';
 
   /*
    * 10b. Send `cram:` noop_cmd
    */
   memset(recv, 0, sizeof(unsigned char) * recvsize);
-  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, CRAM_COMMAND_LEN, recv,
+  if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)cram_cmd, ATCLIENT_CRAM_COMMAND_LEN, recv,
                                       recvsize, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;

@@ -171,7 +171,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,"Connected\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected\n");
 
   // ===============
   // after connect
@@ -224,7 +224,6 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   ret = 0;
-  goto exit;
 
 exit: {
   if (ret != 0) {
@@ -339,7 +338,6 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   }
 
   ret = 0;
-  goto exit;
 exit: { return ret; }
 }
 
@@ -408,7 +406,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   if (src[src_len - 1] != '\n') {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "command does not have a trailing \\n character:\t%s\n", src);
   }
-  if ((ret = mbedtls_ssl_write(&(ctx->ssl), src, src_len)) <= 0) { // error only when the returned value is negative
+  if ((ret = mbedtls_ssl_write(&ctx->ssl, src, src_len)) <= 0) { // error only when the returned value is negative
     mbedtls_strerror(ret, error_buf, sizeof(error_buf));
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write returned -0x%x: %s\n", -ret, error_buf);
     goto exit;
@@ -424,9 +422,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     int attempt = 0;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
                  "Partial write successful. Performing recursive write. Current ret: %d\n", ret);
-
-    while (attempt < ATCLIENT_CONNECTION_MAX_RECURSIVE_WRITE_ATTEMPTS) {
-      ret = mbedtls_ssl_write(&(ctx->ssl), src + length_written, remaining_length);
+    // warning: potiential infinite loop
+    while (ret > 0) {
+      ret = mbedtls_ssl_write(&ctx->ssl, src + length_written, remaining_length);
 
       if (ret <= 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Recursive write failed with exit code: %d\n", ret);
@@ -436,13 +434,14 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       length_written += ret;
       remaining_length -= ret;
 
-      // Break if the current write wrote exactly what was expected
+      // This is the condition for a successful write
       if (ret == remaining_length) {
         break;
       }
 
       attempt++;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Recursive write attempt #: %d\tmbedtls_ssl_write:%d\n", attempt, ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Recursive write attempt #: %d\tmbedtls_ssl_write:%d\n", attempt,
+                   ret);
     }
 
     if (remaining_length != 0) {
@@ -531,7 +530,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   do {
     // TODO: better read handling
     // - see the improved implementation in atclient_monitor_read
-    if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recv_size - l)) <= 0) {
+    if ((ret = mbedtls_ssl_read(&ctx->ssl, recv + l, recv_size - l)) <= 0) {
       mbedtls_strerror(ret, error_buf, sizeof(error_buf));
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read returned err: -0x%x: %s\n", -ret, error_buf);
       goto exit;
@@ -576,7 +575,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
    */
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char *recvcopy = NULL;
-    if ((recvcopy = malloc(sizeof(unsigned char) * (*recv_len))) != NULL) {
+    if ((recvcopy = malloc(sizeof(unsigned char) * *recv_len)) != NULL) {
       memcpy(recvcopy, recv, *recv_len);
       atlogger_fix_stdout_buffer((char *)recvcopy, *recv_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recv_len, recvcopy,

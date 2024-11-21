@@ -24,8 +24,7 @@ int main(int argc, char *argv[]) {
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
   atlogger_set_opts(0); // disabling timestamps for now due to a potential bug in atlogger.c
   int ret = 0;
-  char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *firstAppName = NULL,
-       *firstDeviceName = NULL;
+  char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
   int *root_port = NULL;
   char enrollment_id[ENROLL_ID_MAX_LEN];
   char status[ENROLL_STATUS_STRING_MAX_LEN];
@@ -140,7 +139,7 @@ int main(int argc, char *argv[]) {
   /*
    * 1. Parse args
    */
-  if ((ret = atactivate_parse_args(argc, argv, &atsign, &cram_secret, &atkeys_fp, &root_host, root_port)) != 0) {
+  if ((ret = atactivate_parse_args(argc, argv, &atsign, &cram_secret, &otp, &atkeys_fp, &root_host, root_port)) != 0) {
     goto exit;
   }
   // 1.1 if atkeys filepath was not passed through args, build default atkeys file path

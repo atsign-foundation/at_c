@@ -9,7 +9,7 @@ typedef struct {
 } enroll_namespace_t;
 
 typedef struct {
-  int length;
+  size_t length;
   enroll_namespace_t *namespaces[];
 } enroll_namespace_list_t;
 

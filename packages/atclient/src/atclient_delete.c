@@ -78,13 +78,13 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   const char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if (atclient_string_utils_get_substring_position(response, DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
     goto exit;
   }
-  response_trimmed = response_trimmed + strlen(DATA_TOKEN);
+  response_trimmed = response_trimmed + strlen(ATCLIENT_DATA_TOKEN);
 
   if (commit_id != NULL) {
     *commit_id = atoi(response_trimmed);

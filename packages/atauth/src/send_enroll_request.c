@@ -68,15 +68,15 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   /*
    * 4. Trim + json-decode + read enrollment-id and enrollment status from the server response
    */
-  if ((ret = atclient_string_utils_get_substring_position((const char *)recv, DATA_TOKEN, &recv_trimmed)) != 0) {
+  if ((ret = atclient_string_utils_get_substring_position((const char *)recv, ATCLIENT_DATA_TOKEN, &recv_trimmed)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv did not have prefix \"data:\"\n", (int)recv_len, recv);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s\n", recv); // log error from server
     goto free_command_exit;
   }
-  recv_trimmed += strlen(DATA_TOKEN);
-  recv_trimmed[recv_len - strlen(DATA_TOKEN)] = '\0';
+  recv_trimmed += strlen(ATCLIENT_DATA_TOKEN);
+  recv_trimmed[recv_len - strlen(ATCLIENT_DATA_TOKEN)] = '\0';
 
-  cJSON *recv_json_decoded = cJSON_ParseWithLength(recv_trimmed, recv_len - strlen(DATA_TOKEN));
+  cJSON *recv_json_decoded = cJSON_ParseWithLength(recv_trimmed, recv_len - strlen(ATCLIENT_DATA_TOKEN));
   if (recv_json_decoded == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse JSON response");
     ret = 1;
