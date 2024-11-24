@@ -5,10 +5,10 @@
 #include "enroll_params.h"
 #include <stddef.h>
 
-#define ENROLL_COMMAND_MAX_LENGTH 1500
-
 /**
  * @brief Constructs an enroll command based on the args provided. Currently only supports enroll:request
+ *
+ * @note To caclulate the buffer size needed to hold the command, call this method with command = NULL and cmd_size = 0
  *
  * @param command A pointer to store the constructed enroll command. Should be allocated of size
  * ENROLL_COMMAND_MAX_LENGTH

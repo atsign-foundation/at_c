@@ -35,7 +35,6 @@ int atcommons_enroll_params_init(enroll_params_t *ep);
  * @param ep Pointer to the enroll_params_t struct whose values need to be converted to a json string
  * @return int 0 for success, non-zero int for failure
  */
-int atcommons_enroll_params_to_json(char **json_string, size_t json_string_size, size_t *json_string_len,
-                                    const enroll_params_t *ep);
+int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len, const enroll_params_t *ep);
 
 #endif

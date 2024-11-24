@@ -29,7 +29,7 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   /*
    * 1. Fetch enroll:request command length and allocate memory
    */
-  const enroll_operation_t e_op = apkam_request;
+  const enroll_operation_t e_op = atcommons_apkam_request;
   size_t cmd_len = 0;
   atcommons_build_enroll_command(NULL, 0, &cmd_len, e_op, ep); // fetch enroll_command length
   const size_t cmd_size = cmd_len;
@@ -68,7 +68,8 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   /*
    * 4. Trim + json-decode + read enrollment-id and enrollment status from the server response
    */
-  if ((ret = atclient_string_utils_get_substring_position((const char *)recv, ATCLIENT_DATA_TOKEN, &recv_trimmed)) != 0) {
+  if ((ret = atclient_string_utils_get_substring_position((const char *)recv, ATCLIENT_DATA_TOKEN, &recv_trimmed)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv did not have prefix \"data:\"\n", (int)recv_len, recv);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s\n", recv); // log error from server
     goto free_command_exit;

@@ -1,8 +1,11 @@
 #include "atcommons/enroll_params.h"
+#include "atlogger/atlogger.h"
 
 #include <atcommons/at_expect.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define TAG "test_enroll_params"
 
 // this test case has all params populated e.g. app-name, deice-name, ...
 int test_case_1() {
@@ -28,12 +31,10 @@ int test_case_1() {
                         "\"namespace1\":\"rw\",\"namespace2\":\"r\"}}";
 
   size_t params_json_len = 0;
-  atcommons_enroll_params_to_json(NULL, 0, &params_json_len, enroll_params); // fetch expected json len
-  size_t params_json_size = params_json_len;
-  char *params_json = malloc(sizeof(char) * params_json_size);
-  int ret = atcommons_enroll_params_to_json(&params_json, params_json_size, &params_json_len, enroll_params);
+  char *params_json = NULL;
+  int ret = atcommons_enroll_params_to_json(&params_json, &params_json_len, enroll_params);
   if (ret != 0) {
-    printf("atcommons_enroll_params_to_json returned: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_params_to_json returned: %d\n", ret);
     return ret;
   }
 
@@ -129,12 +130,10 @@ int test_case_2() {
       "jFL8fH2zWupjJ510JmoIf2L2MJsiFFUCtRIRTWSIHs1/cXZiIEvhQIDAQAB";
 
   size_t params_json_len = 0;
-  atcommons_enroll_params_to_json(NULL, 0, &params_json_len, enroll_params); // fetch expected json len
-  size_t params_json_size = params_json_len;
-  char *params_json = malloc(sizeof(char) * params_json_size);
-  int ret = atcommons_enroll_params_to_json(&params_json, params_json_size, &params_json_len, enroll_params);
+  char *params_json = NULL;
+  int ret = atcommons_enroll_params_to_json(&params_json, &params_json_len, enroll_params);
   if (ret != 0) {
-    printf("atcommons_enroll_params_to_json returned: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_params_to_json returned: %d\n", ret);
     return ret;
   }
 
@@ -145,12 +144,12 @@ int test_case_2() {
 int main() {
   int ret = test_case_1();
   if (ret != 0) {
-    printf("test_enroll_params | test case 1 failed | ret: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test case 1| ret: %d\n", ret);
     return ret;
   }
   ret = test_case_2();
   if (ret != 0) {
-    printf("test_enroll_params | test case 2 failed | ret: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test case 2| ret: %d\n", ret);
     return ret;
   }
   return ret;

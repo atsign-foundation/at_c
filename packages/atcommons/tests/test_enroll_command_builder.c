@@ -1,9 +1,14 @@
+#include "atcommons/at_expect.h"
 #include "atcommons/enroll_command_builder.h"
 #include "atcommons/enroll_namespace.h"
 #include "atcommons/enroll_params.h"
+#include "atlogger/atlogger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define TAG "test_enroll_command_builder"
+
 int main() {
   int ret = 1;
 
@@ -25,25 +30,18 @@ int main() {
   params.otp = "XYZABC";
   params.ns_list = ns_list;
 
-  char *command = malloc(sizeof(char) * ENROLL_COMMAND_MAX_LENGTH);
+  size_t cmd_size = 0;
+  atcommons_build_enroll_command(NULL, 0, &cmd_size, atcommons_apkam_request, &params);
+  char *command = malloc(sizeof(char) * cmd_size);
   size_t cmd_len = 0;
-  ret = atcommons_build_enroll_command(command, sizeof(char) * ENROLL_COMMAND_MAX_LENGTH, &cmd_len, apkam_request,
-                                       &params);
+  ret = atcommons_build_enroll_command(command, sizeof(char) * cmd_size, &cmd_len, atcommons_apkam_request, &params);
   if (ret != 0) {
     goto exit;
   }
-  printf("%s\n", command);
-  printf("%s\n", expected_string);
 
-  ret = strncmp(command, expected_string, strlen(expected_string));
-  if (ret == 0) {
-    printf("test passed\n");
-  } else {
-    printf("test failed | ret: %d\n", ret);
-  }
+  ret = atcommons_string_expect(command, expected_string);
 
 exit: {
-  fflush(stdout);
   free(command);
   return ret;
 }

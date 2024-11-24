@@ -20,25 +20,25 @@ int enroll_operation_to_string(char **op_name, const enroll_operation_t e_op) {
   }
 
   switch (e_op) {
-  case apkam_request:
+  case atcommons_apkam_request:
     strcpy(*op_name, ENROLL_OPERATION_REQUEST);
     break;
-  case apkam_approve:
+  case atcommons_apkam_approve:
     strcpy(*op_name, ENROLL_OPERATION_APPROVE);
     break;
-  case apkam_deny:
+  case atcommons_apkam_deny:
     strcpy(*op_name, ENROLL_OPERATION_DENY);
     break;
-  case apkam_revoke:
+  case atcommons_apkam_revoke:
     strcpy(*op_name, ENROLL_OPERATION_REVOKE);
     break;
-  case apkam_unrevoke:
+  case atcommons_apkam_unrevoke:
     strcpy(*op_name, ENROLL_OPERATION_UNREVOKE);
     break;
-  case apkam_list:
+  case atcommons_apkam_list:
     strcpy(*op_name, ENROLL_OPERATION_LIST);
     break;
-  case apkam_delete:
+  case atcommons_apkam_delete:
     strcpy(*op_name, ENROLL_OPERATION_DELETE);
     break;
   default:

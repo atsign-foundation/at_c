@@ -16,18 +16,7 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   int ret = 0;
   int cur_len = 0;
   char *params_json = NULL, *e_op = NULL;
-  size_t params_json_len = 0, params_json_size = 0;
-
-  // fetch length of params json string
-  atcommons_enroll_params_to_json(NULL, 0, &params_json_len, params);
-  params_json_size = params_json_len + 1; // specify the size of the buffer
-  params_json = malloc(sizeof(char) * params_json_size);
-  if (params_json == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for params_json\n");
-    ret = -1;
-    return ret;
-  }
-  memset(params_json, 0, sizeof(char) * params_json_size);
+  size_t params_json_len = 0;
 
   e_op = malloc(sizeof(char) * MAX_ENROLL_OPERATION_STRING_LEN);
   if (e_op == NULL) {
@@ -37,7 +26,7 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   }
   memset(e_op, 0, sizeof(char) * MAX_ENROLL_OPERATION_STRING_LEN);
 
-  // Calculate the expected command length
+  // A, B, C and D are used ONLY to calculate the expected command length
   if (command == NULL && cmd_size == 0) {
     /*
      * A. Caclculate enroll prefix len
@@ -56,8 +45,8 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
     /*
      * C. Calculate enroll params json len
      */
-    atcommons_enroll_params_to_json(NULL, 0, &params_json_len, params); // fetch 'enroll_params_json' length
-    cur_len += params_json_len + 3;                                     // +2 for \r\n\0
+    atcommons_enroll_params_to_json(NULL, &params_json_len, params); // fetch 'enroll_params_json' length
+    cur_len += params_json_len + 3;                                  // +2 for \r\n\0
 
     /*
      * D. Populate 'cmd_len' with the calculated commmand length
@@ -85,21 +74,11 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   /*
    * 3. Convert enroll params to JSON, then append to command
    */
-  if (params_json == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate mem for params_json\n");
-    ret = -1;
-    goto exit;
-  }
-  if ((ret = atcommons_enroll_params_to_json(&params_json, params_json_size, &params_json_len, params)) != 0) {
+  if ((ret = atcommons_enroll_params_to_json(&params_json, &params_json_len, params)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_params_to_json: %d\n", ret);
-    ret = 1;
     goto exit;
   }
-  if (params_json_len > params_json_size) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "buffer overflow in params_json\n");
-    ret = -1;
-    goto exit;
-  }
+
   // populate enroll_params_json into 'command'
   cur_len += snprintf(command + cur_len, cmd_size, "%s\r\n", params_json);
   *cmd_len = cur_len;

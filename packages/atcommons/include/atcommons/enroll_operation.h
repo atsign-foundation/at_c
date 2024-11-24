@@ -4,13 +4,13 @@
 #define MAX_ENROLL_OPERATION_STRING_LEN 8
 
 typedef enum {
-  apkam_request,
-  apkam_approve,
-  apkam_deny,
-  apkam_revoke,
-  apkam_unrevoke,
-  apkam_list,
-  apkam_delete
+  atcommons_apkam_request,
+  atcommons_apkam_approve,
+  atcommons_apkam_deny,
+  atcommons_apkam_revoke,
+  atcommons_apkam_unrevoke,
+  atcommons_apkam_list,
+  atcommons_apkam_delete
 } enroll_operation_t;
 
 /**

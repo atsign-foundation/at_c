@@ -4,11 +4,11 @@
 #define ENROLL_STATUS_STRING_MAX_LEN 10
 
 typedef enum {
-  enroll_status_pending,
-  enroll_status_approved,
-  enroll_status_denied,
-  enroll_status_revoked,
-  enroll_status_expired
+  atcommons_enroll_status_pending,
+  atcommons_enroll_status_approved,
+  atcommons_enroll_status_denied,
+  atcommons_enroll_status_revoked,
+  atcommons_enroll_status_expired
 } enroll_status_t;
 
 /**

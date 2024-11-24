@@ -46,8 +46,7 @@ int atcommons_enroll_params_init(enroll_params_t *ep) {
   return 0; // Ensure return for successful initialization
 }
 
-int atcommons_enroll_params_to_json(char **json_string, const size_t json_string_size, size_t *json_string_len,
-                                    const enroll_params_t *ep) {
+int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len, const enroll_params_t *ep) {
   int ret = 0;
 
   if (ep == NULL) {
@@ -57,89 +56,71 @@ int atcommons_enroll_params_to_json(char **json_string, const size_t json_string
     return ret;
   }
 
-  cJSON *json = cJSON_CreateObject();
-  if (!json) {
+  cJSON *json_object = cJSON_CreateObject();
+  if (json_object == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create JSON object\n");
     ret = -1;
     return ret;
   }
 
   // Add each parameter to JSON only if it is not NULL
-  if (ep->enrollment_id) {
-    cJSON_AddStringToObject(json, ENROLLMENT_ID, ep->enrollment_id);
+  if (ep->enrollment_id != NULL) {
+    cJSON_AddStringToObject(json_object, ENROLLMENT_ID, ep->enrollment_id);
   }
 
-  if (ep->app_name) {
-    cJSON_AddStringToObject(json, APP_NAME, ep->app_name);
+  if (ep->app_name != NULL) {
+    cJSON_AddStringToObject(json_object, APP_NAME, ep->app_name);
   }
 
-  if (ep->device_name) {
-    cJSON_AddStringToObject(json, DEVICE_NAME, ep->device_name);
+  if (ep->device_name != NULL) {
+    cJSON_AddStringToObject(json_object, DEVICE_NAME, ep->device_name);
   }
 
-  if (ep->otp) {
-    cJSON_AddStringToObject(json, OTP, ep->otp);
+  if (ep->otp != NULL) {
+    cJSON_AddStringToObject(json_object, OTP, ep->otp);
   }
 
   char *ns_json = NULL;
   // Ensure ns_list is not NULL before accessing namespaces
-  if (ep->ns_list && ep->ns_list->length > 0) {
+  if (ep->ns_list != NULL && ep->ns_list->length > 0) {
     size_t ns_list_str_len = 0;
-    atcommons_enroll_namespace_list_to_json(NULL, 0, &ns_list_str_len, ep->ns_list); // get string length
-    size_t ns_list_str_size = sizeof(char) * ns_list_str_len + 1;
-    ns_json = malloc(ns_list_str_size);
-    if (ns_json == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for namespace json string\n");
-      ret = -1;
-      goto exit;
-    }
-    memset(ns_json, 0, ns_list_str_size);
-    if (ns_json == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for ns_json\n");
-      ret = -1;
-      goto exit;
-    }
-    if ((ret = atcommons_enroll_namespace_list_to_json(ns_json, ns_list_str_size, &ns_list_str_len, ep->ns_list)) !=
-        0) {
+    if ((ret = atcommons_enroll_namespace_list_to_json(&ns_json, &ns_list_str_len, ep->ns_list)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                    "enroll_namespace_list serialization failed. atcommons_enroll_namespace_list_to_json: %d\n", ret);
       ret = 1;
       goto exit;
     }
-    cJSON_AddRawToObject(json, NAMESPACES, ns_json);
+    cJSON_AddRawToObject(json_object, NAMESPACES, ns_json);
   }
 
   // Add Base64-encoded strings directly to JSON
-  if (ep->apkam_public_key) {
-    cJSON_AddStringToObject(json, APKAM_PUBLIC_KEY, (const char *)ep->apkam_public_key);
+  if (ep->apkam_public_key != NULL) {
+    cJSON_AddStringToObject(json_object, APKAM_PUBLIC_KEY, (const char *)ep->apkam_public_key);
   }
 
-  if (ep->encrypted_default_encryption_private_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY,
+  if (ep->encrypted_default_encryption_private_key != NULL) {
+    cJSON_AddStringToObject(json_object, ENCRYPTED_DEFAULT_ENCRYPTION_PRIVATE_KEY,
                             (const char *)ep->encrypted_default_encryption_private_key);
   }
 
-  if (ep->encrypted_self_encryption_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY,
+  if (ep->encrypted_self_encryption_key != NULL) {
+    cJSON_AddStringToObject(json_object, ENCRYPTED_DEFAULT_SELF_ENCRYPTION_KEY,
                             (const char *)ep->encrypted_self_encryption_key);
   }
 
-  if (ep->encrypted_apkam_symmetric_key) {
-    cJSON_AddStringToObject(json, ENCRYPTED_APKAM_SYMMETRIC_KEY, (const char *)ep->encrypted_apkam_symmetric_key);
+  if (ep->encrypted_apkam_symmetric_key != NULL) {
+    cJSON_AddStringToObject(json_object, ENCRYPTED_APKAM_SYMMETRIC_KEY,
+                            (const char *)ep->encrypted_apkam_symmetric_key);
   }
-
-  if (json_string == NULL) {                                     // used to calculate string length
-    *json_string_len = strlen(cJSON_PrintUnformatted(json)) + 1; // +1 for \0
-    ret = 1; // Return non-zero to ensure this method cannot be succesfully used without json_string
-    goto exit;
+  // pass memory ownership of the json string to the caller
+  if (json_string != NULL) {
+    *json_string = cJSON_PrintUnformatted(json_object);
   }
-
-  // Populate json_string and calculate its length
-  *json_string_len = snprintf(*json_string, json_string_size, "%s", cJSON_PrintUnformatted(json));
+  if (json_string_len != NULL) {
+    *json_string_len = strlen(cJSON_PrintUnformatted(json_object));
+  }
 
 exit:
-  cJSON_Delete(json);
-  if (ns_json)
-    free(ns_json);
+  free(ns_json);
   return ret;
 }
