@@ -21,8 +21,7 @@
 #define RSA_2048_PRIVKEY_BYTES 1300 // in PKCS#8 format includes padding
 
 int main(int argc, char *argv[]) {
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
-  atlogger_set_opts(0); // disabling timestamps for now due to a potential bug in atlogger.c
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
   int ret = 0;
   char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
   int *root_port = NULL;
@@ -39,10 +38,10 @@ int main(int argc, char *argv[]) {
   apkam_symmetric_key_bytes = malloc(aes256_key_unsigned_char_bytes_size);
 
   // initialize base64 encoded apkam symmetric key and self encryption key
-  size_t aes_key_base64_size = atchops_base64_encoded_size(AES_256_KEY_BYTES) + 1;
+  size_t aes_key_base64_size = atchops_base64_encoded_size(aes256_key_unsigned_char_bytes_size);
   size_t aes256_key_unsigned_char_base64_size = sizeof(unsigned char) * aes_key_base64_size;
   unsigned char *self_encryption_key_base64 = malloc(aes256_key_unsigned_char_base64_size);
-  unsigned char *apkam_symmetric_key_base64 = malloc(aes256_key_unsigned_char_bytes_size);
+  unsigned char *apkam_symmetric_key_base64 = malloc(aes256_key_unsigned_char_base64_size);
 
   // intialize encrypted APKAM symmetric Key and encrypted default encryption private key (bytes)
   const size_t rsa_2048_privkey_base64_len = atchops_base64_encoded_size(RSA_2048_PRIVKEY_BYTES);
@@ -125,6 +124,7 @@ int main(int argc, char *argv[]) {
     goto enc_self_enc_key_base64_exit;
   }
 
+  memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
   memset(self_encryption_key_bytes, 0, aes256_key_unsigned_char_bytes_size);
   memset(apkam_symmetric_key_bytes, 0, aes256_key_unsigned_char_bytes_size);
   memset(self_encryption_key_base64, 0, aes256_key_unsigned_char_base64_size);
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
   atclient_authenticate_options options;
   atclient_authenticate_options_init(&options);
 
-  if ((ret = atclient_cram_authenticate(&at_client, atsign, cram_secret, &options))) {
+  if ((ret = atclient_cram_authenticate(&at_client, atsign, cram_secret, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "CRAM authentication failed\n");
     goto atclient_exit;
   }
@@ -173,11 +173,11 @@ int main(int argc, char *argv[]) {
 
   // 3.1 Generate APKAM Keypair - RSA2048
   unsigned char *pkam_public_key_base64 = NULL, *pkam_private_key_base64 = NULL;
-  if ((ret = atchops_rsa_key_generate_base64(&pkam_public_key_base64, &pkam_private_key_base64))) {
+  if ((ret = atchops_rsa_key_generate_base64(&pkam_public_key_base64, &pkam_private_key_base64)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed APKAM Keypair Generation\n");
     goto atkeys_free_exit;
   }
-  // sets base64 public and private key in the atkeys struct
+  // set base64 pkam public and private key in the atkeys struct
   atclient_atkeys_set_pkam_public_key_base64(&atkeys, (const char *)pkam_public_key_base64,
                                              strlen((const char *)pkam_public_key_base64));
   atclient_atkeys_set_pkam_private_key_base64(&atkeys, (const char *)pkam_private_key_base64,
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
 
   // 3.2 Generate Default Encryption Keypair - RSA2048
   unsigned char *encrypt_public_key_base64 = NULL, *encrypt_private_key_base64 = NULL;
-  if ((ret = atchops_rsa_key_generate_base64(&encrypt_public_key_base64, &encrypt_private_key_base64))) {
+  if ((ret = atchops_rsa_key_generate_base64(&encrypt_public_key_base64, &encrypt_private_key_base64)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed Default Encryption Keypair Generation\n");
     goto pkam_keypair_free_exit;
   }
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
                                                strlen((const char *)encrypt_private_key_base64));
 
   // 3.3 Generate Self Encryption Key - AES256
-  if ((ret = atchops_aes_generate_key(self_encryption_key_bytes, ATCHOPS_AES_256))) {
+  if ((ret = atchops_aes_generate_key(self_encryption_key_bytes, ATCHOPS_AES_256)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed Self Encryption Key Generation | ret: %d\n", ret);
     goto def_enc_keypair_free_exit;
   }
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
                                                  self_enc_key_base64_len);
 
   // 3.4 Generate APKAM Symmetric Key - AES256
-  if ((ret = atchops_aes_generate_key(apkam_symmetric_key_bytes, ATCHOPS_AES_256))) {
+  if ((ret = atchops_aes_generate_key(apkam_symmetric_key_bytes, ATCHOPS_AES_256)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed APKAM SymmetricKey Generation\n");
     goto def_enc_keypair_free_exit;
   }
@@ -312,7 +312,6 @@ int main(int argc, char *argv[]) {
   /*
    * 6. Perform PKAM auth
    */
-  printf("atisgm: %s\n", atsign);
   if ((ret = atclient_pkam_authenticate(&at_client, atsign, &atkeys, &options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "PKAM auth failed | atclient_pkam_authenticate: %d\n", ret);
     goto atclient_exit;
@@ -322,39 +321,40 @@ int main(int argc, char *argv[]) {
   /*
    * 7. Update Default Encryption Public Key to server
    */
-  atclient_atkey atkey;
-  atclient_atkey_init(&atkey);
+  atclient_atkey def_enc_pub_atkey;
+  atclient_atkey_init(&def_enc_pub_atkey);
 
-  if ((ret = atclient_atkey_create_public_key(&atkey, "publickey", atsign, NULL))) {
+  if ((ret = atclient_atkey_create_public_key(&def_enc_pub_atkey, "publickey", atsign, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create public key\n");
-    goto def_enc_keypair_free_exit;
+    goto enc_pub_key_free_exit;
   }
-  atclient_atkey_metadata_set_is_public(&atkey.metadata, true);
+  atclient_atkey_metadata_set_is_public(&def_enc_pub_atkey.metadata, true);
 
-  if ((ret = atclient_put_public_key(&at_client, &atkey, atkeys.encrypt_private_key_base64, NULL, NULL)) != 0) {
+  if ((ret = atclient_put_public_key(&at_client, &def_enc_pub_atkey, atkeys.encrypt_private_key_base64, NULL, NULL)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed to updating enc_public_key to server | atclient_put_public_key: %d\n", ret);
-    goto def_enc_keypair_free_exit;
+    goto enc_pub_key_free_exit;
   }
 
   /*
    * 8. Delete CRAM secret from the server
    */
-  atclient_atkey_free(&atkey);
-  atclient_atkey_init(&atkey);
+  atclient_atkey cram_atkey;
+  atclient_atkey_init(&cram_atkey);
 
-  if ((ret = atclient_atkey_create_reserved_key(&atkey, "privatekey:at_secret"))) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed creating self key: at_secret\n");
-    goto def_enc_keypair_free_exit;
+  if ((ret = atclient_atkey_create_reserved_key(&cram_atkey, "privatekey:at_secret")) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed creating reserved_key: at_secret\n");
+    goto cram_atkey_free_exit;
   }
 
   atclient_delete_request_options delete_request_options;
   atclient_delete_request_options_init(&delete_request_options);
   // skips is_atclient_atkey_is_shared_by_initialized check
   atclient_delete_request_options_set_skip_shared_by_check(&delete_request_options, true);
-  if ((ret = atclient_delete(&at_client, &atkey, &delete_request_options, NULL))) {
+  if ((ret = atclient_delete(&at_client, &cram_atkey, &delete_request_options, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed deleting CRAM Secret\n");
-    goto def_enc_keypair_free_exit;
+    goto cram_atkey_free_exit;
   }
 
   /*
@@ -363,12 +363,14 @@ int main(int argc, char *argv[]) {
   if ((ret = atclient_atkeys_write_to_path(&atkeys, atkeys_fp)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkeys_write_to_path: %d\n", ret);
     ret = 1;
-    goto def_enc_keypair_free_exit;
+    goto cram_atkey_free_exit;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Success !!!\t Your atKeys file has been generated at \'%s\'\n",
                atkeys_fp);
 
-// exits
+  // exits
+cram_atkey_free_exit: { atclient_atkey_free(&cram_atkey); }
+enc_pub_key_free_exit: { atclient_atkey_free(&def_enc_pub_atkey); }
 def_enc_keypair_free_exit: {
   free(encrypt_public_key_base64);
   free(encrypt_private_key_base64);
