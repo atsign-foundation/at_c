@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient1, "@8incanteater", &atkeys1, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient1, "@8incanteater", &atkeys1, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to pkam auth\n");
     goto exit;
   }
