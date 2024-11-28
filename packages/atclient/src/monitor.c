@@ -152,7 +152,10 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
       case MBEDTLS_ERR_SSL_WANT_WRITE:         // handshake incomplete
         usleep(10000);                         // Try again in 10 milliseconds
         break;
-
+        // Timeout means nothing to read, return EMPTY message type
+      case MBEDTLS_ERR_SSL_TIMEOUT:
+        message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY;
+        return 0;
         // Monitor connection bad, must be discarded
       case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY: // transport closed with close notify
       case 0:                                 // transport closed without close notify

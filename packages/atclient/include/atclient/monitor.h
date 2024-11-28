@@ -19,6 +19,7 @@ enum atclient_monitor_response_type {
   ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,   // indicates caller to access `notification` from the union
   ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE,  // indicates caller to access `data_response` from the union
   ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE, // indicates caller to access `error_response` from the union
+  ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY,          // indicates that no message was received
 
   // the following 3 enums help indicate what type of error occurred when reading from the monitor connection, you will
   // expect one of these enums along with a non-zero return value from atclient_monitor_read
@@ -26,6 +27,7 @@ enum atclient_monitor_response_type {
                                // `error_read` from the union
   ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION,
   ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION,
+
 };
 
 // Represents error information when `ATCLIENT_MONITOR_ERROR_READ` is the message type given by atclient_monitor_read
