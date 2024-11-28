@@ -121,12 +121,10 @@ void atclient_stop_atserver_connection(atclient *ctx);
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
  * @param options pointer to an initialized atclient_authenticate_options struct that stored auth params
- * @param err_msg pointer a char buffer that will hold the error response from server. This can be NULL if not needed.
- * Need not be allocated; caller should free this after use
  * @return int 0 on success, non-zero on error
  */
 int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
-                               const atclient_authenticate_options *options, char **err_msg);
+                               atclient_authenticate_options *options);
 
 /**
  * @brief authenticate with secondary server with AES CRAM key. This is supposed to be a one-time auth, to activate the

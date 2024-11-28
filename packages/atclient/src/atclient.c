@@ -188,7 +188,7 @@ bool atclient_is_atsign_initialized(const atclient *ctx) {
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
-                               const atclient_authenticate_options *options, char **err_msg) {
+                               atclient_authenticate_options *options) {
 
   int ret = 1; // error by default
 
@@ -362,10 +362,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
                  (int)recv_len, recv);
-
-    if(*err_msg != NULL) {
-      *err_msg = (char *)recv;
-    }
     goto exit;
   }
 

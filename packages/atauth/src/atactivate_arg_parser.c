@@ -8,7 +8,7 @@
 #define DEFAULT_ROOT_PORT 64
 
 int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_secret, char **otp, char **atkeys_fp,
-                          char **app_name, char **device_name, char **namespaces, char **root_host) {
+                          char **root_host, int *root_port) {
   int ret = 0;
   int opt;
 
@@ -19,9 +19,15 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
     return -1;
   }
   strcpy(*root_host, DEFAULT_ROOT_SERVER);
+  root_port = malloc(sizeof(int));
+  if (root_port == NULL) {
+    fprintf(stderr, "Memory allocation failed for root_port\n");
+    return -1;
+  }
+  *root_port = DEFAULT_ROOT_PORT;
 
   // Parse command-line arguments
-  while ((opt = getopt(argc, argv, "a:c:k:o:p:d:n:r:h")) != -1) {
+  while ((opt = getopt(argc, argv, "a:c:k:o:r:p:h")) != -1) {
     switch (opt) {
     case 'a':
       *atsign = malloc(sizeof(char) * strlen(optarg) + 1);
@@ -33,8 +39,6 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
       strcpy(*atsign, optarg);
       break;
     case 'c':
-      if (cram_secret == NULL)
-        break;
       *cram_secret = malloc(sizeof(char) * strlen(optarg) + 1);
       if (*cram_secret == NULL) {
         fprintf(stderr, "Memory allocation failed for cram_secret\n");
@@ -44,8 +48,6 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
       strcpy(*cram_secret, optarg);
       break;
     case 'k':
-      if (atkeys_fp == NULL)
-        break;
       *atkeys_fp = malloc(sizeof(char) * strlen(optarg) + 1);
       if (*atkeys_fp == NULL) {
         fprintf(stderr, "Memory allocation failed for atkeys file path\n");
@@ -55,48 +57,13 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
       strcpy(*atkeys_fp, optarg);
       break;
     case 'o':
-      if (otp == NULL)
-        break;
       *otp = malloc(sizeof(char) * strlen(optarg));
-      if (*otp == NULL) {
+      if(*otp == NULL) {
         fprintf(stderr, "Memory allocation failed for atkeys file path\n");
         ret = -1;
         goto exit;
       }
       strcpy(*otp, optarg);
-      break;
-    case 'p':
-      if (app_name == NULL)
-        break;
-      *app_name = realloc(*root_host, sizeof(char) * strlen(optarg) + 1);
-      if (*app_name == NULL) {
-        fprintf(stderr, "Memory reallocation failed for app_name\n");
-        ret = -1;
-        goto exit;
-      }
-      strcpy(*app_name, optarg);
-      break;
-    case 'd':
-      if (device_name == NULL)
-        break;
-      *device_name = realloc(*root_host, sizeof(char) * strlen(optarg) + 1);
-      if (*device_name == NULL) {
-        fprintf(stderr, "Memory reallocation failed for device_name\n");
-        ret = -1;
-        goto exit;
-      }
-      strcpy(*device_name, optarg);
-      break;
-    case 'n':
-      if (namespaces == NULL)
-        break;
-      *namespaces = realloc(*namespaces, sizeof(char) * strlen(optarg) + 1);
-      if (*namespaces == NULL) {
-        fprintf(stderr, "Memory reallocation failed for namespaces\n");
-        ret = -1;
-        goto exit;
-      }
-      strcpy(*namespaces, optarg);
       break;
     case 'r':
       *root_host = realloc(*root_host, sizeof(char) * strlen(optarg) + 1);
@@ -106,6 +73,9 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
         goto exit;
       }
       strcpy(*root_host, optarg);
+      break;
+    case 'p':
+      *root_port = atoi(optarg);
       break;
     case 'h':
       fprintf(stderr, "Usage: %s -a atsign -c cram-secret -o otp [-r root-server] [-p port]\n", argv[0]);
@@ -117,13 +87,13 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
     }
   }
 
-  if (atsign == NULL) {
+  if (*atsign == NULL) {
     fprintf(stderr, "Error: -a (atsign) is mandatory.\n");
     fprintf(stderr, "Usage: %s -a atsign -c cram-secret -o otp [-r root-server] [-p port]\n", argv[0]);
     ret = 1;
   }
 
-  if (cram_secret == NULL && otp == NULL) {
+  if(*cram_secret == NULL && *otp == NULL) {
     fprintf(stderr, "Cannot proceed without either of CRAM secret on enroll OTP.\n");
     fprintf(stderr, "Usage: %s -a atsign -c cram-secret -o otp [-r root-server] [-p port]\n", argv[0]);
     ret = 1;
