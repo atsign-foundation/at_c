@@ -128,14 +128,14 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
 
     size_t off = chunksize * chunks;
-    int i = 0;
+    size_t i = 0;
     while (i < chunksize) {
       ret = mbedtls_ssl_read(&(monitor_conn->atserver_connection.ssl), (unsigned char *)buffer + off + i, 1);
       // successfully read
       if (buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
         done_reading = true;
-        break;
+        goto exit_loop;
       }
       // successfully read something, continue
       if (ret > 0) {
@@ -158,11 +158,15 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
       case 0:                                 // transport closed without close notify
       default:                                // Other errors
         done_reading = true;
-        break;
+        if (ret == 0) {
+          ret = -1;
+        }
+        goto exit_loop;
       }
     }
     chunks = chunks + 1;
   }
+exit_loop:
   if (ret <= 0) { // you should reconnect...
     message->type = ATCLIENT_MONITOR_ERROR_READ;
     message->error_read.error_code = ret;
@@ -339,13 +343,11 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   // holds shared encryption key in raw bytes (after base64 decode operation)
   const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
   unsigned char sharedenckey[sharedenckeysize];
-  size_t sharedenckeylen = 0;
 
   // temporarily holds the shared encryption key in base64
   const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize);
   unsigned char sharedenckeybase64[sharedenckeybase64size];
   memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-  size_t sharedenckeybase64len = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
