@@ -13,13 +13,15 @@
  * @param argv The array of arguments
  * @param atsign pointer to store the atsign value
  * @param cram_secret pointer to store the cram_secret value
- * @param otp
+ * @param otp OTP fetched from otp verb handler
  * @param atkeys_fp pointer to store the file path of the atkeys
+ * @param app_name
+ * @param device_name
+ * @param namespaces
  * @param root_host pointer to store the root host server address
- * @param root_port pointer to store the root port value
  * @return int 0 on success, non-zero on error
  */
 int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_secret, char **otp, char **atkeys_fp,
-                          char **root_host, int *root_port);
+                          char **app_name, char **device_name, char **namespaces, char **root_host);
 
 #endif // ATACTIVATE_ARG_PARSER_H
