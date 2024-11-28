@@ -4,6 +4,10 @@
 extern "C" {
 #endif
 
+#ifdef TARGET_PORTENTA_H7
+#define ATCHOPS_MBEDTLS_VERSION_2
+#endif
+
 #include <mbedtls/aes.h>         // IWYU pragma: export
 #include <mbedtls/asn1.h>        // IWYU pragma: export
 #include <mbedtls/base64.h>      // IWYU pragma: export

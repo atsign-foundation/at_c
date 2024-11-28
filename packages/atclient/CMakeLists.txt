@@ -81,7 +81,7 @@ if(NOT ESP_PLATFORM)
   message(STATUS "[ATCLIENT] ATCLIENT_AS_SUBPROJECT: ${ATCLIENT_AS_SUBPROJECT}")
 
   # Import mbedtls
-  if(NOT TARGET mbedcrypto OR NOT TARGET everest OR NOT TARGET p256m)
+  if(NOT TARGET mbedcrypto)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_mbedtls.cmake)
   endif()
 

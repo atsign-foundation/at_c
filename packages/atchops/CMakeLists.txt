@@ -65,7 +65,7 @@ if(NOT ESP_PLATFORM)
   message(STATUS "[ATCHOPS] ATCHOPS_AS_SUBPROJECT: ${ATCHOPS_AS_SUBPROJECT}")
 
   # Import mbedtls
-  if(NOT TARGET mbedcrypto OR NOT TARGET everest OR NOT TARGET p256m)
+  if(NOT TARGET mbedcrypto)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_mbedtls.cmake)
   endif()
 
@@ -85,6 +85,7 @@ if(NOT ESP_PLATFORM)
     ${PROJECT_NAME}
     PUBLIC
       $<BUILD_INTERFACE:${ATCHOPS_INCLUDE_DIR}> # when `cmake ..` look for headers when building in ./packages/atchops/include/atchops/*.h
+      $<BUILD_INTERFACE:${MBEDTLS_INCLUDEDIR}>
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # when `make install` look inside of something like /usr/local/include/**
   )
 

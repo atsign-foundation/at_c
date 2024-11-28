@@ -144,7 +144,7 @@ void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
   }
 
   if (carriagereturnindex != -1) {
-    for (int i = carriagereturnindex; i < strlen - 1; i++) {
+    for (size_t i = carriagereturnindex; i < strlen - 1; i++) {
       str[i] = str[i + 1];
     }
     str[strlen - 1] = '\0';
@@ -160,7 +160,7 @@ void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
   }
 
   if (newlineindex != -1) {
-    for (int i = newlineindex; i < strlen - 1; i++) {
+    for (size_t i = newlineindex; i < strlen - 1; i++) {
       str[i] = str[i + 1];
     }
     str[strlen - 1] = '\0';
