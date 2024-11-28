@@ -1,3 +1,8 @@
+## 0.3.3
+
+- fix: monitor resiliency
+  - Added a new monitor message which represents an empty message after a timeout
+
 ## 0.3.2
 
 - Fix unused include warnings in notify
