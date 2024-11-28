@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TAG "atactivate"
+#define TAG "at_activate_cli"
 #define DEFAULT_FIRST_APP_NAME "firstApp"
 #define DEFAULT_FIRST_DEVICE_NAME "firstDevice"
 #define AES_256_KEY_BYTES 32
@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
   int ret = 0;
   char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
-  int *root_port = NULL;
   char enrollment_id[ENROLL_ID_MAX_LEN];
   char status[ENROLL_STATUS_STRING_MAX_LEN];
 
@@ -139,7 +138,8 @@ int main(int argc, char *argv[]) {
   /*
    * 1. Parse args
    */
-  if ((ret = atactivate_parse_args(argc, argv, &atsign, &cram_secret, &otp, &atkeys_fp, &root_host, root_port)) != 0) {
+  if ((ret = atactivate_parse_args(argc, argv, &atsign, &cram_secret, &otp, &atkeys_fp, NULL, NULL, NULL,
+                                   &root_host)) != 0) {
     goto exit;
   }
   // 1.1 if atkeys filepath was not passed through args, build default atkeys file path
@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
   /*
    * 6. Perform PKAM auth
    */
-  if ((ret = atclient_pkam_authenticate(&at_client, atsign, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&at_client, atsign, &atkeys, &options, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "PKAM auth failed | atclient_pkam_authenticate: %d\n", ret);
     goto atclient_exit;
   }

@@ -124,7 +124,7 @@ typedef struct atclient_get_atkeys_request_options {
 } atclient_get_atkeys_request_options;
 
 /*
- * 5. Pkam auhtenticate Request Options
+ * 5. Pkam authenticate Request Options
  */
 typedef struct atclient_authenticate_options {
   char *atdirectory_host;
