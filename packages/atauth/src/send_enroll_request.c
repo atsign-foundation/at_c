@@ -13,7 +13,7 @@
 
 #define TAG "send_enroll_request"
 
-int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char *enroll_id, char *enroll_status) {
+int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t *ep, char *enroll_id, char *enroll_status) {
   int ret = 0;
   const size_t recv_size = 100; // to hold the response for enroll request
   unsigned char recv[recv_size];
@@ -29,7 +29,7 @@ int atauth_send_enroll_request(atclient *client, const enroll_params_t *ep, char
   /*
    * 1. Fetch enroll:request command length and allocate memory
    */
-  const enroll_operation_t e_op = atcommons_apkam_request;
+  const atcommons_enroll_operation_t e_op = atcommons_apkam_request;
   size_t cmd_len = 0;
   atcommons_build_enroll_command(NULL, 0, &cmd_len, e_op, ep); // fetch enroll_command length
   const size_t cmd_size = cmd_len;

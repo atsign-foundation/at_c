@@ -12,7 +12,7 @@
 #define TAG "enroll command builder"
 
 int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t *cmd_len,
-                                   const enroll_operation_t operation, const enroll_params_t *params) {
+                                   const atcommons_enroll_operation_t operation, const atcommons_enroll_params_t *params) {
   int ret = 0;
   int cur_len = 0;
   char *params_json = NULL, *e_op = NULL;
@@ -36,8 +36,8 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
     /*
      * B. Calculate enroll operation len
      */
-    if ((ret = enroll_operation_to_string(&e_op, operation)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll_operation_to_string: %d\n", ret);
+    if ((ret = atcommons_enroll_operation_to_string(&e_op, operation)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_atcommons_enroll_operation_to_string: %d\n", ret);
       goto free_enroll_op;
     }
     cur_len += snprintf(NULL, 0, "%s:", e_op);
@@ -64,8 +64,8 @@ int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t 
   /*
    * 2. Convert enroll operation to string, then append to command
    */
-  if ((ret = enroll_operation_to_string(&e_op, operation)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll_operation_to_string: %d\n", ret);
+  if ((ret = atcommons_enroll_operation_to_string(&e_op, operation)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_operation_to_string: %d\n", ret);
     ret = 1;
     return ret;
   }

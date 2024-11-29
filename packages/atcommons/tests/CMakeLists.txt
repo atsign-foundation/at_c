@@ -1,3 +1,4 @@
+include_directories(${PROJECT_SOURCE_DIR}/src)
 file(GLOB_RECURSE files ${CMAKE_CURRENT_LIST_DIR}/test_*.c)
 foreach (file ${files})
     # ${filename} - without `.c`

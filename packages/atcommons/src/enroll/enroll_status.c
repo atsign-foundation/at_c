@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <string.h>
 
-int enroll_status_to_string(char *status, const enroll_status_t es) {
+int enroll_status_to_string(char *status, const atcommons_enroll_status_t es) {
   int ret = 0;
   if (status == NULL) {
     ret = -1;
@@ -12,15 +12,15 @@ int enroll_status_to_string(char *status, const enroll_status_t es) {
 
   switch (es) {
     case atcommons_enroll_status_pending:
-      strncpy(status, "pending", ENROLL_STATUS_STRING_MAX_LEN);
+      strncpy(status, "pending", ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN);
     case atcommons_enroll_status_approved:
-      strncpy(status, "approved", ENROLL_STATUS_STRING_MAX_LEN);
+      strncpy(status, "approved", ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN);
     case atcommons_enroll_status_denied:
-      strncpy(status, "denied", ENROLL_STATUS_STRING_MAX_LEN);
+      strncpy(status, "denied", ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN);
     case atcommons_enroll_status_revoked:
-      strncpy(status, "revoked", ENROLL_STATUS_STRING_MAX_LEN);
+      strncpy(status, "revoked", ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN);
     case atcommons_enroll_status_expired:
-      strncpy(status, "expired", ENROLL_STATUS_STRING_MAX_LEN);
+      strncpy(status, "expired", ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN);
     default:
       ret = -1;
   }

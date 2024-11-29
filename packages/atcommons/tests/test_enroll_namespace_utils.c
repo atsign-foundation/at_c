@@ -1,8 +1,7 @@
-#include "atcommons/at_expect.h"
+#include "at_expect.c"
 #include "atcommons/enroll_namespace.h"
 #include "atlogger/atlogger.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -22,12 +21,12 @@ int main() {
 }
 
 int test_enroll_namespace_to_json() {
-  enroll_namespace_t en;
+  atcommons_enroll_namespace_t en;
   en.name = "ns1";
   en.access = "rw";
   char en_expected_json[] = "{\"ns1\":\"rw\"}";
 
-  enroll_namespace_t en2;
+  atcommons_enroll_namespace_t en2;
   en2.name = "ns2";
   en2.access = "r";
   char en2_expected_json[] = "{\"ns2\":\"r\"}";
@@ -59,17 +58,17 @@ int test_enroll_namespace_to_json() {
 }
 
 int test_enroll_namespace_list_to_json() {
-  enroll_namespace_t en;
+  atcommons_enroll_namespace_t en;
   en.name = "ns1";
   en.access = "rw";
 
-  enroll_namespace_t en2;
+  atcommons_enroll_namespace_t en2;
   en2.name = "ns2";
   en2.access = "r";
 
   char en_expected_json[] = "{\"ns1\":\"rw\",\"ns2\":\"r\"}";
 
-  enroll_namespace_list_t *ns_list = malloc(sizeof(enroll_namespace_list_t));
+  atcommons_enroll_namespace_list_t *ns_list = malloc(sizeof(atcommons_enroll_namespace_list_t));
   atcommons_enroll_namespace_list_append(&ns_list, &en);
   atcommons_enroll_namespace_list_append(&ns_list, &en2);
 

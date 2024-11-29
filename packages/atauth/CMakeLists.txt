@@ -1,5 +1,6 @@
 # Configurable options
 option(ATAUTH_BUILD_TESTS "Build tests for atauth" OFF)
+option(ATAUTH_BUILD_EXECUTABLES "Build executables in atauth" ON)
 
 # Set include directory and file sources
 set (ATAUTH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -117,11 +118,14 @@ if(NOT ESP_PLATFORM)
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
-    add_executable(atactivate ${CMAKE_CURRENT_LIST_DIR}/src/atactivate.c)
-    target_link_libraries(atactivate PRIVATE cjson atlogger atcommons atchops atclient atauth)
+    # Build atactivate executable
+    if (ATAUTH_BUILD_EXECUTABLES)
+        add_executable(atactivate ${CMAKE_CURRENT_LIST_DIR}/src/atactivate.c)
+        target_link_libraries(atactivate PRIVATE cjson atlogger atcommons atchops atclient atauth)
+    endif ()
 
     # EXPORT
-    if(NOT ATAUTH_AS_SUBPROJECT)
+    if (NOT ATAUTH_AS_SUBPROJECT)
         # install as a config.make
         install(
                 EXPORT ${PROJECT_NAME}-config

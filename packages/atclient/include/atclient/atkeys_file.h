@@ -1,6 +1,8 @@
-#ifndef ATCLIENT_atkeys_file_H
-#define ATCLIENT_atkeys_file_H
-
+#ifndef ATCLIENT_ATKEYS_FILE_H
+#define ATCLIENT_ATKEYS_FILE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

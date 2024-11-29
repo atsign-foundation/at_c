@@ -1,5 +1,5 @@
-#ifndef ENROLL_OPERATION_H
-#define ENROLL_OPERATION_H
+#ifndef ATCOMMONS_ENROLL_OPERATION_H
+#define ATCOMMONS_ENROLL_OPERATION_H
 
 #define MAX_ENROLL_OPERATION_STRING_LEN 8
 
@@ -11,7 +11,7 @@ typedef enum {
   atcommons_apkam_unrevoke,
   atcommons_apkam_list,
   atcommons_apkam_delete
-} enroll_operation_t;
+} atcommons_enroll_operation_t;
 
 /**
  * @brief Parses enroll operation type enroll_operation_t and converts that into a string
@@ -20,6 +20,6 @@ typedef enum {
  * @param e_op enroll operation as enum enroll_operation_t
  * @return int 0 on success, non-zero on failure
  */
-int enroll_operation_to_string(char **op_name, enroll_operation_t e_op);
+int atcommons_enroll_operation_to_string(char **op_name, atcommons_enroll_operation_t e_op);
 
 #endif

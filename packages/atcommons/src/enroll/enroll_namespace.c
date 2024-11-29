@@ -28,22 +28,23 @@ int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, en
   enroll_namespace_list_t *temp =
       realloc(*ns_list, sizeof(enroll_namespace_list_t) + sizeof(enroll_namespace_t *) * new_length);
 
-  // Check if realloc was successful
   if (temp == NULL) {
-    atlogger_log(TAG, 0, "Memory allocation failed for namespace list\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to realloc memory for enroll namespace list\n");
     return -1;
   }
 
-  // Copy the new namespace struct into the next position
+  // Add the new namespace to the end of the list
   temp->namespaces[temp->length] = ns;
   temp->length++;
 
+  // Update the original ns_list to point to the new (reallocated) memory
   *ns_list = temp;
+
   return 0;
 }
 
 int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, size_t *ns_str_len,
-                                       const enroll_namespace_t *ns) {
+                                       const atcommons_enroll_namespace_t *ns) {
   if (ns == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns(namespace) cannot be null\n");
     return -1;
@@ -58,7 +59,7 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, s
 }
 
 int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_list_str_len,
-                                            const enroll_namespace_list_t *ns_list) {
+                                            const atcommons_enroll_namespace_list_t *ns_list) {
   if (ns_list == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list(namespace list) cannot be null\n");
     return -1;
@@ -88,6 +89,7 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
     *ns_list_str_len = strlen(*ns_list_string);
   }
 
+  cJSON_Delete(json_obj);
   return 0;
 }
 

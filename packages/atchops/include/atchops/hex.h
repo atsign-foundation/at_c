@@ -1,6 +1,8 @@
-#ifndef UTILS_H
-#define UTILS_H
-
+#ifndef ATCHOPS_HEX_H
+#define ATCHOPS_HEX_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stddef.h>
 
 /**
@@ -33,6 +35,9 @@ int atchops_hex_to_bytes(unsigned char *bytes, const size_t byte_len, const char
  *
  * @return 0 on success, or -1 if the `hex_str` buffer is too small to store the resulting string.
  */
-int atchops_bytes_to_hex (char *hex_str, const size_t hex_str_len, const unsigned char *bytes, const size_t bytes_len);
+int atchops_bytes_to_hex(char *hex_str, const size_t hex_str_len, const unsigned char *bytes, const size_t bytes_len);
 
-#endif // UTILS_H
+#ifdef __cplusplus
+}
+#endif
+#endif

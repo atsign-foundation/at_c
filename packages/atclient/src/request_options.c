@@ -1222,7 +1222,6 @@ void atclient_delete_request_options_free(atclient_delete_request_options *optio
    * 1. Validate arguments
    */
   if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_request_options_free: Invalid arguments\n");
     return;
   }
 

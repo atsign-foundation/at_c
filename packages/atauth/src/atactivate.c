@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   int ret = 0;
   char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
   char enrollment_id[ENROLL_ID_MAX_LEN];
-  char status[ENROLL_STATUS_STRING_MAX_LEN];
+  char status[ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN];
 
   // intialize iv used for aes encryption of keys
   unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
       malloc(sizeof(unsigned char) * aes256_encrypted_rsa_2048_privkey_base64_len);
 
   // allocate memory for enroll params
-  enroll_params_t *ep = malloc(sizeof(enroll_params_t)); // Allocate enrollment params
+  atcommons_enroll_params_t *ep = malloc(sizeof(atcommons_enroll_params_t)); // Allocate enrollment params
 
   // ensure all the above memory allocations hold
   if (iv == NULL) {
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   memset(encrypted_default_encryption_private_key_base64, 0,
          sizeof(unsigned char) * aes256_encrypted_rsa_2048_privkey_base64_len);
   memset(encrypted_self_encryption_key_base64, 0, sizeof(unsigned char) * aes256_encrypted_aes_key_base64_len);
-  memset(ep, 0, sizeof(enroll_params_t));
+  memset(ep, 0, sizeof(atcommons_enroll_params_t));
 
   /*
    * 1. Parse args

@@ -1,17 +1,17 @@
-#ifndef ENROLL_NAMESPACE_STRUCT_H
-#define ENROLL_NAMESPACE_STRUCT_H
+#ifndef ATCOMMONS_ENROLL_NAMESPACE_H
+#define ATCOMMONS_ENROLL_NAMESPACE_H
 
 #include <stddef.h>
 
 typedef struct {
   char *name;
   char *access;
-} enroll_namespace_t;
+} atcommons_enroll_namespace_t;
 
 typedef struct {
   size_t length;
-  enroll_namespace_t *namespaces[];
-} enroll_namespace_list_t;
+  atcommons_enroll_namespace_t *namespaces[];
+} atcommons_enroll_namespace_list_t;
 
 /**
  * @brief serializes enroll_namespace struct to JSON string
@@ -26,7 +26,7 @@ typedef struct {
  * @return int 0 on success, non-zero int on failure
  */
 int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, size_t *ns_str_len,
-                                       const enroll_namespace_t *ns);
+                                       const atcommons_enroll_namespace_t *ns);
 
 /**
  * @brief serialises a list of enroll_namespace[s] to JSON string
@@ -40,7 +40,7 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, s
  * @return int 0 on success, non-zero int on failure
  */
 int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_list_str_len,
-                                            const enroll_namespace_list_t *ns_list);
+                                            const atcommons_enroll_namespace_list_t *ns_list);
 
 /**
  * @brief appends an enroll_namespace struct to an enroll_namespace_list struct.
@@ -56,7 +56,8 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
  * the list
  * @return int 0 on success, non-zero int on failure
  */
-int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, enroll_namespace_t *ns);
+int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **ns_list,
+                                           atcommons_enroll_namespace_t *ns);
 
 /**
  *

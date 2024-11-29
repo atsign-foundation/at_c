@@ -10,7 +10,7 @@ set(
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_namespace.c
         ${CMAKE_CURRENT_LIST_DIR}/src/enroll/enroll_params.c
         ${CMAKE_CURRENT_LIST_DIR}/src/command_builders/enroll_command_builder.c
-        ${CMAKE_CURRENT_LIST_DIR}/tests/at_expect.c
+        ${CMAKE_CURRENT_LIST_DIR}/tests
 )
 
 # Project setup

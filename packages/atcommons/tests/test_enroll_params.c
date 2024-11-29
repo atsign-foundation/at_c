@@ -1,8 +1,7 @@
 #include "atcommons/enroll_params.h"
 #include "atlogger/atlogger.h"
 
-#include <atcommons/at_expect.h>
-#include <stdio.h>
+#include "at_expect.c"
 #include <stdlib.h>
 
 #define TAG "test_enroll_params"
@@ -10,18 +9,18 @@
 // this test case has all params populated e.g. app-name, deice-name, ...
 int test_case_1() {
   // create an enroll_namespace
-  enroll_namespace_t namespace;
+  atcommons_enroll_namespace_t namespace;
   namespace.name = "namespace1";
   namespace.access = "rw";
 
   // another way to create an enroll namespace
-  enroll_namespace_t namespace2 = {"namespace2", "r"};
+  atcommons_enroll_namespace_t namespace2 = {"namespace2", "r"};
 
-  enroll_namespace_list_t *ns_list = malloc(sizeof(enroll_namespace_list_t));
+  atcommons_enroll_namespace_list_t *ns_list = malloc(sizeof(atcommons_enroll_namespace_list_t));
   atcommons_enroll_namespace_list_append(&ns_list, &namespace);
   atcommons_enroll_namespace_list_append(&ns_list, &namespace2);
 
-  enroll_params_t *enroll_params = malloc(sizeof(enroll_params_t));
+  atcommons_enroll_params_t *enroll_params = malloc(sizeof(atcommons_enroll_params_t));
   atcommons_enroll_params_init(enroll_params);
   enroll_params->app_name = "test-app";
   enroll_params->device_name = "test-device";
@@ -83,12 +82,12 @@ int test_case_2() {
       "Rol3v1pAigsuSSkOTAkcse3wHXIX9b4tZd7SBrHLXJnZt2EqLur5pIKKjD\"}";
 
   // another way to create an enroll namespace
-  enroll_namespace_t namespace = {"test01", "rw"};
+  atcommons_enroll_namespace_t namespace = {"test01", "rw"};
 
-  enroll_namespace_list_t *ns_list = malloc(sizeof(enroll_namespace_list_t));
+  atcommons_enroll_namespace_list_t *ns_list = malloc(sizeof(atcommons_enroll_namespace_list_t));
   atcommons_enroll_namespace_list_append(&ns_list, &namespace);
 
-  enroll_params_t *enroll_params = malloc(sizeof(enroll_params_t));
+  atcommons_enroll_params_t *enroll_params = malloc(sizeof(atcommons_enroll_params_t));
   atcommons_enroll_params_init(enroll_params);
   enroll_params->app_name = "app1";
   enroll_params->device_name = "rhaegar";
