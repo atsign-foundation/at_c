@@ -21,7 +21,7 @@
 
 #define TAG "enroll_params"
 
-int atcommons_enroll_params_init(enroll_params_t *ep) {
+int atcommons_enroll_params_init(atcommons_enroll_params_t *ep) {
   /*
    * 1. Validate arguments
    */
@@ -32,21 +32,12 @@ int atcommons_enroll_params_init(enroll_params_t *ep) {
   /*
    * 2. Initialize
    */
-  memset(ep, 0, sizeof(enroll_params_t));
-  ep->enrollment_id = NULL;
-  ep->app_name = NULL;
-  ep->device_name = NULL;
-  ep->otp = NULL;
-  ep->apkam_public_key = NULL;
-  ep->encrypted_default_encryption_private_key = NULL;
-  ep->encrypted_self_encryption_key = NULL;
-  ep->encrypted_apkam_symmetric_key = NULL;
-  ep->ns_list = NULL;
+  memset(ep, 0, sizeof(atcommons_enroll_params_t));
 
-  return 0; // Ensure return for successful initialization
+  return 0;
 }
 
-int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len, const enroll_params_t *ep) {
+int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len, const atcommons_enroll_params_t *ep) {
   int ret = 0;
 
   if (ep == NULL) {
@@ -122,5 +113,6 @@ int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len,
 
 exit:
   free(ns_json);
+  cJSON_Delete(json_object);
   return ret;
 }

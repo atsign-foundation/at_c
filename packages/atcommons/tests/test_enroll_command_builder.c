@@ -1,11 +1,8 @@
-#include "atcommons/at_expect.h"
+#include "at_expect.c"
 #include "atcommons/enroll_command_builder.h"
 #include "atcommons/enroll_namespace.h"
 #include "atcommons/enroll_params.h"
-#include "atlogger/atlogger.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define TAG "test_enroll_command_builder"
 
@@ -14,16 +11,16 @@ int main() {
 
   char expected_string[] = "enroll:request:{\"appName\":\"test-app\",\"deviceName\":\"test-device\",\"otp\":\"XYZABC\","
                            "\"namespaces\":{\"namespace1\":\"rw\",\"namespace2\":\"r\"}}";
-  enroll_namespace_t namespace;
+  atcommons_enroll_namespace_t namespace;
   namespace.name = "namespace1";
   namespace.access = "rw";
-  enroll_namespace_t namespace2 = {"namespace2", "r"};
+  atcommons_enroll_namespace_t namespace2 = {"namespace2", "r"};
 
-  enroll_namespace_list_t *ns_list = malloc(sizeof(enroll_namespace_list_t));
+  atcommons_enroll_namespace_list_t *ns_list = malloc(sizeof(atcommons_enroll_namespace_list_t));
   atcommons_enroll_namespace_list_append(&ns_list, &namespace);
   atcommons_enroll_namespace_list_append(&ns_list, &namespace2);
 
-  enroll_params_t params;
+  atcommons_enroll_params_t params;
   atcommons_enroll_params_init(&params);
   params.app_name = "test-app";
   params.device_name = "test-device";

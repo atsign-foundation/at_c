@@ -1,8 +1,8 @@
-#ifndef ENROLL_VERB_BUILDER_H
-#define ENROLL_VERB_BUILDER_H
+#ifndef ATCOMMONS_ENROLL_VERB_BUILDER_H
+#define ATCOMMONS_ENROLL_VERB_BUILDER_H
 
-#include "enroll_operation.h"
-#include "enroll_params.h"
+#include "atcommons/enroll_operation.h"
+#include "atcommons/enroll_params.h"
 #include <stddef.h>
 
 /**
@@ -18,7 +18,7 @@
  * @param params A pointer to the enroll_params_t struct that holds the parameters for the current enrollment operations
  * @return 0 on success, non-zero indicating failure
  */
-int atcommons_build_enroll_command(char *command, size_t cmd_size, size_t *cmd_len, enroll_operation_t operation,
-                                   const enroll_params_t *params);
+int atcommons_build_enroll_command(char *command, size_t cmd_size, size_t *cmd_len,
+                                   atcommons_enroll_operation_t operation, const atcommons_enroll_params_t *params);
 
 #endif
