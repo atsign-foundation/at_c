@@ -4,6 +4,7 @@
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
+#include <mbedtls/error.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -170,6 +171,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
     goto exit;
   }
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected\n");
 
   // ===============
   // after connect
@@ -222,7 +224,6 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   ret = 0;
-  goto exit;
 
 exit: {
   if (ret != 0) {
@@ -337,13 +338,13 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   }
 
   ret = 0;
-  goto exit;
 exit: { return ret; }
 }
 
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t src_len,
                              unsigned char *recv, const size_t recv_size, size_t *recv_len) {
   int ret = 1;
+  char error_buf[100];
 
   /*
    * 1. Validate arguments
@@ -402,8 +403,12 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   // if return value is positive and less than src_len
   // we should continue to write from the appropriate offset
   // (multiple writes must be summed to determine total data written)
-  if ((ret = mbedtls_ssl_write(&(ctx->ssl), src, src_len)) <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
+  if (src[src_len - 1] != '\n') {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "command does not have a trailing \\n character:\t%s\n", src);
+  }
+  if ((ret = mbedtls_ssl_write(&ctx->ssl, src, src_len)) <= 0) { // error only when the returned value is negative
+    mbedtls_strerror(ret, error_buf, sizeof(error_buf));
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write returned -0x%x: %s\n", -ret, error_buf);
     goto exit;
   }
 
@@ -449,6 +454,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
    * 7. Exit if recv is NULL
    */
   if (recv == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv is null. exiting\n");
     ret = 0;
     goto exit;
   }
@@ -484,8 +490,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   do {
     // TODO: better read handling
     // - see the improved implementation in atclient_monitor_read
-    if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + l, recv_size - l)) <= 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
+    if ((ret = mbedtls_ssl_read(&ctx->ssl, recv + l, recv_size - l)) <= 0) {
+      mbedtls_strerror(ret, error_buf, sizeof(error_buf));
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read returned err: -0x%x: %s\n", -ret, error_buf);
       goto exit;
     }
     l = l + ret;
@@ -528,7 +535,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
    */
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char *recvcopy = NULL;
-    if ((recvcopy = malloc(sizeof(unsigned char) * (*recv_len))) != NULL) {
+    if ((recvcopy = malloc(sizeof(unsigned char) * *recv_len)) != NULL) {
       memcpy(recvcopy, recv, *recv_len);
       atlogger_fix_stdout_buffer((char *)recvcopy, *recv_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recv_len, recvcopy,
@@ -568,7 +575,6 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
   atclient_connection_disable_connection(ctx);
 
   ret = 0;
-  goto exit;
 exit: { return ret; }
 }
 

@@ -114,20 +114,31 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondaryhost,
 void atclient_stop_atserver_connection(atclient *ctx);
 
 /**
- * @brief authenticate with secondary server with RSA pkam private key. it is expected atkeys has been populated with
+ * @brief authenticate with secondary server with RSA pkam private key. It is expected atkeys has been populated with
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param atserver_host host of secondary. if you do not know the host, you can use
- * atclient_utils_find_atserver_address, this string is assumed to be null terminated
- * @param atserver_port port of secondary. if you do not know the port, you can use
- * atclient_utils_find_atserver_address,
  * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
+ * @param options pointer to an initialized atclient_authenticate_options struct that stored auth params
  * @return int 0 on success, non-zero on error
  */
 int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
-                               atclient_pkam_authenticate_options *options);
+                               atclient_authenticate_options *options);
+
+/**
+ * @brief authenticate with secondary server with AES CRAM key. This is supposed to be a one-time auth, to activate the
+ * atsign and set the necessary keys. Once the atsign is activated, use "atclient_pkam_authenticate()"
+ *
+ * @param ctx initialized atclient context
+ * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
+ * @param cram_secret the AES key that will be used to authenticate. Expects a base64 encoded null terminated AES-256
+ * key
+ * @param options pointer to an initialized atclient_authenticate_options struct that stored auth params
+ * @return int 0 on success, non-zero on error
+ */
+int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cram_secret,
+                               atclient_authenticate_options *options);
 
 /**
  * @brief Put a string value into a self key into your atServer. Putting a self key is a private value and is encrypted

@@ -36,8 +36,8 @@ int main() {
   atclient_atkey_init(&atkey);
   atclient_atkeys_init(&atkeys);
   
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
 
   if ((ret = atclient_atkeys_populate_from_path(&atkeys, ATKEYS_FILE_PATH)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys");
@@ -65,7 +65,7 @@ exit: {
   atclient_free(&atclient);
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
-  atclient_pkam_authenticate_options_free(&options);
+  atclient_authenticate_options_free(&options);
   return ret;
 }
 }

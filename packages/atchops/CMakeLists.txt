@@ -14,6 +14,8 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/rsa.c
   ${CMAKE_CURRENT_LIST_DIR}/src/sha.c
   ${CMAKE_CURRENT_LIST_DIR}/src/uuid.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/hex.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/utf8.c
 )
 
 # Project setup
@@ -100,8 +102,8 @@ if(NOT ESP_PLATFORM)
     p256m
     uuid4-static
   )
-
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCHOPS_INSTALL_TARGETS})
+
   # INSTALL
   # Install the include headers
   install(

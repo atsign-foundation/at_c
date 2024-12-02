@@ -39,7 +39,7 @@ void atclient_monitor_init(atclient *monitor_conn) { atclient_init(monitor_conn)
 void atclient_monitor_free(atclient *monitor_conn) { atclient_free(monitor_conn); }
 
 int atclient_monitor_pkam_authenticate(atclient *monitor_conn, const char *atsign, const atclient_atkeys *atkeys,
-                                       atclient_pkam_authenticate_options *options) {
+                                       atclient_authenticate_options *options) {
   int ret = 1;
 
   if ((ret = atclient_pkam_authenticate(monitor_conn, atsign, atkeys, options)) != 0) {

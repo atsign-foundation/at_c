@@ -147,7 +147,7 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
   cJSON *apkam_symmetric_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_JSON_KEY);
   if (apkam_symmetric_key != NULL) {
     if ((ret = set_apkam_symmetric_key_str(atkeys_file, apkam_symmetric_key->valuestring,
-                                          strlen(apkam_symmetric_key->valuestring))) != 0) {
+                                           strlen(apkam_symmetric_key->valuestring))) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_apkam_symmetric_key_str: %d\n", ret);
       goto exit;
     }
@@ -215,7 +215,7 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
    * 2. Variables
    */
 
-  cJSON *root = NULL; // free later
+  cJSON *root = NULL;    // free later
   char *json_str = NULL; // free later
 
   root = cJSON_CreateObject();
@@ -244,7 +244,7 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
     cJSON_AddStringToObject(root, "selfEncryptionKey", atkeys_file->self_encryption_key_str);
   }
 
-  if(is_apkam_symmetric_key_str_initialized(atkeys_file)) {
+  if (is_apkam_symmetric_key_str_initialized(atkeys_file)) {
     cJSON_AddStringToObject(root, "apkamSymmetricKey", atkeys_file->apkam_symmetric_key_str);
   }
 
@@ -273,10 +273,10 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
 
   ret = 0;
 exit: {
-  if(json_str != NULL) {
+  if (json_str != NULL) {
     free(json_str);
   }
-  if(root != NULL) {
+  if (root != NULL) {
     cJSON_Delete(root);
   }
   return ret;

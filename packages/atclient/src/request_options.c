@@ -10,8 +10,8 @@
 #define TAG "request_options"
 
 // default param values for ATCLIENT PKAM AUTHENTICATE OPTIONS
-#define ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_ROOT_SERVER_HOST "root.atsign.org"
-#define ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_ROOT_SERVER_PORT 64
+#define ATCLIENT_AUTHENTICATE_DEFAULT_ROOT_SERVER_HOST "root.atsign.org"
+#define ATCLIENT_AUTHENTICATE_DEFAULT_ROOT_SERVER_PORT 64
 
 static void atclient_put_shared_key_request_options_set_shared_encryption_key_initialized(
     atclient_put_shared_key_request_options *options, const bool initialized);
@@ -38,7 +38,9 @@ static void atclient_get_atkeys_request_options_set_regex_initialized(atclient_g
 static void
 atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atkeys_request_options *options,
                                                                 const bool initialized);
-
+static void
+atclient_delete_request_options_skip_shared_by_check_set_intitialized(atclient_delete_request_options *options,
+                                                                      const bool initialized);
 /*
  * =================
  * 1A. Put SelfKey
@@ -1200,6 +1202,118 @@ void atclient_get_public_key_request_options_unset_store_atkey_metadata(
   atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(options, false);
 }
 
+void atclient_delete_request_options_init(atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_request_options_init: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Initialize the options
+   */
+  memset(options, 0, sizeof(atclient_delete_request_options));
+}
+
+void atclient_delete_request_options_free(atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    return;
+  }
+
+  /*
+  * 2. Reset the value
+  */
+  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
+    atclient_delete_request_options_unset_skip_shared_by_check(options);
+  }
+}
+
+bool atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(
+    atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_is_skip_shared_by_check_initialized: Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the skip_shared_by_check is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX] &
+         ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED;
+}
+
+static void
+atclient_delete_request_options_skip_shared_by_check_set_intitialized(atclient_delete_request_options *options,
+                                                                      const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_set_skip_shared_by_check_flag: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. set initialized state
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX] |=
+        ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INDEX] &=
+        ~ATCLIENT_DELETE_REQUEST_OPTIONS_SKIP_SHARED_BY_CHECK_INITIALIZED;
+  }
+}
+
+void atclient_delete_request_options_set_skip_shared_by_check(atclient_delete_request_options *options,
+                                                              const bool option) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_unset_skip_shared_by_check_flag: Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset pre-exsting value (if exists)
+   */
+  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options)) {
+    atclient_delete_request_options_unset_skip_shared_by_check(options);
+  }
+
+  /*
+   * 3. Set value and set intiliazed to true
+   */
+   memcpy(&(options->skip_shared_by_check), &option, sizeof(option));
+  atclient_delete_request_options_skip_shared_by_check_set_intitialized(options, true);
+}
+
+void atclient_delete_request_options_unset_skip_shared_by_check(atclient_delete_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_delete_request_options_unset_skip_shared_by_check_flag: Invalid arguments\n");
+    return;
+  }
+
+  options->skip_shared_by_check = false;
+  atclient_delete_request_options_skip_shared_by_check_set_intitialized(options, false);
+}
+
 void atclient_get_atkeys_request_options_init(atclient_get_atkeys_request_options *options) {
   /*
    * 1. Validate arguments
@@ -1435,20 +1549,20 @@ void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_r
   atclient_get_atkeys_request_options_set_show_hidden_initialized(options, false);
 }
 
-void atclient_pkam_authenticate_options_init(atclient_pkam_authenticate_options *options) {
-  memset(options, 0, sizeof(atclient_pkam_authenticate_options));
-  options->atdirectory_host = ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_AT_DIRECTORY_HOST;
-  options->atdirectory_port = ATCLIENT_PKAM_AUTHENTICATE_DEFAULT_AT_DIRECTORY_PORT;
+void atclient_authenticate_options_init(atclient_authenticate_options *options) {
+  memset(options, 0, sizeof(atclient_authenticate_options));
+  options->atdirectory_host = ATCLIENT_AUTHENTICATE_DEFAULT_ROOT_SERVER_HOST;
+  options->atdirectory_port = ATCLIENT_AUTHENTICATE_DEFAULT_ROOT_SERVER_PORT;
   options->atserver_host = NULL;
   options->atserver_port = 0;
 }
 
-void atclient_pkam_authenticate_options_free(atclient_pkam_authenticate_options *options) {
+void atclient_authenticate_options_free(atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_free: Invalid arguments\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_free: Invalid arguments\n");
     return;
   }
 
@@ -1456,31 +1570,30 @@ void atclient_pkam_authenticate_options_free(atclient_pkam_authenticate_options 
    * 2. Free options
    */
 
-  if (atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_at_directory_host(options);
+  if (atclient_authenticate_options_is_atdirectory_host_initialized(options)) {
+    atclient_authenticate_options_unset_at_directory_host(options);
   }
 
-  if (atclient_pkam_authenticate_options_is_atdirectory_port_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_at_directory_port(options);
+  if (atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
+    atclient_authenticate_options_unset_at_directory_port(options);
   }
 
-  if (atclient_pkam_authenticate_options_is_atserver_host_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_atserver_host(options);
+  if (atclient_authenticate_options_is_atserver_host_initialized(options)) {
+    atclient_authenticate_options_unset_atserver_host(options);
   }
 
-  if (atclient_pkam_authenticate_options_is_atserver_port_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_atserver_port(options);
+  if (atclient_authenticate_options_is_atserver_port_initialized(options)) {
+    atclient_authenticate_options_unset_atserver_port(options);
   }
 }
 
-bool atclient_pkam_authenticate_options_is_atdirectory_host_initialized(
-    const atclient_pkam_authenticate_options *options) {
+bool atclient_authenticate_options_is_atdirectory_host_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_is_atdirectory_host_initialized: "
+                 "atclient_authenticate_options_is_atdirectory_host_initialized: "
                  "Invalid arguments\n");
     return false;
   }
@@ -1488,18 +1601,17 @@ bool atclient_pkam_authenticate_options_is_atdirectory_host_initialized(
   /*
    * 2. Check if the at directory host is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED;
 }
 
-bool atclient_pkam_authenticate_options_is_atdirectory_port_initialized(
-    const atclient_pkam_authenticate_options *options) {
+bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_is_atdirectory_port_initialized: "
+                 "atclient_authenticate_options_is_atdirectory_port_initialized: "
                  "Invalid arguments\n");
     return false;
   }
@@ -1507,18 +1619,17 @@ bool atclient_pkam_authenticate_options_is_atdirectory_port_initialized(
   /*
    * Check if the at directory port is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED;
 }
 
-bool atclient_pkam_authenticate_options_is_atserver_host_initialized(
-    const atclient_pkam_authenticate_options *options) {
+bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_is_atserver_host_initialized: "
+                 "atclient_authenticate_options_is_atserver_host_initialized: "
                  "Invalid arguments\n");
     return false;
   }
@@ -1526,18 +1637,17 @@ bool atclient_pkam_authenticate_options_is_atserver_host_initialized(
   /*
    * Check if the atserver host is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
 }
 
-bool atclient_pkam_authenticate_options_is_atserver_port_initialized(
-    const atclient_pkam_authenticate_options *options) {
+bool atclient_authenticate_options_is_atserver_port_initialized(const atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_is_atserver_port_initialized: "
+                 "atclient_authenticate_options_is_atserver_port_initialized: "
                  "Invalid arguments\n");
     return false;
   }
@@ -1545,73 +1655,73 @@ bool atclient_pkam_authenticate_options_is_atserver_port_initialized(
   /*
    * Check if the atserver port is initialized
    */
-  return options->_initialized_fields[ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] &
-         ATCLIENT_PKAM_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
+  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] &
+         ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
 }
 
-void atclient_pkam_authenticate_options_unset_at_directory_host(atclient_pkam_authenticate_options *options) {
+void atclient_authenticate_options_unset_at_directory_host(atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_unset_at_directory_host: Invalid arguments\n");
+                 "atclient_authenticate_options_unset_at_directory_host: Invalid arguments\n");
     return;
   }
 
   /*
    * 2. Unsetat directory   */
-  if (atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options)) {
+  if (atclient_authenticate_options_is_atdirectory_host_initialized(options)) {
     free(options->atdirectory_host);
   }
   options->atdirectory_host = NULL;
 }
 
-void atclient_pkam_authenticate_options_unset_at_directory_port(atclient_pkam_authenticate_options *options) {
+void atclient_authenticate_options_unset_at_directory_port(atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_unset_at_directory_port: Invalid arguments\n");
+                 "atclient_authenticate_options_unset_at_directory_port: Invalid arguments\n");
     return;
   }
   options->atdirectory_port = 64;
 }
 
-void atclient_pkam_authenticate_options_unset_atserver_host(atclient_pkam_authenticate_options *options) {
+void atclient_authenticate_options_unset_atserver_host(atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_unset_atserver_host: Invalid arguments\n");
+                 "atclient_authenticate_options_unset_atserver_host: Invalid arguments\n");
     return;
   }
 
   /*
    * 2. Unset atserver host
    */
-  if (atclient_pkam_authenticate_options_is_atserver_host_initialized(options)) {
+  if (atclient_authenticate_options_is_atserver_host_initialized(options)) {
     free(options->atserver_host);
   }
   options->atserver_host = NULL;
 }
 
-void atclient_pkam_authenticate_options_unset_atserver_port(atclient_pkam_authenticate_options *options) {
+void atclient_authenticate_options_unset_atserver_port(atclient_authenticate_options *options) {
   /*
    * 1. Validate arguments
    */
   if (options == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_unset_atserver_port: Invalid arguments\n");
+                 "atclient_authenticate_options_unset_atserver_port: Invalid arguments\n");
     return;
   }
   options->atserver_port = 0;
 }
 
-int atclient_pkam_authenticate_options_set_at_directory_host(atclient_pkam_authenticate_options *options,
-                                                             char *atdirectory_host) {
+int atclient_authenticate_options_set_at_directory_host(atclient_authenticate_options *options,
+                                                        char *atdirectory_host) {
   int ret = 1;
 
   /*
@@ -1620,15 +1730,15 @@ int atclient_pkam_authenticate_options_set_at_directory_host(atclient_pkam_authe
   if (options == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_set_at_directory_host: Invalid arguments\n");
+                 "atclient_authenticate_options_set_at_directory_host: Invalid arguments\n");
     return ret;
   }
 
   /*
    * 2. Unset at directory host, if initialized
    */
-  if (atclient_pkam_authenticate_options_is_atdirectory_host_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_at_directory_host(options);
+  if (atclient_authenticate_options_is_atdirectory_host_initialized(options)) {
+    atclient_authenticate_options_unset_at_directory_host(options);
   }
 
   /*
@@ -1640,8 +1750,7 @@ int atclient_pkam_authenticate_options_set_at_directory_host(atclient_pkam_authe
 exit: { return ret; }
 }
 
-int atclient_pkam_authenticate_options_set_at_directory_port(atclient_pkam_authenticate_options *options,
-                                                             int atdirectory_port) {
+int atclient_authenticate_options_set_at_directory_port(atclient_authenticate_options *options, int atdirectory_port) {
   int ret = 1;
 
   /*
@@ -1650,15 +1759,15 @@ int atclient_pkam_authenticate_options_set_at_directory_port(atclient_pkam_authe
   if (options == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_set_at_directory_port: Invalid arguments\n");
+                 "atclient_authenticate_options_set_at_directory_port: Invalid arguments\n");
     return ret;
   }
 
   /*
    * 2. Unset at directory port, if initialized
    */
-  if (atclient_pkam_authenticate_options_is_atdirectory_port_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_at_directory_host(options);
+  if (atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
+    atclient_authenticate_options_unset_at_directory_host(options);
   }
 
   /*
@@ -1670,8 +1779,7 @@ int atclient_pkam_authenticate_options_set_at_directory_port(atclient_pkam_authe
 exit: { return ret; }
 }
 
-int atclient_pkam_authenticate_options_set_atserver_host(atclient_pkam_authenticate_options *options,
-                                                         char *atserver_host) {
+int atclient_authenticate_options_set_atserver_host(atclient_authenticate_options *options, char *atserver_host) {
   int ret = 1;
 
   /*
@@ -1680,15 +1788,15 @@ int atclient_pkam_authenticate_options_set_atserver_host(atclient_pkam_authentic
   if (options == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_set_atserver_host: Invalid arguments\n");
+                 "atclient_authenticate_options_set_atserver_host: Invalid arguments\n");
     return ret;
   }
 
   /*
    * 2. Unset the atserver host, if initialized
    */
-  if (atclient_pkam_authenticate_options_is_atserver_host_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_atserver_host(options);
+  if (atclient_authenticate_options_is_atserver_host_initialized(options)) {
+    atclient_authenticate_options_unset_atserver_host(options);
   }
 
   /*
@@ -1702,8 +1810,7 @@ int atclient_pkam_authenticate_options_set_atserver_host(atclient_pkam_authentic
 exit: { return ret; }
 }
 
-int atclient_pkam_authenticate_options_set_atserver_port(atclient_pkam_authenticate_options *options,
-                                                         int atserver_port) {
+int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options, int atserver_port) {
   int ret = 1;
 
   /*
@@ -1712,15 +1819,15 @@ int atclient_pkam_authenticate_options_set_atserver_port(atclient_pkam_authentic
   if (options == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_pkam_authenticate_options_set_atserver_port: Invalid arguments\n");
+                 "atclient_authenticate_options_set_atserver_port: Invalid arguments\n");
     return ret;
   }
 
   /*
    * 2. Unset the atserver port, if initialized
    */
-  if (atclient_pkam_authenticate_options_is_atserver_port_initialized(options)) {
-    atclient_pkam_authenticate_options_unset_atserver_host(options);
+  if (atclient_authenticate_options_is_atserver_port_initialized(options)) {
+    atclient_authenticate_options_unset_atserver_host(options);
   }
 
   /*

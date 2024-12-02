@@ -13,9 +13,6 @@
 #define ERROR_PREFIX "\e[1;31m[ERROR]\e[0m"
 #define DEBUG_PREFIX "\e[0;34m[DEBG]\e[0m"
 
-static char prefix[PREFIX_BUFFER_LEN];
-static struct timespec timespec;
-
 typedef struct atlogger_ctx {
   enum atlogger_logging_level level;
   int opts;
@@ -26,12 +23,10 @@ static int is_ctx_initalized = 0;
 
 static atlogger_ctx *atlogger_get_instance() {
   if (is_ctx_initalized == 0) {
-    memset(prefix, 0, sizeof(char) * PREFIX_BUFFER_LEN);
     ctx.opts = ATLOGGER_ENABLE_TIMESTAMPS;
 
     is_ctx_initalized = 1;
   }
-
   return &ctx;
 }
 
@@ -66,6 +61,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
   }
 
   atlogger_ctx *ctx = atlogger_get_instance();
+  struct timespec timespec;
   if (ctx->opts & ATLOGGER_ENABLE_TIMESTAMPS) {
     int res = clock_gettime(CLOCK_REALTIME, &timespec);
 
@@ -77,7 +73,6 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
         res = 0;
       }
     }
-
     if (res == 0) {
       snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%09lu", timespec.tv_nsec);
       off += strlen(prefix + off);
@@ -115,9 +110,13 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   va_list args;
   va_start(args, format);
   if (tag != NULL) {
-    atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
-    printf("%.*s ", (int)strlen(prefix), prefix);
-    printf("%.*s | ", (int)strlen(tag), tag);
+    char *prefix = malloc(sizeof(char) * PREFIX_BUFFER_LEN);
+    if (prefix != NULL) {
+      atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
+      printf("%.*s ", (int)strlen(prefix), prefix);
+      printf("%.*s | ", (int)strlen(tag), tag);
+      free(prefix);
+    }
   }
   vprintf(format, args);
   va_end(args);

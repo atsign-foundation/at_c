@@ -61,8 +61,8 @@ int main() {
   atclient_atkeys_init(&atkeys);
   atclient_atkeys_populate_from_path(&atkeys, ATSIGN_ATKEYS_FILE_PATH);
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
 
   char *atkeystr = NULL;
 
@@ -128,7 +128,7 @@ exit: {
   atclient_atkey_free(&atkey);
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
-  atclient_pkam_authenticate_options_free(&options);
+  atclient_authenticate_options_free(&options);
   free(atkeystr);
   return ret;
 }
