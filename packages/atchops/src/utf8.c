@@ -1,4 +1,3 @@
-#include <atchops/platform.h>
 #include <atchops/utf8.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>

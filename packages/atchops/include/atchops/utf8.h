@@ -3,7 +3,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <atchops/platform.h> // IWYU pragma: keep
 #include <stddef.h>
 
 /**

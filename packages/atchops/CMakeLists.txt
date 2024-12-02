@@ -24,11 +24,11 @@ set(CMAKE_C_STANDARD 99)
 cmake_policy(SET CMP0135 NEW)
 
 # register as an espidf component
-if(ESP_PLATFORM)
+if(ESP_PLATFORM)  
   idf_component_register(
         SRCS ${ATCHOPS_SOURCES}
         INCLUDE_DIRS ${ATCHOPS_INCLUDE_DIR}
-        REQUIRES mbedtls atlogger
+        REQUIRES mbedtls atlogger uuid4
   )
 
   add_custom_command(
@@ -65,8 +65,13 @@ if(NOT ESP_PLATFORM)
   message(STATUS "[ATCHOPS] ATCHOPS_AS_SUBPROJECT: ${ATCHOPS_AS_SUBPROJECT}")
 
   # Import mbedtls
-  if(NOT TARGET mbedcrypto)
+  if(NOT TARGET mbedcrypto OR NOT TARGET everest OR NOT TARGET p256m)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_mbedtls.cmake)
+  endif()
+
+  # Import uuid4
+  if(NOT TARGET uuid4-static)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_uuid4.cmake)
   endif()
 
   # Import atlogger
@@ -85,12 +90,18 @@ if(NOT ESP_PLATFORM)
     ${PROJECT_NAME}
     PUBLIC
       $<BUILD_INTERFACE:${ATCHOPS_INCLUDE_DIR}> # when `cmake ..` look for headers when building in ./packages/atchops/include/atchops/*.h
-      $<BUILD_INTERFACE:${MBEDTLS_INCLUDEDIR}>
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # when `make install` look inside of something like /usr/local/include/**
   )
 
   # Link dependencies to library targets
-  set(ATCHOPS_INSTALL_TARGETS atlogger mbedcrypto everest p256m)
+  set(
+    ATCHOPS_INSTALL_TARGETS
+    atlogger
+    mbedcrypto
+    everest
+    p256m
+    uuid4-static
+  )
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCHOPS_INSTALL_TARGETS})
 
   # INSTALL

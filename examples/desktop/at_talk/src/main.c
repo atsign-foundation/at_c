@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <bits/getopt_core.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
