@@ -10,7 +10,8 @@
 
 #define TAG "enroll_namespace"
 
-int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, enroll_namespace_t *ns) {
+int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **ns_list,
+                                           atcommons_enroll_namespace_t *ns) {
   if (ns == NULL) {
     atlogger_log(TAG, 0, "Namespace to append cannot be null\n");
     return -1;
@@ -21,13 +22,10 @@ int atcommons_enroll_namespace_list_append(enroll_namespace_list_t **ns_list, en
     (*ns_list)->length = 0;
   }
 
-  // Calculate new size
   const size_t new_length = (*ns_list)->length + 1;
-
   // Try reallocating memory for the array of enroll_namespace_t structs
-  enroll_namespace_list_t *temp =
-      realloc(*ns_list, sizeof(enroll_namespace_list_t) + sizeof(enroll_namespace_t *) * new_length);
-
+  atcommons_enroll_namespace_list_t *temp = realloc(*ns_list, sizeof(atcommons_enroll_namespace_list_t) +
+                                                                  sizeof(atcommons_enroll_namespace_t *) * new_length);
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to realloc memory for enroll namespace list\n");
     return -1;
@@ -93,9 +91,12 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
   return 0;
 }
 
-int atcommons_enroll_namespace_list_from_string(char *json_str, enroll_namespace_list_t *ns_list) {
+int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str) {
   int sep_count = 0;
-  int ns_string_end = strlen(json_str);
+  const int ns_string_end = strlen(json_str);
+  int ret = 0;
+
+  // Count seperator in the namespace list string. Replaces all occurences of ':' and ',' to '\0'
   for (int i = 0; i < ns_string_end; i++) {
     if (json_str[i] == ':') {
       sep_count++;
@@ -108,15 +109,35 @@ int atcommons_enroll_namespace_list_from_string(char *json_str, enroll_namespace
   }
 
   int pos = 0;
-  enroll_namespace_t *ns_temp = NULL;
+  // Case 1: json_str contains only one namespace
+  if (sep_count == 1) {
+    atcommons_enroll_namespace_t ns_temp;
+    ns_temp.name = strdup(json_str + pos);
+    pos += strlen(json_str) + 1;
+    ns_temp.access = strdup(json_str + pos);
+
+    if ((ret = atcommons_enroll_namespace_list_append(ns_list, &ns_temp)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed appending ns to ns_list | atcommons_enroll_namespace_list_append: %d", ret);
+      return ret;
+    }
+  }
+
+  // Case 2: json_str contains more than one namespace
+  atcommons_enroll_namespace_t *ns_temp = NULL;
   for (int i = 0; i < sep_count; i++) {
-    ns_temp = malloc(sizeof(enroll_namespace_t));
+    ns_temp = malloc(sizeof(atcommons_enroll_namespace_t));
     ns_temp->name = strdup(json_str + pos);
-    pos = strlen(json_str + pos) + 1;
+    pos += strlen(json_str + pos) + 1;
     ns_temp->access = strdup(json_str + pos);
-    atcommons_enroll_namespace_list_append(&ns_list, ns_temp);
+
+    if ((ret = atcommons_enroll_namespace_list_append(ns_list, ns_temp)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed appending ns to ns_list | atcommons_enroll_namespace_list_append: %d", ret);
+      return ret;
+    }
     pos += strlen(json_str + pos) + 1;
   }
 
-  return 0;
+exit: { return ret; }
 }

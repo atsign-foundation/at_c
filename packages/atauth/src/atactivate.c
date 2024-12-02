@@ -11,19 +11,20 @@
 #include <atcommons/enroll_status.h>
 #include <atlogger/atlogger.h>
 
+#include <atclient/string_utils.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define TAG "at_activate_cli"
+#define TAG "Activate CLI"
 #define DEFAULT_FIRST_APP_NAME "firstApp"
 #define DEFAULT_FIRST_DEVICE_NAME "firstDevice"
 #define AES_256_KEY_BYTES 32
 #define RSA_2048_PRIVKEY_BYTES 1300 // in PKCS#8 format includes padding
 
 int main(int argc, char *argv[]) {
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
   int ret = 0;
-  char *atsign = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
+  char *atsign_temp = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
   char enrollment_id[ENROLL_ID_MAX_LEN];
   char status[ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN];
 
@@ -138,11 +139,20 @@ int main(int argc, char *argv[]) {
   /*
    * 1. Parse args
    */
-  if ((ret = atactivate_parse_args(argc, argv, &atsign, &cram_secret, &otp, &atkeys_fp, NULL, NULL, NULL,
+  if ((ret = atactivate_parse_args(argc, argv, &atsign_temp, &cram_secret, &otp, &atkeys_fp, NULL, NULL, NULL,
                                    &root_host)) != 0) {
     goto exit;
   }
-  // 1.1 if atkeys filepath was not passed through args, build default atkeys file path
+
+  // 1.1 Ensure atsign starts with '@'
+  char *atsign = NULL;
+  if((ret = atclient_string_utils_atsign_with_at(atsign_temp, &atsign)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
+    goto exit;
+  }
+  free(atsign_temp); // no longer needed
+
+  // 1.2 if atkeys filepath was not passed through args, build default atkeys file path
   if (atkeys_fp == NULL) {
     if ((ret = atauth_build_atkeys_file_path(&atkeys_fp, atsign)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not build atkeys filepath\n");
@@ -330,7 +340,7 @@ int main(int argc, char *argv[]) {
   }
   atclient_atkey_metadata_set_is_public(&def_enc_pub_atkey.metadata, true);
 
-  if ((ret = atclient_put_public_key(&at_client, &def_enc_pub_atkey, atkeys.encrypt_private_key_base64, NULL, NULL)) !=
+  if ((ret = atclient_put_public_key(&at_client, &def_enc_pub_atkey, atkeys.encrypt_public_key_base64, NULL, NULL)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed to updating enc_public_key to server | atclient_put_public_key: %d\n", ret);

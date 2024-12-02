@@ -65,6 +65,6 @@ int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **n
  * @param json_str
  * @return
  */
-int atcommons_enroll_namespace_list_from_string(char *json_str, enroll_namespace_list_t *ns_list);
+int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str);
 
 #endif

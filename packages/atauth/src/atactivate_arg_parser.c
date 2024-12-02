@@ -7,7 +7,8 @@
 #define DEFAULT_ROOT_SERVER "root.atsign.org"
 #define DEFAULT_ROOT_PORT 64
 
-int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_secret, char **otp, char **atkeys_fp,
+/// ToDO: add impl to read the root server FQDN then parse it. Currently only accepts root host, cannot parse root port
+int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cram_secret, char **otp, char **atkeys_fp,
                           char **app_name, char **device_name, char **namespaces, char **root_host) {
   int ret = 0;
   int opt;
@@ -79,7 +80,7 @@ int atactivate_parse_args(int argc, char *argv[], char **atsign, char **cram_sec
     case 'd':
       if (device_name == NULL)
         break;
-      *device_name = realloc(*root_host, sizeof(char) * strlen(optarg) + 1);
+      *device_name = realloc(*device_name, sizeof(char) * strlen(optarg) + 1);
       if (*device_name == NULL) {
         fprintf(stderr, "Memory reallocation failed for device_name\n");
         ret = -1;
