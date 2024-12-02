@@ -413,46 +413,6 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
 
   /*
-   * 4 a. In some cases, mbedtls_ssl_write returns a non-zero value. When only part of the data written.
-   * Repeat mbedtls_ssl_write until the ret is equal to remaining_length (which is the condition for successful write)
-   */
-  if (ret != src_len) {
-    int length_written = ret;
-    int remaining_length = src_len - length_written;
-    int attempt = 0;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
-                 "Partial write successful. Performing recursive write. Current ret: %d\n", ret);
-    // warning: potiential infinite loop
-    while (ret > 0) {
-      ret = mbedtls_ssl_write(&ctx->ssl, src + length_written, remaining_length);
-
-      if (ret <= 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Recursive write failed with exit code: %d\n", ret);
-        goto exit;
-      }
-
-      length_written += ret;
-      remaining_length -= ret;
-
-      // This is the condition for a successful write
-      if (ret == remaining_length) {
-        break;
-      }
-
-      attempt++;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Recursive write attempt #: %d\tmbedtls_ssl_write:%d\n", attempt,
-                   ret);
-    }
-
-    if (remaining_length != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Write failed after multiple attempts\n");
-      ret = 1;
-      goto exit;
-    }
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Write successful after %d attempts\n", attempt);
-  }
-
-  /*
    * 5. Print debug log
    */
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == src_len) {
