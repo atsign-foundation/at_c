@@ -106,7 +106,7 @@ if(NOT ESP_PLATFORM)
   if(NOT TARGET atcommons)
     set(atcommons_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atcommons)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atcommons.cmake)
-  endif ()
+  endif()
 
   # Create library targets
   add_library(${PROJECT_NAME} STATIC ${ATCLIENT_SOURCES})
