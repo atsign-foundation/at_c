@@ -9,9 +9,10 @@
 
 ## Packages
 
+- [atauth](./packages/atauth/README.md) provides a binary for activating an atsign.
 - [atchops](./packages/atchops/README.md) stands for "Cryptographic and Hashing Operations" catered for the atProtocol. atchops uses [MbedTLS crypto](https://github.com/Mbed-TLS/mbedtls) and other MbedTLS crypto libraries as a dependency.
 - [atclient](./packages/atclient/README.md) implements the atProtocol and will be the core dependency for most applications. atclient depends on [atchops](./packages/atchops/README.md) and [MbedTLS](https://github.com/Mbed-TLS/mbedtls).
-- [atclient_espidf](./packages/atclient_espidf/README.md) is a package for helping you build atclient for ESP-IDF (Espressif IoT Development Framework) based projects.
+- [atcommons](./packages/atcommons/README.md) is a collection of common utilities and data structures used across the atSDK.
 - [atlogger](./packages/atlogger/README.md) is a tiny logging package.
 
 ## Building Source
