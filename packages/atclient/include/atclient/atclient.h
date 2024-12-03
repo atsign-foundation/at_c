@@ -118,8 +118,8 @@ void atclient_stop_atserver_connection(atclient *ctx);
  * the pkam private key and atclient context is connected to the root server
  *
  * @param ctx initialized atclient context
- * @param atkeys populated atkeys, especially with the pkam private key
  * @param atsign the atsign the atkeys belong to, this string is assumed to be null terminated
+ * @param atkeys populated atkeys, especially with the pkam private key
  * @param options pointer to an initialized atclient_authenticate_options struct that stored auth params
  * @return int 0 on success, non-zero on error
  */
