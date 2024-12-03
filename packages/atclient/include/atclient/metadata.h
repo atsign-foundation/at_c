@@ -287,16 +287,6 @@ int atclient_atkey_metadata_clone(atclient_atkey_metadata *dst, const atclient_a
 int atclient_atkey_metadata_from_json_str(atclient_atkey_metadata *metadata, const char *metadata_str);
 
 /**
- * @brief Populates the metadata struct from a cJSON pointer. This function is good for debugging.
- *
- * @param metadata the metadata struct to populate
- * @param json the json object to populate from
- * @return int 0 on success
- */
-
-int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json);
-
-/**
  * @brief Reads metadata struct and converts it to a json formatted string. This function should mostly be used for
  * debugging only. See atclient_atkey_metadata_to_protocolstr for a more useful function when working with atProtocol
  *
