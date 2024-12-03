@@ -54,7 +54,6 @@ if(NOT ESP_PLATFORM)
     mbedcrypto
     everest
     p256m
-    uuid4-static
     atchops
     cjson
     atlogger

@@ -24,11 +24,11 @@ set(CMAKE_C_STANDARD 99)
 cmake_policy(SET CMP0135 NEW)
 
 # register as an espidf component
-if(ESP_PLATFORM)  
+if(ESP_PLATFORM)
   idf_component_register(
         SRCS ${ATCHOPS_SOURCES}
         INCLUDE_DIRS ${ATCHOPS_INCLUDE_DIR}
-        REQUIRES mbedtls atlogger uuid4
+        REQUIRES mbedtls atlogger
   )
 
   add_custom_command(
@@ -69,11 +69,6 @@ if(NOT ESP_PLATFORM)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_mbedtls.cmake)
   endif()
 
-  # Import uuid4
-  if(NOT TARGET uuid4-static)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_uuid4.cmake)
-  endif()
-
   # Import atlogger
   if(NOT TARGET atlogger)
     set(atlogger_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atlogger)
@@ -94,14 +89,7 @@ if(NOT ESP_PLATFORM)
   )
 
   # Link dependencies to library targets
-  set(
-    ATCHOPS_INSTALL_TARGETS
-    atlogger
-    mbedcrypto
-    everest
-    p256m
-    uuid4-static
-  )
+  set(ATCHOPS_INSTALL_TARGETS atlogger mbedcrypto everest p256m)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCHOPS_INSTALL_TARGETS})
 
   # INSTALL

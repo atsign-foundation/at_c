@@ -132,7 +132,6 @@ if(NOT ESP_PLATFORM)
     mbedcrypto
     everest
     p256m
-    uuid4-static
     cjson
   )
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCLIENT_INSTALL_TARGETS})
