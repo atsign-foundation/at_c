@@ -41,17 +41,17 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth Begin\n");
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
 
-  if ((ret = atclient_pkam_authenticate_options_set_at_directory_host(&options, ATDIRECTORY_HOST)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_host: %d\n",
+  if ((ret = atclient_authenticate_options_set_at_directory_host(&options, ATDIRECTORY_HOST)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_at_directory_host: %d\n",
                  ret);
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate_options_set_at_directory_port(&options, ATDIRECTORY_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_port: %d\n",
+  if ((ret = atclient_authenticate_options_set_at_directory_port(&options, ATDIRECTORY_PORT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_at_directory_port: %d\n",
                  ret);
     goto exit;
   }
@@ -66,7 +66,7 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
   goto exit;
 
 exit: {
-  atclient_pkam_authenticate_options_free(&options);
+  atclient_authenticate_options_free(&options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth End (%d)\n", ret);
   return ret;
 }
@@ -77,17 +77,17 @@ int functional_tests_monitor_pkam_auth(atclient *monitor, atclient_atkeys *atkey
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_monitor_pkam_auth Begin\n");
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
 
-  if ((ret = atclient_pkam_authenticate_options_set_at_directory_host(&options, ATDIRECTORY_HOST)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_host: %d\n",
+  if ((ret = atclient_authenticate_options_set_at_directory_host(&options, ATDIRECTORY_HOST)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_at_directory_host: %d\n",
                  ret);
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate_options_set_at_directory_port(&options, ATDIRECTORY_PORT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_port: %d\n",
+  if ((ret = atclient_authenticate_options_set_at_directory_port(&options, ATDIRECTORY_PORT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_at_directory_port: %d\n",
                  ret);
     goto exit;
   }
@@ -98,7 +98,7 @@ int functional_tests_monitor_pkam_auth(atclient *monitor, atclient_atkeys *atkey
   }
 
 exit: {
-  atclient_pkam_authenticate_options_free(&options);
+  atclient_authenticate_options_free(&options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_monitor_pkam_auth End (%d)\n", ret);
   return ret;
 }

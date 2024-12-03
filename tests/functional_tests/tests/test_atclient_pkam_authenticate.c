@@ -73,8 +73,8 @@ static int test_2_pkam_with_options() {
   atclient atclient;
   atclient_init(&atclient);
 
-  atclient_pkam_authenticate_options options;
-  atclient_pkam_authenticate_options_init(&options);
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
 
   char *atserver_host = NULL;
   int atserver_port = 0;
@@ -90,19 +90,19 @@ static int test_2_pkam_with_options() {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate_options_set_atserver_host(&options, atserver_host)) != 0) {
-    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_host: %d\n",
+  if ((ret = atclient_authenticate_options_set_atserver_host(&options, atserver_host)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_at_directory_host: %d\n",
                  ret);
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate_options_set_atserver_port(&options, atserver_port)) != 0) {
-    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate_options_set_at_directory_port: %d\n",
+  if ((ret = atclient_authenticate_options_set_atserver_port(&options, atserver_port)) != 0) {
+    atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_at_directory_port: %d\n",
                  ret);
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, &atkeys, ATSIGN, &options) != 0)) {
+  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, &options) != 0)) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }
@@ -110,7 +110,7 @@ static int test_2_pkam_with_options() {
   ret = 0;
 
 exit: { 
-  atclient_pkam_authenticate_options_free(&options);
+  atclient_authenticate_options_free(&options);
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
   atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "End test_2_pkam_with_options: %d\n", ret);
