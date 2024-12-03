@@ -64,9 +64,21 @@ When creating source files, include headers, or tests to certain packages, pleas
 
 ## Maintainers
 
-[Atsign](https://atsign.com/) maintains this repository. Feel free to contact us about anything at [info@atsign.com](mailto:info@atsign.com)
+[Atsign](https://atsign.com/) actively maintains this repository. Feel free to contact us about anything at [info@atsign.com](mailto:info@atsign.com). 
 
-- [XavierChanth](https://github.com/XavierChanth)
-- [JeremyTubongbanua](https://github.com/JeremyTubongbanua)
-- [realvarx](https://github.com/realvarx)
+As of December 2, 2024, the list of maintainers below are the active maintainers of this repository. You can ping them for help in your GitHub issues or pull requests:
+
 - [cpswan](https://github.com/cpswan)
+- [JeremyTubongbanua](https://github.com/JeremyTubongbanua)
+- [sitaram-kalluri](https://github.com/sitaram-kalluri)
+- [srieteja](https://github.com/srieteja)
+- [XavierChanth](https://github.com/XavierChanth)
+
+### Recognized Contributors
+
+Atsign encourages all contributions from the community. We appreciate the following contributors for their work on this repository:
+
+- [HamdaanaliQuatil](https://github.com/HamdaanAliQuatil) - wrote the initial version of the atlogger package
+- [realvarx](https://github.com/realvarx) - many changes, including the initial version of atclient, end-to-end encryption, and CRUD operations
+- [natt-n](https://github.com/natt-n) - implemented atKeys file reading utility functions
+- [Xlin123](https://github.com/Xlin123) - docs fixes and example code improvements
