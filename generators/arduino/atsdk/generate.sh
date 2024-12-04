@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 # Note about template naming:
-# files will be named as *.template.ext unless they are .c or .h files
-# then they will be named as *.[c|h].template so that the Arduino
+# They will be named as *.[c|h]template so that the Arduino
 # compiler won't try to compile them
 
 script_dir="$(dirname -- "$(readlink -f -- "$0")")"
@@ -94,8 +93,6 @@ gen_src() {
 fix_rel_headers() {
   # modify .h files to use relative path
   for outer in ${packages[@]}; do
-    # cjson is not nested, nor does it have includes to any other packages
-    # so we skip it
     local includes=$(
       cd "$src_base/$outer" &&
         ls *.h
@@ -111,10 +108,6 @@ fix_rel_headers() {
         if [ "$inner" = "$outer" ]; then
           # e.g. <atclient/atclient.h> -> "atclient.h" when in package atclient
           replace='#include "\1"'
-        elif [ "$inner" = "cjson" ]; then
-          # e.g. <cJSON.h> -> "../cjson/cJSON.h"
-          match="^#include [<\"](cJSON.*\.h)[>\"]"
-          replace='#include "../cjson/\1"'
         else
           # e.g. <atlogger/atlogger.h> -> "../atlogger/atlogger.h" when in package atclient
           replace="#include \"../$inner/\\1\""
@@ -179,11 +172,6 @@ fix_rel_headers() {
       local match="^#include [<\"]$p/(.*\.h)[>\"]"
       # e.g. <atlogger/atlogger.h> -> "atlogger/atlogger.h" when in package atclient
       local replace="#include \"$p/\\1\""
-      if [ "$p" = "cjson" ]; then
-        # e.g. <cJSON.h> -> "cjson/cJSON.h"
-        match="^#include [<\"](cJSON.*\.h)[>\"]"
-        replace='#include "cjson/\1"'
-      fi
       sedi -E -e "s@$match@$replace@" "$src_base/$f"
     done
     # fi
@@ -191,22 +179,20 @@ fix_rel_headers() {
 }
 
 public_headers() {
+  cat "$script_dir/atsdk.htemplate" >>$src_base/atsdk.h
   for d in ${packages[@]}; do
-    # cjson is not nested, so we skip it
-    if [ "$outer" = "cjson" ]; then
-      continue
-    fi
     local includes=$(
       cd "$src_base/$d" &&
         ls *.h
     )
     for f in $includes; do
 
-      echo "#include \"$d/$f\"" >>$src_base/atsdk.h
+      echo "#include \"$d/$f\" // IWYU pragma: export" >>$src_base/atsdk.h
     done
   done
-
-  echo "includes=atsdk.h" >>$script_dir/library.properties
+  cp "$script_dir/atsdk_cjson.htemplate" $src_base/atsdk_cjson.h
+  cp "$script_dir/atsdk_cjson.ctemplate" $src_base/atsdk_cjson.c
+  cp "$script_dir/atsdk_atsdk.cpptemplate" $src_base/atsdk_atsdk.cpp
 }
 
 echo "Cleaning generated files and folders"

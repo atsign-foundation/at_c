@@ -1917,8 +1917,6 @@ int atclient_authenticate_options_set_atserver_port(atclient_authenticate_option
   goto exit;
 
 exit: { return ret; }
-<<<<<<< Conflict 2 of 2
-  ++ ++ ++ +Contents of side #1
 }
 
 static void atclient_authenticate_options_set_atdirectory_host_initialized(atclient_authenticate_options *options,
@@ -2016,8 +2014,3 @@ static void atclient_authenticate_options_set_atserver_port_initialized(atclient
         ~ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
   }
 }
-% % % % % % % Changes from base to side #2 -
-}
-+
-}
->>>>>>> Conflict 2 of 2 ends
