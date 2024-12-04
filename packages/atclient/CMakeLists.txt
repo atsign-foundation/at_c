@@ -126,6 +126,7 @@ if(NOT ESP_PLATFORM)
   set(
     ATCLIENT_INSTALL_TARGETS
     atlogger
+    atcommons
     atchops
     mbedtls
     mbedx509

@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#include "atclient/cjson.h"
+#include "atcommons/json.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

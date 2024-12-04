@@ -1,6 +1,6 @@
 #include "atclient/metadata.h"
-#include "atclient/json.h"
 #include "atclient/string_utils.h"
+#include "atcommons/json.h"
 #include "atlogger/atlogger.h"
 #include <inttypes.h>
 #include <stddef.h>
