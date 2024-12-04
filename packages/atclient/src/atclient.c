@@ -11,6 +11,7 @@
 #include "atclient/request_options.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
+#include <atchops/platform.h>
 #include <atchops/utf8.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -454,7 +455,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     goto exit;
   }
   char *atsign_without_at = malloc(sizeof(char) * strlen(atsign_with_at) + 1);
-  if(atsign_without_at == NULL) {
+  if (atsign_without_at == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for atsign_without_at");
     ret = -1;
     goto exit;
@@ -574,7 +575,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    * 10a. Build `cram:` noop_cmd
    */
   cram_cmd = malloc(sizeof(char) * ATCLIENT_CRAM_COMMAND_LEN + 1); // free later
-  if(cram_cmd == NULL) {
+  if (cram_cmd == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for cram_cmd");
     ret = -1;
     goto exit;

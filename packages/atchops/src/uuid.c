@@ -1,4 +1,5 @@
 #include "atchops/uuid.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -82,13 +83,10 @@ exit: { return ret; }
  * under the terms of the MIT license. See LICENSE for details.
  */
 
-#if defined(_WIN32)
-#include <wincrypt.h>
-#include <windows.h>
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(ATCHOPS_TARGET_ESPIDF)
 #include "esp_random.h"
+#else
+#include "atchops/mbedtls.h"
 #endif
 
 static uint64_t xorshift128plus(uint64_t *s) {
@@ -102,39 +100,10 @@ static uint64_t xorshift128plus(uint64_t *s) {
 }
 
 static int uuid4_init(void) {
-#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-  int res;
-  FILE *fp = fopen("/dev/urandom", "rb");
-  if (!fp) {
-    return UUID4_EFAILURE;
-  }
-  res = fread(seed, 1, sizeof(seed), fp);
-  fclose(fp);
-  if (res != sizeof(seed)) {
-    return UUID4_EFAILURE;
-  }
-
-#elif defined(_WIN32)
-  int res;
-  HCRYPTPROV hCryptProv;
-  res = CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-  if (!res) {
-    return UUID4_EFAILURE;
-  }
-  res = CryptGenRandom(hCryptProv, (DWORD)sizeof(seed), (PBYTE)seed);
-  CryptReleaseContext(hCryptProv, 0);
-  if (!res) {
-    return UUID4_EFAILURE;
-  }
-
-#elif defined(CONFIG_IDF_TARGET_ESP32)
-  for (int i = 0; i < 2; i++) {
-    seed[i] = ((uint64_t)esp_random() << 32) | esp_random(); // Generate random 64-bit values
-  }
-#elif defined(TARGET_PORTENTA_H7)
+#if defined(ATCHOPS_TARGET_UNIX) || defined(ATCHOPS_TARGET_WINDOWS) || defined(ATCHOPS_TARGET_ARDUINO)
   int ret = 0;
-  mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
+  mbedtls_entropy_context entropy;
 
   // TODO replace this string
   const unsigned char pers[13] = {"Arduino_Seed"};
@@ -170,6 +139,10 @@ static int uuid4_init(void) {
   mbedtls_ctr_drbg_free(&ctr_drbg);
   mbedtls_entropy_free(&entropy);
   return UUID4_ESUCCESS;
+#elif defined(ATCHOPS_TARGET_ESPIDF)
+  for (int i = 0; i < 2; i++) {
+    seed[i] = ((uint64_t)esp_random() << 32) | esp_random(); // Generate random 64-bit values
+  }
 #else
 #error "unsupported platform"
 #endif

@@ -1,9 +1,11 @@
 #ifndef ATCHOPS_AES_H
 #define ATCHOPS_AES_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stddef.h>
 
 enum atchops_aes_size {

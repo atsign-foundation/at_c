@@ -9,6 +9,7 @@
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
+#include <atchops/platform.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
@@ -92,7 +93,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
     goto exit;
   }
   atlogger_fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd,
+               ATCLIENT_RESET);
 
   ret = 0;
   goto exit;
@@ -178,7 +180,7 @@ exit_loop:
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen(buffer), buffer,
-               reset);
+               ATCLIENT_RESET);
 
   char *messagetype = NULL;
   char *messagebody = NULL;

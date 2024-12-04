@@ -2,22 +2,24 @@
 #include "atclient/atkey.h"
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define TAG "atclient_get_public_key"
 
-static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value);
+static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                                      const char **value);
 
-int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **value, atclient_get_public_key_request_options *request_options) {
+int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **value,
+                            atclient_get_public_key_request_options *request_options) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, (const char **) value)) !=
-      0) {
+  if ((ret = atclient_get_public_key_validate_arguments(atclient, atkey, (const char **)value)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_public_key_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -54,7 +56,9 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
     goto exit;
   }
 
-  const bool bypass_cache = request_options != NULL && atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) && request_options->bypass_cache;
+  const bool bypass_cache = request_options != NULL &&
+                            atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) &&
+                            request_options->bypass_cache;
 
   const size_t plookup_cmd_size = strlen("plookup:all:\r\n") + (bypass_cache ? strlen("bypassCache:true:") : 0) +
                                   strlen(atkey_str_without_public) + 1;
@@ -83,7 +87,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -108,8 +112,11 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
    * 6. Return data to caller
    */
 
-  bool write_metadata_to_atkey = request_options != NULL && atclient_get_public_key_request_options_is_store_atkey_metadata_initialized(request_options) && request_options->store_atkey_metadata;
-  if(write_metadata_to_atkey) {
+  bool write_metadata_to_atkey =
+      request_options != NULL &&
+      atclient_get_public_key_request_options_is_store_atkey_metadata_initialized(request_options) &&
+      request_options->store_atkey_metadata;
+  if (write_metadata_to_atkey) {
     cJSON *metadata = cJSON_GetObjectItem(root, "metaData");
     if (metadata == NULL) {
       ret = 1;
@@ -125,7 +132,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
     }
   }
 
-  if(value != NULL) {
+  if (value != NULL) {
     if ((*value = malloc(sizeof(char) * (strlen(data->valuestring) + 1))) == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
@@ -148,7 +155,8 @@ exit: {
 }
 }
 
-static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey, const char **value) {
+static int atclient_get_public_key_validate_arguments(const atclient *atclient, const atclient_atkey *atkey,
+                                                      const char **value) {
   int ret = 1;
 
   if (atclient == NULL) {
@@ -175,13 +183,13 @@ static int atclient_get_public_key_validate_arguments(const atclient *atclient, 
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(atkey)) {
+  if (!atclient_atkey_is_key_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not initialized\n");
     goto exit;
   }
 
-  if(!atclient_atkey_is_shared_by_initialized(atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not shared by initialized\n");
     goto exit;

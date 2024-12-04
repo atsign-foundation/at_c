@@ -6,6 +6,7 @@
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
+#include <atchops/platform.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -83,7 +84,7 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -198,7 +199,8 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
   if (!atclient_string_utils_starts_with(response, "data:")) {
     if (atclient_string_utils_starts_with(response, "error:AT0015-key not found")) {
       ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_stringutils_starts_with: %d; error:AT0015-key not found\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "atclient_stringutils_starts_with: %d; error:AT0015-key not found\n", ret);
       goto exit;
     }
   }
@@ -270,7 +272,8 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   const size_t shared_encryption_key_encrypted_base64_size = 2048;
   unsigned char shared_encryption_key_encrypted_base64[shared_encryption_key_encrypted_base64_size];
 
-  const size_t shared_encryption_key_encrypted_size = atchops_base64_decoded_size(shared_encryption_key_encrypted_base64_size);
+  const size_t shared_encryption_key_encrypted_size =
+      atchops_base64_decoded_size(shared_encryption_key_encrypted_base64_size);
   unsigned char shared_encryption_key_encrypted[shared_encryption_key_encrypted_size];
 
   /*
@@ -356,8 +359,7 @@ exit: {
 }
 
 int atclient_create_shared_encryption_key_pair_for_me_and_other(
-    atclient *atclient, const char *recipient_atsign,
-    unsigned char *shared_encryption_key_shared_by_me_with_other) {
+    atclient *atclient, const char *recipient_atsign, unsigned char *shared_encryption_key_shared_by_me_with_other) {
 
   int ret = 1;
 
@@ -368,7 +370,6 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
     return ret;
   }
-
 
   if (recipient_atsign == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recipient_atsign is NULL\n");
@@ -404,7 +405,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   unsigned char shared_encryption_key_base64[shared_encryption_key_base64_size];
 
   // encrypted for us
-  const size_t shared_encryption_key_base64_encrypted_for_us_size = 256; // rsa encryption always outputs 256 bytes (2048 bit key) TODO: constant
+  const size_t shared_encryption_key_base64_encrypted_for_us_size =
+      256; // rsa encryption always outputs 256 bytes (2048 bit key) TODO: constant
   unsigned char shared_encryption_key_base64_encrypted_for_us[shared_encryption_key_base64_encrypted_for_us_size];
 
   // encrypted for us (base64 encoded)
@@ -414,7 +416,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
       shared_encryption_key_base64_encrypted_for_us_base64[shared_encryption_key_base64_encrypted_for_us_base64_size];
 
   // encrypted for them
-  const size_t shared_encryption_key_base64_encrypted_for_them_size = 256; // rsa encryption always outputs 256 bytes (2048 bit key) TODO: constant
+  const size_t shared_encryption_key_base64_encrypted_for_them_size =
+      256; // rsa encryption always outputs 256 bytes (2048 bit key) TODO: constant
   unsigned char shared_encryption_key_base64_encrypted_for_them[shared_encryption_key_base64_encrypted_for_them_size];
 
   // encrypted for them (base64 encoded)
@@ -423,7 +426,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   unsigned char shared_encryption_key_base64_encrypted_for_them_base64
       [shared_encryption_key_base64_encrypted_for_them_base64_size];
 
-  char *update_cmd_for_us = NULL; // for us (update:shared_key.shared_with@shared_by command)
+  char *update_cmd_for_us = NULL;   // for us (update:shared_key.shared_with@shared_by command)
   char *update_cmd_for_them = NULL; // for them (update:@shared_with:shared_key@shared_by command)
 
   const size_t recv_size = 256; // sufficient to receive response from a update: command
@@ -454,7 +457,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     goto exit;
   }
 
-  if ((ret = atchops_rsa_key_populate_public_key(&public_key_struct, public_key_base64, strlen(public_key_base64))) != 0) {
+  if ((ret = atchops_rsa_key_populate_public_key(&public_key_struct, public_key_base64, strlen(public_key_base64))) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_key_populate_public_key: %d\n", ret);
     goto exit;
   }
@@ -486,7 +490,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   memset(shared_encryption_key_base64_encrypted_for_us, 0,
          sizeof(unsigned char) * shared_encryption_key_base64_encrypted_for_us_size);
   if ((ret = atchops_rsa_encrypt(&atclient->atkeys.encrypt_public_key, (unsigned char *)shared_encryption_key_base64,
-                                 shared_encryption_key_base64_len, shared_encryption_key_base64_encrypted_for_us)) != 0) {
+                                 shared_encryption_key_base64_len, shared_encryption_key_base64_encrypted_for_us)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "failed to encrypt shared enc key for us | atchops_rsa_encrypt: %d\n", ret);
     goto exit;
@@ -531,8 +536,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
    */
   // 6a. `update:shared_key.recipient_atsign@myatsign <key>`
   const size_t update_cmd_for_us_size = strlen("update:shared_key.") + strlen(sharedwith_atsign_without_at) +
-                                strlen(sharedby_atsign_with_at) + strlen(" ") +
-                                shared_encryption_key_base64_encrypted_for_us_base64_len + strlen("\r\n") + 1;
+                                        strlen(sharedby_atsign_with_at) + strlen(" ") +
+                                        shared_encryption_key_base64_encrypted_for_us_base64_len + strlen("\r\n") + 1;
   if ((update_cmd_for_us = (char *)malloc(sizeof(char) * update_cmd_for_us_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for update_cmd_for_us\n");
@@ -542,9 +547,9 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
            sharedby_atsign_with_at, shared_encryption_key_base64_encrypted_for_us_base64);
 
   // 6b. `update:@shared_with:shared_key@shared_by <key>`
-  const size_t update_cmd_for_them_size = strlen("update:") + strlen(sharedwith_atsign_with_at) + strlen(":shared_key") +
-                                strlen(sharedby_atsign_with_at) + strlen(" ") +
-                                shared_encryption_key_base64_encrypted_for_them_base64_len + strlen("\r\n") + 1;
+  const size_t update_cmd_for_them_size =
+      strlen("update:") + strlen(sharedwith_atsign_with_at) + strlen(":shared_key") + strlen(sharedby_atsign_with_at) +
+      strlen(" ") + shared_encryption_key_base64_encrypted_for_them_base64_len + strlen("\r\n") + 1;
 
   if ((update_cmd_for_them = (char *)malloc(sizeof(char) * update_cmd_for_them_size)) == NULL) {
     ret = 1;
@@ -559,8 +564,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
    */
 
   // 7a. Our key
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)update_cmd_for_us, update_cmd_for_us_size - 1,
-                                      recv, recv_size, &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)update_cmd_for_us,
+                                      update_cmd_for_us_size - 1, recv, recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -576,8 +581,8 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   recv_len = 0;
 
   // 7b. Their key
-  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)update_cmd_for_them, update_cmd_for_them_size - 1,
-                                      recv, recv_size, &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&(atclient->atserver_connection), (unsigned char *)update_cmd_for_them,
+                                      update_cmd_for_them_size - 1, recv, recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }

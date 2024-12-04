@@ -3,6 +3,7 @@
 #include "atchops/rsa_key.h"
 #include "atchops/sha.h"
 #include "atlogger/atlogger.h"
+#include <atchops/platform.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

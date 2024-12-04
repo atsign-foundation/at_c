@@ -1,4 +1,5 @@
 #include <atchops/aes.h>
+#include <atchops/platform.h>
 #include <atclient/constants.h>
 #include <atclient/request_options.h>
 #include <atlogger/atlogger.h>
@@ -75,19 +76,17 @@ atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atk
 /*
  * 5. Authenticate Request Options
  */
-static void
-atclient_authenticate_options_set_atdirectory_host_initialized(atclient_authenticate_options *options,
-                                                                       const bool initialized);
+static void atclient_authenticate_options_set_atdirectory_host_initialized(atclient_authenticate_options *options,
+                                                                           const bool initialized);
 
-static void
-atclient_authenticate_options_set_atdirectory_port_initialized(atclient_authenticate_options *options,
-                                                                       const bool initialized);
+static void atclient_authenticate_options_set_atdirectory_port_initialized(atclient_authenticate_options *options,
+                                                                           const bool initialized);
 
 static void atclient_authenticate_options_set_atserver_host_initialized(atclient_authenticate_options *options,
-                                                                                const bool initialized);
+                                                                        const bool initialized);
 
 static void atclient_authenticate_options_set_atserver_port_initialized(atclient_authenticate_options *options,
-                                                                                const bool initialized);
+                                                                        const bool initialized);
 
 /*
  * =================
@@ -1344,8 +1343,8 @@ void atclient_delete_request_options_set_skip_shared_by_check(atclient_delete_re
   /*
    * 3. Set value and set intiliazed to true
    */
-  memcpy(&(options->skip_shared_by_check), &option, sizeof(option));
   atclient_delete_request_options_set_skip_shared_by_check_intitialized(options, true);
+  memcpy(&(options->skip_shared_by_check), &option, sizeof(option));
 }
 
 void atclient_delete_request_options_unset_skip_shared_by_check(atclient_delete_request_options *options) {
@@ -1772,8 +1771,7 @@ void atclient_authenticate_options_unset_atserver_port(atclient_authenticate_opt
   atclient_authenticate_options_set_atserver_port_initialized(options, false);
 }
 
-int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_options *options,
-                                                        char *atdirectory_host) {
+int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_options *options, char *atdirectory_host) {
   int ret = 1;
 
   /*
@@ -1810,7 +1808,6 @@ int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_opt
   const size_t atdirectory_host_len = strlen(atdirectory_host);
   memcpy(options->atdirectory_host, atdirectory_host, atdirectory_host_len);
   options->atdirectory_host[atdirectory_host_len] = '\0';
-
 
   ret = 0;
   goto exit;
@@ -1871,7 +1868,7 @@ int atclient_authenticate_options_set_atserver_host(atclient_authenticate_option
    * 3. Set atserver host
    */
   const size_t atserver_host_size = strlen(atserver_host) + 1;
-  if((options->atserver_host = (char *)malloc(sizeof(char) * atserver_host_size)) == NULL) {
+  if ((options->atserver_host = (char *)malloc(sizeof(char) * atserver_host_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_authenticate_options_set_atserver_host: Failed to allocate memory for atserver host\n");
@@ -1920,6 +1917,8 @@ int atclient_authenticate_options_set_atserver_port(atclient_authenticate_option
   goto exit;
 
 exit: { return ret; }
+<<<<<<< Conflict 2 of 2
+  ++ ++ ++ +Contents of side #1
 }
 
 static void atclient_authenticate_options_set_atdirectory_host_initialized(atclient_authenticate_options *options,
@@ -1928,8 +1927,9 @@ static void atclient_authenticate_options_set_atdirectory_host_initialized(atcli
    * 1. Validate arguments
    */
   if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_host_initialized: "
-                                                    "Invalid arguments\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_authenticate_options_set_atdirectory_host_initialized: "
+                 "Invalid arguments\n");
     return;
   }
 
@@ -1951,8 +1951,9 @@ static void atclient_authenticate_options_set_atdirectory_port_initialized(atcli
    * 1. Validate arguments
    */
   if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_port_initialized: "
-                                                    "Invalid arguments\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_authenticate_options_set_atdirectory_port_initialized: "
+                 "Invalid arguments\n");
     return;
   }
 
@@ -1974,8 +1975,9 @@ static void atclient_authenticate_options_set_atserver_host_initialized(atclient
    * 1. Validate arguments
    */
   if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atserver_host_initialized: "
-                                                    "Invalid arguments\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_authenticate_options_set_atserver_host_initialized: "
+                 "Invalid arguments\n");
     return;
   }
 
@@ -1997,8 +1999,9 @@ static void atclient_authenticate_options_set_atserver_port_initialized(atclient
    * 1. Validate arguments
    */
   if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atserver_port_initialized: "
-                                                    "Invalid arguments\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_authenticate_options_set_atserver_port_initialized: "
+                 "Invalid arguments\n");
     return;
   }
 
@@ -2013,3 +2016,8 @@ static void atclient_authenticate_options_set_atserver_port_initialized(atclient
         ~ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
   }
 }
+% % % % % % % Changes from base to side #2 -
+}
++
+}
+>>>>>>> Conflict 2 of 2 ends

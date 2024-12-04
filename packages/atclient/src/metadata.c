@@ -2,6 +2,7 @@
 #include "atclient/string_utils.h"
 #include "atcommons/json.h"
 #include "atlogger/atlogger.h"
+#include <atchops/platform.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -12,7 +13,7 @@
 #define TAG "metadata"
 
 // Json library specific
-#if ATCLIENT_JSON_PROVIDER == ATCLIENT_JSON_PROVIDER_CJSON
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 static int atclient_atkey_metadata_from_cjson_node(atclient_atkey_metadata *metadata, const cJSON *json);
 #endif
 
@@ -2069,7 +2070,7 @@ exit: { return ret; }
 }
 
 // Json library specific
-#if ATCLIENT_JSON_PROVIDER == ATCLIENT_JSON_PROVIDER_CJSON
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atclient_atkey_metadata_from_json_str(atclient_atkey_metadata *metadata, const char *metadata_str) {
   int ret = 1;
 

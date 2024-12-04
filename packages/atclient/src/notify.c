@@ -9,6 +9,7 @@
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
+#include <atchops/platform.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
 #include <stdio.h>

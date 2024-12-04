@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include "atcommons/json.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h> // IWYU pragma: keep (for uint8_t)

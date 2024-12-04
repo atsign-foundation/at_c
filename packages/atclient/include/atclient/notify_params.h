@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include "atclient/atkey.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdint.h>
 
 #define ATCLIENT_DEFAULT_NOTIFIER "SYSTEM"

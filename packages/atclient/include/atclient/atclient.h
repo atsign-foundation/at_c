@@ -8,6 +8,7 @@ extern "C" {
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include "atclient/request_options.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 #include <stddef.h>
 

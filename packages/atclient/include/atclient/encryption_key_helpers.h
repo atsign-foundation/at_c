@@ -7,6 +7,7 @@ extern "C" {
 #include "atclient/atclient.h"
 #include "atclient/atkey.h"
 #include "atclient/atkeys.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 
 /**
  * @brief Retreives the public encryption key of a given atsign.

@@ -1,6 +1,7 @@
 #include "atchops/aes_ctr.h"
-#include <atlogger/atlogger.h>
 #include "atchops/mbedtls.h"
+#include <atchops/platform.h>
+#include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -238,9 +239,10 @@ int atchops_aes_ctr_decrypt(const unsigned char *key, const enum atchops_aes_siz
   /*
    * 5. Return outputs
    */
-  if(plaintext_padded_len - pad_val > plaintext_size) {
+  if (plaintext_padded_len - pad_val > plaintext_size) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "plaintext_size is less than (plaintext_padded_len - pad_val). The buffer is too small.\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "plaintext_size is less than (plaintext_padded_len - pad_val). The buffer is too small.\n");
     goto exit;
   }
 

@@ -6,6 +6,7 @@ extern "C" {
 
 #include "atclient/atclient.h"
 #include "atclient/notify_params.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 
 int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **notification_id);
 

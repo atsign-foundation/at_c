@@ -2,7 +2,6 @@
 
 # Configurable variables
 option(ENABLE_TESTING "Enable MbedTLS tests" OFF)
-option(ATCHOPS_MBEDTLS_VERSION_2 "Use v2 of mbedtls" OFF)
 set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE OPT_IN) # only try find_package if FIND_PACKAGE_ARGS is set
 
 message(STATUS "[MbedTLS] fetching package...")

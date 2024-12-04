@@ -1,6 +1,7 @@
 #include "atclient/notify_params.h"
 #include "atchops/aes.h"
 #include "atclient/atkey.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stdint.h>
 #include <stdlib.h>

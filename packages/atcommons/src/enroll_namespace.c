@@ -48,6 +48,7 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, s
   return 0;
 }
 
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_list_str_len,
                                             const atcommons_enroll_namespace_list_t *ns_list) {
   if (ns_list == NULL) {
@@ -82,3 +83,7 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
   cJSON_Delete(json_obj);
   return 0;
 }
+
+#else
+#error "JSON provider not supported"
+#endif

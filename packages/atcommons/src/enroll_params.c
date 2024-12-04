@@ -37,6 +37,7 @@ int atcommons_enroll_params_init(atcommons_enroll_params_t *ep) {
   return 0;
 }
 
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len, const atcommons_enroll_params_t *ep) {
   int ret = 0;
 
@@ -116,3 +117,6 @@ exit:
   cJSON_Delete(json_object);
   return ret;
 }
+#else
+#error "JSON provider not supported"
+#endif

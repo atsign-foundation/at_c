@@ -4,9 +4,10 @@
 extern "C" {
 #endif
 
-#include "atchops/constants.h"
+#include "atchops/constants.h" // IWYU pragma: keep
 #include "atchops/rsa_key.h"
 #include "atchops/sha.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stddef.h>
 
 /**

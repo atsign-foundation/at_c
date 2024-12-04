@@ -1,5 +1,6 @@
 #include "atchops/sha.h"
 #include "atchops/mbedtls.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 

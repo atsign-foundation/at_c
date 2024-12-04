@@ -6,6 +6,7 @@ extern "C" {
 
 #include "atclient/atclient.h"
 #include "atclient/atnotification.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 
 /**

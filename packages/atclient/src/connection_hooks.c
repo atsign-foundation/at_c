@@ -1,9 +1,10 @@
-#include "atclient/connection.h"
 #include "atclient/connection_hooks.h"
+#include "atclient/connection.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TAG "connection_hooks"
 
@@ -129,28 +130,28 @@ int atclient_connection_hooks_set(atclient_connection *ctx, const atclient_conne
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Received 'NONE' hook as hook set input type\n");
     goto exit;
   case ATCLIENT_CONNECTION_HOOK_TYPE_PRE_READ: {
-    if((ret = atclient_connection_hooks_set_pre_read(ctx, (atclient_connection_hook *)hook)) != 0) {
+    if ((ret = atclient_connection_hooks_set_pre_read(ctx, (atclient_connection_hook *)hook)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set pre read hook\n");
       goto exit;
     }
     break;
   }
   case ATCLIENT_CONNECTION_HOOK_TYPE_POST_READ: {
-    if((ret = atclient_connection_hooks_set_post_read(ctx, (atclient_connection_hook *)hook)) != 0) {
+    if ((ret = atclient_connection_hooks_set_post_read(ctx, (atclient_connection_hook *)hook)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set post read hook\n");
       goto exit;
     }
     break;
   }
   case ATCLIENT_CONNECTION_HOOK_TYPE_PRE_WRITE: {
-    if((ret = atclient_connection_hooks_set_pre_write(ctx, (atclient_connection_hook *)hook)) != 0) {
+    if ((ret = atclient_connection_hooks_set_pre_write(ctx, (atclient_connection_hook *)hook)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set pre write hook\n");
       goto exit;
     }
     break;
   }
   case ATCLIENT_CONNECTION_HOOK_TYPE_POST_WRITE: {
-    if((ret = atclient_connection_hooks_set_post_write(ctx, (atclient_connection_hook *)hook)) != 0) {
+    if ((ret = atclient_connection_hooks_set_post_write(ctx, (atclient_connection_hook *)hook)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set post write hook\n");
       goto exit;
     }

@@ -1,6 +1,7 @@
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
+#include <atchops/platform.h>
 #include <atclient/atclient.h>
 #include <atclient/atkey.h>
 #include <atclient/constants.h>
@@ -77,18 +78,18 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   if (request_options != NULL &&
       atclient_put_shared_key_request_options_is_shared_encryption_key_initialized(request_options)) {
     memcpy(shared_encryption_key, request_options->shared_encryption_key, shared_encryption_key_size);
-  } else  {
-    ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign_with_at,
-                                                                    shared_encryption_key);
+  } else {
+    ret = atclient_get_shared_encryption_key_shared_by_me(ctx, recipient_atsign_with_at, shared_encryption_key);
     if (ret == ATCLIENT_ERR_AT0015_KEY_NOT_FOUND) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Did not find shared_encryption_key_shared_by_me.. Creating key pair for me and other...\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG,
+                   "Did not find shared_encryption_key_shared_by_me.. Creating key pair for me and other...\n");
       if ((ret = atclient_create_shared_encryption_key_pair_for_me_and_other(ctx, recipient_atsign_with_at,
-                                                                           shared_encryption_key)) != 0) {
+                                                                             shared_encryption_key)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                    "atclient_create_shared_encryption_key_pair_for_me_and_other: %d\n", ret);
+                     "atclient_create_shared_encryption_key_pair_for_me_and_other: %d\n", ret);
         goto exit;
       }
-    } else if(ret != 0) {
+    } else if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_encryption_key_shared_by_me: %d\n", ret);
       goto exit;
     }
@@ -97,18 +98,18 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   /*
    * 4. Generate IV
    */
-  if((ret = atchops_iv_generate(iv)) != 0) {
+  if ((ret = atchops_iv_generate(iv)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_iv_generate: %d\n", ret);
     goto exit;
   }
 
   memset(iv_base64, 0, sizeof(char) * iv_base64_size);
-  if((ret = atchops_base64_encode(iv, iv_size, (unsigned char *) iv_base64, iv_base64_size, NULL)) != 0) {
+  if ((ret = atchops_base64_encode(iv, iv_size, (unsigned char *)iv_base64, iv_base64_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_atkey_metadata_set_iv_nonce(&(atkey->metadata), iv_base64)) != 0) {
+  if ((ret = atclient_atkey_metadata_set_iv_nonce(&(atkey->metadata), iv_base64)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_iv_nonce: %d\n", ret);
     goto exit;
   }
@@ -118,15 +119,16 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
    */
   size_t value_encrypted_len = 0;
   memset(value_encrypted, 0, sizeof(unsigned char) * value_encrypted_size);
-  if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (const unsigned char *) value, value_len, value_encrypted,
-                                     value_encrypted_size, &value_encrypted_len)) != 0) {
+  if ((ret = atchops_aes_ctr_encrypt(shared_encryption_key, ATCHOPS_AES_256, iv, (const unsigned char *)value,
+                                     value_len, value_encrypted, value_encrypted_size, &value_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_aes_ctr_encrypt: %d\n", ret);
     goto exit;
   }
 
   size_t value_encrypted_base64_len = 0;
   memset(value_encrypted_base64, 0, sizeof(char) * value_encrypted_base64_size);
-  if((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, (unsigned char *) value_encrypted_base64, value_encrypted_base64_size, &value_encrypted_base64_len)) != 0) {
+  if ((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, (unsigned char *)value_encrypted_base64,
+                                   value_encrypted_base64_size, &value_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
   }
@@ -146,8 +148,8 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   }
   const size_t atkey_str_len = strlen(atkey_str);
 
-  const size_t update_cmd_size =
-      strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len + strlen(" ") + value_encrypted_base64_len + strlen("\r\n") + 1;
+  const size_t update_cmd_size = strlen("update") + metadata_protocol_str_len + strlen(":") + atkey_str_len +
+                                 strlen(" ") + value_encrypted_base64_len + strlen("\r\n") + 1;
   if ((update_cmd = malloc(sizeof(char) * update_cmd_size)) == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for update_cmd\n");
@@ -160,8 +162,8 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   /*
    * 7. Send update command
    */
-  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *) update_cmd, update_cmd_len, recv, recv_size,
-                                      &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&ctx->atserver_connection, (unsigned char *)update_cmd, update_cmd_len, recv,
+                                      recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -173,7 +175,7 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -189,13 +191,14 @@ int atclient_put_shared_key(atclient *ctx, atclient_atkey *atkey, const char *va
 
   ret = 0;
   goto exit;
-exit: { 
+exit: {
   free(recipient_atsign_with_at);
   free(update_cmd);
   free(metadata_protocol_str);
   free(atkey_str);
   free(recv);
-  return ret; }
+  return ret;
+}
 }
 
 static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const atclient_atkey *atkey,
@@ -211,13 +214,13 @@ static int atclient_put_shared_key_validate_arguments(const atclient *ctx, const
     goto exit;
   }
 
-  if(!atclient_is_atsign_initialized(ctx)) {
+  if (!atclient_is_atsign_initialized(ctx)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atsign is not initialized\n");
     goto exit;
   }
 
-  if(!atclient_is_atserver_connection_started(ctx)) {
+  if (!atclient_is_atserver_connection_started(ctx)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not started\n");
     goto exit;

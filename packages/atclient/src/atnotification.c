@@ -1,4 +1,5 @@
 #include "atclient/atnotification.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +7,7 @@
 #define TAG "atnotification"
 
 // Json library specific
-#if ATCLIENT_JSON_PROVIDER == ATCLIENT_JSON_PROVIDER_CJSON
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 static int atclient_atnotification_from_cjson_node(atclient_atnotification *notification, const cJSON *root);
 #endif
 
@@ -1581,7 +1582,7 @@ exit: { return ret; }
 }
 
 // Json library specific
-#if ATCLIENT_JSON_PROVIDER == ATCLIENT_JSON_PROVIDER_CJSON
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atclient_atnotification_from_json_str(atclient_atnotification *notification, const char *json_str) {
   int ret = 1;
   /*

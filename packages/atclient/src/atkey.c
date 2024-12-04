@@ -2,6 +2,7 @@
 #include "atclient/metadata.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
+#include <atchops/platform.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -78,9 +79,10 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
     return 0;
   }
 
-  atclient_atkey_type type = atclient_atkey_get_type(atkey); 
+  atclient_atkey_type type = atclient_atkey_get_type(atkey);
 
-  if((!atclient_atkey_is_shared_by_initialized(atkey) || strlen(atkey->shared_by) <= 0) && type != ATCLIENT_ATKEY_TYPE_RESERVED_KEY){
+  if ((!atclient_atkey_is_shared_by_initialized(atkey) || strlen(atkey->shared_by) <= 0) &&
+      type != ATCLIENT_ATKEY_TYPE_RESERVED_KEY) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey->shared_by is not initialized\n");
     return 0;
   }
@@ -103,8 +105,8 @@ size_t atclient_atkey_strlen(const atclient_atkey *atkey) {
   if (atclient_atkey_is_namespacestr_initialized(atkey) && strlen(atkey->namespace_str) > 0) {
     len += strlen(".") + strlen(atkey->namespace_str);
   }
-  if(atclient_atkey_is_shared_by_initialized(atkey)){
-   len += strlen(atkey->shared_by);
+  if (atclient_atkey_is_shared_by_initialized(atkey)) {
+    len += strlen(atkey->shared_by);
   }
   return len;
 }
