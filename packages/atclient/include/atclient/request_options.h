@@ -39,12 +39,12 @@ extern "C" {
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INITIALIZED (VALUE_INITIALIZED << 1)
 
-#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INDEX 0
-#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INDEX 0
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INDEX 0
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INDEX 0
 #define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX 0
 #define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX 0
-#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
-#define ATCLIENT_AUTHENTICATE_OPTIONS_AT_DIRECTORY_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INITIALIZED (VALUE_INITIALIZED << 0)
+#define ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INITIALIZED (VALUE_INITIALIZED << 1)
 #define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED (VALUE_INITIALIZED << 3)
 
@@ -260,12 +260,12 @@ void atclient_authenticate_options_init(atclient_authenticate_options *options);
 void atclient_authenticate_options_free(atclient_authenticate_options *options);
 
 bool atclient_authenticate_options_is_atdirectory_host_initialized(const atclient_authenticate_options *options);
-int atclient_authenticate_options_set_at_directory_host(atclient_authenticate_options *options, char *atdirectory_host);
-void atclient_authenticate_options_unset_at_directory_host(atclient_authenticate_options *options);
+int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_options *options, char *atdirectory_host);
+void atclient_authenticate_options_unset_atdirectory_host(atclient_authenticate_options *options);
 
 bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclient_authenticate_options *options);
-int atclient_authenticate_options_set_at_directory_port(atclient_authenticate_options *options, int atdirectory_port);
-void atclient_authenticate_options_unset_at_directory_port(atclient_authenticate_options *options);
+int atclient_authenticate_options_set_atdirectory_port(atclient_authenticate_options *options, int atdirectory_port);
+void atclient_authenticate_options_unset_atdirectory_port(atclient_authenticate_options *options);
 
 bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_authenticate_options *options);
 int atclient_authenticate_options_set_atserver_host(atclient_authenticate_options *options, char *atserver_host);
