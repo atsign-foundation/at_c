@@ -10,6 +10,8 @@
 // uuid4 was originally an external library which was depended upon as
 // an external dependency, it has been moved into this file as private
 // symbols so that it's easier to make platform specific overrides
+// Original repo: https://github.com/rxi/uuid4
+// Fork (now merged into here): https://github.com/atsign-foundation/uuid4
 
 // This section is from uuid4/uuid4.h
 /**
