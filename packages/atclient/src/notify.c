@@ -335,12 +335,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   }
 
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
-#ifdef TARGET_PORTENTA_H7
-    // PRIu64 not defined on portenta but we know it's 32 bit so we can hard code it to llu
-    snprintf(cmd + off, cmdsize - off, ":ttln:%llu", params->notification_expiry);
-#else
     snprintf(cmd + off, cmdsize - off, ":ttln:%" PRIu64, params->notification_expiry);
-#endif
     off += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry);
   }
 

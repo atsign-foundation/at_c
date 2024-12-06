@@ -18,9 +18,5 @@
 #elif defined(CONFIG_IDF_TARGET_ESP32)
 #define ATCHOPS_TARGET_ESPIDF
 
-#elif defined(TARGET_PORTENTA_H7)
-#define ATCHOPS_TARGET_ARDUINO
-#define ATCHOPS_MBEDTLS_VERSION_2
-
 #endif
 #endif

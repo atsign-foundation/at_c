@@ -181,7 +181,6 @@ fix_rel_headers() {
 
 public_headers() {
   cp $script_dir/lib/* $src_base/
-  # cat "$script_dir/atsdk.htemplate" >>$src_base/atsdk.h
   for d in ${packages[@]}; do
     local includes=$(
       cd "$src_base/$d" &&
@@ -191,9 +190,22 @@ public_headers() {
       echo "#include \"$d/$f\" // IWYU pragma: export" >>$src_base/atsdk.h
     done
   done
-  # cp "$script_dir/atsdk_cjson.htemplate" $src_base/atsdk_cjson.h
-  # cp "$script_dir/atsdk_cjson.ctemplate" $src_base/atsdk_cjson.c
-  # cp "$script_dir/atsdk_atsdk.cpptemplate" $src_base/atsdk_atsdk.cpp
+}
+
+overrides() {
+  # logging
+  echo "#define ATLOGGER_OVERRIDE_LOG_FUNCTION" >>$src_base/atlogger/atlogger.h
+  # json
+  {
+    echo "#define ATCOMMONS_JSON_PROVIDER_CJSON"
+    echo "#include <atsdk_cjson.h>"
+  } >>$src_base/atcommons/json.h
+  # platform
+  {
+    echo '#define PRIu64 "llu"'
+    echo "#define ATCHOPS_TARGET_ARDUINO"
+    echo "#define ATCHOPS_MBEDTLS_VERSION_2"
+  } >>$src_base/atchops/platform.h
 }
 
 echo "Cleaning generated files and folders"
@@ -228,6 +240,9 @@ public_headers
 echo "Fixing all includes to be relative"
 fix_rel_headers
 
+echo "Applying Arduino specific overrides"
+overrides
+
 echo "Done generating Arduino library"
 
 # functions
@@ -236,6 +251,7 @@ unset clean
 unset gen_src
 unset public_headers
 unset fix_rel_headers
+unset overrides
 
 # global variables
 unset script_dir

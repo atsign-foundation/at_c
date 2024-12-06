@@ -6,11 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(TARGET_PORTENTA_H7)
-#define ATLOGGER_DISABLE_TIMESTAMPS
-#endif
-
-#ifndef ATLOGGER_DISABLE_TIMESTAMPS
+#if !defined(ATLOGGER_DISABLE_TIMESTAMPS) && !defined(ATLOGGER_OVERRIDE_LOG_FUNCTION)
 #include <time.h>
 #endif
 
@@ -35,6 +31,7 @@ static atlogger_ctx *atlogger_get_instance() {
   return &ctx;
 }
 
+#ifndef ATLOGGER_OVERRIDE_LOG_FUNCTION
 static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix, size_t prefixlen) {
   memset(prefix, 0, prefixlen);
   int off = 0;
@@ -88,6 +85,7 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
   off += 2;
   prefix[off] = '\0';
 }
+#endif
 
 enum atlogger_logging_level atlogger_get_logging_level() {
   atlogger_ctx *ctx = atlogger_get_instance();
@@ -104,6 +102,7 @@ void atlogger_set_opts(int opts) {
   ctx->opts = opts;
 }
 
+#ifndef ATLOGGER_OVERRIDE_LOG_FUNCTION
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...) {
   atlogger_ctx *ctx = atlogger_get_instance();
 
@@ -125,6 +124,7 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   vprintf(format, args);
   va_end(args);
 }
+#endif
 
 void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
   // if str == 'Jeremy\r\n', i want it to be 'Jeremy'

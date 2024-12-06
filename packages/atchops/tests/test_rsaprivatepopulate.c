@@ -1,7 +1,7 @@
 #include "atchops/rsa_key.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <stddef.h>
 
 #define PRIVATE_KEY_BASE64                                                                                             \
   "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCy64Pzy9ZDdm6e96z3DmjektD7sKUo40Ax+"                              \

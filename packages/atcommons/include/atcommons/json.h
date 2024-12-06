@@ -17,16 +17,6 @@ extern "C" {
 #define ATCOMMONS_JSON_PROVIDER_CJSON
 #include <cjson.h> // IWYU pragma: export
 
-#elif defined(TARGET_PORTENTA_H7)
-#define ATCOMMONS_JSON_PROVIDER_CJSON
-#define ATCOMMONS_JSON_PROVIDER_ARDUINO
-
-// This file will be injected into the Arduino build by the generator
-// search for atsdk_cjson.h.template in the generators directory
-#include <atsdk_cjson.h>
-
-#else
-#error "unable to resolve json provider for platform"
 #endif
 
 #ifdef __cplusplus
