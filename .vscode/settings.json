@@ -1,0 +1,11 @@
+// If you want to have custom local settings, vscode should have something like
+// settings.local.json, but they don't the correct way to handle this is:
+// https://code.visualstudio.com/docs/editor/workspaces
+{
+  "files.associations": {
+    "*.ctemplate": "c",
+    "*.cpptemplate": "cpp",
+    "*.htemplate": "cpp"
+  }
+}
+
