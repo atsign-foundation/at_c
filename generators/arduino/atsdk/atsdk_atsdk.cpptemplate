@@ -1,4 +1,0 @@
-#include "atsdk.h"
-#include <Arduino.h>
-
-void atsdk_arduino_setup() {}

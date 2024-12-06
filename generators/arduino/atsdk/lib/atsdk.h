@@ -1,3 +1,4 @@
+
 #ifndef ATSDK_ARDUINO_H
 #define ATSDK_ARDUINO_H
 
@@ -5,8 +6,7 @@
 extern "C" {
 #endif
 
-#include <ctype.h>
-#define ATLOGGER_DISABLE_TIMESTAMPS
+#include <ctype.h> // IWYU pragma: export
 
 #ifdef __cplusplus
 }

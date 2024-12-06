@@ -180,20 +180,20 @@ fix_rel_headers() {
 }
 
 public_headers() {
-  cat "$script_dir/atsdk.htemplate" >>$src_base/atsdk.h
+  cp $script_dir/lib/* $src_base/
+  # cat "$script_dir/atsdk.htemplate" >>$src_base/atsdk.h
   for d in ${packages[@]}; do
     local includes=$(
       cd "$src_base/$d" &&
         ls *.h
     )
     for f in $includes; do
-
       echo "#include \"$d/$f\" // IWYU pragma: export" >>$src_base/atsdk.h
     done
   done
-  cp "$script_dir/atsdk_cjson.htemplate" $src_base/atsdk_cjson.h
-  cp "$script_dir/atsdk_cjson.ctemplate" $src_base/atsdk_cjson.c
-  cp "$script_dir/atsdk_atsdk.cpptemplate" $src_base/atsdk_atsdk.cpp
+  # cp "$script_dir/atsdk_cjson.htemplate" $src_base/atsdk_cjson.h
+  # cp "$script_dir/atsdk_cjson.ctemplate" $src_base/atsdk_cjson.c
+  # cp "$script_dir/atsdk_atsdk.cpptemplate" $src_base/atsdk_atsdk.cpp
 }
 
 echo "Cleaning generated files and folders"
