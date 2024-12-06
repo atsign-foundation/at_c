@@ -33,6 +33,7 @@ clean() {
 # Bootstraps generated files and folders
 bootstrap() {
   mkdir -p $src_base
+  echo "*" >$src_base/.gitignore
 }
 
 # Generic function which symbollically links package files
