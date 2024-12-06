@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <bits/getopt_core.h>
 
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
@@ -124,7 +123,7 @@ int main(int argc, char *argv[]) {
   size_t linelen = 0;
   size_t read;
 
-  printf("%s%s%s: ", HBLU, from_atsign, reset);
+  printf("%s%s%s: ", HBLU, from_atsign, ATCLIENT_RESET);
   while ((read = getline(&line, &linelen, stdin)) != -1) {
     if (read > 1) {
       if (line[read - 1] == '\n') {
@@ -172,7 +171,7 @@ int main(int argc, char *argv[]) {
     }
     pthread_mutex_unlock(&client_mutex);
 
-    printf("%s%s%s: ", HBLU, from_atsign, reset);
+    printf("%s%s%s: ", HBLU, from_atsign, ATCLIENT_RESET);
 
     atclient_atkey_free(&atkey);
     atclient_notify_params_free(&params);
@@ -267,8 +266,8 @@ static void *monitor_handler(void *xargs) {
       }
       if (atclient_atnotification_is_decrypted_value_initialized(&(message.notification))) {
         const atclient_atnotification *notification = &(message.notification);
-        printf("\n%s%s%s: %s\n", HGRN, notification->from, reset, notification->decrypted_value);
-        printf("%s%s%s: ", HBLU, from_atsign, reset);
+        printf("\n%s%s%s: %s\n", HGRN, notification->from, ATCLIENT_RESET, notification->decrypted_value);
+        printf("%s%s%s: ", HBLU, from_atsign, ATCLIENT_RESET);
         fflush(stdout);
       }
       tries = 1;
@@ -385,4 +384,5 @@ static int reconnect_clients(atclient *monitor, atclient *ctx, const char *atser
       return ret;
     }
   }
+  return ret;
 }
