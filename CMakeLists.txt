@@ -41,6 +41,11 @@ message(STATUS "Building atauth")
 set(ATAUTH_BUILD_TESTS ${ATSDK_BUILD_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atauth)
 
+if(${ATSDK_BUILD_TESTS})
+  message(STATUS "Building functional tests")
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests/functional_tests)
+endif()
+
 if(NOT ESP_PLATFORM)
   # install dependencies
   set(

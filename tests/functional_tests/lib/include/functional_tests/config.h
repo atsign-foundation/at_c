@@ -6,11 +6,16 @@ extern "C" {
 
 #include <stddef.h>
 
-#define ATDIRECTORY_HOST "vip.ve.atsign.zone"
-#define ATDIRECTORY_PORT 64
+#define ROOT_HOST "root.atsign.org"
+#define ROOT_PORT 64
 
-#define FIRST_ATSIGN "@purnima🛠"
-#define SECOND_ATSIGN "@bob🛠"
+#ifndef FIRST_ATSIGN
+#define FIRST_ATSIGN "@12alpaca"
+#endif
+
+#ifndef SECOND_ATSIGN
+#define SECOND_ATSIGN "@12snowboating"
+#endif
 
 /**
  * @brief Get the atkeys file path for the given atSign.

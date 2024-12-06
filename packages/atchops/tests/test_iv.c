@@ -1,9 +1,9 @@
 #include "atchops/iv.h"
+#include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <atlogger/atlogger.h>
 
 #define TAG "test_iv"
 
@@ -18,9 +18,9 @@ int main() {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate IV\n");
     goto exit;
   }
-  
+
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "IV (%d bytes): ", ivsize);
-  for (int i = 0; i < ivsize; i++) {
+  for (size_t i = 0; i < ivsize; i++) {
     printf("%02x ", iv[i]);
   }
   printf("\n");
