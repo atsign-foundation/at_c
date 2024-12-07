@@ -21,7 +21,18 @@ project(
   LANGUAGES C
 )
 
-find_package(atsdk CONFIG REQUIRED)
+if(NOT DEFINED FUNCTIONAL_TESTS_AS_SUBPROJECT)
+  set(FUNCTIONAL_TESTS_AS_SUBPROJECT ON)
+  if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(FUNCTIONAL_TESTS_AS_SUBPROJECT OFF)
+  endif()
+endif()
+
+if(NOT FUNCTIONAL_TESTS_AS_SUBPROJECT)
+  find_package(atsdk CONFIG REQUIRED)
+else()
+  add_library(atsdk::atclient ALIAS atclient)
+endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib)
 

@@ -1,6 +1,26 @@
 # Configurable options
 set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
-option(ATSDK_BUILD_TESTS "Build tests for atsdk" OFF)
+
+option(ATSDK_BUILD_TESTS "Build tests for atsdk ON | \"unit\" | \"func\" " OFF)
+
+# to avoid caching issues
+if(ATSDK_BUILD_TESTS STREQUAL "func")
+  message("FUNCTIONAL TESTING ENABLED")
+  set(ATSDK_BUILD_UNIT_TESTS OFF)
+  set(ATSDK_BUILD_FUNCTIONAL_TESTS ON)
+elseif(ATSDK_BUILD_TESTS STREQUAL "unit")
+  message("UNIT TESTING ENABLED")
+  set(ATSDK_BUILD_UNIT_TESTS ON)
+  set(ATSDK_BUILD_FUNCTIONAL_TESTS OFF)
+elseif(ATSDK_BUILD_TESTS)
+  message("ALL TESTING ENABLED")
+  set(ATSDK_BUILD_FUNCTIONAL_TESTS ON)
+  set(ATSDK_BUILD_UNIT_TESTS ON)
+else()
+  message("TESTING DISABLED")
+  set(ATSDK_BUILD_UNIT_TESTS OFF)
+  set(ATSDK_BUILD_FUNCTIONAL_TESTS OFF)
+endif()
 
 # Basic project setup
 cmake_minimum_required(VERSION 3.24)
@@ -30,22 +50,16 @@ message(STATUS "Building atlogger")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atlogger)
 
 message(STATUS "Building atchops")
-set(ATCHOPS_BUILD_TESTS ${ATSDK_BUILD_TESTS})
+set(ATCHOPS_BUILD_TESTS ${ATSDK_BUILD_UNIT_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atchops)
 
 message(STATUS "Building atclient")
-set(ATCLIENT_BUILD_TESTS ${ATSDK_BUILD_TESTS})
+set(ATCLIENT_BUILD_TESTS ${ATSDK_BUILD_UNIT_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atclient)
 
 message(STATUS "Building atauth")
-set(ATAUTH_BUILD_TESTS ${ATSDK_BUILD_TESTS})
+set(ATAUTH_BUILD_TESTS ${ATSDK_BUILD_UNIT_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atauth)
-
-if(${ATSDK_BUILD_TESTS})
-  message(STATUS "Building functional tests")
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests/functional_tests)
-  enable_testing()
-endif()
 
 if(NOT ESP_PLATFORM)
   # install dependencies
@@ -89,4 +103,13 @@ if(NOT ESP_PLATFORM)
       FILE "cmake/${PROJECT_NAME}-config.cmake"
     )
   endif()
+endif()
+
+if(ATSDK_BUILD_FUNCTIONAL_TESTS)
+  message(STATUS "Building functional tests")
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests/functional_tests)
+endif()
+
+if(ATSDK_BUILD_UNIT_TESTS OR ATSDK_BUILD_FUNCTIONAL_TESTS)
+  enable_testing()
 endif()
