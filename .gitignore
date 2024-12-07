@@ -17,6 +17,8 @@ lib/**/lib*.a
 
 sdkconfig
 
+Testing/
+
 __pycache__/
 
 .pio/

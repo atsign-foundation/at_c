@@ -35,7 +35,7 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   int len = vsnprintf(NULL, 0, format, args);
   char *buf = new char[len + 1];
   vsnprintf(buf, len, format, args);
-  Serial.println(buf);
+  Serial.print(buf);
   delete[] buf;
 
   va_end(args);

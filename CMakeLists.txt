@@ -44,6 +44,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atauth)
 if(${ATSDK_BUILD_TESTS})
   message(STATUS "Building functional tests")
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests/functional_tests)
+  enable_testing()
 endif()
 
 if(NOT ESP_PLATFORM)
