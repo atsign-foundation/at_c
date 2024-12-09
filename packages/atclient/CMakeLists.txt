@@ -81,7 +81,7 @@ if(NOT ESP_PLATFORM)
   message(STATUS "[ATCLIENT] ATCLIENT_AS_SUBPROJECT: ${ATCLIENT_AS_SUBPROJECT}")
 
   # Import mbedtls
-  if(NOT TARGET mbedcrypto OR NOT TARGET everest OR NOT TARGET p256m)
+  if(NOT TARGET mbedcrypto)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/find_mbedtls.cmake)
   endif()
 
@@ -106,7 +106,7 @@ if(NOT ESP_PLATFORM)
   if(NOT TARGET atcommons)
     set(atcommons_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../atcommons)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/atcommons.cmake)
-  endif ()
+  endif()
 
   # Create library targets
   add_library(${PROJECT_NAME} STATIC ${ATCLIENT_SOURCES})
@@ -126,13 +126,13 @@ if(NOT ESP_PLATFORM)
   set(
     ATCLIENT_INSTALL_TARGETS
     atlogger
+    atcommons
     atchops
     mbedtls
     mbedx509
     mbedcrypto
     everest
     p256m
-    uuid4-static
     cjson
   )
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ATCLIENT_INSTALL_TARGETS})

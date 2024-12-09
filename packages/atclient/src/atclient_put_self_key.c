@@ -1,14 +1,15 @@
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
+#include <atchops/platform.h>
 #include <atclient/atclient.h>
 #include <atclient/atkey.h>
+#include <atclient/constants.h>
 #include <atclient/request_options.h>
 #include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
-#include <atclient/constants.h>
 
 #define TAG "atclient_put_self_key"
 
@@ -87,7 +88,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   }
 
   memset(iv_base64, 0, sizeof(unsigned char) * iv_base64_size);
-  if ((ret = atchops_base64_encode(iv, iv_size, (unsigned char *) iv_base64, iv_base64_size, NULL)) != 0) {
+  if ((ret = atchops_base64_encode(iv, iv_size, (unsigned char *)iv_base64, iv_base64_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
   }
@@ -109,7 +110,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
 
   size_t value_encrypted_base64_len = 0;
   memset(value_encrypted_base64, 0, sizeof(char) * value_encrypted_base64_size);
-  if ((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, (unsigned char *) value_encrypted_base64,
+  if ((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, (unsigned char *)value_encrypted_base64,
                                    value_encrypted_base64_size, &value_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
@@ -161,7 +162,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -196,13 +197,13 @@ static int atclient_put_self_key_validate_arguments(atclient *ctx, atclient_atke
     goto exit;
   }
 
-  if(!atclient_is_atserver_connection_started(ctx)) {
+  if (!atclient_is_atserver_connection_started(ctx)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx.atserver_connection is not started\n");
     goto exit;
   }
 
-  if(!atclient_is_atsign_initialized(ctx)) {
+  if (!atclient_is_atsign_initialized(ctx)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx->atsign is not intiialized\n");
     goto exit;
@@ -214,13 +215,13 @@ static int atclient_put_self_key_validate_arguments(atclient *ctx, atclient_atke
     goto exit;
   }
 
-  if(!atclient_atkey_is_key_initialized(atkey)) {
+  if (!atclient_atkey_is_key_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is not initialized\n");
     goto exit;
   }
 
-  if(!atclient_atkey_is_shared_by_initialized(atkey)) {
+  if (!atclient_atkey_is_shared_by_initialized(atkey)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.shared_by is not initialized\n");
     goto exit;

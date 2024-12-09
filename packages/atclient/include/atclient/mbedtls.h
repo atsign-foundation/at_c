@@ -4,11 +4,10 @@
 extern "C" {
 #endif
 
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/net_sockets.h>
-#include <mbedtls/ssl.h>
-#include <mbedtls/threading.h>
+#include <atchops/mbedtls.h>     // IWYU pragma: export
+#include <mbedtls/net_sockets.h> // IWYU pragma: export
+#include <mbedtls/ssl.h>         // IWYU pragma: export
+#include <mbedtls/threading.h>   // IWYU pragma: export
 
 #ifdef __cplusplus
 }

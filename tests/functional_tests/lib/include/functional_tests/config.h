@@ -9,8 +9,13 @@ extern "C" {
 #define ROOT_HOST "root.atsign.org"
 #define ROOT_PORT 64
 
+#ifndef FIRST_ATSIGN
 #define FIRST_ATSIGN "@12alpaca"
+#endif
+
+#ifndef SECOND_ATSIGN
 #define SECOND_ATSIGN "@12snowboating"
+#endif
 
 /**
  * @brief Get the atkeys file path for the given atSign.

@@ -13,10 +13,10 @@
 
 #define TAG "send_enroll_request"
 
-int atauth_validate_send_enroll_request_arguments(const atclient *ctx, const atcommons_enroll_params_t *ep,
+int atauth_validate_send_enroll_request_arguments(atclient *client, const atcommons_enroll_params_t *ep,
                                                   const char *enroll_id, const char *enroll_status);
 
-int atauth_send_enroll_request(atclient *ctx, const atcommons_enroll_params_t *ep, char *enroll_id,
+int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t *ep, char *enroll_id,
                                char *enroll_status) {
   int ret = 0;
   const size_t recv_size = 100; // to hold the response for enroll request
@@ -60,7 +60,7 @@ int atauth_send_enroll_request(atclient *ctx, const atcommons_enroll_params_t *e
   /*
    * 3. Send enroll:request command to server
    */
-  if ((ret = atclient_connection_send(&ctx->atserver_connection, (const unsigned char *)command, cmd_len, recv,
+  if ((ret = atclient_connection_send(&client->atserver_connection, (const unsigned char *)command, cmd_len, recv,
                                       recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     ret = 1;

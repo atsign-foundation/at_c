@@ -6,6 +6,7 @@ extern "C" {
 
 #include "atchops/rsa_key.h"
 #include "atclient/atkeys_file.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <atchops/rsa.h>
 #include <stddef.h>
 #include <stdint.h>

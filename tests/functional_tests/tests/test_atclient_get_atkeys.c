@@ -1,5 +1,6 @@
 #include <atclient/atclient.h>
 #include <atlogger/atlogger.h>
+#include <functional_tests/config.h>
 #include <functional_tests/helpers.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,7 @@
 
 #define SCAN_REGEX ".*"
 
-#define ATSIGN1 "@12alpaca"
+#define ATSIGN1 FIRST_ATSIGN
 
 static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, const bool showhidden);
 static int test_2_atclient_get_atkeys_null(atclient *ctx, const char *scan_regex, const bool showhidden);
@@ -47,12 +48,12 @@ int main() {
     goto exit;
   }
 
-  if((ret = test_3_atclient_get_atkeys_null_ctx(SCAN_REGEX, false)) != 0) {
+  if ((ret = test_3_atclient_get_atkeys_null_ctx(SCAN_REGEX, false)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_atclient_get_atkeys_null_ctx failed: %d", ret);
     goto exit;
   }
 
-  if((ret = test_4_atclient_get_atkeys_null_regex(&atclient1, SCAN_REGEX, false)) != 0) {
+  if ((ret = test_4_atclient_get_atkeys_null_regex(&atclient1, SCAN_REGEX, false)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_atclient_get_atkeys_null_regex failed: %d", ret);
     goto exit;
   }
@@ -79,7 +80,7 @@ static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, con
     goto exit;
   }
 
-  for(size_t i = 0; i < atkey_array_len; i++) {
+  for (size_t i = 0; i < atkey_array_len; i++) {
     char *atkeystr = NULL;
     atclient_atkey_to_string(&atkey_array[i], &atkeystr);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkey_array[%zu]: %s\n", i, atkeystr);
@@ -119,8 +120,7 @@ exit: {
 }
 }
 
-static int test_3_atclient_get_atkeys_null_ctx(const char *scan_regex, const bool showhidden)
-{
+static int test_3_atclient_get_atkeys_null_ctx(const char *scan_regex, const bool showhidden) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_3_atclient_get_atkeys_null_ctx\n");
@@ -144,8 +144,7 @@ exit: {
 }
 }
 
-static int test_4_atclient_get_atkeys_null_regex(atclient *ctx, const char *scan_regex, const bool showhidden)
-{
+static int test_4_atclient_get_atkeys_null_regex(atclient *ctx, const char *scan_regex, const bool showhidden) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_4_atclient_get_atkeys_null_regex\n");

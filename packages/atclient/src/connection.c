@@ -4,7 +4,8 @@
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atlogger/atlogger.h"
-#include <mbedtls/error.h>
+#include <atchops/mbedtls.h>
+#include <atchops/platform.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -308,7 +309,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
       memcpy(valuecopy, value, value_len);
       atlogger_fix_stdout_buffer((char *)valuecopy, value_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, value_len, valuecopy,
-                   reset);
+                   ATCLIENT_RESET);
       free(valuecopy);
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -421,7 +422,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       memcpy(srccopy, src, src_len);
       atlogger_fix_stdout_buffer((char *)srccopy, src_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
-                   srccopy, reset);
+                   srccopy, ATCLIENT_RESET);
       free(srccopy);
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -539,7 +540,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       memcpy(recvcopy, recv, *recv_len);
       atlogger_fix_stdout_buffer((char *)recvcopy, *recv_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recv_len, recvcopy,
-                   reset);
+                   ATCLIENT_RESET);
       free(recvcopy);
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -732,7 +733,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
       memcpy(recvcopy, recv, recv_len);
       atlogger_fix_stdout_buffer((char *)recvcopy, recv_len);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, recv_len, recvcopy,
-                   reset);
+                   ATCLIENT_RESET);
       free(recvcopy);
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include "atclient/atkeys.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 
 /**
  * @brief Get address of atServer from the atDirectory, You should check the return code of this function before using

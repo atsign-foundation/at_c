@@ -9,6 +9,7 @@
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
+#include <atchops/platform.h>
 #include <atchops/uuid.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
@@ -92,7 +93,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
     goto exit;
   }
   atlogger_fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd, reset);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd,
+               ATCLIENT_RESET);
 
   ret = 0;
   goto exit;
@@ -128,14 +130,14 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
 
     size_t off = chunksize * chunks;
-    int i = 0;
+    size_t i = 0;
     while (i < chunksize) {
       ret = mbedtls_ssl_read(&(monitor_conn->atserver_connection.ssl), (unsigned char *)buffer + off + i, 1);
       // successfully read
       if (buffer[off + i] == '\n') {
         buffer[off + i] = '\0';
         done_reading = true;
-        break;
+        goto exit_loop;
       }
       // successfully read something, continue
       if (ret > 0) {
@@ -152,17 +154,24 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
       case MBEDTLS_ERR_SSL_WANT_WRITE:         // handshake incomplete
         usleep(10000);                         // Try again in 10 milliseconds
         break;
-
+        // Timeout means nothing to read, return EMPTY message type
+      case MBEDTLS_ERR_SSL_TIMEOUT:
+        message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY;
+        return 0;
         // Monitor connection bad, must be discarded
       case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY: // transport closed with close notify
       case 0:                                 // transport closed without close notify
       default:                                // Other errors
         done_reading = true;
-        break;
+        if (ret == 0) {
+          ret = -1;
+        }
+        goto exit_loop;
       }
     }
     chunks = chunks + 1;
   }
+exit_loop:
   if (ret <= 0) { // you should reconnect...
     message->type = ATCLIENT_MONITOR_ERROR_READ;
     message->error_read.error_code = ret;
@@ -171,7 +180,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   }
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen(buffer), buffer,
-               reset);
+               ATCLIENT_RESET);
 
   char *messagetype = NULL;
   char *messagebody = NULL;
@@ -339,13 +348,11 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   // holds shared encryption key in raw bytes (after base64 decode operation)
   const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
   unsigned char sharedenckey[sharedenckeysize];
-  size_t sharedenckeylen = 0;
 
   // temporarily holds the shared encryption key in base64
   const size_t sharedenckeybase64size = atchops_base64_encoded_size(sharedenckeysize);
   unsigned char sharedenckeybase64[sharedenckeybase64size];
   memset(sharedenckeybase64, 0, sizeof(unsigned char) * sharedenckeybase64size);
-  size_t sharedenckeybase64len = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 

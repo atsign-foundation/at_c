@@ -2,6 +2,7 @@
 #include "atchops/base64.h"
 #include "atchops/constants.h"
 #include "atchops/mbedtls.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdlib.h>

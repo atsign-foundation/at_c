@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [trunk]
 
-permissions:  # added using https://github.com/step-security/secure-repo
+permissions: # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
@@ -15,13 +15,18 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: atsdk Unit CTest
+      - name: build atSDK
         run: |
-          cmake -S . -B build -DATSDK_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+          cmake -S . -B build -DATSDK_BUILD_TESTS="unit"
           cmake --build build --target all
-          ctest --test-dir build/packages/atchops/tests --output-on-failure --timeout 2
-          ctest --test-dir build/packages/atclient/tests --output-on-failure --timeout 2
+
+      - name: atchops Unit CTest
+        working-directory: build/packages/atchops/tests
+        run: ctest --test-dir . --output-on-failure --timeout 5
+
+      - name: atclient Unit CTest
+        working-directory: build/packages/atclient/tests
+        run: ctest --test-dir . --output-on-failure --timeout 5
 
   functional-tests:
     runs-on: "ubuntu-latest"
@@ -37,15 +42,13 @@ jobs:
 
       - name: Install atSDK
         run: |
-          cmake -S . -B build
+          cmake -S . -B build -DATSDK_BUILD_TESTS="func"
           sudo cmake --build build --target install
 
       - name: Build and Run Functional Tests
-        working-directory: tests/functional_tests
+        working-directory: build/tests/functional_tests
         run: |
-          cmake -S . -B build
-          cmake --build build
-          ctest --test-dir build -VV --timeout 60
+          ctest --test-dir . -VV --timeout 90
 
   build-examples:
     runs-on: "ubuntu-latest"
@@ -73,19 +76,19 @@ jobs:
           cmake -S . -B build -DTARGET_SRC=put_publickey.c && cmake --build build
           cmake -S . -B build -DTARGET_SRC=put_selfkey.c && cmake --build build
           cmake -S . -B build -DTARGET_SRC=put_sharedkey.c && cmake --build build
-      
+
       - name: Build events
         working-directory: examples/desktop/events
         run: |
           cmake -S . -B build
           cmake --build build
-      
+
       - name: Build pkam_authenticate
         working-directory: examples/desktop/pkam_authenticate
         run: |
           cmake -S . -B build
           cmake --build build
-      
+
       - name: Build REPL
         working-directory: examples/desktop/repl
         run: |

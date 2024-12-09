@@ -1,9 +1,9 @@
 #include "atchops/aes.h"
 #include "atchops/aes_ctr.h"
 #include "atchops/iv.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <stddef.h>
 
 #define PLAINTEXT "Hello World!\n"
 
@@ -33,16 +33,15 @@ int main() {
     goto exit;
   }
   // log the key
-  printf("key (%d): ", keysize);
+  printf("key (%zu): ", keysize);
   for (size_t i = 0; i < keysize; i++) {
     printf("%02x ", key[i]);
   }
   printf("\n");
 
-
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  ret = atchops_aes_ctr_encrypt(key, ATCHOPS_AES_256, iv, (const unsigned char *)PLAINTEXT,
-                               strlen(PLAINTEXT), ciphertext, ciphertextsize, &ciphertextlen);
+  ret = atchops_aes_ctr_encrypt(key, ATCHOPS_AES_256, iv, (const unsigned char *)PLAINTEXT, strlen(PLAINTEXT),
+                                ciphertext, ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     printf("Error encrypting\n");
     goto exit;
@@ -55,28 +54,28 @@ int main() {
   }
 
   // log ciphertext bytes
-  printf("ciphertext (%d): ", ciphertextlen);
+  printf("ciphertext (%zu): ", ciphertextlen);
   for (size_t i = 0; i < ciphertextlen; i++) {
     printf("%02x ", ciphertext[i]);
   }
   printf("\n");
 
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen,
-                               plaintext2, plaintext2size, &plaintext2len);
+  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, plaintext2, plaintext2size,
+                                &plaintext2len);
   if (ret != 0) {
     printf("Error decrypting\n");
     goto exit;
   }
 
   // log plaintext2 bytes
-  printf("plaintext2 (%d): ", plaintext2len);
+  printf("plaintext2 (%zu): ", plaintext2len);
   for (size_t i = 0; i < plaintext2len; i++) {
     printf("%02x ", plaintext2[i]);
   }
   printf("\n");
 
-  if(strcmp(PLAINTEXT, (char *)plaintext2) != 0) {
+  if (strcmp(PLAINTEXT, (char *)plaintext2) != 0) {
     printf("plaintext2 is \"%.*s\" when it should be \"%s\"\n", (int)plaintext2len, plaintext2, PLAINTEXT);
     ret = 1;
     goto exit;

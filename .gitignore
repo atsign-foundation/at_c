@@ -9,13 +9,15 @@ cmake_install.cmake
 
 compile_commands.json
 
-/*build*/
+build/
 install/
 bin/
 
 lib/**/lib*.a
 
 sdkconfig
+
+Testing/
 
 __pycache__/
 

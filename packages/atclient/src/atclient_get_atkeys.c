@@ -1,22 +1,25 @@
+#include <atchops/platform.h>
 #include <atclient/atclient.h>
+#include <atclient/constants.h>
 #include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <atclient/constants.h>
 
 #define TAG "atclient_get_atkeys"
 
-static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len);
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey,
+                                                  const size_t *output_array_len);
 
-int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len, const atclient_get_atkeys_request_options *request_options) {
+int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *output_array_len,
+                        const atclient_get_atkeys_request_options *request_options) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
-  if ((ret = atclient_get_atkeys_validate_arguments(atclient, (const atclient_atkey **) atkey, output_array_len)) != 0) {
+  if ((ret = atclient_get_atkeys_validate_arguments(atclient, (const atclient_atkey **)atkey, output_array_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_atkeys_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -26,21 +29,20 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
    */
   size_t scan_cmd_size = strlen("scan");
 
-  if(request_options != NULL) {
-    if(atclient_get_atkeys_request_options_is_show_hidden_initialized(request_options)) {
-      if(request_options->show_hidden) {
+  if (request_options != NULL) {
+    if (atclient_get_atkeys_request_options_is_show_hidden_initialized(request_options)) {
+      if (request_options->show_hidden) {
         scan_cmd_size += strlen(":showHidden:true");
       } else {
         scan_cmd_size += strlen(":showHidden:false");
       }
     }
-    if(atclient_get_atkeys_request_options_is_regex_initialized(request_options)) {
+    if (atclient_get_atkeys_request_options_is_regex_initialized(request_options)) {
       scan_cmd_size += strlen(" ") + strlen(request_options->regex);
     }
   }
 
   scan_cmd_size += strlen("\r\n") + 1;
-
 
   char scan_cmd[scan_cmd_size];
 
@@ -55,15 +57,15 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
    */
   size_t pos = 0;
   pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, "scan");
-  if(request_options != NULL) {
-    if(atclient_get_atkeys_request_options_is_show_hidden_initialized(request_options)) {
-      if(request_options->show_hidden) {
+  if (request_options != NULL) {
+    if (atclient_get_atkeys_request_options_is_show_hidden_initialized(request_options)) {
+      if (request_options->show_hidden) {
         pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, ":showHidden:true");
       } else {
         pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, ":showHidden:false");
       }
     }
-    if(atclient_get_atkeys_request_options_is_regex_initialized(request_options)) {
+    if (atclient_get_atkeys_request_options_is_regex_initialized(request_options)) {
       pos += snprintf(scan_cmd + pos, scan_cmd_size - pos, " %s", request_options->regex);
     }
   }
@@ -88,7 +90,7 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -158,7 +160,8 @@ exit: {
 }
 }
 
-static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey, const size_t *output_array_len) {
+static int atclient_get_atkeys_validate_arguments(const atclient *atclient, const atclient_atkey **atkey,
+                                                  const size_t *output_array_len) {
   int ret = 1;
 
   // check to make sure atclient is not null
@@ -180,13 +183,13 @@ static int atclient_get_atkeys_validate_arguments(const atclient *atclient, cons
     goto exit;
   }
 
-  if(atkey == NULL) {
+  if (atkey == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey is NULL\n");
     goto exit;
   }
 
-  if(output_array_len == NULL) {
+  if (output_array_len == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "output_array_len is NULL\n");
     goto exit;

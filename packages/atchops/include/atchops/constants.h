@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 
+#include <atchops/platform.h> // IWYU pragma: keep
 #define ATCHOPS_RNG_PERSONALIZATION "@atchops12345"
 
 #ifdef __cplusplus

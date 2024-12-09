@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <atchops/constants.h>
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stddef.h>
 
 typedef enum atchops_md_type {

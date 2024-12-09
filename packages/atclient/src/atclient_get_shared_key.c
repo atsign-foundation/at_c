@@ -5,11 +5,12 @@
 #include <atchops/aes_ctr.h>
 #include <atchops/base64.h>
 #include <atchops/iv.h>
+#include <atchops/platform.h>
+#include <atclient/constants.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <atclient/constants.h>
 
 #define TAG "atclient_get_sharedkey"
 
@@ -24,11 +25,11 @@ static int
 atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atkey *atkey, char **value,
                                                 const atclient_get_shared_key_request_options *request_options);
 
-int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey,
-                            char **value, const atclient_get_shared_key_request_options *request_options) {
+int atclient_get_shared_key(atclient *atclient, atclient_atkey *atkey, char **value,
+                            const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
-  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, (const char **) value)) != 0) {
+  if ((ret = atclient_get_shared_key_validate_arguments(atclient, atkey, (const char **)value)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_shared_key_validate_arguments: %d\n", ret);
     return ret;
   }
@@ -130,9 +131,9 @@ static int atclient_get_shared_key_validate_arguments(const atclient *atclient, 
 exit: { return ret; }
 }
 
-static int atclient_get_shared_key_shared_by_me_with_other(
-    atclient *atclient, atclient_atkey *atkey,
-    char **value, const atclient_get_shared_key_request_options *request_options) {
+static int
+atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atkey *atkey, char **value,
+                                                const atclient_get_shared_key_request_options *request_options) {
   int ret = 1;
 
   /*
@@ -229,7 +230,7 @@ static int atclient_get_shared_key_shared_by_me_with_other(
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -455,7 +456,7 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
   char *response = (char *)recv;
   char *response_trimmed = NULL;
   // below method points the response_trimmed variable to the position of 'data:' substring
-  if(atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  if (atclient_string_utils_get_substring_position(response, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);

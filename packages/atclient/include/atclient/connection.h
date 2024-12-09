@@ -6,6 +6,7 @@ extern "C" {
 
 #include "atchops/mbedtls.h"
 #include "atclient/connection_hooks.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 #include <stddef.h>
 

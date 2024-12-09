@@ -1,15 +1,17 @@
 #include <atclient/atclient_utils.h>
 #include <atlogger/atlogger.h>
+#include <functional_tests/config.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define ATDIRECTORY_HOST "root.atsign.org"
 #define ATDIRECTORY_PORT 64
 
-#define ATSIGN "@12alpaca"
-
 #define TAG "test_atclient_find_atserver_address"
 
+// This ATSIGN should be pinned, we don't need the keys for it
+// we want to test for a successful lookup in the atDirectory
+#define ATSIGN "@12alpaca"
 #define EXPECTED_HOST "228aafb0-94d3-5aa2-a3b3-e36af115480d.swarm0002.atsign.zone"
 #define EXPECTED_PORT 6943
 
@@ -85,7 +87,8 @@ static int test_2_find_atserver_address_should_fail() {
 
   if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, "asjdflasjdf", &atserver_host,
                                                   &atserver_port)) == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address passed with exit code 0, when it was expected to fail... %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_find_atserver_address passed with exit code 0, when it was expected to fail... %d\n", ret);
     goto exit;
   }
 

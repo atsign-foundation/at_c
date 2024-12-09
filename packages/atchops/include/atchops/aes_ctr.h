@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include "atchops/aes.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stddef.h>
 
 /**

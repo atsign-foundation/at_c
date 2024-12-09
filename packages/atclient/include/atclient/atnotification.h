@@ -4,7 +4,8 @@
 extern "C" {
 #endif
 
-#include "atclient/cjson.h"
+#include "atcommons/json.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -96,7 +97,6 @@ void atclient_atnotification_init(atclient_atnotification *notification);
 void atclient_atnotification_free(atclient_atnotification *notification);
 
 int atclient_atnotification_from_json_str(atclient_atnotification *notification, const char *json_str);
-int atclient_atnotification_from_cjson_node(atclient_atnotification *notification, const cJSON *root);
 
 // Check if a field is initialized
 bool atclient_atnotification_is_id_initialized(const atclient_atnotification *notification);

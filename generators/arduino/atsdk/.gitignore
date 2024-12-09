@@ -1,0 +1,6 @@
+# generated
+build/
+src/
+library.properties
+.development
+*.zip

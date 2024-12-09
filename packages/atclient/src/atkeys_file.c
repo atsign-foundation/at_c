@@ -1,6 +1,7 @@
 #include "atclient/atkeys_file.h"
 #include "atlogger/atlogger.h"
-#include <cJSON.h>
+#include <atchops/platform.h>
+#include <atcommons/json.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -77,6 +78,7 @@ int atclient_atkeys_file_from_path(atclient_atkeys_file *atkeys_file, const char
   return ret;
 }
 
+#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const char *file_string) {
   int ret = 1;
 
@@ -282,6 +284,9 @@ exit: {
   return ret;
 }
 }
+#else
+#error "JSON provider not supported"
+#endif
 
 void atclient_atkeys_file_free(atclient_atkeys_file *atkeys_file) {
   unset_aes_pkam_public_key_str(atkeys_file);

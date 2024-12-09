@@ -1,10 +1,10 @@
 #include "atchops/aes_ctr.h"
-#include "atchops/iv.h"
 #include "atchops/base64.h"
+#include "atchops/iv.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #define CIPHERTEXTBASE64                                                                                               \
   "yY9vOA8bbzyADNGOxFPdT6bGxySKmNd6usP5/"                                                                              \
@@ -56,27 +56,27 @@ int main() {
   size_t keylen = 0;
 
   unsigned char *iv = malloc(sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
-  if(iv == NULL) {
+  if (iv == NULL) {
     printf("malloc (failed): %d\n", ret);
     goto exit;
   }
   memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
-  ret = atchops_base64_decode(CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize, &ciphertextlen);
-  if(ret != 0) {
+  ret = atchops_base64_decode((unsigned char *)CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize,
+                              &ciphertextlen);
+  if (ret != 0) {
     printf("atchops_base64_decode (failed): %d\n", ret);
     goto exit;
   }
 
-  ret = atchops_base64_decode(AESKEYBASE64, strlen(AESKEYBASE64), key, 32, &keylen);
-  if(ret != 0) {
+  ret = atchops_base64_decode((unsigned char *)AESKEYBASE64, strlen(AESKEYBASE64), key, 32, &keylen);
+  if (ret != 0) {
     printf("atchops_base64_decode (failed): %d\n", ret);
     goto exit;
   }
 
-  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv,
-                              ciphertext, ciphertextlen,
-                              plaintext, plaintextsize, &plaintextlen);
+  ret = atchops_aes_ctr_decrypt(key, ATCHOPS_AES_256, iv, ciphertext, ciphertextlen, plaintext, plaintextsize,
+                                &plaintextlen);
   if (ret != 0) {
     printf("atchops_aes_ctr_decrypt (failed): %d\n", ret);
     goto exit;
@@ -90,7 +90,7 @@ int main() {
   printf("decrypted text: %.*s\n", (int)plaintextlen, plaintext);
 
   printf("decrypted bytes:\n");
-  for (int i = 0; i < plaintextlen && i < plaintextsize; i++) {
+  for (size_t i = 0; i < plaintextlen && i < plaintextsize; i++) {
     printf("%02x ", *(plaintext + i));
   }
   printf("\n");

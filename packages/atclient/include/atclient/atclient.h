@@ -8,6 +8,7 @@ extern "C" {
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include "atclient/request_options.h"
+#include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -126,7 +127,7 @@ void atclient_stop_atserver_connection(atclient *ctx);
  * @return int 0 on success, non-zero on error
  */
 int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
-                               const atclient_authenticate_options *options, char **err_msg);
+                               atclient_authenticate_options *options, char **err_msg);
 
 /**
  * @brief authenticate with secondary server with AES CRAM key. This is supposed to be a one-time auth, to activate the

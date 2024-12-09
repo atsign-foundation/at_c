@@ -5,7 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if !defined(ATLOGGER_DISABLE_TIMESTAMPS) && !defined(ATLOGGER_OVERRIDE_LOG_FUNCTION)
 #include <time.h>
+#endif
 
 #define PREFIX_BUFFER_LEN 64
 #define INFO_PREFIX "\e[0;32m[INFO]\e[0m"
@@ -23,13 +26,12 @@ static int is_ctx_initalized = 0;
 
 static atlogger_ctx *atlogger_get_instance() {
   if (is_ctx_initalized == 0) {
-    ctx.opts = ATLOGGER_ENABLE_TIMESTAMPS;
-
     is_ctx_initalized = 1;
   }
   return &ctx;
 }
 
+#ifndef ATLOGGER_OVERRIDE_LOG_FUNCTION
 static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix, size_t prefixlen) {
   memset(prefix, 0, prefixlen);
   int off = 0;
@@ -60,30 +62,30 @@ static void atlogger_get_prefix(enum atlogger_logging_level logging_level, char 
   }
   }
 
-  atlogger_ctx *ctx = atlogger_get_instance();
+#ifndef ATLOGGER_DISABLE_TIMESTAMPS
   struct timespec timespec;
-  if (ctx->opts & ATLOGGER_ENABLE_TIMESTAMPS) {
-    int res = clock_gettime(CLOCK_REALTIME, &timespec);
+  int res = clock_gettime(CLOCK_REALTIME, &timespec);
 
-    if (res == 0) {
-      res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, " %F %T",
-                     gmtime(&timespec.tv_sec)); // format accurate to the second
-      if (res != 0) {
-        off += res;
-        res = 0;
-      }
+  if (res == 0) {
+    res = strftime(prefix + off, PREFIX_BUFFER_LEN - off, " %F %T",
+                   gmtime(&timespec.tv_sec)); // format accurate to the second
+    if (res != 0) {
+      off += res;
+      res = 0;
     }
-    if (res == 0) {
-      snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%09lu", timespec.tv_nsec);
-      off += strlen(prefix + off);
-    }
-
-    off -= 3;
-    snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " |");
-    off += 2;
-    prefix[off] = '\0';
   }
+  if (res == 0) {
+    snprintf(prefix + off, PREFIX_BUFFER_LEN - off, ".%09lu", timespec.tv_nsec);
+    off += strlen(prefix + off);
+  }
+#endif
+
+  off -= 3;
+  snprintf(prefix + off, PREFIX_BUFFER_LEN - off, " |");
+  off += 2;
+  prefix[off] = '\0';
 }
+#endif
 
 enum atlogger_logging_level atlogger_get_logging_level() {
   atlogger_ctx *ctx = atlogger_get_instance();
@@ -100,6 +102,7 @@ void atlogger_set_opts(int opts) {
   ctx->opts = opts;
 }
 
+#ifndef ATLOGGER_OVERRIDE_LOG_FUNCTION
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...) {
   atlogger_ctx *ctx = atlogger_get_instance();
 
@@ -121,6 +124,7 @@ void atlogger_log(const char *tag, const enum atlogger_logging_level level, cons
   vprintf(format, args);
   va_end(args);
 }
+#endif
 
 void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
   // if str == 'Jeremy\r\n', i want it to be 'Jeremy'
@@ -144,7 +148,7 @@ void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
   }
 
   if (carriagereturnindex != -1) {
-    for (int i = carriagereturnindex; i < strlen - 1; i++) {
+    for (size_t i = carriagereturnindex; i < strlen - 1; i++) {
       str[i] = str[i + 1];
     }
     str[strlen - 1] = '\0';
@@ -160,7 +164,7 @@ void atlogger_fix_stdout_buffer(char *str, const size_t strlen) {
   }
 
   if (newlineindex != -1) {
-    for (int i = newlineindex; i < strlen - 1; i++) {
+    for (size_t i = newlineindex; i < strlen - 1; i++) {
       str[i] = str[i + 1];
     }
     str[strlen - 1] = '\0';

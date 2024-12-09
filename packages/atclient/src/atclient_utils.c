@@ -2,6 +2,7 @@
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include "atclient/string_utils.h"
+#include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <pwd.h>
 #include <stddef.h>

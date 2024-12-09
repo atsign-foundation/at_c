@@ -3,6 +3,7 @@
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
+#include <atchops/platform.h>
 #include <atclient/request_options.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +19,7 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   /*
    * 1. Check arguments
    */
-  if ((ret = atclient_delete_validate_arguments(atclient, atkey, (atclient_delete_request_options*)options)) != 0) {
+  if ((ret = atclient_delete_validate_arguments(atclient, atkey, (atclient_delete_request_options *)options)) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_delete_validate_arguments: %d\n", ret);
     return ret;
@@ -65,8 +66,8 @@ int atclient_delete(atclient *atclient, const atclient_atkey *atkey, const atcli
   /*
    * 4. Send command
    */
-  if ((ret = atclient_connection_send(&atclient->atserver_connection, (unsigned char *)delete_cmd,
-                                      delete_cmd_size - 1, recv, recv_size, &recv_len)) != 0) {
+  if ((ret = atclient_connection_send(&atclient->atserver_connection, (unsigned char *)delete_cmd, delete_cmd_size - 1,
+                                      recv, recv_size, &recv_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -134,7 +135,8 @@ static int atclient_delete_validate_arguments(const atclient *atclient, const at
   }
 
   // skip atclient_atkey_is_shared_by_initialized() if atclient_delete_request_options->skip_shared_by_check is true
-  if(atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options) && options->skip_shared_by_check) {
+  if (atclient_delete_request_options_is_skip_shared_by_check_flag_initialized(options) &&
+      options->skip_shared_by_check) {
     ret = 0;
     goto exit;
   }
