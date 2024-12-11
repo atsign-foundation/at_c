@@ -84,6 +84,40 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
   return 0;
 }
 
+int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str) {
+  int sep_count = 0;
+  const int ns_string_end = strlen(json_str);
+  int ret = 0;
+
+  // Count seperator in the namespace list string. Replaces all occurences of ':' and ',' to '\0'
+  for (int i = 0; i < ns_string_end; i++) {
+    if (json_str[i] == ':') {
+      sep_count++;
+      json_str[i] = '\0';
+    }
+
+    if (json_str[i] == ',') {
+      json_str[i] = '\0';
+    }
+  }
+
+  int pos = 0;
+  atcommons_enroll_namespace_t *ns_temp = NULL;
+  for (int i = 0; i < sep_count; i++) {
+    ns_temp = malloc(sizeof(atcommons_enroll_namespace_t));
+    ns_temp->name = strdup(json_str + pos);
+    pos += strlen(json_str + pos) + 1;
+    ns_temp->access = strdup(json_str + pos);
+
+    if ((ret = atcommons_enroll_namespace_list_append(ns_list, ns_temp)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Failed appending ns to ns_list | atcommons_enroll_namespace_list_append: %d", ret);
+      return ret;
+    }
+    pos += strlen(json_str + pos) + 1;
+  }
+  exit: { return ret; }
+}
 #else
 #error "JSON provider not supported"
 #endif
