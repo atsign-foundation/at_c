@@ -1,6 +1,6 @@
 #include "atcommons/enroll_namespace.h"
 
-#include "atcommons/json.h"
+#include "cJSON.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,12 +12,20 @@
 
 int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **ns_list,
                                            atcommons_enroll_namespace_t *ns) {
-  // allocate enough memory for enroll_namespace_list struct, and the number of atcommons_enroll_namespace_t structs
-  // that are in the list
-  atcommons_enroll_namespace_list_t *temp =
-      realloc(*ns_list, sizeof(atcommons_enroll_namespace_list_t) +
-                            sizeof(atcommons_enroll_namespace_t) * ((*ns_list)->length + 1));
+  if (ns == NULL) {
+    atlogger_log(TAG, 0, "Namespace to append cannot be null\n");
+    return -1;
+  }
 
+  // If the list's length is uninitialized (SIZE_MAX), set it to 0
+  if ((*ns_list)->length == SIZE_MAX) {
+    (*ns_list)->length = 0;
+  }
+
+  const size_t new_length = (*ns_list)->length + 1;
+  // Try reallocating memory for the array of enroll_namespace_t structs
+  atcommons_enroll_namespace_list_t *temp = realloc(*ns_list, sizeof(atcommons_enroll_namespace_list_t) +
+                                                                  sizeof(atcommons_enroll_namespace_t *) * new_length);
   if (temp == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to realloc memory for enroll namespace list\n");
     return -1;
@@ -48,7 +56,6 @@ int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, s
   return 0;
 }
 
-#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_list_str_len,
                                             const atcommons_enroll_namespace_list_t *ns_list) {
   if (ns_list == NULL) {
@@ -102,11 +109,17 @@ int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_
   }
 
   int pos = 0;
+
   atcommons_enroll_namespace_t *ns_temp = NULL;
   for (int i = 0; i < sep_count; i++) {
     ns_temp = malloc(sizeof(atcommons_enroll_namespace_t));
     ns_temp->name = strdup(json_str + pos);
     pos += strlen(json_str + pos) + 1;
+    if(json_str + pos == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid namespace access value\n");
+      ret = 1;
+      return ret;
+    }
     ns_temp->access = strdup(json_str + pos);
 
     if ((ret = atcommons_enroll_namespace_list_append(ns_list, ns_temp)) != 0) {
@@ -118,6 +131,3 @@ int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_
   }
   exit: { return ret; }
 }
-#else
-#error "JSON provider not supported"
-#endif

@@ -13,7 +13,7 @@
 
 #define TAG "send_enroll_request"
 
-int atauth_validate_send_enroll_request_arguments(atclient *client, const atcommons_enroll_params_t *ep,
+int atauth_validate_send_enroll_request_arguments(const atclient *client, const atcommons_enroll_params_t *ep,
                                                   const char *enroll_id, const char *enroll_status);
 
 int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t *ep, char *enroll_id,
