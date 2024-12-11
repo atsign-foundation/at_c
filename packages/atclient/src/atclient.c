@@ -189,7 +189,7 @@ bool atclient_is_atsign_initialized(const atclient *ctx) {
 }
 
 int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
-                               const atclient_authenticate_options *options, char **err_msg) {
+                               atclient_authenticate_options *options, char **err_msg) {
 
   int ret = 1; // error by default
 
@@ -249,8 +249,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 4. Get atdirectory_host and atdirectory_port
    */
-  if(options != NULL && atclient_authenticate_options_is_atdirectory_host_initialized(options) && options->atdirectory_host != NULL &&
-     atclient_authenticate_options_is_atdirectory_port_initialized(options) && options->atdirectory_port != 0) {
+  if (options != NULL && atclient_authenticate_options_is_atdirectory_host_initialized(options) &&
+      options->atdirectory_host != NULL && atclient_authenticate_options_is_atdirectory_port_initialized(options) &&
+      options->atdirectory_port != 0) {
     atdirectory_host = options->atdirectory_host;
     atdirectory_port = options->atdirectory_port;
   } else {
@@ -272,9 +273,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
 
   if (atserver_host == NULL || atserver_port == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                 "Missing atServer host or port. Using %s:%lu atDirectory to find atServer address\n", atdirectory_host, atdirectory_port);
-    if ((ret = atclient_utils_find_atserver_address(atdirectory_host,
-                                                    atdirectory_port, atsign, &atserver_host,
+                 "Missing atServer host or port. Using %s:%lu atDirectory to find atServer address\n", atdirectory_host,
+                 atdirectory_port);
+    if ((ret = atclient_utils_find_atserver_address(atdirectory_host, atdirectory_port, atsign, &atserver_host,
                                                     &atserver_port)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
       goto exit;
@@ -378,7 +379,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
                  (int)recv_len, recv);
 
-    if(*err_msg != NULL) {
+    if (*err_msg != NULL) {
       *err_msg = (char *)recv;
     }
     goto exit;
