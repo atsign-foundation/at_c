@@ -1249,6 +1249,101 @@ void atclient_get_public_key_request_options_unset_store_atkey_metadata(
   atclient_get_public_key_request_options_set_store_atkey_metadata_initialized(options, false);
 }
 
+bool atclient_get_public_key_request_options_is_should_auth_initialized(
+    const atclient_get_public_key_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_public_key_request_options_is_should_auth_initialized: "
+                 "Invalid arguments\n");
+    return false;
+  }
+
+  /*
+   * 2. Check if the bypass cache is initialized
+   */
+  return options->_initialized_fields[ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INDEX] &
+         ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INITIALIZED;
+}
+
+static void
+atclient_get_public_key_request_options_set_should_auth_initialized(atclient_get_public_key_request_options *options,
+                                                                     const bool initialized) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_public_key_request_options_set_should_auth_initialized: "
+                 "Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Set the bypass cache initialized
+   */
+  if (initialized) {
+    options->_initialized_fields[ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INDEX] |=
+        ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INITIALIZED;
+  } else {
+    options->_initialized_fields[ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INDEX] &=
+        ~ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INITIALIZED;
+  }
+}
+
+int atclient_get_public_key_request_options_set_should_auth(atclient_get_public_key_request_options *options,
+                                                             const bool should_auth) {
+  int ret = 1;
+
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_public_key_request_options_set_should_auth: "
+                 "Invalid arguments\n");
+    return ret;
+  }
+
+  /*
+   * 2. Unset the bypass cache, if necessary
+   */
+  if (atclient_get_public_key_request_options_is_should_auth_initialized(options)) {
+    atclient_get_public_key_request_options_unset_should_auth(options);
+  }
+
+  /*
+   * 3. Set the bypass cache
+   */
+  options->should_auth = should_auth;
+  atclient_get_public_key_request_options_set_should_auth_initialized(options, true);
+
+  ret = 0;
+  goto exit;
+exit: { return ret; }
+}
+
+void atclient_get_public_key_request_options_unset_should_auth(atclient_get_public_key_request_options *options) {
+  /*
+   * 1. Validate arguments
+   */
+  if (options == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_public_key_request_options_unset_bypass_cache: "
+                 "Invalid arguments\n");
+    return;
+  }
+
+  /*
+   * 2. Unset the bypass cache
+   */
+  options->should_auth = true;
+  atclient_get_public_key_request_options_set_bypass_cache_initialized(options, false);
+}
+
 void atclient_delete_request_options_init(atclient_delete_request_options *options) {
   /*
    * 1. Validate arguments

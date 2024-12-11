@@ -108,6 +108,7 @@ typedef struct atclient_get_shared_key_request_options {
 typedef struct atclient_get_public_key_request_options {
   bool bypass_cache;
   bool store_atkey_metadata;
+  bool should_auth;
   uint8_t _initialized_fields[1];
 } atclient_get_public_key_request_options;
 
