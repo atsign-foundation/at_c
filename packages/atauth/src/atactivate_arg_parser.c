@@ -1,4 +1,5 @@
 #include "atauth/atactivate_arg_parser.h"
+#include <atlogger/atlogger.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +23,7 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
   strcpy(*root_host, DEFAULT_ROOT_SERVER);
 
   // Parse command-line arguments
-  while ((opt = getopt(argc, argv, "a:c:k:o:p:d:n:r:h")) != -1) {
+  while ((opt = getopt(argc, argv, "a:c:k:o:p:d:n:r:vh")) != -1) {
     switch (opt) {
     case 'a':
       *atsign = malloc(sizeof(char) * strlen(optarg) + 1);
@@ -108,6 +109,9 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
       }
       strcpy(*root_host, optarg);
       break;
+    case 'v':
+      atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
+      break;
     case 'h':
       fprintf(stderr, "Usage: %s -a atsign -c cram-secret -o otp [-r root-server] [-p port]\n", argv[0]);
       exit(0); // force exit to display usage
@@ -125,7 +129,7 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
   }
 
   if (cram_secret == NULL && otp == NULL) {
-    fprintf(stderr, "Cannot proceed without either of CRAM secret on enroll OTP.\n");
+    fprintf(stderr, "Cannot proceed without either of CRAM secret or enroll OTP.\n");
     fprintf(stderr, "Usage: %s -a atsign -c cram-secret -o otp [-r root-server] [-p port]\n", argv[0]);
     ret = 1;
   }

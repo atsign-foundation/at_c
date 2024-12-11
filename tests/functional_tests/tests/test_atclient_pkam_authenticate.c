@@ -108,7 +108,7 @@ static int test2_pkam_with_options() {
     return ret;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL, NULL)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     return ret;
   } else {

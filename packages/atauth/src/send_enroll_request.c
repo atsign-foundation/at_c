@@ -24,7 +24,7 @@ int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t
   char *recv_trimmed = NULL;
   size_t recv_len;
 
-  if ((ret = atauth_validate_send_enroll_request_arguments(ctx, ep, enroll_id, enroll_status)) != 0) {
+  if ((ret = atauth_validate_send_enroll_request_arguments(client, ep, enroll_id, enroll_status)) != 0) {
     goto exit;
   }
 
@@ -116,11 +116,11 @@ exit:
   return ret;
 }
 
-int atauth_validate_send_enroll_request_arguments(const atclient *ctx, const atcommons_enroll_params_t *ep,
+int atauth_validate_send_enroll_request_arguments(const atclient *client, const atcommons_enroll_params_t *ep,
                                                   const char *enroll_id, const char *enroll_status) {
   int ret = 0;
 
-  if (ctx == NULL) {
+  if (client == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is null\n");
     ret = -1;
     return ret;

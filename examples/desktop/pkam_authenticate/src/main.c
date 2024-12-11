@@ -36,8 +36,9 @@ int main(int argc, char **argv) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
   const char *atsign = ATSIGN;
+  char *err_msg;
 
-  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, NULL, &err_msg)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   } else {
