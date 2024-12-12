@@ -1,4 +1,5 @@
 #include "atchops/uuid.h"
+#include "atchops/constants.h"
 #include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
@@ -105,16 +106,14 @@ static int uuid4_init(void) {
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_context entropy;
 
-  // TODO replace this string
-  const unsigned char pers[13] = {"Arduino_Seed"};
-
   size_t off = sizeof(uint64_t) / sizeof(unsigned char);
   size_t n = off * 2;
   unsigned char pointer[n]; // create char pointer to long number
   mbedtls_ctr_drbg_init(&ctr_drbg);
   mbedtls_entropy_init(&entropy);
 
-  ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, pers, sizeof(pers));
+  ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (unsigned char *)ATCHOPS_RNG_PERSONALIZATION,
+                              sizeof(ATCHOPS_RNG_PERSONALIZATION));
   if (ret != 0) {
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);

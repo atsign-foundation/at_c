@@ -219,22 +219,22 @@ static int test_2_notify_long_text(atclient *atclient, char *notification_id) {
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+  if ((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+  if ((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_value(&params, VERY_LONG_TEXT)) != 0) {
+  if ((ret = atclient_notify_params_set_value(&params, VERY_LONG_TEXT)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+  if ((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set should_encrypt: %d\n", ret);
     goto exit;
   }
