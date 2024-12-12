@@ -60,10 +60,11 @@ int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **n
                                            atcommons_enroll_namespace_t *ns);
 
 /**
+ * @brief Parses a namespace list string and populates these namespaces into the enroll_namespace_list_t struct provided
  *
- * @param ns_list
- * @param json_str
- * @return
+ * @param ns_list Double pointer to a enroll_namespace_list_t struct which would hold the list of namespaces
+ * @param json_str The namespace list string that is to be parsed. (Expected format: "ns1:rw,ns2:r")
+ * @return int 0 on success, non-zero int on failure
  */
 int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str);
 

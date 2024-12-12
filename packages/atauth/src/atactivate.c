@@ -16,10 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TAG "Activate CLI"
+#define TAG "activate_cli"
 
 int main(int argc, char *argv[]) {
-  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
   int ret = 0;
   char *atsign_temp = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
   char enrollment_id[ENROLL_ID_MAX_LEN];
@@ -50,7 +49,8 @@ int main(int argc, char *argv[]) {
       aes_key_base64_size); // size of AES256 key encrypted with another AES256 key(bytes)
   const size_t aes256_encrypted_aes256_key_unsigned_char_size =
       sizeof(unsigned char) * aes256_encrypted_aes256_key_size;
-  unsigned char *encrypted_default_encryption_private_key_bytes = malloc(aes256_encrypted_rsa_privkey_unsigned_char_size);
+  unsigned char *encrypted_default_encryption_private_key_bytes =
+      malloc(aes256_encrypted_rsa_privkey_unsigned_char_size);
   unsigned char *encrypted_self_encryption_key_bytes = malloc(aes256_encrypted_aes256_key_unsigned_char_size);
 
   // intialize base64 encoded encrypted APKAM symmetric Key and encrypted default encryption private key
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
   // 1.1 Ensure atsign starts with '@'
   char *atsign = NULL;
-  if((ret = atclient_string_utils_atsign_with_at(atsign_temp, &atsign)) != 0) {
+  if ((ret = atclient_string_utils_atsign_with_at(atsign_temp, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
@@ -262,7 +262,8 @@ int main(int argc, char *argv[]) {
 
   // 4.1.1 Base64 encode the encrypted_default_encryption_private_key
   size_t encrypted_default_encryption_private_key_base64_len = 0;
-  if ((ret = atchops_base64_encode(encrypted_default_encryption_private_key_bytes, encrypted_def_encrypt_private_key_bytes_len,
+  if ((ret = atchops_base64_encode(encrypted_default_encryption_private_key_bytes,
+                                   encrypted_def_encrypt_private_key_bytes_len,
                                    encrypted_default_encryption_private_key_base64,
                                    sizeof(unsigned char) * aes256_encrypted_rsa_2048_privkey_base64_len,
                                    &encrypted_default_encryption_private_key_base64_len)) != 0) {

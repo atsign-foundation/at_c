@@ -105,7 +105,7 @@ int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t
   }
   strncpy(enroll_status, enroll_status_cjson->valuestring, strlen(enroll_status_cjson->valuestring));
   enroll_status[strlen(enroll_status_cjson->valuestring)] = '\0';
-
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Enrollment request sent successfully\n");
   ret = 0;
 
 cjson_delete_exit:

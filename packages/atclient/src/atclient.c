@@ -315,8 +315,8 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   char *str_with_data_prefix = NULL;
   if (atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &str_with_data_prefix) != 0) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
-                 (int)recv_len, recv);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv: \"%.*s\" \n", (int)recv_len, recv);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv did not have prefix \"data:\"\n");
     goto exit;
   }
 
