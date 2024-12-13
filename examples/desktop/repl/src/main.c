@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, repl_args.atsign, &atkeys, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, repl_args.atsign, &atkeys, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     goto exit;
   }

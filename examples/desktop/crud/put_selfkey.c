@@ -52,7 +52,7 @@ int main() {
 
   char *atkeystr = NULL;
 
-  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, ATSIGN, &atkeys, &options, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }

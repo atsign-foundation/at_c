@@ -49,7 +49,7 @@ int main() {
     goto exit;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate");
     goto exit;
   }

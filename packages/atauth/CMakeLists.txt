@@ -12,6 +12,9 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/auth_cli.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atauth_build_atkeys_file_path.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atauth_fetch_home_dir.c
+        ../../examples/desktop/at_talk/src/main.c
+        ../../examples/desktop/connection_hooks/main.c
+        ../../examples/desktop/crud/delete.c
 )
 
 # Project setup
