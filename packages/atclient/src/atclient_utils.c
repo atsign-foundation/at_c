@@ -1,7 +1,3 @@
-#include "atclient/atclient_utils.h"
-#include "atclient/atkeys.h"
-#include "atclient/connection.h"
-#include "atclient/string_utils.h"
 #include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <pwd.h>
@@ -9,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "atclient/atclient_utils.h"
+#include "atclient/atkeys.h"
+#include "atclient/connection.h"
+#include "atclient/string_utils.h"
 
 #define TAG "atclient_utils"
 

@@ -4,16 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ATDIRECTORY_HOST "root.atsign.org"
-#define ATDIRECTORY_PORT 64
-
 #define TAG "test_atclient_find_atserver_address"
 
 // This ATSIGN should be pinned, we don't need the keys for it
 // we want to test for a successful lookup in the atDirectory
-#define ATSIGN "@12alpaca"
-#define EXPECTED_HOST "228aafb0-94d3-5aa2-a3b3-e36af115480d.swarm0002.atsign.zone"
-#define EXPECTED_PORT 6943
+#define EXPECTED_HOST "vip.ve.atsign.zone"
+#define EXPECTED_PORT 25000
 
 static int test_1_find_atserver_address_should_pass();
 static int test_2_find_atserver_address_should_fail();
@@ -47,7 +43,7 @@ static int test_1_find_atserver_address_should_pass() {
   char *atserver_host = NULL;
   int atserver_port = 0;
 
-  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, ATSIGN, &atserver_host,
+  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, FIRST_ATSIGN, &atserver_host,
                                                   &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
     goto exit;

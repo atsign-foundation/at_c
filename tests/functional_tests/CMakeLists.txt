@@ -1,13 +1,25 @@
 option(FIRST_ATSIGN "First atSign used for all functional tests" OFF)
 if(NOT "${FIRST_ATSIGN}" STREQUAL OFF)
-  message("Functional tests override first atsign: ${FIRST_ATSIGN}")
+  message("[ATSDK FUNCTIONAL TESTS] Functional tests override first atsign: ${FIRST_ATSIGN}")
   add_compile_definitions(FIRST_ATSIGN=${FIRST_ATSIGN})
 endif()
 
 option(SECOND_ATSIGN "Second atSign for two-way atSign functional tests" OFF)
 if(NOT "${SECOND_ATSIGN}" STREQUAL OFF)
-  message("Functional tests override second atsign: ${SECOND_ATSIGN}")
+  message("[ATSDK FUNCTIONAL TESTS] Functional tests override second atsign: ${SECOND_ATSIGN}")
   add_compile_definitions(SECOND_ATSIGN=${SECOND_ATSIGN})
+endif()
+
+option(ATDIRECTORY_HOST "Host for atDirectory functional tests" OFF)
+if(NOT "${ATDIRECTORY_HOST}" STREQUAL OFF)
+  message("[ATSDK FUNCTIONAL TESTS] Functional tests override atDirectory host: ${ATDIRECTORY_HOST}")
+  add_compile_definitions(ATDIRECTORY_HOST=${ATDIRECTORY_HOST})
+endif()
+
+option(ATDIRECTORY_PORT "Port for atDirectory functional tests" OFF)
+if(NOT "${ATDIRECTORY_PORT}" STREQUAL OFF)
+  message("[ATSDK FUNCTIONAL TESTS] Functional tests override atDirectory port: ${ATDIRECTORY_PORT}")
+  add_compile_definitions(ATDIRECTORY_PORT=${ATDIRECTORY_PORT})
 endif()
 
 cmake_minimum_required(VERSION 3.19)
