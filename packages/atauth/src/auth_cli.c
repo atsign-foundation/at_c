@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
   unsigned char enc_privkey_iv[ATCHOPS_IV_BUFFER_SIZE];
   unsigned char self_enc_key_iv[ATCHOPS_IV_BUFFER_SIZE];
 
-  memset(apkam_symmetric_key_bytes, 0, aes256_key_unsigned_char_bytes_size + 1);
+  memset(apkam_symmetric_key_bytes, 0, aes256_key_unsigned_char_bytes_size);
   memset(apkam_symmetric_key_base64, 0, aes256_key_unsigned_char_base64_size);
   memset(encrypted_apkam_symmetric_key_bytes, 0, sizeof(unsigned char) * rsa_2048_ciphertext_size);
   memset(encrypted_apkam_symmetric_key_base64, 0, sizeof(unsigned char) * base64_encoded_rsa2048_ciphertext_size);
@@ -191,8 +191,8 @@ int main(int argc, char *argv[]) {
   // 2.5.1 base64 encode the encrypted APKAM symmetric key
   size_t encrypted_apkam_symmetric_key_base64_len = 0;
   if ((ret = atchops_base64_encode(
-           encrypted_apkam_symmetric_key_bytes, sizeof(unsigned char) * rsa_2048_ciphertext_size,
-           encrypted_apkam_symmetric_key_base64, sizeof(unsigned char) * base64_encoded_rsa2048_ciphertext_size,
+           (unsigned char *)encrypted_apkam_symmetric_key_bytes, sizeof(unsigned char) * rsa_2048_ciphertext_size,
+           (unsigned char *)encrypted_apkam_symmetric_key_base64, sizeof(unsigned char) * base64_encoded_rsa2048_ciphertext_size,
            &encrypted_apkam_symmetric_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed base64 encoding encrypted_apkam_symmetric_key | atchops_base64_encode: %d\n", ret);
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
   ep.otp = otp;
   ep.ns_list = ns_list;
   ep.apkam_public_key = (unsigned char *)atkeys.pkam_public_key_base64;
-  ep.encrypted_apkam_symmetric_key = encrypted_apkam_symmetric_key_base64;
+  ep.encrypted_apkam_symmetric_key = (unsigned char *)encrypted_apkam_symmetric_key_base64;
 
   // 3.2 Send enrollment request
   if ((ret = atauth_send_enroll_request(&at_client, &ep, enrollment_id, status)) != 0) {
@@ -424,7 +424,7 @@ int retry_pkam_auth_until_success(atclient *ctx, const char *atsign, const atcli
   char *err_msg;
 
   while (true) {
-    ret = atclient_pkam_authenticate(ctx, atsign, atkeys, opts, &err_msg);
+    ret = atclient_pkam_authenticate(ctx, atsign, atkeys, (atclient_authenticate_options *)opts, &err_msg);
 
     if (ret == 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enrollment approved | APKAM auth success\n");
@@ -453,17 +453,11 @@ int get_apkam_key(char **key, const char *key_name, atclient_connection *ctx, co
   const size_t cmd_size =
       snprintf(NULL, 0, "keys:get:keyName:%s.%s.__manage%s\r\n", enrollment_id, key_name, atsign) + 1;
   char command[cmd_size];
-  if (command == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for keys:get command\n");
-    ret = -1;
-    return ret;
-  }
-  memset(command, 0, sizeof(char) * cmd_size);
 
   // Construct command
   snprintf(command, cmd_size, "keys:get:keyName:%s.%s.__manage%s\r\n", enrollment_id, key_name, atsign);
   const size_t recv_size = 2400;
-  char recv[recv_size];
+  unsigned char recv[recv_size];
   memset(recv, 0, sizeof(char) * recv_size);
   size_t recv_len = 0;
   if ((ret = atclient_connection_send(ctx, (unsigned char *)command, strlen(command), recv, recv_size, &recv_len)) !=

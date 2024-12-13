@@ -9,6 +9,7 @@
 
 int test_enroll_namespace_to_json();
 int test_enroll_namespace_list_to_json();
+int test_enroll_namespace_list_from_string();
 
 int main() {
   int ret = test_enroll_namespace_to_json();
@@ -17,6 +18,11 @@ int main() {
     return ret;
   }
   ret = test_enroll_namespace_list_to_json();
+  if(ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s failed\n", "test_enroll_namespace_list_to_json");
+    return ret;
+  }
+  ret = test_enroll_namespace_list_from_string();
   return ret;
 }
 
@@ -82,5 +88,42 @@ int test_enroll_namespace_list_to_json() {
   ret = atcommons_string_expect(ns_list_json, en_expected_json);
 
   free(ns_list_json);
+  return ret;
+}
+
+int test_enroll_namespace_list_from_string() {
+  char *nsl_str_1 = "ns1:rw,ns2:r";
+  char *nsl_str_2 = "ns3:rw";
+  atcommons_enroll_namespace_list_t *nsl = malloc(sizeof(atcommons_enroll_namespace_list_t));
+
+  int ret = atcommons_enroll_namespace_list_from_string(&nsl, nsl_str_1);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string: %d\n", ret);
+    return ret;
+  }
+  ret = atcommons_enroll_namespace_list_from_string(&nsl, nsl_str_2);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string: %d\n", ret);
+    return ret;
+  }
+
+  const size_t ns_name_len = 3;
+  const size_t ns_access_len = 2;
+  if(strncmp(nsl->namespaces[0]->name, "ns1", ns_name_len) || strncmp(nsl->namespaces[0]->access, "rw", ns_access_len)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_enroll_namespace_list_from_string case 1: failed\n");
+    return ret;
+  }
+  if(strncmp(nsl->namespaces[1]->name, "ns2", ns_name_len) || strncmp(nsl->namespaces[1]->access, "r", ns_access_len - 1)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_enroll_namespace_list_from_string case 2: failed\n");
+    return ret;
+  }
+  if(strncmp(nsl->namespaces[2]->name, "ns3", ns_name_len) || strncmp(nsl->namespaces[2]->access, "rw", ns_access_len)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_enroll_namespace_list_from_string case 3: failed\n");
+    return ret;
+  }
+
   return ret;
 }

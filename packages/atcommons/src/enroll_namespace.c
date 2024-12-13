@@ -5,11 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <atlogger/atlogger.h>
-
-#if defined(__linux__)
-#include <linux/limits.h>
-#endif
 
 #define TAG "enroll_namespace"
 
