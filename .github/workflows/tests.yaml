@@ -40,11 +40,18 @@ jobs:
           cp "@alice🛠_key.atKeys" ~/.atsign/keys/
           cp "@bob🛠_key.atKeys" ~/.atsign/keys/
 
-      - name: Start Virtual Environment
-        working-directory: tests/functional_tests/tools/virtualenv
+      - name: Install Docker Compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
+
+      - name: Add vip.ve.atsign.zone to /etc/hosts
+        run: |
+          echo "127.0.0.1       vip.ve.atsign.zone" | sudo tee -a /etc/hosts
+
+      - name: Start and PKAM Virtual Environment
+        working-directory: tests/functional_tests/tools/virtualenv
+        run: |
           ./start_virtualenv.sh
           sleep 2
           ./pkam_virtualenv.sh
