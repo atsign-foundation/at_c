@@ -273,7 +273,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
       options->atserver_port != 0) {
     atserver_host = options->atserver_host;
     atserver_port = options->atserver_port;
-    should_free_atserver_host = true;
+    should_free_atserver_host = false;
   }
 
   if (atserver_host == NULL || atserver_port == 0) {
