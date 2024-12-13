@@ -42,12 +42,12 @@ jobs:
 
       - name: Install atSDK
         run: |
-          cmake -S . -B build -DATSDK_BUILD_TESTS="func" -DCMAKE_BUILD_TYPE=Debug -DFIRST_ATSIGN="\"@alice🛠️\"" -DSECOND_ATSIGN="\"@bob🛠\"" -DATDIRECTORY_HOST="\"vip.ve.atsign.zone\"" -DATDIRECTORY_PORT=64
+          cmake -S . -B build -DATSDK_BUILD_TESTS="func" -DCMAKE_BUILD_TYPE=Debug -DFIRST_ATSIGN="\"@alice🛠\"" -DSECOND_ATSIGN="\"@bob🛠\"" -DATDIRECTORY_HOST='"vip.ve.atsign.zone"' -DATDIRECTORY_PORT=64
           sudo cmake --build build --target install
 
       - name: Build and Run Functional Tests
         run: |
-          ctest --test-dir build/tests/functional_tests -VV --timeout 90
+          ctest --test-dir build/tests/functional_tests -VV --timeout 30
 
   build-examples:
     runs-on: "ubuntu-latest"
