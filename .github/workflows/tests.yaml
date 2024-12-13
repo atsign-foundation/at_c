@@ -40,6 +40,13 @@ jobs:
           cp "@alice🛠_key.atKeys" ~/.atsign/keys/
           cp "@bob🛠_key.atKeys" ~/.atsign/keys/
 
+      - name: Start Virtual Environment
+        working-directory: tests/functional_tests/tools/virtualenv
+        run: |
+          ./start_virtualenv.sh
+          sleep 2
+          ./pkam_virtualenv.sh
+
       - name: Install atSDK
         run: |
           cmake -S . -B build -DATSDK_BUILD_TESTS="func" -DCMAKE_BUILD_TYPE=Debug -DFIRST_ATSIGN="\"@alice🛠\"" -DSECOND_ATSIGN="\"@bob🛠\"" -DATDIRECTORY_HOST='"vip.ve.atsign.zone"' -DATDIRECTORY_PORT=64
