@@ -186,6 +186,9 @@ static int test_3_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
+  // give enough time for virtualenv root:64 to respond to the \n command
+  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+
   if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     ret = 1;

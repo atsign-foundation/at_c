@@ -54,7 +54,7 @@ exit: { return ret; }
 }
 
 void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms) {
-  mbedtls_ssl_conf_read_timeout(&(monitor_conn->atserver_connection.ssl_config), timeoutms);
+  atclient_set_read_timeout(&(monitor_conn->atserver_connection), timeoutms);
 }
 
 int atclient_monitor_start(atclient *monitor_conn, const char *regex) {

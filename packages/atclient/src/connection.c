@@ -788,6 +788,15 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
 exit: { return ret; }
 }
 
+void atclient_connection_set_read_timeout(atclient_connection *ctx, const uint32_t timeout_ms) {
+  if (ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return;
+  }
+
+  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), timeout_ms);
+}
+
 static void my_debug(void *ctx, int level, const char *file, int line, const char *str) {
   ((void)level);
   fprintf((FILE *)ctx, "%s:%04d: %s", file, line, str);

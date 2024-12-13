@@ -78,7 +78,7 @@ int main() {
     goto exit;
   }
 
-  atclient_monitor_set_read_timeout(&monitor_conn, 5);
+  atclient_monitor_set_read_timeout(&monitor_conn, 5*1000);
 
   if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys_sharedwith, ATKEY_SHAREDWITH)) !=
       0) {

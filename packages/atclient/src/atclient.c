@@ -701,7 +701,7 @@ exit: {
 bool atclient_is_connected(atclient *ctx) { return atclient_connection_is_connected(&(ctx->atserver_connection)); }
 
 void atclient_set_read_timeout(atclient *ctx, const int timeout_ms) {
-  mbedtls_ssl_conf_read_timeout(&ctx->atserver_connection.ssl_config, timeout_ms);
+  atclient_connection_set_read_timeout(&ctx->atserver_connection, timeout_ms);
 }
 
 static void atclient_set_atsign_initialized(atclient *ctx, const bool initialized) {
