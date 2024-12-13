@@ -8,9 +8,9 @@ extern "C" {
 
 #include <ctype.h> // IWYU pragma: export
 
+#include "./atsdk_socket.h"
 #ifdef __cplusplus
 }
 #endif
 
-void atsdk_arduino_setup();
 #endif
