@@ -1,12 +1,10 @@
 #include <atclient/connection.h>
 #include <atlogger/atlogger.h>
 #include <functional_tests/helpers.h>
+#include <functional_tests/config.h>
 #include <string.h>
 
 #define TAG "test_atclient_connection"
-
-#define ROOT_HOST "root.atsign.org"
-#define ROOT_PORT 64
 
 static int assert_equals(bool actual, bool expected);
 
@@ -160,7 +158,11 @@ static int test_2_connect(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_connect(conn, ROOT_HOST, ROOT_PORT);
+  // log host and port that we're testing
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connecting to Host: %s\n", ATDIRECTORY_HOST);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connecting to Port: %d\n", ATDIRECTORY_PORT);
+
+  ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     goto exit;
@@ -203,7 +205,7 @@ static int test_4_send(atclient_connection *conn) {
 
   int ret = 1;
 
-  const unsigned char *send_data = (const unsigned char *)"12alpaca\r\n";
+  const unsigned char *send_data = (const unsigned char *)(FIRST_ATSIGN "\r\n");
   const size_t send_data_len = strlen((const char *)send_data);
 
   const size_t recvsize = 1024;
@@ -271,7 +273,7 @@ static int test_7_send_should_fail(atclient_connection *conn) {
 
   int ret = 1;
 
-  const unsigned char *send_data = (const unsigned char *)"12alpaca\r\n";
+  const unsigned char *send_data = (const unsigned char *) FIRST_ATSIGN "\r\n";
   const size_t send_data_len = strlen((const char *)send_data);
 
   const size_t recvsize = 1024;
@@ -302,7 +304,7 @@ static int test_8_reconnect(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_connect(conn, ROOT_HOST, ROOT_PORT);
+  ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect: %d\n", ret);
     goto exit;
@@ -381,7 +383,7 @@ static int test_12_connect(atclient_connection *conn) {
 
   int ret = 1;
 
-  ret = atclient_connection_connect(conn, ROOT_HOST, ROOT_PORT);
+  ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     goto exit;
@@ -438,7 +440,7 @@ static int test_15_send_should_fail(atclient_connection *conn) {
 
   int ret = 1;
 
-  const unsigned char *send_data = (const unsigned char *)"12alpaca\r\n";
+  const unsigned char *send_data = (const unsigned char *)FIRST_ATSIGN "\r\n";
   const size_t send_data_len = strlen((const char *)send_data);
 
   const size_t recvsize = 1024;

@@ -10,8 +10,6 @@
 
 #define SCAN_REGEX ".*"
 
-#define ATSIGN1 FIRST_ATSIGN
-
 static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, const bool showhidden);
 static int test_2_atclient_get_atkeys_null(atclient *ctx, const char *scan_regex, const bool showhidden);
 static int test_3_atclient_get_atkeys_null_ctx(const char *scan_regex, const bool showhidden);
@@ -28,12 +26,12 @@ int main() {
   atclient_atkeys atkeys1;
   atclient_atkeys_init(&atkeys1);
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys1, ATSIGN1, strlen(ATSIGN1))) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys1, FIRST_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_set_up_atkeys failed: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys1, ATSIGN1, strlen(ATSIGN1))) != 0) {
+  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys1, FIRST_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "functional_tests_pkam_auth failed: %d\n", ret);
     goto exit;
   }
