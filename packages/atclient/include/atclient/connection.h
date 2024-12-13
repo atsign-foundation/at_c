@@ -130,6 +130,15 @@ int atclient_connection_disconnect(atclient_connection *ctx);
  */
 bool atclient_connection_is_connected(atclient_connection *ctx);
 
+/**
+ * @brief set the blocking read timeout of the connection
+ * 
+ * @param ctx the connection to set the read timeout on, assumed to be initialized and connected
+ * @param timeout_ms the timeout in milliseconds
+ * @return void
+ */
+void atclient_connection_set_read_timeout(atclient_connection *ctx, const uint32_t timeout_ms);
+
 #ifdef __cplusplus
 }
 #endif
