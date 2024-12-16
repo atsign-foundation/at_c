@@ -3,21 +3,20 @@
 #ifndef ATCLIENT_SOCKET_SHARED_H
 #define ATCLIENT_SOCKET_SHARED_H
 #include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <atchops/platform.h>
 
-#if defined(ATCLIENT_SOCKET_PROVIDER_EXTERNAL)
-// Noop, this indicates an external socket provider will be linked
+#if defined(ATCLIENT_SOCKET_PROVIDER_ARDUINO_BEARSSL)
+// Noop
 #else
 #define ATCLIENT_SOCKET_PROVIDER_MBEDTLS
 #endif
 
-#ifdef ATCLIENT_SOCKET_PROVIDER_EXTERNAL
-#include "../atsdk_socket.h" // IWYU pragma: export
-#else
+#if !defined(ATCLIENT_SOCKET_PROVIDER_ARDUINO_BEARSSL)
 // Defined later based on platform specific implementation
 struct atclient_tls_socket;
 

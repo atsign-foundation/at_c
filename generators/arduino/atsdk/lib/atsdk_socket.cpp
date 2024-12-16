@@ -1,10 +1,14 @@
 #include "./atsdk_socket.h"
-#include "./atsdk_atlogger.h"
+#include "./atsdk.h"
 #include <cstring>
 
 #ifndef __clang__
 #include <Arduino.h>
+#include <ArduinoBearSSL.h>
+#include <ArduinoECCX08.h>
 #include <WiFi.h>
+#else
+#include <atclient/atclient.h>
 #endif
 
 extern "C" {
@@ -23,80 +27,35 @@ static const int MAX_READ_TIMEOUTS = 1000;
 #define TAG "atsdk_wifi_tls_socket"
 // Converts opaque pointer socket->wificlient back to a WifiClient*
 
-#define ATSDK_WIFI_MAX_CLIENTS 4
-
-static WiFiClient clients[ATSDK_WIFI_MAX_CLIENTS];
-static bool clients_used[ATSDK_WIFI_MAX_CLIENTS];
-static bool clients_used_initialized = false;
-
-// Let Arduino manage the socket lifetime
+// Let the socket lifetime be managed externally
 void atclient_raw_socket_init(struct atclient_raw_socket *) {}
 void atclient_raw_socket_free(struct atclient_raw_socket *) {}
 void atclient_tls_socket_set_read_timeout(struct atclient_tls_socket *, const int) {}
+void atclient_tls_socket_init(struct atclient_tls_socket *) {}
+void atclient_tls_socket_free(struct atclient_tls_socket *) {}
 
-void atclient_tls_socket_init(struct atclient_tls_socket *socket) {
-  if (!clients_used_initialized) {
-    memset(clients_used, 0, sizeof(bool) * ATSDK_WIFI_MAX_CLIENTS);
-  }
-  int pos = 0;
-  while (pos < ATSDK_WIFI_MAX_CLIENTS && clients_used[pos])
-    ;
-  if (pos == ATSDK_WIFI_MAX_CLIENTS) {
-    socket->handle = -1;
-  } else {
-    socket->handle = pos;
-    clients_used[pos] = true;
-  }
-}
-void atclient_tls_socket_free(struct atclient_tls_socket *socket) {
-  if (socket->handle == -1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid socket handle\n");
-    return;
-  }
-  socket->handle = -1;
-  clients_used[socket->handle] = false;
+void atclient_setup_bearssl(atclient *atclient, BearSSLClient *ssl_client) {
+  atclient->atserver_connection._socket.bear_ssl_client = (void *)ssl_client;
 }
 
 int atclient_tls_socket_configure(struct atclient_tls_socket *, unsigned char *, size_t) { return 0; }
 
 int atclient_tls_socket_connect(struct atclient_tls_socket *socket, const char *host, const uint16_t port) {
-  if (socket->handle == -1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid socket handle\n");
-    return -1;
-  }
-  WiFiClient client = clients[socket->handle];
-  int ret = client.connectSSL(host, port);
-  return ret;
+  return socket->bear_ssl_client->connect(host, port) == 0;
 }
 
 int atclient_tls_socket_disconnect(struct atclient_tls_socket *socket) {
-  if (socket->handle == -1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid socket handle\n");
-    return -1;
-  }
-  WiFiClient client = clients[socket->handle];
-  client.stop();
+  socket->bear_ssl_client->stop();
   return 0;
 }
 
 int atclient_tls_socket_write(struct atclient_tls_socket *socket, const unsigned char *value, size_t value_len) {
-  if (socket->handle == -1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid socket handle\n");
-    return -1;
-  }
-  WiFiClient client = clients[socket->handle];
-  size_t ret = client.write(value, value_len);
+  size_t ret = socket->bear_ssl_client->write(value, value_len);
   return ret = value_len;
 }
 
 int atclient_tls_socket_read(struct atclient_tls_socket *socket, unsigned char **value, size_t *value_len,
                              const struct atclient_socket_read_options options) {
-  if (socket->handle == -1) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid socket handle\n");
-    return -1;
-  }
-  WiFiClient client = clients[socket->handle];
-
   if (options.type != ATCLIENT_SOCKET_READ_UNTIL_CHAR) {
     // Nothing else implemented right now
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "read options type %d is not a valid type\n", options.type);
@@ -127,9 +86,7 @@ int atclient_tls_socket_read(struct atclient_tls_socket *socket, unsigned char *
     do {
       // When reading to a character we must read byte by byte to prevent
       // over reading and risk corrupting the next message
-      c = client.read();
-      Serial.print(c);
-      if (c == -1) {
+      if (!socket->bear_ssl_client->available()) {
         timeout_count++;
         if (timeout_count == MAX_READ_TIMEOUTS) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read the full message after %d attempts\n",
@@ -140,6 +97,8 @@ int atclient_tls_socket_read(struct atclient_tls_socket *socket, unsigned char *
         delay(1);
         continue;
       }
+      c = socket->bear_ssl_client->read();
+      Serial.print(c);
       recv[offset + pos] = c;
       pos++;
       if (until_char == c) {

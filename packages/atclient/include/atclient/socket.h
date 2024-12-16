@@ -30,7 +30,11 @@ extern "C" {
 
 // Export the appropriate platform specific struct implementation
 #if defined(ATCLIENT_SOCKET_PROVIDER_MBEDTLS)
-#include "socket_mbedtls.h"
+#include "./socket_mbedtls.h"
+#endif
+
+#if defined(ATCLIENT_SOCKET_PROVIDER_ARDUINO_BEARSSL)
+#include "./socket_arduino_bearssl.h"
 #endif
 
 // IWYU pragma: end_exports
