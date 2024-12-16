@@ -673,7 +673,6 @@ int atclient_send_heartbeat(atclient *heartbeat_conn) {
     memset(recv, 0, sizeof(unsigned char) * recvsize);
   }
   size_t recv_len = 0;
-  char *ptr = (char *)recv;
 
   if ((ret = atclient_connection_send(&heartbeat_conn->atserver_connection, (unsigned char *)noop_cmd, noop_cmd_len,
                                       recv, recvsize, &recv_len)) != 0) {

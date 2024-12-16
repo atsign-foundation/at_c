@@ -20,10 +20,6 @@ extern "C" {
 
 #define ATCLIENT_ERR_AT0015_KEY_NOT_FOUND -0x1980
 
-// default param values for ATCLIENT PKAM AUTHENTICATE OPTIONS
-#define ATCLIENT_DEFAULT_AT_DIRECTORY_HOST "root.atsign.org"
-#define ATCLIENT_DEFAULT_AT_DIRECTORY_PORT 64
-
 #define ATCLIENT_DATA_TOKEN "data:"
 
 #define ATCLIENT_CRAM_PREFIX "cram"

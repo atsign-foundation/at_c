@@ -10,7 +10,7 @@ int main() {
   int ret = 1;
 
   char expected_string[] = "enroll:request:{\"appName\":\"test-app\",\"deviceName\":\"test-device\",\"otp\":\"XYZABC\","
-                           "\"namespaces\":{\"namespace1\":\"rw\",\"namespace2\":\"r\"}}";
+                           "\"namespaces\":{\"namespace1\":\"rw\",\"namespace2\":\"r\"}}\r\n";
   atcommons_enroll_namespace_t namespace;
   namespace.name = "namespace1";
   namespace.access = "rw";

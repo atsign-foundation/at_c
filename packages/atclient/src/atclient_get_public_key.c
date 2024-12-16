@@ -48,6 +48,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
 
   char *atkey_str_without_public = NULL;
   char *ptr = strstr(atkey_str, "public:");
+
   if (ptr != NULL) {
     atkey_str_without_public = ptr + strlen("public:");
   } else {
@@ -56,16 +57,13 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
     goto exit;
   }
 
-  bool bypass_cache = false;
-  bool should_auth = true;
-  if (request_options != NULL) {
-    bypass_cache = atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) &&
-                   request_options->bypass_cache;
-    should_auth = atclient_get_public_key_request_options_is_should_auth_initialized(request_options) &&
-                  request_options->should_auth;
-  }
+  const bool bypass_cache = atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) &&
+                            request_options->bypass_cache;
+  // use plookup verb if atclient instance is authenticated (or) lookup verb otherwise
+  // if the atsign var is set in the atclient instance, that is considered authenticated
+  const bool authenticated_lookup = atclient->atsign == NULL ? false : true;
+  char *verb = authenticated_lookup ? "plookup" : "lookup";
 
-  char *verb = should_auth ? "plookup" : "lookup";
   const size_t lookup_cmd_size = strlen(verb) + strlen(":all:\r\n") + (bypass_cache ? strlen("bypassCache:true:") : 0) +
                                  strlen(atkey_str_without_public) + 1;
 
@@ -132,7 +130,7 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
 
     metadata_str = cJSON_Print(metadata);
 
-    if ((ret = atclient_atkey_metadata_from_json_str(&(atkey->metadata), metadata_str)) != 0) {
+    if ((ret = atclient_atkey_metadata_from_json_str(&atkey->metadata, metadata_str)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str: %d\n", ret);
       goto exit;
     }
@@ -149,7 +147,6 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
   }
 
   ret = 0;
-  goto exit;
 exit: {
   if (root != NULL) {
     cJSON_Delete(root);
@@ -174,12 +171,6 @@ static int atclient_get_public_key_validate_arguments(const atclient *atclient, 
   if (!atclient_is_atserver_connection_started(atclient)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver connection not started\n");
-    goto exit;
-  }
-
-  if (!atclient_is_atsign_initialized(atclient)) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign not initialized\n");
     goto exit;
   }
 

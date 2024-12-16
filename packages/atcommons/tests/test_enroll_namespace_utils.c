@@ -14,15 +14,18 @@ int test_enroll_namespace_list_from_string();
 int main() {
   int ret = test_enroll_namespace_to_json();
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s failed\n", "test_enroll_namespace_to_json");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s failed\n", "test_enroll_namespace_to_json: %d", ret);
     return ret;
   }
   ret = test_enroll_namespace_list_to_json();
   if(ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s failed\n", "test_enroll_namespace_list_to_json");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s failed\n", "test_enroll_namespace_list_to_json: %d", ret);
     return ret;
   }
   ret = test_enroll_namespace_list_from_string();
+  if(ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s failed\n", "test_enroll_namespace_list_from_string: %d", ret);
+  }
   return ret;
 }
 
@@ -94,16 +97,28 @@ int test_enroll_namespace_list_to_json() {
 int test_enroll_namespace_list_from_string() {
   char *nsl_str_1 = "ns1:rw,ns2:r";
   char *nsl_str_2 = "ns3:rw";
+  char *nsl_invalid_str_1 = "ns4";
+  char *nsl_invalid_str_2 = "ns5:";
   atcommons_enroll_namespace_list_t *nsl = malloc(sizeof(atcommons_enroll_namespace_list_t));
 
   int ret = atcommons_enroll_namespace_list_from_string(&nsl, nsl_str_1);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string(ns string 1): %d\n", ret);
     return ret;
   }
   ret = atcommons_enroll_namespace_list_from_string(&nsl, nsl_str_2);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string(ns string 2): %d\n", ret);
+    return ret;
+  }
+  ret = atcommons_enroll_namespace_list_from_string(&nsl, nsl_invalid_str_1);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string(ns string 3): %d\n", ret);
+    return ret;
+  }
+  ret = atcommons_enroll_namespace_list_from_string(&nsl, nsl_invalid_str_2);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atcommons_enroll_namespace_list_from_string(ns string 4): %d\n", ret);
     return ret;
   }
 
@@ -122,6 +137,18 @@ int test_enroll_namespace_list_from_string() {
   if(strncmp(nsl->namespaces[2]->name, "ns3", ns_name_len) || strncmp(nsl->namespaces[2]->access, "rw", ns_access_len)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_enroll_namespace_list_from_string case 3: failed\n");
+    return ret;
+  }
+
+  // following two test cases are negative. Them being NULL is expected behaviour
+  if(nsl->namespaces[3]->name != NULL || nsl->namespaces[3]->access != NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_enroll_namespace_list_from_string case 4: failed\n");
+    return ret;
+  }
+  if(nsl->namespaces[4]->name != NULL || nsl->namespaces[4]->access != NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_enroll_namespace_list_from_string case 5: failed\n");
     return ret;
   }
 

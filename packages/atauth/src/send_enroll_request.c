@@ -19,7 +19,7 @@ int atauth_validate_send_enroll_request_arguments(const atclient *client, const 
 int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t *ep, char *enroll_id,
                                char *enroll_status) {
   int ret = 0;
-  const size_t recv_size = 100; // to hold the response for enroll request
+  const size_t recv_size = 300; // to hold the response for enroll request
   unsigned char recv[recv_size];
   char *recv_trimmed = NULL;
   size_t recv_len;

@@ -32,10 +32,8 @@ extern "C" {
 
 #define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INDEX 0
 #define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INDEX 0
-#define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INDEX 0
 #define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_BYPASS_CACHE_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_STORE_ATKEY_METADATA_INITIALIZED (VALUE_INITIALIZED << 1)
-#define ATCLIENT_GET_PUBLIC_KEY_REQUEST_OPTIONS_SHOULD_AUTH_INITIALIZED (VALUE_INITIALIZED << 2)
 
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_REGEX_INDEX 0
 #define ATCLIENT_GET_ATKEYS_REQUEST_OPTIONS_SHOW_HIDDEN_INDEX 0
@@ -108,7 +106,6 @@ typedef struct atclient_get_shared_key_request_options {
 typedef struct atclient_get_public_key_request_options {
   bool bypass_cache;
   bool store_atkey_metadata;
-  bool should_auth;
   uint8_t _initialized_fields[1];
 } atclient_get_public_key_request_options;
 
@@ -232,12 +229,6 @@ int atclient_get_public_key_request_options_set_store_atkey_metadata(atclient_ge
                                                                      const bool store_atkey_metadata);
 void atclient_get_public_key_request_options_unset_store_atkey_metadata(
     atclient_get_public_key_request_options *options);
-
- bool atclient_get_public_key_request_options_is_should_auth_initialized(
-    const atclient_get_public_key_request_options *options);
- int atclient_get_public_key_request_options_set_should_auth(atclient_get_public_key_request_options *options,
-                                                              const bool should_auth);
- void atclient_get_public_key_request_options_unset_should_auth(atclient_get_public_key_request_options *options);
 
 /*
  * 3. Delete

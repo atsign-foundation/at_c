@@ -27,7 +27,8 @@ int create_new_atserver_connection(atclient *ctx, const char *atsign, const atcl
 int atauth_validate_args(const char *otp, const char *app_name, const char *device_name, const char *namespaces_str);
 
 int main(int argc, char *argv[]) {
-  int ret = 0;
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
+  int ret = 0, root_port = 0;
   char *atsign_temp = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL, *app_name = NULL, *device_name = NULL,
        *namespaces_str = NULL;
 
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]) {
   char status[ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN];
 
   // initialize apkam symmetric key buffer (bytes)
-  size_t aes256_key_unsigned_char_bytes_size = sizeof(unsigned char) * AES_256_KEY_BYTES;
+  size_t aes256_key_unsigned_char_bytes_size = sizeof(unsigned char) * ATAUTH_AES_256_KEY_BYTES;
   unsigned char apkam_symmetric_key_bytes[aes256_key_unsigned_char_bytes_size];
 
   // initialize apkam symmetric key buffer (base64)
@@ -66,7 +67,7 @@ int main(int argc, char *argv[]) {
    * 1. Parse + validate command-line arguments
    */
   if ((ret = atactivate_parse_args(argc, argv, &atsign_temp, NULL, &otp, &atkeys_fp, &app_name, &device_name,
-                                   &namespaces_str, &root_host)) != 0) {
+                                   &namespaces_str, &root_host, &root_port)) != 0) {
     goto exit;
   }
 
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]) {
   atclient_atkeys_set_pkam_private_key_base64(&atkeys, (const char *)pkam_private_key_base64,
                                               strlen((const char *)pkam_private_key_base64));
 
-  // 2.1.2 populate the pkam public/private key bytes in the atkeys struct by parsing the base64 formats
+  // 2.1.2 populate the pkam public/private key bytes in the atkeys struct by parsing the base64 encoded keys
   atclient_atkeys_populate_pkam_public_key(&atkeys, (const char *)pkam_public_key_base64,
                                            strlen((const char *)pkam_public_key_base64));
   atclient_atkeys_populate_pkam_private_key(&atkeys, (const char *)pkam_private_key_base64,
@@ -120,14 +121,14 @@ int main(int argc, char *argv[]) {
   atclient_authenticate_options opts;
   atclient_authenticate_options_init(&opts);
   atclient_authenticate_options_set_atdirectory_host(&opts, root_host);
+  atclient_authenticate_options_set_atdirectory_port(&opts, root_port);
 
   atclient at_client;
   atclient_init(&at_client);
-  atclient_set_atsign(&at_client, atsign);
 
   // 2.2.1 Start new connection
   if ((ret = create_new_atserver_connection(&at_client, atsign, &opts)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "create_new_atserver_connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "create_new_atserver_connection: %d\n", ret);
     goto pkam_pub_keys_exit;
   }
 
@@ -190,10 +191,11 @@ int main(int argc, char *argv[]) {
 
   // 2.5.1 base64 encode the encrypted APKAM symmetric key
   size_t encrypted_apkam_symmetric_key_base64_len = 0;
-  if ((ret = atchops_base64_encode(
-           (unsigned char *)encrypted_apkam_symmetric_key_bytes, sizeof(unsigned char) * rsa_2048_ciphertext_size,
-           (unsigned char *)encrypted_apkam_symmetric_key_base64, sizeof(unsigned char) * base64_encoded_rsa2048_ciphertext_size,
-           &encrypted_apkam_symmetric_key_base64_len)) != 0) {
+  if ((ret = atchops_base64_encode((unsigned char *)encrypted_apkam_symmetric_key_bytes,
+                                   sizeof(unsigned char) * rsa_2048_ciphertext_size,
+                                   (unsigned char *)encrypted_apkam_symmetric_key_base64,
+                                   sizeof(unsigned char) * base64_encoded_rsa2048_ciphertext_size,
+                                   &encrypted_apkam_symmetric_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed base64 encoding encrypted_apkam_symmetric_key | atchops_base64_encode: %d\n", ret);
     goto enc_pub_key_exit;
@@ -204,6 +206,10 @@ int main(int argc, char *argv[]) {
    */
   // 3.1 Initialize and populate enrollment params structs
   atcommons_enroll_namespace_list_t *ns_list = malloc(sizeof(atcommons_enroll_namespace_list_t));
+  if (ns_list == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for namespace list\n");
+    goto enc_pub_key_exit;
+  }
 
   // 3.1.1 parse namespace list string passed through command-line args
   if ((ret = atcommons_enroll_namespace_list_from_string(&ns_list, namespaces_str)) != 0) {
@@ -242,7 +248,7 @@ int main(int argc, char *argv[]) {
   char *encrypted_default_self_encryption_key = NULL;
 
   // 4.1.1 Fetch encrypted default encryption private key
-  if ((ret = get_apkam_key(&encrypted_default_encryption_private_key, ENCRYPTED_DEFAULT_ENC_PRIVKEY_NAME,
+  if ((ret = get_apkam_key(&encrypted_default_encryption_private_key, ATAUTH_ENCRYPTED_DEFAULT_ENC_PRIVKEY_NAME,
                            &at_client.atserver_connection, enrollment_id, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed fetching def_encryption_privkey | get_apkam_key: %d\n",
                  ret);
@@ -251,7 +257,7 @@ int main(int argc, char *argv[]) {
   }
 
   // 4.1.2 Fetch encrypted self encryption key
-  if ((ret = get_apkam_key(&encrypted_default_self_encryption_key, ENCRYPTED_SELF_ENC_KEY_NAME,
+  if ((ret = get_apkam_key(&encrypted_default_self_encryption_key, ATAUTH_ENCRYPTED_SELF_ENC_KEY_NAME,
                            &at_client.atserver_connection, enrollment_id, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed fetching def_encryption_privkey | get_apkam_key: %d\n",
                  ret);
@@ -417,7 +423,7 @@ exit: {
 }
 
 // retries APKAM auth using the set of atkeys provided until the authentication succeeds
-// sleeps `DEFAULT_APKAM_RETRY_INTERVAL` seconds after each attempt
+// sleeps `ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL` seconds after each attempt
 int retry_pkam_auth_until_success(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
                                   const atclient_authenticate_options *opts) {
   int ret = 1;
@@ -437,8 +443,8 @@ int retry_pkam_auth_until_success(atclient *ctx, const char *atsign, const atcli
       return ret;
     }
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "APKAM auth failed. Retrying in %d secs\n",
-                 DEFAULT_APKAM_RETRY_INTERVAL);
-    sleep(DEFAULT_APKAM_RETRY_INTERVAL);
+                 ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL);
+    sleep(ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL);
   }
 }
 
@@ -498,33 +504,29 @@ exit: {
 
 // returns 1 if the error_message contains the ENROLLMENT_DENIED error code, otherwise 0
 int is_enrollment_denied(const char *err_msg) {
-  return strncmp(err_msg, ENROLLMENT_DENIED_ERR_CODE, strlen(ENROLLMENT_DENIED_ERR_CODE)) == 0 ? 1 : 0;
+  return strncmp(err_msg, ATAUTH_ENROLLMENT_DENIED_ERR_CODE, strlen(ATAUTH_ENROLLMENT_DENIED_ERR_CODE)) == 0 ? 1 : 0;
 }
 
 int create_new_atserver_connection(atclient *ctx, const char *atsign, const atclient_authenticate_options *options) {
   char *atserver_host = NULL;
   int atserver_port = 0, ret = 0;
-  if (options != NULL) {
-    if (atclient_authenticate_options_is_atdirectory_host_initialized(options) &&
-        atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
-      atserver_host = options->atdirectory_host;
-      atserver_port = options->atdirectory_port;
-    }
-  }
 
   if (atserver_host == NULL || atserver_port == 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                 "Missing atServer host or port. Using production atDirectory to look up atServer host and port\n");
-    if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
-                                                    ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
-                                                    &atserver_port)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Fetching secondary server address for atsign: %s\n", atsign);
+    if ((ret = atclient_utils_find_atserver_address(options->atdirectory_host, options->atdirectory_port, atsign,
+                                                    &atserver_host, &atserver_port)) != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atclient_utils_find_atserver_address: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                   "Could not fetch secondary address for atsign: %s on root directory: %s:%d\n", atsign,
+                   options->atdirectory_host, options->atdirectory_port);
       goto exit;
     }
   }
 
   if ((ret = atclient_start_atserver_connection(ctx, atserver_host, atserver_port)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atclient_start_atserver_connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not connect to secondary server at %s:%d\n", atserver_host,
+                 atserver_port);
   }
 
 exit: { return ret; }

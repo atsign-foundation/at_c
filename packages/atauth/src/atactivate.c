@@ -21,6 +21,7 @@
 int main(int argc, char *argv[]) {
   int ret = 0;
   char *atsign_temp = NULL, *cram_secret = NULL, *root_host = NULL, *atkeys_fp = NULL, *otp = NULL;
+  int root_port = 0;
   char enrollment_id[ENROLL_ID_MAX_LEN];
   char status[ATCOMMONS_ENROLL_STATUS_STRING_MAX_LEN];
 
@@ -29,7 +30,7 @@ int main(int argc, char *argv[]) {
 
   // initialize apkam symmetric key and self encryption key (bytes)
   unsigned char *self_encryption_key_bytes, *apkam_symmetric_key_bytes;
-  size_t aes256_key_unsigned_char_bytes_size = sizeof(unsigned char) * AES_256_KEY_BYTES;
+  size_t aes256_key_unsigned_char_bytes_size = sizeof(unsigned char) * ATAUTH_AES_256_KEY_BYTES;
   self_encryption_key_bytes = malloc(aes256_key_unsigned_char_bytes_size);
   apkam_symmetric_key_bytes = malloc(aes256_key_unsigned_char_bytes_size);
 
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]) {
   unsigned char *apkam_symmetric_key_base64 = malloc(aes256_key_unsigned_char_base64_size);
 
   // intialize encrypted APKAM symmetric Key and encrypted default encryption private key (bytes)
-  const size_t rsa_2048_privkey_base64_len = atchops_base64_encoded_size(RSA_2048_PRIVKEY_BYTES);
+  const size_t rsa_2048_privkey_base64_len = atchops_base64_encoded_size(ATAUTH_RSA_2048_PRIVKEY_BYTES);
   const size_t aes256_encrypted_rsa_privkey_size = atchops_aes_ctr_ciphertext_size(
       rsa_2048_privkey_base64_len); // size for an AES256 encrypted RSA2048 privkey in bytes
   const size_t aes256_encrypted_rsa_privkey_unsigned_char_size =
@@ -137,7 +138,7 @@ int main(int argc, char *argv[]) {
    * 1. Parse args
    */
   if ((ret = atactivate_parse_args(argc, argv, &atsign_temp, &cram_secret, &otp, &atkeys_fp, NULL, NULL, NULL,
-                                   &root_host)) != 0) {
+                                   &root_host, &root_port)) != 0) {
     goto exit;
   }
 
@@ -295,8 +296,8 @@ int main(int argc, char *argv[]) {
 
   // 4.3 Initialize enrollment params
   atcommons_enroll_params_init(ep);
-  ep->app_name = DEFAULT_FIRST_APP_NAME;
-  ep->device_name = DEFAULT_FIRST_DEVICE_NAME;
+  ep->app_name = ATAUTH_DEFAULT_FIRST_APP_NAME;
+  ep->device_name = ATAUTH_DEFAULT_FIRST_DEVICE_NAME;
   ep->apkam_public_key = (unsigned char *)atkeys.pkam_public_key_base64;
   ep->encrypted_default_encryption_private_key = encrypted_default_encryption_private_key_base64;
   ep->encrypted_self_encryption_key = encrypted_self_encryption_key_base64;
