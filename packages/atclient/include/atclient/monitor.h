@@ -10,11 +10,6 @@ extern "C" {
 #include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 
-// HACK let's just get it working for now this is so wrong
-#ifndef MBEDTLS_ERR_SSL_TIMEOUT
-#define MBEDTLS_ERR_SSL_TIMEOUT -37
-#endif
-
 /**
  * @brief Represents a message received from the monitor connection, typically derived from the prefix of the response
  * (e.g. "data:ok"'s message type would be "data" = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE)

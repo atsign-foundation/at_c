@@ -144,7 +144,6 @@ exit: {
 
 static int test_4_atclient_get_atkeys_null_regex(atclient *ctx, const char *scan_regex, const bool showhidden) {
   int ret = 1;
-  return 0; // NOTE: disabled temporarily DONT LET THIS GET MERGED
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_4_atclient_get_atkeys_null_regex\n");
 
