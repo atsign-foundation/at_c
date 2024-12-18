@@ -297,7 +297,6 @@ int atclient_tls_socket_read_until_char(struct atclient_tls_socket *socket, unsi
 
     // Read into current block
     size_t pos = 0; // position in current block
-    int timeout_count = 0;
     do {
       // When reading to a character we must read byte by byte to prevent
       // over reading and risk corrupting the next message
@@ -334,15 +333,8 @@ int atclient_tls_socket_read_until_char(struct atclient_tls_socket *socket, unsi
       case MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS: // crypto operation in progress
                                                // async error, we need to try again
         break;
-      case MBEDTLS_ERR_SSL_TIMEOUT: // timeout before reading the expected character
-                                    // timeout usually indicates nothing to read
-        timeout_count++;
-        if (timeout_count == MAX_READ_TIMEOUTS) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to read the full message after %d attempts\n",
-                       MAX_READ_TIMEOUTS);
-          return ATCLIENT_SSL_TIMEOUT_EXITCODE;
-        }
-        usleep(1000);
+      case MBEDTLS_ERR_SSL_TIMEOUT:
+        return ATCLIENT_SSL_TIMEOUT_EXITCODE;
         break;
         // unexpected errors while reading
       default:
