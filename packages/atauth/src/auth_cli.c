@@ -206,8 +206,7 @@ int main(int argc, char *argv[]) {
    */
   // 3.1 Initialize and populate enrollment params structs
   atcommons_enroll_namespace_list_t *ns_list = malloc(sizeof(atcommons_enroll_namespace_list_t));
-  if (ns_list == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for namespace list\n");
+  if((ret = atcommmons_init_enroll_namespace_list(ns_list)) != 0) {
     goto enc_pub_key_exit;
   }
 

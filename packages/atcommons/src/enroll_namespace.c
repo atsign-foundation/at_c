@@ -10,6 +10,17 @@
 
 #define TAG "enroll_namespace"
 
+int atcommmons_init_enroll_namespace_list(atcommons_enroll_namespace_list_t *ns_list) {
+  if(ns_list == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Memory not allocated for namespace list struct\n");
+    return -1;
+  }
+
+  memset(ns_list, 0, sizeof(atcommons_enroll_namespace_list_t));
+
+  return 0;
+}
+
 int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **ns_list,
                                            atcommons_enroll_namespace_t *ns) {
   if (ns == NULL) {
