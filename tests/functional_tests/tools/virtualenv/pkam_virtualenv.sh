@@ -5,4 +5,4 @@ cd "$SCRIPT_DIRECTORY"
 
 CONTAINER_NAME="virtualenv"
 
-sudo docker exec "$CONTAINER_NAME" supervisorctl start pkamLoad
+docker exec "$CONTAINER_NAME" supervisorctl start pkamLoad
