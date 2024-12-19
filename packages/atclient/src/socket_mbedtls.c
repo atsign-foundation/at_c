@@ -343,7 +343,7 @@ int atclient_tls_socket_read_until_char(struct atclient_tls_socket *socket, unsi
         } else {
           char strerr[512];
           mbedtls_strerror(ret, strerr, 512);
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s", strerr);
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s\n", strerr);
         }
         free(recv);
         return ret;
