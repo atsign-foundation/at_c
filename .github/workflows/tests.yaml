@@ -53,9 +53,9 @@ jobs:
         working-directory: tests/functional_tests/tools/virtualenv
         run: |
           ./start_virtualenv.sh
-          sleep 5
+          sleep 10
           ./pkam_virtualenv.sh
-          sleep 5
+          sleep 10
 
       - name: Install atSDK
         run: |
