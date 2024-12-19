@@ -54,7 +54,7 @@ exit: { return ret; }
 }
 
 void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms) {
-  atclient_set_read_timeout(&(monitor_conn->atserver_connection), timeoutms);
+  atclient_set_read_timeout(monitor_conn, timeoutms);
 }
 
 int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
@@ -106,85 +106,31 @@ exit: {
 
 int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message,
                           atclient_monitor_hooks *hooks) {
-  int ret = -1;
 
-  char *buffertemp = NULL;
-  char *buffer = NULL;
+  unsigned char *buffer = NULL;
+  size_t buffer_len;
 
-  size_t chunks = 0;
-  const size_t chunksize = ATCLIENT_MONITOR_BUFFER_LEN;
+  int ret = atclient_tls_socket_read(&monitor_conn->atserver_connection._socket, &buffer, &buffer_len,
+                                     atclient_socket_read_until_char('\n'));
 
-  buffer = malloc(sizeof(char) * chunksize);
-  if (buffer == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for buffer\n");
+  if (ret == ATCLIENT_SSL_TIMEOUT_EXITCODE) {
+    // treat a timeout as empty message, non error
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY;
+    ret = 0;
     goto exit;
-  }
-  memset(buffer, 0, sizeof(char) * chunksize);
-
-  bool done_reading = false;
-  while (!done_reading) {
-    if (chunks > 0) {
-      buffertemp = realloc(buffer, sizeof(char) * (chunksize + (chunksize * chunks)));
-      buffer = buffertemp;
-      buffertemp = NULL;
-    }
-
-    size_t off = chunksize * chunks;
-    size_t i = 0;
-    while (i < chunksize) {
-      ret = mbedtls_ssl_read(&(monitor_conn->atserver_connection.ssl), (unsigned char *)buffer + off + i, 1);
-      // successfully read
-      if (buffer[off + i] == '\n') {
-        buffer[off + i] = '\0';
-        done_reading = true;
-        goto exit_loop;
-      }
-      // successfully read something, continue
-      if (ret > 0) {
-        i++;
-        continue;
-      }
-
-      // Handle errors
-      switch (ret) {
-        // Special error cases where we should try reading again
-      case MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS:  // async operation in progress
-      case MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS: // crypto operation in progress
-      case MBEDTLS_ERR_SSL_WANT_READ:          // handshake incomplete
-      case MBEDTLS_ERR_SSL_WANT_WRITE:         // handshake incomplete
-        usleep(10000);                         // Try again in 10 milliseconds
-        break;
-        // Timeout means nothing to read, return EMPTY message type
-      case MBEDTLS_ERR_SSL_TIMEOUT:
-        message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY;
-        return 0;
-        // Monitor connection bad, must be discarded
-      case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY: // transport closed with close notify
-      case 0:                                 // transport closed without close notify
-      default:                                // Other errors
-        done_reading = true;
-        if (ret == 0) {
-          ret = -1;
-        }
-        goto exit_loop;
-      }
-    }
-    chunks = chunks + 1;
-  }
-exit_loop:
-  if (ret <= 0) { // you should reconnect...
+  } else if (ret != 0) { // you should reconnect...
     message->type = ATCLIENT_MONITOR_ERROR_READ;
     message->error_read.error_code = ret;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Read nothing from the monitor connection: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Error: monitor exited with code %d\n", ret);
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen(buffer), buffer,
-               ATCLIENT_RESET);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen((char *)buffer),
+               buffer, ATCLIENT_RESET);
 
   char *messagetype = NULL;
   char *messagebody = NULL;
-  ret = parse_message(buffer, &messagetype, &messagebody);
+  ret = parse_message((char *)buffer, &messagetype, &messagebody);
   if (ret != 0) {
     message->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
@@ -251,12 +197,10 @@ exit_loop:
     ret = -1;
     goto exit;
   }
-
   ret = 0;
   goto exit;
 exit: {
   free(buffer);
-  free(buffertemp);
   return ret;
 }
 }

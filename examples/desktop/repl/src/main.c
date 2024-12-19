@@ -24,8 +24,7 @@
  *     --key-file [~/.atsign/keys/@atsign_key.atKeys]
  */
 
-static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenticate_options,
-                                    const char *root_url);
+static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenticate_options, const char *root_url);
 static int start_repl_loop(atclient *atclient, repl_args *repl_args);
 
 int main(int argc, char *argv[]) {
@@ -97,8 +96,7 @@ exit: {
 }
 }
 
-static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenticate_options,
-                                    const char *root_url) {
+static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenticate_options, const char *root_url) {
   int ret = 1;
 
   if (pkam_authenticate_options == NULL) {
@@ -162,7 +160,7 @@ static int start_repl_loop(atclient *atclient, repl_args *repl_args) {
 
   bool loop = true;
 
-  const size_t stdin_buffer_size = STDIN_BUFFER_SIZE;
+  size_t stdin_buffer_size = STDIN_BUFFER_SIZE;
   char stdin_buffer[stdin_buffer_size];
   char *stdin_buffer_ptr = stdin_buffer;
   size_t stdin_buffer_len = 0;
@@ -202,7 +200,7 @@ static int start_repl_loop(atclient *atclient, repl_args *repl_args) {
         goto exit;
       }
 
-      if((ret = atclient_connection_read(&(atclient->atserver_connection), &recv, NULL, 0)) != 0) {
+      if ((ret = atclient_connection_read(&(atclient->atserver_connection), (unsigned char **)&recv, NULL)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read response\n");
         goto exit;
       }

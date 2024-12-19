@@ -1,10 +1,9 @@
 #include "atclient/connection.h"
-#include "atchops/constants.h"
-#include "atclient/cacerts.h"
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
+#include "atclient/socket.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
-#include <atchops/mbedtls.h>
 #include <atchops/platform.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -13,13 +12,6 @@
 #include <string.h>
 
 #define TAG "connection"
-
-/* Concatenation of all available CA certificates in PEM format */
-static const char cas_pem[] = LETS_ENCRYPT_ROOT GOOGLE_GLOBAL_SIGN GOOGLE_GTS_ROOT_R1 GOOGLE_GTS_ROOT_R2
-    GOOGLE_GTS_ROOT_R3 GOOGLE_GTS_ROOT_R4 ZEROSSL_INTERMEDIATE "";
-static const size_t cas_pem_len = sizeof(cas_pem);
-
-static void my_debug(void *ctx, int level, const char *file, int line, const char *str);
 
 static void atclient_connection_set_is_connection_enabled(atclient_connection *ctx, const bool should_be_connected);
 static bool atclient_connection_is_connection_enabled(const atclient_connection *ctx);
@@ -39,13 +31,6 @@ static void atclient_connection_unset_port(atclient_connection *ctx);
 void atclient_connection_init(atclient_connection *ctx, atclient_connection_type type) {
   memset(ctx, 0, sizeof(atclient_connection));
   ctx->type = type;
-  ctx->_is_host_initialized = false;
-  ctx->host = NULL;
-  ctx->_is_port_initialized = false;
-  ctx->port = 0;
-  ctx->_is_connection_enabled = false;
-  ctx->_is_hooks_enabled = false;
-  ctx->hooks = NULL;
 }
 
 void atclient_connection_free(atclient_connection *ctx) {
@@ -83,18 +68,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   }
 
   /*
-   * 2. Variables
-   */
-  const size_t recv_size = 256;
-  unsigned char recv[recv_size];
-  memset(recv, 0, sizeof(unsigned char) * recv_size);
-  size_t recv_len = 0;
-
-  const size_t port_str_size = 6;
-  char port_str[port_str_size];
-
-  /*
-   * 3. Disable and Reenable connection
+   * 2. Disable and Reenable connection
    */
   if (atclient_connection_is_connection_enabled(ctx)) {
     atclient_connection_disable_connection(ctx);
@@ -102,76 +76,19 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   atclient_connection_enable_connection(ctx);
 
-  /*
-   * 3. Parse CA certs
-   */
-  if ((ret = mbedtls_x509_crt_parse(&(ctx->cacert), (unsigned char *)cas_pem, cas_pem_len)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_x509_crt_parse failed with exit code: %d\n", ret);
-    goto exit;
+  // 3. Setup ssl configuration
+  ret = atclient_tls_socket_configure(&ctx->_socket, NULL, 0);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to setup ssl configuration\n");
+    return ret;
   }
 
-  /*
-   * 4. Seed the random number generator
-   */
-  if ((ret = mbedtls_ctr_drbg_seed(&(ctx->ctr_drbg), mbedtls_entropy_func, &(ctx->entropy),
-                                   (unsigned char *)ATCHOPS_RNG_PERSONALIZATION,
-                                   strlen(ATCHOPS_RNG_PERSONALIZATION))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ctr_drbg_seed failed with exit code: %d\n", ret);
-    goto exit;
+  ret = atclient_tls_socket_connect(&ctx->_socket, host, port);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to connect to %s:%u", host, port);
+    return ret;
   }
 
-  /*
-   * 5. Start the socket connection
-   */
-  snprintf(port_str, port_str_size, "%d", port);
-  if ((ret = mbedtls_net_connect(&(ctx->net), host, port_str, MBEDTLS_NET_PROTO_TCP)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_net_connect failed with exit code: %d\n", ret);
-    goto exit;
-  }
-
-  /*
-   * 6. Prepare the SSL connection
-   */
-  if ((ret = mbedtls_ssl_config_defaults(&(ctx->ssl_config), MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM,
-                                         MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_config_defaults failed with exit code: %d\n", ret);
-    goto exit;
-  }
-
-  mbedtls_ssl_conf_ca_chain(&(ctx->ssl_config), &(ctx->cacert), NULL);
-  mbedtls_ssl_conf_authmode(&(ctx->ssl_config), MBEDTLS_SSL_VERIFY_REQUIRED);
-  mbedtls_ssl_conf_rng(&(ctx->ssl_config), mbedtls_ctr_drbg_random, &(ctx->ctr_drbg));
-  mbedtls_ssl_conf_dbg(&(ctx->ssl_config), my_debug, stdout);
-  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config),
-                                ATCLIENT_CLIENT_READ_TIMEOUT_MS); // recv will timeout after X seconds
-
-  if ((ret = mbedtls_ssl_setup(&(ctx->ssl), &(ctx->ssl_config))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_setup failed with exit code: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = mbedtls_ssl_set_hostname(&(ctx->ssl), host)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_set_hostname failed with exit code: %d\n", ret);
-    goto exit;
-  }
-
-  mbedtls_ssl_set_bio(&(ctx->ssl), &(ctx->net), mbedtls_net_send, NULL, mbedtls_net_recv_timeout);
-
-  /*
-   * 7. Perform the SSL handshake
-   */
-  if ((ret = mbedtls_ssl_handshake(&(ctx->ssl))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_handshake failed with exit code: %d\n", ret);
-    goto exit;
-  }
-
-  /*
-   * 7. Verify the server certificate
-   */
-  if ((ret = mbedtls_ssl_get_verify_result(&(ctx->ssl))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_get_verify_result failed with exit code: %d\n", ret);
-    goto exit;
-  }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Connected\n");
 
   // ===============
@@ -179,38 +96,32 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // ===============
 
   // read anything that was already sent
-  // TODO: better read handling
-  // - see the improved implementation in atclient_monitor_read
-  // - this might require special handling since we are attempting to empty read buffer
-  if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv, recv_size)) <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
+
+  // FIXME: temporary hack to adapt TLS socket read's heap allocated reading to
+  // the existing functions which expect stack allocated memory
+  // all callers of this function should support dynamic memory allocations
+  // to ensure we are able to read the result in full
+  // the atclient_tls_socket_read function has a built in limit
+  unsigned char *buf1, *buf2;
+  size_t n1, n2;
+  ret = atclient_tls_socket_read(&ctx->_socket, &buf1, &n1, atclient_socket_read_until_char('@'));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    goto exit;
+  }
+  free(buf1);
+
+  if ((ret = atclient_tls_socket_write(&(ctx->_socket), (const unsigned char *)"\r\n", strlen("\r\n"))) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_tls_socket_write failed with exit code: %d\n", ret);
     goto exit;
   }
 
-  // TODO: better write handling
-  // We should retry if we get:
-  // MBEDTLS_ERR_SSL_WANT_WRITE
-  // MBEDTLS_ERR_SSL_WANT_READ
-  // MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS
-  // MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS
-  // if return value is positive and less than src_len
-  // we should continue to write from the appropriate offset
-  // (multiple writes must be summed to determine total data written)
-  // press enter
-  if ((ret = mbedtls_ssl_write(&(ctx->ssl), (const unsigned char *)"\r\n", strlen("\r\n"))) <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
+  ret = atclient_tls_socket_read(&ctx->_socket, &buf2, &n2, atclient_socket_read_until_char('@'));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
     goto exit;
   }
-
-  // read anything that was sent
-  memset(recv, 0, sizeof(unsigned char) * recv_size);
-  // TODO: better read handling
-  // - see the improved implementation in atclient_monitor_read
-  // - this might require special handling since we are attempting to empty read buffer
-  if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv, recv_size)) <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
-    goto exit;
-  }
+  free(buf2);
 
   // now we are guaranteed a blank canvas
 
@@ -286,17 +197,8 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
   /*
    * 2. Write the value
    */
-  // TODO: better write handling
-  // We should retry if we get:
-  // MBEDTLS_ERR_SSL_WANT_WRITE
-  // MBEDTLS_ERR_SSL_WANT_READ
-  // MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS
-  // MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS
-  // if return value is positive and less than src_len
-  // we should continue to write from the appropriate offset
-  // (multiple writes must be summed to determine total data written)
-  if ((ret = mbedtls_ssl_write(&(ctx->ssl), value, value_len)) <= 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write failed with exit code: %d\n", ret);
+  if ((ret = atclient_tls_socket_write(&ctx->_socket, value, value_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_tls_socket_write failed with exit code: %d\n", ret);
     goto exit;
   }
 
@@ -342,10 +244,40 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
 exit: { return ret; }
 }
 
+// TODO:  unit test later, this is a pure function
+// TODO: name this better later, this is a private function
+// read_buf is the buffer to search
+// read_n is the length of the buffer
+// read_i is the output of the start of `data:` or other token like error
+
+static int find_index_past_at_prompt(const unsigned char *read_buf, size_t read_n, size_t *read_i) {
+  // NOTE: if you change this if, check the second while loop
+  // it depends on this guard clause
+  if (read_n != 0 && read_buf[0] != '@') { // Doesn't start with a prompt
+    return 0;
+  }
+
+  while (++*read_i < read_n && read_buf[*read_i] != ':')
+    ;                      // Walks forward to the end of the buffer or first ':'
+  if (*read_i == read_n) { // Past the end of the buffer, did not find `:`
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Unable to find command result token `:`, connection should be reset\n");
+    return 1;
+  }
+  // We are at a `:`
+  while (--*read_i > 0 && read_buf[*read_i] != '@')
+    ; // Walk backwards to the first '@' we find
+  // We are at the first character or last '@' before a `:`
+  // but the first character is '@' so we are at '@'
+
+  ++*read_i; // move forward one to be after the '@'
+
+  return 0;
+}
+
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t src_len,
                              unsigned char *recv, const size_t recv_size, size_t *recv_len) {
   int ret = 1;
-  char error_buf[100];
 
   /*
    * 1. Validate arguments
@@ -395,28 +327,19 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   /*
    * 4. Write the value
    */
-  // TODO: better write handling
-  // We should retry if we get:
-  // MBEDTLS_ERR_SSL_WANT_WRITE
-  // MBEDTLS_ERR_SSL_WANT_READ
-  // MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS
-  // MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS
-  // if return value is positive and less than src_len
-  // we should continue to write from the appropriate offset
-  // (multiple writes must be summed to determine total data written)
   if (src[src_len - 1] != '\n') {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "command does not have a trailing \\n character:\t%s\n", src);
   }
-  if ((ret = mbedtls_ssl_write(&ctx->ssl, src, src_len)) <= 0) { // error only when the returned value is negative
-    mbedtls_strerror(ret, error_buf, sizeof(error_buf));
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_write returned -0x%x: %s\n", -ret, error_buf);
+
+  if ((ret = atclient_tls_socket_write(&ctx->_socket, src, src_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_tls_socket_write failed with exit code: %d\n", ret);
     goto exit;
   }
 
   /*
    * 5. Print debug log
    */
-  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG && ret == src_len) {
+  if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
     unsigned char *srccopy = NULL;
     if ((srccopy = malloc(sizeof(unsigned char) * src_len)) != NULL) {
       memcpy(srccopy, src, src_len);
@@ -485,30 +408,39 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   /*
    * 9. Read the value
    */
-  int tries = 0;
-  bool found = false;
-  size_t l = 0;
-  do {
-    // TODO: better read handling
-    // - see the improved implementation in atclient_monitor_read
-    if ((ret = mbedtls_ssl_read(&ctx->ssl, recv + l, recv_size - l)) <= 0) {
-      mbedtls_strerror(ret, error_buf, sizeof(error_buf));
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read returned err: -0x%x: %s\n", -ret, error_buf);
-      goto exit;
-    }
-    l = l + ret;
-    for (int i = l; i >= l - ret && i >= 0; i--) {
-      if (*(recv + i) == '\n' || *(recv + i) == '\r') {
-        *recv_len = i;
-        found = true;
-        break;
-      }
-    }
-    if (found) {
-      break;
-    }
-  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found);
-  recv[*recv_len] = '\0'; // null terminate the string
+
+  // FIXME: temporary hack to adapt TLS socket read's heap allocated reading to
+  // the existing functions which expect stack allocated memory
+  // all callers of this function should support dynamic memory allocations
+  // to ensure we are able to read the result in full
+  // the atclient_tls_socket_read function has a built in limit
+  unsigned char *read_buf;
+  size_t read_n;
+  ret = atclient_tls_socket_read(&ctx->_socket, &read_buf, &read_n, atclient_socket_read_until_char('\n'));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    goto exit;
+  }
+
+  size_t read_i = 0; // will store where the start of `<type>:` is (if happy path)
+  ret = find_index_past_at_prompt(read_buf, read_n, &read_i);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse the result read from the connection\n");
+    free(read_buf);
+    goto exit;
+  }
+  if (read_n - read_i > recv_size) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Read amount exceeds the stack allocated limit (will be fixed in a future update)\n");
+    free(read_buf);
+    goto exit;
+  }
+
+  // copy to recv, discarding the prompt
+  memcpy(recv, read_buf + read_i, read_n - read_i);
+  free(read_buf);
+  recv[read_n - 1] = '\0'; // null terminate the string
+  *recv_len = read_n;
 
   /*
    * 10. Run post read hook, if it exists
@@ -569,14 +501,12 @@ int atclient_connection_disconnect(atclient_connection *ctx) {
     return ret;
   }
 
-  do {
-    ret = mbedtls_ssl_close_notify(&(ctx->ssl));
-  } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_WANT_READ || ret != 0);
+  // intentionally disregarding the return value
+  atclient_tls_socket_disconnect(&ctx->_socket);
 
   atclient_connection_disable_connection(ctx);
 
-  ret = 0;
-exit: { return ret; }
+  return 0;
 }
 
 bool atclient_connection_is_connected(atclient_connection *ctx) {
@@ -626,8 +556,7 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
   return true;
 }
 
-int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len,
-                             const size_t value_max_len) {
+int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len) {
   int ret = 1;
 
   /*
@@ -647,18 +576,6 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
     return ret;
   }
-
-  /*
-   * 2. Variables
-   */
-  size_t recv_size;
-  if (value_max_len == 0) {
-    // we read 4 KB at a time, TODO: make a constant
-    recv_size = 4096;
-  } else {
-    recv_size = value_max_len;
-  }
-  unsigned char *recv = malloc(sizeof(unsigned char) * recv_size);
 
   /*
    * 3. Call pre_read hook, if it exists
@@ -685,81 +602,18 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
   /*
    * 4. Read the value
    */
-  bool found_end = false;
-  size_t pos = 0;
-  size_t recv_len = 0;
-  do {
-    // TODO: better read handling
-    // - see the improved implementation in atclient_monitor_read
-    if ((ret = mbedtls_ssl_read(&(ctx->ssl), recv + pos, recv_size - pos)) <= 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "mbedtls_ssl_read failed with exit code: %d\n", ret);
-      goto exit;
-    }
-    pos += ret;
-
-    // check if we found the end of the message
-    int i = pos;
-    while (!found_end && i-- > 0) {
-      found_end = recv[i] == '\n' || recv[i] == '\r';
-    }
-
-    if (found_end) {
-      recv_len = i;
-    } else {
-      if (value_max_len != 0) {
-        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "Message is too long, it exceeds the maximum length of %d\n",
-                     value_max_len);
-        recv_len = value_max_len;
-        break;
-      } else {
-        recv_size *= 2; // double the buffer size
-        unsigned char *temp = realloc(recv, sizeof(unsigned char) * recv_size);
-        if (temp == NULL) {
-          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reallocate memory\n");
-          free(recv);
-          goto exit;
-        }
-        recv = temp;
-      }
-    }
-  } while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == 0 || !found_end);
-
+  ret = atclient_tls_socket_read(&ctx->_socket, value, value_len, atclient_socket_read_until_char('\n'));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    goto exit;
+  }
+  *value[*value_len - 1] = '\0'; // replace '\n' with '\0'
   /*
    * 5. Print debug log
    */
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
-    unsigned char *recvcopy = NULL;
-    if ((recvcopy = malloc(sizeof(unsigned char) * recv_len)) != NULL) {
-      memcpy(recvcopy, recv, recv_len);
-      atlogger_fix_stdout_buffer((char *)recvcopy, recv_len);
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, recv_len, recvcopy,
-                   ATCLIENT_RESET);
-      free(recvcopy);
-    } else {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "Failed to allocate memory to pretty print the network received buffer\n");
-    }
-  }
-
-  /*
-   * 6. Set the value and value_len
-   */
-  if (found_end) {
-    if (recv_len != 0 && recv_len < recv_size) {
-      recv[recv_len] = '\0';
-    }
-  }
-  if (value_len != NULL) {
-    *value_len = recv_len;
-  }
-  if (value != NULL) {
-    if ((*value = malloc(sizeof(unsigned char) * (recv_len + 1))) == NULL) {
-      ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for value\n");
-      goto exit;
-    }
-    memcpy(*value, recv, recv_len);
-    (*value)[recv_len] = '\0';
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *value_len, *value,
+                 ATCLIENT_RESET);
   }
 
   /*
@@ -770,9 +624,9 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
     atclient_connection_hook_params params;
     params.src = NULL;
     params.src_len = 0;
-    params.recv = recv;
-    params.recv_size = recv_size;
-    params.recv_len = &recv_len;
+    params.recv = *value;
+    params.recv_size = *value_len;
+    params.recv_len = value_len;
     ret = ctx->hooks->post_read(&params);
     if (ctx->hooks != NULL) {
       ctx->hooks->_is_nested_call = false;
@@ -793,14 +647,7 @@ void atclient_connection_set_read_timeout(atclient_connection *ctx, const uint32
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
     return;
   }
-
-  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), timeout_ms);
-}
-
-static void my_debug(void *ctx, int level, const char *file, int line, const char *str) {
-  ((void)level);
-  fprintf((FILE *)ctx, "%s:%04d: %s", file, line, str);
-  fflush((FILE *)ctx);
+  atclient_tls_socket_set_read_timeout(&ctx->_socket, timeout_ms);
 }
 
 static void atclient_connection_set_is_connection_enabled(atclient_connection *ctx, const bool should_be_connected) {
@@ -830,12 +677,7 @@ static void atclient_connection_enable_connection(atclient_connection *ctx) {
   /*
    * 3. Enable the connection
    */
-  mbedtls_net_init(&(ctx->net));
-  mbedtls_ssl_init(&(ctx->ssl));
-  mbedtls_ssl_config_init(&(ctx->ssl_config));
-  mbedtls_x509_crt_init(&(ctx->cacert));
-  mbedtls_entropy_init(&(ctx->entropy));
-  mbedtls_ctr_drbg_init(&(ctx->ctr_drbg));
+  atclient_tls_socket_init(&ctx->_socket);
 
   /*
    * 4. Set the connection enabled flag
@@ -855,13 +697,10 @@ static void atclient_connection_disable_connection(atclient_connection *ctx) {
   /*
    * 2. Free the contexts
    */
+  // This is bad behavior for portability
+  // We should not free the whole socket
   if (atclient_connection_is_connection_enabled(ctx)) {
-    mbedtls_net_free(&(ctx->net));
-    mbedtls_ssl_free(&(ctx->ssl));
-    mbedtls_ssl_config_free(&(ctx->ssl_config));
-    mbedtls_x509_crt_free(&(ctx->cacert));
-    mbedtls_entropy_free(&(ctx->entropy));
-    mbedtls_ctr_drbg_free(&(ctx->ctr_drbg));
+    atclient_tls_socket_free(&ctx->_socket);
   }
 
   /*

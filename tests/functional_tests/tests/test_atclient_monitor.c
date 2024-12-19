@@ -175,22 +175,22 @@ static int send_notification(atclient *atclient) {
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
+  if ((ret = atclient_notify_params_set_operation(&params, ATCLIENT_NOTIFY_OPERATION_UPDATE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set operation: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
+  if ((ret = atclient_notify_params_set_atkey(&params, &atkey)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set atkey: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE)) != 0) {
+  if ((ret = atclient_notify_params_set_value(&params, ATKEY_VALUE)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set value: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
+  if ((ret = atclient_notify_params_set_should_encrypt(&params, true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set should_encrypt: %d\n", ret);
     goto exit;
   }
@@ -230,7 +230,7 @@ static int monitor_for_notification(atclient *monitor_conn, atclient *atclient2)
       continue;
     }
 
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value: %s\n",message.notification.decrypted_value);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Decrypted Value: %s\n", message.notification.decrypted_value);
 
     // compare the decrypted value with the expected value
     if (strcmp(message.notification.decrypted_value, ATKEY_VALUE) != 0) {
@@ -321,8 +321,8 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
   char *atserver_host = strdup(monitor_conn->atserver_connection.host);
   int atserver_port = monitor_conn->atserver_connection.port;
 
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys),
-                                                NULL)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys), NULL)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }

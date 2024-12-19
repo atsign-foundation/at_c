@@ -46,7 +46,7 @@ int atclient_get_atkeys(atclient *atclient, atclient_atkey **atkey, size_t *outp
 
   char scan_cmd[scan_cmd_size];
 
-  const size_t recv_size = 8192; // TODO change using atclient_connection_read which will handle realloc
+  const size_t recv_size = 16384; // TODO change using atclient_connection_read which will handle realloc
   unsigned char recv[recv_size];
   size_t recv_len = 0;
 

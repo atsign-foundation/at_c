@@ -1,11 +1,12 @@
+#include "functional_tests/config.h"
 #include <pwd.h>
-#include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include "functional_tests/config.h"
+#include <unistd.h>
 
-int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize, size_t *pathlen) {
+int functional_tests_get_atkeys_path(const char *atsign, const size_t atsignlen, char *path, const size_t pathsize,
+                                     size_t *pathlen) {
   // for home directory
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;

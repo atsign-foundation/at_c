@@ -205,6 +205,7 @@ overrides() {
     echo '#define PRIu64 "llu"'
     echo "#define ATCHOPS_TARGET_ARDUINO"
     echo "#define ATCHOPS_MBEDTLS_VERSION_2"
+    echo "#define ATCLIENT_NET_SOCKET_PROVIDER_EXTERNAL"
   } >>$src_base/atchops/platform.h
 }
 

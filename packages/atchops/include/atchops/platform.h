@@ -7,8 +7,6 @@
 
 // Platforms we support
 
-// Default MbedTLS version
-
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #define ATCHOPS_TARGET_UNIX
 

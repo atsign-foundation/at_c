@@ -236,6 +236,12 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   char *pkam_cmd = NULL;
   char *atsign_with_at = NULL;
 
+  bool should_free_atserver_host = false;
+
+  // expected result on a successful login
+  size_t expected_len = 1 + strlen(atsign) + strlen("@data:success");
+  char expected_buf[expected_len];
+
   /*
    * 3. Ensure that the atsign has the @ symbol.
    */
@@ -249,8 +255,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 4. Get atdirectory_host and atdirectory_port
    */
-  if(options != NULL && atclient_authenticate_options_is_atdirectory_host_initialized(options) && options->atdirectory_host != NULL &&
-     atclient_authenticate_options_is_atdirectory_port_initialized(options) && options->atdirectory_port != 0) {
+  if (options != NULL && atclient_authenticate_options_is_atdirectory_host_initialized(options) &&
+      options->atdirectory_host != NULL && atclient_authenticate_options_is_atdirectory_port_initialized(options) &&
+      options->atdirectory_port != 0) {
     atdirectory_host = options->atdirectory_host;
     atdirectory_port = options->atdirectory_port;
   } else {
@@ -261,7 +268,6 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 5. Get atserver_host and atserver_port
    */
-  bool should_free_atserver_host;
   if (options != NULL && atclient_authenticate_options_is_atserver_host_initialized(options) &&
       options->atserver_host != NULL && atclient_authenticate_options_is_atserver_port_initialized(options) &&
       options->atserver_port != 0) {
@@ -272,9 +278,9 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
 
   if (atserver_host == NULL || atserver_port == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                 "Missing atServer host or port. Using %s:%lu atDirectory to find atServer address\n", atdirectory_host, atdirectory_port);
-    if ((ret = atclient_utils_find_atserver_address(atdirectory_host,
-                                                    atdirectory_port, atsign, &atserver_host,
+                 "Missing atServer host or port. Using %s:%lu atDirectory to find atServer address\n", atdirectory_host,
+                 atdirectory_port);
+    if ((ret = atclient_utils_find_atserver_address(atdirectory_host, atdirectory_port, atsign, &atserver_host,
                                                     &atserver_port)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
       goto exit;
@@ -307,6 +313,14 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
    */
   if ((ret = atclient_connection_send(&(ctx->atserver_connection), (unsigned char *)from_cmd, from_cmd_size - 1, recv,
                                       recvsize, &recv_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
+    goto exit;
+  }
+
+  // We get @data:success when doing pkam auth instead of data:success so read off an '@'
+  if ((ret = atclient_tls_socket_read(&ctx->atserver_connection._socket, NULL, NULL,
+                                      atclient_socket_read_until_char('@'))) != 0) {
+
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_send: %d\n", ret);
     goto exit;
   }
@@ -446,7 +460,8 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
 
   unsigned char digest[SHA_512_DIGEST_SIZE];
   memset(digest, 0, sizeof(unsigned char) * SHA_512_DIGEST_SIZE);
-
+  char *atsign_without_at = NULL;
+  bool should_free_atserver_host = false;
   /*
    * 3. Ensure that the atsign has the @ symbol.
    */
@@ -454,7 +469,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
-  char *atsign_without_at = malloc(sizeof(char) * strlen(atsign_with_at) + 1);
+  atsign_without_at = malloc(sizeof(char) * strlen(atsign_with_at) + 1);
   if (atsign_without_at == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Could not allocate memory for atsign_without_at");
     ret = -1;
@@ -466,7 +481,6 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   /*
    * 4. Get atserver_host and atserver_port
    */
-  bool should_free_atserver_host = false;
   if (options != NULL) {
     if (atclient_authenticate_options_is_atdirectory_host_initialized(options) &&
         atclient_authenticate_options_is_atdirectory_port_initialized(options)) {

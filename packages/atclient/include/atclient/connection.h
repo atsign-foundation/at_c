@@ -1,12 +1,24 @@
+/*
+ *
+ * The connection family of types and methods represents a single connection to
+ * if you want a pure socket representation see socket.h.
+ *
+ * At the moment _socket represents a singular tcp socket, but in the future it may be altered
+ * to be a union of different connection types, such as a websocket or other construct.
+ * It is considered an internal construct and is subject to breaking changes across
+ * minor releases, especially while at_c remains in beta status.
+ *
+ */
 #ifndef ATCLIENT_CONNECTION_H
 #define ATCLIENT_CONNECTION_H
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "atchops/mbedtls.h"
-#include "atclient/connection_hooks.h"
 #include <atchops/platform.h> // IWYU pragma: keep
+
+#include "atclient/connection_hooks.h"
+#include "atclient/socket.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -18,27 +30,21 @@ typedef enum atclient_connection_type {
 
 typedef struct atclient_connection {
   atclient_connection_type type; // set in atclient_connection_init
-
+  uint16_t port;                 // example: 64
   bool _is_host_initialized : 1;
-  char *host; // example: "root.atsign.org"
-
   bool _is_port_initialized : 1;
-  uint16_t port; // example: 64
+  bool _is_connection_enabled : 1;
+  bool _is_hooks_enabled : 1;
+
+  char *host; // example: "root.atsign.org"
 
   // atclient_connection_connect sets this to true and atclient_connection_disconnect sets this to false
   // this does not mean that the connection is still alive, it just means that the connection was established at least
   // once, at some  point, check atclient_connection_is_connected for a live status on the connection
   // _is_connection_enabled also serves as an internal boolean to check if the following mbedlts contexts have been
   // initialized and need to be freed at the end
-  bool _is_connection_enabled : 1;
-  mbedtls_net_context net;
-  mbedtls_ssl_context ssl;
-  mbedtls_ssl_config ssl_config;
-  mbedtls_x509_crt cacert;
-  mbedtls_entropy_context entropy;
-  mbedtls_ctr_drbg_context ctr_drbg;
 
-  bool _is_hooks_enabled : 1;
+  struct atclient_tls_socket _socket;
   atclient_connection_hooks *hooks;
 } atclient_connection;
 
@@ -80,8 +86,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
  * @param value_max_len the maximum length of the data to read, setting this to 0 means no limit
  * @return int 0 on success
  */
-int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len,
-                             const size_t value_max_len);
+int atclient_connection_read(atclient_connection *ctx, unsigned char **value, size_t *value_len);
 
 /**
  * @brief Write data to the connection

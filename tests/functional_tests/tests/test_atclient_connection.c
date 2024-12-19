@@ -255,7 +255,7 @@ exit: {
 static int test_6_is_connected_should_be_false(atclient_connection *conn) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_6_is_connected_should_be_false Begin\n");
 
-  int ret= 1; 
+  int ret = 1;
 
   if (atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -424,7 +424,7 @@ static int test_14_simulate_server_not_responding(atclient_connection *conn) {
   int ret = 1;
 
   // simulate server not responding
-  ret = mbedtls_ssl_close_notify(&conn->ssl);
+  ret = mbedtls_ssl_close_notify(&conn->_socket.ssl);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to close notify: %d\n", ret);
     goto exit;
@@ -459,7 +459,8 @@ static int test_15_send_should_fail(atclient_connection *conn) {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Successfully failed at sending message to a disconnected connection: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
+               "Successfully failed at sending message to a disconnected connection: %d\n", ret);
 
   ret = 0;
   goto exit;

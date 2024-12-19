@@ -21,6 +21,8 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/atnotification.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection_hooks.c
   ${CMAKE_CURRENT_LIST_DIR}/src/connection.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/socket.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/socket_mbedtls.c
   ${CMAKE_CURRENT_LIST_DIR}/src/encryption_key_helpers.c
   ${CMAKE_CURRENT_LIST_DIR}/src/metadata.c
   ${CMAKE_CURRENT_LIST_DIR}/src/monitor.c
