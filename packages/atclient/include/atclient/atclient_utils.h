@@ -30,6 +30,17 @@ int atclient_utils_find_atserver_address(const char *atdirectory_host, const int
  */
 int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign);
 
+/**
+ * @brief find the index of the next character after an atServer / atDirectory's prompt
+ *
+ * @param read_buf buffer to check
+ * @param read_n length of the buffer to check
+ * @param read_i output parameter containing the first token after the prompt
+ *
+ * @return int 0 on success, non-zero on error
+ */
+int atclient_utils_find_index_past_at_prompt(const unsigned char *read_buf, size_t read_n, size_t *read_i);
+
 #ifdef __cplusplus
 }
 #endif

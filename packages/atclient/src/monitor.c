@@ -1,5 +1,6 @@
 #include "atclient/monitor.h"
 #include "atclient/atclient.h"
+#include "atclient/atclient_utils.h"
 #include "atclient/atnotification.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
@@ -18,7 +19,7 @@
 
 #define TAG "atclient_monitor"
 
-static int parse_message(char *original, char **message_type, char **message_body);
+static int parse_message(char *original, size_t original_len, char **message_type, char **message_body);
 static int parse_notification(atclient_atnotification *notification, const char *messagebody);
 static int decrypt_notification(atclient *monitor_conn, atclient_atnotification *notification);
 
@@ -125,17 +126,17 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen((char *)buffer),
-               buffer, ATCLIENT_RESET);
-
   char *messagetype = NULL;
   char *messagebody = NULL;
-  ret = parse_message((char *)buffer, &messagetype, &messagebody);
+  ret = parse_message((char *)buffer, buffer_len, &messagetype, &messagebody);
   if (ret != 0) {
     message->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to find message type and message body from: %s\n", buffer);
     goto exit;
   }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)strlen((char *)buffer),
+               buffer, ATCLIENT_RESET);
 
   if (strcmp(messagetype, "notification") == 0) {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
@@ -212,10 +213,20 @@ bool atclient_monitor_is_connected(atclient *monitor_conn) {
 // given a string notification (*original is assumed to JSON parsable), we can deduce the message_type (e.g. data,
 // error, notification) and return the message body which is everything after the prefix (data:, error:, notification:).
 // This function will modify *message_type and *message_body to point to the respective values in *original.
-static int parse_message(char *original, char **message_type, char **message_body) {
+static int parse_message(char *original, size_t original_len, char **message_type, char **message_body) {
   int ret = -1;
   char *temp = NULL;
   char *saveptr;
+
+  size_t read_i;
+  ret = atclient_utils_find_index_past_at_prompt((unsigned char *)original, original_len, &read_i);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Failed to parse the message: %.*s\n", original_len, original);
+    goto exit;
+  }
+  original = original + read_i;
+  original_len = original_len - read_i;
+  original[original_len - 1] = '\0';
 
   // Parse the message type (everything before ':')
   temp = strtok_r(original, ":", &saveptr);

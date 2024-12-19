@@ -58,11 +58,6 @@ struct atclient_socket_read_options {
  */
 struct atclient_socket_read_options atclient_socket_read_until_char(char read_until);
 
-/**
- * @brief Creates read options configured to read until a specific character is encountered
- */
-struct atclient_socket_read_options atclient_socket_read_clear_at_prompt();
-
 #ifdef __cplusplus
 }
 #endif

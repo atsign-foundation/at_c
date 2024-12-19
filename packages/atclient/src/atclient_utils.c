@@ -124,3 +124,30 @@ int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const c
 
 exit: { return ret; }
 }
+
+// TODO: unit test
+int atclient_utils_find_index_past_at_prompt(const unsigned char *read_buf, size_t read_n, size_t *read_i) {
+  // NOTE: if you change this if, check the second while loop
+  // it depends on this guard clause
+  *read_i = 0;
+  if (read_n != 0 && read_buf[0] != '@') { // Doesn't start with a prompt
+    return 0;
+  }
+
+  while (++*read_i < read_n && read_buf[*read_i] != ':')
+    ;                      // Walks forward to the end of the buffer or first ':'
+  if (*read_i == read_n) { // Past the end of the buffer, did not find `:`
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Unable to find command result token `:`, connection should be reset\n");
+    return 1;
+  }
+  // We are at a `:`
+  while (--*read_i > 0 && read_buf[*read_i] != '@')
+    ; // Walk backwards to the first '@' we find
+  // We are at the first character or last '@' before a `:`
+  // but the first character is '@' so we are at '@'
+
+  ++*read_i; // move forward one to be after the '@'
+
+  return 0;
+}

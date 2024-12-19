@@ -1,4 +1,5 @@
 #include "atclient/connection.h"
+#include "atclient/atclient_utils.h"
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atclient/socket.h"
@@ -244,37 +245,6 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
 exit: { return ret; }
 }
 
-// TODO:  unit test later, this is a pure function
-// TODO: name this better later, this is a private function
-// read_buf is the buffer to search
-// read_n is the length of the buffer
-// read_i is the output of the start of `data:` or other token like error
-
-static int find_index_past_at_prompt(const unsigned char *read_buf, size_t read_n, size_t *read_i) {
-  // NOTE: if you change this if, check the second while loop
-  // it depends on this guard clause
-  if (read_n != 0 && read_buf[0] != '@') { // Doesn't start with a prompt
-    return 0;
-  }
-
-  while (++*read_i < read_n && read_buf[*read_i] != ':')
-    ;                      // Walks forward to the end of the buffer or first ':'
-  if (*read_i == read_n) { // Past the end of the buffer, did not find `:`
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Unable to find command result token `:`, connection should be reset\n");
-    return 1;
-  }
-  // We are at a `:`
-  while (--*read_i > 0 && read_buf[*read_i] != '@')
-    ; // Walk backwards to the first '@' we find
-  // We are at the first character or last '@' before a `:`
-  // but the first character is '@' so we are at '@'
-
-  ++*read_i; // move forward one to be after the '@'
-
-  return 0;
-}
-
 int atclient_connection_send(atclient_connection *ctx, const unsigned char *src, const size_t src_len,
                              unsigned char *recv, const size_t recv_size, size_t *recv_len) {
   int ret = 1;
@@ -423,7 +393,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   }
 
   size_t read_i = 0; // will store where the start of `<type>:` is (if happy path)
-  ret = find_index_past_at_prompt(read_buf, read_n, &read_i);
+  ret = atclient_utils_find_index_past_at_prompt(read_buf, read_n, &read_i);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse the result read from the connection\n");
     free(read_buf);
@@ -435,9 +405,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     free(read_buf);
     goto exit;
   }
-
+  read_n -= read_i;
   // copy to recv, discarding the prompt
-  memcpy(recv, read_buf + read_i, read_n - read_i);
+  memcpy(recv, read_buf + read_i, read_n);
   free(read_buf);
   recv[read_n - 1] = '\0'; // null terminate the string
   *recv_len = read_n;
@@ -602,12 +572,32 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
   /*
    * 4. Read the value
    */
-  ret = atclient_tls_socket_read(&ctx->_socket, value, value_len, atclient_socket_read_until_char('\n'));
+  unsigned char *read_buf;
+  size_t read_n;
+  ret = atclient_tls_socket_read(&ctx->_socket, &read_buf, &read_n, atclient_socket_read_until_char('\n'));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
     goto exit;
   }
-  *value[*value_len - 1] = '\0'; // replace '\n' with '\0'
+  size_t read_i = 0; // will store where the start of `<type>:` is (if happy path)
+  ret = atclient_utils_find_index_past_at_prompt(*value, *value_len, &read_i);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse the result read from the connection\n");
+    free(read_buf);
+    goto exit;
+  }
+  read_n -= read_i;
+  *value = malloc(read_n * sizeof(char));
+  if (*value == NULL) {
+    free(read_buf);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for the final output buffer\n");
+    goto exit;
+  }
+  memcpy(*value, read_buf + read_i, read_n);
+  free(read_buf);
+  *value[read_n - 1] = '\0'; // null terminate the string
+  *value_len = read_n;
+
   /*
    * 5. Print debug log
    */
