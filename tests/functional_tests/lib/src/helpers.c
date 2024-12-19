@@ -76,7 +76,7 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
     goto exit;
   }
 
-  atclient_set_read_timeout(&atclient, 5*1000); // 5 second read timeout
+  atclient_set_read_timeout(atclient, 5*1000); // 5 second read timeout
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
 
