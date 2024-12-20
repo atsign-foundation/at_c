@@ -86,7 +86,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   ret = atclient_tls_socket_connect(&ctx->_socket, host, port);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to connect to %s:%u", host, port);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to connect to %s:%u\n", host, port);
     return ret;
   }
 
