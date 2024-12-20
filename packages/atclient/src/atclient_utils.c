@@ -125,12 +125,16 @@ int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const c
 exit: { return ret; }
 }
 
-// TODO: unit test
 int atclient_utils_find_index_past_at_prompt(const unsigned char *read_buf, size_t read_n, size_t *read_i) {
   // NOTE: if you change this if, check the second while loop
   // it depends on this guard clause
   *read_i = 0;
   if (read_n != 0 && read_buf[0] != '@') { // Doesn't start with a prompt
+    return 0;
+  }
+
+  if (read_n >= 5 && strncmp((const char *)read_buf, "@null", 5) == 0) {
+    *read_i = 1;
     return 0;
   }
 
