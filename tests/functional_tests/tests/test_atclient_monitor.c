@@ -118,8 +118,7 @@ int main() {
 
   goto exit;
 exit: {
-  if ((ret = functional_tests_tear_down_sharedenckeys(&atclient1, ATKEY_SHAREDWITH)) != 0) {
-    ret = 1;
+  if ((functional_tests_tear_down_sharedenckeys(&atclient1, ATKEY_SHAREDWITH)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to tear down sharedenckeys: %d\n", ret);
   }
   atclient_atkeys_free(&atkeys_sharedby);
