@@ -41,6 +41,14 @@ jobs:
           cp "@alice🛠_key.atKeys" ~/.atsign/keys/
           cp "@bob🛠_key.atKeys" ~/.atsign/keys/
 
+      - name: Start Virtual Environment
+        working-directory: tests/functional_tests/tools/virtualenv
+        run: |
+          sudo ./start_virtualenv.sh
+          sleep 5
+          sudo ./pkam_virtualenv.sh
+          sleep 1
+
       - name: Add vip.ve.atsign.zone to /etc/hosts
         run: |
           echo "127.0.0.1 vip.ve.atsign.zone" | sudo tee -a /etc/hosts
