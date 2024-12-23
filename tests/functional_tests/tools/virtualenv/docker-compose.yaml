@@ -13,8 +13,8 @@ services:
       - '64:64'
       - '9001:9001'
       - '25000-25019:25000-25019'
-    # extra_hosts:
-    #   - 'vip.ve.atsign.zone:127.0.0.1'
+    extra_hosts:
+      - 'vip.ve.atsign.zone:127.0.0.1'
 # Remove these comments to run a DNS Masq service locally
 # This enables you to code and test offline and use physical devices
 # connecting to your Virtual Environment, not needed if you have
