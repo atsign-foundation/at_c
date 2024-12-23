@@ -48,7 +48,7 @@ jobs:
 
       - name: Run Functional Tests
         run: |
-          ctest --test-dir build/tests/functional_tests -VV --timeout 90
+          ctest --test-dir build/tests/functional_tests -VV --timeout 10
 
   build-examples:
     runs-on: "ubuntu-latest"
