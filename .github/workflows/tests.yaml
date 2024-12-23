@@ -37,6 +37,7 @@ jobs:
         working-directory: tests/functional_tests/tools/virtualenv/keys
         run: |
           mkdir -p ~/.atsign/keys/
+          ls -la
           cp "@alice🛠️_key.atKeys" ~/.atsign/keys/
           cp "@bob🛠_key.atKeys" ~/.atsign/keys/
 
