@@ -637,8 +637,7 @@ void atclient_connection_set_read_timeout(atclient_connection *ctx, const uint32
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
     return;
   }
-
-  mbedtls_ssl_conf_read_timeout(&(ctx->ssl_config), timeout_ms);
+  atclient_tls_socket_set_read_timeout(&ctx->_socket, timeout_ms);
 }
 
 static void my_debug(void *ctx, int level, const char *file, int line, const char *str) {
