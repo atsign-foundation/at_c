@@ -54,6 +54,9 @@ jobs:
       - name: Add vip.ve.atsign.zone to /etc/hosts
         run: |
           echo "127.0.0.1 vip.ve.atsign.zone" | sudo tee -a /etc/hosts
+          cat /etc/hosts
+          echo "---"
+          nslookup vip.ve.atsign.zone
 
       - name: Install atSDK
         run: |
