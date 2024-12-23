@@ -76,7 +76,7 @@ static int test1_pkam_no_options() {
   }
   atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &authenticate_options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &authenticate_options, NULL)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     return ret;
   } else {
@@ -131,7 +131,7 @@ static int test2_pkam_with_options() {
     return ret;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options, NULL)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     return ret;
   } else {
