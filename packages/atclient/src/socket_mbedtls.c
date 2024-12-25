@@ -151,8 +151,10 @@ int atclient_tls_socket_connect(struct atclient_tls_socket *socket, const char *
     return 1;
   }
 
-  char port_str[5];
-  snprintf(port_str, 5, "%" PRIu16, port);
+  const size_t port_str_size = 6;
+  char port_str[port_str_size];
+  memset(port_str, 0, sizeof(char) * port_str_size);
+  snprintf(port_str, port_str_size, "%" PRIu16, port);
 
   int ret;
   // 1. Connect
