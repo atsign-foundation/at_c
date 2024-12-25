@@ -26,7 +26,7 @@ static int test_13_is_connected_should_be_true(atclient_connection *conn);
 static int test_14_disconnect(atclient_connection *conn);
 static int test_15_send_should_fail(atclient_connection *conn);
 static int test_16_is_connected_should_be_false(atclient_connection *conn);
-static int test_17_should_be_connected_should_be_true(atclient_connection *conn);
+static int test_17_disconnect(atclient_connection *conn);
 
 int main(int argc, char *argv[]) {
   int ret = 1;
