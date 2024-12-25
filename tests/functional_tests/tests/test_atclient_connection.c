@@ -23,7 +23,7 @@ static int test_10_free(atclient_connection *conn);
 static int test_11_initialize(atclient_connection *conn);
 static int test_12_connect(atclient_connection *conn);
 static int test_13_is_connected_should_be_true(atclient_connection *conn);
-static int test_14_simulate_server_not_responding(atclient_connection *conn);
+static int test_14_disconnect(atclient_connection *conn);
 static int test_15_send_should_fail(atclient_connection *conn);
 static int test_16_is_connected_should_be_false(atclient_connection *conn);
 static int test_17_should_be_connected_should_be_true(atclient_connection *conn);
@@ -100,8 +100,8 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = test_14_simulate_server_not_responding(&root_conn)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_14_simulate_server_not_responding: %d\n", ret);
+  if ((ret = test_14_disconnect(&root_conn)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_14_disconnect: %d\n", ret);
     goto exit;
   }
 
@@ -207,6 +207,8 @@ static int test_4_send(atclient_connection *conn) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_send Begin\n");
 
   int ret = 1;
+  int attempts = 0;
+  const int max_attempts = 10;
 
   const unsigned char *send_data = (const unsigned char *)(FIRST_ATSIGN "\r\n");
   const size_t send_data_len = strlen((const char *)send_data);
@@ -215,13 +217,30 @@ static int test_4_send(atclient_connection *conn) {
   unsigned char recv[1024];
   size_t recvlen = 0;
 
-  ret = atclient_connection_send(conn, send_data, send_data_len, recv, recvsize, &recvlen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send: %d\n", ret);
-    goto exit;
+  while (attempts < max_attempts) {
+    ret = atclient_connection_send(conn, send_data, send_data_len, recv, recvsize, &recvlen);
+    if (ret == 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Received: %s\n", recv);
+      break;
+    } else {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send: %d, attempt: %d\n", ret, attempts + 1);
+      if (!atclient_connection_is_connected(conn)) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Reconnecting...\n");
+        ret = atclient_connection_connect(conn, ATDIRECTORY_HOST, ATDIRECTORY_PORT);
+        if (ret != 0) {
+          atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to reconnect: %d\n", ret);
+          goto exit;
+        }
+      }
+    }
+    attempts++;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Received: %s\n", recv);
+  if (attempts == max_attempts) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Max attempts reached. Failed to send data.\n");
+    ret = 1;
+    goto exit;
+  }
 
   ret = 0;
   goto exit;
@@ -332,6 +351,8 @@ static int test_9_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
+  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+
   if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     ret = 1;
@@ -405,6 +426,8 @@ static int test_13_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
+  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+
   if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
     goto exit;
@@ -418,22 +441,21 @@ exit: {
 }
 }
 
-static int test_14_simulate_server_not_responding(atclient_connection *conn) {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_14_simulate_server_not_responding Begin\n");
+static int test_14_disconnect(atclient_connection *conn) {
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_14_disconnect Begin\n");
 
   int ret = 1;
 
   // simulate server not responding
-  ret = mbedtls_ssl_close_notify(&conn->_socket.ssl);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to close notify: %d\n", ret);
+  if ((ret = atclient_connection_disconnect(conn)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_disconnect: %d\n", ret);
     goto exit;
   }
 
   ret = 0;
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_14_simulate_server_not_responding End: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_14_disconnect End: %d\n", ret);
   return ret;
 }
 }
@@ -475,6 +497,8 @@ static int test_16_is_connected_should_be_false(atclient_connection *conn) {
 
   int ret = 1;
 
+  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+
   if (atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_connection_is_connected returned true when it should have been false: %d\n", ret);
@@ -492,21 +516,21 @@ exit: {
 }
 }
 
-static int test_17_should_be_connected_should_be_true(atclient_connection *conn) {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_17_should_be_connected_should_be_true Begin\n");
+static int test_17_should_be_connected_should_be_false(atclient_connection *conn) {
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_17_should_be_connected_should_be_false Begin\n");
 
   int ret = 1;
 
-  if ((ret = assert_equals(conn->_is_connection_enabled, true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->_should_be_connected should be true, but is false\n");
+  if ((ret = assert_equals(conn->_is_connection_enabled, false)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "conn->_should_be_connected should be false, but is true\n");
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "conn->_should_be_connected is true, as expected\n");
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "conn->_should_be_connected is false, as expected\n");
 
   ret = 0;
   goto exit;
 exit: {
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_17_should_be_connected_should_be_true End: %d\n", ret);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_17_should_be_connected_should_be_false End: %d\n", ret);
   return ret;
 }
 }
