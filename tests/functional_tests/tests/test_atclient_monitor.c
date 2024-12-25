@@ -146,7 +146,7 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atsign, atkeys, NULL)) != 0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, atsign, atkeys, &authenticate_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_monitor_pkam_authenticate: %d\n", ret);
     goto exit;
   }
@@ -317,10 +317,23 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_4_re_pkam_auth_and_start_monitor Start\n");
 
+  atclient_authenticate_options authenticate_options;
+  atclient_authenticate_options_init(&authenticate_options);
+
   char *atserver_host = strdup(monitor_conn->atserver_connection.host);
   int atserver_port = monitor_conn->atserver_connection.port;
 
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys), NULL)) !=
+  if((ret = atclient_authenticate_options_set_atserver_host(&authenticate_options, atserver_host)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atserver_host: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_authenticate_options_set_atserver_port(&authenticate_options, atserver_port)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atserver_port: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys), &authenticate_options)) !=
       0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
