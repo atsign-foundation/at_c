@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = test_17_should_be_connected_should_be_true(&root_conn)) != 0) {
+  if ((ret = test_17_disconnect(&root_conn)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_17_should_be_connected_should_be_true: %d\n", ret);
     goto exit;
   }
@@ -516,7 +516,7 @@ exit: {
 }
 }
 
-static int test_17_should_be_connected_should_be_false(atclient_connection *conn) {
+static int test_17_disconnect(atclient_connection *conn) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_17_should_be_connected_should_be_false Begin\n");
 
   int ret = 1;
