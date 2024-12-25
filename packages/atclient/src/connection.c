@@ -640,12 +640,6 @@ void atclient_connection_set_read_timeout(atclient_connection *ctx, const uint32
   atclient_tls_socket_set_read_timeout(&ctx->_socket, timeout_ms);
 }
 
-static void my_debug(void *ctx, int level, const char *file, int line, const char *str) {
-  ((void)level);
-  fprintf((FILE *)ctx, "%s:%04d: %s", file, line, str);
-  fflush((FILE *)ctx);
-}
-
 static void atclient_connection_set_is_connection_enabled(atclient_connection *ctx, const bool should_be_connected) {
   ctx->_is_connection_enabled = should_be_connected;
 }
