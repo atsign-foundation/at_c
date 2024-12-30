@@ -139,6 +139,13 @@ int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atcho
   /*
    * 1. Validate arguments
    */
+  if ((public_key->n.len - 1) != 256 && (public_key->n.len - 1)  != 512) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%d\n", public_key->n.len);
+    ret = 1; // Invalid key size
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid key size\n");
+    return ret;
+  }
+
   if (public_key == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is NULL\n");

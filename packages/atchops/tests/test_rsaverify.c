@@ -2,6 +2,7 @@
 #include <mbedtls/md.h>
 #include <stdio.h>
 #include <string.h>
+#include "atlogger/atlogger.h"
 
 #define PUBLIC_KEY_BASE64                                                                                              \
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuA7KmWrIPcKTH3hSzsDZ"                                                   \
@@ -40,6 +41,7 @@
   "sDFCwDRQsGFXNkdnSFZovMfmNQp+p6fuOgrnuSfLR1gI8nV3JQy8U/eZT5ABh06j"                                                   \
   "3A6sUy0M7TXTd6ljRS3MRBatOA=="
 
+
 #define SIGNATURE_SIZE 256
 #define SIGNATURE_BASE64_SIZE 2048
 
@@ -53,6 +55,8 @@
   "qh7LeuVvActKJwlFF0yUbiSX4v1Urm50Lk9IqMEqLrbo49BW2eYblEjMsMBlcJag=="
 
 int main() {
+
+  atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
   int ret = 1;
 
