@@ -81,7 +81,7 @@ int main() {
     goto exit;
   }
 
-  ret = atchops_rsa_sign(&privatekey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature);
+  ret = atchops_rsa_sign(&privatekey, ATCHOPS_MD_SHA256, (const unsigned char *)message, messagelen, signature, SIGNATURE_SIZE);
   if (ret != 0) {
     printf("atchops_rsa_sign (failed): %d\n", ret);
     goto exit;

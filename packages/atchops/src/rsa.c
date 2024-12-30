@@ -12,7 +12,7 @@
 #define TAG "rsa"
 
 int atchops_rsa_sign(const atchops_rsa_key_private_key *private_key, const atchops_md_type md_type,
-                     const unsigned char *message, const size_t message_len, unsigned char *signature) {
+                     const unsigned char *message, const size_t message_len, unsigned char *signature, const size_t key_size) {
   int ret = 1;
 
   /*
@@ -133,12 +133,18 @@ ret: {
 }
 
 int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atchops_md_type md_type,
-                       const unsigned char *message, const size_t message_len, unsigned char *signature) {
+                       const unsigned char *message, const size_t message_len, unsigned char *signature, const size_t key_size) {
   int ret = 1;
 
   /*
    * 1. Validate arguments
    */
+  if (public_key->n.len != 256 && public_key->n.len != 512) {
+    ret = 1; // Invalid key size
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid key size\n");
+    return ret;
+  }
+
   if (public_key == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "public_key is NULL\n");
@@ -248,7 +254,7 @@ exit: {
 }
 
 int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsigned char *plaintext,
-                        const size_t plaintext_len, unsigned char *ciphertext) {
+                        const size_t plaintext_len, unsigned char *ciphertext, const size_t key_size) {
   int ret = 1;
 
   /*
@@ -345,7 +351,7 @@ exit: {
 
 int atchops_rsa_decrypt(const atchops_rsa_key_private_key *private_key, const unsigned char *ciphertext,
                         const size_t ciphertext_len, unsigned char *plaintext, const size_t plaintextsize,
-                        size_t *plaintext_len) {
+                        size_t *plaintext_len, const size_t key_size) {
   int ret = 1;
 
   /*

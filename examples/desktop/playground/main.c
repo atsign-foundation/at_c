@@ -9,7 +9,5 @@ int main() {
 
   // Enter your code here
 
-  ret = 0;
-
 exit: { return ret; }
 }
