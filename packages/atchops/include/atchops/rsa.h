@@ -69,18 +69,6 @@ int atchops_rsa_decrypt(const atchops_rsa_key_private_key *private_key, const un
                         const size_t ciphertext_len, unsigned char *plaintext, const size_t plaintext_size,
                         size_t *plaintext_len);
 
-/**
- * @brief generate an RSA keypair
- *
- * @param public_key the public key struct to populate, should be initialized first
- * @param private_key the private key struct to populate, should be initialized first
- * @param keysize the size of the key to generate, e.g. 2048 or 4096
- * @param md_type the hash type to use, see atchops_md_type, e.g. ATCHOPS_MD_SHA256
- * @return int 0 on success
- */
-int atchops_rsa_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key,
-                         const size_t keysize, const atchops_md_type md_type);
-
 #ifdef __cplusplus
 }
 #endif
