@@ -60,15 +60,6 @@ int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, at
 int atchops_rsa_key_generate_base64(unsigned char **public_key_base64, unsigned char **private_key_base64);
 
 /**
-* @brief case where we want to generate a new RSA-4096 key pair (public and private)
-* @param public_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function.
-* this buffer will be null-terminated for you.  this will hold the public key in raw bytes.
-* @param private_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function.
-* this buffer will be null-terminated for you. this will hold the private key in base64 encoding.
-*/
-int atchops_rsa_key_generate_base64_4096(unsigned char **public_key_base64, unsigned char **private_key_base64);
-
-/**
  * @brief Generate a new RSA 2048 key pair (public and private)
  *
  * @param public_key the public key struct to populate, assumed to be allocated and initialized. initialized via
@@ -77,16 +68,6 @@ int atchops_rsa_key_generate_base64_4096(unsigned char **public_key_base64, unsi
  * atchops_rsa_key_private_key_init
  */
 int atchops_rsa_key_generate(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key);
-
-/**
- * @brief Generate a new RSA 4096 key pair (public and private)
- *
- * @param public_key the public key struct to populate, assumed to be allocated and initialized. initialized via
- * atchops_rsa_key_public_key_init
- * @param private_key the private key struct to populate, assumed to be allocated and initialized. initialized via
- * atchops_rsa_key_private_key_init
- */
-int atchops_rsa_key_generate_4096(atchops_rsa_key_public_key *public_key, atchops_rsa_key_private_key *private_key);
 
 /**
  * @brief Populate a public key struct from a base64 string
@@ -98,17 +79,6 @@ int atchops_rsa_key_generate_4096(atchops_rsa_key_public_key *public_key, atchop
  */
 int atchops_rsa_key_populate_public_key(atchops_rsa_key_public_key *public_key_struct, const char *public_key_base64,
                                         const size_t public_key_base64_len);
-
-/**
- * @brief Populate a public key struct from a base64 string
- *
- * @param public_key_struct the public key struct to populate
- * @param public_key_base64 a base64 string representing an RSA 4096 Public Key
- * @param public_key_base64_len the length of the base64 string
- * @return int 0 on success
- */
-int atchops_rsa_key_populate_public_key_4096(atchops_rsa_key_public_key *public_key_struct, const char *public_key_base64,
-                                             const size_t public_key_base64_len);
 
 /**
  * @brief Populate a private key struct from a base64 string
