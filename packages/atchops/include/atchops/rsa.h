@@ -10,9 +10,6 @@ extern "C" {
 #include <atchops/platform.h> // IWYU pragma: keep
 #include <stddef.h>
 
-#define RSA_2048_KEY_SIZE 256
-#define RSA_4096_KEY_SIZE 512
-
 /**
  * @brief Sign a hashed message with an RSA private key
  *
@@ -28,7 +25,7 @@ extern "C" {
  * @return int 0 on success
  */
 int atchops_rsa_sign(const atchops_rsa_key_private_key *private_key, const atchops_md_type md_type,
-                     const unsigned char *message, const size_t message_len, unsigned char *signature, const size_t key_size);
+                     const unsigned char *message, const size_t message_len, unsigned char *signature);
 
 /**
  * @brief Verify a signature with an RSA public key
@@ -43,7 +40,7 @@ int atchops_rsa_sign(const atchops_rsa_key_private_key *private_key, const atcho
  * @return int 0 on success
  */
 int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atchops_md_type md_type,
-                       const unsigned char *message, const size_t message_len, unsigned char *signature, const size_t key_size);
+                       const unsigned char *message, const size_t message_len, unsigned char *signature);
 
 /**
  * @brief Encrypt bytes with an RSA public key
@@ -56,7 +53,7 @@ int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atcho
  * @return int 0 on success
  */
 int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsigned char *plaintext,
-                        const size_t plaintext_len, unsigned char *ciphertext, const size_t key_size);
+                        const size_t plaintext_len, unsigned char *ciphertext);
 
 /**
  * @brief Decrypt bytes with an RSA private key
@@ -73,7 +70,7 @@ int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsi
  */
 int atchops_rsa_decrypt(const atchops_rsa_key_private_key *private_key, const unsigned char *ciphertext,
                         const size_t ciphertext_len, unsigned char *plaintext, const size_t plaintext_size,
-                        size_t *plaintext_len, const size_t key_size);
+                        size_t *plaintext_len);
 
 /**
  * @brief generate an RSA keypair
