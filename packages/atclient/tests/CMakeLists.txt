@@ -8,4 +8,3 @@ foreach(file ${files})
   target_link_libraries(${filename} PRIVATE atclient)
   add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
 endforeach()
-

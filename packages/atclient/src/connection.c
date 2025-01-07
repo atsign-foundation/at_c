@@ -632,6 +632,14 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
 exit: { return ret; }
 }
 
+void atclient_connection_set_read_timeout(atclient_connection *ctx, const uint32_t timeout_ms) {
+  if (ctx == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ctx is NULL\n");
+    return;
+  }
+  atclient_tls_socket_set_read_timeout(&ctx->_socket, timeout_ms);
+}
+
 static void atclient_connection_set_is_connection_enabled(atclient_connection *ctx, const bool should_be_connected) {
   ctx->_is_connection_enabled = should_be_connected;
 }

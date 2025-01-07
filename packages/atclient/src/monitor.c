@@ -55,7 +55,7 @@ exit: { return ret; }
 }
 
 void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeoutms) {
-  atclient_tls_socket_set_read_timeout(&monitor_conn->atserver_connection._socket, timeoutms);
+  atclient_set_read_timeout(monitor_conn, timeoutms);
 }
 
 int atclient_monitor_start(atclient *monitor_conn, const char *regex) {

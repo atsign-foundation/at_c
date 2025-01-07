@@ -118,12 +118,12 @@ int main() {
   char notification_id[37];
   memset(notification_id, 0, sizeof(char) * 37);
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys, ATKEY_SHAREDBY)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys, ATKEY_SHAREDBY, strlen(ATKEY_SHAREDBY))) != 0) {
+  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys, ATKEY_SHAREDBY)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
@@ -192,7 +192,7 @@ static int test_1_notify(atclient *atclient, char *notification_id) {
   goto exit;
 
 exit: {
-  if ((ret = functional_tests_tear_down_sharedenckeys(atclient, ATKEY_SHAREDWITH)) != 0) {
+  if (functional_tests_tear_down_sharedenckeys(atclient, ATKEY_SHAREDWITH) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to tear down sharedenckeys: %d\n", ret);
   }
   atclient_notify_params_free(&params);

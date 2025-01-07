@@ -12,7 +12,7 @@
 
 #define TAG "functional_tests_helpers"
 
-int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
+int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
   const size_t atkeyspathsize = 1024;
@@ -20,7 +20,7 @@ int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, 
   memset(atkeyspath, 0, atkeyspathsize);
   size_t atkeyspathlen = 0;
 
-  if ((ret = functional_tests_get_atkeys_path(atsign, atsignlen, atkeyspath, atkeyspathsize, &atkeyspathlen)) != 0) {
+  if ((ret = functional_tests_get_atkeys_path(atsign, strlen(atsign), atkeyspath, atkeyspathsize, &atkeyspathlen)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys_sharedwith path: %d\n", ret);
     goto exit;
   }
@@ -35,22 +35,55 @@ int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, 
 exit: { return ret; }
 }
 
-int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign,
-                               const size_t atsignlen) {
+int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth Begin\n");
 
-  if ((ret = atclient_pkam_authenticate(atclient, atsign, atkeys, NULL, NULL)) != 0) {
+  if(atclient == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    return ret;
+  }
+
+  if(atkeys == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
+    return ret;
+  }
+
+  if(atsign == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is NULL\n");
+    return ret;
+  }
+
+  atclient_authenticate_options authenticate_options;
+  atclient_authenticate_options_init(&authenticate_options);
+
+  if((ret = atclient_authenticate_options_set_atdirectory_host(&authenticate_options, ATDIRECTORY_HOST)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_host: %d\n", ret);
+    goto exit;
+  }
+
+  if((ret = atclient_authenticate_options_set_atdirectory_port(&authenticate_options, ATDIRECTORY_PORT)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_port: %d\n", ret);
+    goto exit;
+  }
+
+  if ((ret = atclient_pkam_authenticate(atclient, atsign, atkeys, &authenticate_options, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_pkam_authenticate: %d\n", ret);
     goto exit;
   }
+
+  atclient_set_read_timeout(atclient, 5*1000); // 5 second read timeout
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
 
   goto exit;
 
 exit: {
+  atclient_authenticate_options_free(&authenticate_options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth End (%d)\n", ret);
   return ret;
 }

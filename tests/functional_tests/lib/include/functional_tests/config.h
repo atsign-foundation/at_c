@@ -6,8 +6,13 @@ extern "C" {
 
 #include <stddef.h>
 
-#define ROOT_HOST "root.atsign.org"
-#define ROOT_PORT 64
+#ifndef ATDIRECTORY_HOST
+#define ATDIRECTORY_HOST "root.atsign.org"
+#endif
+
+#ifndef ATDIRECTORY_PORT
+#define ATDIRECTORY_PORT 64
+#endif 
 
 #ifndef FIRST_ATSIGN
 #define FIRST_ATSIGN "@12alpaca"

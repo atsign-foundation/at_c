@@ -34,21 +34,34 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Load secrets
-        working-directory: tests/functional_tests
+        working-directory: tests/functional_tests/tools/virtualenv/keys
         run: |
           mkdir -p ~/.atsign/keys/
-          echo "${{ secrets.ATKEYS_12ALPACA }}" > ~/.atsign/keys/@12alpaca_key.atKeys
-          echo "${{ secrets.ATKEYS_12SNOWBOATING }}" > ~/.atsign/keys/@12snowboating_key.atKeys
+          cp "@alice🛠_key.atKeys" ~/.atsign/keys/
+          cp "@bob🛠_key.atKeys" ~/.atsign/keys/
+
+      - name: Start Virtual Environment
+        working-directory: tests/functional_tests/tools/virtualenv
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+          sudo ./start_virtualenv.sh
+          sleep 5
+          sudo ./pkam_virtualenv.sh
+          sleep 1
+
+      - name: Add vip.ve.atsign.zone to /etc/hosts
+        run: |
+          echo "127.0.0.1 vip.ve.atsign.zone" | sudo tee -a /etc/hosts
 
       - name: Install atSDK
         run: |
-          cmake -S . -B build -DATSDK_BUILD_TESTS="func"
+          cmake -S . -B build -DATSDK_BUILD_TESTS="func" -DCMAKE_BUILD_TYPE=Debug -DFIRST_ATSIGN="\"@alice🛠\"" -DSECOND_ATSIGN="\"@bob🛠\"" -DATDIRECTORY_HOST="\"vip.ve.atsign.zone\"" -DATDIRECTORY_PORT=64
           sudo cmake --build build --target install
 
-      - name: Build and Run Functional Tests
-        working-directory: build/tests/functional_tests
+      - name: Run Functional Tests
         run: |
-          ctest --test-dir . -VV --timeout 90
+          ctest --test-dir build/tests/functional_tests -VV --timeout 90
 
   build-examples:
     runs-on: "ubuntu-latest"

@@ -55,6 +55,17 @@ static int test1_pkam_no_options() {
   atclient atclient;
   atclient_init(&atclient);
 
+  atclient_authenticate_options authenticate_options;
+  atclient_authenticate_options_init(&authenticate_options);
+
+  if((ret = atclient_authenticate_options_set_atdirectory_host(&authenticate_options, ATDIRECTORY_HOST)) != 0) {
+    return ret;
+  }
+
+  if((ret = atclient_authenticate_options_set_atdirectory_port(&authenticate_options, ATDIRECTORY_PORT)) != 0) {
+    return ret;
+  }
+
   if ((ret = atclient_atkeys_file_from_path(&atkeys_file, atkeyspath)) != 0) {
     return ret;
   }
@@ -65,13 +76,14 @@ static int test1_pkam_no_options() {
   }
   atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL, NULL)) != 0) {
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &authenticate_options, NULL)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     return ret;
   } else {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
 
+  atclient_authenticate_options_free(&authenticate_options);
   return ret;
 }
 
@@ -88,6 +100,12 @@ static int test2_pkam_with_options() {
   atclient atclient;
   atclient_init(&atclient);
 
+  atclient_authenticate_options options;
+  atclient_authenticate_options_init(&options);
+
+  char *atserver_host = NULL;
+  int atserver_port = 0;
+
   if ((ret = atclient_atkeys_file_from_path(&atkeys_file, atkeyspath)) != 0) {
     return ret;
   }
@@ -98,21 +116,33 @@ static int test2_pkam_with_options() {
   }
   atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_INFO, "atclient_atkeys_populate_from_atkeys_file: %d\n", ret);
 
-  atclient_authenticate_options options;
-  atclient_authenticate_options_init(&options);
-
-  if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
-                                                  ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &options.atserver_host,
-                                                  &options.atserver_port)) != 0) {
+  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST,
+                                                  ATDIRECTORY_PORT, atsign, &atserver_host,
+                                                  &atserver_port)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
     return ret;
   }
 
-  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, NULL, NULL)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atserver_host(&options, atserver_host)) != 0) {
+    return ret;
+  }
+
+  if ((ret = atclient_authenticate_options_set_atserver_port(&options, atserver_port)) != 0) {
+    return ret;
+  }
+
+  if ((ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &options, NULL)) != 0) {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate\n");
     return ret;
   } else {
     atlogger_log(tag, ATLOGGER_LOGGING_LEVEL_DEBUG, "Authenticated\n");
   }
+
+  atclient_authenticate_options_free(&options);
+  atclient_atkeys_file_free(&atkeys_file);
+  atclient_atkeys_free(&atkeys);
+  atclient_free(&atclient);
+  free(atserver_host);
+
   return ret;
 }

@@ -1,6 +1,7 @@
 # Configurable options
 set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
 
+option(ATSDK_MEMCHECK "Enable memcheck configuration" OFF)
 option(ATSDK_BUILD_TESTS "Build tests for atsdk ON | \"unit\" | \"func\" " OFF)
 
 # to avoid caching issues
@@ -21,6 +22,9 @@ else()
   set(ATSDK_BUILD_UNIT_TESTS OFF)
   set(ATSDK_BUILD_FUNCTIONAL_TESTS OFF)
 endif()
+
+# Disable building mbedtls programs
+set(ENABLE_PROGRAMS OFF)
 
 # Basic project setup
 cmake_minimum_required(VERSION 3.24)
@@ -111,5 +115,10 @@ if(ATSDK_BUILD_FUNCTIONAL_TESTS)
 endif()
 
 if(ATSDK_BUILD_UNIT_TESTS OR ATSDK_BUILD_FUNCTIONAL_TESTS)
+  if(ATSDK_MEMCHECK)
+    include(CTest)
+    add_compile_options(-fsanitize=address)
+    add_link_options(-fsanitize=address)
+  endif()
   enable_testing()
 endif()

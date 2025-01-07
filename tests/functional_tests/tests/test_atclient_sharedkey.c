@@ -29,12 +29,6 @@ int main(int argc, char *argv[]) {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  char *atsign1 = FIRST_ATSIGN;
-  const size_t atsign1len = strlen(atsign1);
-
-  char *atsign2 = SECOND_ATSIGN;
-  const size_t atsign2len = strlen(atsign2);
-
   atclient atclient1;
   atclient_init(&atclient1);
 
@@ -47,12 +41,12 @@ int main(int argc, char *argv[]) {
   atclient_atkeys atkeys2;
   atclient_atkeys_init(&atkeys2);
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys1, atsign1, atsign1len)) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys1, FIRST_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys1, atsign1, strlen(atsign1))) != 0) {
+  if ((ret = functional_tests_pkam_auth(&atclient1, &atkeys1, FIRST_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
     goto exit;
   }
@@ -67,12 +61,12 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys2, atsign2, atsign2len)) != 0) {
+  if ((ret = functional_tests_set_up_atkeys(&atkeys2, SECOND_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys2, atsign2, strlen(atsign2))) != 0) {
+  if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys2, SECOND_ATSIGN)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_up: %d\n", ret);
     goto exit;
   }
@@ -95,11 +89,11 @@ int main(int argc, char *argv[]) {
   goto exit;
 
 exit: {
-  if (functional_tests_tear_down_sharedenckeys(&atclient1, atsign2) != 0) {
+  if (functional_tests_tear_down_sharedenckeys(&atclient1, SECOND_ATSIGN) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
   }
-  if (functional_tests_tear_down_sharedenckeys(&atclient2, atsign1) != 0) {
+  if (functional_tests_tear_down_sharedenckeys(&atclient2, FIRST_ATSIGN) != 0) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
   }

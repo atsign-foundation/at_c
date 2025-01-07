@@ -320,12 +320,13 @@ int atchops_rsa_key_generate_base64(unsigned char **public_key_base64_output,
 
   // 7b. Second, we need to add headers to the PKCS#1 formatted private key to make it PKCS#8 formatted
   const size_t private_key_pkcs8_size = private_key_non_base64_len + 22;
-  private_key_pkcs8 = (unsigned char *)malloc(private_key_pkcs8_size);
+  const size_t private_key_alloc_size = private_key_pkcs8_size + 4;
+  private_key_pkcs8 = (unsigned char *)malloc(private_key_alloc_size);
   if (private_key_pkcs8 == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_pkcs8\n");
     goto exit;
   }
-  memset(private_key_pkcs8, 0, sizeof(unsigned char) * private_key_pkcs8_size);
+  memset(private_key_pkcs8, 0, sizeof(unsigned char) * private_key_alloc_size);
   // https://lapo.it/asn1js/ use this to debug
   // PrivateKeyInfo SEQUENCE (3 elements)
   private_key_pkcs8[0] = 0x30; // constructed sequence tag

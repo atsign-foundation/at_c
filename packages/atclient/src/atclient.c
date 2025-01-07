@@ -273,7 +273,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
       options->atserver_port != 0) {
     atserver_host = options->atserver_host;
     atserver_port = options->atserver_port;
-    should_free_atserver_host = true;
+    should_free_atserver_host = false;
   }
 
   if (atserver_host == NULL || atserver_port == 0) {
@@ -719,7 +719,7 @@ exit: {
 bool atclient_is_connected(atclient *ctx) { return atclient_connection_is_connected(&(ctx->atserver_connection)); }
 
 void atclient_set_read_timeout(atclient *ctx, const int timeout_ms) {
-  atclient_tls_socket_set_read_timeout(&ctx->atserver_connection._socket, timeout_ms);
+  atclient_connection_set_read_timeout(&ctx->atserver_connection, timeout_ms);
 }
 
 static void atclient_set_atsign_initialized(atclient *ctx, const bool initialized) {
