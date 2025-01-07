@@ -70,8 +70,7 @@ int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t
   /*
    * 4. Trim + json-decode + read enrollment-id and enrollment status from the server response
    */
-  if ((ret = atclient_string_utils_get_substring_position((const char *)recv, ATCLIENT_DATA_TOKEN, &recv_trimmed)) !=
-      0) {
+  if ((ret = atclient_string_utils_get_substring_position(recv, ATCLIENT_DATA_TOKEN, &recv_trimmed)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "recv did not have prefix \"data:\"\n", (int)recv_len, recv);
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s\n", recv); // log error from server
     goto free_command_exit;
@@ -88,7 +87,7 @@ int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t
 
   // parse and populate the enrollment id from server response
   const cJSON *enroll_id_cjson = cJSON_GetObjectItemCaseSensitive(recv_json_decoded, "enrollmentId");
-  if (!cJSON_IsString(enroll_id_cjson) || (enroll_id_cjson->valuestring == NULL)) {
+  if (!cJSON_IsString(enroll_id_cjson) || enroll_id_cjson->valuestring == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract enrollment_id\n");
     ret = 1;
     goto cjson_delete_exit;
@@ -98,7 +97,7 @@ int atauth_send_enroll_request(atclient *client, const atcommons_enroll_params_t
 
   // parse and populate enrollment status from server response
   const cJSON *enroll_status_cjson = cJSON_GetObjectItemCaseSensitive(recv_json_decoded, "status");
-  if (!cJSON_IsString(enroll_status_cjson) || (enroll_status_cjson->valuestring == NULL)) {
+  if (!cJSON_IsString(enroll_status_cjson) || enroll_status_cjson->valuestring == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract enroll status\n");
     ret = 1;
     goto cjson_delete_exit;

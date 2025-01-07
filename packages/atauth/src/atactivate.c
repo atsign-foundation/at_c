@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   // intialize base64 encoded encrypted APKAM symmetric Key and encrypted default encryption private key
   const size_t aes256_encrypted_rsa_2048_privkey_base64_len = atchops_base64_encoded_size(rsa_2048_privkey_base64_len);
   const size_t aes256_encrypted_aes_key_base64_len =
-      atchops_base64_encoded_size(atchops_base64_encoded_size(ATCHOPS_AES_256));
+      atchops_base64_encoded_size(atchops_aes_ctr_ciphertext_size(ATCHOPS_AES_256));
   unsigned char *encrypted_self_encryption_key_base64 =
       malloc(sizeof(unsigned char) * aes256_encrypted_aes_key_base64_len);
   unsigned char *encrypted_default_encryption_private_key_base64 =

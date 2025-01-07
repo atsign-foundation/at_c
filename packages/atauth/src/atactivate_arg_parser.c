@@ -12,9 +12,11 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
                           char **app_name, char **device_name, char **namespaces, char **root_host, int *root_port) {
   int ret = 0, opt = 0;
   char *root_fqdn = NULL;
-  const char *usage = "Usage: \n\tActivate: \t./atactivate -a atsign -c cram-secret [-k path_to_store_keysfile] [-r root-domain]"
-                      "\n\n\tNew enrollment: ./at_auth_cli -a atsign -s otp/spp -p app_name -d device_name -n "
-                      "namespaces(\"wavi:rw,buzz:r\") [-k path_to_store_keysfile] [-r root-domain]\n";
+  const char *usage =
+      "Usage: \n\tActivate: \t./atactivate -a atsign -c cram-secret [-k atkeys filepath] [-r root-domain]"
+      "\n\n\tNew enrollment: ./at_auth_cli -a atsign -s otp/spp -p app_name -d device_name -n "
+      "namespaces [-k atkeys filepath] [-r root-domain]\n\nNotes: \n\t1) namepsaces list should follow format: "
+      "\"wavi:rw,buzz:r\"\n\t2) root domain should follow format \"root_domain:port\"\n";
 
   // Parse command-line arguments
   while ((opt = getopt(argc, argv, "a:c:k:s:p:d:n:r:vh")) != -1) {
@@ -107,11 +109,11 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
       atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
       break;
     case 'h':
-      fprintf(stdout, usage);
-      ret = 0;
+      fprintf(stdout, "%s", usage);
+      ret = 1;
       goto exit;
     default:
-      fprintf(stderr, usage);
+      fprintf(stderr, "%s", usage);
       ret = -1;
       goto exit;
     }
@@ -125,13 +127,13 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
 
   if (atsign == NULL) {
     fprintf(stderr, "Error: -a (atsign) is mandatory.\n");
-    fprintf(stderr, usage);
+    fprintf(stderr, "%s", usage);
     ret = 1;
   }
 
   if (cram_secret == NULL && otp == NULL) {
     fprintf(stderr, "Cannot proceed without either of CRAM secret or enroll OTP.\n");
-    fprintf(stderr, usage);
+    fprintf(stderr, "%s", usage);
     ret = 1;
   }
 
@@ -140,12 +142,12 @@ exit:
 }
 
 int parse_root_domain(const char *root_domain_string, char **root_host, int *root_port) {
-  if(root_domain_string == NULL) {
+  if (root_domain_string == NULL) {
     return 1;
   }
   *root_host = strdup(strtok((char *)root_domain_string, ":"));
   *root_port = atoi(strtok(NULL, ":"));
-  if(*root_host == NULL || root_port == NULL) {
+  if (*root_host == NULL || root_port == NULL) {
     return 1;
   }
   return 0;
