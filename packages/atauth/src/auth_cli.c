@@ -66,12 +66,9 @@ int main(int argc, char *argv[]) {
   char encrypted_default_self_encryption_key[aes256_encrypted_aes_key_base64_size];
 
   // init buffers to hold IVs for encrypted self enc key and enc private key received from server
-  unsigned char enc_privkey_iv[ATCHOPS_IV_BUFFER_SIZE];
-  unsigned char self_enc_key_iv[ATCHOPS_IV_BUFFER_SIZE];
-
-  // init buffers for IV's that will be used to decrypt keys received from server
-  unsigned char default_iv_1[ATCHOPS_IV_BUFFER_SIZE]; // legacy iv 1
-  unsigned char default_iv_2[ATCHOPS_IV_BUFFER_SIZE]; // legacy iv 2
+  size_t base64_encoded_iv_size = atchops_base64_encoded_size(ATCHOPS_IV_BUFFER_SIZE);
+  unsigned char enc_privkey_iv[base64_encoded_iv_size]; // base64 encoded iv
+  unsigned char self_enc_key_iv[base64_encoded_iv_size]; // base64 encoded iv
 
   memset(apkam_symmetric_key_bytes, 0, aes256_key_unsigned_char_bytes_size);
   memset(apkam_symmetric_key_base64, 0, aes256_key_unsigned_char_base64_size);
@@ -79,14 +76,14 @@ int main(int argc, char *argv[]) {
   memset(encrypted_apkam_symmetric_key_base64, 0, base64_encoded_rsa2048_ciphertext_size);
   memset(encrypted_default_encryption_private_key, 0, aes256_encrypted_rsa_privkey_base64_size);
   memset(encrypted_default_self_encryption_key, 0, aes256_encrypted_aes_key_base64_size);
-  memset(enc_privkey_iv, 0, ATCHOPS_IV_BUFFER_SIZE);
-  memset(self_enc_key_iv, 0, ATCHOPS_IV_BUFFER_SIZE);
-  memset(default_iv_1, 0, ATCHOPS_IV_BUFFER_SIZE);
-  memset(default_iv_2, 0, ATCHOPS_IV_BUFFER_SIZE);
+  memset(enc_privkey_iv, 0, base64_encoded_iv_size);
+  memset(self_enc_key_iv, 0, base64_encoded_iv_size);
   memset(enrollment_id, 0, sizeof(enrollment_id));
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "encrypted enc privkey allocated size: %lu\n", aes256_encrypted_rsa_privkey_base64_size);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "encrypted self enc key allocated size: %lu\n", aes256_encrypted_aes_key_base64_size);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "encrypted enc privkey allocated size: %lu\n",
+               aes256_encrypted_rsa_privkey_base64_size);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "encrypted self enc key allocated size: %lu\n",
+               aes256_encrypted_aes_key_base64_size);
 
   /*
    * 1. Parse + validate command-line arguments
@@ -269,7 +266,6 @@ int main(int argc, char *argv[]) {
    * 4. Fetch APKAM keys from server using get:keys verb and decrypt them (keys are encrypted with APKAM SymmetricKey)
    */
   unsigned char *enc_privkey_iv_base64_decoded = NULL, *self_enc_key_iv_base64_decoded = NULL;
-  // bool enc_privkey_iv_legacy = false, self_enc_key_iv_legacy = false;
 
   // 4.1.1 Fetch encrypted default encryption private key
   if ((ret = get_apkam_key(encrypted_default_encryption_private_key, enc_privkey_iv,
@@ -289,19 +285,6 @@ int main(int argc, char *argv[]) {
     ret = 1;
     goto encrypted_enc_privkey_exit;
   }
-
-  // 4.1.3 Validate IVs fetched in 4.1.1 and 4.1.2 and use default IVs if necessary (for backwards compatability)
-  // Also, sets free flags to false if using default IVs which use stack allocated memory
-  // if (enc_privkey_iv == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Using default IV to decrypt def enc privkey");
-  //   enc_privkey_iv = (char *)default_iv_1;
-  //   enc_privkey_iv_legacy = true;
-  // }
-  // if (self_enc_key_iv == NULL) {
-  //   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Using default IV to decrypt self enc key");
-  //   self_enc_key_iv = (char *)default_iv_2;
-  //   self_enc_key_iv_legacy = true;
-  // }
 
   // 4.2 Decrypt the default encryption private key using apkam symmetric key
   // 4.2.1 base64 decode the encrypted DefaultEncryptionPrivateKey
@@ -332,25 +315,23 @@ int main(int argc, char *argv[]) {
 
   // 4.2.2 base64 decode the encryption private key IV if received from server (base64 decoding not required when using
   // legacy IV)
-  // if (!enc_privkey_iv_legacy) {
-    size_t enc_privkey_iv_base64_decoded_size = atchops_base64_decoded_size(strlen(enc_privkey_iv));
-    size_t enc_privkey_iv_base64_decoded_len = 0;
-    enc_privkey_iv_base64_decoded = malloc(sizeof(char) * strlen(enc_privkey_iv));
-    if (enc_privkey_iv_base64_decoded == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for enc_privkey_iv_base64_decoded\n");
-      goto encrypted_enc_privkey_exit;
-    }
-    memset(enc_privkey_iv_base64_decoded, 0, enc_privkey_iv_base64_decoded_size);
+  size_t enc_privkey_iv_base64_decoded_size = ATCHOPS_IV_BUFFER_SIZE;
+  size_t enc_privkey_iv_base64_decoded_len = 0;
+  enc_privkey_iv_base64_decoded = malloc(sizeof(char) * ATCHOPS_IV_BUFFER_SIZE);
+  if (enc_privkey_iv_base64_decoded == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for enc_privkey_iv_base64_decoded\n");
+    goto encrypted_enc_privkey_exit;
+  }
+  memset(enc_privkey_iv_base64_decoded, 0, enc_privkey_iv_base64_decoded_size);
 
-    if ((ret = atchops_base64_decode((unsigned char *)enc_privkey_iv, strlen(enc_privkey_iv),
-                                     enc_privkey_iv_base64_decoded, enc_privkey_iv_base64_decoded_size,
-                                     &enc_privkey_iv_base64_decoded_len)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "Failed base64 decoding the enc privkey iv received from server | atchops_base64_decode: %d\n", ret);
-      ret = 1;
-      goto encrypted_enc_privkey_exit;
-    }
-  // }
+  if ((ret =
+           atchops_base64_decode(enc_privkey_iv, strlen(enc_privkey_iv), enc_privkey_iv_base64_decoded,
+                                 enc_privkey_iv_base64_decoded_size, &enc_privkey_iv_base64_decoded_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed base64 decoding the enc privkey iv received from server | atchops_base64_decode: %d\n", ret);
+    ret = 1;
+    goto encrypted_enc_privkey_exit;
+  }
 
   // 4.2.3 decrypt the default encryption private key using APKAM symmetric key
   size_t decypted_def_enc_privkey_size =
@@ -367,8 +348,7 @@ int main(int argc, char *argv[]) {
   if ((ret = atchops_aes_ctr_decrypt(apkam_symmetric_key_bytes, ATCHOPS_AES_256, enc_privkey_iv_base64_decoded,
                                      encrypted_default_enc_privkey_base64_decoded,
                                      encrypted_default_enc_privkey_base64_decoded_len, decrypted_def_enc_privkey_bytes,
-                                     sizeof(unsigned char) * decypted_def_enc_privkey_size,
-                                     &decrypted_def_enc_privkey_len)) != 0) {
+                                     decypted_def_enc_privkey_size, &decrypted_def_enc_privkey_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed decrypting the def_enc_privkey | atchops_aes_ctr_decrypt: %d\n", ret);
     goto decrypted_self_enc_key_bytes_exit;
@@ -420,30 +400,27 @@ int main(int argc, char *argv[]) {
     goto self_enc_key_base64_decoded_exit;
   }
 
-  // 4.2.2 base64 decode the self encryption key IV if received from server
+  // 4.3.2 base64 decode the self encryption key IV if received from server
   // base64 decoding not required when using legacy IV
-  // if (!self_enc_key_iv_legacy) {
-    size_t self_enc_key_iv_base64_decoded_size = atchops_base64_decoded_size(strlen(self_enc_key_iv));
-    size_t self_enc_key_iv_base64_decoded_len = 0;
-    self_enc_key_iv_base64_decoded = malloc(sizeof(char) * strlen(self_enc_key_iv));
-    if (self_enc_key_iv_base64_decoded == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for self_enc_key_iv_base64_decoded\n");
-      goto encrypted_enc_privkey_exit;
-    }
-    memset(self_enc_key_iv_base64_decoded, 0, self_enc_key_iv_base64_decoded_size);
+  size_t self_enc_key_iv_base64_decoded_size = ATCHOPS_IV_BUFFER_SIZE;
+  size_t self_enc_key_iv_base64_decoded_len = 0;
+  self_enc_key_iv_base64_decoded = malloc(sizeof(char) * ATCHOPS_IV_BUFFER_SIZE);
+  if (self_enc_key_iv_base64_decoded == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for self_enc_key_iv_base64_decoded\n");
+    goto encrypted_enc_privkey_exit;
+  }
+  memset(self_enc_key_iv_base64_decoded, 0, self_enc_key_iv_base64_decoded_size);
 
-    if ((ret = atchops_base64_decode((unsigned char *)self_enc_key_iv, strlen(self_enc_key_iv),
-                                     self_enc_key_iv_base64_decoded, self_enc_key_iv_base64_decoded_size,
-                                     &self_enc_key_iv_base64_decoded_len)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "Failed base64 decoding the self_enc_key iv received from server | atchops_base64_decode: %d\n",
-                   ret);
-      ret = 1;
-      goto encrypted_enc_privkey_exit;
-    }
-  // }
+  if ((ret = atchops_base64_decode(self_enc_key_iv, strlen(self_enc_key_iv),
+                                   self_enc_key_iv_base64_decoded, self_enc_key_iv_base64_decoded_size,
+                                   &self_enc_key_iv_base64_decoded_len)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed base64 decoding the self_enc_key iv received from server | atchops_base64_decode: %d\n", ret);
+    ret = 1;
+    goto encrypted_enc_privkey_exit;
+  }
 
-  // 4.3.2 Decrypt the default self encryption key using APKAM symmetric key
+  // 4.3.3 Decrypt the default self encryption key using APKAM symmetric key
   size_t decrypted_self_enc_key_size = atchops_aes_ctr_plaintext_size(encrypted_self_enc_key_base64_decoded_len);
   unsigned char *decrypted_self_enc_key = malloc(sizeof(unsigned char) * decrypted_self_enc_key_size);
 
@@ -451,12 +428,11 @@ int main(int argc, char *argv[]) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to allocate memory for decrypted_self_enc_key\n");
     goto exit;
   }
-  memset(decrypted_self_enc_key_bytes, 0, sizeof(unsigned char) * decrypted_self_enc_key_size);
-  size_t decrypted_self_enc_key_len = 0;
 
+  size_t decrypted_self_enc_key_len = 0;
   if ((ret = atchops_aes_ctr_decrypt(apkam_symmetric_key_bytes, ATCHOPS_AES_256, self_enc_key_iv_base64_decoded,
                                      encrypted_self_enc_key_base64_decoded, encrypted_self_enc_key_base64_decoded_len,
-                                     decrypted_self_enc_key, sizeof(unsigned char) * decrypted_self_enc_key_size,
+                                     decrypted_self_enc_key, decrypted_self_enc_key_size,
                                      &decrypted_self_enc_key_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed decrypting the self_enc_key | atchops_aes_ctr_decrypt: %d\n", ret);
@@ -484,16 +460,8 @@ self_enc_key_base64_decoded_exit: { free(encrypted_self_enc_key_base64_decoded);
 decypted_def_enc_privkey_base64_exit: { free(def_encryption_privkey_base64); }
 decrypted_self_enc_key_bytes_exit: { free(decrypted_def_enc_privkey_bytes); }
 encrypted_enc_privkey_base64_decoded_exit: { free(encrypted_default_enc_privkey_base64_decoded); }
-encrypted_self_enc_key_exit: { }//free(encrypted_default_self_encryption_key); }
-encrypted_enc_privkey_exit: { }//free(encrypted_default_encryption_private_key); }
-self_enc_key_iv_exit: {
-  // if (enc_privkey_iv_legacy)
-  //   free(self_enc_key_iv);
-}
-enc_privkey_iv_exit: {
-  // if (self_enc_key_iv_legacy)
-  //   free(enc_privkey_iv);
-}
+encrypted_self_enc_key_exit: {} // free(encrypted_default_self_encryption_key); }
+encrypted_enc_privkey_exit: {}  // free(encrypted_default_encryption_private_key); }
 ns_list_exit: { free(ns_list); }
 enc_pub_key_exit: { free(enc_pubkey_base64); }
 pkam_pub_keys_exit: {
@@ -543,7 +511,8 @@ int retry_pkam_auth_until_success(atclient *ctx, const char *atsign, const atcli
   }
 }
 
-/** Fetches enrollment specific keys from server which has been encrypted using the current enrollment's APKAM SymmetricKey
+/** Fetches enrollment specific keys from server which has been encrypted using the current enrollment's APKAM
+ * SymmetricKey
  *
  * Note: It is assumed that the atclient instance has a valid authenticated connection.
  */
