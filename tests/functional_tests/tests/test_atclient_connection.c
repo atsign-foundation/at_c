@@ -1,7 +1,7 @@
 #include <atclient/connection.h>
 #include <atlogger/atlogger.h>
-#include <functional_tests/helpers.h>
 #include <functional_tests/config.h>
+#include <functional_tests/helpers.h>
 #include <string.h>
 
 #define TAG "test_atclient_connection"
@@ -71,17 +71,17 @@ int main(int argc, char *argv[]) {
   }
 
   if ((ret = test_8_reconnect(&root_conn)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_7_reconnect: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_8_reconnect: %d\n", ret);
     goto exit;
   }
 
   if ((ret = test_9_is_connected_should_be_true(&root_conn)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_8_is_connected: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_9_is_connected: %d\n", ret);
     goto exit;
   }
 
   if ((ret = test_10_free(&root_conn)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_9_free: %d\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_10_free: %d\n", ret);
     goto exit;
   }
 
@@ -122,7 +122,10 @@ int main(int argc, char *argv[]) {
 
   ret = 0;
   goto exit;
-exit: { return ret; }
+exit: {
+  atclient_connection_free(&root_conn);
+  return ret;
+}
 }
 
 static int assert_equals(bool actual, bool expected) {
@@ -187,7 +190,7 @@ static int test_3_is_connected_should_be_true(atclient_connection *conn) {
   int ret = 1;
 
   // give enough time for virtualenv root:64 to respond to the \n command
-  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+  atclient_connection_set_read_timeout(conn, 10 * 1000); // 10 second read timeout
 
   if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
@@ -295,7 +298,7 @@ static int test_7_send_should_fail(atclient_connection *conn) {
 
   int ret = 1;
 
-  const unsigned char *send_data = (const unsigned char *) FIRST_ATSIGN "\r\n";
+  const unsigned char *send_data = (const unsigned char *)FIRST_ATSIGN "\r\n";
   const size_t send_data_len = strlen((const char *)send_data);
 
   const size_t recvsize = 1024;
@@ -351,7 +354,7 @@ static int test_9_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
-  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+  atclient_connection_set_read_timeout(conn, 10 * 1000); // 10 second read timeout
 
   if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
@@ -426,7 +429,7 @@ static int test_13_is_connected_should_be_true(atclient_connection *conn) {
 
   int ret = 1;
 
-  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+  atclient_connection_set_read_timeout(conn, 10 * 1000); // 10 second read timeout
 
   if (!atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to connect: %d\n", ret);
@@ -497,7 +500,7 @@ static int test_16_is_connected_should_be_false(atclient_connection *conn) {
 
   int ret = 1;
 
-  atclient_connection_set_read_timeout(conn, 10*1000); // 10 second read timeout
+  atclient_connection_set_read_timeout(conn, 10 * 1000); // 10 second read timeout
 
   if (atclient_connection_is_connected(conn)) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,

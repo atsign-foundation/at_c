@@ -48,14 +48,14 @@ build-test-memcheck: configure-test-memcheck
 
 # TEST COMMANDS
 
-test-unit: build-test-unit
-  ctest --test-dir $PWD/build/test-unit
+test-unit +ARGS='': build-test-unit
+  ctest --test-dir $PWD/build/test-unit {{ARGS}}
 
-test-func: build-test-func
-  ctest --test-dir $PWD/build/test-func
+test-func +ARGS='': build-test-func
+  ctest --test-dir $PWD/build/test-func {{ARGS}}
 
-test-all: build-test-all
-  ctest --test-dir $PWD/build/test-all
+test-all +ARGS='': build-test-all
+  ctest --test-dir $PWD/build/test-all {{ARGS}}
 
 memcheck +ARGS='': build-test-memcheck
   ctest -T memcheck --test-dir $PWD/build/test-memcheck {{ARGS}}
@@ -96,11 +96,17 @@ configure-test-func:
   cmake -B $PWD/build/test-func -S $PWD \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS="-std=c99 -Wno-error " \
+    -DCMAKE_C_FLAGS="-std=c99 -Wno-error" \
     -DATSDK_BUILD_TESTS="func" \
     -DATSDK_MEMCHECK=OFF \
+    -DATDIRECTORY_HOST="\"$ATDIRECTORY_HOST\"" \
+    -DATDIRECTORY_PORT=$ATDIRECTORY_PORT \
     -DFIRST_ATSIGN="\"$FIRST_ATSIGN\"" \
-    -DSECOND_ATSIGN="\"$SECOND_ATSIGN\""
+    -DSECOND_ATSIGN="\"$SECOND_ATSIGN\"" \
+    -DFIRST_ATSIGN_ATSERVER_HOST="\"$FIRST_ATSIGN_ATSERVER_HOST\"" \
+    -DFIRST_ATSIGN_ATSERVER_PORT=$FIRST_ATSIGN_ATSERVER_PORT \
+    -DSECOND_ATSIGN_ATSERVER_HOST="\"$SECOND_ATSIGN_ATSERVER_HOST\"" \
+    -DSECOND_ATSIGN_ATSERVER_PORT=$SECOND_ATSIGN_ATSERVER_PORT
 
 configure-test-all:
   cmake -B $PWD/build/test-all -S $PWD \
@@ -126,6 +132,12 @@ configure-test-memcheck:
 # DIAGNOSTIC COMMANDS
 
 show-env:
-  echo "$FIRST_ATSIGN"
-  echo "$SECOND_ATSIGN"
   echo "$C_COMPILER"
+  echo "$ATDIRECTORY_HOST"
+  echo "$ATDIRECTORY_PORT"
+  echo "$FIRST_ATSIGN"
+  echo "$FIRST_ATSIGN_ATSERVER_HOST"
+  echo "$FIRST_ATSIGN_ATSERVER_PORT"
+  echo "$SECOND_ATSIGN"
+  echo "$SECOND_ATSIGN_ATSERVER_HOST"
+  echo "$SECOND_ATSIGN_ATSERVER_PORT"

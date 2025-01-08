@@ -218,6 +218,7 @@ static int test1b_publickey_without_namespace() {
   ret = 0;
   goto exit;
 exit: {
+  atclient_atkey_free(&atkey);
   free(string);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test1b_publickey_without_namespace Ended:%d\n", ret);
   return ret;
@@ -481,6 +482,7 @@ static int test2c_sharedkey_without_namespace() {
   ret = 0;
   goto exit;
 exit: {
+  atclient_atkey_free(&atkey);
   free(string);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test2c_sharedkey_without_namespace Ended:%d\n", ret);
   return ret;

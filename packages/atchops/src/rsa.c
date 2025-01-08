@@ -243,6 +243,8 @@ int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atcho
   goto exit;
 exit: {
   mbedtls_rsa_free(&rsa);
+  mbedtls_entropy_free(&entropy_ctx);
+  mbedtls_ctr_drbg_free(&ctr_drbg_ctx);
   return ret;
 }
 }

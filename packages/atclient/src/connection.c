@@ -747,6 +747,7 @@ static int atclient_connection_set_host(atclient_connection *ctx, const char *ho
     return ret;
   }
 
+  char *old_host = ctx->host;
   /*
    * 2. Allocate memory for the host
    */
@@ -757,6 +758,7 @@ static int atclient_connection_set_host(atclient_connection *ctx, const char *ho
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for host\n");
     goto exit;
   }
+  free(old_host);
 
   /*
    * 3. Copy the host

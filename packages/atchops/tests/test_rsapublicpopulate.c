@@ -1,8 +1,8 @@
 
 #include "atchops/rsa_key.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <stddef.h>
 
 #define PUBLIC_KEY_BASE64                                                                                              \
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuuD88vWQ3Zunves9w5o3pLQ+7ClKONAMftVQ9dirJt6VD0xg5DNzX+"                \
@@ -48,5 +48,8 @@ int main() {
   printf("\n");
 
   goto exit;
-exit: { return ret; }
+exit: {
+  atchops_rsa_key_public_key_free(&publickey);
+  return ret;
+}
 }

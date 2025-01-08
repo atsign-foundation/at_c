@@ -6,10 +6,7 @@
 
 #define TAG "test_atclient_find_atserver_address"
 
-// This ATSIGN should be pinned, we don't need the keys for it
-// we want to test for a successful lookup in the atDirectory
-#define EXPECTED_HOST "vip.ve.atsign.zone"
-#define EXPECTED_PORT 25000
+#define UNDEFINED_ATSIGN_WITHOUT_AT ",,,,"
 
 static int test_1_find_atserver_address_should_pass();
 static int test_2_find_atserver_address_should_fail();
@@ -40,10 +37,14 @@ static int test_1_find_atserver_address_should_pass() {
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_find_atserver_address_should_pass Begin\n");
 
+  const char *atsign = FIRST_ATSIGN;
+  const char *expected_host = FIRST_ATSIGN_ATSERVER_HOST;
+  int expected_port = FIRST_ATSIGN_ATSERVER_PORT;
+
   char *atserver_host = NULL;
   int atserver_port = 0;
 
-  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, FIRST_ATSIGN, &atserver_host,
+  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, atsign, &atserver_host,
                                                   &atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_find_atserver_address: %d\n", ret);
     goto exit;
@@ -52,13 +53,13 @@ static int test_1_find_atserver_address_should_pass() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_host: %s\n", atserver_host);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atserver_port: %d\n", atserver_port);
 
-  if (strcmp(atserver_host, EXPECTED_HOST) != 0) {
+  if (strcmp(atserver_host, expected_host) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver_host doesn't match\n");
     ret = 1;
     goto exit;
   }
 
-  if (atserver_port != EXPECTED_PORT) {
+  if (atserver_port != expected_port) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver_port doesn't match\n");
     ret = 1;
     goto exit;
@@ -81,7 +82,7 @@ static int test_2_find_atserver_address_should_fail() {
   char *atserver_host = NULL;
   int atserver_port = 0;
 
-  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, "asjdflasjdf", &atserver_host,
+  if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, UNDEFINED_ATSIGN_WITHOUT_AT, &atserver_host,
                                                   &atserver_port)) == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_find_atserver_address passed with exit code 0, when it was expected to fail... %d\n", ret);

@@ -103,5 +103,9 @@ int main() {
 
   goto exit;
 
-exit: { return ret; }
+exit: {
+  atchops_rsa_key_public_key_free(&publickey);
+  atchops_rsa_key_private_key_free(&privatekey);
+  return ret;
+}
 }

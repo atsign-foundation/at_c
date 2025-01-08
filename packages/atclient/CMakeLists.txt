@@ -3,6 +3,7 @@ option(ATCLIENT_BUILD_TESTS "Build tests for atclient" OFF)
 
 # Set include directory and file sources
 set(ATCLIENT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
+set(ATCLIENT_PROTECTED_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(
   ATCLIENT_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/src/atclient_delete.c
@@ -30,6 +31,9 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/notify_params.c
   ${CMAKE_CURRENT_LIST_DIR}/src/request_options.c
   ${CMAKE_CURRENT_LIST_DIR}/src/string_utils.c
+  # protected files
+  ${CMAKE_CURRENT_LIST_DIR}/src/atserver_message.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/atserver_message.c
 )
 
 # Project setup
@@ -123,6 +127,13 @@ if(NOT ESP_PLATFORM)
       $<BUILD_INTERFACE:${cjson_SOURCE_DIR}>
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_include_directories(
+      ${PROJECT_NAME}
+      PUBLIC $<BUILD_INTERFACE:${ATCLIENT_PROTECTED_INCLUDE_DIR}>
+    )
+  endif()
 
   # Link dependencies to library targets
   set(

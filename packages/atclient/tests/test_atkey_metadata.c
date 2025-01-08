@@ -316,6 +316,9 @@ static int test_atkey_metadata_to_protocolstr() {
   goto exit;
 exit: {
   atclient_atkey_metadata_free(&metadata);
+  if (protocolfragment != NULL) {
+    free(protocolfragment);
+  }
   return ret;
 }
 }
@@ -373,6 +376,9 @@ static int test_atkey_metadata_to_protocolstr2() {
   goto exit;
 exit: {
   atclient_atkey_metadata_free(&metadata);
+  if (protocolfragment != NULL) {
+    free(protocolfragment);
+  }
   return ret;
 }
 }

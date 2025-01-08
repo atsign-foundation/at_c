@@ -403,6 +403,9 @@ int atchops_rsa_key_generate_base64(unsigned char **public_key_base64_output,
   (*private_key_base64_output)[private_key_base64_pkcs8_len] = '\0';
 
 exit: {
+  mbedtls_ctr_drbg_free(&ctr_drbg);
+  mbedtls_entropy_free(&entropy);
+  mbedtls_pk_free(&pk);
   free(private_key_non_base64);
   free(private_key_pkcs8);
   free(private_key_pkcs8_base64);

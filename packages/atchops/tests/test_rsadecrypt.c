@@ -74,5 +74,8 @@ int main() {
 
   goto ret;
 
-ret: { return ret; }
+ret: {
+  atchops_rsa_key_private_key_free(&privatekey);
+  return ret;
+}
 }

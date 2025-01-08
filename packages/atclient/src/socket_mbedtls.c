@@ -133,12 +133,12 @@ exit:
 
 void atclient_tls_socket_free(struct atclient_tls_socket *socket) {
   if (socket != NULL) {
-    atclient_raw_socket_free(&socket->raw);
     mbedtls_ssl_free(&socket->ssl);
     mbedtls_ssl_config_free(&socket->ssl_config);
     mbedtls_entropy_free(&(socket->entropy));
     mbedtls_ctr_drbg_free(&(socket->ctr_drbg));
     mbedtls_x509_crt_free(&(socket->cacert));
+    atclient_raw_socket_free(&socket->raw);
     memset(socket, 0, sizeof(struct atclient_tls_socket));
   }
 }
@@ -147,7 +147,7 @@ static int atclient_tls_socket_ssl_handshake(struct atclient_tls_socket *socket,
 
 int atclient_tls_socket_connect(struct atclient_tls_socket *socket, const char *host, const uint16_t port) {
   if (socket == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tls socket is when trying to connect NULL\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tls socket is NULL when trying to connect\n");
     return 1;
   }
 
@@ -217,8 +217,11 @@ int atclient_tls_socket_disconnect(struct atclient_tls_socket *socket) {
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
                  "mbedtls_ssl_close_notify failed, socket will be silently closed, exit code: %d\n", ret);
-    return ret;
   }
+
+  mbedtls_ssl_free(&socket->ssl);
+  mbedtls_net_close(&socket->raw.net);
+  mbedtls_net_free(&socket->raw.net);
 
   return ret;
 }

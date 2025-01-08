@@ -392,7 +392,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:success\"\n",
                  (int)recv_len, recv);
 
-    if (*err_msg != NULL) {
+    if (err_msg != NULL) {
       *err_msg = (char *)recv;
     }
     goto exit;

@@ -65,6 +65,10 @@ exit: { return ret; }
 }
 
 void atclient_atkey_free(atclient_atkey *atkey) {
+  atclient_atkey_unset_key(atkey);
+  atclient_atkey_unset_namespace_str(atkey);
+  atclient_atkey_unset_shared_by(atkey);
+  atclient_atkey_unset_shared_with(atkey);
   atclient_atkey_metadata_free(&(atkey->metadata));
   memset(atkey, 0, sizeof(atclient_atkey));
 }

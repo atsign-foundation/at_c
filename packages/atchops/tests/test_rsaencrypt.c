@@ -54,5 +54,8 @@ int main() {
 
   goto ret;
 
-ret: { return ret; }
+ret: {
+  atchops_rsa_key_public_key_free(&publickey);
+  return ret;
+}
 }

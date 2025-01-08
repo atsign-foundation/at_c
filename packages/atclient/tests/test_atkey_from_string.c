@@ -175,8 +175,8 @@ static int test1a_cached_publickey_without_namespace() {
   ret = 0;
   goto exit;
 exit: {
-  return ret;
   atclient_atkey_free(&atkey);
+  return ret;
 }
 }
 

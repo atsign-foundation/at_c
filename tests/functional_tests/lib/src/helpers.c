@@ -5,34 +5,38 @@
 #include <atclient/constants.h>
 #include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
+#include <pwd.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define TAG "functional_tests_helpers"
 
 int functional_tests_set_up_atkeys(atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
-  const size_t atkeyspathsize = 1024;
-  char atkeyspath[atkeyspathsize];
-  memset(atkeyspath, 0, atkeyspathsize);
-  size_t atkeyspathlen = 0;
+  char *path = NULL;
 
-  if ((ret = functional_tests_get_atkeys_path(atsign, strlen(atsign), atkeyspath, atkeyspathsize, &atkeyspathlen)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys_sharedwith path: %d\n", ret);
+  if ((ret = functional_tests_get_atkeys_path(atsign, &path)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atkeys path for atSign \"%s\"\n", atsign);
     goto exit;
   }
 
-  if ((ret = atclient_atkeys_populate_from_path(atkeys, atkeyspath)) != 0) {
+  if ((ret = atclient_atkeys_populate_from_path(atkeys, path)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys_sharedwith from path: %d\n", ret);
     goto exit;
   }
 
   goto exit;
 
-exit: { return ret; }
+exit: {
+  if (path != NULL) {
+    free(path);
+  }
+  return ret;
+}
 }
 
 int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, const char *atsign) {
@@ -40,19 +44,19 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "functional_tests_pkam_auth Begin\n");
 
-  if(atclient == NULL) {
+  if (atclient == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
     return ret;
   }
 
-  if(atkeys == NULL) {
+  if (atkeys == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys is NULL\n");
     return ret;
   }
 
-  if(atsign == NULL) {
+  if (atsign == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atsign is NULL\n");
     return ret;
@@ -61,12 +65,12 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
   atclient_authenticate_options authenticate_options;
   atclient_authenticate_options_init(&authenticate_options);
 
-  if((ret = atclient_authenticate_options_set_atdirectory_host(&authenticate_options, ATDIRECTORY_HOST)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atdirectory_host(&authenticate_options, ATDIRECTORY_HOST)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_host: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_authenticate_options_set_atdirectory_port(&authenticate_options, ATDIRECTORY_PORT)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atdirectory_port(&authenticate_options, ATDIRECTORY_PORT)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_port: %d\n", ret);
     goto exit;
   }
@@ -76,7 +80,7 @@ int functional_tests_pkam_auth(atclient *atclient, atclient_atkeys *atkeys, cons
     goto exit;
   }
 
-  atclient_set_read_timeout(atclient, 5*1000); // 5 second read timeout
+  atclient_set_read_timeout(atclient, 5 * 1000); // 5 second read timeout
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "pkam authenticated\n");
 
@@ -199,9 +203,10 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
 
   ret = true;
   goto exit;
-exit: { 
+exit: {
   atclient_atkey_free(&atkey);
-  return ret; }
+  return ret;
+}
 }
 
 int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const char *shared_by,
@@ -256,9 +261,10 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
 
   ret = true;
   goto exit;
-exit: { 
+exit: {
   atclient_atkey_free(&atkey);
-  return ret; }
+  return ret;
+}
 }
 
 int functional_tests_tear_down_sharedenckeys(atclient *atclient1, const char *recipient) {
@@ -350,4 +356,16 @@ exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down End (%d)\n", ret);
   return ret;
 }
+}
+
+int functional_tests_get_atkeys_path(const char *atsign, char **path) {
+  struct passwd *pw = getpwuid(getuid());
+  const char *homedir = pw->pw_dir;
+  const size_t path_size = strlen(homedir) + strlen("/.atsign/keys/") + strlen(atsign) + strlen("_key.atkeys") + 1;
+  if ((*path = (char *)malloc(sizeof(char) * path_size)) == NULL) {
+    return 1; // failed to allocate memory
+  }
+  memset(*path, 0, sizeof(char) * path_size);
+  snprintf(*path, path_size, "%s/.atsign/keys/%s_key.atKeys", homedir, atsign);
+  return 0;
 }
