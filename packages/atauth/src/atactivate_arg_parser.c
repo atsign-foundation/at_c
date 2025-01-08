@@ -1,6 +1,7 @@
 #include "atauth/atactivate_arg_parser.h"
 #include <atclient/constants.h>
 #include <atlogger/atlogger.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,8 +16,8 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
   const char *usage =
       "Usage: \n\tActivate: \t./atactivate -a atsign -c cram-secret [-k atkeys filepath] [-r root-domain]"
       "\n\n\tNew enrollment: ./at_auth_cli -a atsign -s otp/spp -p app_name -d device_name -n "
-      "namespaces [-k atkeys filepath] [-r root-domain]\n\nNotes: \n\t1) namepsaces list should follow format: "
-      "\"wavi:rw,buzz:r\"\n\t2) root domain should follow format \"root_domain:port\"\n";
+      "namespaces [-k atkeys filepath+filename to be store keysfile] [-r root-domain]\n\nNotes: \n\t1) namepsaces list"
+      " should follow format: \"wavi:rw,buzz:r\"\n\t2) root domain should follow format \"root_domain:port\"\n";
 
   // Parse command-line arguments
   while ((opt = getopt(argc, argv, "a:c:k:s:p:d:n:r:vh")) != -1) {
