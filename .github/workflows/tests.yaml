@@ -20,11 +20,8 @@ jobs:
           cmake -S . -B build -DATSDK_BUILD_TESTS="unit" -DCMAKE_BUILD_TYPE="Debug"
           cmake --build build --target all
 
-      - name: atchops Unit CTest
-        run: ctest --test-dir build/packages/atchops/tests --output-on-failure --timeout 5 -VV
-
-      - name: atclient Unit CTest
-        run: ctest --test-dir build/packages/atclient/tests --output-on-failure --timeout 5 -VV
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure --timeout 5 -VV
 
   functional-tests:
     runs-on: "ubuntu-latest"
@@ -50,7 +47,7 @@ jobs:
           ./start_virtualenv.sh
           sleep 1
           ./pkam_virtualenv.sh
-      
+
       - name: Build and Run Check Docker Readiness
         working-directory: tests/functional_tests/check_docker_readiness
         run: |
