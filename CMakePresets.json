@@ -40,7 +40,7 @@
         "BUILD_SHARED_LIBS": "OFF",
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_C_FLAGS": "-std=c99 -Wno-error",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/package-source/install",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/release-static/tmp-install-dir",
         "ATSDK_BUILD_TESTS": "OFF",
         "ATSDK_MEMCHECK": "OFF",
         "ENABLE_TESTING": "OFF",
@@ -58,22 +58,17 @@
     {
       "name": "release-static",
       "configurePreset": "release-static"
+    },
+    {
+      "name": "package-source",
+      "configurePreset": "release-static",
+      "targets": ["package_source"]
     }
   ],
   "packagePresets": [
     {
-      "name": "static-zip",
-      "generators": ["ZIP"],
-      "configurePreset": "release-static",
-      "packageDirectory": "${sourceDir}/package-source",
-      "configFile": "${sourceDir}/CPackSourceConfig.cmake"
-    },
-    {
-      "name": "static-tgz",
-      "generators": ["TGZ"],
-      "configurePreset": "release-static",
-      "packageDirectory": "${sourceDir}/package-source",
-      "configFile": "${sourceDir}/CPackSourceConfig.cmake"
+      "name": "release-static",
+      "configurePreset": "release-static"
     }
   ],
   "workflowPresets": [
@@ -82,8 +77,14 @@
       "steps": [
         { "type": "configure", "name": "release-static" },
         { "type": "build", "name": "release-static" },
-        { "type": "package", "name": "static-zip" },
-        { "type": "package", "name": "static-tgz" }
+        { "type": "package", "name": "release-static" }
+      ]
+    },
+    {
+      "name": "package-source",
+      "steps": [
+        { "type": "configure", "name": "release-static" },
+        { "type": "build", "name": "package-source" }
       ]
     }
   ]

@@ -116,7 +116,6 @@ function(build_atsdk_package)
 
     # Build the tests
     if(arg_BUILD_TESTS)
-      enable_testing()
       add_subdirectory(${arg_PACKAGE_DIR}/tests)
     endif()
   endif()
