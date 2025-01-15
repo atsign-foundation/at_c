@@ -9,7 +9,7 @@ extern "C" {
 
 struct atdirectory_connection {
   struct atclient_tls_socket socket;
-  char *host;
+  const char *host;
   const uint16_t port;
 };
 
