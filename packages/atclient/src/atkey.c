@@ -175,15 +175,17 @@ int atclient_atkey_from_string(atclient_atkey *atkey, const char *atkeystr) {
   char composite[composite_size]; // holds {key}.{namespace}
   memset(composite, 0, sizeof(char) * composite_size);
 
-  char *copy = NULL;
-
   /*
    * 3.
    */
-  if ((copy = strdup(atkeystr)) == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdndup failed\n");
+  size_t copy_len = strlen(atkeystr) + 1;
+  char *copy = malloc(sizeof(char) * copy_len);
+  if (copy == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "creating a copy of atkeystr failed\n");
     goto exit;
   }
+  memset(copy, 0, copy_len);
+  memcpy(copy, atkeystr, copy_len - 1);
 
   char *token = strtok_r(copy, ":", &save_ptr);
   if (token == NULL) {
@@ -434,12 +436,16 @@ int atclient_atkey_set_key(atclient_atkey *atkey, const char *key) {
     atkey->key = NULL;
     atkey->_initialized_fields[ATCLIENT_ATKEY_KEY_INDEX] &= ~ATCLIENT_ATKEY_KEY_INITIALIZED;
   }
-  atkey->key = strdup(key);
+  size_t key_len = strlen(key) + 1;
+  atkey->key = malloc(sizeof(char) * key_len);
   if (atkey->key == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "allocating atkey.key failed\n");
     ret = 1;
     goto exit;
   }
+  memset(atkey->key, 0, key_len);
+  memcpy(atkey->key, key, key_len - 1);
+
   atkey->_initialized_fields[ATCLIENT_ATKEY_KEY_INDEX] |= ATCLIENT_ATKEY_KEY_INITIALIZED;
   ret = 0;
   goto exit;
@@ -463,12 +469,16 @@ int atclient_atkey_set_namespace_str(atclient_atkey *atkey, const char *namespac
     atkey->namespace_str = NULL;
     atkey->_initialized_fields[ATCLIENT_ATKEY_NAMESPACE_STR_INDEX] &= ~ATCLIENT_ATKEY_NAMESPACE_STR_INITIALIZED;
   }
-  atkey->namespace_str = strdup(namespace_str);
+  size_t namespace_len = strlen(namespace_str) + 1;
+  atkey->namespace_str = malloc(sizeof(char) * namespace_len);
   if (atkey->namespace_str == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "allocating atkey.namespace_str failed\n");
     ret = 1;
     goto exit;
   }
+  memset(atkey->namespace_str, 0, namespace_len);
+  memcpy(atkey->namespace_str, namespace_str, namespace_len - 1);
+
   atkey->_initialized_fields[ATCLIENT_ATKEY_NAMESPACE_STR_INDEX] |= ATCLIENT_ATKEY_NAMESPACE_STR_INITIALIZED;
   ret = 0;
   goto exit;
@@ -492,12 +502,16 @@ int atclient_atkey_set_shared_by(atclient_atkey *atkey, const char *shared_by) {
     atkey->shared_by = NULL;
     atkey->_initialized_fields[ATCLIENT_ATKEY_SHARED_BY_INDEX] &= ~ATCLIENT_ATKEY_SHARED_BY_INITIALIZED;
   }
-  atkey->shared_by = strdup(shared_by);
+  size_t shared_by_len = strlen(shared_by) + 1;
+  atkey->shared_by = malloc(sizeof(char) * shared_by_len);
   if (atkey->shared_by == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "allocating atkey.shared_by failed\n");
     ret = 1;
     goto exit;
   }
+  memset(atkey->shared_by, 0, shared_by_len);
+  memcpy(atkey->shared_by, shared_by, shared_by_len - 1);
+
   atkey->_initialized_fields[ATCLIENT_ATKEY_SHARED_BY_INDEX] |= ATCLIENT_ATKEY_SHARED_BY_INITIALIZED;
   ret = 0;
   goto exit;
@@ -521,12 +535,16 @@ int atclient_atkey_set_shared_with(atclient_atkey *atkey, const char *shared_wit
     atkey->shared_with = NULL;
     atkey->_initialized_fields[ATCLIENT_ATKEY_SHARED_WITH_INDEX] &= ~ATCLIENT_ATKEY_SHARED_WITH_INITIALIZED;
   }
-  atkey->shared_with = strdup(shared_with);
+  size_t shared_with_len = strlen(shared_with) + 1;
+  atkey->shared_with = malloc(sizeof(char) * shared_with_len);
   if (atkey->shared_with == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "strdup failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "allocating atkey.shared_with failed\n");
     ret = 1;
     goto exit;
   }
+  memset(atkey->shared_with, 0, shared_with_len);
+  memcpy(atkey->shared_with, shared_with, shared_with_len - 1);
+
   atkey->_initialized_fields[ATCLIENT_ATKEY_SHARED_WITH_INDEX] |= ATCLIENT_ATKEY_SHARED_WITH_INITIALIZED;
   ret = 0;
   goto exit;

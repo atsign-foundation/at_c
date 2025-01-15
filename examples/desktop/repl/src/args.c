@@ -4,10 +4,10 @@
 #include <atlogger/atlogger.h>
 #include <pwd.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
 
 #define TAG "repl_args"
 
@@ -68,7 +68,7 @@ int repl_args_parse(repl_args *repl_args, const int argc, const char *argv[]) {
 
   struct argparse argparse;
   argparse_init(&argparse, options, NULL, 0);
-  argparse_parse(&argparse, argc, (const char **) argv);
+  argparse_parse(&argparse, argc, (const char **)argv);
   argparse_describe(&argparse, "repl v0.1.0", "");
 
   /*
@@ -85,7 +85,15 @@ int repl_args_parse(repl_args *repl_args, const int argc, const char *argv[]) {
    * 4. Set default values
    */
   if (repl_args->root_url == NULL) {
-    repl_args->root_url = strdup(REPL_ARGS_ROOT_URL_DEFAULT);
+    size_t root_len = strlen(REPL_ARGS_ROOT_URL_DEFAULT) + 1;
+    repl_args->root_url = malloc(sizeof(char) * root_len);
+    if (repl_args->root_url) {
+      ret = 1;
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for root_url\n");
+      goto exit;
+    }
+    memset(repl_args->root_url, 0, root_len);
+    memcpy(repl_args->root_url, REPL_ARGS_ROOT_URL_DEFAULT, root_len - 1);
   }
 
   if (repl_args->key_file == NULL) {
@@ -103,7 +111,7 @@ int repl_args_parse(repl_args *repl_args, const int argc, const char *argv[]) {
     }
 
     repl_args->key_file = (char *)malloc(strlen(pw->pw_dir) + strlen("/.atsign/keys/@") + strlen(atsign_without_at) +
-                              strlen("_key.atKeys") + 1);
+                                         strlen("_key.atKeys") + 1);
     if (repl_args->key_file == NULL) {
       ret = 1;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for key_file\n");

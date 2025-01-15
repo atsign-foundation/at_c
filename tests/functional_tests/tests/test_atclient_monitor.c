@@ -78,10 +78,9 @@ int main() {
     goto exit;
   }
 
-  atclient_monitor_set_read_timeout(&monitor_conn, 5*1000);
+  atclient_monitor_set_read_timeout(&monitor_conn, 5 * 1000);
 
-  if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys_sharedwith, ATKEY_SHAREDWITH)) !=
-      0) {
+  if ((ret = functional_tests_pkam_auth(&atclient2, &atkeys_sharedwith, ATKEY_SHAREDWITH)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
@@ -136,12 +135,12 @@ static int monitor_pkam_auth(atclient *monitor_conn, const atclient_atkeys *atke
   atclient_authenticate_options authenticate_options;
   atclient_authenticate_options_init(&authenticate_options);
 
-  if((ret = atclient_authenticate_options_set_atdirectory_host(&authenticate_options, ATDIRECTORY_HOST)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atdirectory_host(&authenticate_options, ATDIRECTORY_HOST)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_host: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_authenticate_options_set_atdirectory_port(&authenticate_options, ATDIRECTORY_PORT)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atdirectory_port(&authenticate_options, ATDIRECTORY_PORT)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atdirectory_port: %d\n", ret);
     goto exit;
   }
@@ -320,21 +319,28 @@ static int test_4_re_pkam_auth_and_start_monitor(atclient *monitor_conn) {
   atclient_authenticate_options authenticate_options;
   atclient_authenticate_options_init(&authenticate_options);
 
-  char *atserver_host = strdup(monitor_conn->atserver_connection.host);
+  size_t atserver_host_len = strlen(monitor_conn->atserver_connection.host) + 1;
+  char *atserver_host = malloc(sizeof(char) * atserver_host_len);
+  if (atserver_host == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate atserver_host\n");
+    return 1;
+  }
+  memset(atserver_host, 0, atserver_host_len);
+  memcpy(atserver_host, monitor_conn->atserver_connection.host, atserver_host_len - 1);
   int atserver_port = monitor_conn->atserver_connection.port;
 
-  if((ret = atclient_authenticate_options_set_atserver_host(&authenticate_options, atserver_host)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atserver_host(&authenticate_options, atserver_host)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atserver_host: %d\n", ret);
     goto exit;
   }
 
-  if((ret = atclient_authenticate_options_set_atserver_port(&authenticate_options, atserver_port)) != 0) {
+  if ((ret = atclient_authenticate_options_set_atserver_port(&authenticate_options, atserver_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_authenticate_options_set_atserver_port: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys), &authenticate_options)) !=
-      0) {
+  if ((ret = atclient_monitor_pkam_authenticate(monitor_conn, monitor_conn->atsign, &(monitor_conn->atkeys),
+                                                &authenticate_options)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate with PKAM: %d\n", ret);
     goto exit;
   }
