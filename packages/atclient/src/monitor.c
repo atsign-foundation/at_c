@@ -215,8 +215,6 @@ bool atclient_monitor_is_connected(atclient *monitor_conn) {
 // This function will modify *message_type and *message_body to point to the respective values in *original.
 static int parse_message(char *original, size_t original_len, char **message_type, char **message_body) {
   int ret = -1;
-  char *temp = NULL;
-  char *saveptr;
 
   size_t read_i;
   ret = atclient_utils_find_index_past_at_prompt((unsigned char *)original, original_len, &read_i);
@@ -229,20 +227,25 @@ static int parse_message(char *original, size_t original_len, char **message_typ
   original[original_len - 1] = '\0';
 
   // Parse the message type (everything before ':')
-  temp = strtok_r(original, ":", &saveptr);
-  if (temp == NULL) {
+  size_t pos = 0;
+  while (original[pos] != ':' && ++pos < original_len - 1)
+    ;
+
+  if (pos == original_len) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message type\n");
     goto exit;
   }
-  *message_type = temp;
+
+  original[pos] = 0;
+  *message_type = original;
+  pos++;
 
   // The rest of the string is the message body (JSON in this case)
-  temp = strtok_r(NULL, "", &saveptr); // Use an empty delimiter to get the rest of the string
-  if (temp == NULL) {
+  if (pos >= original_len) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse message body\n");
     goto exit;
   }
-  *message_body = temp;
+  *message_body = original + pos;
 
   // Trim leading whitespace or newlines from message_body
   while (**message_body == ' ' || **message_body == '\n') {
