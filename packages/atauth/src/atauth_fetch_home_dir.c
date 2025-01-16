@@ -12,10 +12,19 @@
 #define PATH_MAX 260 // Max path length for Windows (adjustable if needed)
 
 #else
-#include <limits.h>
 #include <pwd.h>
 #include <unistd.h>
 #define PATH_SEPARATOR '/'
+#endif
+
+#if __has_include(<linux/limits.h>)
+#include <linux/limits.h>
+#else
+#include <limits.h>
+#endif
+
+#if !defined(PATH_MAX)
+#define PATH_MAX 512
 #endif
 
 #define TAG "fetch_home_dir"
