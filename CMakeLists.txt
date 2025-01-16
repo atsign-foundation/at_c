@@ -40,6 +40,9 @@ project(
   LANGUAGES C
 )
 
+# Includes from cmake project directory
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/CPackSetup.cmake")
+
 # Determine if atchops is being built as a subproject using add_subdirectory()
 if(NOT DEFINED ATSDK_AS_SUBPROJECT)
   set(ATSDK_AS_SUBPROJECT ON)

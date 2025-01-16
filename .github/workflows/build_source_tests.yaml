@@ -50,3 +50,13 @@ jobs:
         working-directory: examples/desktop/sample_cmake_project
         run: |
           ./build/main
+
+  atsdk-package:
+    strategy:
+      fail-fast: true
+      matrix:
+        preset: ["package-static", "package-source"]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: cmake --workflow --preset ${{ matrix.preset }}

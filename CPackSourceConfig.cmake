@@ -1,7 +1,0 @@
-set(CPACK_PACKAGE_FILE_NAME atsdk)
-set(CPACK_PACKAGE_NAME atsdk)
-set(CPACK_PACKAGE_DESCRIPTION "Atsign's atSDK library")
-set(CPACK_PACKAGE_VERSION 0.3.0)
-set(CPACK_PACKAGE_VENDOR_NAME atsign-foundation)
-set(CPACK_CMAKE_GENERATOR "Unix Makefiles")
-set(CPACK_INSTALL_CMAKE_PROJECTS ".;atsdk;ALL;/")

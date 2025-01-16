@@ -28,6 +28,12 @@ install: build-debug
 
 # BUILD COMMANDS
 
+package-static:
+  cmake --workflow --preset package-static
+
+package-source:
+  cmake --workflow --preset package-source
+
 build-debug: configure-debug
   cmake --build $PWD/build/debug
 
