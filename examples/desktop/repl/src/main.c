@@ -107,11 +107,14 @@ static int set_up_pkam_auth_options(atclient_authenticate_options *pkam_authenti
   char *root_url_copy = NULL;
 
   if (root_url != NULL) {
-    root_url_copy = strdup(root_url);
+    size_t root_len = strlen(root_url) + 1;
+    root_url_copy = malloc(sizeof(char) * root_len);
     if (root_url_copy == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to copy root_url\n");
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate root_url_copy\n");
       goto exit;
     }
+    memset(root_url_copy, 0, root_len);
+    memcpy(root_url_copy, root_url, root_len - 1);
 
     char *root_host = strtok(root_url_copy, ":");
     if (root_host == NULL) {

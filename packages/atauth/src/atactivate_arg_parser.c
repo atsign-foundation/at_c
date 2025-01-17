@@ -1,4 +1,4 @@
-#include "atauth/atactivate_arg_parser.h"
+#include <atauth/atactivate_arg_parser.h>
 #include <atclient/constants.h>
 #include <atlogger/atlogger.h>
 #include <getopt.h>
@@ -6,9 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <getopt.h>
 
-int parse_root_domain(const char *root_domain_string, char **root_host, int *root_port);
+int parse_root_domain(char *root_domain_string, char **root_host, int *root_port);
 
 int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cram_secret, char **otp, char **atkeys_fp,
                           char **app_name, char **device_name, char **namespaces, char **root_host, int *root_port) {
@@ -123,7 +122,15 @@ int atactivate_parse_args(const int argc, char *argv[], char **atsign, char **cr
 
   // set default root server address if not provided through CLI
   if (root_fqdn == NULL || parse_root_domain(root_fqdn, root_host, root_port) != 0) {
-    *root_host = strdup(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST);
+    size_t root_len = strlen(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST) + 1;
+    *root_host = malloc(sizeof(char) * root_len);
+    if (*root_host == NULL) {
+      ret = 1;
+      fprintf(stderr, "Failed to allocate *root_host\n");
+    }
+    memset(*root_host, 0, root_len);
+    memcpy(*root_host, ATCLIENT_ATDIRECTORY_PRODUCTION_HOST, root_len - 1);
+
     *root_port = ATCLIENT_ATDIRECTORY_PRODUCTION_PORT;
   }
 
@@ -143,13 +150,28 @@ exit:
   return ret;
 }
 
-int parse_root_domain(const char *root_domain_string, char **root_host, int *root_port) {
+int parse_root_domain(char *root_domain_string, char **root_host, int *root_port) {
   if (root_domain_string == NULL) {
     return 1;
   }
-  *root_host = strdup(strtok((char *)root_domain_string, ":"));
-  *root_port = atoi(strtok(NULL, ":"));
-  if (*root_host == NULL || root_port == NULL) {
+  size_t len = strlen(root_domain_string);
+  size_t pos = 0;
+  while (++pos < len && root_domain_string[pos] != ':')
+    ; // walk to end of string or ':'
+  if (pos == len) {
+    return 1;
+  }
+  root_domain_string[pos] = 0;
+
+  *root_host = malloc(sizeof(char) * pos);
+  if (*root_host == NULL) {
+    return 1;
+  }
+  memcpy(*root_host, root_domain_string, pos - 1);
+  (*root_host)[pos - 1] = 0;
+
+  *root_port = atoi(root_domain_string + pos + 1);
+  if (*root_host == NULL || *root_port == 0) {
     return 1;
   }
   return 0;

@@ -2,16 +2,16 @@
 
 #include "atcommons/json.h"
 
+#include <atlogger/atlogger.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-#include <atlogger/atlogger.h>
 
 #define TAG "enroll_namespace"
 
 int atcommmons_init_enroll_namespace_list(atcommons_enroll_namespace_list_t *ns_list) {
-  if(ns_list == NULL) {
+  if (ns_list == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Memory not allocated for namespace list struct\n");
     return -1;
   }
@@ -103,7 +103,7 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
   return 0;
 }
 #else
-  #error "JSON provider not supported"
+#error "JSON provider not supported"
 #endif
 
 int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str) {
@@ -128,21 +128,38 @@ int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_
   atcommons_enroll_namespace_t *ns_temp = NULL;
   for (int i = 0; i < sep_count; i++) {
     ns_temp = malloc(sizeof(atcommons_enroll_namespace_t));
-    ns_temp->name = strdup(json_str + pos);
-    pos += strlen(json_str + pos) + 1;
-    if(json_str + pos == NULL) {
+    size_t name_len = strlen(json_str + pos) + 1;
+    ns_temp->name = malloc(sizeof(char) * name_len);
+    if (ns_temp->name == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate ns name entry\n");
+      ret = 1;
+      return ret;
+    }
+    memset(ns_temp->name, 0, name_len);
+    memcpy(ns_temp->name, json_str + pos, name_len - 1);
+
+    pos += name_len;
+    if (json_str + pos == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid namespace access value\n");
       ret = 1;
       return ret;
     }
-    ns_temp->access = strdup(json_str + pos);
+    size_t access_len = strlen(json_str + pos) + 1;
+    ns_temp->access = malloc(sizeof(char) * access_len);
+    if (ns_temp->access == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate ns access entry\n");
+      ret = 1;
+      return ret;
+    }
+    memset(ns_temp->access, 0, access_len);
+    memcpy(ns_temp->access, json_str + pos, access_len - 1);
 
     if ((ret = atcommons_enroll_namespace_list_append(ns_list, ns_temp)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                    "Failed appending ns to ns_list | atcommons_enroll_namespace_list_append: %d", ret);
       return ret;
     }
-    pos += strlen(json_str + pos) + 1;
+    pos += access_len;
   }
-  exit: { return ret; }
+  return ret;
 }
