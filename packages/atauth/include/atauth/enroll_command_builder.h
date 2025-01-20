@@ -1,8 +1,8 @@
 #ifndef ATCOMMONS_ENROLL_VERB_BUILDER_H
 #define ATCOMMONS_ENROLL_VERB_BUILDER_H
 
-#include "atcommons/enroll_operation.h"
-#include "atcommons/enroll_params.h"
+#include "atauth/enroll_operation.h"
+#include "atauth/enroll_params.h"
 #include <stddef.h>
 
 /**

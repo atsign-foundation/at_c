@@ -3,7 +3,7 @@
 
 // NOTE: there are two platform specific files:
 // - atchops/platform.h
-// - atcommons/json.h
+// - atclient/json.h
 
 // Platforms we support
 

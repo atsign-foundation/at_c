@@ -1,7 +1,7 @@
 #ifndef ATCOMMONS_ENROLL_PARAMS_H
 #define ATCOMMONS_ENROLL_PARAMS_H
 
-#include "atcommons/enroll_namespace.h"
+#include "atauth/enroll_namespace.h"
 
 typedef struct {
   char *enrollment_id;

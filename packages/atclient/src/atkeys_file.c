@@ -1,7 +1,7 @@
 #include "atclient/atkeys_file.h"
 #include "atlogger/atlogger.h"
 #include <atchops/platform.h>
-#include <atcommons/json.h>
+#include <atclient/json.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>

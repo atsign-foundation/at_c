@@ -1,8 +1,8 @@
 #include "atclient/atclient.h"
-#include "atcommons/enroll_status.h"
+#include "atauth/enroll_status.h"
 #include "atlogger/atlogger.h"
-#include "atcommons/enroll_namespace.h"
-#include "atcommons/enroll_params.h"
+#include "atauth/enroll_namespace.h"
+#include "atauth/enroll_params.h"
 #include "atauth/send_enroll_request.h"
 #include "atchops/base64.h"
 #include <stdio.h>

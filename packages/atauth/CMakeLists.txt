@@ -12,6 +12,11 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/auth_cli.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atauth_build_atkeys_file_path.c
   ${CMAKE_CURRENT_LIST_DIR}/src/atauth_fetch_home_dir.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_operation.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_status.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_namespace.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_params.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_command_builder.c
 )
 
 # Project setup
@@ -52,7 +57,7 @@ build_atsdk_package(
     DEPS atlogger atcommons atchops atclient
     EXTERNAL_DEPS mbedtls cjson
     INSTALL_TARGETS cjson mbedtls mbedx509 mbedcrypto everest p256m atclient atcommons atlogger atchops
-    BUILD_TESTS OFF
+    BUILD_TESTS ${ATAUTH_BUILD_TESTS}
 )
 
 if(ATAUTH_BUILD_EXECUTABLES)
@@ -67,4 +72,8 @@ if(ATAUTH_BUILD_EXECUTABLES)
     at_auth_cli
     PRIVATE cjson atlogger atcommons atchops atclient atauth
   )
+endif()
+
+if(ATAUTH_BUILD_TESTS)
+  enable_testing()
 endif()

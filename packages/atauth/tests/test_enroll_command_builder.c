@@ -1,7 +1,7 @@
 #include "at_expect.c"
-#include "atcommons/enroll_command_builder.h"
-#include "atcommons/enroll_namespace.h"
-#include "atcommons/enroll_params.h"
+#include "atauth/enroll_command_builder.h"
+#include "atauth/enroll_namespace.h"
+#include "atauth/enroll_params.h"
 #include <stdlib.h>
 
 #define TAG "test_enroll_command_builder"

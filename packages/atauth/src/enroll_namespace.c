@@ -1,6 +1,6 @@
-#include "atcommons/enroll_namespace.h"
+#include "atauth/enroll_namespace.h"
 
-#include "atcommons/json.h"
+#include "atclient/json.h"
 
 #include <atlogger/atlogger.h>
 #include <stdint.h>

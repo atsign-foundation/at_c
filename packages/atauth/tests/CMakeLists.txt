@@ -6,7 +6,7 @@ foreach(file ${files})
   string(REPLACE ".c" "" filename ${filename})
 
   add_executable(${filename} ${file})
-  target_link_libraries(${filename} PRIVATE atcommons)
+  target_link_libraries(${filename} PRIVATE atauth)
   add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
 endforeach()
 enable_testing()

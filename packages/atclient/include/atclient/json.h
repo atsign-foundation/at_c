@@ -6,7 +6,7 @@ extern "C" {
 
 // NOTE: there are two platform specific files:
 // - atchops/platform.h
-// - atcommons/json.h
+// - atclient/json.h
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || \
     defined(_WIN32) || defined(CONFIG_IDF_TARGET_ESP32)
