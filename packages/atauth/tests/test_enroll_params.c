@@ -1,4 +1,4 @@
-#include "atcommons/enroll_params.h"
+#include "atauth/enroll_params.h"
 #include "atlogger/atlogger.h"
 
 #include "at_expect.c"

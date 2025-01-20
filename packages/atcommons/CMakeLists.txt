@@ -3,14 +3,7 @@ option(ATCOMMONS_BUILD_TESTS "Build tests for atcommons" OFF)
 
 # Set include directory and file sources
 set(ATCOMMONS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
-set(
-  ATCOMMONS_SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_operation.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_status.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_namespace.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_params.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_command_builder.c
-)
+set(ATCOMMONS_SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/temp.c")
 
 # Project setup
 cmake_minimum_required(VERSION 3.24)
@@ -29,6 +22,7 @@ if(ESP_PLATFORM)
   return()
 endif()
 
+set(ATCOMMONS_BUILD_TESTS OFF) # DISABLE TESTS - no tests in atcommons right now
 build_atsdk_package(
     PACKAGE_NAME atcommons
     PACKAGE_DESCRIPTION "Atsign technology common utilities and implementations"
@@ -37,8 +31,7 @@ build_atsdk_package(
     INCLUDE_DIR ${ATCOMMONS_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATCOMMONS_SOURCES}
     DEPS atlogger
-    EXTERNAL_DEPS cjson
-    INSTALL_TARGETS cjson atlogger
+    INSTALL_TARGETS atlogger
     BUILD_TESTS ${ATCOMMONS_BUILD_TESTS}
 )
 

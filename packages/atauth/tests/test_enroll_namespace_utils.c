@@ -1,5 +1,5 @@
 #include "at_expect.c"
-#include "atcommons/enroll_namespace.h"
+#include "atauth/enroll_namespace.h"
 #include "atlogger/atlogger.h"
 
 #include <stdlib.h>

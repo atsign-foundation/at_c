@@ -11,7 +11,7 @@
 #include <atclient/atclient_utils.h>
 #include <atclient/constants.h>
 #include <atclient/string_utils.h>
-#include <atcommons/enroll_status.h>
+#include <atauth/enroll_status.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>

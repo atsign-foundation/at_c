@@ -1,4 +1,4 @@
-#include "atcommons/enroll_status.h"
+#include "atauth/enroll_status.h"
 
 #include <stddef.h>
 #include <string.h>

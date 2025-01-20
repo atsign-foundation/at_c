@@ -1,4 +1,4 @@
-#include "atcommons/enroll_operation.h"
+#include "atauth/enroll_operation.h"
 
 #include <stddef.h>
 #include <stdlib.h>

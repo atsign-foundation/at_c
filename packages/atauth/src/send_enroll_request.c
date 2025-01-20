@@ -3,9 +3,9 @@
 #include "atclient/atclient.h"
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
-#include "atcommons/enroll_command_builder.h"
-#include "atcommons/enroll_operation.h"
-#include "atcommons/enroll_params.h"
+#include "atauth/enroll_command_builder.h"
+#include "atauth/enroll_operation.h"
+#include "atauth/enroll_params.h"
 #include "atlogger/atlogger.h"
 #include <stdlib.h>
 #include <string.h>

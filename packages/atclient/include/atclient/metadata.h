@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#include "atcommons/json.h"
+#include "atclient/json.h"
 #include <atchops/platform.h> // IWYU pragma: keep
 #include <stdbool.h>
 #include <stddef.h>

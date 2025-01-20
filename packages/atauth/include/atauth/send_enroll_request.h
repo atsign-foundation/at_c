@@ -2,7 +2,7 @@
 #define ATAUTH_SEND_ENROLL_REQUEST
 
 #include <atclient/atclient.h>
-#include <atcommons/enroll_params.h>
+#include <atauth/enroll_params.h>
 
 #define ENROLL_ID_MAX_LEN 50
 
