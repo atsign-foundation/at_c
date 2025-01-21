@@ -67,8 +67,11 @@ memcheck +ARGS='': build-test-memcheck
   ctest -T memcheck --test-dir $PWD/build/test-memcheck {{ARGS}}
 
 memcheck-docker +ARGS='':
-  docker run --rm --platform linux/amd64 --mount type=bind,src=$PWD,dst=/mnt/at_c atc-memcheck-docker:latest \
-    just memcheck {{ARGS}}
+  docker run --rm --platform linux/amd64 \
+  --mount type=bind,src=$PWD,dst=/mnt/at_c \
+  --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
+  atc-memcheck-docker:latest \
+  just memcheck {{ARGS}}
 
 # CONFIGURE COMMANDS
 
