@@ -54,9 +54,9 @@ build_atsdk_package(
     PACKAGE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     INCLUDE_DIR ${ATAUTH_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATAUTH_SOURCES}
-    DEPS atlogger atcommons atchops atclient
+    DEPS atlogger atcommons atchops atclient argparse
     EXTERNAL_DEPS mbedtls cjson
-    INSTALL_TARGETS cjson mbedtls mbedx509 mbedcrypto everest p256m atclient atcommons atlogger atchops
+    INSTALL_TARGETS cjson mbedtls mbedx509 mbedcrypto everest p256m atclient atcommons atlogger atchops argparse
     BUILD_TESTS ${ATAUTH_BUILD_TESTS}
 )
 
