@@ -1,11 +1,10 @@
 #include "atauth/send_enroll_request.h"
-
-#include "atclient/atclient.h"
-#include "atclient/constants.h"
-#include "atclient/string_utils.h"
 #include "atauth/enroll_command_builder.h"
 #include "atauth/enroll_operation.h"
 #include "atauth/enroll_params.h"
+#include "atclient/atclient.h"
+#include "atclient/constants.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <stdlib.h>
 #include <string.h>

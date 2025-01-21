@@ -3,6 +3,7 @@
 #include <atauth/atactivate_arg_parser.h>
 #include <atauth/atauth_build_atkeys_file_path.h>
 #include <atauth/auth_cli.h>
+#include <atauth/enroll_status.h>
 #include <atauth/send_enroll_request.h>
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
@@ -11,7 +12,6 @@
 #include <atclient/atclient_utils.h>
 #include <atclient/constants.h>
 #include <atclient/string_utils.h>
-#include <atauth/enroll_status.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>
@@ -200,7 +200,8 @@ int auth_cli(int argc, char *argv[]) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed encoding APKAM SymmetricKey to base64\n");
     goto enc_pub_key_exit;
   }
-  atclient_atkeys_set_apkam_symmetric_key_base64(&atkeys, (const char *)apkam_symmetric_key_base64, apkam_symmetric_key_base64_len);
+  atclient_atkeys_set_apkam_symmetric_key_base64(&atkeys, (const char *)apkam_symmetric_key_base64,
+                                                 apkam_symmetric_key_base64_len);
 
   // 2.5 Encrypt APKAM Symmetric Key using Default Encryption PublicKey
   if ((ret = atchops_rsa_encrypt(&encrypt_public_key, apkam_symmetric_key_base64, apkam_symmetric_key_base64_len,
@@ -213,7 +214,8 @@ int auth_cli(int argc, char *argv[]) {
   // 2.5.1 base64 encode the encrypted APKAM symmetric key
   size_t encrypted_apkam_symmetric_key_base64_len = 0;
   if ((ret = atchops_base64_encode(encrypted_apkam_symmetric_key_bytes, rsa_2048_ciphertext_size,
-                                   (unsigned char *)encrypted_apkam_symmetric_key_base64, base64_encoded_rsa2048_ciphertext_size,
+                                   (unsigned char *)encrypted_apkam_symmetric_key_base64,
+                                   base64_encoded_rsa2048_ciphertext_size,
                                    &encrypted_apkam_symmetric_key_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed base64 encoding encrypted_apkam_symmetric_key | atchops_base64_encode: %d\n", ret);
@@ -297,14 +299,12 @@ int auth_cli(int argc, char *argv[]) {
                  "Unable to allocate memory for encrypted_default_enc_privkey_base64_decoded\n");
     goto ns_list_exit;
   }
-  memset(encrypted_default_enc_privkey_base64_decoded, 0,
-         encrypted_default_enc_privkey_base64_decoded_size);
+  memset(encrypted_default_enc_privkey_base64_decoded, 0, encrypted_default_enc_privkey_base64_decoded_size);
 
-  if ((ret =
-           atchops_base64_decode((unsigned char *)encrypted_default_encryption_private_key, encrypted_default_encryption_private_key_len,
-                                 encrypted_default_enc_privkey_base64_decoded,
-                                 encrypted_default_enc_privkey_base64_decoded_size,
-                                 &encrypted_default_enc_privkey_base64_decoded_len)) != 0) {
+  if ((ret = atchops_base64_decode(
+           (unsigned char *)encrypted_default_encryption_private_key, encrypted_default_encryption_private_key_len,
+           encrypted_default_enc_privkey_base64_decoded, encrypted_default_enc_privkey_base64_decoded_size,
+           &encrypted_default_enc_privkey_base64_decoded_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Failed base64 decoding encrypted_default_enc_privkey | atchops_base64_decode: %d\n", ret);
     goto decrypted_enc_privkeykey_exit;

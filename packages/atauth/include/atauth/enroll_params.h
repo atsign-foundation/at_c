@@ -11,10 +11,11 @@ typedef struct {
   atcommons_enroll_namespace_list_t
       *ns_list; // list of enroll namespaces and their required access for current enrollment
   unsigned char *apkam_public_key;
-  unsigned char *encrypted_default_encryption_private_key; // apkam symmetric key encrypted default enc private key
-  unsigned char *encrypted_default_encryption_private_key_iv; // IV that has been used to encrypt the default encryption private key
-  unsigned char *encrypted_self_encryption_key;            // apkam symmetric key encrypted seld enc key
-  unsigned char *encrypted_self_encryption_key_iv; //IV that has been used to encrypt the self encryption key
+  unsigned char *encrypted_default_encryption_private_key;    // apkam symmetric key encrypted default enc private key
+  unsigned char *encrypted_default_encryption_private_key_iv; // IV that has been used to encrypt the default encryption
+                                                              // private key
+  unsigned char *encrypted_self_encryption_key;               // apkam symmetric key encrypted seld enc key
+  unsigned char *encrypted_self_encryption_key_iv; // IV that has been used to encrypt the self encryption key
   unsigned char *encrypted_apkam_symmetric_key;
   int apkam_keys_expiry_in_millis;
 } atcommons_enroll_params_t;

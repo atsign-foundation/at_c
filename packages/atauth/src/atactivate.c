@@ -6,11 +6,11 @@
 #include "atclient/atkeys.h"
 #include "atclient/connection.h"
 #include <atauth/atactivate.h>
+#include <atauth/enroll_status.h>
 #include <atauth/send_enroll_request.h>
 #include <atchops/aes.h>
 #include <atchops/aes_ctr.h>
 #include <atchops/iv.h>
-#include <atauth/enroll_status.h>
 #include <atlogger/atlogger.h>
 
 #include <atclient/string_utils.h>

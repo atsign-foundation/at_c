@@ -12,7 +12,8 @@
 #define TAG "enroll command builder"
 
 int atcommons_build_enroll_command(char *command, const size_t cmd_size, size_t *cmd_len,
-                                   const atcommons_enroll_operation_t operation, const atcommons_enroll_params_t *params) {
+                                   const atcommons_enroll_operation_t operation,
+                                   const atcommons_enroll_params_t *params) {
   int ret = 0;
   int cur_len = 0;
   char *params_json = NULL, *e_op = NULL;
