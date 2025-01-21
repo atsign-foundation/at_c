@@ -1,6 +1,7 @@
-#include "atauth/enroll_params.h"
+#include "enroll_params.h"
 
 #include "atclient/json.h"
+#include "enroll_namespace.h"
 
 #include <atlogger/atlogger.h>
 #include <stddef.h>
@@ -21,29 +22,30 @@
 
 #define TAG "enroll_params"
 
-int atcommons_enroll_params_init(atcommons_enroll_params_t *ep) {
-  /*
-   * 1. Validate arguments
-   */
+void atauth_enroll_params_init(atauth_enroll_params_t *ep) {
   if (ep == NULL) {
-    return -1;
+    return;
   }
-
-  /*
-   * 2. Initialize
-   */
-  memset(ep, 0, sizeof(atcommons_enroll_params_t));
-
-  return 0;
+  ep->enrollment_id = NULL;
+  ep->app_name = NULL;
+  ep->device_name = NULL;
+  ep->otp = NULL;
+  ep->apkam_public_key = NULL;
+  ep->encrypted_default_encryption_private_key = NULL;
+  ep->encrypted_default_encryption_private_key_iv = NULL;
+  ep->encrypted_self_encryption_key = NULL;
+  ep->encrypted_self_encryption_key_iv = NULL;
+  ep->encrypted_apkam_symmetric_key = NULL;
+  ep->namespaces = NULL;
+  ep->apkam_keys_expiry_in_millis = 0;
 }
 
 #ifdef ATCOMMONS_JSON_PROVIDER_CJSON
-int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len, const atcommons_enroll_params_t *ep) {
+int atauth_enroll_params_to_json(const atauth_enroll_params_t *ep, char **json_string) {
   int ret = 0;
 
   if (ep == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "enroll params cannot be null for atcommons_enroll_params_to_json\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enroll params cannot be null for atauth_enroll_params_to_json\n");
     ret = -1;
     return ret;
   }
@@ -55,7 +57,6 @@ int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len,
     return ret;
   }
 
-  // Add each parameter to JSON only if it is not NULL
   if (ep->enrollment_id != NULL) {
     cJSON_AddStringToObject(json_object, ENROLLMENT_ID, ep->enrollment_id);
   }
@@ -72,22 +73,20 @@ int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len,
     cJSON_AddStringToObject(json_object, OTP, ep->otp);
   }
 
-  char *ns_json = NULL;
-  // Ensure ns_list is not NULL before accessing namespaces
-  if (ep->ns_list != NULL && ep->ns_list->length > 0) {
-    size_t ns_list_str_len = 0;
-    if ((ret = atcommons_enroll_namespace_list_to_json(&ns_json, &ns_list_str_len, ep->ns_list)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "enroll_namespace_list serialization failed. atcommons_enroll_namespace_list_to_json: %d\n", ret);
-      ret = 1;
+  if (ep->namespaces != NULL && ep->namespaces->len > 0) {
+    char *ns_json = NULL;
+    ret = enroll_namespace_to_json_string(ep->namespaces, &ns_json);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to convert namespace list to json\n");
       goto exit;
     }
     cJSON_AddRawToObject(json_object, NAMESPACES, ns_json);
+    free(ns_json);
   }
 
   // Add Base64-encoded strings directly to JSON
   if (ep->apkam_public_key != NULL) {
-    cJSON_AddStringToObject(json_object, APKAM_PUBLIC_KEY, (const char *)ep->apkam_public_key);
+    cJSON_AddStringToObject(json_object, APKAM_PUBLIC_KEY, ep->apkam_public_key);
   }
 
   if (ep->encrypted_default_encryption_private_key != NULL) {
@@ -108,12 +107,8 @@ int atcommons_enroll_params_to_json(char **json_string, size_t *json_string_len,
   if (json_string != NULL) {
     *json_string = cJSON_PrintUnformatted(json_object);
   }
-  if (json_string_len != NULL) {
-    *json_string_len = strlen(cJSON_PrintUnformatted(json_object));
-  }
 
 exit:
-  free(ns_json);
   cJSON_Delete(json_object);
   return ret;
 }

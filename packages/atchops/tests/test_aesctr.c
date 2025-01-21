@@ -32,7 +32,7 @@ int main() {
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
   memset(iv, 0, sizeof(unsigned char) * ATCHOPS_IV_BUFFER_SIZE);
 
-  ret = atchops_base64_decode((unsigned char *)AESKEY_BASE64, strlen(AESKEY_BASE64), key, keysize, &keylen);
+  ret = atchops_base64_decode(AESKEY_BASE64, strlen(AESKEY_BASE64), key, keysize, &keylen);
   if (ret != 0) {
     printf("atchops_base64_decode (failed): %d\n", ret);
     goto exit;

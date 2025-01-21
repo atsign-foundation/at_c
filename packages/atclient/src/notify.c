@@ -63,7 +63,6 @@ int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **
 
   // holds end notify: command
   char *cmd = NULL;
-  size_t cmdsize = 0;
 
   unsigned char *recv = NULL;
 
@@ -76,19 +75,18 @@ int atclient_notify(atclient *ctx, const atclient_notify_params *params, char **
     size_t ciphertextlen = 0;
 
     const size_t ciphertextbase64size = atchops_base64_encoded_size(ciphertextsize) + 1;
-    unsigned char ciphertextbase64[ciphertextbase64size];
+    char ciphertextbase64[ciphertextbase64size];
     memset(ciphertextbase64, 0, sizeof(unsigned char) * ciphertextbase64size);
     size_t ciphertextbase64len = 0;
 
     const size_t ivbase64size = atchops_base64_encoded_size(ATCHOPS_IV_BUFFER_SIZE) + 1;
-    unsigned char ivbase64[ivbase64size];
+    char ivbase64[ivbase64size];
     memset(ivbase64, 0, sizeof(unsigned char) * ivbase64size);
     size_t ivbase64len = 0;
 
     const size_t sharedenckeysize = ATCHOPS_AES_256 / 8;
     unsigned char sharedenckey[sharedenckeysize];
     memset(sharedenckey, 0, sizeof(unsigned char) * sharedenckeysize);
-    size_t sharedenckeylen;
 
     if (params->shared_encryption_key == NULL) {
       char *recipient_atsign_with_at = NULL;

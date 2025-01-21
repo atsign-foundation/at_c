@@ -52,6 +52,38 @@ static int set_apkam_symmetric_key_str(atclient_atkeys_file *atkeys_file, const 
 static int set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str,
                                  const size_t enrollment_id_str_len);
 
+#ifdef _WIN32 /* Windows Definitions */
+#define HOMEVAR "USERPROFILE"
+#define USERVAR "USERNAME"
+#else /* Mac / Linux Definitions */
+#define HOMEVAR "HOME"
+#define USERVAR "USER"
+#endif
+
+char *atkeys_file_get_default_path(const char *atsign) {
+  char *home_dir = getenv(HOMEVAR);
+  if (home_dir == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Unable to determine your home directory: please "
+                 "set %s environment variable\n",
+                 HOMEVAR);
+    return NULL;
+  }
+  if (atsign == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get default atKeys file path: atsign is NULL\n");
+    return NULL;
+  }
+  size_t path_len = strlen(home_dir) + strlen("/.atsign/keys_key.atKeys") + strlen(atsign) + 2; // +2 for '/'s
+  char *path = malloc(sizeof(char) * (path_len + 1));
+  if (path == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate atkeys file path\n");
+    return NULL;
+  }
+  snprintf(path, path_len, "%s/.atsign/keys/%s_key.atKeys", home_dir, atsign);
+  path[path_len] = 0;
+  return path;
+}
+
 void atclient_atkeys_file_init(atclient_atkeys_file *atkeys_file) {
   memset(atkeys_file, 0, sizeof(atclient_atkeys_file));
 }

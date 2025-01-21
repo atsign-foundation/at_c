@@ -17,6 +17,7 @@ static int atclient_put_self_key_validate_arguments(atclient *ctx, atclient_atke
 
 int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *value,
                           const atclient_put_self_key_request_options *request_options, int *commit_id) {
+  (void)request_options; // intentionally ignore unused parameter (exists for consistency with other signatures)
   int ret = 1;
 
   /*
@@ -72,9 +73,9 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
     goto exit;
   }
 
-  if ((ret = atchops_base64_decode((unsigned char *)ctx->atkeys.self_encryption_key_base64,
-                                   strlen(ctx->atkeys.self_encryption_key_base64), self_encryption_key,
-                                   self_encryption_key_size, NULL)) != 0) {
+  if ((ret =
+           atchops_base64_decode(ctx->atkeys.self_encryption_key_base64, strlen(ctx->atkeys.self_encryption_key_base64),
+                                 self_encryption_key, self_encryption_key_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -88,7 +89,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
   }
 
   memset(iv_base64, 0, sizeof(unsigned char) * iv_base64_size);
-  if ((ret = atchops_base64_encode(iv, iv_size, (unsigned char *)iv_base64, iv_base64_size, NULL)) != 0) {
+  if ((ret = atchops_base64_encode(iv, iv_size, iv_base64, iv_base64_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;
   }
@@ -110,7 +111,7 @@ int atclient_put_self_key(atclient *ctx, atclient_atkey *atkey, const char *valu
 
   size_t value_encrypted_base64_len = 0;
   memset(value_encrypted_base64, 0, sizeof(char) * value_encrypted_base64_size);
-  if ((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, (unsigned char *)value_encrypted_base64,
+  if ((ret = atchops_base64_encode(value_encrypted, value_encrypted_len, value_encrypted_base64,
                                    value_encrypted_base64_size, &value_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: %d\n", ret);
     goto exit;

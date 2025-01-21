@@ -1,10 +1,10 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <atchops/base64.h>
 #include <atchops/rsa.h>
 #include <atchops/rsa_key.h>
-#include <atchops/base64.h>
 #include <atlogger/atlogger.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define PLAINTEXT "Hello, World!"
 
@@ -120,7 +120,7 @@ int main() {
     goto exit;
   }
 
-  if((ret = test2_generate_base64())) {
+  if ((ret = test2_generate_base64())) {
     atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to test2_generate_base64\n");
     goto exit;
   }
@@ -135,8 +135,8 @@ exit: {
 static int test2_generate_base64() {
   int ret = 1;
 
-  unsigned char *public_key_base64 = NULL;
-  unsigned char *private_key_base64 = NULL;
+  char *public_key_base64 = NULL;
+  char *private_key_base64 = NULL;
 
   unsigned char *public_key_base64_decoded = NULL;
   unsigned char *private_key_base64_decoded = NULL;
@@ -166,8 +166,10 @@ static int test2_generate_base64() {
   const size_t public_key_base64_len = strlen((const char *)public_key_base64);
   const size_t private_key_base64_len = strlen((const char *)private_key_base64);
 
-  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO, "Public Key Base64 (%lu): %s\n", public_key_base64_len,  public_key_base64);
-  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO, "Private Key Base64 (%lu): %s\n", private_key_base64_len, private_key_base64);
+  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO, "Public Key Base64 (%lu): %s\n", public_key_base64_len,
+               public_key_base64);
+  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO, "Private Key Base64 (%lu): %s\n",
+               private_key_base64_len, private_key_base64);
 
   /*
    * 2. test that we can base 64 decode them
@@ -176,14 +178,16 @@ static int test2_generate_base64() {
   // 2a. prepare the buffers
   const size_t public_key_base64_decoded_size = atchops_base64_decoded_size(public_key_base64_len);
   if ((public_key_base64_decoded = (unsigned char *)malloc(public_key_base64_decoded_size)) == NULL) {
-    atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for public_key_base64_decoded\n");
+    atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed to allocate memory for public_key_base64_decoded\n");
     goto exit;
   }
   memset(public_key_base64_decoded, 0, sizeof(unsigned char) * public_key_base64_decoded_size);
 
   const size_t private_key_base64_decoded_size = atchops_base64_decoded_size(private_key_base64_len);
   if ((private_key_base64_decoded = (unsigned char *)malloc(private_key_base64_decoded_size)) == NULL) {
-    atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for private_key_base64_decoded\n");
+    atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed to allocate memory for private_key_base64_decoded\n");
     goto exit;
   }
   memset(private_key_base64_decoded, 0, sizeof(unsigned char) * private_key_base64_decoded_size);
@@ -204,13 +208,15 @@ static int test2_generate_base64() {
   }
 
   // 2c. print
-  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO, "Public Key Base64 Decoded (%lu): ", public_key_base64_decoded_len);
+  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO,
+               "Public Key Base64 Decoded (%lu): ", public_key_base64_decoded_len);
   for (size_t i = 0; i < public_key_base64_decoded_len; i++) {
     atlogger_log(NULL, ATLOGGER_LOGGING_LEVEL_INFO, "%02x ", public_key_base64_decoded[i]);
   }
   atlogger_log(NULL, ATLOGGER_LOGGING_LEVEL_INFO, "\n");
 
-  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO, "Private Key Base64 Decoded (%lu): ", private_key_base64_decoded_len);
+  atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_INFO,
+               "Private Key Base64 Decoded (%lu): ", private_key_base64_decoded_len);
   for (size_t i = 0; i < private_key_base64_decoded_len; i++) {
     atlogger_log(NULL, ATLOGGER_LOGGING_LEVEL_INFO, "%02x ", private_key_base64_decoded[i]);
   }
@@ -221,12 +227,14 @@ static int test2_generate_base64() {
    */
 
   // 3a. populate the structs
-  if ((ret = atchops_rsa_key_populate_public_key(&public_key, (const char *)public_key_base64, public_key_base64_len)) != 0) {
+  if ((ret = atchops_rsa_key_populate_public_key(&public_key, (const char *)public_key_base64,
+                                                 public_key_base64_len)) != 0) {
     atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate public key\n");
     goto exit;
   }
 
-  if ((ret = atchops_rsa_key_populate_private_key(&private_key, (const char *)private_key_base64, private_key_base64_len)) != 0) {
+  if ((ret = atchops_rsa_key_populate_private_key(&private_key, (const char *)private_key_base64,
+                                                  private_key_base64_len)) != 0) {
     atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate private key\n");
     goto exit;
   }
@@ -245,7 +253,8 @@ static int test2_generate_base64() {
 
   // 3c. decrypt the ciphertext
   size_t plaintext_len = 0;
-  if ((ret = atchops_rsa_decrypt(&private_key, ciphertext, ciphertext_size, plaintext, plaintext_size, &plaintext_len)) != 0) {
+  if ((ret = atchops_rsa_decrypt(&private_key, ciphertext, ciphertext_size, plaintext, plaintext_size,
+                                 &plaintext_len)) != 0) {
     atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt ciphertext\n");
     goto exit;
   }
@@ -256,12 +265,13 @@ static int test2_generate_base64() {
   }
   atlogger_log(NULL, ATLOGGER_LOGGING_LEVEL_INFO, "\n");
 
-exit: { 
+exit: {
   free(public_key_base64);
   free(private_key_base64);
   free(public_key_base64_decoded);
   free(private_key_base64_decoded);
   atchops_rsa_key_public_key_free(&public_key);
   atchops_rsa_key_private_key_free(&private_key);
-  return ret; }
+  return ret;
+}
 }

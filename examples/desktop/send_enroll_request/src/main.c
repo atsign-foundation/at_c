@@ -27,11 +27,11 @@ int main() {
     ns_list->length = 0;
 
     // Append namespaces to ns_list
-    int ret = atcommons_enroll_namespace_list_append(&ns_list, &namespace1);
+    int ret = atauth_enroll_namespace_list_append(&ns_list, &namespace1);
 
-    ret = atcommons_enroll_namespace_list_append(&ns_list, &namespace2);
+    ret = atauth_enroll_namespace_list_append(&ns_list, &namespace2);
 
-    ret = atcommons_enroll_namespace_list_append(&ns_list, &(enroll_namespace_t){"riverlands", "rw"});
+    ret = atauth_enroll_namespace_list_append(&ns_list, &(enroll_namespace_t){"riverlands", "rw"});
 
     // Allocate and initialize enroll_params_t
     enroll_params_t *params = malloc(sizeof(enroll_params_t));
@@ -40,7 +40,7 @@ int main() {
         free(ns_list);
         return -1;
     }
-    atcommons_enroll_params_init(params);
+    atauth_enroll_params_init(params);
 
     // Assign parameters
     params->app_name = "test-app";

@@ -6,17 +6,16 @@ option(ATAUTH_BUILD_EXECUTABLES "Build executables in atauth" ON)
 set(ATAUTH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(
   ATAUTH_SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/src/send_enroll_request.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atactivate_arg_parser.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atactivate.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/auth_cli.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atauth_build_atkeys_file_path.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/atauth_fetch_home_dir.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_operation.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_status.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/apkam_keys.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/at_activate.c
   ${CMAKE_CURRENT_LIST_DIR}/src/enroll_namespace.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_operation.c
   ${CMAKE_CURRENT_LIST_DIR}/src/enroll_params.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_command_builder.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_request.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/enroll_response.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/params.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/run_onboard_command.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/run_enroll_command.c
 )
 
 # Project setup
@@ -62,15 +61,10 @@ build_atsdk_package(
 
 if(ATAUTH_BUILD_EXECUTABLES)
   add_compile_definitions(-DATAUTH_BUILD_EXECUTABLES=1)
-  add_executable(atactivate ${CMAKE_CURRENT_LIST_DIR}/src/atactivate.c)
+  add_executable(at_activate ${CMAKE_CURRENT_LIST_DIR}/src/at_activate.c)
   target_link_libraries(
-    atactivate
-    PRIVATE cjson atlogger atcommons atchops atclient atauth
-  )
-  add_executable(at_auth_cli ${CMAKE_CURRENT_LIST_DIR}/src/auth_cli.c)
-  target_link_libraries(
-    at_auth_cli
-    PRIVATE cjson atlogger atcommons atchops atclient atauth
+    at_activate
+    PRIVATE cjson atlogger atcommons atchops atclient atauth argparse
   )
 endif()
 

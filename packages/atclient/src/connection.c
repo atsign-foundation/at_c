@@ -3,7 +3,6 @@
 #include "atclient/connection_hooks.h"
 #include "atclient/constants.h"
 #include "atclient/socket.h"
-#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <atchops/platform.h>
 #include <stdbool.h>

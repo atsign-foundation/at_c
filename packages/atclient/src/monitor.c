@@ -349,7 +349,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   if (atclient_atnotification_is_iv_nonce_initialized(notification) &&
       !atclient_string_utils_starts_with(notification->iv_nonce, "null")) {
     size_t ivlen;
-    ret = atchops_base64_decode((unsigned char *)notification->iv_nonce, strlen(notification->iv_nonce), iv,
+    ret = atchops_base64_decode(notification->iv_nonce, strlen(notification->iv_nonce), iv,
                                 ATCHOPS_IV_BUFFER_SIZE, &ivlen);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode iv\n");
@@ -373,7 +373,7 @@ static int decrypt_notification(atclient *atclient, atclient_atnotification *not
   }
 
   // 4. decrypt value
-  ret = atchops_base64_decode((unsigned char *)notification->value, strlen(notification->value), ciphertext,
+  ret = atchops_base64_decode(notification->value, strlen(notification->value), ciphertext,
                               ciphertextsize, &ciphertextlen);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decode value\n");

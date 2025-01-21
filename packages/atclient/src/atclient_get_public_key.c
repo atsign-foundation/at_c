@@ -3,6 +3,7 @@
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
 #include <atchops/platform.h>
+#include <atclient/json.h>
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>

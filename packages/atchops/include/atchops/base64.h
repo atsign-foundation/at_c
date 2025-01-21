@@ -17,8 +17,7 @@ extern "C" {
  * @param dstlen the length of the result after operation, NULLable if you don't want the length
  * @return int 0 on success
  */
-int atchops_base64_encode(const unsigned char *src, const size_t srcsize, unsigned char *dst, size_t dstsize,
-                          size_t *dstlen);
+int atchops_base64_encode(const unsigned char *src, const size_t srcsize, char *dst, size_t dstsize, size_t *dstlen);
 
 /**
  * @brief Base64 decode some bytes
@@ -30,8 +29,7 @@ int atchops_base64_encode(const unsigned char *src, const size_t srcsize, unsign
  * @param dstlen the length of the result after operation, NULLable if you don't want the length
  * @return int 0 on success
  */
-int atchops_base64_decode(const unsigned char *src, const size_t srcsize, unsigned char *dst, size_t dstsize,
-                          size_t *dstlen);
+int atchops_base64_decode(const char *src, const size_t srcsize, unsigned char *dst, size_t dstsize, size_t *dstlen);
 
 /**
  * @brief calculate the size of the base64 encoded string. This function is usually called before encoding to allocate

@@ -73,7 +73,6 @@ int main() {
 
   char signaturebase64[SIGNATURE_BASE64_SIZE];
   memset(signaturebase64, 0, sizeof(char) * SIGNATURE_BASE64_SIZE);
-  size_t signaturebase64len = 0;
 
   ret = atchops_rsa_key_populate_private_key(&privatekey, PRIVATE_KEY_BASE64, strlen(PRIVATE_KEY_BASE64));
   if (ret != 0) {

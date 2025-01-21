@@ -166,7 +166,6 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
     goto exit;
   }
 
-  char *sender_atsign_without_at = sender_atsign_with_at + 1;
   char *recipient_atsign_without_at = recipient_atsign_with_at + 1;
 
   // llookup:shared_key.recipient_atsign@myatsign
@@ -211,7 +210,7 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
   /*
    * 6. Decrypt and return it
    */
-  if ((ret = atchops_base64_decode((unsigned char *)response_without_data, response_without_data_len, key_raw_encrypted,
+  if ((ret = atchops_base64_decode(response_without_data, response_without_data_len, key_raw_encrypted,
                                    key_raw_encrypted_size, &key_raw_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
@@ -223,8 +222,8 @@ int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *r
     goto exit;
   }
 
-  if ((ret = atchops_base64_decode((unsigned char *)key_raw_decrypted, key_raw_decrypted_len,
-                                   shared_encryption_key_shared_by_me, ATCHOPS_AES_256 / 8, NULL)) != 0) {
+  if ((ret = atchops_base64_decode((char *)key_raw_decrypted, key_raw_decrypted_len, shared_encryption_key_shared_by_me,
+                                   ATCHOPS_AES_256 / 8, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -325,7 +324,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
          sizeof(unsigned char) * shared_encryption_key_encrypted_base64_size);
   size_t shared_encryption_key_encrypted_base64_len = 0;
 
-  if ((ret = atchops_base64_decode((unsigned char *)response_without_data, strlen(response_without_data),
+  if ((ret = atchops_base64_decode(response_without_data, strlen(response_without_data),
                                    shared_encryption_key_encrypted_base64, shared_encryption_key_encrypted_base64_size,
                                    &shared_encryption_key_encrypted_base64_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
@@ -343,7 +342,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   }
 
   const size_t shared_encryption_key_shared_by_other_size = ATCHOPS_AES_256 / 8;
-  if ((ret = atchops_base64_decode(shared_encryption_key_encrypted, shared_encryption_key_encrypted_len,
+  if ((ret = atchops_base64_decode((char *)shared_encryption_key_encrypted, shared_encryption_key_encrypted_len,
                                    shared_encryption_key_shared_by_other, shared_encryption_key_shared_by_other_size,
                                    NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
@@ -402,7 +401,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
 
   // the original AES-256 key (base64 encoded)
   const size_t shared_encryption_key_base64_size = atchops_base64_encoded_size(shared_encryption_key_size);
-  unsigned char shared_encryption_key_base64[shared_encryption_key_base64_size];
+  char shared_encryption_key_base64[shared_encryption_key_base64_size];
 
   // encrypted for us
   const size_t shared_encryption_key_base64_encrypted_for_us_size =
@@ -412,8 +411,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   // encrypted for us (base64 encoded)
   const size_t shared_encryption_key_base64_encrypted_for_us_base64_size =
       atchops_base64_encoded_size(shared_encryption_key_base64_encrypted_for_us_size);
-  unsigned char
-      shared_encryption_key_base64_encrypted_for_us_base64[shared_encryption_key_base64_encrypted_for_us_base64_size];
+  char shared_encryption_key_base64_encrypted_for_us_base64[shared_encryption_key_base64_encrypted_for_us_base64_size];
 
   // encrypted for them
   const size_t shared_encryption_key_base64_encrypted_for_them_size =
@@ -423,7 +421,7 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   // encrypted for them (base64 encoded)
   const size_t shared_encryption_key_base64_encrypted_for_them_base64_size =
       atchops_base64_encoded_size(shared_encryption_key_base64_encrypted_for_them_size);
-  unsigned char shared_encryption_key_base64_encrypted_for_them_base64
+  char shared_encryption_key_base64_encrypted_for_them_base64
       [shared_encryption_key_base64_encrypted_for_them_base64_size];
 
   char *update_cmd_for_us = NULL;   // for us (update:shared_key.shared_with@shared_by command)
@@ -441,7 +439,6 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
     goto exit;
   }
-  char *sharedby_atsign_without_at = sharedby_atsign_with_at + 1;
 
   if ((ret = atclient_string_utils_atsign_with_at(recipient_atsign, &sharedwith_atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
@@ -513,8 +510,9 @@ int atclient_create_shared_encryption_key_pair_for_me_and_other(
   // 5b. Encrypt for them
   memset(shared_encryption_key_base64_encrypted_for_them, 0,
          sizeof(unsigned char) * shared_encryption_key_base64_encrypted_for_them_size);
-  if ((ret = atchops_rsa_encrypt(&public_key_struct, shared_encryption_key_base64, shared_encryption_key_base64_len,
-                                 shared_encryption_key_base64_encrypted_for_them)) != 0) {
+  if ((ret = atchops_rsa_encrypt(&public_key_struct, (unsigned char *)shared_encryption_key_base64,
+                                 shared_encryption_key_base64_len, shared_encryption_key_base64_encrypted_for_them)) !=
+      0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_rsa_encrypt: %d\n", ret);
     goto exit;
   }

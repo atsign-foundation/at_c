@@ -49,7 +49,7 @@ int main() {
     goto exit;
   }
   printf("e:\t");
-  for (int i = 0; i < privatekey.e.len; i++) {
+  for (size_t i = 0; i < privatekey.e.len; i++) {
     printf("%02x ", privatekey.e.value[i]);
   }
   printf("\n");
@@ -59,7 +59,7 @@ int main() {
     goto exit;
   }
   printf("d:\t");
-  for (int i = 0; i < privatekey.d.len; i++) {
+  for (size_t i = 0; i < privatekey.d.len; i++) {
     printf("%02x ", privatekey.d.value[i]);
   }
   printf("\n");
@@ -69,7 +69,7 @@ int main() {
     goto exit;
   }
   printf("p:\t");
-  for (int i = 0; i < privatekey.p.len; i++) {
+  for (size_t i = 0; i < privatekey.p.len; i++) {
     printf("%02x ", privatekey.p.value[i]);
   }
   printf("\n");
@@ -79,7 +79,7 @@ int main() {
     goto exit;
   }
   printf("q:\t");
-  for (int i = 0; i < privatekey.q.len; i++) {
+  for (size_t i = 0; i < privatekey.q.len; i++) {
     printf("%02x ", privatekey.q.value[i]);
   }
   printf("\n");

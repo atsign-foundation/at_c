@@ -8,6 +8,7 @@
 #include <atchops/iv.h>
 #include <atchops/platform.h>
 #include <atchops/rsa.h>
+#include <atclient/json.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -43,7 +44,6 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   const size_t self_encryption_size = ATCHOPS_AES_256 / 8; // 32 byte = 256 bits
   unsigned char self_encryption_key[self_encryption_size];
   memset(self_encryption_key, 0, sizeof(unsigned char) * self_encryption_size);
-  size_t self_encryption_key_len = 0;
 
   unsigned char iv[ATCHOPS_IV_BUFFER_SIZE];
 
@@ -124,8 +124,8 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
    * 6. Decrypt value
    */
   if (atclient_atkey_metadata_is_iv_nonce_initialized(&metadata)) {
-    if ((ret = atchops_base64_decode((unsigned char *)metadata.iv_nonce, strlen(metadata.iv_nonce), iv,
-                                     ATCHOPS_IV_BUFFER_SIZE, NULL)) != 0) {
+    if ((ret = atchops_base64_decode(metadata.iv_nonce, strlen(metadata.iv_nonce), iv, ATCHOPS_IV_BUFFER_SIZE, NULL)) !=
+        0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
@@ -141,7 +141,7 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
     goto exit;
   }
 
-  if ((ret = atchops_base64_decode((unsigned char *)atclient->atkeys.self_encryption_key_base64,
+  if ((ret = atchops_base64_decode(atclient->atkeys.self_encryption_key_base64,
                                    strlen(atclient->atkeys.self_encryption_key_base64), self_encryption_key,
                                    self_encryption_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
@@ -158,9 +158,8 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   memset(value_raw_encrypted, 0, sizeof(char) * value_raw_encrypted_size);
   size_t value_raw_encrypted_len = 0;
 
-  if ((ret = atchops_base64_decode((unsigned char *)data->valuestring, strlen(data->valuestring),
-                                   (unsigned char *)value_raw_encrypted, value_raw_encrypted_size,
-                                   &value_raw_encrypted_len)) != 0) {
+  if ((ret = atchops_base64_decode(data->valuestring, strlen(data->valuestring), (unsigned char *)value_raw_encrypted,
+                                   value_raw_encrypted_size, &value_raw_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }

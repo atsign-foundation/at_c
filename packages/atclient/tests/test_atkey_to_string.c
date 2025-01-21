@@ -287,7 +287,6 @@ static int test1d_cached_publickey_with_namespace() {
   char *string = NULL;
 
   const char *expected = TEST_ATKEY_TO_STRING_1D; // "cached:public:name.wavi@jeremy"
-  const size_t expectedlen = strlen(expected);
 
   if ((ret = atclient_atkey_metadata_set_is_cached(&(atkey.metadata), true)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_set_is_cached failed\n");

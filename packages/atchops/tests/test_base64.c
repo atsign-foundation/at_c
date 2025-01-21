@@ -79,17 +79,17 @@ int main() {
   size_t dstlen = 0;
 
   const size_t dst2size = DST_SIZE;
-  unsigned char dst2[dst2size];
+  char dst2[dst2size];
   memset(dst2, 0, sizeof(unsigned char) * dst2size);
   size_t dst2len = 0;
 
-  retval = atchops_base64_decode((unsigned char *)src, srclen, dst, dstsize, &dstlen);
+  retval = atchops_base64_decode(src, srclen, dst, dstsize, &dstlen);
   if (retval) {
     printf("atchops_base64_decode (failed): %d\n", retval);
     goto ret;
   }
   printf("base64 decoded (%lu):", dstlen);
-  for (int i = 0; i < dstlen; i++) {
+  for (size_t i = 0; i < dstlen; i++) {
     printf("%02x ", dst[i]);
   }
   printf("\n");
@@ -125,7 +125,7 @@ static int calculate_buffer_size_helper(const char *src, const size_t srclen) {
   int ret = 1;
 
   const size_t dstsize = atchops_base64_encoded_size(srclen);
-  unsigned char dst[dstsize];
+  char dst[dstsize];
   memset(dst, 0, sizeof(unsigned char) * dstsize);
   size_t dstolen = 0;
 
@@ -153,7 +153,7 @@ static int calculate_buffer_size_helper(const char *src, const size_t srclen) {
     ret = 1;
     goto exit;
   }
-  
+
   // log dst2size
   atlogger_log("calculate_buffer_size_helper", ATLOGGER_LOGGING_LEVEL_INFO, "dst2size: %lu\n", dst2size);
 

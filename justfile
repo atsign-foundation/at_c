@@ -11,7 +11,9 @@ set dotenv-load
 # SETUP COMMANDS
 
 setup: configure-test-all
+  [ -f "$PWD/compile_commands.json" ] && rm $PWD/compile_commands.json || true
   ln -s $PWD/build/test-all/compile_commands.json $PWD
+  [ -f "$PWD/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true
   ln -s $PWD/build/test-all/compile_commands.json $PWD/tests
 
 setup-valgrind:

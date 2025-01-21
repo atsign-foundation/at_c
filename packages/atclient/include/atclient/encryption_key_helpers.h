@@ -5,8 +5,6 @@ extern "C" {
 #endif
 
 #include "atclient/atclient.h"
-#include "atclient/atkey.h"
-#include "atclient/atkeys.h"
 #include <atchops/platform.h> // IWYU pragma: keep
 
 /**

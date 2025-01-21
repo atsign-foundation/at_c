@@ -16,6 +16,7 @@ static int atclient_put_public_key_validate_arguments(const atclient *ctx, const
 
 int atclient_put_public_key(atclient *ctx, atclient_atkey *atkey, const char *value,
                             const atclient_put_public_key_request_options *request_options, int *commit_id) {
+  (void)request_options; // intentionally ignore unused parameter (exists for consistency with other signatures)
   int ret = 1;
 
   /*
