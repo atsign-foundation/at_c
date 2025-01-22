@@ -227,31 +227,31 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
   }
 
   if (is_aes_pkam_public_key_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "aesPkamPublicKey", atkeys_file->aes_pkam_public_key_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_APKAM_PUBLIC_KEY_JSON_KEY, atkeys_file->aes_pkam_public_key_str);
   }
 
   if (is_aes_pkam_private_key_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "aesPkamPrivateKey", atkeys_file->aes_pkam_private_key_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_APKAM_PRIVATE_KEY_JSON_KEY, atkeys_file->aes_pkam_private_key_str);
   }
 
   if (is_aes_encrypt_public_key_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "aesEncryptPublicKey", atkeys_file->aes_encrypt_public_key_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_DEFAULT_ENCRYPTION_PUBLIC_KEY_JSON_KEY, atkeys_file->aes_encrypt_public_key_str);
   }
 
   if (is_aes_encrypt_private_key_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "aesEncryptPrivateKey", atkeys_file->aes_encrypt_private_key_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_DEFAULT_ENCRYPTION_PRIVATE_KEY_JSON_KEY, atkeys_file->aes_encrypt_private_key_str);
   }
 
   if (is_self_encryption_key_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "selfEncryptionKey", atkeys_file->self_encryption_key_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_DEFAULT_SELF_ENCRYPTION_KEY_JSON_KEY, atkeys_file->self_encryption_key_str);
   }
 
   if (is_apkam_symmetric_key_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "apkamSymmetricKey", atkeys_file->apkam_symmetric_key_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_JSON_KEY, atkeys_file->apkam_symmetric_key_str);
   }
 
   if (is_enrollment_id_str_initialized(atkeys_file)) {
-    cJSON_AddStringToObject(root, "enrollmentId", atkeys_file->enrollment_id_str);
+    cJSON_AddStringToObject(root, ATCLIENT_ATKEYS_FILE_APKAM_ENROLLMENT_ID_JSON_KEY, atkeys_file->enrollment_id_str);
   }
 
   json_str = cJSON_PrintUnformatted(root);
