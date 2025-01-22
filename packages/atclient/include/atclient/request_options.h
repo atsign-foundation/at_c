@@ -132,10 +132,9 @@ typedef struct atclient_get_atkeys_request_options {
  */
 typedef struct atclient_authenticate_options {
   char *atdirectory_host;
-  int atdirectory_port;
   char *atserver_host;
-  int atserver_port;
-  uint16_t _initialized_fields[1];
+  uint16_t atdirectory_port;
+  uint16_t atserver_port;
 } atclient_authenticate_options;
 
 /*
@@ -258,25 +257,22 @@ int atclient_get_atkeys_request_options_set_show_hidden(atclient_get_atkeys_requ
 void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_request_options *options);
 
 /*
- * 5. AtClient_PKAM_Authenticate Options
+ * 5. AtClient_Authenticate Options
  */
 void atclient_authenticate_options_init(atclient_authenticate_options *options);
 void atclient_authenticate_options_free(atclient_authenticate_options *options);
 
-bool atclient_authenticate_options_is_atdirectory_host_initialized(const atclient_authenticate_options *options);
 int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_options *options, char *atdirectory_host);
 void atclient_authenticate_options_unset_atdirectory_host(atclient_authenticate_options *options);
 
-bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclient_authenticate_options *options);
-int atclient_authenticate_options_set_atdirectory_port(atclient_authenticate_options *options, int atdirectory_port);
+int atclient_authenticate_options_set_atdirectory_port(atclient_authenticate_options *options,
+                                                       uint16_t atdirectory_port);
 void atclient_authenticate_options_unset_atdirectory_port(atclient_authenticate_options *options);
 
-bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_authenticate_options *options);
 int atclient_authenticate_options_set_atserver_host(atclient_authenticate_options *options, char *atserver_host);
 void atclient_authenticate_options_unset_atserver_host(atclient_authenticate_options *options);
 
-bool atclient_authenticate_options_is_atserver_port_initialized(const atclient_authenticate_options *options);
-int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options, int atserver_port);
+int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options, uint16_t atserver_port);
 void atclient_authenticate_options_unset_atserver_port(atclient_authenticate_options *options);
 
 #ifdef __cplusplus

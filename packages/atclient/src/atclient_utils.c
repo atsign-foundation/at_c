@@ -11,9 +11,9 @@
 
 #define TAG "atclient_utils"
 
-int atclient_utils_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
-                                         char **atserver_host, int *atserver_port) {
-  return atdirectory_lookup_once(atdirectory_host, atdirectory_port, atsign, atserver_host, (uint16_t *)atserver_port);
+int atclient_utils_find_atserver_address(const char *atdirectory_host, const uint16_t atdirectory_port,
+                                         const char *atsign, char **atserver_host, uint16_t *atserver_port) {
+  return atdirectory_lookup_once(atdirectory_host, atdirectory_port, atsign, atserver_host, atserver_port);
 }
 
 int atclient_utils_populate_atkeys_from_homedir(atclient_atkeys *atkeys, const char *atsign) {

@@ -18,8 +18,8 @@ extern "C" {
  * @param atserver_port the output port of the secondary server, will be set to 0 if the port is not found
  * @return int 0 on success, non-zero on error
  */
-int atclient_utils_find_atserver_address(const char *atdirectory_host, const int atdirectory_port, const char *atsign,
-                                         char **atserver_host, int *atserver_port);
+int atclient_utils_find_atserver_address(const char *atdirectory_host, const uint16_t atdirectory_port,
+                                         const char *atsign, char **atserver_host, uint16_t *atserver_port);
 
 /**
  * @brief Populate atkeys from the atkeys file in the home directory of the user.

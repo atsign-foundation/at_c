@@ -42,7 +42,7 @@ static int test_1_find_atserver_address_should_pass() {
   int expected_port = FIRST_ATSIGN_ATSERVER_PORT;
 
   char *atserver_host = NULL;
-  int atserver_port = 0;
+  uint16_t atserver_port = 0;
 
   if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, atsign, &atserver_host,
                                                   &atserver_port)) != 0) {
@@ -81,7 +81,7 @@ static int test_2_find_atserver_address_should_fail() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_find_atserver_address_should_fail Begin\n");
 
   char *atserver_host = NULL;
-  int atserver_port = 0;
+  uint16_t atserver_port = 0;
 
   if ((ret = atclient_utils_find_atserver_address(ATDIRECTORY_HOST, ATDIRECTORY_PORT, UNDEFINED_ATSIGN_WITHOUT_AT,
                                                   &atserver_host, &atserver_port)) == 0) {
