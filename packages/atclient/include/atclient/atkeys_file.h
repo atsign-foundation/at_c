@@ -15,16 +15,22 @@ extern "C" {
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INDEX 0
-#define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INDEX 0
+#define ATCLIENT_ATKEYS_FILE_ATSIGN_SELF_ENCRYPTION_KEY_STR_INDEX 0
+#define ATCLIENT_ATKEYS_FILE_ATSIGN_STR_INDEX 0
 #define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INDEX 0
+#define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INDEX 1
 
 #define ATCLIENT_ATKEYS_FILE_AES_PKAM_PUBLIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 0)
 #define ATCLIENT_ATKEYS_FILE_AES_PKAM_PRIVATE_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 1)
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PUBLIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 2)
 #define ATCLIENT_ATKEYS_FILE_AES_ENCRYPT_PRIVATE_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 3)
 #define ATCLIENT_ATKEYS_FILE_SELF_ENCRYPTION_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 4)
-#define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INITIALIZED (VALUE_INITIALIZED << 5)
-#define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 6)
+#define ATCLIENT_ATKEYS_FILE_ATSIGN_SELF_ENCRYPTION_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 5)
+#define ATCLIENT_ATKEYS_FILE_ATSIGN_STR_INITIALIZED (VALUE_INITIALIZED << 6)
+#define ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_STR_INITIALIZED (VALUE_INITIALIZED << 7)
+
+#define ATCLIENT_ATKEYS_FILE_ENROLLMENT_ID_STR_INITIALIZED (VALUE_INITIALIZED << 0)
+
 
 #define ATCLIENT_ATKEYS_FILE_APKAM_PUBLIC_KEY_JSON_KEY "aesPkamPublicKey"
 #define ATCLIENT_ATKEYS_FILE_APKAM_PRIVATE_KEY_JSON_KEY "aesPkamPrivateKey"
@@ -46,6 +52,12 @@ typedef struct atclient_atkeys_file {
                                      // reveal base64-encoded RSA key
   char *self_encryption_key_str;     // base64-encoded non-encrypted self encryption key. base64 decoding will reveal
                                      // 32-byte AES key
+  char *atsign_self_encryption_key_str; // base64-encoded non-encrypted self encryption key. base64 decoding willr eveal
+                                        // 32-byte AES key. this value should usually always be the same as
+                                        // self_encryption_key_str, and has been added for backwards compatibility
+                                        // purposes.
+  char *atsign; // the atsign that is associated with this atkeys file. this value is harvested from the getting the
+                // atsign_self_encryption_key_str value. atsign acts as the json key for atsign_self_encryption_key_str
   char *apkam_symmetric_key_str;
   char *enrollment_id_str;
   uint8_t _initialized_fields[1];
@@ -99,6 +111,7 @@ bool atclient_atkeys_file_is_aes_pkam_private_key_str_initialized(const atclient
 bool atclient_atkeys_file_is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 bool atclient_atkeys_file_is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 bool atclient_atkeys_file_is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+bool atclient_atkeys_file_is_atsign_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 bool atclient_atkeys_file_is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 bool atclient_atkeys_file_is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file);
 
@@ -117,6 +130,9 @@ int atclient_atkeys_file_set_aes_encrypt_private_key_str(atclient_atkeys_file *a
 int atclient_atkeys_file_set_self_encryption_key_str(atclient_atkeys_file *atkeys_file,
                                                      const char *self_encryption_key_str,
                                                      const size_t self_encryption_key_str_len);
+int atclient_atkeys_file_set_atsign_self_encryption_key_str(atclient_atkeys_file *atkeys_file,
+                                                            const char *atsign_self_encryption_key_str,
+                                                            const size_t atsign_self_encryption_key_str_len);
 int atclient_atkeys_file_set_apkam_symmetric_key_str(atclient_atkeys_file *atkeys_file,
                                                      const char *apkam_symmetric_key_str,
                                                      const size_t apkam_symmetric_key_str_len);

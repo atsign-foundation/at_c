@@ -18,6 +18,8 @@ static bool is_aes_pkam_private_key_str_initialized(const atclient_atkeys_file *
 static bool is_aes_encrypt_public_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 static bool is_aes_encrypt_private_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 static bool is_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file);
+static bool is_atsign_self_encryption_key_str_initialized(const atclient_atkeys_file *atkeys_file); // TODO
+static bool is_atsign_initialized(const atclient_atkeys_file *atkeys_file); // TODO
 static bool is_apkam_symmetric_key_str_initialized(const atclient_atkeys_file *atkeys_file);
 static bool is_enrollment_id_str_initialized(const atclient_atkeys_file *atkeys_file);
 
@@ -26,6 +28,8 @@ static void set_aes_pkam_private_key_str_initialized(atclient_atkeys_file *atkey
 static void set_aes_encrypt_public_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
 static void set_aes_encrypt_private_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
 static void set_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
+static void set_atsign_self_encryption_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized); // TODO
+static void set_atsign_initialized(atclient_atkeys_file *atkeys_file, const bool initialized); // TODO
 static void set_apkam_symmetric_key_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
 static void set_enrollment_id_str_initialized(atclient_atkeys_file *atkeys_file, const bool initialized);
 
@@ -34,23 +38,20 @@ static void unset_aes_pkam_private_key_str(atclient_atkeys_file *atkeys_file);
 static void unset_aes_encrypt_public_key_str(atclient_atkeys_file *atkeys_file);
 static void unset_aes_encrypt_private_key_str(atclient_atkeys_file *atkeys_file);
 static void unset_self_encryption_key_str(atclient_atkeys_file *atkeys_file);
+static void unset_atsign_self_encryption_key_str(atclient_atkeys_file *atkeys_file); // TODO
+static void unset_atsign_initialized(atclient_atkeys_file *atkeys_file); // TODO
 static void unset_apkam_symmetric_key_str(atclient_atkeys_file *atkeys_file);
 static void unset_enrollment_id_str(atclient_atkeys_file *atkeys_file);
 
-static int set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file, const char *aes_pkam_public_key_str,
-                                       const size_t aes_pkam_publickey_str_len);
-static int set_aes_pkam_private_key_str(atclient_atkeys_file *atkeys_file, const char *aes_pkam_private_key_str,
-                                        const size_t aes_pkam_private_key_str_len);
-static int set_aes_encrypt_public_key_str(atclient_atkeys_file *atkeys_file, const char *aes_encrypt_public_key_str,
-                                          const size_t aes_encrypt_public_key_str_len);
-static int set_aes_encrypt_private_key_str(atclient_atkeys_file *atkeys_file, const char *aes_encrypt_private_key_str,
-                                           const size_t aes_encrypt_private_key_str_len);
-static int set_self_encryption_key_str(atclient_atkeys_file *atkeys_file, const char *self_encryption_key_str,
-                                       const size_t self_encryption_key_str_len);
-static int set_apkam_symmetric_key_str(atclient_atkeys_file *atkeys_file, const char *apkam_symmetric_key_str,
-                                       const size_t apkam_symmetric_key_str_len);
-static int set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str,
-                                 const size_t enrollment_id_str_len);
+static int set_aes_pkam_public_key_str(atclient_atkeys_file *atkeys_file, const char *aes_pkam_public_key_str);
+static int set_aes_pkam_private_key_str(atclient_atkeys_file *atkeys_file, const char *aes_pkam_private_key_str);
+static int set_aes_encrypt_public_key_str(atclient_atkeys_file *atkeys_file, const char *aes_encrypt_public_key_str);
+static int set_aes_encrypt_private_key_str(atclient_atkeys_file *atkeys_file, const char *aes_encrypt_private_key_str);
+static int set_self_encryption_key_str(atclient_atkeys_file *atkeys_file, const char *self_encryption_key_str);
+static int set_atsign_self_encryption_key_str(atclient_atkeys_file *atkeys_file, const char *atsign_self_encryption_key_str); // TODO
+static int set_atsign_initialized(atclient_atkeys_file *atkeys_file, const char *atsign_str); // TODO
+static int set_apkam_symmetric_key_str(atclient_atkeys_file *atkeys_file, const char *apkam_symmetric_key_str);
+static int set_enrollment_id_str(atclient_atkeys_file *atkeys_file, const char *enrollment_id_str);
 
 void atclient_atkeys_file_init(atclient_atkeys_file *atkeys_file) {
   memset(atkeys_file, 0, sizeof(atclient_atkeys_file));
@@ -145,6 +146,19 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_self_encryption_key_str: %d\n", ret);
     goto exit;
   }
+
+  cJSON *atsign_key = NULL;
+  cJSON_ArrayForEach(atsign_key, root) {
+    if (atsign_key->string && atsign_key->string[0] == '@') {
+      if ((ret = set_atsign_self_encryption_key_str(atkeys_file, atsign_key->valuestring,
+                                                    strlen(atsign_key->valuestring))) != 0) {
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_atsign_self_encryption_key_str: %d\n", ret);
+        goto exit;
+      }
+    }
+  }
+
+
 
   cJSON *apkam_symmetric_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_SYMMETRIC_KEY_JSON_KEY);
   if (apkam_symmetric_key != NULL) {
