@@ -57,13 +57,17 @@ Locally (requires valgrind):
 
 In docker, first run the setup to build the docker image locally:
 
-`just setup-memcheck-docker`
+`just setup-valgrind`
 
 Then whenever you want to run the memory check tests:
 
 `just memd`
 
 > This will create an ephemeral docker container, all of the test output will be located in `build/test-memcheck/` as if it was run locally.
+
+If you want a bash prompt in the valgrind container:
+
+`just vald`
 
 ### See all commands
 

@@ -3,6 +3,7 @@ alias test := test-all
 alias unit := test-unit
 alias func := test-func
 alias memd := memcheck-docker
+alias vald := valgrind-docker
 
 set dotenv-filename := "just.env"
 set dotenv-load
@@ -13,7 +14,7 @@ setup: configure-test-all
   ln -s $PWD/build/test-all/compile_commands.json $PWD
   ln -s $PWD/build/test-all/compile_commands.json $PWD/tests
 
-setup-memcheck-docker:
+setup-valgrind:
   docker build --platform linux/amd64 -t atc-memcheck-docker:latest -f $PWD/valgrind.Dockerfile $PWD
 
 clean:
@@ -72,6 +73,14 @@ memcheck-docker +ARGS='':
   --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
   atc-memcheck-docker:latest \
   just memcheck {{ARGS}}
+
+valgrind-docker:
+  docker run --rm --platform linux/amd64 \
+  -ti \
+  --mount type=bind,src=$PWD,dst=/mnt/at_c \
+  --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
+  atc-memcheck-docker:latest  \
+  /bin/bash
 
 # CONFIGURE COMMANDS
 
