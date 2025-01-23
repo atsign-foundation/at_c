@@ -108,11 +108,11 @@ int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_li
 
 int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str) {
   int sep_count = 0;
-  const int ns_string_end = strlen(json_str);
+  const size_t ns_string_end = strlen(json_str);
   int ret = 0;
 
   // Count seperator in the namespace list string. Replaces all occurences of ':' and ',' to '\0'
-  for (int i = 0; i < ns_string_end; i++) {
+  for (size_t i = 0; i < ns_string_end; i++) {
     if (json_str[i] == ':') {
       sep_count++;
       json_str[i] = '\0';
