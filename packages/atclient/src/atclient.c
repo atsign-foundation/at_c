@@ -251,9 +251,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 4. Get atdirectory_host and atdirectory_port
    */
-  if (options != NULL && atclient_authenticate_options_is_atdirectory_host_initialized(options) &&
-      options->atdirectory_host != NULL && atclient_authenticate_options_is_atdirectory_port_initialized(options) &&
-      options->atdirectory_port != 0) {
+  if (options != NULL && options->atdirectory_host != NULL && options->atdirectory_port != 0) {
     atdirectory_host = options->atdirectory_host;
     atdirectory_port = options->atdirectory_port;
   } else {
@@ -264,9 +262,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   /*
    * 5. Get atserver_host and atserver_port
    */
-  if (options != NULL && atclient_authenticate_options_is_atserver_host_initialized(options) &&
-      options->atserver_host != NULL && atclient_authenticate_options_is_atserver_port_initialized(options) &&
-      options->atserver_port != 0) {
+  if (options != NULL && options->atserver_host != NULL && options->atserver_port != 0) {
     atserver_host = options->atserver_host;
     atserver_port = options->atserver_port;
     should_free_atserver_host = false;
@@ -440,6 +436,8 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   char *from_cmd = NULL;
   char *cram_cmd = NULL;
   char *atsign_with_at = NULL;
+  char *atdirectory_host = NULL;
+  int atdirectory_port = 0;
   char *atserver_host = NULL;
   int atserver_port = 0;
 
@@ -482,17 +480,21 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
    * 4. Get atserver_host and atserver_port
    */
   if (options != NULL) {
-    if (atclient_authenticate_options_is_atdirectory_host_initialized(options) &&
-        atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
-      atserver_host = options->atdirectory_host;
-      atserver_port = options->atdirectory_port;
-    }
+    atserver_host = options->atserver_host;
+    atserver_port = options->atserver_port;
+    atdirectory_host = options->atdirectory_host;
+    atdirectory_port = options->atdirectory_port;
   }
 
   if (atserver_host == NULL || atserver_port == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Using production atDirectory to lookup atServer host and port\n");
-    if ((ret = atclient_utils_find_atserver_address(ATCLIENT_ATDIRECTORY_PRODUCTION_HOST,
-                                                    ATCLIENT_ATDIRECTORY_PRODUCTION_PORT, atsign, &atserver_host,
+    if (atdirectory_host == NULL) {
+      atdirectory_host = ATCLIENT_ATDIRECTORY_PRODUCTION_HOST;
+    }
+    if (atdirectory_port == 0) {
+      atdirectory_port = ATCLIENT_ATDIRECTORY_PRODUCTION_PORT;
+    }
+    if ((ret = atclient_utils_find_atserver_address(atdirectory_host, atdirectory_port, atsign, &atserver_host,
                                                     &atserver_port)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_utils_find_atserver_address: %d\n", ret);
       goto exit;

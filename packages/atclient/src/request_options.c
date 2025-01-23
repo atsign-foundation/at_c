@@ -74,21 +74,6 @@ atclient_get_atkeys_request_options_set_show_hidden_initialized(atclient_get_atk
                                                                 const bool initialized);
 
 /*
- * 5. Authenticate Request Options
- */
-static void atclient_authenticate_options_set_atdirectory_host_initialized(atclient_authenticate_options *options,
-                                                                           const bool initialized);
-
-static void atclient_authenticate_options_set_atdirectory_port_initialized(atclient_authenticate_options *options,
-                                                                           const bool initialized);
-
-static void atclient_authenticate_options_set_atserver_host_initialized(atclient_authenticate_options *options,
-                                                                        const bool initialized);
-
-static void atclient_authenticate_options_set_atserver_port_initialized(atclient_authenticate_options *options,
-                                                                        const bool initialized);
-
-/*
  * =================
  * 1A. Put SelfKey
  * =================
@@ -1598,8 +1583,8 @@ void atclient_get_atkeys_request_options_unset_show_hidden(atclient_get_atkeys_r
 
 void atclient_authenticate_options_init(atclient_authenticate_options *options) {
   memset(options, 0, sizeof(atclient_authenticate_options));
-  options->atdirectory_host = ATCLIENT_ATDIRECTORY_PRODUCTION_HOST;
-  options->atdirectory_port = ATCLIENT_ATDIRECTORY_PRODUCTION_PORT;
+  options->atdirectory_host = NULL;
+  options->atdirectory_port = 0;
   options->atserver_host = NULL;
   options->atserver_port = 0;
 }
@@ -1617,93 +1602,10 @@ void atclient_authenticate_options_free(atclient_authenticate_options *options) 
    * 2. Free options
    */
 
-  if (atclient_authenticate_options_is_atdirectory_host_initialized(options)) {
-    atclient_authenticate_options_unset_atdirectory_host(options);
-  }
-
-  if (atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
-    atclient_authenticate_options_unset_atdirectory_port(options);
-  }
-
-  if (atclient_authenticate_options_is_atserver_host_initialized(options)) {
-    atclient_authenticate_options_unset_atserver_host(options);
-  }
-
-  if (atclient_authenticate_options_is_atserver_port_initialized(options)) {
-    atclient_authenticate_options_unset_atserver_port(options);
-  }
-}
-
-bool atclient_authenticate_options_is_atdirectory_host_initialized(const atclient_authenticate_options *options) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_is_atdirectory_host_initialized: "
-                 "Invalid arguments\n");
-    return false;
-  }
-
-  /*
-   * 2. Check if the at directory host is initialized
-   */
-  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INDEX] &
-         ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INITIALIZED;
-}
-
-bool atclient_authenticate_options_is_atdirectory_port_initialized(const atclient_authenticate_options *options) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_is_atdirectory_port_initialized: "
-                 "Invalid arguments\n");
-    return false;
-  }
-
-  /*
-   * Check if the at directory port is initialized
-   */
-  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INDEX] &
-         ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INITIALIZED;
-}
-
-bool atclient_authenticate_options_is_atserver_host_initialized(const atclient_authenticate_options *options) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_is_atserver_host_initialized: "
-                 "Invalid arguments\n");
-    return false;
-  }
-
-  /*
-   * Check if the atserver host is initialized
-   */
-  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] &
-         ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
-}
-
-bool atclient_authenticate_options_is_atserver_port_initialized(const atclient_authenticate_options *options) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_is_atserver_port_initialized: "
-                 "Invalid arguments\n");
-    return false;
-  }
-
-  /*
-   * Check if the atserver port is initialized
-   */
-  return options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] &
-         ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
+  atclient_authenticate_options_unset_atdirectory_host(options);
+  atclient_authenticate_options_unset_atdirectory_port(options);
+  atclient_authenticate_options_unset_atserver_host(options);
+  atclient_authenticate_options_unset_atserver_port(options);
 }
 
 void atclient_authenticate_options_unset_atdirectory_host(atclient_authenticate_options *options) {
@@ -1718,11 +1620,10 @@ void atclient_authenticate_options_unset_atdirectory_host(atclient_authenticate_
 
   /*
    * 2. Unsetat directory   */
-  if (atclient_authenticate_options_is_atdirectory_host_initialized(options) && options->atdirectory_host != NULL) {
+  if (options->atdirectory_host != NULL) {
     free(options->atdirectory_host);
   }
   options->atdirectory_host = NULL;
-  atclient_authenticate_options_set_atdirectory_host_initialized(options, false);
 }
 
 void atclient_authenticate_options_unset_atdirectory_port(atclient_authenticate_options *options) {
@@ -1734,8 +1635,7 @@ void atclient_authenticate_options_unset_atdirectory_port(atclient_authenticate_
                  "atclient_authenticate_options_unset_atdirectory_port: Invalid arguments\n");
     return;
   }
-  options->atdirectory_port = ATCLIENT_ATDIRECTORY_PRODUCTION_PORT;
-  atclient_authenticate_options_set_atdirectory_port_initialized(options, false);
+  options->atdirectory_port = 0;
 }
 
 void atclient_authenticate_options_unset_atserver_host(atclient_authenticate_options *options) {
@@ -1751,11 +1651,10 @@ void atclient_authenticate_options_unset_atserver_host(atclient_authenticate_opt
   /*
    * 2. Unset atserver host
    */
-  if (atclient_authenticate_options_is_atserver_host_initialized(options) && options->atserver_host != NULL) {
+  if (options->atserver_host != NULL) {
     free(options->atserver_host);
   }
   options->atserver_host = NULL;
-  atclient_authenticate_options_set_atserver_host_initialized(options, false);
 }
 
 void atclient_authenticate_options_unset_atserver_port(atclient_authenticate_options *options) {
@@ -1768,7 +1667,6 @@ void atclient_authenticate_options_unset_atserver_port(atclient_authenticate_opt
     return;
   }
   options->atserver_port = 0;
-  atclient_authenticate_options_set_atserver_port_initialized(options, false);
 }
 
 int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_options *options, char *atdirectory_host) {
@@ -1785,36 +1683,32 @@ int atclient_authenticate_options_set_atdirectory_host(atclient_authenticate_opt
   }
 
   /*
-   * 2. Unset at directory host, if initialized
-   */
-  if (atclient_authenticate_options_is_atdirectory_host_initialized(options)) {
-    atclient_authenticate_options_unset_atdirectory_host(options);
-  }
-
-  /*
    * 3. Set at directory host
    */
   const size_t atdirectory_host_size = strlen(atdirectory_host) + 1;
-  if ((options->atdirectory_host = (char *)malloc(sizeof(char) * atdirectory_host_size)) == NULL) {
+  char *new_host = (char *)malloc(sizeof(char) * atdirectory_host_size);
+  if (new_host == NULL) {
     ret = 1;
     atlogger_log(
         TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
         "atclient_authenticate_options_set_atdirectory_host: Failed to allocate memory for at directory host\n");
     goto exit;
   }
+  if (options->atdirectory_host != NULL) {
+    atclient_authenticate_options_unset_atdirectory_host(options);
+  }
+  options->atdirectory_host = new_host;
 
-  atclient_authenticate_options_set_atdirectory_host_initialized(options, true);
-
-  const size_t atdirectory_host_len = strlen(atdirectory_host);
-  memcpy(options->atdirectory_host, atdirectory_host, atdirectory_host_len);
-  options->atdirectory_host[atdirectory_host_len] = '\0';
+  memcpy(options->atdirectory_host, atdirectory_host, atdirectory_host_size - 1);
+  options->atdirectory_host[atdirectory_host_size - 1] = '\0';
 
   ret = 0;
   goto exit;
 exit: { return ret; }
 }
 
-int atclient_authenticate_options_set_atdirectory_port(atclient_authenticate_options *options, int atdirectory_port) {
+int atclient_authenticate_options_set_atdirectory_port(atclient_authenticate_options *options,
+                                                       uint16_t atdirectory_port) {
   int ret = 1;
 
   /*
@@ -1828,17 +1722,9 @@ int atclient_authenticate_options_set_atdirectory_port(atclient_authenticate_opt
   }
 
   /*
-   * 2. Unset at directory port, if initialized
-   */
-  if (atclient_authenticate_options_is_atdirectory_port_initialized(options)) {
-    atclient_authenticate_options_unset_atdirectory_host(options);
-  }
-
-  /*
    * 3. Set at directory port
    */
   options->atdirectory_port = atdirectory_port;
-  atclient_authenticate_options_set_atdirectory_port_initialized(options, true);
   ret = 0;
   goto exit;
 exit: { return ret; }
@@ -1856,30 +1742,24 @@ int atclient_authenticate_options_set_atserver_host(atclient_authenticate_option
                  "atclient_authenticate_options_set_atserver_host: Invalid arguments\n");
     return ret;
   }
-
-  /*
-   * 2. Unset the atserver host, if initialized
-   */
-  if (atclient_authenticate_options_is_atserver_host_initialized(options)) {
-    atclient_authenticate_options_unset_atserver_host(options);
-  }
-
   /*
    * 3. Set atserver host
    */
   const size_t atserver_host_size = strlen(atserver_host) + 1;
-  if ((options->atserver_host = (char *)malloc(sizeof(char) * atserver_host_size)) == NULL) {
+  char *new_host = (char *)malloc(sizeof(char) * atserver_host_size);
+  if (new_host == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "atclient_authenticate_options_set_atserver_host: Failed to allocate memory for atserver host\n");
     return ret;
   }
+  if (options->atserver_host != NULL) {
+    atclient_authenticate_options_unset_atserver_host(options);
+  }
+  options->atserver_host = new_host;
 
-  const size_t atserver_host_len = strlen(atserver_host);
-  memcpy(options->atserver_host, atserver_host, atserver_host_len);
-  options->atserver_host[atserver_host_len] = '\0';
-
-  atclient_authenticate_options_set_atserver_host_initialized(options, true);
+  memcpy(options->atserver_host, atserver_host, atserver_host_size - 1);
+  options->atserver_host[atserver_host_size - 1] = '\0';
 
   ret = 0;
   goto exit;
@@ -1887,7 +1767,7 @@ int atclient_authenticate_options_set_atserver_host(atclient_authenticate_option
 exit: { return ret; }
 }
 
-int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options, int atserver_port) {
+int atclient_authenticate_options_set_atserver_port(atclient_authenticate_options *options, uint16_t atserver_port) {
   int ret = 1;
 
   /*
@@ -1901,116 +1781,12 @@ int atclient_authenticate_options_set_atserver_port(atclient_authenticate_option
   }
 
   /*
-   * 2. Unset the atserver port, if initialized
-   */
-  if (atclient_authenticate_options_is_atserver_port_initialized(options)) {
-    atclient_authenticate_options_unset_atserver_host(options);
-  }
-
-  /*
    * 3. Set atserver port
    */
   options->atserver_port = atserver_port;
-  atclient_authenticate_options_set_atserver_port_initialized(options, true);
 
   ret = 0;
   goto exit;
 
 exit: { return ret; }
-}
-
-static void atclient_authenticate_options_set_atdirectory_host_initialized(atclient_authenticate_options *options,
-                                                                           const bool initialized) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_set_atdirectory_host_initialized: "
-                 "Invalid arguments\n");
-    return;
-  }
-
-  /*
-   * 2. Set the at directory host initialized
-   */
-  if (initialized) {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INDEX] |=
-        ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INITIALIZED;
-  } else {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INDEX] &=
-        ~ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_HOST_INITIALIZED;
-  }
-}
-
-static void atclient_authenticate_options_set_atdirectory_port_initialized(atclient_authenticate_options *options,
-                                                                           const bool initialized) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_set_atdirectory_port_initialized: "
-                 "Invalid arguments\n");
-    return;
-  }
-
-  /*
-   * 2. Set the at directory port initialized
-   */
-  if (initialized) {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INDEX] |=
-        ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INITIALIZED;
-  } else {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INDEX] &=
-        ~ATCLIENT_AUTHENTICATE_OPTIONS_ATDIRECTORY_PORT_INITIALIZED;
-  }
-}
-
-static void atclient_authenticate_options_set_atserver_host_initialized(atclient_authenticate_options *options,
-                                                                        const bool initialized) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_set_atserver_host_initialized: "
-                 "Invalid arguments\n");
-    return;
-  }
-
-  /*
-   * 2. Set the atserver host initialized
-   */
-  if (initialized) {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] |=
-        ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
-  } else {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INDEX] &=
-        ~ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_HOST_INITIALIZED;
-  }
-}
-
-static void atclient_authenticate_options_set_atserver_port_initialized(atclient_authenticate_options *options,
-                                                                        const bool initialized) {
-  /*
-   * 1. Validate arguments
-   */
-  if (options == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "atclient_authenticate_options_set_atserver_port_initialized: "
-                 "Invalid arguments\n");
-    return;
-  }
-
-  /*
-   * 2. Set the atserver port initialized
-   */
-  if (initialized) {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] |=
-        ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
-  } else {
-    options->_initialized_fields[ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INDEX] &=
-        ~ATCLIENT_AUTHENTICATE_OPTIONS_ATSERVER_PORT_INITIALIZED;
-  }
 }

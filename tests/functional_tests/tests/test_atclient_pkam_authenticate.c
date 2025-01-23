@@ -1,11 +1,11 @@
 #include "atclient/request_options.h"
-#include <functional_tests/config.h>
-#include <functional_tests/helpers.h>
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/atkeys_file.h>
 #include <atclient/constants.h>
 #include <atlogger/atlogger.h>
+#include <functional_tests/config.h>
+#include <functional_tests/helpers.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,7 +102,7 @@ static int test2_pkam_with_options(const char *path) {
   atclient_authenticate_options_init(&options);
 
   char *atserver_host = NULL;
-  int atserver_port = 0;
+  uint16_t atserver_port = 0;
 
   if ((ret = atclient_atkeys_file_from_path(&atkeys_file, path)) != 0) {
     return ret;
