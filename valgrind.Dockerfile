@@ -6,6 +6,7 @@ RUN apt-get install -y git-core \
   ninja-build \
   sudo \
   curl \
+  clang \
   just \
   valgrind \
   gcc \
