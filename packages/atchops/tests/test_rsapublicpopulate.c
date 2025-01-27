@@ -31,7 +31,7 @@ int main() {
     goto exit;
   }
   printf("n:\t");
-  for (int i = 0; i < publickey.n.len; i++) {
+  for (size_t i = 0; i < publickey.n.len; i++) {
     printf("%02x ", publickey.n.value[i]);
   }
   printf("\n");
@@ -42,7 +42,7 @@ int main() {
     goto exit;
   }
   printf("e:\t");
-  for (int i = 0; i < publickey.e.len; i++) {
+  for (size_t i = 0; i < publickey.e.len; i++) {
     printf("%02x ", publickey.e.value[i]);
   }
   printf("\n");

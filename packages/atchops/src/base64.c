@@ -3,12 +3,13 @@
 #include <atchops/platform.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
+#include <string.h>
 
 #define TAG "base64"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-int atchops_base64_encode(const unsigned char *src, const size_t src_len, unsigned char *dst, const size_t dst_size,
+int atchops_base64_encode(const unsigned char *src, const size_t src_len, char *dst, const size_t dst_size,
                           size_t *dst_len) {
   int ret = 1;
 
@@ -44,22 +45,23 @@ int atchops_base64_encode(const unsigned char *src, const size_t src_len, unsign
    */
   if (dst_len == NULL) {
     size_t x; // throw away variable
-    if ((ret = mbedtls_base64_encode(dst, dst_size, &x, src, src_len)) != 0) {
+    if ((ret = mbedtls_base64_encode((unsigned char *)dst, dst_size, &x, src, src_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: mbedtls_base64_encode failed\n");
       goto exit;
     }
   } else {
-    if ((ret = mbedtls_base64_encode(dst, dst_size, dst_len, src, src_len)) != 0) {
+    if ((ret = mbedtls_base64_encode((unsigned char *)dst, dst_size, dst_len, src, src_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_encode: mbedtls_base64_encode failed\n");
       goto exit;
     }
   }
+
   ret = 0;
   goto exit;
 exit: { return ret; }
 }
 
-int atchops_base64_decode(const unsigned char *src, const size_t src_len, unsigned char *dst, const size_t dst_size,
+int atchops_base64_decode(const char *src, const size_t src_len, unsigned char *dst, const size_t dst_size,
                           size_t *dst_len) {
   int ret = 1;
 
@@ -95,12 +97,12 @@ int atchops_base64_decode(const unsigned char *src, const size_t src_len, unsign
    */
   if (dst_len == NULL) {
     size_t x; // throw away variable
-    if ((ret = mbedtls_base64_decode(dst, dst_size, &x, src, src_len)) != 0) {
+    if ((ret = mbedtls_base64_decode(dst, dst_size, &x, (unsigned char *)src, src_len)) != 0) {
       atlogger_log("base64", ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: mbedtls_base64_decode failed\n");
       goto exit;
     }
   } else {
-    if ((ret = mbedtls_base64_decode(dst, dst_size, dst_len, src, src_len)) != 0) {
+    if ((ret = mbedtls_base64_decode(dst, dst_size, dst_len, (unsigned char *)src, src_len)) != 0) {
       atlogger_log("base64", ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: mbedtls_base64_decode failed\n");
       goto exit;
     }

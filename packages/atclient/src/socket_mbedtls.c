@@ -1,7 +1,6 @@
 // These two headers must be included in a specific order
 #include "atchops/platform.h" // IWYU pragma: keep
 // Don't move them
-#include "atclient/monitor.h"
 #include "atclient/socket.h"
 
 #if defined(ATCLIENT_SOCKET_PROVIDER_MBEDTLS)
@@ -31,7 +30,6 @@
 
 // I think the -1 is unnecessary but better safe than sorry
 #define MAX_READ_BLOCKS (SIZE_T_MAX / READ_BLOCK_LEN - 1)
-static const int MAX_READ_TIMEOUTS = 3;
 
 // Hey fellow engineer, if you want to understand this file, you better have this link on hand:
 // https://mbed-tls.readthedocs.io/projects/api/en/v3.6.1/api/file/ssl_8h

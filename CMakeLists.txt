@@ -68,6 +68,9 @@ message(STATUS "Building atclient")
 set(ATCLIENT_BUILD_TESTS ${ATSDK_BUILD_UNIT_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atclient)
 
+message(STATUS "Building argparse")
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/argparse)
+
 message(STATUS "Building atauth")
 set(ATAUTH_BUILD_TESTS ${ATSDK_BUILD_UNIT_TESTS})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atauth)
@@ -86,6 +89,7 @@ if(NOT ESP_PLATFORM)
     atlogger
     atclient
     atcommons
+    argparse
     atauth
   )
 

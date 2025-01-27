@@ -614,8 +614,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   /*
    * 3. Prepare self encryption key for use
    */
-  if ((ret = atchops_base64_decode((unsigned char *)self_encryption_key_str, self_encryption_key_str_len,
-                                   self_encryption_key, self_encryption_key_size, &self_encryption_key_len)) != 0) {
+  if ((ret = atchops_base64_decode(self_encryption_key_str, self_encryption_key_str_len, self_encryption_key,
+                                   self_encryption_key_size, &self_encryption_key_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding selfencryption key: %d\n", ret);
     goto exit;
   }
@@ -633,7 +633,7 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   }
 
   // 4b. pkam public key
-  if ((ret = atchops_base64_decode((unsigned char *)aes_pkam_public_key_str, aes_pkam_public_key_len, rsa_key_encrypted,
+  if ((ret = atchops_base64_decode(aes_pkam_public_key_str, aes_pkam_public_key_len, rsa_key_encrypted,
                                    rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam public key: %d\n", ret);
     goto exit;
@@ -657,8 +657,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   memset(iv, 0, sizeof(unsigned char) * iv_size);
 
   // 4c. pkam private key
-  if ((ret = atchops_base64_decode((unsigned char *)aes_pkam_private_key_str, aes_pkam_private_key_len,
-                                   rsa_key_encrypted, rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
+  if ((ret = atchops_base64_decode(aes_pkam_private_key_str, aes_pkam_private_key_len, rsa_key_encrypted,
+                                   rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding pkam private key: %d\n", ret);
     goto exit;
   }
@@ -681,8 +681,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   memset(iv, 0, sizeof(unsigned char) * iv_size);
 
   // 4d. encrypt public key
-  if ((ret = atchops_base64_decode((unsigned char *)aes_encrypt_public_key_str, aes_encrypt_public_key_len,
-                                   rsa_key_encrypted, rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
+  if ((ret = atchops_base64_decode(aes_encrypt_public_key_str, aes_encrypt_public_key_len, rsa_key_encrypted,
+                                   rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt public key: %d\n", ret);
     goto exit;
   }
@@ -705,8 +705,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
   memset(iv, 0, sizeof(unsigned char) * iv_size);
 
   // 4e. encrypt private key
-  if ((ret = atchops_base64_decode((unsigned char *)aes_encrypt_private_key_str, aes_encrypt_private_key_len,
-                                   rsa_key_encrypted, rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
+  if ((ret = atchops_base64_decode(aes_encrypt_private_key_str, aes_encrypt_private_key_len, rsa_key_encrypted,
+                                   rsa_key_encrypted_size, &rsa_key_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding encrypt private key: %d\n", ret);
     goto exit;
   }
@@ -764,8 +764,8 @@ int atclient_atkeys_populate_from_strings(atclient_atkeys *atkeys, const char *a
    * 5. apkam symmetric key, if it exists
    */
   if (apkam_symmetric_key_str != NULL && apkam_symmetric_key_str_len > 0) {
-    if ((ret = atchops_base64_decode((unsigned char *)apkam_symmetric_key_str, apkam_symmetric_key_str_len,
-                                     apkam_symmetric_key, apkam_symmetric_key_size, &apkam_symmetric_key_len)) != 0) {
+    if ((ret = atchops_base64_decode(apkam_symmetric_key_str, apkam_symmetric_key_str_len, apkam_symmetric_key,
+                                     apkam_symmetric_key_size, &apkam_symmetric_key_len)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tried base64 decoding apkamsymmetric key: %d\n", ret);
       goto exit;
     }
@@ -960,15 +960,14 @@ int atclient_atkeys_write_to_atkeys_file(atclient_atkeys *atkeys, atclient_atkey
   size_t rsa_key_encrypted_len = 0;
 
   const size_t rsa_key_encrypted_base64_size = atchops_base64_encoded_size(rsa_key_encrypted_size);
-  unsigned char rsa_key_encrypted_base64[rsa_key_encrypted_base64_size];
+  char rsa_key_encrypted_base64[rsa_key_encrypted_base64_size];
   size_t rsa_key_encrypted_base64_len = 0;
 
   /*
    * 3. Prepare self encryption key for use
    */
-  if ((ret = atchops_base64_decode((unsigned char *)atkeys->self_encryption_key_base64,
-                                   strlen(atkeys->self_encryption_key_base64), self_encryption_key,
-                                   self_encryption_key_size, NULL)) != 0) {
+  if ((ret = atchops_base64_decode(atkeys->self_encryption_key_base64, strlen(atkeys->self_encryption_key_base64),
+                                   self_encryption_key, self_encryption_key_size, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "base64 decode self encryption key: %d\n", ret);
     goto exit;
   }

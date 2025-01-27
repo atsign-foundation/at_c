@@ -1,5 +1,4 @@
 #include "atchops/iv.h"
-#include "atchops/base64.h"
 #include "atchops/constants.h"
 #include "atchops/mbedtls.h"
 #include <atchops/platform.h>

@@ -52,6 +52,15 @@ typedef struct atclient_atkeys_file {
 } atclient_atkeys_file;
 
 /**
+ * @brief Gets the default path for the atKeys file for a given atsign
+ *
+ * @param atsign The atsign to get the default path for (with the '@')
+ * @return char* The default path to the atKeys file. The caller is responsible for freeing this memory.
+ *                Returns NULL if memory allocation fails or if atsign is NULL.
+ */
+char *atkeys_file_get_default_path(const char *atsign);
+
+/**
  * @brief Initialize the struct. This function does not allocate the struct, but manages its memory internally. This
  * function should be called before any subsequent calls.
  *

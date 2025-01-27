@@ -62,14 +62,14 @@ int main() {
   }
   memset(iv, 0, ATCHOPS_IV_BUFFER_SIZE); // keys in the atKeys file are encrypted with AES with IV {0} * 16
 
-  ret = atchops_base64_decode((unsigned char *)CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize,
+  ret = atchops_base64_decode(CIPHERTEXTBASE64, strlen(CIPHERTEXTBASE64), ciphertext, ciphertextsize,
                               &ciphertextlen);
   if (ret != 0) {
     printf("atchops_base64_decode (failed): %d\n", ret);
     goto exit;
   }
 
-  ret = atchops_base64_decode((unsigned char *)AESKEYBASE64, strlen(AESKEYBASE64), key, 32, &keylen);
+  ret = atchops_base64_decode(AESKEYBASE64, strlen(AESKEYBASE64), key, 32, &keylen);
   if (ret != 0) {
     printf("atchops_base64_decode (failed): %d\n", ret);
     goto exit;

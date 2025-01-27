@@ -1,5 +1,6 @@
 #include "atclient/atnotification.h"
 #include <atchops/platform.h>
+#include <atclient/json.h> // IWYU pragma: keep
 #include <atlogger/atlogger.h>
 #include <stdlib.h>
 #include <string.h>

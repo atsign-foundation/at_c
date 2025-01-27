@@ -1,165 +1,169 @@
-#include "atauth/enroll_namespace.h"
-
-#include "atclient/json.h"
-
-#include <atlogger/atlogger.h>
+#include "enroll_namespace.h"
+#include "atlogger/atlogger.h"
+#include "cJSON.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#define TAG "enroll_namespace"
-
-int atcommmons_init_enroll_namespace_list(atcommons_enroll_namespace_list_t *ns_list) {
-  if (ns_list == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Memory not allocated for namespace list struct\n");
-    return -1;
-  }
-
-  memset(ns_list, 0, sizeof(atcommons_enroll_namespace_list_t));
-
-  return 0;
+void enroll_namespace_init(struct enroll_namespace *ns) {
+  ns->len = 0;
+  ns->namespaces = NULL;
+  ns->permissions = NULL;
 }
 
-int atcommons_enroll_namespace_list_append(atcommons_enroll_namespace_list_t **ns_list,
-                                           atcommons_enroll_namespace_t *ns) {
-  if (ns == NULL) {
-    atlogger_log(TAG, 0, "Namespace to append cannot be null\n");
-    return -1;
+void enroll_namespace_free(struct enroll_namespace *ns) {
+  if (ns->len > 0) {
+    for (size_t i = 0; i < ns->len; i++) {
+      if (ns->namespaces[i] != NULL) {
+        free(ns->namespaces[i]);
+      }
+    }
+
+    if (ns->namespaces != NULL) {
+      free(ns->namespaces);
+    }
+    if (ns->permissions != NULL) {
+      free(ns->permissions);
+    }
   }
-
-  // If the list's length is uninitialized (SIZE_MAX), set it to 0
-  if ((*ns_list)->length == SIZE_MAX) {
-    (*ns_list)->length = 0;
-  }
-
-  const size_t new_length = (*ns_list)->length + 1;
-  // Try reallocating memory for the array of enroll_namespace_t structs
-  atcommons_enroll_namespace_list_t *temp = realloc(*ns_list, sizeof(atcommons_enroll_namespace_list_t) +
-                                                                  sizeof(atcommons_enroll_namespace_t *) * new_length);
-  if (temp == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unable to realloc memory for enroll namespace list\n");
-    return -1;
-  }
-
-  // Add the new namespace to the end of the list
-  temp->namespaces[temp->length] = ns;
-  temp->length++;
-
-  // Update the original ns_list to point to the new (reallocated) memory
-  *ns_list = temp;
-
-  return 0;
 }
 
-int atcommons_enroll_namespace_to_json(char *ns_str, const size_t ns_str_size, size_t *ns_str_len,
-                                       const atcommons_enroll_namespace_t *ns) {
-  if (ns == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns(namespace) cannot be null\n");
-    return -1;
-  }
-  if (ns_str == NULL && ns_str_size == 0) {
-    *ns_str_len = snprintf(NULL, 0, "{\"%s\":\"%s\"}", ns->name, ns->access) + 1; // +1 for \0
-  }
+int parse_enroll_namespace(const char *input, struct enroll_namespace *output) {
+  const char *TAG = "parse_enroll_namespace";
 
-  *ns_str_len = snprintf(ns_str, ns_str_size, "{\"%s\":\"%s\"}", ns->name, ns->access);
-
-  return 0;
-}
-
-#ifdef ATCOMMONS_JSON_PROVIDER_CJSON
-int atcommons_enroll_namespace_list_to_json(char **ns_list_string, size_t *ns_list_str_len,
-                                            const atcommons_enroll_namespace_list_t *ns_list) {
-  if (ns_list == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list(namespace list) cannot be null\n");
-    return -1;
+  size_t input_len = strlen(input);
+  char *buffer = malloc(sizeof(char) * (input_len + 1));
+  if (buffer == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for parse buffer\n");
+    return 1;
   }
-  if (ns_list_str_len == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ns_list_str_len(namespace_list string length) cannot be null\n");
-    return -1;
-  }
-  // Create a new cJSON object
-  cJSON *json_obj = cJSON_CreateObject();
-  if (json_obj == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create JSON object\n");
-    return -1;
-  }
+  memcpy(buffer, input, input_len);
+  buffer[input_len] = 0;
 
-  for (size_t ns_elmnt = 0; ns_elmnt < ns_list->length; ns_elmnt++) {
-    cJSON_AddStringToObject(json_obj, ns_list->namespaces[ns_elmnt]->name, ns_list->namespaces[ns_elmnt]->access);
-  }
-
-  *ns_list_string = cJSON_PrintUnformatted(json_obj);
-  if (*ns_list_string == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to print JSON\n");
-    cJSON_Delete(json_obj);
-    return -1;
-  }
-  if (ns_list_str_len != NULL) {
-    *ns_list_str_len = strlen(*ns_list_string);
-  }
-
-  cJSON_Delete(json_obj);
-  return 0;
-}
-#else
-#error "JSON provider not supported"
-#endif
-
-int atcommons_enroll_namespace_list_from_string(atcommons_enroll_namespace_list_t **ns_list, char *json_str) {
   int sep_count = 0;
-  const size_t ns_string_end = strlen(json_str);
-  int ret = 0;
+  int commas = 0;
+  int permitopen_end = strlen(buffer);
 
-  // Count seperator in the namespace list string. Replaces all occurences of ':' and ',' to '\0'
-  for (size_t i = 0; i < ns_string_end; i++) {
-    if (json_str[i] == ':') {
+  for (int i = 0; i < permitopen_end; i++) {
+    if (buffer[i] == ':') {
       sep_count++;
-      json_str[i] = '\0';
+      buffer[i] = '\0';
     }
 
-    if (json_str[i] == ',') {
-      json_str[i] = '\0';
+    if (buffer[i] == ',') {
+      commas++;
+      buffer[i] = '\0';
     }
+  }
+
+  if (commas != sep_count - 1) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "namespace:permissions list has invalid format\n");
+    free(buffer);
+    return 1;
+  }
+
+  output->len = sep_count;
+  output->namespaces = malloc(sep_count * sizeof(char *));
+  if (output->namespaces == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate namespaces list\n");
+    free(buffer);
+    return 1;
+  }
+  for (int i = 0; i < sep_count; i++) {
+    output->namespaces[i] = NULL;
+  }
+
+  output->permissions = malloc(sep_count * sizeof(enum namespace_permissions));
+
+  if (output->permissions == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate permissions list\n");
+    free(buffer);
+    free(output->namespaces);
+    return 1;
   }
 
   int pos = 0;
 
-  atcommons_enroll_namespace_t *ns_temp = NULL;
   for (int i = 0; i < sep_count; i++) {
-    ns_temp = malloc(sizeof(atcommons_enroll_namespace_t));
-    size_t name_len = strlen(json_str + pos) + 1;
-    ns_temp->name = malloc(sizeof(char) * name_len);
-    if (ns_temp->name == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate ns name entry\n");
-      ret = 1;
-      return ret;
+    // Add the namespace to the namespace list
+    size_t namespace_len = strlen(buffer + pos);
+    (output->namespaces)[i] = malloc(sizeof(char) * (namespace_len + 1));
+    if ((output->namespaces)[i] == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate namespace string %d\n", i);
+      free(buffer);
+      enroll_namespace_free(output);
+      return 1;
     }
-    memset(ns_temp->name, 0, name_len);
-    memcpy(ns_temp->name, json_str + pos, name_len - 1);
 
-    pos += name_len;
-    if (json_str + pos == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid namespace access value\n");
-      ret = 1;
-      return ret;
-    }
-    size_t access_len = strlen(json_str + pos) + 1;
-    ns_temp->access = malloc(sizeof(char) * access_len);
-    if (ns_temp->access == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate ns access entry\n");
-      ret = 1;
-      return ret;
-    }
-    memset(ns_temp->access, 0, access_len);
-    memcpy(ns_temp->access, json_str + pos, access_len - 1);
+    memcpy(output->namespaces[i], buffer + pos, namespace_len);
+    output->namespaces[i][namespace_len] = 0;
 
-    if ((ret = atcommons_enroll_namespace_list_append(ns_list, ns_temp)) != 0) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "Failed appending ns to ns_list | atcommons_enroll_namespace_list_append: %d", ret);
-      return ret;
+    // Jump to the permission string
+    pos += strlen(buffer + pos) + 1;
+
+    size_t permission_len = strlen(buffer + pos);
+    uint8_t permission_bits = 0;
+
+    for (size_t j = 0; j < permission_len; j++) {
+      switch ((buffer + pos)[j]) {
+      case 'r':
+        permission_bits |= 0b01;
+        break;
+      case 'w':
+        permission_bits |= 0b10;
+        break;
+      default:
+        atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unrecognized namespace permission value: %s\n", buffer + pos);
+        free(buffer);
+        enroll_namespace_free(output);
+        return 1;
+      }
     }
-    pos += access_len;
+
+    switch (permission_bits) {
+    case np_readonly:
+    case np_read_write:
+      output->permissions[i] = permission_bits;
+      break;
+    default:
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse namespace permissions %s\n", buffer + pos);
+      free(buffer);
+      enroll_namespace_free(output);
+      return 1;
+    }
+
+    // Jump to the next namespace string
+    pos += permission_len + 1;
   }
-  return ret;
+  free(buffer);
+
+  return 0;
+}
+
+int enroll_namespace_to_json_string(struct enroll_namespace *ns, char **json_string) {
+  const char *TAG = "enroll_namespace_to_json_string";
+  cJSON *json = cJSON_CreateObject();
+  if (json == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cJSON object\n");
+    return 1;
+  }
+
+  for (size_t i = 0; i < ns->len; i++) {
+    switch (ns->permissions[i]) {
+    case np_readonly:
+      cJSON_AddStringToObject(json, ns->namespaces[i], "r");
+      break;
+    case np_read_write:
+      cJSON_AddStringToObject(json, ns->namespaces[i], "rw");
+      break;
+    }
+  }
+  *json_string = cJSON_PrintUnformatted(json);
+  cJSON_Delete(json);
+  if (*json_string == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for cJSON print string\n");
+    return 1;
+  }
+
+  return 0;
 }

@@ -1,6 +1,7 @@
 #include <atchops/platform.h>
 #include <atclient/atclient.h>
 #include <atclient/constants.h>
+#include <atclient/json.h>
 #include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
 #include <stdio.h>

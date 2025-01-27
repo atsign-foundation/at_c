@@ -7,6 +7,7 @@
 #include <atchops/iv.h>
 #include <atchops/platform.h>
 #include <atclient/constants.h>
+#include <atclient/json.h>
 #include <atlogger/atlogger.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -74,6 +75,11 @@ static int atclient_get_shared_key_validate_arguments(const atclient *atclient, 
   if (atclient == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient is NULL\n");
+    goto exit;
+  }
+  if (value == NULL) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "value is NULL\n");
     goto exit;
   }
 
@@ -273,8 +279,7 @@ atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atk
    * 8. Set IV in the AtKey
    */
   if (atclient_atkey_metadata_is_iv_nonce_initialized(&metadata)) {
-    if ((ret = atchops_base64_decode((unsigned char *)metadata.iv_nonce, strlen(metadata.iv_nonce), iv, iv_size,
-                                     NULL)) != 0) {
+    if ((ret = atchops_base64_decode(metadata.iv_nonce, strlen(metadata.iv_nonce), iv, iv_size, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
@@ -296,8 +301,8 @@ atclient_get_shared_key_shared_by_me_with_other(atclient *atclient, atclient_atk
   }
   memset(value_raw_encrypted, 0, sizeof(unsigned char) * value_raw_encrypted_size);
   size_t value_raw_encrypted_len = 0;
-  if ((ret = atchops_base64_decode((unsigned char *)value_raw_encrypted_base64, value_raw_encrypted_base64_len,
-                                   value_raw_encrypted, value_raw_encrypted_size, &value_raw_encrypted_len)) != 0) {
+  if ((ret = atchops_base64_decode(value_raw_encrypted_base64, value_raw_encrypted_base64_len, value_raw_encrypted,
+                                   value_raw_encrypted_size, &value_raw_encrypted_len)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
     goto exit;
   }
@@ -495,8 +500,7 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
    * 8. Set IV
    */
   if (atclient_atkey_metadata_is_iv_nonce_initialized(&metadata)) {
-    if ((ret = atchops_base64_decode((unsigned char *)metadata.iv_nonce, strlen(metadata.iv_nonce), iv, iv_size,
-                                     NULL)) != 0) {
+    if ((ret = atchops_base64_decode(metadata.iv_nonce, strlen(metadata.iv_nonce), iv, iv_size, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
@@ -507,7 +511,7 @@ atclient_get_shared_key_shared_by_other_with_me(atclient *atclient, atclient_atk
   /*
    * 9. Decrypt data
    */
-  const unsigned char *value_raw_encrypted_base64 = (unsigned char *)data->valuestring;
+  const char *value_raw_encrypted_base64 = data->valuestring;
   const size_t value_raw_encrypted_base64_len = strlen(data->valuestring);
 
   // 9a. base64 decode

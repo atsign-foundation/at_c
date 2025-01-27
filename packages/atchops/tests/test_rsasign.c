@@ -72,8 +72,7 @@ int main() {
   printf("atchops_rsa_sign (success): %d\n", ret);
   printf("signature: \"%.*s\"\n", SIGNATURE_SIZE, signature);
 
-  ret = atchops_base64_encode(signature, SIGNATURE_SIZE, (unsigned char *)signaturebase64, SIGNATURE_BASE64_SIZE,
-                              &signaturebase64len);
+  ret = atchops_base64_encode(signature, SIGNATURE_SIZE, signaturebase64, SIGNATURE_BASE64_SIZE, &signaturebase64len);
   if (ret != 0) {
     printf("atchops_base64_encode (failed): %d\n", ret);
     goto exit;

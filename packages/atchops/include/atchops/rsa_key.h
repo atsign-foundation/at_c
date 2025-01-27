@@ -57,7 +57,7 @@ int atchops_rsa_key_private_key_clone(const atchops_rsa_key_private_key *src, at
  * @param private_key_base64 this should be a NULL pointer that will be allocated and populated for you by the function.
  * this buffer will be null-terminated for you. this will hold the private key in base64 encoding.
  */
-int atchops_rsa_key_generate_base64(unsigned char **public_key_base64, unsigned char **private_key_base64);
+int atchops_rsa_key_generate_base64(char **public_key_base64, char **private_key_base64);
 
 /**
  * @brief Generate a new RSA 2048 key pair (public and private)

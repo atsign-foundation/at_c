@@ -208,7 +208,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   int atdirectory_port = 0;
 
   char *atserver_host = NULL;
-  int atserver_port = 0;
+  uint16_t atserver_port = 0;
 
   const size_t recvsize = 1024; // sufficient buffer size to receive 1. host & port from atDirectory, 2. challenge from
                                 // `from:` noop_cmd, 3. pkam success message from `pkam:` noop_cmd
@@ -226,7 +226,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   memset(signature, 0, sizeof(unsigned char) * signature_size);
 
   const size_t signature_base64_size = atchops_base64_encoded_size(signature_size);
-  unsigned char signature_base64[signature_base64_size];
+  char signature_base64[signature_base64_size];
   memset(signature_base64, 0, sizeof(unsigned char) * signature_base64_size);
   size_t signature_base64_len = 0;
 
@@ -439,7 +439,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   char *atdirectory_host = NULL;
   int atdirectory_port = 0;
   char *atserver_host = NULL;
-  int atserver_port = 0;
+  uint16_t atserver_port = 0;
 
   const size_t recvsize = 1024; // sufficient buffer size to receive 1. host & port from atDirectory, 2. challenge from
                                 // `from:` noop_cmd, 3. cram success message from `cram:` noop_cmd
