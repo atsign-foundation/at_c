@@ -36,6 +36,7 @@ void atauth_enroll_params_init(atauth_enroll_params_t *ep) {
   ep->encrypted_self_encryption_key = NULL;
   ep->encrypted_self_encryption_key_iv = NULL;
   ep->encrypted_apkam_symmetric_key = NULL;
+  ep->encrypted_apkam_symmetric_key_iv = NULL;
   ep->namespaces = NULL;
   ep->apkam_keys_expiry_in_millis = 0;
 }

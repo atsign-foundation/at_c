@@ -15,7 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define TAG "atauth_onboard_command"
+#define TAG "ONBOARD"
 
 int atauth_onboard_command(const char *atsign, const char *root_domain, const char *keys_path, const char *cram_key) {
   int ret = 0;
@@ -64,10 +64,8 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
   }
 
   // generate new apkam keys
-  struct atauth_apkam_keys apkam_keys;
-  atauth_apkam_keys_init(&apkam_keys); // free me
-
-  ret = atauth_apkam_keys_generate_all(&apkam_keys);
+  struct atauth_generated_first_enrollment_keys apkam_keys;
+  ret = atauth_generated_first_enrollment_keys_generate(&apkam_keys);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate apkam keys\n");
     goto free_apkam_keys;
@@ -77,11 +75,7 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
   atauth_enroll_params_t ep = {
       .app_name = ATAUTH_DEFAULT_FIRST_APP_NAME,
       .device_name = ATAUTH_DEFAULT_FIRST_DEVICE_NAME,
-      .apkam_public_key = apkam_keys.pkam_public_key_base64,
-      .encrypted_default_encryption_private_key = apkam_keys.encrypted_encrypt_private_key_base64,
-      .encrypted_default_encryption_private_key_iv = apkam_keys.encrypted_encrypt_private_iv_base64,
-      .encrypted_self_encryption_key = apkam_keys.encrypted_self_encryption_key_base64,
-      .encrypted_self_encryption_key_iv = apkam_keys.encrypted_self_encryption_key_iv_base64,
+      .apkam_public_key = apkam_keys.apkam_public_key,
   };
 
   struct enroll_response response;
@@ -92,16 +86,24 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
   }
 
   // convert apkam_keys into an atkeys
-  atclient_atkeys *atkeys;
-  ret = atauth_apkam_keys_create_atkeys(&apkam_keys, &atkeys);
+  atclient_atkeys atkeys;
+  atclient_atkeys_init(&atkeys);
+  ret = atauth_generated_first_enrollment_keys_populate_atkeys(&apkam_keys, &atkeys);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create the atkeys from the generated apkam keys\n");
     goto free_enroll_response;
   }
 
-  ret = atclient_atkeys_set_enrollment_id(atkeys, response.enrollment_id, strlen(response.enrollment_id));
+  ret = atclient_atkeys_set_enrollment_id(&atkeys, response.enrollment_id, strlen(response.enrollment_id));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set enrollment_id in atkeys\n");
+    goto free_atkeys;
+  }
+
+  // write atKeys to atKeys file
+  ret = atclient_atkeys_write_to_path(&atkeys, resolved_atkeys_path);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write the atkeys file\n");
     goto free_atkeys;
   }
 
@@ -110,16 +112,9 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Terminated cram instance of atserver connection\n");
 
   // pkam auth
-  ret = atclient_pkam_authenticate(&atclient, atsign, atkeys, &auth_opts, NULL);
+  ret = atclient_pkam_authenticate(&atclient, atsign, &atkeys, &auth_opts, NULL);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to pkam auth to the atServer\n");
-    goto free_atkeys;
-  }
-
-  // write atKeys to atKeys file
-  ret = atclient_atkeys_write_to_path(atkeys, resolved_atkeys_path);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to write the atkeys file\n");
     goto free_atkeys;
   }
 
@@ -139,7 +134,7 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
     goto free_encrypt_public_atkey;
   }
 
-  ret = atclient_put_public_key(&atclient, &encrypt_public_atkey, atkeys->encrypt_public_key_base64, NULL, NULL);
+  ret = atclient_put_public_key(&atclient, &encrypt_public_atkey, atkeys.encrypt_public_key_base64, NULL, NULL);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put encrypt public key to atServer\n");
     goto free_encrypt_public_atkey;
@@ -165,6 +160,9 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
     goto free_cram_atkey;
   }
 
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "Onboarding complete, keys have been written to %s\n",
+               resolved_atkeys_path);
+
   // done
 free_cram_atkey:
   atclient_atkey_free(&cram_atkey);
@@ -172,11 +170,11 @@ free_encrypt_public_atkey:
   atclient_atkey_free(&encrypt_public_atkey);
 free_atkeys:
   atclient_connection_disconnect(&atclient.atserver_connection);
-  atclient_atkeys_free(atkeys);
+  atclient_atkeys_free(&atkeys);
 free_enroll_response:
   free_enroll_response(&response);
 free_apkam_keys:
-  atauth_apkam_keys_free(&apkam_keys);
+  atauth_generated_first_enrollment_keys_free(&apkam_keys);
 free_auth_options:
   atclient_free(&atclient);
   atclient_authenticate_options_free(&auth_opts);

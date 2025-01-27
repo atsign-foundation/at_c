@@ -16,6 +16,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/params.c
   ${CMAKE_CURRENT_LIST_DIR}/src/run_onboard_command.c
   ${CMAKE_CURRENT_LIST_DIR}/src/run_enroll_command.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/wait_for_enrollment.c
 )
 
 # Project setup
@@ -25,20 +26,12 @@ cmake_policy(SET CMP0135 NEW)
 
 ## not adding the esp target yet
 
-project(
-  atauth
-  VERSION 0.0.1
-  DESCRIPTION "Atsign technology authentication library"
-  HOMEPAGE_URL https://atsign.com
-  LANGUAGES C
-)
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/package_util.cmake)
 if(ESP_PLATFORM)
   add_atsdk_espidf_component(
     PACKAGE_NAME atauth
     PACKAGE_DESCRIPTION "Atsign technology authentication library"
-    PACKAGE_VERSION 0.0.1
+    PACKAGE_VERSION 0.4.0
     INCLUDE_DIR ${ATAUTH_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATAUTH_SOURCES}
     DEPS json mbedtls atlogger atcommons atchops atclient
@@ -49,7 +42,7 @@ endif()
 build_atsdk_package(
     PACKAGE_NAME atauth
     PACKAGE_DESCRIPTION "Atsign technology authentication library"
-    PACKAGE_VERSION 0.0.1
+    PACKAGE_VERSION 0.4.0
     PACKAGE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     INCLUDE_DIR ${ATAUTH_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATAUTH_SOURCES}

@@ -1,349 +1,297 @@
 #include "apkam_keys.h"
 #include "atchops/aes.h"
-#include "atchops/aes_ctr.h"
 #include "atchops/base64.h"
-#include "atchops/iv.h"
 #include "atchops/rsa_key.h"
 #include "atclient/atkeys.h"
 #include "atlogger/atlogger.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define TAG "atauth_apkam"
 
-void atauth_apkam_keys_init(struct atauth_apkam_keys *keys) {
-  keys->apkam_symmetric_key_bytes = NULL;
-  keys->apkam_symmetric_key_base64 = NULL;
-  keys->pkam_public_key_base64 = NULL;
-  keys->pkam_private_key_base64 = NULL;
-  keys->encrypt_public_key_base64 = NULL;
-  keys->encrypt_private_key_base64 = NULL;
-  keys->self_encryption_key_bytes = NULL;
-  keys->self_encryption_key_base64 = NULL;
-  keys->encrypted_encrypt_private_key_base64 = NULL;
-  keys->encrypted_encrypt_private_iv_base64 = NULL;
-  keys->encrypted_self_encryption_key_base64 = NULL;
-  keys->encrypted_self_encryption_key_iv_base64 = NULL;
+// SYMMETRIC KEY
+
+void atauth_apkam_symmetric_key_init(struct atauth_apkam_symmetric_key *key) {
+  key->symmetric_key_raw = NULL;
+  key->symmetric_key_base64 = NULL;
+  key->encrypted_symmetric_key_base64 = NULL;
+  key->symmetric_key_raw_len = 0;
+  key->symmetric_key_base64_len = 0;
+  key->encrypted_symmetric_key_base64_len = 0;
 }
 
-void atauth_apkam_keys_free(struct atauth_apkam_keys *keys) {
-  if (keys->apkam_symmetric_key_bytes != NULL) {
-    free(keys->apkam_symmetric_key_bytes);
-    keys->apkam_symmetric_key_bytes = NULL;
-  }
-  if (keys->apkam_symmetric_key_base64 != NULL) {
-    free(keys->apkam_symmetric_key_base64);
-    keys->apkam_symmetric_key_base64 = NULL;
-  }
-  if (keys->pkam_public_key_base64 != NULL) {
-    free(keys->pkam_public_key_base64);
-    keys->pkam_public_key_base64 = NULL;
-  }
-  if (keys->pkam_private_key_base64 != NULL) {
-    free(keys->pkam_private_key_base64);
-    keys->pkam_private_key_base64 = NULL;
-  }
-  if (keys->encrypt_public_key_base64 != NULL) {
-    free(keys->encrypt_public_key_base64);
-    keys->encrypt_public_key_base64 = NULL;
-  }
-  if (keys->encrypt_private_key_base64 != NULL) {
-    free(keys->encrypt_private_key_base64);
-    keys->encrypt_private_key_base64 = NULL;
-  }
-  if (keys->self_encryption_key_bytes != NULL) {
-    free(keys->self_encryption_key_bytes);
-    keys->self_encryption_key_bytes = NULL;
-  }
-  if (keys->self_encryption_key_base64 != NULL) {
-    free(keys->self_encryption_key_base64);
-    keys->self_encryption_key_base64 = NULL;
-  }
-  if (keys->encrypted_encrypt_private_key_base64 != NULL) {
-    free(keys->encrypted_encrypt_private_key_base64);
-    keys->encrypted_encrypt_private_key_base64 = NULL;
-  }
-  if (keys->encrypted_encrypt_private_iv_base64 != NULL) {
-    free(keys->encrypted_encrypt_private_iv_base64);
-    keys->encrypted_encrypt_private_iv_base64 = NULL;
-  }
-  if (keys->encrypted_self_encryption_key_base64 != NULL) {
-    free(keys->encrypted_self_encryption_key_base64);
-    keys->encrypted_self_encryption_key_base64 = NULL;
-  }
-  if (keys->encrypted_self_encryption_key_iv_base64 != NULL) {
-    free(keys->encrypted_self_encryption_key_iv_base64);
-    keys->encrypted_self_encryption_key_iv_base64 = NULL;
-  }
-}
+int atauth_apkam_symmetric_key_generate(struct atauth_apkam_symmetric_key *key,
+                                        const atchops_rsa_key_public_key *default_encryption_public_key) {
+  int ret;
+  size_t cipher_text_len = 256; // size for rsa 2048 encrypt
+  unsigned char cipher_text[cipher_text_len];
 
-int atauth_apkam_keys_generate_all(struct atauth_apkam_keys *keys) {
-  int ret = 0;
-
-  const size_t AES256_SIZE = 32; // in bytes
-  size_t AES256_B64_SIZE = atchops_base64_encoded_size(AES256_SIZE);
-  const size_t RSA2048_SIZE = 256; // in bytes
-  size_t RSA2048_B64_SIZE = atchops_base64_encoded_size(RSA2048_SIZE);
-
-  // Generate APKAM Symmetric Key
-
-  keys->apkam_symmetric_key_bytes = malloc(AES256_SIZE);
+  key->symmetric_key_raw_len = ATCHOPS_AES_256 / 8;
+  key->symmetric_key_raw = malloc(sizeof(unsigned char) * (key->symmetric_key_raw_len));
+  // NULL checked by function
+  ret = atchops_aes_generate_key(key->symmetric_key_raw, ATCHOPS_AES_256);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate APKAM symmetric key\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate symmetric key\n");
     goto exit;
   }
 
-  ret = atchops_aes_generate_key(keys->apkam_symmetric_key_bytes, ATCHOPS_AES_256);
+  key->symmetric_key_base64_len = atchops_base64_encoded_size(key->symmetric_key_raw_len);
+  key->symmetric_key_base64 = malloc(sizeof(char) * (key->symmetric_key_base64_len + 1));
+  // NULL checked by function
+  ret = atchops_base64_encode(key->symmetric_key_raw, key->symmetric_key_raw_len, key->symmetric_key_base64,
+                              key->symmetric_key_base64_len, &key->symmetric_key_base64_len);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate APKAM symmetric key\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to base64 encode symmetric key iv\n");
     goto exit;
   }
 
-  // base64 encoded APKAM symmetric key
-
-  keys->apkam_symmetric_key_base64 = malloc(sizeof(char) * (AES256_B64_SIZE + 1));
+  ret = atchops_rsa_encrypt(default_encryption_public_key, (unsigned char *)key->symmetric_key_base64,
+                            key->symmetric_key_base64_len, cipher_text);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate APKAM symmetric key base64\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encrypt symmetric key: %d\n", ret);
     goto exit;
   }
 
-  size_t apkam_symmetric_key_base64_len;
-  ret = atchops_base64_encode(keys->apkam_symmetric_key_bytes, AES256_SIZE, keys->apkam_symmetric_key_base64,
-                              AES256_B64_SIZE, &apkam_symmetric_key_base64_len);
+  // base64 encode encrypted symmetric key
+  key->encrypted_symmetric_key_base64_len = atchops_base64_encoded_size(cipher_text_len);
+  key->encrypted_symmetric_key_base64 = malloc(sizeof(char) * (key->encrypted_symmetric_key_base64_len + 1));
+  // NULL checked by function
+  ret = atchops_base64_encode(cipher_text, cipher_text_len, key->encrypted_symmetric_key_base64,
+                              key->encrypted_symmetric_key_base64_len, &key->encrypted_symmetric_key_base64_len);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to base64 encode APKAM symmetric key\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to base64 encode symmetric key iv\n");
     goto exit;
   }
-  keys->apkam_symmetric_key_base64[apkam_symmetric_key_base64_len] = 0;
+  key->symmetric_key_base64[key->symmetric_key_base64_len] = 0;
+  memset(cipher_text, 0, cipher_text_len);
 
-  // generate pkam keys
-  ret = atchops_rsa_key_generate_base64(&keys->pkam_public_key_base64, &keys->pkam_private_key_base64);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate PKAM key pair\n");
-    goto exit;
-  }
-
-  // generate encrypt keys
-  ret = atchops_rsa_key_generate_base64(&keys->encrypt_public_key_base64, &keys->encrypt_private_key_base64);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate encrypt key pair\n");
-    goto exit;
-  }
-
-  // generate self encryption key
-  keys->self_encryption_key_bytes = malloc(AES256_SIZE);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate self encryption key\n");
-    goto exit;
-  }
-
-  ret = atchops_aes_generate_key(keys->self_encryption_key_bytes, ATCHOPS_AES_256);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate self encryption key\n");
-    goto exit;
-  }
-
-  // base64 encoded self encryption key
-
-  keys->self_encryption_key_base64 = malloc(sizeof(char) * (AES256_B64_SIZE + 1));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate self encryption key base64\n");
-    goto exit;
-  }
-
-  size_t self_encryption_key_base64_len;
-  ret = atchops_base64_encode(keys->self_encryption_key_bytes, AES256_SIZE, keys->self_encryption_key_base64,
-                              AES256_B64_SIZE, &self_encryption_key_base64_len);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to base64 encode self encryption key\n");
-    goto exit;
-  }
-  keys->self_encryption_key_base64[self_encryption_key_base64_len] = 0;
-
-  // generate encrypt private iv
-  unsigned char encrypt_private_iv[ATCHOPS_IV_BUFFER_SIZE];
-  ret = atchops_iv_generate(encrypt_private_iv);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate encrypt private key iv\n");
-    goto exit;
-  }
-
-  // base64 encode encrypt private iv
-  size_t encrypt_private_iv_base64_len = atchops_base64_encoded_size(ATCHOPS_IV_BUFFER_SIZE);
-  keys->encrypted_encrypt_private_iv_base64 = malloc(sizeof(char) * (encrypt_private_iv_base64_len + 1));
-  if (keys->encrypted_encrypt_private_iv_base64 == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Failed to allocate base64 encoded, encrypted encrypt private iv\n");
-    ret = 1;
-    goto exit;
-  }
-
-  size_t encrypt_private_iv_base64_olen;
-  ret = atchops_base64_encode(encrypt_private_iv, ATCHOPS_IV_BUFFER_SIZE, keys->encrypted_encrypt_private_iv_base64,
-                              encrypt_private_iv_base64_len, &encrypt_private_iv_base64_olen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to base64 encode encrypted encrypt private iv\n");
-    goto exit;
-  }
-  if (encrypt_private_iv_base64_olen > encrypt_private_iv_base64_len) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Failed to base64 encode encrypted encrypt private iv: output exceeds allocated length\n");
-  }
-  keys->encrypted_encrypt_private_iv_base64[encrypt_private_iv_base64_len] = 0;
-
-  // encrypt encrypt private key
-  size_t encrypt_private_key_base64_cipher_len = atchops_aes_ctr_ciphertext_size(RSA2048_B64_SIZE);
-  unsigned char *encrypt_private_key_base64_cipher = malloc(encrypt_private_key_base64_cipher_len);
-
-  if (encrypt_private_key_base64_cipher == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate encrypt private key ciphertext\n");
-    goto exit;
-  }
-
-  size_t encrypt_private_key_base64_cipher_olen;
-  ret = atchops_aes_ctr_encrypt(keys->apkam_symmetric_key_bytes, ATCHOPS_AES_256, encrypt_private_iv,
-                                (unsigned char *)keys->encrypt_private_key_base64, RSA2048_B64_SIZE,
-                                encrypt_private_key_base64_cipher, encrypt_private_key_base64_cipher_len,
-                                &encrypt_private_key_base64_cipher_olen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encrypt encrypt private key\n");
-    free(encrypt_private_key_base64_cipher);
-    goto exit;
-  }
-
-  // base64 encode encrypted encrypt private key
-
-  size_t encrypted_encrypt_private_key_base64_len = atchops_base64_encoded_size(encrypt_private_key_base64_cipher_olen);
-  keys->encrypted_encrypt_private_key_base64 = malloc(encrypted_encrypt_private_key_base64_len);
-  if (keys->encrypted_encrypt_private_key_base64 == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Failed to allocate base64 encoded, encrypted encrypt private key\n");
-    free(encrypt_private_key_base64_cipher);
-    goto exit;
-  }
-
-  ret = atchops_base64_encode(encrypt_private_key_base64_cipher, encrypt_private_key_base64_cipher_olen,
-                              keys->encrypted_encrypt_private_key_base64, encrypted_encrypt_private_key_base64_len,
-                              &keys->encrypted_encrypt_private_key_base64_len);
-  free(encrypt_private_key_base64_cipher);
-
-  // generate self encryption iv
-  unsigned char self_encrypt_iv[ATCHOPS_IV_BUFFER_SIZE];
-  ret = atchops_iv_generate(self_encrypt_iv);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate self encryption key iv\n");
-    goto exit;
-  }
-
-  // encrypt self encryption key
-
-  size_t self_encryption_key_base64_cipher_len = atchops_aes_ctr_ciphertext_size(AES256_B64_SIZE);
-  unsigned char *self_encryption_key_base64_cipher = malloc(self_encryption_key_base64_cipher_len);
-
-  if (self_encryption_key_base64_cipher == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate self encryption key ciphertext\n");
-    goto exit;
-  }
-
-  size_t self_encryption_key_base64_cipher_olen;
-  ret = atchops_aes_ctr_encrypt(keys->apkam_symmetric_key_bytes, ATCHOPS_AES_256, self_encrypt_iv,
-                                (unsigned char *)keys->self_encryption_key_base64, AES256_B64_SIZE,
-                                self_encryption_key_base64_cipher, self_encryption_key_base64_cipher_len,
-                                &self_encryption_key_base64_cipher_olen);
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encrypt self encryption key\n");
-    free(self_encryption_key_base64_cipher);
-    goto exit;
-  }
-
-  // base64 encode encrypted self encryption key
-
-  size_t encrypted_self_encryption_key_base64_len = atchops_base64_encoded_size(self_encryption_key_base64_cipher_olen);
-  keys->encrypted_self_encryption_key_base64 = malloc(encrypted_self_encryption_key_base64_len);
-  if (keys->encrypted_self_encryption_key_base64 == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Failed to allocate base64 encoded, encrypted self encryption key\n");
-    free(self_encryption_key_base64_cipher);
-    goto exit;
-  }
-
-  ret = atchops_base64_encode(self_encryption_key_base64_cipher, self_encryption_key_base64_cipher_olen,
-                              keys->encrypted_self_encryption_key_base64, encrypted_self_encryption_key_base64_len,
-                              &keys->encrypted_self_encryption_key_base64_len);
-  free(self_encryption_key_base64_cipher);
-
-  goto success;
 exit:
-  atauth_apkam_keys_free(keys);
-success:
+  if (ret != 0) {
+    atauth_apkam_symmetric_key_free(key);
+  }
   return ret;
 }
 
-int atauth_apkam_keys_create_atkeys(const struct atauth_apkam_keys *keys, atclient_atkeys **atkeys_out) {
-  if (atkeys_out == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkeys_out parameter is and cannot be NULL\n");
-    return 1;
+void atauth_apkam_symmetric_key_free(struct atauth_apkam_symmetric_key *key) {
+  if (key->symmetric_key_raw != NULL) {
+    free(key->symmetric_key_raw);
   }
-
-  atclient_atkeys *atkeys = malloc(sizeof(atclient_atkeys));
-  if (atkeys == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate atclient_atkeys\n");
-    return 1;
+  if (key->symmetric_key_base64 != NULL) {
+    free(key->symmetric_key_base64);
   }
+  if (key->encrypted_symmetric_key_base64 != NULL) {
+    free(key->encrypted_symmetric_key_base64);
+  }
+  atauth_apkam_symmetric_key_init(key);
+}
 
+// FIRST ENROLLMENT
+
+void atauth_generated_first_enrollment_keys_init(struct atauth_generated_first_enrollment_keys *keys) {
+  keys->apkam_public_key = NULL;
+  keys->apkam_private_key = NULL;
+  keys->encrypt_public_key = NULL;
+  keys->encrypt_private_key = NULL;
+  keys->self_encryption_key_raw = NULL;
+  keys->self_encryption_key_raw_len = 0;
+  keys->self_encryption_key_base64 = NULL;
+  keys->self_encryption_key_base64_len = 0;
+}
+
+int atauth_generated_first_enrollment_keys_generate(struct atauth_generated_first_enrollment_keys *keys) {
   int ret;
-  // set the base64 values and populate the raw rsa numbers
-  ret = atclient_atkeys_set_pkam_public_key_base64(atkeys, (char *)keys->pkam_public_key_base64,
-                                                   strlen((char *)keys->pkam_public_key_base64));
+  ret = atchops_rsa_key_generate_base64(&keys->apkam_public_key, &keys->apkam_private_key);
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate apkam key pair\n");
+    goto exit;
+  }
+  ret = atchops_rsa_key_generate_base64(&keys->encrypt_public_key, &keys->encrypt_private_key);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate default encryption key pair\n");
+    goto exit;
+  }
+  keys->self_encryption_key_raw_len = ATCHOPS_AES_256 / 8; // bits to bytes
+  keys->self_encryption_key_raw = malloc(sizeof(unsigned char) * (keys->self_encryption_key_raw_len));
+  // function already has a built in check for NULL
+  ret = atchops_aes_generate_key(keys->self_encryption_key_raw, ATCHOPS_AES_256);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate self encryption key pair\n");
+    goto exit;
+  }
+  keys->self_encryption_key_base64_len = atchops_base64_encoded_size(keys->self_encryption_key_raw_len);
+  keys->self_encryption_key_base64 = malloc(sizeof(char) * keys->self_encryption_key_base64_len);
+  // function already has a built in check for NULL
+  ret = atchops_base64_encode(keys->self_encryption_key_raw, keys->self_encryption_key_raw_len,
+                              keys->self_encryption_key_base64, keys->self_encryption_key_base64_len,
+                              &keys->self_encryption_key_base64_len);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to base64 encode self encryption key pair\n");
+    goto exit;
+  }
+exit:
+  if (ret != 0) {
+    atauth_generated_first_enrollment_keys_free(keys);
+  }
+  return ret;
+}
+
+int atauth_generated_first_enrollment_keys_populate_atkeys(
+    const struct atauth_generated_first_enrollment_keys *generated_keys, atclient_atkeys *atkeys) {
+  int ret;
+  ret = atclient_atkeys_set_pkam_private_key_base64(atkeys, generated_keys->apkam_private_key,
+                                                    strlen(generated_keys->apkam_private_key));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to load atkeys with apkam private key\n");
     return ret;
   }
-  ret = atclient_atkeys_populate_pkam_public_key(atkeys, (char *)keys->pkam_public_key_base64,
-                                                 strlen((char *)keys->pkam_public_key_base64));
+  ret = atclient_atkeys_set_pkam_public_key_base64(atkeys, generated_keys->apkam_public_key,
+                                                   strlen(generated_keys->apkam_public_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to load atkeys with apkam public key\n");
     return ret;
   }
-  ret = atclient_atkeys_set_pkam_private_key_base64(atkeys, (char *)keys->pkam_private_key_base64,
-                                                    strlen((char *)keys->pkam_private_key_base64));
+  ret = atclient_atkeys_set_encrypt_private_key_base64(atkeys, generated_keys->encrypt_private_key,
+                                                       strlen(generated_keys->encrypt_private_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to load atkeys with encrypt private key\n");
     return ret;
   }
-  ret = atclient_atkeys_populate_pkam_private_key(atkeys, (char *)keys->pkam_private_key_base64,
-                                                  strlen((char *)keys->pkam_private_key_base64));
+  ret = atclient_atkeys_set_encrypt_public_key_base64(atkeys, generated_keys->encrypt_public_key,
+                                                      strlen(generated_keys->encrypt_public_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to load atkeys with encrypt public key\n");
     return ret;
   }
-  ret = atclient_atkeys_set_encrypt_public_key_base64(atkeys, (char *)keys->pkam_public_key_base64,
-                                                      strlen((char *)keys->encrypt_public_key_base64));
+  ret = atclient_atkeys_populate_pkam_private_key(atkeys, generated_keys->apkam_private_key,
+                                                  strlen(generated_keys->apkam_private_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with apkam private key\n");
     return ret;
   }
-  ret = atclient_atkeys_populate_encrypt_public_key(atkeys, (char *)keys->pkam_public_key_base64,
-                                                    strlen((char *)keys->encrypt_public_key_base64));
+  ret = atclient_atkeys_populate_pkam_public_key(atkeys, generated_keys->apkam_public_key,
+                                                 strlen(generated_keys->apkam_public_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with apkam public key\n");
     return ret;
   }
-  ret = atclient_atkeys_set_encrypt_private_key_base64(atkeys, (char *)keys->pkam_private_key_base64,
-                                                       strlen((char *)keys->encrypt_private_key_base64));
+  ret = atclient_atkeys_populate_encrypt_private_key(atkeys, generated_keys->encrypt_private_key,
+                                                     strlen(generated_keys->encrypt_private_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with encrypt private key\n");
     return ret;
   }
-  ret = atclient_atkeys_populate_encrypt_private_key(atkeys, (char *)keys->pkam_private_key_base64,
-                                                     strlen((char *)keys->encrypt_private_key_base64));
+  ret = atclient_atkeys_populate_encrypt_public_key(atkeys, generated_keys->encrypt_public_key,
+                                                    strlen(generated_keys->encrypt_public_key));
   if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with encrypt public key\n");
     return ret;
   }
-  ret = atclient_atkeys_set_apkam_symmetric_key_base64(atkeys, keys->apkam_symmetric_key_base64,
-                                                       strlen((char *)keys->apkam_symmetric_key_base64));
+  ret = atclient_atkeys_set_self_encryption_key_base64(atkeys, generated_keys->self_encryption_key_base64,
+                                                       generated_keys->self_encryption_key_base64_len);
   if (ret != 0) {
-    return ret;
-  }
-  ret = atclient_atkeys_set_self_encryption_key_base64(atkeys, keys->self_encryption_key_base64,
-                                                       strlen((char *)keys->self_encryption_key_base64));
-  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with self encryption key\n");
     return ret;
   }
 
-  *atkeys_out = atkeys;
   return 0;
+}
+
+void atauth_generated_first_enrollment_keys_free(struct atauth_generated_first_enrollment_keys *keys) {
+  if (keys->apkam_public_key != NULL) {
+    free(keys->apkam_public_key);
+  }
+  if (keys->apkam_private_key != NULL) {
+    free(keys->apkam_private_key);
+  }
+  if (keys->encrypt_public_key != NULL) {
+    free(keys->encrypt_public_key);
+  }
+  if (keys->encrypt_private_key != NULL) {
+    free(keys->encrypt_private_key);
+  }
+  if (keys->self_encryption_key_raw != NULL) {
+    free(keys->self_encryption_key_raw);
+  }
+  if (keys->self_encryption_key_base64 != NULL) {
+    free(keys->self_encryption_key_base64);
+  }
+  atauth_generated_first_enrollment_keys_init(keys);
+}
+
+// APKAM ENROLLMENT
+
+void atauth_generated_apkam_enrollment_keys_init(struct atauth_generated_apkam_enrollment_keys *keys) {
+  keys->apkam_public_key = NULL;
+  keys->apkam_private_key = NULL;
+  atauth_apkam_symmetric_key_init(&keys->apkam_symmetric_key);
+}
+int atauth_generated_apkam_enrollment_keys_generate(struct atauth_generated_apkam_enrollment_keys *keys,
+                                                    const atchops_rsa_key_public_key *default_encryption_public_key) {
+  int ret;
+
+  ret = atchops_rsa_key_generate_base64(&keys->apkam_public_key, &keys->apkam_private_key);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate apkam key pair\n");
+    goto exit;
+  }
+  ret = atauth_apkam_symmetric_key_generate(&keys->apkam_symmetric_key, default_encryption_public_key);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate & encrypt apkam symmetric key\n");
+    goto exit;
+  }
+exit:
+  if (ret != 0) {
+    atauth_generated_apkam_enrollment_keys_free(keys);
+  }
+  return ret;
+}
+
+int atauth_generated_apkam_enrollment_keys_populate_atkeys(
+    const struct atauth_generated_apkam_enrollment_keys *generated_keys, atclient_atkeys *atkeys) {
+  int ret;
+  ret = atclient_atkeys_set_pkam_private_key_base64(atkeys, generated_keys->apkam_private_key,
+                                                    strlen(generated_keys->apkam_private_key));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to load atkeys with apkam private key\n");
+    return ret;
+  }
+  ret = atclient_atkeys_set_pkam_public_key_base64(atkeys, generated_keys->apkam_public_key,
+                                                   strlen(generated_keys->apkam_public_key));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to load atkeys with apkam public key\n");
+    return ret;
+  }
+  ret = atclient_atkeys_populate_pkam_private_key(atkeys, generated_keys->apkam_private_key,
+                                                  strlen(generated_keys->apkam_private_key));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with apkam private key\n");
+    return ret;
+  }
+  ret = atclient_atkeys_populate_pkam_public_key(atkeys, generated_keys->apkam_public_key,
+                                                 strlen(generated_keys->apkam_public_key));
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with apkam public key\n");
+    return ret;
+  }
+  ret = atclient_atkeys_set_apkam_symmetric_key_base64(atkeys, generated_keys->apkam_symmetric_key.symmetric_key_base64,
+                                                       generated_keys->apkam_symmetric_key.symmetric_key_base64_len);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate atkeys with apkam symmetric key\n");
+    return ret;
+  }
+
+  return 0;
+}
+
+void atauth_generated_apkam_enrollment_keys_free(struct atauth_generated_apkam_enrollment_keys *keys) {
+  if (keys->apkam_public_key != NULL) {
+    free(keys->apkam_public_key);
+    keys->apkam_public_key = NULL;
+  }
+  if (keys->apkam_private_key != NULL) {
+    free(keys->apkam_private_key);
+    keys->apkam_private_key = NULL;
+  }
+  atauth_apkam_symmetric_key_free(&keys->apkam_symmetric_key);
 }

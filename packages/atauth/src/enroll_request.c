@@ -9,6 +9,20 @@
 
 #define TAG "atauth_enroll_request"
 
+// needed for onboard
+// .app_name = ATAUTH_DEFAULT_FIRST_APP_NAME,
+// .device_name = ATAUTH_DEFAULT_FIRST_DEVICE_NAME,
+// .apkam_public_key = apkam_keys.pkam_public_key_base64,
+//
+// needed for enroll
+// app_name from cli
+// device_name from cli
+//
+// encrypted APKAM symmetric key (encrypted with downloaded)
+//
+//
+// raw keys of everything else
+
 int atauth_generate_enroll_command_string(const atauth_enroll_params_t *params,
                                           const atauth_enroll_operation_t operation, char **command_string) {
   int ret = 0;
