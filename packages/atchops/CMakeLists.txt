@@ -28,7 +28,7 @@ if(ESP_PLATFORM)
   add_atsdk_espidf_component(
     PACKAGE_NAME atchops
     PACKAGE_DESCRIPTION "atchops - cryptographic hash operations"
-    PACKAGE_VERSION 0.0.1
+    PACKAGE_VERSION 0.4.0
     INCLUDE_DIR ${ATCHOPS_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATCHOPS_SOURCES}
     DEPS mbedtls atlogger
@@ -39,7 +39,7 @@ endif()
 build_atsdk_package(
     PACKAGE_NAME atchops
     PACKAGE_DESCRIPTION "atchops - cryptographic hash operations"
-    PACKAGE_VERSION 0.0.1
+    PACKAGE_VERSION 0.4.0
     PACKAGE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     INCLUDE_DIR ${ATCHOPS_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATCHOPS_SOURCES}

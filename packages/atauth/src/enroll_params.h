@@ -18,6 +18,7 @@ typedef struct {
   char *encrypted_self_encryption_key;               // apkam symmetric key encrypted seld enc key
   char *encrypted_self_encryption_key_iv;            // IV that has been used to encrypt the self encryption key
   char *encrypted_apkam_symmetric_key;
+  char *encrypted_apkam_symmetric_key_iv;
   int apkam_keys_expiry_in_millis;
 } atauth_enroll_params_t;
 
