@@ -21,7 +21,7 @@ int wait_for_enrollment(atclient *ctx, const char *atsign, const atclient_atkeys
     }
 
     if (err_msg != NULL && is_enrollment_denied(err_msg)) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "enrollment id: %s has been denied\n", atkeys->enrollment_id);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enrollment id: %s has been denied\n", atkeys->enrollment_id);
       ret = 1;
       return ret;
     }
