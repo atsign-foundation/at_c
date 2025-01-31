@@ -34,6 +34,7 @@ int main() {
 
   free(path);
 
+  mbedtls_psa_crypto_free();
   return ret;
 }
 
@@ -81,6 +82,9 @@ static int test1_pkam_no_options(const char *path) {
 
 exit: {
   atclient_authenticate_options_free(&authenticate_options);
+  atclient_free(&atclient);
+  atclient_atkeys_free(&atkeys);
+  atclient_atkeys_file_free(&atkeys_file);
   return ret;
 }
 }
