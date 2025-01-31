@@ -99,6 +99,7 @@ exit: {
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "End (%d)\n", ret);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
@@ -161,6 +162,9 @@ static int test_2_get(atclient *atclient) {
 
   goto exit;
 exit: {
+  if (value != NULL) {
+    free(value);
+  }
   atclient_atkey_free(&atkey);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_get End (%d)\n", ret);
   return ret;
@@ -306,7 +310,8 @@ static int test_6_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.is_encrypted: %d\n", atkey.metadata.is_encrypted);
 
-  if (atclient_atkey_metadata_is_is_binary_initialized(&(atkey.metadata)) && atkey.metadata.is_binary != ATKEY_ISBINARY) {
+  if (atclient_atkey_metadata_is_is_binary_initialized(&(atkey.metadata)) &&
+      atkey.metadata.is_binary != ATKEY_ISBINARY) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed is_binary comparison, got %d and expected %d\n",
                  atkey.metadata.is_binary, ATKEY_ISBINARY);
     goto exit;
