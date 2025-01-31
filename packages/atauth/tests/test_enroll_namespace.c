@@ -63,6 +63,7 @@ static int test_1a_parse_enroll_namespace_valid() {
                  ns.permissions[1]);
     return 1;
   }
+  enroll_namespace_free(&ns);
   return 0;
 }
 
@@ -162,6 +163,7 @@ static int test_3a_to_json() {
                  expected_json_3a, json);
   }
 
+  free(json);
   free(ns.namespaces[0]);
   free(ns.namespaces[1]);
   free(ns.namespaces);
