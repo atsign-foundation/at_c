@@ -124,6 +124,7 @@ int main(int argc, char *argv[]) {
   goto exit;
 exit: {
   atclient_connection_free(&root_conn);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
