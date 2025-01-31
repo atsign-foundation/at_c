@@ -61,6 +61,7 @@ int main() {
 exit: {
   atclient_free(&atclient1);
   atclient_atkeys_free(&atkeys1);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
@@ -85,14 +86,14 @@ static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, con
     free(atkeystr);
   }
 
-  for (size_t i = 0; i < atkey_array_len; i++) {
-    atclient_atkey_free(&atkey_array[i]);
-  }
-
   ret = 0;
   goto exit;
 exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_1_atclient_get_atkeys: %d\n", ret);
+  for (size_t i = 0; i < atkey_array_len; i++) {
+    atclient_atkey_free(atkey_array + i);
+  }
+  free(atkey_array);
   return ret;
 }
 }
@@ -161,6 +162,10 @@ static int test_4_atclient_get_atkeys_null_regex(atclient *ctx, const char *scan
   goto exit;
 exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_4_atclient_get_atkeys_null_regex: %d\n", ret);
+  for (size_t i = 0; i < arrlen; i++) {
+    atclient_atkey_free(arr + i);
+  }
+  free(arr);
   return ret;
 }
 }
