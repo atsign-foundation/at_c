@@ -2,15 +2,15 @@
 #include <atclient/atkeys.h>
 #include <atclient/atkeys_file.h>
 #include <atlogger/atlogger.h>
-#include <string.h>
 #include <functional_tests/config.h>
 #include <functional_tests/helpers.h>
+#include <string.h>
 
 #define TAG "test_atkeys_write"
 
 #define ATKEYS_FILE_PATH_COPY "temp_key.atKeys"
 
-int main(int argc, char *argv[]) {
+int main() {
   int ret = 1;
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
   atclient_authenticate_options authenticate_options;
   atclient_authenticate_options_init(&authenticate_options);
 
-  if ((ret = functional_tests_set_up_atkeys(&atkeys, FIRST_ATSIGN)) != 0) { // populate `atkeys` from `~/.atsign/keys/@atsign_key.atKeys`
+  if ((ret = functional_tests_set_up_atkeys(&atkeys, FIRST_ATSIGN)) !=
+      0) { // populate `atkeys` from `~/.atsign/keys/@atsign_key.atKeys`
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to populate atkeys from string\n");
     goto exit;
   }
@@ -116,9 +117,11 @@ int main(int argc, char *argv[]) {
   }
 
 exit: {
+  atclient_authenticate_options_free(&authenticate_options);
   atclient_atkeys_free(&atkeys);
   atclient_atkeys_free(&atkeys1);
   atclient_free(&atclient1);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
