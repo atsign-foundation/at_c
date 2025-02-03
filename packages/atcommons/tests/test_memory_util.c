@@ -50,6 +50,11 @@ static int test1a_valid_basic() {
   }
 
   atcommons_memlist_failure_free(&memlist);
+  if (memlist.allocated != 0) {
+    atlogger_log(TAG " 1a", ATLOGGER_LOGGING_LEVEL_ERROR, "Expected memlist.allocated to be 0, actual: %d\n",
+                 memlist.allocated);
+    return 1;
+  }
   return 0;
 }
 
