@@ -54,8 +54,6 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   char *value_raw = NULL;
   char *metadata_str = NULL;
 
-  atclient_atkey_metadata metadata;
-
   /*
    * 3. Build `llookup:` command
    */
@@ -115,7 +113,7 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
 
   metadata_str = cJSON_Print(metadata_json);
 
-  if ((ret = atclient_atkey_metadata_from_json_str(&metadata, metadata_str)) != 0) {
+  if ((ret = atclient_atkey_metadata_from_json_str(&atkey->metadata, metadata_str)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_atkey_metadata_from_json_str: %d\n", ret);
     goto exit;
   }
@@ -123,9 +121,9 @@ int atclient_get_self_key(atclient *atclient, atclient_atkey *atkey, char **valu
   /**
    * 6. Decrypt value
    */
-  if (atclient_atkey_metadata_is_iv_nonce_initialized(&metadata)) {
-    if ((ret = atchops_base64_decode(metadata.iv_nonce, strlen(metadata.iv_nonce), iv, ATCHOPS_IV_BUFFER_SIZE, NULL)) !=
-        0) {
+  if (atclient_atkey_metadata_is_iv_nonce_initialized(&atkey->metadata)) {
+    if ((ret = atchops_base64_decode(atkey->metadata.iv_nonce, strlen(atkey->metadata.iv_nonce), iv,
+                                     ATCHOPS_IV_BUFFER_SIZE, NULL)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atchops_base64_decode: %d\n", ret);
       goto exit;
     }
