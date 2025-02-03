@@ -143,6 +143,7 @@ exit: {
   atclient_free(&atclient1);
   atclient_atkeys_free(&atkeys);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "End (%d)\n", ret);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
