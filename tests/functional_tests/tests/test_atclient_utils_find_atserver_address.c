@@ -1,6 +1,7 @@
 #include <atclient/atclient_utils.h>
 #include <atlogger/atlogger.h>
 #include <functional_tests/config.h>
+#include <mbedtls/psa_util.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,7 +30,10 @@ int main() {
   ret = 0;
   goto exit;
 
-exit: { return ret; }
+exit: {
+  mbedtls_psa_crypto_free();
+  return ret;
+}
 }
 
 static int test_1_find_atserver_address_should_pass() {
