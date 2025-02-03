@@ -88,14 +88,6 @@ int main() {
   goto exit;
 
 exit: {
-  if (functional_tests_tear_down_sharedenckeys(&atclient1, SECOND_ATSIGN) != 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
-  }
-  if (functional_tests_tear_down_sharedenckeys(&atclient2, FIRST_ATSIGN) != 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
-  }
   atclient_free(&atclient1);
   atclient_atkeys_free(&atkeys1);
   atclient_free(&atclient2);

@@ -193,9 +193,6 @@ static int test_1_notify(atclient *atclient, char *notification_id) {
   goto exit;
 
 exit: {
-  if (functional_tests_tear_down_sharedenckeys(atclient, ATKEY_SHAREDWITH) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to tear down sharedenckeys: %d\n", ret);
-  }
   atclient_notify_params_free(&params);
   atclient_atkey_free(&atkey);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_notify End (%d)\n", ret);
