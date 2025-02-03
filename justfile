@@ -8,13 +8,21 @@ alias vald := valgrind-docker
 set dotenv-filename := "just.env"
 set dotenv-load
 
+postfix := quote(os() + "-" + arch())
+debug_dir := quote(justfile_directory() / "build/debug-") + postfix
+release_dir := quote(justfile_directory() / "build/release-") + postfix
+test_dir := quote(justfile_directory() / "build/test-") + postfix
+unit_dir := quote(justfile_directory() / "build/unit-") + postfix
+func_dir := quote(justfile_directory() / "build/func-") + postfix
+memcheck_dir := quote(justfile_directory() / "build/memcheck-") + postfix
+
 # SETUP COMMANDS
 
 setup: configure-test-all
   [ -f "$PWD/compile_commands.json" ] && rm $PWD/compile_commands.json || true
-  ln -s $PWD/build/test-all/compile_commands.json $PWD
+  ln -s {{test_dir}}/compile_commands.json $PWD
   [ -f "$PWD/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true
-  ln -s $PWD/build/test-all/compile_commands.json $PWD/tests
+  ln -s {{test_dir}}/compile_commands.json $PWD/tests
 
 setup-valgrind:
   docker build --platform linux/amd64 -t atc-memcheck-docker:latest -f $PWD/valgrind.Dockerfile $PWD
@@ -27,7 +35,7 @@ clean:
 # INSTALL COMMANDS
 
 install: build-debug
-  cmake: --build $PWD/build/debug --target install
+  cmake: --build {{debug_dir}} --target install
 
 # BUILD COMMANDS
 
@@ -38,36 +46,36 @@ package-source:
   cmake --workflow --preset package-source
 
 build-debug: configure-debug
-  cmake --build $PWD/build/debug
+  cmake --build {{debug_dir}}
 
 build-release: configure-release
-  cmake --build $PWD/build/release
+  cmake --build {{release_dir}}
 
 build-test-unit: configure-test-unit
-  cmake --build $PWD/build/test-unit
+  cmake --build {{unit_dir}}
 
 build-test-func: configure-test-func
-  cmake --build $PWD/build/test-func
+  cmake --build {{func_dir}}
 
 build-test-all: configure-test-all
-  cmake --build $PWD/build/test-all
+  cmake --build {{test_dir}}
 
 build-test-memcheck: configure-test-memcheck
-  cmake --build $PWD/build/test-memcheck
+  cmake --build {{memcheck_dir}}
 
 # TEST COMMANDS
 
 test-unit +ARGS='': build-test-unit
-  ctest --test-dir $PWD/build/test-unit {{ARGS}}
+  ctest --test-dir {{unit_dir}} {{ARGS}}
 
 test-func +ARGS='': build-test-func
-  ctest --test-dir $PWD/build/test-func {{ARGS}}
+  ctest --test-dir {{func_dir}} {{ARGS}}
 
 test-all +ARGS='': build-test-all
-  ctest --test-dir $PWD/build/test-all {{ARGS}}
+  ctest --test-dir {{test_dir}} {{ARGS}}
 
 memcheck +ARGS='': build-test-memcheck
-  ctest -T memcheck --test-dir $PWD/build/test-memcheck {{ARGS}}
+  ctest -T memcheck --test-dir {{memcheck_dir}} {{ARGS}}
 
 memcheck-docker +ARGS='':
   docker run --rm --platform linux/amd64 \
@@ -87,7 +95,8 @@ valgrind-docker:
 # CONFIGURE COMMANDS
 
 configure-debug:
-  cmake -B $PWD/build/debug -S $PWD \
+  cmake -B {{debug_dir}} \
+    -S $PWD \
     -G "$GENERATOR" \
     -DCMAKE_INSTALL_PREFIX="$HOME/.local/" \
     -DCMAKE_BUILD_TYPE=Debug \
@@ -97,7 +106,8 @@ configure-debug:
     -DATSDK_MEMCHECK=OFF
 
 configure-release:
-  cmake -B $PWD/build/release -S $PWD \
+  cmake -B {{release_dir}} \
+    -S $PWD \
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER=$C_COMPILER \
@@ -106,7 +116,8 @@ configure-release:
     -DATSDK_MEMCHECK=OFF
 
 configure-test-unit:
-  cmake -B $PWD/build/test-unit -S $PWD \
+  cmake -B {{unit_dir}} \
+    -S $PWD \
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
@@ -117,7 +128,8 @@ configure-test-unit:
     -DSECOND_ATSIGN="\"$SECOND_ATSIGN\""
 
 configure-test-func:
-  cmake -B $PWD/build/test-func -S $PWD \
+  cmake -B {{func_dir}} \
+    -S $PWD \
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
@@ -134,7 +146,8 @@ configure-test-func:
     -DSECOND_ATSIGN_ATSERVER_PORT=$SECOND_ATSIGN_ATSERVER_PORT
 
 configure-test-all:
-  cmake -B $PWD/build/test-all -S $PWD \
+  cmake -B {{test_dir}} \
+    -S $PWD \
     -G "$GENERATOR" \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_BUILD_TYPE=Debug \
@@ -152,7 +165,8 @@ configure-test-all:
     -DSECOND_ATSIGN_ATSERVER_PORT=$SECOND_ATSIGN_ATSERVER_PORT
 
 configure-test-memcheck:
-  cmake -B $PWD/build/test-memcheck -S $PWD \
+  cmake -B {{memcheck_dir}} \
+    -S $PWD \
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
