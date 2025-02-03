@@ -19,7 +19,7 @@
 #define MONITOR_REGEX ".*"
 
 static int get_atsign_input(int argc, char *argv[], char **atsign_input);
-static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen);
+static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign);
 
 int main(int argc, char *argv[]) {
   int ret = 1;
@@ -40,14 +40,14 @@ int main(int argc, char *argv[]) {
   atclient monitor_conn;
   atclient_monitor_init(&monitor_conn);
 
-  atclient_monitor_response *message = NULL;
+  atclient_monitor_message *message = NULL;
 
   if ((ret = get_atsign_input(argc, argv, &atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get atsign input (Example: \'./monitor -a @bob\')\n");
     goto exit;
   }
 
-  if ((ret = set_up_atkeys(&atkeys, atsign, strlen(atsign))) != 0) {
+  if ((ret = set_up_atkeys(&atkeys, atsign)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set up atkeys: %d\n", ret);
     goto exit;
   }
@@ -76,25 +76,25 @@ int main(int argc, char *argv[]) {
   size_t max_tries = 10;
   while (true) {
 
-    ret = atclient_monitor_read(&monitor_conn, &atclient2, &message, NULL);
+    ret = atclient_monitor_read(&monitor_conn, &atclient2, message, NULL);
 
     switch (message->type) {
-    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE: {
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_NONE:
+    case ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY:
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NONE\n");
       break;
-    }
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION\n");
       // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message Body: %s\n", message->notification.value);
-      if (strcmp(message->notification.id, "-1") == 0) {
+      if (strcmp(message->notification->id, "-1") == 0) {
         // ignore stats notification
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Received stats notification, ignoring it.\n");
         break;
       }
-      if (atclient_atnotification_is_decrypted_value_initialized(&message->notification)) {
+      if (atclient_atnotification_is_decrypted_value_initialized(message->notification)) {
         // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message id: %s\n", message->notification.id);
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "decrypted_value: \"%s\"\n",
-                     message->notification.decrypted_value);
+                     message->notification->decrypted_value);
       }
       tries = 1;
       break;
@@ -121,7 +121,8 @@ int main(int argc, char *argv[]) {
       break;
     }
     case ATCLIENT_MONITOR_ERROR_READ: {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_READ with error code %d\n", message->error_read.error_code);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Message type: ATCLIENT_MONITOR_ERROR_READ with error code %d\n",
+                   message->error_read.error_code);
       tries++;
       break;
     }
@@ -130,8 +131,7 @@ int main(int argc, char *argv[]) {
     if (tries >= max_tries) {
       if (!atclient_monitor_is_connected(&monitor_conn)) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "We are not connected :( attempting reconnection\n");
-        if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atsign, &atkeys, NULL)) !=
-            0) {
+        if ((ret = atclient_monitor_pkam_authenticate(&monitor_conn, atsign, &atkeys, NULL)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to authenticate monitor with PKAM\n");
           continue;
         }
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 exit: {
   atclient_atkeys_free(&atkeys);
   atclient_monitor_free(&monitor_conn);
-  atclient_monitor_response_free(message);
+  atclient_monitor_message_free(message);
   atclient_free(&atclient2);
   return ret;
 }
@@ -177,7 +177,7 @@ static int get_atsign_input(int argc, char *argv[], char **atsign_input) {
   return 0;
 }
 
-static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign, const size_t atsignlen) {
+static int set_up_atkeys(atclient_atkeys *atkeys, const char *atsign) {
   int ret = 1;
 
   const size_t atkeyspathsize = 1024;

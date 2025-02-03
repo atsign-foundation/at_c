@@ -37,7 +37,7 @@ clean:
 # INSTALL COMMANDS
 
 install: build-debug
-  cmake: --build {{debug_dir}} --target install
+  cmake --build {{debug_dir}} --target install
 
 # BUILD COMMANDS
 
