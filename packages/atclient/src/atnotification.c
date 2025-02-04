@@ -44,6 +44,9 @@ void atclient_atnotification_init(atclient_atnotification *notification) {
 }
 
 void atclient_atnotification_free(atclient_atnotification *notification) {
+  if (notification == NULL) {
+    return;
+  }
   if (atclient_atnotification_is_id_initialized(notification)) {
     atclient_atnotification_unset_id(notification);
   }
@@ -1632,21 +1635,19 @@ exit: {
 }
 
 static int atclient_atnotification_from_cjson_node(atclient_atnotification *notification, const cJSON *root) {
-  int ret = 1;
+  int ret;
 
   /*
    * 1. Validate arguments
    */
   if (notification == NULL) {
-    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification is NULL\n");
-    return ret;
+    return 1;
   }
 
   if (root == NULL) {
-    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "JSON node is NULL\n");
-    return ret;
+    return 1;
   }
 
   /*
@@ -1657,11 +1658,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (id->type != cJSON_NULL) {
       if (id->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification id is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_id(notification, id->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification id\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_id(notification);
@@ -1675,11 +1676,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (from->type != cJSON_NULL) {
       if (from->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification from is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_from(notification, from->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification from\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_from(notification);
@@ -1693,11 +1694,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (to->type != cJSON_NULL) {
       if ((to->type != cJSON_String)) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification to is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_to(notification, to->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification to\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_to(notification);
@@ -1711,11 +1712,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (key->type != cJSON_NULL) {
       if (key->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification key is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_key(notification, key->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification key\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_key(notification);
@@ -1729,11 +1730,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (value->type != cJSON_NULL) {
       if (value->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification value is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_value(notification, value->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification value\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_value(notification);
@@ -1747,11 +1748,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (operation->type != cJSON_NULL) {
       if (operation->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification operation is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_operation(notification, operation->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification operation\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_operation(notification);
@@ -1765,11 +1766,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
   if (epoch_millis != NULL) {
     if (epoch_millis->type != cJSON_Number) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification epoch_millis is not an integer\n");
-      goto exit;
+      return 1;
     }
     if ((ret = atclient_atnotification_set_epoch_millis(notification, epoch_millis->valueint)) != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification epoch_millis\n");
-      goto exit;
+      return ret;
     }
   }
 
@@ -1778,11 +1779,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (message_type->type != cJSON_NULL) {
       if (message_type->type != cJSON_String) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification message_type is not a string\n");
-        goto exit;
+        return 1;
       }
       if ((ret = atclient_atnotification_set_message_type(notification, message_type->valuestring)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification message_type\n");
-        goto exit;
+        return ret;
       }
     } else {
       atclient_atnotification_unset_message_type(notification);
@@ -1797,16 +1798,16 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     if (is_encrypted->type == cJSON_True) {
       if ((ret = atclient_atnotification_set_is_encrypted(notification, true)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification is_encrypted\n");
-        goto exit;
+        return ret;
       }
     } else if (is_encrypted->type == cJSON_False) {
       if ((ret = atclient_atnotification_set_is_encrypted(notification, false)) != 0) {
         atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification is_encrypted\n");
-        goto exit;
+        return ret;
       }
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification is_encrypted is not a boolean\n");
-      goto exit;
+      return 1;
     }
   }
 
@@ -1818,11 +1819,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
       if (enc_key_name->type != cJSON_NULL) {
         if (enc_key_name->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification enc_key_name is not a string\n");
-          goto exit;
+          return 1;
         }
         if ((ret = atclient_atnotification_set_enc_key_name(notification, enc_key_name->valuestring)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification enc_key_name\n");
-          goto exit;
+          return ret;
         }
       } else {
         atclient_atnotification_unset_enc_key_name(notification);
@@ -1838,11 +1839,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
       if (enc_algo->type != cJSON_NULL) {
         if (enc_algo->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification enc_algo is not a string\n");
-          goto exit;
+          return 1;
         }
         if ((ret = atclient_atnotification_set_enc_algo(notification, enc_algo->valuestring)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification enc_algo\n");
-          goto exit;
+          return ret;
         }
       } else {
         atclient_atnotification_unset_enc_algo(notification);
@@ -1858,11 +1859,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
       if (iv_nonce->type != cJSON_NULL) {
         if (iv_nonce->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification iv_nonce is not a string\n");
-          goto exit;
+          return 1;
         }
         if ((ret = atclient_atnotification_set_iv_nonce(notification, iv_nonce->valuestring)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification iv_nonce\n");
-          goto exit;
+          return ret;
         }
       } else {
         atclient_atnotification_unset_iv_nonce(notification);
@@ -1878,11 +1879,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
       if (ske_enc_key_name->type != cJSON_NULL) {
         if (ske_enc_key_name->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification ske_enc_key_name is not a string\n");
-          goto exit;
+          return 1;
         }
         if ((ret = atclient_atnotification_set_ske_enc_key_name(notification, ske_enc_key_name->valuestring)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ske_enc_key_name\n");
-          goto exit;
+          return ret;
         }
       } else {
         atclient_atnotification_unset_ske_enc_key_name(notification);
@@ -1898,11 +1899,11 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
       if (ske_enc_algo->type != cJSON_NULL) {
         if (ske_enc_algo->type != cJSON_String) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification ske_enc_algo is not a string\n");
-          goto exit;
+          return 1;
         }
         if ((ret = atclient_atnotification_set_ske_enc_algo(notification, ske_enc_algo->valuestring)) != 0) {
           atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notification ske_enc_algo\n");
-          goto exit;
+          return ret;
         }
       } else {
         atclient_atnotification_unset_ske_enc_algo(notification);
@@ -1913,8 +1914,6 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
     }
   }
 
-  ret = 0;
-  goto exit;
-exit: { return ret; }
+  return 0;
 }
 #endif
