@@ -24,8 +24,6 @@
 
 #define max(a, b) (a > b ? a : b)
 
-static void free_atserver_message(void *ptr);
-
 void atclient_monitor_message_init(atclient_monitor_message *message) {
   memset(message, 0, sizeof(atclient_monitor_message));
   // ensure these fields are initalized as NULL on systems where NULL != 0
@@ -36,11 +34,14 @@ void atclient_monitor_message_init(atclient_monitor_message *message) {
 void atclient_monitor_message_free(atclient_monitor_message *message) {
   switch (message->type) {
   case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION:
-  case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION:
   case ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION:
+  case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION:
     atclient_atnotification_free(message->notification);
+    free(message->notification);
   default:
-    free_atserver_message(message->atserver_message);
+    if (message->atserver_message != NULL) {
+      atserver_message_free((struct atserver_message *)message->atserver_message);
+    }
     break;
   }
   message->atserver_message = NULL;
@@ -115,13 +116,6 @@ exit: {
 }
 }
 
-static void free_atserver_message(void *ptr) {
-  if (ptr != NULL) {
-    atserver_message_free((struct atserver_message *)ptr);
-    free(ptr);
-  }
-}
-
 int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message *message,
                           atclient_monitor_hooks *hooks) {
 
@@ -168,19 +162,27 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
 
   ret = populate_monitor_message(message);
   if (ret != 0) {
-    free_atserver_message(message->atserver_message);
+    atserver_message_free((struct atserver_message *)message->atserver_message);
+    free(message->atserver_message);
+    message->atserver_message = NULL;
     return ret;
   } else if (message->type != ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION) {
     return 0;
   }
 
-  // Can only be a success notification at this point, time to decrypt
+  if (message->notification->is_encrypted == false) {
+    return 0;
+  }
+
+  // Can only be an encrypted success notification at this point, time to decrypt
   if (hooks != NULL && hooks->pre_decrypt_notification != NULL) {
     ret = hooks->pre_decrypt_notification();
     if (ret != 0) {
       message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to run pre_decrypt_notification hook\n");
-      free_atserver_message(message->atserver_message);
+      atserver_message_free((struct atserver_message *)message->atserver_message);
+      free(message->atserver_message);
+      message->atserver_message = NULL;
       return ret;
     }
   }
@@ -191,7 +193,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     if (ret != 0) {
       message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to run post_decrypt_notification hook\n");
-      free_atserver_message(message->atserver_message);
+      atserver_message_free((struct atserver_message *)message->atserver_message);
+      free(message->atserver_message);
+      message->atserver_message = NULL;
       return ret;
     }
   }
@@ -199,7 +203,9 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   if (ret != 0) {
     message->type = ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt notification");
-    free_atserver_message(message->atserver_message);
+    atserver_message_free((struct atserver_message *)message->atserver_message);
+    free(message->atserver_message);
+    message->atserver_message = NULL;
   }
   return ret;
 }
@@ -213,6 +219,7 @@ int populate_monitor_message(atclient_monitor_message *message) {
   const char *token = atserver_message_get_token(*atserver_message);
   size_t token_len = atserver_message->token_len;
   if (token == NULL || token_len == 0) {
+    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atserver_message has no token prefix\n");
     return 1;
   }
@@ -235,31 +242,30 @@ int populate_monitor_message(atclient_monitor_message *message) {
     break;
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown token type: %.*s\n", token_len, token);
+  message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
   return 2;
 }
 
 int populate_monitor_data_message(atclient_monitor_message *message) {
+  message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
   struct atserver_message *atserver_message = message->atserver_message;
   char *body = atserver_message_get_body(*atserver_message);
   if (body == NULL) {
-    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Empty body for atserver data response\n");
     return 1;
   }
-  message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE;
   message->data_response = body;
   return 0;
 }
 
 int populate_monitor_error_message(atclient_monitor_message *message) {
+  message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
   struct atserver_message *atserver_message = message->atserver_message;
   char *body = atserver_message_get_body(*atserver_message);
   if (body == NULL) {
-    message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_EMPTY;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Empty body for atserver error response\n");
     return 1;
   }
-  message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_ERROR_RESPONSE;
   message->error_response = body;
   return 0;
 }
@@ -270,6 +276,7 @@ int populate_monitor_notification_message(atclient_monitor_message *message) {
   char *body = atserver_message_get_body(*atserver_message);
   if (body == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Empty body for atserver error response\n");
+    message->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
     return 1;
   }
   message->notification = malloc(sizeof(atclient_atnotification));
@@ -277,11 +284,12 @@ int populate_monitor_notification_message(atclient_monitor_message *message) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for notification\n");
     return 2;
   }
+  atclient_atnotification_init(message->notification);
 
   int ret = atclient_atnotification_from_json_str(message->notification, body);
   if (ret != 0) {
     message->type = ATCLIENT_MONITOR_ERROR_PARSE_NOTIFICATION;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse the notification\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse the notification body: %s\n", body);
   } else {
     message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION;
   }

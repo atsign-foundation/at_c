@@ -70,6 +70,9 @@ struct atserver_message atserver_message_parse(char *buffer, size_t len) {
 }
 
 void atserver_message_free(struct atserver_message *message) {
+  if (message == NULL) {
+    return;
+  }
   if (message->buffer != NULL) {
     free(message->buffer);
     message->buffer = NULL;
