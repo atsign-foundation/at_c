@@ -15,15 +15,42 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install automake autoconf libtool libsubunit-dev valgrind
+
       - name: Build atSDK
         run: |
-          cmake -S . -B build -DATSDK_BUILD_TESTS="unit" -DCMAKE_BUILD_TYPE="Debug"
+          cmake -S . -B build \
+            -DATSDK_BUILD_TESTS="unit" \
+            -DCMAKE_BUILD_TYPE="Debug" \
+            -DCMAKE_C_FLAGS="-std=c99 -Wall -Wextra -Werror-implicit-function-declaration" \
+            -DATSDK_MEMCHECK=ON
+
           cmake --build build --target all
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure --timeout 5 -VV
 
+      # Unit tests are so fast we can run them serially and they will still
+      # finish before the functional tests.
+      # Long timeout because RSA keygen test sometimes takes a while
+      - name: Run memcheck tests
+        run: ctest -T memcheck --test-dir build --output-on-failure --timeout 60 -VV
+
   functional-tests:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - type: normal
+            flags: ""
+            valgrind: false
+          - type: memcheck
+            flags: "-T memcheck"
+            valgrind: true
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -55,11 +82,19 @@ jobs:
           cmake --build build
           for i in {1..3}; do ./build/check_docker_readiness && break || sleep 5; done
 
+      - name: Install valgrind
+        if: ${{ matrix.valgrind == true }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install automake autoconf libtool libsubunit-dev valgrind
+
       - name: Install atSDK
         run: |
           cmake -S . -B build                                       \
             -DATSDK_BUILD_TESTS="func"                              \
             -DCMAKE_BUILD_TYPE=Debug                                \
+            -DATSDK_MEMCHECK=ON                                     \
+            -DCMAKE_C_FLAGS="-std=c99 -Wall -Wextra -Werror-implicit-function-declaration" \
             -DATDIRECTORY_HOST="\"vip.ve.atsign.zone\""             \
             -DATDIRECTORY_PORT=64                                   \
             -DFIRST_ATSIGN="\"@alice🛠\""                           \
@@ -71,9 +106,9 @@ jobs:
 
           cmake --build build
 
-      - name: Run Functional Tests
+      - name: Run ${{ matrix.type }} Functional Tests
         run: |
-          ctest --test-dir build/tests/functional_tests -VV --timeout 90
+          ctest ${{ matrix.flags }} --test-dir build  --output-on-failure --timeout 90 -VV
 
   build-examples:
     runs-on: "ubuntu-latest"

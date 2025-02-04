@@ -1,5 +1,6 @@
 #include "functional_tests/config.h"
 #include "functional_tests/helpers.h"
+#include "psa/crypto_extra.h"
 #include <atclient/atclient.h>
 #include <atclient/string_utils.h>
 #include <atlogger/atlogger.h>
@@ -102,6 +103,7 @@ exit: {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "tear_down: %d\n", tear_down(&atclient));
   atclient_atkeys_free(&atkeys);
   atclient_free(&atclient);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
@@ -185,6 +187,9 @@ static int test_3_get(atclient *atclient) {
   ret = 0;
   goto exit;
 exit: {
+  if (value != NULL) {
+    free(value);
+  }
   atclient_atkey_free(&atkey);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_3_get End (%d)\n", ret);
   return ret;
@@ -288,8 +293,9 @@ static int test_7_get_with_metadata(atclient *atclient) {
     goto exit;
   }
 
-  if((ret = atclient_get_self_key_request_options_set_store_atkey_metadata(&request_options, true)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_get_self_key_request_options_set_store_atkey_metadata: %d\n", ret);
+  if ((ret = atclient_get_self_key_request_options_set_store_atkey_metadata(&request_options, true)) != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "atclient_get_self_key_request_options_set_store_atkey_metadata: %d\n", ret);
     goto exit;
   }
 
@@ -313,7 +319,8 @@ static int test_7_get_with_metadata(atclient *atclient) {
   }
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
 
-  if (atclient_atkey_metadata_is_is_encrypted_initialized(&atkey.metadata) && atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {
+  if (atclient_atkey_metadata_is_is_encrypted_initialized(&atkey.metadata) &&
+      atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.is_encrypted: %d != %d\n",
                  atkey.metadata.is_encrypted, true);
     ret = 1;
@@ -332,6 +339,7 @@ static int test_7_get_with_metadata(atclient *atclient) {
   ret = 0;
   goto exit;
 exit: {
+  free(value);
   atclient_atkey_free(&atkey);
   atclient_get_self_key_request_options_free(&request_options);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_7_get_with_metadata End (%d)\n", ret);

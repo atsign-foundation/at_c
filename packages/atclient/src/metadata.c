@@ -1,6 +1,6 @@
 #include "atclient/metadata.h"
-#include "atclient/string_utils.h"
 #include "atclient/json.h"
+#include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
 #include <atchops/platform.h>
 #include <inttypes.h>
@@ -1706,11 +1706,14 @@ static int set_created_by(atclient_atkey_metadata *metadata, const char *created
   int ret = 1;
   const size_t created_by_len = strlen(created_by);
   const size_t created_by_size = created_by_len + 1;
-  if ((metadata->created_by = malloc(sizeof(char) * (created_by_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (created_by_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_created_by malloc failed\n");
     goto exit;
   }
+  unset_created_by(metadata);
+  metadata->created_by = temp;
   memcpy(metadata->created_by, created_by, created_by_len);
   metadata->created_by[created_by_len] = '\0';
   set_is_created_by_initialized(metadata, true);
@@ -1723,11 +1726,14 @@ static int set_updated_by(atclient_atkey_metadata *metadata, const char *updated
   int ret = 1;
   const size_t updated_by_len = strlen(updated_by);
   const size_t updated_by_size = updated_by_len + 1;
-  if ((metadata->updated_by = malloc(sizeof(char) * (updated_by_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (updated_by_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updated_by malloc failed\n");
     goto exit;
   }
+  unset_updated_by(metadata);
+  metadata->updated_by = temp;
   memcpy(metadata->updated_by, updated_by, updated_by_len);
   metadata->updated_by[updated_by_len] = '\0';
   set_is_updated_by_initialized(metadata, true);
@@ -1740,11 +1746,14 @@ static int set_status(atclient_atkey_metadata *metadata, const char *status) {
   int ret = 1;
   const size_t statuslen = strlen(status);
   const size_t statussize = statuslen + 1;
-  if ((metadata->status = malloc(sizeof(char) * (statussize))) == NULL) {
+  char *temp = malloc(sizeof(char) * (statussize));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_status malloc failed\n");
     goto exit;
   }
+  unset_status(metadata);
+  metadata->status = temp;
   memcpy(metadata->status, status, statuslen);
   metadata->status[statuslen] = '\0';
   set_is_status_initialized(metadata, true);
@@ -1762,11 +1771,14 @@ static int set_expires_at(atclient_atkey_metadata *metadata, const char *expires
   int ret = 1;
   const size_t expires_at_len = strlen(expires_at);
   const size_t expires_at_size = expires_at_len + 1;
-  if ((metadata->expires_at = malloc(sizeof(char) * (expires_at_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (expires_at_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_expires_at malloc failed\n");
     goto exit;
   }
+  unset_expires_at(metadata);
+  metadata->expires_at = temp;
   memcpy(metadata->expires_at, expires_at, expires_at_len);
   metadata->expires_at[expires_at_len] = '\0';
   set_is_expires_at_initialized(metadata, true);
@@ -1779,11 +1791,14 @@ static int set_available_at(atclient_atkey_metadata *metadata, const char *avail
   int ret = 1;
   const size_t available_at_len = strlen(available_at);
   const size_t available_at_size = available_at_len + 1;
-  if ((metadata->available_at = malloc(sizeof(char) * (available_at_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (available_at_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_available_at malloc failed\n");
     goto exit;
   }
+  unset_available_at(metadata);
+  metadata->available_at = temp;
   memcpy(metadata->available_at, available_at, available_at_len);
   metadata->available_at[available_at_len] = '\0';
   set_is_available_at_initialized(metadata, true);
@@ -1796,11 +1811,14 @@ static int set_refresh_at(atclient_atkey_metadata *metadata, const char *refresh
   int ret = 1;
   const size_t refresh_at_len = strlen(refresh_at);
   const size_t refresh_at_size = refresh_at_len + 1;
-  if ((metadata->refresh_at = malloc(sizeof(char) * (refresh_at_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (refresh_at_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_refresh_at malloc failed\n");
     goto exit;
   }
+  unset_refresh_at(metadata);
+  metadata->refresh_at = temp;
   memcpy(metadata->refresh_at, refresh_at, refresh_at_len);
   metadata->refresh_at[refresh_at_len] = '\0';
   set_is_refresh_at_initialized(metadata, true);
@@ -1812,11 +1830,14 @@ exit: { return ret; }
 static int set_created_at(atclient_atkey_metadata *metadata, const char *created_at) {
   int ret = 1;
   const size_t created_at_len = strlen(created_at);
-  if ((metadata->created_at = malloc(sizeof(char) * (created_at_len + 1))) == NULL) {
+  char *temp = malloc(sizeof(char) * (created_at_len + 1));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_created_at malloc failed\n");
     goto exit;
   }
+  unset_created_at(metadata);
+  metadata->created_at = temp;
   memcpy(metadata->created_at, created_at, created_at_len);
   metadata->created_at[created_at_len] = '\0';
   set_is_created_at_initialized(metadata, true);
@@ -1829,11 +1850,14 @@ static int set_updated_at(atclient_atkey_metadata *metadata, const char *updated
   int ret = 1;
   const size_t updated_at_len = strlen(updated_at);
   const size_t updated_at_size = updated_at_len + 1;
-  if ((metadata->updated_at = malloc(sizeof(char) * (updated_at_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (updated_at_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_updated_at malloc failed\n");
     goto exit;
   }
+  unset_updated_at(metadata);
+  metadata->updated_at = temp;
   memcpy(metadata->updated_at, updated_at, updated_at_len);
   metadata->updated_at[updated_at_len] = '\0';
   set_is_updated_at_initialized(metadata, true);
@@ -1886,11 +1910,14 @@ static int set_data_signature(atclient_atkey_metadata *metadata, const char *dat
   int ret = 1;
   const size_t data_signature_len = strlen(data_signature);
   const size_t data_signature_size = data_signature_len + 1;
-  if ((metadata->data_signature = malloc(sizeof(char) * (data_signature_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (data_signature_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_data_signature malloc failed\n");
     goto exit;
   }
+  unset_data_signature(metadata);
+  metadata->data_signature = temp;
   memcpy(metadata->data_signature, data_signature, data_signature_len);
   metadata->data_signature[data_signature_len] = '\0';
   set_is_data_signature_initialized(metadata, true);
@@ -1903,11 +1930,14 @@ static int set_shared_key_status(atclient_atkey_metadata *metadata, const char *
   int ret = 1;
   const size_t shared_key_status_len = strlen(shared_key_status);
   const size_t shared_key_status_size = shared_key_status_len + 1;
-  if ((metadata->shared_key_status = malloc(sizeof(char) * (shared_key_status_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (shared_key_status_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_shared_key_status malloc failed\n");
     goto exit;
   }
+  unset_shared_key_status(metadata);
+  metadata->shared_key_status = temp;
   memcpy(metadata->shared_key_status, shared_key_status, shared_key_status_len);
   metadata->shared_key_status[shared_key_status_len] = '\0';
   set_is_shared_key_status_initialized(metadata, true);
@@ -1920,11 +1950,14 @@ static int set_shared_key_enc(atclient_atkey_metadata *metadata, const char *sha
   int ret = 1;
   const size_t shared_key_enc_len = strlen(shared_key_enc);
   const size_t shared_key_enc_size = shared_key_enc_len + 1;
-  if ((metadata->shared_key_enc = malloc(sizeof(char) * (shared_key_enc_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (shared_key_enc_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_shared_key_enc malloc failed\n");
     goto exit;
   }
+  unset_shared_key_enc(metadata);
+  metadata->shared_key_enc = temp;
   memcpy(metadata->shared_key_enc, shared_key_enc, shared_key_enc_len);
   metadata->shared_key_enc[shared_key_enc_len] = '\0';
   set_is_shared_key_enc_initialized(metadata, true);
@@ -1937,11 +1970,14 @@ static int set_pub_key_hash(atclient_atkey_metadata *metadata, const char *pub_k
   int ret = 1;
   const size_t pub_key_hash_len = strlen(pub_key_hash);
   const size_t pub_key_hash_size = pub_key_hash_len + 1;
-  if ((metadata->pub_key_hash = malloc(sizeof(char) * (pub_key_hash_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (pub_key_hash_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pub_key_hash malloc failed\n");
     goto exit;
   }
+  unset_pub_key_hash(metadata);
+  metadata->pub_key_hash = temp;
   memcpy(metadata->pub_key_hash, pub_key_hash, pub_key_hash_len);
   metadata->pub_key_hash[pub_key_hash_len] = '\0';
   set_is_pub_key_hash_initialized(metadata, true);
@@ -1954,11 +1990,14 @@ static int set_pubkeyalgo(atclient_atkey_metadata *metadata, const char *pub_key
   int ret = 1;
   const size_t pub_key_algo_len = strlen(pub_key_algo);
   const size_t pub_key_algo_size = pub_key_algo_len + 1;
-  if ((metadata->pub_key_algo = malloc(sizeof(char) * (pub_key_algo_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (pub_key_algo_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_pubkeyalgo malloc failed\n");
     goto exit;
   }
+  unset_pub_key_algo(metadata);
+  metadata->pub_key_algo = temp;
   memcpy(metadata->pub_key_algo, pub_key_algo, pub_key_algo_len);
   metadata->pub_key_algo[pub_key_algo_len] = '\0';
   set_is_pub_key_algo_initialized(metadata, true);
@@ -1971,11 +2010,14 @@ static int set_encoding(atclient_atkey_metadata *metadata, const char *encoding)
   int ret = 1;
   const size_t encoding_len = strlen(encoding);
   const size_t encoding_size = encoding_len + 1;
-  if ((metadata->encoding = malloc(sizeof(char) * (encoding_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (encoding_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_encoding malloc failed\n");
     goto exit;
   }
+  unset_encoding(metadata);
+  metadata->encoding = temp;
   memcpy(metadata->encoding, encoding, encoding_len);
   metadata->encoding[encoding_len] = '\0';
   set_is_encoding_initialized(metadata, true);
@@ -1988,11 +2030,14 @@ static int set_enc_key_name(atclient_atkey_metadata *metadata, const char *enc_k
   int ret = 1;
   const size_t enc_key_name_len = strlen(enc_key_name);
   const size_t enc_key_name_size = enc_key_name_len + 1;
-  if ((metadata->enc_key_name = malloc(sizeof(char) * (enc_key_name_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (enc_key_name_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_enc_key_name malloc failed\n");
     goto exit;
   }
+  unset_enc_key_name(metadata);
+  metadata->enc_key_name = temp;
   memcpy(metadata->enc_key_name, enc_key_name, enc_key_name_len);
   metadata->enc_key_name[enc_key_name_len] = '\0';
   set_is_enc_key_name_initialized(metadata, true);
@@ -2005,11 +2050,14 @@ static int set_enc_algo(atclient_atkey_metadata *metadata, const char *enc_algo)
   int ret = 1;
   const size_t enc_algo_len = strlen(enc_algo);
   const size_t enc_algo_size = enc_algo_len + 1;
-  if ((metadata->enc_algo = malloc(sizeof(char) * (enc_algo_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (enc_algo_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_enc_algo malloc failed\n");
     goto exit;
   }
+  unset_enc_algo(metadata);
+  metadata->enc_algo = temp;
   memcpy(metadata->enc_algo, enc_algo, enc_algo_len);
   metadata->enc_algo[enc_algo_len] = '\0';
   set_is_enc_algo_initialized(metadata, true);
@@ -2022,11 +2070,14 @@ static int set_iv_nonce(atclient_atkey_metadata *metadata, const char *iv_nonce)
   int ret = 1;
   const size_t iv_nonce_len = strlen(iv_nonce);
   const size_t iv_nonce_size = iv_nonce_len + 1;
-  if ((metadata->iv_nonce = malloc(sizeof(char) * (iv_nonce_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (iv_nonce_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_iv_nonce malloc failed\n");
     goto exit;
   }
+  unset_iv_nonce(metadata);
+  metadata->iv_nonce = temp;
   memcpy(metadata->iv_nonce, iv_nonce, iv_nonce_len);
   metadata->iv_nonce[iv_nonce_len] = '\0';
   set_is_iv_nonce_initialized(metadata, true);
@@ -2039,11 +2090,14 @@ static int set_ske_enc_key_name(atclient_atkey_metadata *metadata, const char *s
   int ret = 1;
   const size_t ske_enc_key_name_len = strlen(ske_enc_key_name);
   const size_t ske_enc_key_name_size = ske_enc_key_name_len + 1;
-  if ((metadata->ske_enc_key_name = malloc(sizeof(char) * (ske_enc_key_name_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (ske_enc_key_name_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_ske_enc_key_name malloc failed\n");
     goto exit;
   }
+  unset_ske_enc_key_name(metadata);
+  metadata->ske_enc_key_name = temp;
   memcpy(metadata->ske_enc_key_name, ske_enc_key_name, ske_enc_key_name_len);
   metadata->ske_enc_key_name[ske_enc_key_name_len] = '\0';
   set_is_ske_enc_key_name_initialized(metadata, true);
@@ -2056,11 +2110,14 @@ static int set_ske_enc_algo(atclient_atkey_metadata *metadata, const char *ske_e
   int ret = 1;
   const size_t ske_enc_algo_len = strlen(ske_enc_algo);
   const size_t ske_enc_algo_size = ske_enc_algo_len + 1;
-  if ((metadata->ske_enc_algo = malloc(sizeof(char) * (ske_enc_algo_size))) == NULL) {
+  char *temp = malloc(sizeof(char) * (ske_enc_algo_size));
+  if (temp == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "set_ske_enc_algo malloc failed\n");
     goto exit;
   }
+  unset_ske_enc_algo(metadata);
+  metadata->ske_enc_algo = temp;
   memcpy(metadata->ske_enc_algo, ske_enc_algo, ske_enc_algo_len);
   metadata->ske_enc_algo[ske_enc_algo_len] = '\0';
   set_is_ske_enc_algo_initialized(metadata, true);

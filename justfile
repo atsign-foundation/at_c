@@ -16,6 +16,8 @@ unit_dir := quote(justfile_directory() / "build/unit-") + postfix
 func_dir := quote(justfile_directory() / "build/func-") + postfix
 memcheck_dir := quote(justfile_directory() / "build/memcheck-") + postfix
 
+c_flags := "-std=c99 -Wall -Wextra -Werror-implicit-function-declaration"
+
 # SETUP COMMANDS
 
 setup: configure-test-all
@@ -101,7 +103,7 @@ configure-debug:
     -DCMAKE_INSTALL_PREFIX="$HOME/.local/" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS="-std=c99 -Wno-error" \
+    -DCMAKE_C_FLAGS={{ c_flags }}\
     -DATSDK_BUILD_TESTS=OFF \
     -DATSDK_MEMCHECK=OFF
 
@@ -121,7 +123,7 @@ configure-test-unit:
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS="-std=c99 -Wno-error " \
+    -DCMAKE_C_FLAGS={{ c_flags }}\
     -DATSDK_BUILD_TESTS="unit" \
     -DATSDK_MEMCHECK=OFF \
     -DFIRST_ATSIGN="\"$FIRST_ATSIGN\"" \
@@ -133,7 +135,7 @@ configure-test-func:
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS="-std=c99 -Wno-error" \
+    -DCMAKE_C_FLAGS={{ c_flags }}\
     -DATSDK_BUILD_TESTS="func" \
     -DATSDK_MEMCHECK=OFF \
     -DATDIRECTORY_HOST="\"$ATDIRECTORY_HOST\"" \
@@ -152,7 +154,7 @@ configure-test-all:
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS="-std=c99 -Wno-error " \
+    -DCMAKE_C_FLAGS={{ c_flags }}\
     -DATSDK_BUILD_TESTS=ON \
     -DATSDK_MEMCHECK=OFF \
     -DATDIRECTORY_HOST="\"$ATDIRECTORY_HOST\"" \
@@ -170,12 +172,16 @@ configure-test-memcheck:
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS="-std=gnu99 -Wno-error" \
+    -DCMAKE_C_FLAGS={{ c_flags }}\
     -DATSDK_BUILD_TESTS=ON \
     -DBUILD_SHARED_LIBS=ON \
     -DATSDK_MEMCHECK=ON \
     -DFIRST_ATSIGN="\"$FIRST_ATSIGN\"" \
-    -DSECOND_ATSIGN="\"$SECOND_ATSIGN\""
+    -DSECOND_ATSIGN="\"$SECOND_ATSIGN\"" \
+    -DFIRST_ATSIGN_ATSERVER_HOST="\"$FIRST_ATSIGN_ATSERVER_HOST\"" \
+    -DFIRST_ATSIGN_ATSERVER_PORT=$FIRST_ATSIGN_ATSERVER_PORT \
+    -DSECOND_ATSIGN_ATSERVER_HOST="\"$SECOND_ATSIGN_ATSERVER_HOST\"" \
+    -DSECOND_ATSIGN_ATSERVER_PORT=$SECOND_ATSIGN_ATSERVER_PORT
 
 # DIAGNOSTIC COMMANDS
 

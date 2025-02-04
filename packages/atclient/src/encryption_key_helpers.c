@@ -5,6 +5,7 @@
 #include "atclient/atkeys.h"
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
+#include "atcommons/memory_util.h"
 #include "atlogger/atlogger.h"
 #include <atchops/platform.h>
 #include <stdlib.h>
@@ -39,8 +40,6 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
    */
 
   char *atsign_with_at = NULL;
-  char *atsign_without_at = NULL;
-
   char *command = NULL;
 
   const size_t recv_size = 1024; // sufficient buffer size to receive the public key
@@ -53,11 +52,6 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
    */
   if ((ret = atclient_string_utils_atsign_with_at(atsign, &atsign_with_at)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_with_at: %d\n", ret);
-    goto exit;
-  }
-
-  if ((ret = atclient_string_utils_atsign_without_at(atsign_with_at, &atsign_without_at)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_string_utils_atsign_without_at: %d\n", ret);
     goto exit;
   }
 
@@ -107,7 +101,15 @@ int atclient_get_public_encryption_key(atclient *ctx, const char *atsign, char *
   (*public_encryption_key)[public_encryption_key_len] = '\0';
 
   ret = 0;
-exit: { return ret; }
+exit: {
+  if (atsign_with_at != NULL) {
+    free(atsign_with_at);
+  }
+  if (command != NULL) {
+    free(command);
+  }
+  return ret;
+}
 }
 
 int atclient_get_shared_encryption_key_shared_by_me(atclient *ctx, const char *recipient_atsign,

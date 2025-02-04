@@ -391,6 +391,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   goto exit;
 
 exit: {
+  free(atkeystr);
   free(metadata_protocol_str);
   return res;
 }

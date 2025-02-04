@@ -23,7 +23,7 @@ static int test_3_get_as_sharedwith(atclient *atclient);
 static int test_4_delete(atclient *atclient);
 static int test_5_should_not_exist_as_sharedby(atclient *atclient);
 
-int main(int argc, char *argv[]) {
+int main() {
   int ret = 1;
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
@@ -88,18 +88,11 @@ int main(int argc, char *argv[]) {
   goto exit;
 
 exit: {
-  if (functional_tests_tear_down_sharedenckeys(&atclient1, SECOND_ATSIGN) != 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
-  }
-  if (functional_tests_tear_down_sharedenckeys(&atclient2, FIRST_ATSIGN) != 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "tear_down: %d\n", ret);
-  }
   atclient_free(&atclient1);
   atclient_atkeys_free(&atkeys1);
   atclient_free(&atclient2);
   atclient_atkeys_free(&atkeys2);
+  mbedtls_psa_crypto_free();
   return ret;
 }
 }
