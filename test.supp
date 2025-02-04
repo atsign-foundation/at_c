@@ -1,0 +1,14 @@
+# Suppressions for test suite
+{
+   Suppress conditional jump for "uninitialised string"
+   Memcheck:Cond
+   ...
+   fun:cJSON_ParseWithOpts
+   fun:cJSON_Parse
+   fun:atclient_atnotification_from_json_str
+   fun:populate_monitor_notification_message
+   fun:populate_monitor_message
+   fun:atclient_monitor_read
+   fun:test_2a_receive_notifications
+   fun:main
+}

@@ -22,8 +22,8 @@ c_flags := "-std=c99 -Wall -Wextra -Werror-implicit-function-declaration"
 
 setup: configure-test-all
   [ -f "$PWD/compile_commands.json" ] && rm $PWD/compile_commands.json || true
-  ln -s {{test_dir}}/compile_commands.json $PWD
-  [ -f "$PWD/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true
+  ln -s {{test_dir}}/compile_commands.json $PWD/
+  [ -f "$PWD/tests/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true
   ln -s {{test_dir}}/compile_commands.json $PWD/tests
 
 setup-valgrind:
@@ -103,7 +103,7 @@ configure-debug:
     -DCMAKE_INSTALL_PREFIX="$HOME/.local/" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS={{ c_flags }}\
+    -DCMAKE_C_FLAGS={{ c_flags }} \
     -DATSDK_BUILD_TESTS=OFF \
     -DATSDK_MEMCHECK=OFF
 
@@ -123,7 +123,7 @@ configure-test-unit:
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS={{ c_flags }}\
+    -DCMAKE_C_FLAGS={{ c_flags }} \
     -DATSDK_BUILD_TESTS="unit" \
     -DATSDK_MEMCHECK=OFF \
     -DFIRST_ATSIGN="\"$FIRST_ATSIGN\"" \
@@ -135,7 +135,7 @@ configure-test-func:
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS={{ c_flags }}\
+    -DCMAKE_C_FLAGS={{ c_flags }} \
     -DATSDK_BUILD_TESTS="func" \
     -DATSDK_MEMCHECK=OFF \
     -DATDIRECTORY_HOST="\"$ATDIRECTORY_HOST\"" \
@@ -154,7 +154,7 @@ configure-test-all:
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS={{ c_flags }}\
+    -DCMAKE_C_FLAGS={{ c_flags }} \
     -DATSDK_BUILD_TESTS=ON \
     -DATSDK_MEMCHECK=OFF \
     -DATDIRECTORY_HOST="\"$ATDIRECTORY_HOST\"" \
@@ -172,7 +172,7 @@ configure-test-memcheck:
     -G "$GENERATOR" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=$C_COMPILER \
-    -DCMAKE_C_FLAGS={{ c_flags }}\
+    -DCMAKE_C_FLAGS={{ c_flags }} \
     -DATSDK_BUILD_TESTS=ON \
     -DBUILD_SHARED_LIBS=ON \
     -DATSDK_MEMCHECK=ON \

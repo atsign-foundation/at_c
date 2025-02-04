@@ -5,39 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "atnotification.h"
 #define TAG "atnotification"
 
 // Json library specific
 #ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 static int atclient_atnotification_from_cjson_node(atclient_atnotification *notification, const cJSON *root);
 #endif
-
-static void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized);
-static void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, const bool initialized);
-static void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized);
-static void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized);
-static void atclient_atnotification_value_set_initialized(atclient_atnotification *notification,
-                                                          const bool initialized);
-static void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification,
-                                                              const bool initialized);
-static void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized);
-static void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized);
-static void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized);
-static void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized);
-static void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification,
-                                                             const bool initialized);
-static void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification,
-                                                             const bool initialized);
-static void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
-                                                                     const bool initialized);
-static void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized);
-static void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
-                                                                    const bool initialized);
 
 void atclient_atnotification_init(atclient_atnotification *notification) {
   memset(notification, 0, sizeof(atclient_atnotification));
@@ -332,7 +306,7 @@ bool atclient_atnotification_is_decrypted_value_initialized(const atclient_atnot
           ATCLIENT_ATNOTIFICATION_DECRYPTEDVALUE_INITIALIZED);
 }
 
-static void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized) {
+void atclient_atnotification_id_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -352,8 +326,7 @@ static void atclient_atnotification_id_set_initialized(atclient_atnotification *
   }
 }
 
-static void atclient_atnotification_from_set_initialized(atclient_atnotification *notification,
-                                                         const bool initialized) {
+void atclient_atnotification_from_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -373,7 +346,7 @@ static void atclient_atnotification_from_set_initialized(atclient_atnotification
   }
 }
 
-static void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized) {
+void atclient_atnotification_to_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -393,7 +366,7 @@ static void atclient_atnotification_to_set_initialized(atclient_atnotification *
   }
 }
 
-static void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized) {
+void atclient_atnotification_key_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -413,8 +386,7 @@ static void atclient_atnotification_key_set_initialized(atclient_atnotification 
   }
 }
 
-static void atclient_atnotification_value_set_initialized(atclient_atnotification *notification,
-                                                          const bool initialized) {
+void atclient_atnotification_value_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -435,8 +407,7 @@ static void atclient_atnotification_value_set_initialized(atclient_atnotificatio
   }
 }
 
-static void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification,
-                                                              const bool initialized) {
+void atclient_atnotification_operation_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -458,8 +429,8 @@ static void atclient_atnotification_operation_set_initialized(atclient_atnotific
   }
 }
 
-static void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized) {
+void atclient_atnotification_epoch_millis_set_initialized(atclient_atnotification *notification,
+                                                          const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -481,8 +452,8 @@ static void atclient_atnotification_epoch_millis_set_initialized(atclient_atnoti
   }
 }
 
-static void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized) {
+void atclient_atnotification_message_type_set_initialized(atclient_atnotification *notification,
+                                                          const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -503,8 +474,8 @@ static void atclient_atnotification_message_type_set_initialized(atclient_atnoti
   }
 }
 
-static void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized) {
+void atclient_atnotification_is_encrypted_set_initialized(atclient_atnotification *notification,
+                                                          const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -526,8 +497,8 @@ static void atclient_atnotification_is_encrypted_set_initialized(atclient_atnoti
   }
 }
 
-static void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized) {
+void atclient_atnotification_enc_key_name_set_initialized(atclient_atnotification *notification,
+                                                          const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -548,8 +519,7 @@ static void atclient_atnotification_enc_key_name_set_initialized(atclient_atnoti
   }
 }
 
-static void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification,
-                                                             const bool initialized) {
+void atclient_atnotification_enc_algo_set_initialized(atclient_atnotification *notification, const bool initialized) {
 
   /*
    * 1. Validate arguments
@@ -571,8 +541,7 @@ static void atclient_atnotification_enc_algo_set_initialized(atclient_atnotifica
   }
 }
 
-static void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification,
-                                                             const bool initialized) {
+void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotification *notification, const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -593,8 +562,8 @@ static void atclient_atnotification_iv_nonce_set_initialized(atclient_atnotifica
   }
 }
 
-static void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
-                                                                     const bool initialized) {
+void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_atnotification *notification,
+                                                              const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -615,8 +584,8 @@ static void atclient_atnotification_ske_enc_key_name_set_initialized(atclient_at
   }
 }
 
-static void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification,
-                                                                 const bool initialized) {
+void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnotification *notification,
+                                                          const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -637,8 +606,8 @@ static void atclient_atnotification_ske_enc_algo_set_initialized(atclient_atnoti
   }
 }
 
-static void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
-                                                                    const bool initialized) {
+void atclient_atnotification_decrypted_value_set_initialized(atclient_atnotification *notification,
+                                                             const bool initialized) {
   /*
    * 1. Validate arguments
    */
@@ -1588,50 +1557,37 @@ exit: { return ret; }
 // Json library specific
 #ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int atclient_atnotification_from_json_str(atclient_atnotification *notification, const char *json_str) {
-  int ret = 1;
   /*
    * 1. Validate arguments
    */
   if (notification == NULL) {
-    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Notification is NULL\n");
-    return ret;
+    return 1;
   }
 
   if (json_str == NULL) {
-    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "JSON string is NULL\n");
-    return ret;
+    return 1;
   }
-
-  /*
-   * 2. Variables
-   */
-  cJSON *root = NULL;
 
   /*
    * 3. Parse JSON
    */
-  if ((root = cJSON_Parse(json_str)) == NULL) {
-    ret = 1;
+  cJSON *root = cJSON_Parse(json_str);
+  if (root == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to parse JSON\n");
-    goto exit;
+    return 1;
   }
 
   /*
    * 4. Extract values
    */
-  if ((ret = atclient_atnotification_from_cjson_node(notification, root)) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract values from JSON\n");
-    goto exit;
-  }
-
-  ret = 0;
-  goto exit;
-exit: {
+  int ret = atclient_atnotification_from_cjson_node(notification, root);
   cJSON_Delete(root);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to extract values from JSON\n");
+  }
   return ret;
-}
 }
 
 static int atclient_atnotification_from_cjson_node(atclient_atnotification *notification, const cJSON *root) {

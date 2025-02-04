@@ -108,7 +108,7 @@ jobs:
 
       - name: Run ${{ matrix.type }} Functional Tests
         run: |
-          ctest ${{ matrix.flags }} --test-dir build  --output-on-failure --timeout 90 -VV
+          ctest ${{ matrix.flags }} --test-dir build --output-on-failure --timeout 90 -VV
 
   build-examples:
     runs-on: "ubuntu-latest"

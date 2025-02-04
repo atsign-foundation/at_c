@@ -45,10 +45,12 @@ static int test_1a_populate_data_ok() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
   if (monitor_message.type != ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE) {
     atlogger_log(TAG " 1a", ATLOGGER_LOGGING_LEVEL_ERROR, "Expected data response type\n");
@@ -82,10 +84,12 @@ static int test_1b_populate_data_empty() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
   if (ret == 0) {
     atclient_monitor_message_free(&monitor_message);
@@ -108,10 +112,12 @@ static int test_2a_populate_error_msg() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
   if (ret != 0) {
     atlogger_log(TAG " 2a", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to populate monitor message\n");
@@ -145,10 +151,12 @@ static int test_2b_populate_error_empty() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
   if (ret == 0) {
     atclient_monitor_message_free(&monitor_message);
@@ -185,10 +193,12 @@ static int test_3a_populate_notification_msg() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
 
   if (ret != 0) {
@@ -240,10 +250,12 @@ static int test_3b_populate_notification_empty() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
   if (ret == 0) {
     atclient_monitor_message_free(&monitor_message);
@@ -266,10 +278,12 @@ static int test_3c_populate_notification_invalid_json() {
   memcpy(buffer, input, strlen(input));
   buffer[input_len] = 0;
 
-  struct atserver_message message = atserver_message_parse(buffer, strlen(buffer));
+  struct atserver_message *message = malloc(sizeof(struct atserver_message));
+  struct atserver_message temp_message = atserver_message_parse(buffer, strlen(buffer));
+  memcpy(message, &temp_message, sizeof(struct atserver_message));
   atclient_monitor_message monitor_message;
   atclient_monitor_message_init(&monitor_message);
-  monitor_message.atserver_message = &message;
+  monitor_message.atserver_message = message;
   int ret = populate_monitor_message(&monitor_message);
   if (ret == 0) {
     atclient_monitor_message_free(&monitor_message);

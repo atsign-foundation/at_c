@@ -408,8 +408,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   // copy to recv, discarding the prompt
   memcpy(recv, read_buf + read_i, read_n);
   free(read_buf);
+  // -1 to remove the \n and replace it with \0
   recv[read_n - 1] = '\0'; // null terminate the string
-  *recv_len = read_n;
+  *recv_len = read_n - 1;
 
   /*
    * 10. Run post read hook, if it exists

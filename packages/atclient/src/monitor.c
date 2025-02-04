@@ -27,6 +27,7 @@
 void atclient_monitor_message_init(atclient_monitor_message *message) {
   memset(message, 0, sizeof(atclient_monitor_message));
   // ensure these fields are initalized as NULL on systems where NULL != 0
+  message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
   message->atserver_message = NULL;
   message->data_response = NULL;
 }
@@ -41,6 +42,7 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   default:
     if (message->atserver_message != NULL) {
       atserver_message_free((struct atserver_message *)message->atserver_message);
+      free(message->atserver_message);
     }
     break;
   }
