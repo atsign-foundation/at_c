@@ -7,7 +7,15 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+// TODO remove use of strtok_r so we can conform to C99 instead of POSIX 2001
+#if _POSIX_C_SOURCE < 200112L
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200112L
+#endif
 #include <string.h>
+extern char *strtok_r(char *, const char *, char **);
+// END (keep string.h include after removing this temp fix)
 
 #define TAG "atkey"
 
