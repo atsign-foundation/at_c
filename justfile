@@ -26,9 +26,6 @@ setup: configure-test-all
   [ -f "$PWD/tests/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true
   ln -s {{test_dir}}/compile_commands.json $PWD/tests
 
-setup-valgrind:
-  docker build --platform linux/amd64 -t atc-memcheck-docker:latest -f $PWD/valgrind.Dockerfile $PWD
-
 clean:
   rm -rf $PWD/build
   rm $PWD/compile_commands.json
@@ -81,17 +78,16 @@ memcheck +ARGS='': build-test-memcheck
 
 memcheck-docker +ARGS='':
   docker run --rm --platform linux/amd64 \
-  --mount type=bind,src=$PWD,dst=/mnt/at_c \
+  --mount type=bind,src=$PWD,dst=/mnt/workdir \
   --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
-  atc-memcheck-docker:latest \
+  atsigncompany/valgrind:latest \
   just memcheck {{ARGS}}
 
 valgrind-docker:
-  docker run --rm --platform linux/amd64 \
-  -ti \
-  --mount type=bind,src=$PWD,dst=/mnt/at_c \
+  docker run --rm --platform linux/amd64 -ti \
+  --mount type=bind,src=$PWD,dst=/mnt/workdir \
   --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
-  atc-memcheck-docker:latest  \
+  atsigncompany/valgrind:latest  \
   /bin/bash
 
 # CONFIGURE COMMANDS

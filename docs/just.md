@@ -51,19 +51,16 @@ Test commands pass arguments to ctest, so you can pass a regex like so:
 
 #### Running memcheck
 
-Locally (requires valgrind):
+Locally (requires valgrind to be installed):
 
 `just memcheck`
 
-In docker, first run the setup to build the docker image locally:
-
-`just setup-valgrind`
-
-Then whenever you want to run the memory check tests:
+Whenever you want to run the memory check tests:
 
 `just memd`
 
-> This will create an ephemeral docker container, all of the test output will be located in `build/test-memcheck/` as if it was run locally.
+> This will create an ephemeral docker container, all of the test output will
+> be located in `build/test-memcheck-linux-x86_64/` as if it was run locally.
 
 If you want a bash prompt in the valgrind container:
 
