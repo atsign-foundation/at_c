@@ -13,7 +13,7 @@ extern "C" {
  * @brief Represents a message received from the monitor connection, typically derived from the prefix of the response
  * (e.g. "data:ok"'s message type would be "data" = ATCLIENT_MONITOR_MESSAGE_TYPE_DATA_RESPONSE)
  */
-enum atclient_monitor_response_type {
+enum atclient_monitor_message_type {
   // the following 4 enums help indicate what type of message was received from the monitor connection and which field
   // of the union to access
   ATCLIENT_MONITOR_MESSAGE_TYPE_NONE,
@@ -32,11 +32,11 @@ enum atclient_monitor_response_type {
 };
 
 // Represents error information when `ATCLIENT_MONITOR_ERROR_READ` is the message type given by atclient_monitor_read
-typedef struct atclient_monitor_response_error_read {
+typedef struct {
   int error_code; // if 0, then the connection should be disposed of immediately, as it is of no use anymore,
                   // if MBEDTLS_ERR_SSL_TIMEOUT, then a read timeout occurred,
                   // else if < 0, then an error occurred when reading from the SSL connection.
-} atclient_monitor_response_error_read;
+} atclient_monitor_message_error_read;
 
 /**
  * @brief Represents a message received from the monitor connection
@@ -45,15 +45,16 @@ typedef struct atclient_monitor_response_error_read {
  * reading this field will tell you which data field of the union to access. Example, if type is
  * ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION,t then you should access the notification field of the union
  */
-typedef struct atclient_monitor_response {
-  enum atclient_monitor_response_type type;
+typedef struct {
+  enum atclient_monitor_message_type type;
+  void *atserver_message; // opaque pointer to atserver_message
   union {
-    atclient_atnotification notification; // when is_notification is true
-    char *data_response;                  // message of the data response (e.g. "ok", when "data:ok" is received)
-    char *error_response;                 // message of the error_response
-    atclient_monitor_response_error_read error_read;
+    atclient_atnotification *notification; // when is_notification is true
+    char *data_response;                   // message of the data response (e.g. "ok", when "data:ok" is received)
+    char *error_response;                  // message of the error_response
+    atclient_monitor_message_error_read error_read;
   };
-} atclient_monitor_response;
+} atclient_monitor_message;
 
 typedef struct atclient_monitor_hooks {
   int (*pre_decrypt_notification)(void);
@@ -64,20 +65,20 @@ typedef struct atclient_monitor_hooks {
  * @brief Initializes the monitor message to a default state, ready for use in other functions.
  *
  * Example:
- * atclient_monitor_response message;
- * atclient_monitor_response_init(&message);
+ * atclient_monitor_message message;
+ * atclient_monitor_message_init(&message);
  *
  * @param message the message to initialize, it is assumed that the memory for this struct has already been allocated
  */
-void atclient_monitor_response_init(atclient_monitor_response *message);
+void atclient_monitor_message_init(atclient_monitor_message *message);
 
 /**
  * @brief Initializes the monitor message to a default state, ready for use in other functions.
  *
  * @param message the message to free, it is assumed that the memory for this struct has already been allocated and was
- * previous called with atclient_monitor_response_init
+ * previous called with atclient_monitor_message_init
  */
-void atclient_monitor_response_free(atclient_monitor_response *message);
+void atclient_monitor_message_free(atclient_monitor_message *message);
 
 /**
  * @brief Initializes the monitor connection. It is recommended that this be called before any other monitor functions.
@@ -133,8 +134,8 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex);
  * @param atclient the atclient context for the atclient connection, it is advised that this connection an entirely
  * separate connection from the monitor_conn to avoid colliding messages when reading. it is assumed that this is
  * initialized and pkam authenticated.
- * @param message A pointer to the initialized atclient_monitor_response. It is up to
- * the caller to allocate memory to this struct, call atclient_monitor_response_init before passing to this function,
+ * @param message A pointer to the initialized atclient_monitor_message. It is up to
+ * the caller to allocate memory to this struct, call atclient_monitor_message_init before passing to this function,
  * then call atclient_monitor_free use. This function populates the message struct with the notification, data response,
  * or error response read from the monitor connection.
  * @param hooks the hooks to use for the monitor connection, can be NULL if no hooks are needed
@@ -143,7 +144,7 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex);
  * @note Message may be a notification, a data response, or an error response, check the type field to determine which
  * data field to use
  */
-int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_response *message,
+int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_monitor_message *message,
                           atclient_monitor_hooks *hooks);
 
 /**

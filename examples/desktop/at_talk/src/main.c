@@ -249,8 +249,8 @@ static void *monitor_handler(void *xargs) {
   int tries = 1;
 
   while (true) {
-    atclient_monitor_response message;
-    atclient_monitor_response_init(&message);
+    atclient_monitor_message message;
+    atclient_monitor_message_init(&message);
 
     pthread_mutex_lock(&monitor_mutex);
     pthread_mutex_lock(&client_mutex);
@@ -260,13 +260,13 @@ static void *monitor_handler(void *xargs) {
 
     switch (message.type) {
     case ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION: {
-      if (strcmp(message.notification.id, "-1") == 0) {
+      if (strcmp(message.notification->id, "-1") == 0) {
         // We received a stats notification. Ignore it.
         break;
       }
-      if (atclient_atnotification_is_decrypted_value_initialized(&(message.notification))) {
-        const atclient_atnotification *notification = &(message.notification);
-        printf("\n%s%s%s: %s\n", HGRN, notification->from, ATCLIENT_RESET, notification->decrypted_value);
+      if (atclient_atnotification_is_decrypted_value_initialized(message.notification)) {
+        printf("\n%s%s%s: %s\n", HGRN, message.notification->from, ATCLIENT_RESET,
+               message.notification->decrypted_value);
         printf("%s%s%s: ", HBLU, from_atsign, ATCLIENT_RESET);
         fflush(stdout);
       }
@@ -324,7 +324,7 @@ static void *monitor_handler(void *xargs) {
     }
     }
 
-    atclient_monitor_response_free(&message);
+    atclient_monitor_message_free(&message);
     usleep(100);
   }
   goto exit;

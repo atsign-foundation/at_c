@@ -1,7 +1,7 @@
 #include "./atserver_message.h"
 #include <stdlib.h>
 
-uint16_t atserver_message_get_body_len(struct atserver_message message) {
+size_t atserver_message_get_body_len(struct atserver_message message) {
   return message.len - message.token_len - message.prompt_len;
 }
 
@@ -27,20 +27,21 @@ char *atserver_message_get_body(struct atserver_message message) {
   return (char *)message.buffer + message.token_len + message.prompt_len;
 }
 
-struct atserver_message atserver_message_parse(char *buffer, uint16_t len) {
+static const struct atserver_message EMPTY_MESSAGE = {.buffer = NULL, .len = 0, .prompt_len = 0, .token_len = 0};
+struct atserver_message atserver_message_parse(char *buffer, size_t len) {
   if (len == 0) {
-    return (struct atserver_message){NULL, 0, 0, 0};
+    return EMPTY_MESSAGE;
   }
 
-  uint16_t prompt_len = 0;
-  uint16_t token_len = 0;
+  size_t prompt_len = 0;
+  size_t token_len = 0;
 
   // find the end of the token
   while (++token_len < len && buffer[token_len] != ':')
     ; // walk to the end of the token section
   if (token_len == len) {
     // Parse error, token not found
-    return (struct atserver_message){NULL, 0, 0, 0};
+    return EMPTY_MESSAGE;
   }
 
   // parse the prompt len (if prompt exists in buffer)
@@ -55,15 +56,23 @@ struct atserver_message atserver_message_parse(char *buffer, uint16_t len) {
     token_len++; // corrected for 0 based indexing
   }
 
-  if (prompt_len > UINT8_MAX || token_len > UINT8_MAX) {
+  if (prompt_len > ATSERVER_MESSAGE_PROMPT_LEN_MAX || token_len > ATSERVER_MESSAGE_TOKEN_LEN_MAX) {
     // Parse error, by specification they should never come close to exceeding UINT8_MAX
-    return (struct atserver_message){NULL, 0, 0, 0};
+    return EMPTY_MESSAGE;
   }
 
-  return (struct atserver_message){buffer, len, prompt_len, token_len};
+  return (struct atserver_message){
+      .buffer = buffer,
+      .len = len,
+      .prompt_len = (ATSERVER_MESSAGE_PROMPT_LEN_TYPE)prompt_len,
+      .token_len = (ATSERVER_MESSAGE_TOKEN_LEN_TYPE)token_len,
+  };
 }
 
 void atserver_message_free(struct atserver_message *message) {
+  if (message == NULL) {
+    return;
+  }
   if (message->buffer != NULL) {
     free(message->buffer);
     message->buffer = NULL;
