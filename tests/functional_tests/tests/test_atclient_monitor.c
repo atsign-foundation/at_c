@@ -415,8 +415,8 @@ static int test_2a_receive_notifications(atclient *from_client, atclient *to_cli
   }
 
   atclient_monitor_message message1;
-  atclient_monitor_message_init(&message1);
   while (ret == 0) {
+    atclient_monitor_message_init(&message1);
     ret = atclient_monitor_read(to_client, worker_client, &message1, NULL);
     if (ret == 0 && message1.type == ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION &&
         strncmp(message1.notification->id, id1, strlen(message1.notification->id)) == 0) {
@@ -450,7 +450,6 @@ static int test_2a_receive_notifications(atclient *from_client, atclient *to_cli
       break;
     }
     atclient_monitor_message_free(&message1);
-    atclient_monitor_message_init(&message1);
   }
   free(id1);
   if (ret == ATCLIENT_SSL_TIMEOUT_EXITCODE) {
@@ -468,8 +467,8 @@ static int test_2a_receive_notifications(atclient *from_client, atclient *to_cli
   ret = send_notification(from_client, value2, key2, namespace, &id2);
 
   atclient_monitor_message message2;
-  atclient_monitor_message_init(&message2);
   while (ret == 0) {
+    atclient_monitor_message_init(&message2);
     ret = atclient_monitor_read(to_client, worker_client, &message2, NULL);
     if (ret == 0 && message2.type == ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION &&
         strncmp(message2.notification->id, id2, strlen(id2)) == 0) {
@@ -503,7 +502,6 @@ static int test_2a_receive_notifications(atclient *from_client, atclient *to_cli
       break;
     }
     atclient_monitor_message_free(&message2);
-    atclient_monitor_message_init(&message2);
   }
   free(id2);
   if (ret == ATCLIENT_SSL_TIMEOUT_EXITCODE) {

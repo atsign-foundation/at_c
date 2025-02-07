@@ -47,8 +47,10 @@ int main() {
 
 uint8_t test_1a_long_prompt() {
   const char *TAG = BASE_TAG("1a");
-  char *buffer = "@foobar@data:baz";
-  const uint16_t len = strlen(buffer);
+
+  const uint16_t len = 17;
+  char buffer[len];
+  memcpy(buffer, "@foobar@data:baz\n", len);
 
   struct atserver_message message = atserver_message_parse(buffer, len);
 
@@ -67,8 +69,9 @@ uint8_t test_1a_long_prompt() {
 
 uint8_t test_1b_short_prompt() {
   const char *TAG = BASE_TAG("1b");
-  char *buffer = "@data:baz";
-  const uint16_t len = strlen(buffer);
+  const uint16_t len = 10;
+  char buffer[len];
+  memcpy(buffer, "@data:baz\n", len);
 
   struct atserver_message message = atserver_message_parse(buffer, len);
 
@@ -87,8 +90,9 @@ uint8_t test_1b_short_prompt() {
 
 uint8_t test_1c_no_prompt() {
   const char *TAG = BASE_TAG("1c");
-  char *buffer = "data:baz";
-  const uint16_t len = strlen(buffer);
+  const uint16_t len = 9;
+  char buffer[len];
+  memcpy(buffer, "data:baz\n", len);
 
   struct atserver_message message = atserver_message_parse(buffer, len);
 
@@ -107,8 +111,9 @@ uint8_t test_1c_no_prompt() {
 
 uint8_t test_2a_no_token() {
   const char *TAG = BASE_TAG("2a");
-  char *buffer = "@foo@baz";
-  const uint16_t len = strlen(buffer);
+  const uint16_t len = 9;
+  char buffer[len];
+  memcpy(buffer, "@foo@baz\n", len);
 
   struct atserver_message message = atserver_message_parse(buffer, len);
 
@@ -127,8 +132,9 @@ uint8_t test_2a_no_token() {
 
 uint8_t test_3a_no_body() {
   const char *TAG = BASE_TAG("3a");
-  char *buffer = "@foobar@data:";
-  const uint16_t len = strlen(buffer);
+  const uint16_t len = 14;
+  char buffer[len];
+  memcpy(buffer, "@foobar@data:\n", len);
 
   struct atserver_message message = atserver_message_parse(buffer, len);
 
@@ -148,9 +154,8 @@ uint8_t test_3a_no_body() {
 uint8_t test_4a_empty_message() {
   const char *TAG = BASE_TAG("4a");
   char *buffer = "";
-  const uint16_t len = strlen(buffer);
 
-  struct atserver_message message = atserver_message_parse(buffer, len);
+  struct atserver_message message = atserver_message_parse(buffer, 0);
 
   if (message.buffer != NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "message.buffer is expected to be NULL but it isn't\n");
@@ -167,7 +172,7 @@ uint8_t test_4a_empty_message() {
 
 uint8_t test_5a_heap() {
   const char *TAG = BASE_TAG("5a");
-  char *static_buffer = "@foobar@data:baz";
+  char *static_buffer = "@foobar@data:baz\n";
   const uint16_t len = strlen(static_buffer);
   char *heap_buffer = malloc(sizeof(char) * len);
   if (heap_buffer == NULL) {
@@ -210,7 +215,7 @@ uint8_t test_5a_heap() {
 
 uint8_t test_5b_bad_parse_heap() {
   const char *TAG = BASE_TAG("5b");
-  char *static_buffer = "@foobar@baz";
+  char *static_buffer = "@foobar@baz\n";
   const uint16_t len = strlen(static_buffer);
   char *heap_buffer = malloc(sizeof(char) * len);
   if (heap_buffer == NULL) {
@@ -233,7 +238,7 @@ uint8_t test_5b_bad_parse_heap() {
   expect_uint("len", 0, message.len);
 
   // ensure original heap buffer is intact
-  if (strncmp(heap_buffer, static_buffer, len) != 0) {
+  if (strncmp(heap_buffer, static_buffer, len - 1) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "heap_buffer is malformed after a failed parse\n");
     free(heap_buffer);
     return 1;

@@ -39,7 +39,7 @@ int main() {
 }
 
 static int test_1a_populate_data_ok() {
-  const char *input = "@bob@data:foo";
+  const char *input = "@bob@data:foo\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
@@ -78,7 +78,7 @@ static int test_1a_populate_data_ok() {
 }
 
 static int test_1b_populate_data_empty() {
-  char *input = "@bob@data:";
+  char *input = "@bob@data:\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
@@ -106,7 +106,7 @@ static int test_1b_populate_data_empty() {
 }
 
 static int test_2a_populate_error_msg() {
-  char *input = "@bob@error:bar";
+  char *input = "@bob@error:bar\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
@@ -145,7 +145,7 @@ static int test_2a_populate_error_msg() {
 }
 
 static int test_2b_populate_error_empty() {
-  char *input = "@bob@error:";
+  char *input = "@bob@error:\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
@@ -187,7 +187,7 @@ static int test_3a_populate_notification_msg() {
                 "\"operation\":\"update\","
                 "\"messageType\":\"MessageType.key\","
                 "\"isEncrypted\":false"
-                "}";
+                "}\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
@@ -244,7 +244,7 @@ static int test_3a_populate_notification_msg() {
 }
 
 static int test_3b_populate_notification_empty() {
-  char *input = "@bob@notification:";
+  char *input = "@bob@notification:\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
@@ -272,7 +272,7 @@ static int test_3b_populate_notification_empty() {
 }
 
 static int test_3c_populate_notification_invalid_json() {
-  char *input = "@bob@notification:{asdfasdfasdfasd";
+  char *input = "@bob@notification:{asdfasdfasdfasd\n";
   size_t input_len = strlen(input);
   char *buffer = malloc(sizeof(char) * (input_len + 1));
   memcpy(buffer, input, strlen(input));
