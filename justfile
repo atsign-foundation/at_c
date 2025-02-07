@@ -79,14 +79,14 @@ memcheck +ARGS='': build-test-memcheck
 memcheck-docker +ARGS='':
   docker run --rm --platform linux/amd64 \
   --mount type=bind,src=$PWD,dst=/mnt/workdir \
-  --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
+  --mount type=bind,src=$HOME/.atsign/keys,dst=/home/atsign/.atsign/keys \
   atsigncompany/valgrind:latest \
   just memcheck {{ARGS}}
 
 valgrind-docker:
   docker run --rm --platform linux/amd64 -ti \
   --mount type=bind,src=$PWD,dst=/mnt/workdir \
-  --mount type=bind,src=$HOME/.atsign/keys,dst=/root/.atsign/keys \
+  --mount type=bind,src=$HOME/.atsign/keys,dst=/home/atsign/.atsign/keys \
   atsigncompany/valgrind:latest  \
   /bin/bash
 
