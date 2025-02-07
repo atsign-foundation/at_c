@@ -14,7 +14,26 @@ static int atclient_atnotification_from_cjson_node(atclient_atnotification *noti
 #endif
 
 void atclient_atnotification_init(atclient_atnotification *notification) {
-  memset(notification, 0, sizeof(atclient_atnotification));
+  // most of the fields are char* so manually set each to NULL
+  // in some niche cases, NULL != 0
+  notification->id = NULL;
+  notification->from = NULL;
+  notification->to = NULL;
+  notification->key = NULL;
+  notification->value = NULL;
+  notification->operation = NULL;
+  notification->message_type = NULL;
+  notification->enc_key_name = NULL;
+  notification->enc_algo = NULL;
+  notification->iv_nonce = NULL;
+  notification->ske_enc_key_name = NULL;
+  notification->ske_enc_algo = NULL;
+  notification->decrypted_value = NULL;
+  // Since there are very few non char* values, set each one manually
+  notification->epoch_millis = 0;
+  notification->is_encrypted = false;
+  notification->_initialized_fields[0] = 0;
+  notification->_initialized_fields[1] = 0;
 }
 
 void atclient_atnotification_free(atclient_atnotification *notification) {
