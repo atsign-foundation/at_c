@@ -189,6 +189,11 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     }
   }
 
+  if(atclient_atnotification_is_is_encrypted_initialized(message->notification) && !message->notification->is_encrypted) {
+    // do not decrypt notification
+    
+  }
+
   ret = decrypt_notification(atclient, message->notification);
   if (hooks != NULL && hooks->post_decrypt_notification != NULL) {
     ret = hooks->post_decrypt_notification(ret);
