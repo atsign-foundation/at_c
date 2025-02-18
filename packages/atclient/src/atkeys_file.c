@@ -120,7 +120,7 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
     return ret;
   }
 
-  cJSON *aes_pkam_public_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_PUBLIC_KEY_JSON_KEY);
+  cJSON *aes_pkam_public_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_DEFAULT_PUBLIC_KEY_JSON_KEY);
   if (aes_pkam_public_key == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read aesPkamPublicKey from JSON\n");
     goto exit;
@@ -132,7 +132,7 @@ int atclient_atkeys_file_from_string(atclient_atkeys_file *atkeys_file, const ch
     goto exit;
   }
 
-  cJSON *aes_pkam_private_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_APKAM_PRIVATE_KEY_JSON_KEY);
+  cJSON *aes_pkam_private_key = cJSON_GetObjectItem(root, ATCLIENT_ATKEYS_FILE_DEFAULT_PRIVATE_KEY_JSON_KEY);
   if (aes_pkam_private_key == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read aesPkamPrivateKey from JSON\n");
     goto exit;
