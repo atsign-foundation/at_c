@@ -247,6 +247,10 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
     cmdsize += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry); // :$ttln
   }
 
+  if(atclient_notify_params_is_should_encrypt_initialized(params)) {
+    cmdsize += strlen(":isEncrypted:") + (params->should_encrypt ? strlen("true") : strlen("false")); // :isEncrypted:true | :isEncrypted:false
+  }
+
   if (atclient_notify_params_is_atkey_initialized(params)) {
 
     const size_t metadatastrlen = atclient_atkey_metadata_protocol_strlen(&params->atkey->metadata);
@@ -335,6 +339,12 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   if (atclient_notify_params_is_notification_expiry_initialized(params) && params->notification_expiry > 0) {
     snprintf(cmd + off, cmdsize - off, ":ttln:%" PRIu64, params->notification_expiry);
     off += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry);
+  }
+
+  if(atclient_notify_params_is_should_encrypt_initialized(params)) {
+    const char *isEncryptedBool = params->should_encrypt ? "true" : "false";
+    snprintf(cmd + off, cmdsize - off, ":isEncrypted:%s", isEncryptedBool);
+    off += strlen(":isEncrypted:") + strlen(isEncryptedBool);
   }
 
   if ((res = atclient_atkey_metadata_to_protocol_str(&(params->atkey->metadata), &metadata_protocol_str)) != 0) {

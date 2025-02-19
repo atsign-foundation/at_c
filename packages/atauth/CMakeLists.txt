@@ -53,7 +53,7 @@ build_atsdk_package(
 )
 
 if(ATAUTH_BUILD_EXECUTABLES)
-  add_compile_definitions(-DATAUTH_BUILD_EXECUTABLES=1)
+  add_compile_definitions(ATAUTH_BUILD_EXECUTABLES=1)
   add_executable(at_activate ${CMAKE_CURRENT_LIST_DIR}/src/at_activate.c)
   target_link_libraries(
     at_activate

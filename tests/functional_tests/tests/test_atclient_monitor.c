@@ -105,6 +105,7 @@ static int test_1a_decrypt_notification(atclient *, atclient *);
 
 // e2e test
 static int test_2a_receive_notifications(atclient *, atclient *, atclient *);
+static int test_2b_receive_non_encrypted_notifications(atclient *, atclient *, atclient *);
 
 int main() {
   int ret = 0;
@@ -151,6 +152,7 @@ int main() {
 
   ret += test_1a_decrypt_notification(&from_client, &to_client);
   ret += test_2a_receive_notifications(&from_client, &to_client, &worker_client);
+  ret += test_2b_receive_non_encrypted_notifications(&from_client, &to_client, &worker_client);
 
   if (ret > 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%d tests failed\n", ret);
@@ -382,6 +384,8 @@ static int send_notification(atclient *from_client, char *value, char *key, char
 static int test_2a_receive_notifications(atclient *from_client, atclient *to_client, atclient *worker_client) {
   int ret;
 
+  atlogger_log(TAG " 2a", ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting test 2a\n");
+
   ret = atchops_uuid_init();
   if (ret != 0) {
     atlogger_log(TAG " 2a", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to init uuid\n");
@@ -512,5 +516,174 @@ static int test_2a_receive_notifications(atclient *from_client, atclient *to_cli
     return 1;
   }
 
+  ret = 0;
+  atlogger_log(TAG " 2a", ATLOGGER_LOGGING_LEVEL_DEBUG, "Finished test 2a with exit code %d\n", ret);
+
+  return ret;
+}
+
+/**
+ * This is a helper function
+ * Send a non-encrypted notification (set should_encrypt to false)
+ */
+static int send_non_encrypted_notification(atclient *from_client, char *value, char *key, char *ns, char **id) {
+  int ret;
+
+  atclient_atkey atkey;
+  atclient_atkey_init(&atkey);
+
+  if((ret = atclient_atkey_create_shared_key(&atkey, key, FROM_ATSIGN, TO_ATSIGN, ns)) != 0) {
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
+    atclient_atkey_free(&atkey);
+    return 1;
+  }
+
+  atclient_notify_params notify;
+  atclient_notify_params_init(&notify);
+
+  ret = atclient_notify_params_set_atkey(&notify, &atkey);
+  if (ret != 0) {
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed to set notify atkey\n");
+    atclient_notify_params_free(&notify);
+    atclient_atkey_free(&atkey);
+    return 1;
+  }
+
+  ret = atclient_notify_params_set_should_encrypt(&notify, false);
+  if (ret != 0) {
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed to set notify should encrypt\n");
+    atclient_notify_params_free(&notify);
+    atclient_atkey_free(&atkey);
+    return 1;
+  }
+
+  ret = atclient_notify_params_set_value(&notify, value);
+  if (ret != 0) {
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed to set notify value\n");
+    atclient_notify_params_free(&notify);
+
+    atclient_atkey_free(&atkey);
+    return 1;
+  }
+
+  ret = atclient_notify_params_set_operation(&notify, ATCLIENT_NOTIFY_OPERATION_UPDATE);
+  if (ret != 0) {
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "Failed to set notify operation\n");
+    atclient_notify_params_free(&notify);
+    atclient_atkey_free(&atkey);
+    return 1;
+  }
+
+  ret = atclient_notify(from_client, &notify, id);
+  if (ret != 0) {
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to notify\n");
+    atclient_notify_params_free(&notify);
+    atclient_atkey_free(&atkey);
+    return 1;
+  }
+
   return 0;
+}
+
+static int test_2b_receive_non_encrypted_notifications(atclient *from_client, atclient *to_client, atclient *worker_client) {
+  int ret = 1;
+
+  atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting test 2b\n");
+
+  const char *key = "non-encrypted-key";
+  const char *value = "non-encrypted-value";
+  const size_t value_len = strlen(value);
+
+  // 1. generate a unique namespace
+  ret = atchops_uuid_init();
+  if (ret != 0) {
+    atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to init uuid\n");
+    return 1;
+  }
+
+  const size_t namespace_size = 37;
+  char namespace[namespace_size];
+  ret = atchops_uuid_generate(namespace, namespace_size);
+  if (ret != 0) {
+    atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate uuid for namespace\n");
+    return 1;
+  }
+  namespace[namespace_size-1] = '\0';
+
+  ret = atclient_monitor_start(to_client, namespace);
+  if (ret != 0) {
+    atlogger_log(TAG " 2a", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to start monitor\n");
+    return 1;
+  }
+
+  char *expected_notification_id = NULL;
+
+  atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sending non-encrypted notification..\n");
+
+  ret = send_non_encrypted_notification(from_client, value, key, namespace, &expected_notification_id);
+  if (ret != 0) {
+    atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send non-encrypted notification\n");
+    return 1;
+  }
+
+  atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent non-encrypted notification with id %s\n", expected_notification_id);
+
+  atclient_monitor_message message;
+  while (ret == 0) {
+    atclient_monitor_message_init(&message);
+    ret = atclient_monitor_read(to_client, worker_client, &message, NULL);
+    if (ret == 0 && message.type == ATCLIENT_MONITOR_MESSAGE_TYPE_NOTIFICATION &&
+        strncmp(message.notification->id, expected_notification_id, strlen(expected_notification_id)) == 0) {
+      // correct notification so check the values
+      if (message.notification->value == NULL) {
+        atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor value is NULL\n");
+        atclient_monitor_message_free(&message);
+        free(expected_notification_id);
+        return 1;
+      }
+      
+      size_t actual_len = strlen(message.notification->value);
+      if (actual_len != value_len) {
+        atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "Monitor value has unexpected length (expected: %zu, actual: %zu)\n",
+                     value_len, actual_len);
+        atclient_monitor_message_free(&message);
+        free(expected_notification_id);
+        return 1;
+      }
+      if (strncmp(message.notification->value, value, actual_len) != 0) {
+        atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "Monitor value has unexpected value\n\t\t"
+                     "expected: '%s'\n\t\t"
+                     "actual: '%s'\n",
+                     "non-encrypted-value", message.notification->value);
+        atclient_monitor_message_free(&message);
+        free(expected_notification_id);
+        return 1;
+      }
+      atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Received non-encrypted notification with id \"%s\" with expected value \"%s\"\n", expected_notification_id, value);
+      atclient_monitor_message_free(&message);
+      break;
+    }
+    atclient_monitor_message_free(&message);
+  }
+
+  free(expected_notification_id);
+
+  if (ret == ATCLIENT_SSL_TIMEOUT_EXITCODE) {
+    atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor timedout after 15 seconds\n");
+    return 1;
+  } else if (ret != 0) {
+    atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Monitor failed with code %d\n", ret);
+    return 1;
+  }
+
+  ret = 0;
+  atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Finished test 2b with exit code %d\n", ret);
+
+  return ret;
 }
