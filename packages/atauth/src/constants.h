@@ -1,3 +1,6 @@
+#ifndef ATAUTH_CONSTANTS_H
+#define ATAUTH_CONSTANTS_H
+
 #define ATAUTH_DEFAULT_FIRST_APP_NAME "firstApp"
 #define ATAUTH_DEFAULT_FIRST_DEVICE_NAME "firstDevice"
 #define ATAUTH_AES_256_KEY_BYTES 32
@@ -10,3 +13,5 @@
 
 #define ATAUTH_ENCRYPTED_DEFAULT_ENC_PRIVKEY_NAME "default_enc_private_key"
 #define ATAUTH_ENCRYPTED_SELF_ENC_KEY_NAME "default_self_enc_key"
+
+#endif // ATAUTH_CONSTANTS_H
