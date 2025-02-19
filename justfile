@@ -28,8 +28,8 @@ setup: configure-test-all
 
 clean:
   rm -rf $PWD/build
-  rm $PWD/compile_commands.json
-  rm $PWD/tests/compile_commands.json
+  rm -f $PWD/compile_commands.json
+  rm -f $PWD/tests/compile_commands.json
 
 # INSTALL COMMANDS
 
