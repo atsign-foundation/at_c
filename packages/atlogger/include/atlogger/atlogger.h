@@ -21,6 +21,44 @@ void atlogger_set_opts(int opts);
 void atlogger_log(const char *tag, const enum atlogger_logging_level level, const char *format, ...);
 void atlogger_fix_stdout_buffer(char *str, const size_t strlen);
 
+typedef struct atlogger_ctx {
+  enum atlogger_logging_level level;
+  int opts;
+} atlogger_ctx;
+
+atlogger_ctx *atlogger_get_instance();
+
+#ifndef ATLOGGER_OVERRIDE_LOG_FUNCTION
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define PREFIX_BUFFER_LEN 64
+void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix, size_t prefixlen);
+void _atlogger_log(const char *tag, enum atlogger_logging_level level, const char *format, ...);
+
+#if defined(ATSDK_DEBUG_MODE)
+#define atlogger_log(TAG, LEVEL, FORMAT, ...)                                                                          \
+  {                                                                                                                    \
+    atlogger_ctx *ctx = atlogger_get_instance();                                                                       \
+    if (LEVEL <= ctx->level) {                                                                                         \
+      if (TAG != NULL) {                                                                                               \
+        char *prefix = malloc(sizeof(char) * PREFIX_BUFFER_LEN);                                                       \
+        if (prefix != NULL) {                                                                                          \
+          atlogger_get_prefix(LEVEL, prefix, PREFIX_BUFFER_LEN);                                                       \
+          printf("%.*s ", (int)strlen(prefix), prefix);                                                                \
+          printf("%s:%d - ", __FILE__, __LINE__);                                                                      \
+          printf("%.*s | ", (int)strlen(TAG), TAG);                                                                    \
+          free(prefix);                                                                                                \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    printf(FORMAT __VA_OPT__(, ) __VA_ARGS__);                                                                         \
+  }
+#else
+#define atlogger_log(TAG, LEVEL, FORMAT, ...) _atlogger_log(TAG, LEVEL, FORMAT __VA_OPT__(, ) __VA_ARGS__);
+#endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif
