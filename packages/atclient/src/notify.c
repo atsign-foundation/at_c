@@ -247,8 +247,9 @@ static size_t calculate_cmd_size(const atclient_notify_params *params, const siz
     cmdsize += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry); // :$ttln
   }
 
-  if(atclient_notify_params_is_should_encrypt_initialized(params)) {
-    cmdsize += strlen(":isEncrypted:") + (params->should_encrypt ? strlen("true") : strlen("false")); // :isEncrypted:true | :isEncrypted:false
+  if (atclient_notify_params_is_should_encrypt_initialized(params)) {
+    cmdsize += strlen(":isEncrypted:") +
+               (params->should_encrypt ? strlen("true") : strlen("false")); // :isEncrypted:true | :isEncrypted:false
   }
 
   if (atclient_notify_params_is_atkey_initialized(params)) {
@@ -290,7 +291,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
   cmdsize = calculate_cmd_size(params, cmdvaluelen, &atkeylen, &metadatastrlen);
   if (cmdsize <= 0) {
     res = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "calculate_cmd_size failed with code %d\n", cmdsize);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "calculate_cmd_size failed with code %zu\n", cmdsize);
     goto exit;
   }
 
@@ -341,7 +342,7 @@ static int generate_cmd(const atclient_notify_params *params, const char *cmdval
     off += strlen(":ttln:") + atclient_string_utils_long_strlen(params->notification_expiry);
   }
 
-  if(atclient_notify_params_is_should_encrypt_initialized(params)) {
+  if (atclient_notify_params_is_should_encrypt_initialized(params)) {
     const char *isEncryptedBool = params->should_encrypt ? "true" : "false";
     snprintf(cmd + off, cmdsize - off, ":isEncrypted:%s", isEncryptedBool);
     off += strlen(":isEncrypted:") + strlen(isEncryptedBool);

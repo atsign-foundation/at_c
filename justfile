@@ -21,7 +21,7 @@ release_c_flags := "-std=c99 -Wno-error"
 
 # SETUP COMMANDS
 
-setup: configure-test-all
+setup:  build-test-all
   [ -f "$PWD/compile_commands.json" ] && rm $PWD/compile_commands.json || true
   ln -s {{test_dir}}/compile_commands.json $PWD/
   [ -f "$PWD/tests/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true

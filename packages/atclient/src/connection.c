@@ -106,7 +106,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   size_t n1, n2;
   ret = atclient_tls_socket_read(&ctx->_socket, &buf1, &n1, atclient_socket_read_until_char('@'));
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n");
     goto exit;
   }
   free(buf1);
@@ -118,7 +118,7 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
 
   ret = atclient_tls_socket_read(&ctx->_socket, &buf2, &n2, atclient_socket_read_until_char('@'));
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n");
     goto exit;
   }
   free(buf2);
@@ -210,7 +210,7 @@ int atclient_connection_write(atclient_connection *ctx, const unsigned char *val
     if (valuecopy != NULL) {
       memcpy(valuecopy, value, value_len);
       atlogger_fix_stdout_buffer((char *)valuecopy, value_len);
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, value_len, valuecopy,
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, (int)value_len, valuecopy,
                    ATCLIENT_RESET);
       free(valuecopy);
     } else {
@@ -313,8 +313,8 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     if ((srccopy = malloc(sizeof(unsigned char) * src_len)) != NULL) {
       memcpy(srccopy, src, src_len);
       atlogger_fix_stdout_buffer((char *)srccopy, src_len);
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN, strlen((char *)srccopy),
-                   srccopy, ATCLIENT_RESET);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLU, HCYN,
+                   (int)strlen((char *)srccopy), srccopy, ATCLIENT_RESET);
       free(srccopy);
     } else {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
@@ -387,7 +387,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
   size_t read_n;
   ret = atclient_tls_socket_read(&ctx->_socket, &read_buf, &read_n, atclient_socket_read_until_char('\n'));
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n");
     goto exit;
   }
 
@@ -441,7 +441,7 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     if ((recvcopy = malloc(sizeof(unsigned char) * *recv_len)) != NULL) {
       memcpy(recvcopy, recv, *recv_len);
       atlogger_fix_stdout_buffer((char *)recvcopy, *recv_len);
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *recv_len, recvcopy,
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)*recv_len, recvcopy,
                    ATCLIENT_RESET);
       free(recvcopy);
     } else {
@@ -576,7 +576,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
   size_t read_n;
   ret = atclient_tls_socket_read(&ctx->_socket, &read_buf, &read_n, atclient_socket_read_until_char('\n'));
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n", ret);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n");
     goto exit;
   }
   size_t read_i = 0; // will store where the start of `<type>:` is (if happy path)
@@ -602,7 +602,7 @@ int atclient_connection_read(atclient_connection *ctx, unsigned char **value, si
    * 5. Print debug log
    */
   if (atlogger_get_logging_level() >= ATLOGGER_LOGGING_LEVEL_DEBUG) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, *value_len, *value,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)*value_len, *value,
                  ATCLIENT_RESET);
   }
 

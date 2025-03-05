@@ -289,18 +289,18 @@ static int test_6_get_with_metadata(atclient *atclient) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ccd: %d\n", atkey.metadata.ccd);
 
   if (atclient_atkey_metadata_is_ttl_initialized(&(atkey.metadata)) && atkey.metadata.ttl != ATKEY_TTL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ttl comparison, got %d and expected %d\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ttl comparison, got %" PRIu64 " and expected %d\n",
                  atkey.metadata.ttl, ATKEY_TTL);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %" PRIu64 "\n", atkey.metadata.ttl);
 
   if (atclient_atkey_metadata_is_ttr_initialized(&(atkey.metadata)) && atkey.metadata.ttr != ATKEY_TTR) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ttr comparison, got %d and expected %d\n",
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed ttr comparison, got %" PRIu64 " and expected %d\n",
                  atkey.metadata.ttr, ATKEY_TTR);
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttr: %d\n", atkey.metadata.ttr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttr: %" PRIu64 "\n", atkey.metadata.ttr);
 
   if (atclient_atkey_metadata_is_is_encrypted_initialized(&(atkey.metadata)) &&
       atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {

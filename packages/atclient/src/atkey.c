@@ -397,7 +397,7 @@ int atclient_atkey_to_string(const atclient_atkey *atkey, char **atkeystr) {
 
   if (index_pos != atkey_str_size - 1) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                 "index_pos != atkey_str_size - 1 (%d != %d - 1). The predicted `atkey_str_size` variable was not "
+                 "index_pos != atkey_str_size - 1 (%zu != %zu - 1). The predicted `atkey_str_size` variable was not "
                  "evaluated correctly.\n",
                  index_pos, atkey_str_size);
   }
