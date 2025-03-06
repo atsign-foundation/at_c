@@ -313,11 +313,12 @@ static int test_7_get_with_metadata(atclient *atclient) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.value: \"%s\" == \"%s\"\n", value, ATKEY_VALUE);
 
   if (atkey.metadata.ttl != ATKEY_TTL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ttl: %d != %d\n", atkey.metadata.ttl, ATKEY_TTL);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atkey.metadata.ttl: %" PRIu64 " != %d\n", atkey.metadata.ttl,
+                 ATKEY_TTL);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %d\n", atkey.metadata.ttl);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "atkey.metadata.ttl: %" PRIu64 "\n", atkey.metadata.ttl);
 
   if (atclient_atkey_metadata_is_is_encrypted_initialized(&atkey.metadata) &&
       atkey.metadata.is_encrypted != ATKEY_ISENCRYPTED) {
@@ -403,7 +404,6 @@ static int tear_down(atclient *atclient) {
   const size_t atkeystrsize = 128;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
 
   const size_t commandsize = 256;
   char command[commandsize];

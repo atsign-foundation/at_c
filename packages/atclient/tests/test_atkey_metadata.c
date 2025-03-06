@@ -1,5 +1,6 @@
 #include "atclient/metadata.h"
 #include "atlogger/atlogger.h"
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -142,7 +143,7 @@ static int test_atkey_metadata_from_jsonstr() {
 
   if (metadata.ttl != 86400) {
     ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.ttl != 86400: %ld\n", metadata.ttl);
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "metadata.ttl != 86400: %" PRIu64 "\n", metadata.ttl);
     goto exit;
   }
 

@@ -1,6 +1,5 @@
 #include "atclient/monitor.h"
 #include "atclient/atclient.h"
-#include "atclient/atclient_utils.h"
 #include "atclient/atnotification.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
@@ -159,7 +158,7 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
   }
   // no longer need to free buffer, memory is owned by message->atserver_message
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, buffer_len, buffer,
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sRECV: %s\"%.*s\"%s\n", BMAG, HMAG, (int)buffer_len, buffer,
                ATCLIENT_RESET);
 
   ret = populate_monitor_message(message);
@@ -243,7 +242,7 @@ int populate_monitor_message(atclient_monitor_message *message) {
     }
     break;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown token type: %.*s\n", token_len, token);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unknown token type: %.*s\n", (int)token_len, token);
   message->type = ATCLIENT_MONITOR_MESSAGE_TYPE_NONE;
   return 2;
 }
@@ -390,7 +389,7 @@ int decrypt_notification(atclient *atclient, atclient_atnotification *notificati
 
     if (ivlen != ATCHOPS_IV_BUFFER_SIZE) {
       ret = 1;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded. Expected %d but got %d\n",
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid iv length was decoded. Expected %d but got %zu\n",
                    ATCHOPS_IV_BUFFER_SIZE, ivlen);
       goto exit;
     }

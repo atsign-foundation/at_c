@@ -71,6 +71,7 @@ function(build_atsdk_package)
     )
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      message(STATUS "LINKING PRIVATE HEADERS FOR DEBUG MODE")
       target_include_directories(
         ${PROJECT_NAME}
         PUBLIC $<BUILD_INTERFACE:${arg_PACKAGE_DIR}/src>

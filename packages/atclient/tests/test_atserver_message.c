@@ -38,10 +38,10 @@ int main() {
   return ret;
 }
 
-#define expect_uint(TEST_TAG, EXP, ACT)                                                                                \
+#define expect_uint(TEST_TAG, EXP, FMT, ACT)                                                                           \
   if (EXP != ACT) {                                                                                                    \
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s: incorrect value (expected: %u, actual: %u)\n", TEST_TAG, EXP, \
-                 ACT);                                                                                                 \
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s: incorrect value (expected: %u, actual: %" FMT ")\n",          \
+                 TEST_TAG, EXP, ACT);                                                                                  \
     return 1;                                                                                                          \
   }
 
@@ -59,10 +59,10 @@ uint8_t test_1a_long_prompt() {
     return 1;
   }
 
-  expect_uint("prompt len", 8, message.prompt_len);
-  expect_uint("token len", 5, message.token_len);
-  expect_uint("body len", 3, atserver_message_get_body_len(message));
-  expect_uint("len", 16, message.len);
+  expect_uint("prompt len", 8, "u", message.prompt_len);
+  expect_uint("token len", 5, "u", message.token_len);
+  expect_uint("body len", 3, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 16, "zu", message.len);
 
   return 0;
 }
@@ -80,10 +80,10 @@ uint8_t test_1b_short_prompt() {
     return 1;
   }
 
-  expect_uint("prompt len", 1, message.prompt_len);
-  expect_uint("token len", 5, message.token_len);
-  expect_uint("body len", 3, atserver_message_get_body_len(message));
-  expect_uint("len", 9, message.len);
+  expect_uint("prompt len", 1, "u", message.prompt_len);
+  expect_uint("token len", 5, "u", message.token_len);
+  expect_uint("body len", 3, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 9, "zu", message.len);
 
   return 0;
 }
@@ -101,10 +101,10 @@ uint8_t test_1c_no_prompt() {
     return 1;
   }
 
-  expect_uint("prompt len", 0, message.prompt_len);
-  expect_uint("token len", 5, message.token_len);
-  expect_uint("body len", 3, atserver_message_get_body_len(message));
-  expect_uint("len", 8, message.len);
+  expect_uint("prompt len", 0, "u", message.prompt_len);
+  expect_uint("token len", 5, "u", message.token_len);
+  expect_uint("body len", 3, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 8, "zu", message.len);
 
   return 0;
 }
@@ -122,10 +122,10 @@ uint8_t test_2a_no_token() {
     return 1;
   }
 
-  expect_uint("prompt len", 0, message.prompt_len);
-  expect_uint("token len", 0, message.token_len);
-  expect_uint("body len", 0, atserver_message_get_body_len(message));
-  expect_uint("len", 0, message.len);
+  expect_uint("prompt len", 0, "u", message.prompt_len);
+  expect_uint("token len", 0, "u", message.token_len);
+  expect_uint("body len", 0, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 0, "zu", message.len);
 
   return 0;
 }
@@ -143,10 +143,10 @@ uint8_t test_3a_no_body() {
     return 1;
   }
 
-  expect_uint("prompt len", 8, message.prompt_len);
-  expect_uint("token len", 5, message.token_len);
-  expect_uint("body len", 0, atserver_message_get_body_len(message));
-  expect_uint("len", 13, message.len);
+  expect_uint("prompt len", 8, "u", message.prompt_len);
+  expect_uint("token len", 5, "u", message.token_len);
+  expect_uint("body len", 0, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 13, "zu", message.len);
 
   return 0;
 }
@@ -162,10 +162,10 @@ uint8_t test_4a_empty_message() {
     return 1;
   }
 
-  expect_uint("prompt len", 0, message.prompt_len);
-  expect_uint("token len", 0, message.token_len);
-  expect_uint("body len", 0, atserver_message_get_body_len(message));
-  expect_uint("len", 0, message.len);
+  expect_uint("prompt len", 0, "u", message.prompt_len);
+  expect_uint("token len", 0, "u", message.token_len);
+  expect_uint("body len", 0, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 0, "zu", message.len);
 
   return 0;
 }
@@ -189,10 +189,10 @@ uint8_t test_5a_heap() {
     return 1;
   }
 
-  expect_uint("prompt len", 8, message.prompt_len);
-  expect_uint("token len", 5, message.token_len);
-  expect_uint("body len", 3, atserver_message_get_body_len(message));
-  expect_uint("len", 16, message.len);
+  expect_uint("prompt len", 8, "u", message.prompt_len);
+  expect_uint("token len", 5, "u", message.token_len);
+  expect_uint("body len", 3, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 16, "zu", message.len);
 
   message.buffer[0] = 'H';
   if (strncmp(heap_buffer, "Hfoobar@data:baz", len) != 0) {
@@ -204,7 +204,7 @@ uint8_t test_5a_heap() {
   atserver_message_free(&message);
   if (message.buffer != NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "message.buffer is expected to be NULL after free but it isn't: %zu\n", message.buffer);
+                 "message.buffer is expected to be NULL after free but it isn't: %s\n", message.buffer);
     return 1;
   }
 
@@ -232,10 +232,10 @@ uint8_t test_5b_bad_parse_heap() {
     return 1;
   }
 
-  expect_uint("prompt len", 0, message.prompt_len);
-  expect_uint("token len", 0, message.token_len);
-  expect_uint("body len", 0, atserver_message_get_body_len(message));
-  expect_uint("len", 0, message.len);
+  expect_uint("prompt len", 0, "u", message.prompt_len);
+  expect_uint("token len", 0, "u", message.token_len);
+  expect_uint("body len", 0, "zu", atserver_message_get_body_len(message));
+  expect_uint("len", 0, "zu", message.len);
 
   // ensure original heap buffer is intact
   if (strncmp(heap_buffer, static_buffer, len - 1) != 0) {

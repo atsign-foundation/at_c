@@ -41,8 +41,8 @@ int main() {
 // returns 1 if EXP != ACT and logs the error
 #define expect_size_t(TEST_TAG, EXP, ACT)                                                                              \
   if (EXP != ACT) {                                                                                                    \
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s: wrong idx value (expected: %d, actual: %d)\n", TEST_TAG, EXP, \
-                 ACT);                                                                                                 \
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%s: wrong idx value (expected: %d, actual: %zu)\n", TEST_TAG,     \
+                 EXP, ACT);                                                                                            \
     return 1;                                                                                                          \
   }
 

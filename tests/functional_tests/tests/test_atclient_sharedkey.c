@@ -167,20 +167,20 @@ static int test_2_get_as_sharedby(atclient *atclient) {
 
   // check ttl, should be 5 minutes
   if (atkey.metadata.ttl != ATKEY_TTL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %d\n", ATKEY_TTL,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %" PRIu64 "\n", ATKEY_TTL,
                  atkey.metadata.ttl);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %" PRIu64 "\n", atkey.metadata.ttl);
 
   if (atkey.metadata.ttr != ATKEY_TTR) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %d\n", ATKEY_TTR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %" PRIu64 "\n", ATKEY_TTR,
                  atkey.metadata.ttr);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttr matched: %d\n", atkey.metadata.ttr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttr matched: %" PRIu64 "\n", atkey.metadata.ttr);
 
   goto exit;
 exit: {
@@ -231,20 +231,20 @@ static int test_3_get_as_sharedwith(atclient *atclient2) {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value matched: %s == %s\n", value, ATKEY_VALUE);
 
   if (atclient_atkey_metadata_is_ttl_initialized(&atkey.metadata) && atkey.metadata.ttl != ATKEY_TTL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %d\n", ATKEY_TTL,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttl mismatch. Expected %d, got %" PRIu64 "\n", ATKEY_TTL,
                  atkey.metadata.ttl);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %d\n", atkey.metadata.ttl);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttl matched: %" PRIu64 "\n", atkey.metadata.ttl);
 
   if (atclient_atkey_metadata_is_ttr_initialized(&atkey.metadata) && atkey.metadata.ttr != ATKEY_TTR) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %d\n", ATKEY_TTR,
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ttr mismatch. Expected %d, got %" PRIu64 "\n", ATKEY_TTR,
                  atkey.metadata.ttr);
     ret = 1;
     goto exit;
   }
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttr matched: %d\n", atkey.metadata.ttr);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "ttr matched: %" PRIu64 "\n", atkey.metadata.ttr);
 
   goto exit;
 exit: {

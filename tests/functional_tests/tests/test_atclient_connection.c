@@ -309,7 +309,8 @@ static int test_7_send_should_fail(atclient_connection *conn) {
   ret = atclient_connection_send(conn, send_data, send_data_len, recv, recvsize, &recvlen);
   if (ret == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Successfully sent \"%s\" when it should have resulted in a failure: %d\n", ret);
+                 "Successfully sent \"%.*s\" when it should have resulted in a failure: %d\n", (int)send_data_len,
+                 send_data, ret);
     ret = 1;
     goto exit;
   }
