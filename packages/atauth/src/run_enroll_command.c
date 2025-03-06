@@ -319,8 +319,8 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
     }
     if (iv_raw_len != ATCHOPS_IV_BUFFER_SIZE) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
-                   "Unexpected size for base64 decoded iv (expected: %zu, actual: %zu)\n", ATCHOPS_IV_BUFFER_SIZE,
-                   iv_raw_len);
+                   "Unexpected size for base64 decoded iv (expected: %zu, actual: %zu)\n",
+                   (size_t)ATCHOPS_IV_BUFFER_SIZE, iv_raw_len);
       cJSON_Delete(json_server_resp);
       return ret;
     }

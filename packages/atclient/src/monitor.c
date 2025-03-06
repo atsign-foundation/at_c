@@ -1,5 +1,6 @@
 #include "atclient/monitor.h"
 #include "atclient/atclient.h"
+#include "atclient/atclient_utils.h"
 #include "atclient/atnotification.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
@@ -73,7 +74,6 @@ void atclient_monitor_set_read_timeout(atclient *monitor_conn, const int timeout
 int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
   int ret = 1;
 
-  size_t cmdsize = 0;
   char *cmd = NULL;
 
   const size_t regexlen = strlen(regex);
@@ -82,14 +82,12 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
   // atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Building monitor command...\n");
 
   // 2. build cmd
-  cmdsize += 7 + 2; // monitor + \r\n
+  size_t cmdsize = 10; // monitor + \r\n\0
   if (regexlen > 0) {
     cmdsize += regexlen + 1; // $regex + ' '
   }
-  cmdsize += 1; // null terminator
   cmd = malloc(sizeof(char) * cmdsize);
   memset(cmd, 0, sizeof(char) * cmdsize);
-  const size_t cmdlen = cmdsize - 1;
 
   if (regexlen > 0) {
     snprintf(cmd, cmdsize, "monitor %.*s\r\n", (int)regexlen, regex);
@@ -97,17 +95,12 @@ int atclient_monitor_start(atclient *monitor_conn, const char *regex) {
     snprintf(cmd, cmdsize, "monitor\r\n");
   }
 
-  monitor_conn->async_read = true;
-
-  ret = atclient_connection_send(&monitor_conn->atserver_connection, (unsigned char *)cmd, cmdlen, NULL, 0, NULL);
+  ret = atclient_connection_write(&monitor_conn->atserver_connection, (unsigned char *)cmd, cmdsize - 1);
   // 3. send monitor cmd
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send monitor command: %d\n", ret);
     goto exit;
   }
-  atlogger_fix_stdout_buffer(cmd, cmdsize);
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "\t%sSENT: %s\"%.*s\"%s\n", BBLK, HCYN, (int)strlen(cmd), cmd,
-               ATCLIENT_RESET);
 
   ret = 0;
   goto exit;

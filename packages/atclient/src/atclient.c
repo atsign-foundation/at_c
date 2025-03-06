@@ -270,7 +270,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
 
   if (atserver_host == NULL || atserver_port == 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
-                 "Missing atServer host or port. Using %s:%lu atDirectory to find atServer address\n", atdirectory_host,
+                 "Missing atServer host or port. Using %s:%u atDirectory to find atServer address\n", atdirectory_host,
                  atdirectory_port);
     if ((ret = atclient_utils_find_atserver_address(atdirectory_host, atdirectory_port, atsign, &atserver_host,
                                                     &atserver_port)) != 0) {
