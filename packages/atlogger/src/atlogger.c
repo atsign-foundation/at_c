@@ -21,13 +21,19 @@
 
 static atlogger_ctx ctx;
 static int is_ctx_initalized = 0;
+FILE *atlogger_logging_stream = NULL;
 
 atlogger_ctx *atlogger_get_instance() {
+  if (atlogger_logging_stream == NULL) {
+    atlogger_logging_stream = stdout;
+  }
   if (is_ctx_initalized == 0) {
     is_ctx_initalized = 1;
   }
   return &ctx;
 }
+
+void atlogger_set_logging_stream(FILE *stream) { atlogger_logging_stream = stream; }
 
 enum atlogger_logging_level atlogger_get_logging_level() {
   atlogger_ctx *ctx = atlogger_get_instance();
@@ -164,12 +170,12 @@ void _atlogger_log(const char *tag, enum atlogger_logging_level level, const cha
     char *prefix = malloc(sizeof(char) * PREFIX_BUFFER_LEN);
     if (prefix != NULL) {
       atlogger_get_prefix(level, prefix, PREFIX_BUFFER_LEN);
-      printf("%.*s ", (int)strlen(prefix), prefix);
-      printf("%.*s | ", (int)strlen(tag), tag);
+      fprintf(atlogger_logging_stream, "%.*s ", (int)strlen(prefix), prefix);
+      fprintf(atlogger_logging_stream, "%.*s | ", (int)strlen(tag), tag);
       free(prefix);
     }
   }
-  vprintf(format, args);
+  vfprintf(atlogger_logging_stream, format, args);
   va_end(args);
 }
 #endif
