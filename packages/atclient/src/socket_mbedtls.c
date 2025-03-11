@@ -322,7 +322,7 @@ int atclient_tls_socket_read_until_char(struct atclient_tls_socket *socket, unsi
         continue;   // continue if not found char yet
       }
       // handle non-happy path
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Socket read error: %d\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Socket read error: -%#x\n", -ret);
       switch (ret) {
       case 0:                                 // connection is closed
       case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY: // connection is closed

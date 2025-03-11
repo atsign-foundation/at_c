@@ -318,7 +318,7 @@ int atclient_get_shared_encryption_key_shared_by_other(atclient *ctx, const char
   if (!atclient_string_utils_starts_with(response, "data:")) {
     if (atclient_string_utils_starts_with(response, "error:AT0015-key not found")) {
       ret = ATCLIENT_ERR_AT0015_KEY_NOT_FOUND;
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key not found\n", ret);
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "key not found\n");
       return ret;
     }
   }
