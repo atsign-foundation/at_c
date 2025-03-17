@@ -40,7 +40,7 @@ void atlogger_get_prefix(enum atlogger_logging_level logging_level, char *prefix
 void _atlogger_log(const char *tag, enum atlogger_logging_level level, const char *format, ...);
 
 #if defined(ATSDK_DEBUG_MODE)
-#define atlogger_log(TAG, LEVEL, FORMAT, ...)                                                                          \
+#define atlogger_log(TAG, LEVEL, ...)                                                                                  \
   {                                                                                                                    \
     atlogger_ctx *ctx = atlogger_get_instance();                                                                       \
     if (LEVEL <= ctx->level) {                                                                                         \
@@ -55,10 +55,10 @@ void _atlogger_log(const char *tag, enum atlogger_logging_level level, const cha
         }                                                                                                              \
       }                                                                                                                \
     }                                                                                                                  \
-    fprintf(atlogger_logging_stream, FORMAT __VA_OPT__(, ) __VA_ARGS__);                                               \
+    fprintf(atlogger_logging_stream, __VA_ARGS__);                                                                     \
   }
 #else
-#define atlogger_log(TAG, LEVEL, FORMAT, ...) _atlogger_log(TAG, LEVEL, FORMAT __VA_OPT__(, ) __VA_ARGS__);
+#define atlogger_log(TAG, LEVEL, ...) _atlogger_log(TAG, LEVEL, __VA_ARGS__);
 #endif
 #endif
 
