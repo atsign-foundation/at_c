@@ -9,6 +9,7 @@ int wait_for_enrollment(atclient *ctx, const char *atsign, const atclient_atkeys
                         const atclient_authenticate_options *opts);
 
 int is_enrollment_denied(const char *err_msg);
+int is_enrollment_pending(const char *err_msg);
 
 #ifdef __cplusplus
 }
