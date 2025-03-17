@@ -370,7 +370,7 @@ int decrypt_notification(atclient *atclient, atclient_atnotification *notificati
   }
 
   // 2. get iv
-  if (atclient_atnotification_is_iv_nonce_initialized(notification) &&
+  if (atclient_atnotification_is_iv_nonce_initialized(notification) && notification->iv_nonce != NULL &&
       !atclient_string_utils_starts_with(notification->iv_nonce, "null")) {
     size_t ivlen;
     ret = atchops_base64_decode(notification->iv_nonce, strlen(notification->iv_nonce), iv, ATCHOPS_IV_BUFFER_SIZE,
