@@ -11,6 +11,8 @@
 #define ENROLLMENT_ID "enrollmentId"
 #define STATUS "status"
 
+static int handle_parse_error_token(const char *buffer);
+
 #ifdef ATCOMMONS_JSON_PROVIDER_CJSON
 int parse_enrollment_response(const char *buffer, struct enroll_response *response) {
   char *enrollment_id = NULL;
@@ -18,8 +20,7 @@ int parse_enrollment_response(const char *buffer, struct enroll_response *respon
 
   int ret = strncmp(buffer, "data:", 5);
   if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Did not receive data response from enroll request\n");
-    return 1;
+    return handle_parse_error_token(buffer);
   }
 
   cJSON *json = cJSON_Parse(buffer + 5);
@@ -67,6 +68,18 @@ int parse_enrollment_response(const char *buffer, struct enroll_response *respon
 #else
 #error no json implementation
 #endif
+
+// Should always return non-zero from this function
+static int handle_parse_error_token(const char *buffer) {
+  int ret = strncmp(buffer, "error:", 6);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unexpected error, please contact support\n");
+    return 2;
+  }
+
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Server responded with error:\n%s\n", buffer + 6);
+  return 1;
+}
 
 void free_enroll_response(struct enroll_response *res) {
   if (res->enrollment_id != NULL) {
