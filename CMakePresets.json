@@ -52,6 +52,14 @@
         "ENABLE_TARGET_EXPORT": "OFF",
         "ENABLE_CJSON_VERSION_SO": "OFF"
       }
+    },
+    {
+      "name": "from-package-source",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "ATSDK_MBEDTLS_PATH": "deps/mbedtls-src",
+        "ATSDK_CJSON_PATH": "deps/cjson-src"
+      }
     }
   ],
   "buildPresets": [
@@ -63,6 +71,10 @@
       "name": "package-source",
       "configurePreset": "release-static",
       "targets": ["package_source"]
+    },
+    {
+      "name": "from-package-source",
+      "configurePreset": "from-package-source"
     }
   ],
   "packagePresets": [
@@ -85,6 +97,13 @@
       "steps": [
         { "type": "configure", "name": "release-static" },
         { "type": "build", "name": "package-source" }
+      ]
+    },
+    {
+      "name": "from-package-source",
+      "steps": [
+        { "type": "configure", "name": "from-package-source" },
+        { "type": "build", "name": "from-package-source" }
       ]
     }
   ]

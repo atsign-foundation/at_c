@@ -31,6 +31,7 @@ set(
   "/docs/"
   "/build/"
   "/generators/"
+  "/tests/"
   # root files
   "/\\\\.clang-format"
   "/\\\\.clang-tidy"
@@ -43,6 +44,7 @@ set(
   "\\\\.DS_Store"
   "\\\\.gitignore"
   "compile_commands.json"
+  "test.supp"
 )
 
 set(CPACK_INSTALL_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CPackSourceDeps.cmake")
