@@ -532,7 +532,7 @@ static int send_non_encrypted_notification(atclient *from_client, char *value, c
   atclient_atkey atkey;
   atclient_atkey_init(&atkey);
 
-  if((ret = atclient_atkey_create_shared_key(&atkey, key, FROM_ATSIGN, TO_ATSIGN, ns)) != 0) {
+  if ((ret = atclient_atkey_create_shared_key(&atkey, key, FROM_ATSIGN, TO_ATSIGN, ns)) != 0) {
     atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create shared key\n");
     atclient_atkey_free(&atkey);
     return 1;
@@ -543,8 +543,7 @@ static int send_non_encrypted_notification(atclient *from_client, char *value, c
 
   ret = atclient_notify_params_set_atkey(&notify, &atkey);
   if (ret != 0) {
-    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Failed to set notify atkey\n");
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notify atkey\n");
     atclient_notify_params_free(&notify);
     atclient_atkey_free(&atkey);
     return 1;
@@ -561,8 +560,7 @@ static int send_non_encrypted_notification(atclient *from_client, char *value, c
 
   ret = atclient_notify_params_set_value(&notify, value);
   if (ret != 0) {
-    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR,
-                 "Failed to set notify value\n");
+    atlogger_log(TAG " send_non_encrypted_notification", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to set notify value\n");
     atclient_notify_params_free(&notify);
 
     atclient_atkey_free(&atkey);
@@ -589,13 +587,14 @@ static int send_non_encrypted_notification(atclient *from_client, char *value, c
   return 0;
 }
 
-static int test_2b_receive_non_encrypted_notifications(atclient *from_client, atclient *to_client, atclient *worker_client) {
+static int test_2b_receive_non_encrypted_notifications(atclient *from_client, atclient *to_client,
+                                                       atclient *worker_client) {
   int ret = 1;
 
   atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Starting test 2b\n");
 
-  const char *key = "non-encrypted-key";
-  const char *value = "non-encrypted-value";
+  char *key = "non-encrypted-key";
+  char *value = "non-encrypted-value";
   const size_t value_len = strlen(value);
 
   // 1. generate a unique namespace
@@ -612,7 +611,7 @@ static int test_2b_receive_non_encrypted_notifications(atclient *from_client, at
     atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to generate uuid for namespace\n");
     return 1;
   }
-  namespace[namespace_size-1] = '\0';
+  namespace[namespace_size - 1] = '\0';
 
   ret = atclient_monitor_start(to_client, namespace);
   if (ret != 0) {
@@ -630,7 +629,8 @@ static int test_2b_receive_non_encrypted_notifications(atclient *from_client, at
     return 1;
   }
 
-  atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent non-encrypted notification with id %s\n", expected_notification_id);
+  atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Sent non-encrypted notification with id %s\n",
+               expected_notification_id);
 
   atclient_monitor_message message;
   while (ret == 0) {
@@ -645,12 +645,11 @@ static int test_2b_receive_non_encrypted_notifications(atclient *from_client, at
         free(expected_notification_id);
         return 1;
       }
-      
+
       size_t actual_len = strlen(message.notification->value);
       if (actual_len != value_len) {
         atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR,
-                     "Monitor value has unexpected length (expected: %zu, actual: %zu)\n",
-                     value_len, actual_len);
+                     "Monitor value has unexpected length (expected: %zu, actual: %zu)\n", value_len, actual_len);
         atclient_monitor_message_free(&message);
         free(expected_notification_id);
         return 1;
@@ -665,7 +664,28 @@ static int test_2b_receive_non_encrypted_notifications(atclient *from_client, at
         free(expected_notification_id);
         return 1;
       }
-      atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG, "Received non-encrypted notification with id \"%s\" with expected value \"%s\"\n", expected_notification_id, value);
+      actual_len = strlen(message.notification->decrypted_value);
+      if (actual_len != value_len) {
+        atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "Monitor decrypted value has unexpected length (expected: %zu, actual: %zu)\n", value_len,
+                     actual_len);
+        atclient_monitor_message_free(&message);
+        free(expected_notification_id);
+        return 1;
+      }
+      if (strncmp(message.notification->decrypted_value, value, actual_len) != 0) {
+        atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_ERROR,
+                     "Monitor decrypted value has unexpected value\n\t\t"
+                     "expected: '%s'\n\t\t"
+                     "actual: '%s'\n",
+                     "non-encrypted-value", message.notification->decrypted_value);
+        atclient_monitor_message_free(&message);
+        free(expected_notification_id);
+        return 1;
+      }
+      atlogger_log(TAG " 2b", ATLOGGER_LOGGING_LEVEL_DEBUG,
+                   "Received non-encrypted notification with id \"%s\" with expected value \"%s\"\n",
+                   expected_notification_id, value);
       atclient_monitor_message_free(&message);
       break;
     }
