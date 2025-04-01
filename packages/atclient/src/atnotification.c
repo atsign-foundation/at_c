@@ -64,6 +64,10 @@ void atclient_atnotification_free(atclient_atnotification *notification) {
   if (atclient_atnotification_is_message_type_initialized(notification)) {
     atclient_atnotification_unset_message_type(notification);
   }
+  // decrypted_value depends on status of is_encrypted so it must be handled first
+  if (atclient_atnotification_is_decrypted_value_initialized(notification)) {
+    atclient_atnotification_unset_decrypted_value(notification);
+  }
   if (atclient_atnotification_is_is_encrypted_initialized(notification)) {
     atclient_atnotification_unset_is_encrypted(notification);
   }
@@ -81,9 +85,6 @@ void atclient_atnotification_free(atclient_atnotification *notification) {
   }
   if (atclient_atnotification_is_ske_enc_algo_initialized(notification)) {
     atclient_atnotification_unset_ske_enc_algo(notification);
-  }
-  if (atclient_atnotification_is_decrypted_value_initialized(notification)) {
-    atclient_atnotification_unset_decrypted_value(notification);
   }
 }
 
@@ -955,7 +956,9 @@ void atclient_atnotification_unset_decrypted_value(atclient_atnotification *noti
   /*
    * 2. Unset the decrypted_value, if necessary
    */
-  if (atclient_atnotification_is_decrypted_value_initialized(notification)) {
+  bool should_free = atclient_atnotification_is_decrypted_value_initialized(notification) &&
+                     atclient_atnotification_is_is_encrypted_initialized(notification) && notification->is_encrypted;
+  if (should_free) {
     free(notification->decrypted_value);
   }
   notification->decrypted_value = NULL;

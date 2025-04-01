@@ -164,10 +164,6 @@ int atclient_monitor_read(atclient *monitor_conn, atclient *atclient, atclient_m
     return 0;
   }
 
-  if (message->notification->is_encrypted == false) {
-    return 0;
-  }
-
   // Can only be an encrypted success notification at this point, time to decrypt
   if (hooks != NULL && hooks->pre_decrypt_notification != NULL) {
     ret = hooks->pre_decrypt_notification();
@@ -350,11 +346,10 @@ int decrypt_notification(atclient *atclient, atclient_atnotification *notificati
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
                  "is_encrypted field was found to be uninitialized, we don't know for sure if we're decrypting "
                  "something that's even encrypted.\n");
-  } else {
-    if (!notification->is_encrypted) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
-                   "is_encrypted is false, we may be trying to decrypt some unencrypted plain text.\n");
-    }
+  } else if (!notification->is_encrypted) {
+    notification->decrypted_value = notification->value;
+    ret = 0;
+    goto exit;
   }
 
   // 1c. get atsign with @

@@ -23,8 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Show compiler version
-        run: ${{ matrix.cc }} --version
+      - name: Show tooling versions
+        run: |
+          echo ${{ matrix.cc }} version
+          ${{ matrix.cc }} --version
+          echo cmake version
+          cmake --version
 
       - name: Install atsdk
         run: cmake -S . -B build -DCMAKE_C_COMPILER="${{ matrix.cc }}" \

@@ -17,9 +17,10 @@ if(NOT TARGET cjson)
   else()
     FetchContent_Declare(
       cjson
-      URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.17.zip
+      URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.zip
       URL_HASH
-        SHA256=51f3b07aece8d1786e74b951fd92556506586cb36670741b6bfb79bf5d484216 # hash for v1.7.17 .zip release source code
+        # SHA256=51f3b07aece8d1786e74b951fd92556506586cb36670741b6bfb79bf5d484216 # hash for v1.7.17 .zip release source code
+        SHA256=cc6d93cc3b659037c34193ecc7be5a874a18c2ac67b24efe82db6a759b486b5d # hash for v1.7.18 .zip release source code
       # FIND_PACKAGE_ARGS 1.7.17 QUIET CONFIG
     )
   endif()
