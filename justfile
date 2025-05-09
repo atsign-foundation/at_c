@@ -16,12 +16,12 @@ unit_dir := quote(justfile_directory() / "build/unit-") + postfix
 func_dir := quote(justfile_directory() / "build/func-") + postfix
 memcheck_dir := quote(justfile_directory() / "build/memcheck-") + postfix
 
-debug_c_flags := "-std=c99 -DATSDK_DEBUG_MODE=1"
-release_c_flags := "-std=c99 -Wno-error"
+debug_c_flags := "-std=c99 -Wno-error -DATSDK_DEBUG_MODE=1"
+release_c_flags := "-std=c99 -Werror"
 
 # SETUP COMMANDS
 
-setup:  build-test-all
+setup: build-test-all
   [ -f "$PWD/compile_commands.json" ] && rm $PWD/compile_commands.json || true
   ln -s {{test_dir}}/compile_commands.json $PWD/
   [ -f "$PWD/tests/compile_commands.json" ] && rm $PWD/tests/compile_commands.json || true

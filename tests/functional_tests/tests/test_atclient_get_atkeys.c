@@ -10,10 +10,10 @@
 
 #define SCAN_REGEX ".*"
 
-static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, const bool showhidden);
-static int test_2_atclient_get_atkeys_null(atclient *ctx, const char *scan_regex, const bool showhidden);
-static int test_3_atclient_get_atkeys_null_ctx(const char *scan_regex, const bool showhidden);
-static int test_4_atclient_get_atkeys_null_regex(atclient *ctx, const char *scan_regex, const bool showhidden);
+static int test_1_atclient_get_atkeys(atclient *ctx);
+static int test_2_atclient_get_atkeys_null(atclient *ctx);
+static int test_3_atclient_get_atkeys_null_ctx(void);
+static int test_4_atclient_get_atkeys_null_regex(atclient *ctx);
 
 int main() {
   int ret = 1;
@@ -36,22 +36,22 @@ int main() {
     goto exit;
   }
 
-  if ((ret = test_1_atclient_get_atkeys(&atclient1, SCAN_REGEX, false)) != 0) {
+  if ((ret = test_1_atclient_get_atkeys(&atclient1)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_1_atclient_get_atkeys failed: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_2_atclient_get_atkeys_null(&atclient1, SCAN_REGEX, false)) != 0) {
+  if ((ret = test_2_atclient_get_atkeys_null(&atclient1)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_2_atclient_get_atkeys_null failed: %d", ret);
     goto exit;
   }
 
-  if ((ret = test_3_atclient_get_atkeys_null_ctx(SCAN_REGEX, false)) != 0) {
+  if ((ret = test_3_atclient_get_atkeys_null_ctx()) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_3_atclient_get_atkeys_null_ctx failed: %d", ret);
     goto exit;
   }
 
-  if ((ret = test_4_atclient_get_atkeys_null_regex(&atclient1, SCAN_REGEX, false)) != 0) {
+  if ((ret = test_4_atclient_get_atkeys_null_regex(&atclient1)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "test_4_atclient_get_atkeys_null_regex failed: %d", ret);
     goto exit;
   }
@@ -66,7 +66,7 @@ exit: {
 }
 }
 
-static int test_1_atclient_get_atkeys(atclient *ctx, const char *scan_regex, const bool showhidden) {
+static int test_1_atclient_get_atkeys(atclient *ctx) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_1_atclient_get_atkeys\n");
@@ -98,7 +98,7 @@ exit: {
 }
 }
 
-static int test_2_atclient_get_atkeys_null(atclient *ctx, const char *scan_regex, const bool showhidden) {
+static int test_2_atclient_get_atkeys_null(atclient *ctx) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_2_atclient_get_atkeys_null\n");
@@ -119,7 +119,7 @@ exit: {
 }
 }
 
-static int test_3_atclient_get_atkeys_null_ctx(const char *scan_regex, const bool showhidden) {
+static int test_3_atclient_get_atkeys_null_ctx() {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_3_atclient_get_atkeys_null_ctx\n");
@@ -143,7 +143,7 @@ exit: {
 }
 }
 
-static int test_4_atclient_get_atkeys_null_regex(atclient *ctx, const char *scan_regex, const bool showhidden) {
+static int test_4_atclient_get_atkeys_null_regex(atclient *ctx) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "test_4_atclient_get_atkeys_null_regex\n");

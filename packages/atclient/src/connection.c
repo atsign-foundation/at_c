@@ -841,12 +841,6 @@ static int atclient_connection_set_port(atclient_connection *ctx, const uint16_t
     return ret;
   }
 
-  if (port < 0) {
-    ret = 1;
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "port is less than 0\n");
-    return ret;
-  }
-
   /*
    * 2. Set the port
    */
