@@ -2,7 +2,17 @@ CompileFlags:
   # Use gcc in development for better diagnostics
   # & Ensure that compilation doesn't fail due to warnings
   Compiler: gcc
-  Add: [-Wno-error, -xc, -std=c99, -DATSDK_DEBUG_MODE]
+  Add:
+    - -xc
+    - -std=c99
+    - -DATSDK_DEBUG_MODE
+    - -Wno-error
+    - -Wall
+    - -Wextra
+    - -Werror-implicit-function-declaration
+    - -Wtype-limits
+    - -Wimplicit-fallthrough
+    - -Wmissing-field-initializers
 
 Index:
   # Enable background indexing for better symbol information

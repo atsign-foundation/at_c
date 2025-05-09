@@ -101,8 +101,8 @@
 
 #define ATNOTIFICATION_OPERATION ATCLIENT_NOTIFY_OPERATION_UPDATE
 
-static int test_1_notify(atclient *atclient, char *notification_id);
-static int test_2_notify_long_text(atclient *atclient, char *notification_id);
+static int test_1_notify(atclient *atclient);
+static int test_2_notify_long_text(atclient *atclient);
 
 int main() {
   int ret = 1;
@@ -128,12 +128,12 @@ int main() {
     goto exit;
   }
 
-  if ((ret = test_1_notify(&atclient1, notification_id)) != 0) {
+  if ((ret = test_1_notify(&atclient1)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to test notify: %d\n", ret);
     goto exit;
   }
 
-  if ((ret = test_2_notify_long_text(&atclient1, notification_id)) != 0) {
+  if ((ret = test_2_notify_long_text(&atclient1)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to test notify long text: %d\n", ret);
     goto exit;
   }
@@ -148,7 +148,7 @@ exit: {
 }
 }
 
-static int test_1_notify(atclient *atclient, char *notification_id) {
+static int test_1_notify(atclient *atclient) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_1_notify Begin\n");
@@ -200,7 +200,7 @@ exit: {
 }
 }
 
-static int test_2_notify_long_text(atclient *atclient, char *notification_id) {
+static int test_2_notify_long_text(atclient *atclient) {
   int ret = 1;
 
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "test_2_notify_long_text Begin\n");

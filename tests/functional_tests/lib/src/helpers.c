@@ -1,5 +1,4 @@
 #include "functional_tests/helpers.h"
-#include "functional_tests/config.h"
 #include <atclient/atclient.h>
 #include <atclient/atclient_utils.h>
 #include <atclient/constants.h>
@@ -103,7 +102,6 @@ int functional_tests_publickey_exists(atclient *atclient, const char *key, const
   const short atkeystrsize = 128;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
 
   const short commandsize = 256;
   char command[commandsize];
@@ -161,7 +159,6 @@ int functional_tests_selfkey_exists(atclient *atclient, const char *key, const c
   const short atkeystrsize = 128;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
 
   const short commandsize = 256;
   char command[commandsize];
@@ -219,7 +216,6 @@ int functional_tests_sharedkey_exists(atclient *atclient, const char *key, const
   const short atkeystrsize = 128;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
 
   const short commandsize = 256;
   char command[commandsize];

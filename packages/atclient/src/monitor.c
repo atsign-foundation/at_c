@@ -1,6 +1,5 @@
 #include "atclient/monitor.h"
 #include "atclient/atclient.h"
-#include "atclient/atclient_utils.h"
 #include "atclient/atnotification.h"
 #include "atclient/connection.h"
 #include "atclient/constants.h"
@@ -39,6 +38,7 @@ void atclient_monitor_message_free(atclient_monitor_message *message) {
   case ATCLIENT_MONITOR_ERROR_DECRYPT_NOTIFICATION:
     atclient_atnotification_free(message->notification);
     free(message->notification);
+    __attribute__((fallthrough));
   default:
     if (message->atserver_message != NULL) {
       atserver_message_free((struct atserver_message *)message->atserver_message);

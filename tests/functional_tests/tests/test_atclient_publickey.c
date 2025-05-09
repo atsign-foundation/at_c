@@ -385,7 +385,6 @@ static int tear_down(atclient *atclient) {
   const size_t atkeystrsize = 128;
   char atkeystr[atkeystrsize];
   memset(atkeystr, 0, sizeof(char) * atkeystrsize);
-  size_t atkeystrlen = 0;
 
   const size_t recvsize = 256;
   char recv[recvsize];
