@@ -16,7 +16,7 @@ unit_dir := quote(justfile_directory() / "build/unit-") + postfix
 func_dir := quote(justfile_directory() / "build/func-") + postfix
 memcheck_dir := quote(justfile_directory() / "build/memcheck-") + postfix
 
-debug_c_flags := "-std=c99 -Wall -Wextra -Werror-implicit-function-declaration -DATSDK_DEBUG_MODE=1"
+debug_c_flags := "-std=c99 -DATSDK_DEBUG_MODE=1"
 release_c_flags := "-std=c99 -Wno-error"
 
 # SETUP COMMANDS

@@ -50,6 +50,27 @@ if(NOT DEFINED ATSDK_AS_SUBPROJECT)
 endif()
 message(STATUS "[ATSDK] ATSDK_AS_SUBPROJECT: ${ATSDK_AS_SUBPROJECT}")
 
+# Shared compile options between clang & gcc
+add_compile_options("-Wall")
+add_compile_options("-Wextra")
+add_compile_options("-Werror-implicit-function-declaration")
+add_compile_options("-Wtype-limits")
+add_compile_options("-Wimplicit-fallthrough")
+add_compile_options("-Wmissing-field-initializers")
+# This enforces strictly using ISO standard (definitely overkill, hence pedantic)
+# enable this to check our deviations from the standard
+# add_compile_options("-pedantic-errors") 
+
+# Custom compiler-based compiler options
+if(CMAKE_C_COMPILER MATCHES ".*clang.*")
+  message(STATUS "[ATSDK] DETECTED COMPILER: clang")
+  if(CMAKE_BUILD_TYPE STREQUAL Release)
+    add_compile_options("-Wno-calloc-transposed-args")
+  endif()
+else() # Assume gcc as the default
+  message(STATUS "[ATSDK] DETECTED COMPILER: gcc")
+endif()
+
 # install each package
 message(STATUS "Building atlogger")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atlogger)
