@@ -86,8 +86,8 @@ static int parse_onboard_params(struct atauth_params *params, int argc, const ch
   // set mandatory values to NULL
   params->onboard.cram_key = NULL;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
   struct argparse_option options[] = {
       OPT_HELP(),
       OPT_STRING('a', "atsign", &params->atsign, "Atsign to use (mandatory)"),
@@ -97,7 +97,7 @@ static int parse_onboard_params(struct atauth_params *params, int argc, const ch
       OPT_BOOLEAN('v', "verbose", &params->verbose, "Enable verbose logging"),
       OPT_END(),
   };
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
   struct argparse argparse;
   argparse_init(&argparse, options, NULL, 0);
@@ -131,8 +131,8 @@ static int parse_enroll_params(struct atauth_params *params, int argc, const cha
   // Set optional values to default value
   params->enroll.expiry = NULL;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
   struct argparse_option options[] = {
       OPT_HELP(),
       OPT_STRING('a', "atsign", &params->atsign, "Atsign to use (mandatory)"),
@@ -148,7 +148,7 @@ static int parse_enroll_params(struct atauth_params *params, int argc, const cha
       OPT_BOOLEAN('v', "verbose", &params->verbose, "Enable verbose logging"),
       OPT_END(),
   };
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
   struct argparse argparse;
   argparse_init(&argparse, options, NULL, 0);
