@@ -53,13 +53,13 @@ int parse_atauth_params(struct atauth_params *params, int argc, const char **arg
   switch (ret) {
   case 0: // use command to determine parsing
     switch (command) {
-    case atauth_cmd_help:
-      show_help();
-      exit(0);
     case atauth_cmd_onboard:
       return parse_onboard_params(params, argc - 1, argv + 1);
     case atauth_cmd_enroll:
       return parse_enroll_params(params, argc - 1, argv + 1);
+    default:
+      show_help();
+      exit(0);
     }
   case 1: // implicit onboard command
     if (strncmp(argv[1], "-h", strlen("-h")) == 0 || strncmp(argv[1], "--help", strlen("--help")) == 0) {
