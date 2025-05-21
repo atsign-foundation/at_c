@@ -10,7 +10,6 @@
 #include "atclient/constants.h"
 #include "atclient/string_utils.h"
 #include "atlogger/atlogger.h"
-#include "cJSON.h"
 #include "constants.h"
 #include "enroll_namespace.h"
 #include "enroll_params.h"

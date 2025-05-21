@@ -1,4 +1,14 @@
 set(ATSDK_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
+if(ATSDK_USE_SHARED_LIBS)
+  # predetermine include dirs for shared libs if we will be linking to them
+  find_path(mbedtls_INCLUDE_DIR NAMES mbedtls/x509.h REQUIRED)
+  # find_path(p256m_INCLUDE_DIR NAMES mbedtls/x509.h)
+  find_path(everest_INCLUDE_DIR NAMES everest/everest.h REQUIRED)
+  find_path(cjson_INCLUDE_DIR NAMES cjson/cJSON.h REQUIRED)
+endif()
+
+set(mbedtls_LIB_NAMES libmbedtls.so libmbedcrypto.so libmbedx509.so)
+set(cjson_LIB_NAMES libcjson.so)
 
 # build a package using cmake
 function(build_atsdk_package)
@@ -53,12 +63,24 @@ function(build_atsdk_package)
       include(${ATSDK_CMAKE_DIR}/${package}.cmake)
     endforeach()
 
-    foreach(package ${arg_EXTERNAL_DEPS})
-      include(${ATSDK_CMAKE_DIR}/find_${package}.cmake)
-    endforeach()
-
     # Create library targets
     add_library(${PROJECT_NAME} STATIC ${arg_PACKAGE_SOURCES})
+
+    if(ATSDK_USE_SHARED_LIBS)
+      foreach(package ${arg_EXTERNAL_DEPS})
+        target_include_directories(${PROJECT_NAME} PUBLIC ${${package}_INCLUDE_DIR})
+        foreach(lib ${${package}_LIB_NAMES})
+          find_library(${lib}_lib_path NAMES ${lib} PATHS /usr/lib /usr/lib64 /usr/local/lib NO_CACHE REQUIRED NO_DEFAULT_PATH NO_PACKAGE_ROOT_PATH NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH NO_CMAKE_INSTALL_PREFIX)
+          message(STATUS ${lib} -> ${${lib}_lib_path})
+          target_link_libraries(${PROJECT_NAME} PRIVATE ${${lib}_lib_path})
+        endforeach()
+      endforeach()
+    else()
+      foreach(package ${arg_EXTERNAL_DEPS})
+        include(${ATSDK_CMAKE_DIR}/find_${package}.cmake)
+      endforeach()
+    endif()
+
 
     # LINK
     # Link include headers to library targets
@@ -79,7 +101,11 @@ function(build_atsdk_package)
     endif()
 
     # Link dependencies to library targets
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${arg_INSTALL_TARGETS})
+    if(ATSDK_USE_SHARED_LIBS)
+      target_link_libraries(${PROJECT_NAME} PUBLIC ${arg_DEPS})
+    else()
+      target_link_libraries(${PROJECT_NAME} PUBLIC ${arg_INSTALL_TARGETS})
+    endif()
 
     # INSTALL
     # Install the include headers
@@ -89,11 +115,19 @@ function(build_atsdk_package)
     )
 
     # Install libraries to config target
-    install(
-      TARGETS ${PROJECT_NAME} ${arg_INSTALL_TARGETS}
-      EXPORT ${PROJECT_NAME}-config
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
+    if(ATSDK_USE_SHARED_LIBS)
+      install(
+        TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}-config
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      )
+    else()
+      install(
+        TARGETS ${PROJECT_NAME} ${arg_INSTALL_TARGETS}
+        EXPORT ${PROJECT_NAME}-config
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      )
+    endif()
 
     # EXPORT
     if(NOT PACKAGE_AS_SUBPROJECT)
@@ -132,7 +166,7 @@ function(add_atsdk_espidf_component)
     0
     arg
     "${options}"
-    "${onValueArgs}"
+    "${oneValueArgs}"
     "${multiValueArgs}"
   )
 
