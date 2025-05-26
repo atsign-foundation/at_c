@@ -3,6 +3,11 @@ set(TARGET_ESPIDF FALSE CACHE BOOL "Build for the espidf platform")
 
 option(ATSDK_MEMCHECK "Enable memcheck configuration" OFF)
 option(ATSDK_BUILD_TESTS "Build tests for atsdk ON | \"unit\" | \"func\" " OFF)
+option(
+  ATSDK_USE_SHARED_LIBS
+  "Link to shared libs for external dependencies"
+  OFF
+)
 
 # to avoid caching issues
 if(ATSDK_BUILD_TESTS STREQUAL "func")
@@ -34,7 +39,7 @@ include(GNUInstallDirs)
 
 project(
   atsdk
-  VERSION 0.4.0
+  VERSION 0.4.1
   DESCRIPTION "Atsign's atSDK library"
   HOMEPAGE_URL https://github.com/atsign-foundation/at_c
   LANGUAGES C
@@ -96,21 +101,33 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/packages/atauth)
 
 if(NOT ESP_PLATFORM)
   # install dependencies
-  set(
-    ATSDK_TARGETS
-    mbedtls
-    mbedx509
-    mbedcrypto
-    everest
-    p256m
-    atchops
-    cjson
-    atlogger
-    atclient
-    atcommons
-    argparse
-    atauth
-  )
+  if(ATSDK_USE_SHARED_LIBS)
+    set(
+      ATSDK_TARGETS
+      atchops
+      atlogger
+      atclient
+      atcommons
+      argparse
+      atauth
+    )
+  else()
+    set(
+      ATSDK_TARGETS
+      mbedtls
+      mbedx509
+      mbedcrypto
+      everest
+      p256m
+      atchops
+      cjson
+      atlogger
+      atclient
+      atcommons
+      argparse
+      atauth
+    )
+  endif()
 
   install(
     TARGETS ${ATSDK_TARGETS}
