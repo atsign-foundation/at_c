@@ -39,7 +39,7 @@ include(GNUInstallDirs)
 
 project(
   atsdk
-  VERSION 0.4.1
+  VERSION 0.4.2
   DESCRIPTION "Atsign's atSDK library"
   HOMEPAGE_URL https://github.com/atsign-foundation/at_c
   LANGUAGES C
