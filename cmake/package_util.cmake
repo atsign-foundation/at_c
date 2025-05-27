@@ -3,7 +3,7 @@ if(ATSDK_USE_SHARED_LIBS)
   # predetermine include dirs for shared libs if we will be linking to them
   find_path(mbedtls_INCLUDE_DIR NAMES mbedtls/x509.h REQUIRED)
   # find_path(p256m_INCLUDE_DIR NAMES mbedtls/x509.h)
-  find_path(everest_INCLUDE_DIR NAMES everest/everest.h REQUIRED)
+  # find_path(everest_INCLUDE_DIR NAMES everest/everest.h REQUIRED)
   find_path(cjson_INCLUDE_DIR NAMES cjson/cJSON.h REQUIRED)
 endif()
 
