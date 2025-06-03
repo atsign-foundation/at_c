@@ -27,13 +27,7 @@ if(NOT TARGET cjson)
       # FIND_PACKAGE_ARGS 1.7.17 QUIET CONFIG
       # GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
       # GIT_TAG v1.7.18
-      # This PATCH_COMMAND entry performs the following:
-      # Replaces the following line in the cJSON CMakeLists.txt:
-      # `cmake_minimum_required(VERSION 3.0)`
-      # With the line:
-      # `cmake_minimum_required(VERSION 3.24)`
-      # This allows us to build it with CMake v4
-      PATCH_COMMAND bash -c "sed -e '2s/0/24/' -i CMakeLists.txt"
+      PATCH_COMMAND /bin/sh ${CMAKE_CURRENT_LIST_DIR}/cjson-patch.sh
     )
   endif()
   FetchContent_MakeAvailable(cjson)
