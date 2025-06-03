@@ -27,7 +27,7 @@ if(NOT TARGET cjson)
       # FIND_PACKAGE_ARGS 1.7.17 QUIET CONFIG
       # GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
       # GIT_TAG v1.7.18
-      PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/cjson.patch
+      PATCH_COMMAND /bin/sh ${CMAKE_CURRENT_LIST_DIR}/cjson-patch.sh
     )
   endif()
   FetchContent_MakeAvailable(cjson)

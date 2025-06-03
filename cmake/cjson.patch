@@ -1,8 +1,0 @@
-# cmake <3.5 is deprecated by cmake 4.0, so we need at least 3.5.
-# 3.24 was chosen because it is our baseline in atsdk.
---- i/CMakeLists.txt
-+++ w/CMakeLists.txt
-@@ -1,2 +1,2 @@
- set(CMAKE_LEGACY_CYGWIN_WIN32 0)
--cmake_minimum_required(VERSION 3.0)
-+cmake_minimum_required(VERSION 3.24)
