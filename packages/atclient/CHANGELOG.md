@@ -1,3 +1,7 @@
+## 0.3.4
+
+- build(deps): Bump MbedTLS to 3.6.4
+
 ## 0.3.3
 
 - fix: monitor resiliency
