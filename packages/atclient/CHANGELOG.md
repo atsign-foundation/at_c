@@ -1,3 +1,7 @@
+## 0.3.5
+
+- feat: Add Conan based SBOM creation with sbomify
+
 ## 0.3.4
 
 - build(deps): Bump MbedTLS to 3.6.4

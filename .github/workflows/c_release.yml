@@ -41,17 +41,22 @@ jobs:
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           path: tarballs/
-## 20240807: Need a different approach to SBOMs for C SDK
-#    - name: Generate SBOMs
-#      run: |
-#        syft scan file:./packages/dart/sshnoports/pubspec.lock \
-#          -o 'spdx-json=tarballs/dart_sshnoports_sbom.spdx.json' \
-#          -o 'cyclonedx-json=tarballs/dart_sshnoports_sbom.cyclonedx.json'
       - name: Move packages for signing
         run: |
           cd tarballs
           mv */*.tar.gz .
           rm -Rf -- */
+      - name: Generate SBOM
+        uses: sbomify/github-action@8ea6f28cd562edee2665001cd4f17aaf7a283722 # v0.5.0
+        env:
+          TOKEN: ${{ secrets.SBOMIFY_TOKEN }}
+          COMPONENT_ID: 'VNl3FVi352OB'
+          LOCK_FILE: './tools/conan.lock'
+          SBOM_VERSION: ${{github.ref_name}}
+          OUTPUT_FILE: 'tarballs/at_c-${{github.ref_name}}-sbom.cdx.json'
+          AUGMENT: true
+          ENRICH: true
+          UPLOAD: true
       - name: Generate SHA256 checksums
         working-directory: tarballs
         run: sha256sum * > checksums.txt
