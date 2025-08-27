@@ -15,7 +15,7 @@ class at_cRecipe(ConanFile):
     author = "atsign-foundation"
     url = "https://github.com/atsign-foundation/at_c"
     description = "Cross-platform C implementation of the atSDK for SOC & embedded devices"
-    
+
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -34,7 +34,7 @@ class at_cRecipe(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-    
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
@@ -56,4 +56,3 @@ class at_cRecipe(ConanFile):
     def requirements(self):
         self.requires("mbedtls/3.6.4")
         self.requires("cjson/1.7.18")
-
