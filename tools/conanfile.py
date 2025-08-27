@@ -7,7 +7,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 
 class at_cRecipe(ConanFile):
     name = "at_c"
-    version = "0.3.4"
+    version = "0.3.5"
     package_type = "library"
 
     # Optional metadata
