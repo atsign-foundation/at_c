@@ -37,15 +37,10 @@ jobs:
       id-token: write # IMPORTANT: mandatory for sigstore
       attestations: write
     steps:
-      - name: Download all the tarballs
+      - name: Download tarball
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           path: tarballs/
-      - name: Move packages for signing
-        run: |
-          cd tarballs
-          mv */*.tar.gz .
-          rm -Rf -- */
       - name: Generate SBOM
         uses: sbomify/github-action@8ea6f28cd562edee2665001cd4f17aaf7a283722 # v0.5.0
         env:
