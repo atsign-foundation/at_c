@@ -50,7 +50,7 @@ jobs:
         uses: sbomify/github-action@8ea6f28cd562edee2665001cd4f17aaf7a283722 # v0.5.0
         env:
           TOKEN: ${{ secrets.SBOMIFY_TOKEN }}
-          COMPONENT_ID: '-93khk8pUi'
+          COMPONENT_ID: 'VNl3FVi352OB'
           LOCK_FILE: './tools/conan.lock'
           SBOM_VERSION: ${{github.ref_name}}
           OUTPUT_FILE: 'tarballs/at_c-${{github.ref_name}}-sbom.cdx.json'
