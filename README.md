@@ -2,6 +2,7 @@
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/atsign-foundation/at_c/badge)](https://securityscorecards.dev/viewer/?uri=github.com/atsign-foundation/at_c&sort_by=check-score&sort_direction=desc)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8138/badge)](https://www.bestpractices.dev/projects/8138)
+[![sbomified](https://sbomify.com/assets/images/logo/badge.svg)](https://app.sbomify.com/component/VNl3FVi352OB)
 
 # at_c
 
