@@ -53,7 +53,7 @@ jobs:
           TOKEN: ${{ secrets.SBOMIFY_TOKEN }}
           COMPONENT_ID: 'VNl3FVi352OB'
           LOCK_FILE: './tools/conan.lock'
-          SBOM_VERSION: ${{github.ref_name}}
+          COMPONENT_VERSION: ${{github.ref_name}}
           OUTPUT_FILE: 'tarballs/at_c-${{github.ref_name}}-sbom.cdx.json'
           AUGMENT: true
           ENRICH: true
