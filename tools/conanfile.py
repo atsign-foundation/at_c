@@ -3,6 +3,7 @@
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.files import get
 
 
 class at_cRecipe(ConanFile):
@@ -21,8 +22,9 @@ class at_cRecipe(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "src/*", "include/*"
+    def source(self):
+        get(self, f"https://github.com/atsign-foundation/at_c/releases/download/v{self.version}/at_c-v{self.version}.tar.gz",
+              strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,15 +42,6 @@ class at_cRecipe(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["at_c"]
