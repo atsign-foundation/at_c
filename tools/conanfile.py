@@ -8,7 +8,7 @@ from conan.tools.files import get
 
 class at_cRecipe(ConanFile):
     name = "at_c"
-    version = "0.3.5"
+    version = "0.3.6"
     package_type = "library"
 
     # Optional metadata
@@ -48,4 +48,4 @@ class at_cRecipe(ConanFile):
 
     def requirements(self):
         self.requires("mbedtls/3.6.4")
-        self.requires("cjson/1.7.18")
+        self.requires("cjson/1.7.19")
