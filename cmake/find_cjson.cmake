@@ -21,12 +21,9 @@ if(NOT TARGET cjson)
   else()
     FetchContent_Declare(
       cjson
-      URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.zip
+      URL https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.19.zip
       URL_HASH
-        SHA256=cc6d93cc3b659037c34193ecc7be5a874a18c2ac67b24efe82db6a759b486b5d # hash for v1.7.18 .zip release source code
-      # FIND_PACKAGE_ARGS 1.7.17 QUIET CONFIG
-      # GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
-      # GIT_TAG v1.7.18
+        SHA256=83fb7750db0601dca735868b8fb1da1318da2d2a1331a9a7da923cb891d26ea9 # hash for v1.7.19 .zip release source code
       PATCH_COMMAND /bin/sh ${CMAKE_CURRENT_LIST_DIR}/cjson-patch.sh
     )
   endif()

@@ -1,3 +1,7 @@
+## 0.3.6
+
+- build(deps): Bump cJSON to 1.7.19
+
 ## 0.3.5
 
 - feat: Add Conan based SBOM creation with sbomify
