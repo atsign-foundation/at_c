@@ -1,3 +1,7 @@
+## 0.3.7
+
+- build(deps): Bump MbedTLS to 3.6.5
+
 ## 0.3.6
 
 - build(deps): Bump cJSON to 1.7.19
