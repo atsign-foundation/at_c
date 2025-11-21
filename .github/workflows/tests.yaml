@@ -19,7 +19,7 @@ jobs:
         uses: jwlawson/actions-setup-cmake@802fa1a2c4e212495c05bf94dba2704a92a472be
         with:
           cmake-version: "3.31.6"
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Install valgrind
         run: |
@@ -58,7 +58,7 @@ jobs:
             valgrind: true
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Load secrets
         working-directory: tests/functional_tests/virtualenv/keys
@@ -124,7 +124,7 @@ jobs:
   build-examples:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
         # Pin cmake to <4.0.0
       - name: Setup cmake
