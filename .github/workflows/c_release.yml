@@ -54,7 +54,7 @@ jobs:
           COMPONENT_ID: 'VNl3FVi352OB'
           LOCK_FILE: './tools/conan.lock'
           COMPONENT_NAME: 'at_c'
-          COMPONENT_VERSION: ${{github.ref_name}}
+          COMPONENT_VERSION: ${{github.ref_name}}-gha${{github.run_number}}
           OUTPUT_FILE: 'tarballs/at_c-${{github.ref_name}}-sbom.cdx.json'
           AUGMENT: true
           ENRICH: true
