@@ -1,3 +1,7 @@
+## 0.3.8
+
+- build(deps): Bump MbedTLS to 3.6.6
+
 ## 0.3.7
 
 - build(deps): Bump MbedTLS to 3.6.5
