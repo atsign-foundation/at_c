@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#define ATCLIENT_ATSDK_VERSION "0.3.7"
+#define ATCLIENT_ATSDK_VERSION "0.3.8"
 
 #ifdef __cplusplus
 }
