@@ -22,9 +22,9 @@ if(NOT TARGET mbedcrypto)
     FetchContent_Declare(
       MbedTLS
       URL
-        https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.6/mbedtls-3.6.6.tar.bz2
+        https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2
       URL_HASH
-        SHA256=8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a # hash for v3.6.6 .tar.bz2 release source code
+        SHA256=a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6 # hash for v3.6.7 .tar.bz2 release source code
       # FIND_PACKAGE_ARGS QUIET CONFIG
     )
   endif()
