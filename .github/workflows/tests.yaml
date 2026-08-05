@@ -18,7 +18,7 @@ jobs:
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2.2.0
         with:
-          cmake-version: "3.31.10"
+          cmake-version: "3.31.12"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install valgrind
@@ -42,8 +42,9 @@ jobs:
       # Unit tests are so fast we can run them serially and they will still
       # finish before the functional tests.
       # Long timeout because RSA keygen test sometimes takes a while
+      # 20260805 60s timeout extended to 300s due to repeated failures of rsa test
       - name: Run memcheck tests
-        run: ctest -T memcheck --test-dir build --output-on-failure --timeout 60 -VV
+        run: ctest -T memcheck --test-dir build --output-on-failure --timeout 300 -VV
 
   functional-tests:
     strategy:
@@ -84,7 +85,7 @@ jobs:
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2.2.0
         with:
-          cmake-version: "3.31.10"
+          cmake-version: "3.31.12"
 
       - name: Build and Run Check Docker Readiness
         working-directory: tests/functional_tests/check_docker_readiness
@@ -130,7 +131,7 @@ jobs:
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2.2.0
         with:
-          cmake-version: "3.31.10"
+          cmake-version: "3.31.12"
       - name: Install atSDK
         run: |
           cmake -S . -B build
