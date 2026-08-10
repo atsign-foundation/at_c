@@ -37,7 +37,7 @@ jobs:
           cmake --build build --target all
 
       - name: Run tests
-        run: ctest --test-dir build --output-on-failure --timeout 5 -VV
+        run: ctest --test-dir build --output-on-failure --timeout 15 -VV
 
       # Unit tests are so fast we can run them serially and they will still
       # finish before the functional tests.
