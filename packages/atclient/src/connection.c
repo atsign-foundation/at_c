@@ -95,35 +95,29 @@ int atclient_connection_connect(atclient_connection *ctx, const char *host, cons
   // after connect
   // ===============
 
-  // read anything that was already sent
+  // Consume the '@' banner/prompt the server sends on connect, so the first
+  // command's response read starts from a blank canvas.
+  //
+  // Note: this used to be followed by writing a bare "\r\n" and reading the
+  // resulting prompt. That elicited an AT0003 'invalid verb' error from the
+  // atServer on every connection, and breaks protocol-aware reverse proxies
+  // (e.g. proxy0001.atsign.org:443) which route on the first line the client
+  // sends and close the connection when that line is empty. Nothing else can
+  // be in flight after the banner, so consuming the banner alone suffices.
 
   // FIXME: temporary hack to adapt TLS socket read's heap allocated reading to
   // the existing functions which expect stack allocated memory
   // all callers of this function should support dynamic memory allocations
   // to ensure we are able to read the result in full
   // the atclient_tls_socket_read function has a built in limit
-  unsigned char *buf1, *buf2;
-  size_t n1, n2;
+  unsigned char *buf1;
+  size_t n1;
   ret = atclient_tls_socket_read(&ctx->_socket, &buf1, &n1, atclient_socket_read_until_char('@'));
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n");
     goto exit;
   }
   free(buf1);
-
-  if ((ret = atclient_tls_socket_write(&(ctx->_socket), (const unsigned char *)"\r\n", strlen("\r\n"))) != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_tls_socket_write failed with exit code: %d\n", ret);
-    goto exit;
-  }
-
-  ret = atclient_tls_socket_read(&ctx->_socket, &buf2, &n2, atclient_socket_read_until_char('@'));
-  if (ret != 0) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to read from the connection\n");
-    goto exit;
-  }
-  free(buf2);
-
-  // now we are guaranteed a blank canvas
 
   if ((ret = atclient_connection_set_host(ctx, host)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_set_host failed with exit code: %d\n", ret);
