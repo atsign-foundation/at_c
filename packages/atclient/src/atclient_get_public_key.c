@@ -58,7 +58,8 @@ int atclient_get_public_key(atclient *atclient, atclient_atkey *atkey, char **va
     goto exit;
   }
 
-  const bool bypass_cache = atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) &&
+  const bool bypass_cache = request_options != NULL &&
+                            atclient_get_public_key_request_options_is_bypass_cache_initialized(request_options) &&
                             request_options->bypass_cache;
   // use plookup verb if atclient instance is authenticated (or) lookup verb otherwise
   // if the atsign var is set in the atclient instance, that is considered authenticated
