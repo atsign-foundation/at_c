@@ -1,3 +1,7 @@
+## 0.3.10
+
+- feat: at_activate supports 'proxy:' root server specs (activation via 443)
+
 ## 0.3.9
 
 - build(deps): Bump MbedTLS to 3.6.7
