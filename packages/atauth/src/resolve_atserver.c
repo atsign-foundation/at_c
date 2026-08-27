@@ -57,10 +57,14 @@ int atauth_resolve_atserver(const char *root_spec, const char *atsign, char **at
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO,
                  "Connecting to the atServer via the reverse proxy %s:%u (no atDirectory lookup)\n", host,
                  (unsigned int)port);
-    *atserver_host = strdup(host);
+    // malloc+copy rather than strdup: strdup is not declared under strict
+    // C99 without feature test macros (breaks -Werror builds on glibc)
+    size_t host_size = strlen(host) + 1;
+    *atserver_host = malloc(host_size);
     if (*atserver_host == NULL) {
       return 1;
     }
+    memcpy(*atserver_host, host, host_size);
     *atserver_port = port;
     return 0;
   }
