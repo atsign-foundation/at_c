@@ -39,11 +39,13 @@ int atauth_resolve_atserver(const char *root_spec, const char *atsign, char **at
     }
     memcpy(host, hostport, host_len);
     host[host_len] = '\0';
-    port = (uint16_t)atoi(colon + 1);
-    if (port == 0) {
+    char *port_end = NULL;
+    long port_val = strtol(colon + 1, &port_end, 10);
+    if (port_end == colon + 1 || *port_end != '\0' || port_val < 1 || port_val > UINT16_MAX) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid port in root server spec: %s\n", root_spec);
       return 1;
     }
+    port = (uint16_t)port_val;
   } else {
     if (strlen(hostport) > MAX_HOST_LEN) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid host in root server spec: %s\n", root_spec);
