@@ -92,7 +92,10 @@ static int parse_onboard_params(struct atauth_params *params, int argc, const ch
       OPT_HELP(),
       OPT_STRING('a', "atsign", &params->atsign, "Atsign to use (mandatory)"),
       OPT_STRING('k', "keys", &params->keys_path, "Path to the key file"),
-      OPT_STRING('r', "rootServer", &params->root_domain, "atDirectory (aka root) server's domain name"),
+      OPT_STRING('r', "rootServer", &params->root_domain,
+                 "atDirectory (aka root) server's domain name, with optional port (default 64). A 'proxy:' prefix "
+                 "(e.g. \"proxy:proxy0001.atsign.org:443\") skips the atDirectory and connects to the atServer via "
+                 "that reverse proxy instead"),
       OPT_STRING('c', "cramkey", &params->onboard.cram_key, "CRAM key"),
       OPT_BOOLEAN('v', "verbose", &params->verbose, "Enable verbose logging"),
       OPT_END(),
@@ -137,7 +140,10 @@ static int parse_enroll_params(struct atauth_params *params, int argc, const cha
       OPT_HELP(),
       OPT_STRING('a', "atsign", &params->atsign, "Atsign to use (mandatory)"),
       OPT_STRING('k', "keys", &params->keys_path, "Path to the key file"),
-      OPT_STRING('r', "rootServer", &params->root_domain, "atDirectory (aka root) server's domain name"),
+      OPT_STRING('r', "rootServer", &params->root_domain,
+                 "atDirectory (aka root) server's domain name, with optional port (default 64). A 'proxy:' prefix "
+                 "(e.g. \"proxy:proxy0001.atsign.org:443\") skips the atDirectory and connects to the atServer via "
+                 "that reverse proxy instead"),
       OPT_STRING('s', "passcode", &params->enroll.passcode, "The passcode to present with this enrollment request"),
       OPT_STRING('p', "app", &params->enroll.app, "The name of the app being enrolled"),
       OPT_STRING('d', "device", &params->enroll.device, "A name for the device on which this app is running"),

@@ -1,4 +1,5 @@
 #include "run_enroll_command.h"
+#include "resolve_atserver.h"
 #include "apkam_keys.h"
 #include "atchops/aes_ctr.h"
 #include "atchops/base64.h"
@@ -59,8 +60,7 @@ int atauth_enroll_command(const char *atsign, const char *root_domain, const cha
   atclient_authenticate_options auth_opts;
   atclient_authenticate_options_init(&auth_opts); // free me
 
-  ret =
-      atclient_utils_find_atserver_address(root_domain, 64, atsign, &auth_opts.atserver_host, &auth_opts.atserver_port);
+  ret = atauth_resolve_atserver(root_domain, atsign, &auth_opts.atserver_host, &auth_opts.atserver_port);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to lookup the atserver host & port\n");
     goto free_auth_options;
