@@ -14,6 +14,7 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/enroll_request.c
   ${CMAKE_CURRENT_LIST_DIR}/src/enroll_response.c
   ${CMAKE_CURRENT_LIST_DIR}/src/params.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/resolve_atserver.c
   ${CMAKE_CURRENT_LIST_DIR}/src/run_onboard_command.c
   ${CMAKE_CURRENT_LIST_DIR}/src/run_enroll_command.c
   ${CMAKE_CURRENT_LIST_DIR}/src/wait_for_enrollment.c
