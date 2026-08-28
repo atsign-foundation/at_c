@@ -72,6 +72,35 @@ int atauth_enroll_command(const char *atsign, const char *root_domain, const cha
     goto free_auth_options;
   }
 
+  if (strncmp(root_domain, "proxy:", strlen("proxy:")) == 0) {
+    // A protocol-aware reverse proxy (e.g. proxy0001.atsign.org:443) routes a
+    // connection using the FIRST line the client sends, and only understands
+    // 'from:' - any other first line makes it answer with its own address and
+    // close the socket. The enroll flow's first real command is a lookup, so
+    // in proxy mode issue a from: exchange first and discard the challenge;
+    // the connection is then bridged to the atServer and every subsequent
+    // command flows through. (The atServer still accepts unauthenticated
+    // lookup/enroll verbs after a bare from:.)
+    const char *atsign_without_at = (atsign[0] == '@') ? atsign + 1 : atsign;
+    const size_t from_cmd_size = strlen("from:") + strlen(atsign_without_at) + strlen("\r\n") + 1;
+    char *from_cmd = malloc(from_cmd_size);
+    if (from_cmd == NULL) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for from_cmd\n");
+      ret = 1;
+      goto free_auth_options;
+    }
+    snprintf(from_cmd, from_cmd_size, "from:%s\r\n", atsign_without_at);
+    unsigned char from_recv[256];
+    size_t from_recv_len = 0;
+    ret = atclient_connection_send(&atclient.atserver_connection, (unsigned char *)from_cmd, strlen(from_cmd),
+                                   from_recv, sizeof(from_recv), &from_recv_len);
+    free(from_cmd);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to route the connection via the reverse proxy\n");
+      goto free_auth_options;
+    }
+  }
+
   atclient_atkeys atkeys;
   atclient_atkeys_init(&atkeys);
 
