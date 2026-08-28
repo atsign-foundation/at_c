@@ -1,3 +1,7 @@
+## 0.3.11
+
+- fix: route the enroll connection through 'proxy:' root specs with from:
+
 ## 0.3.10
 
 - feat: at_activate supports 'proxy:' root server specs (activation via 443)
