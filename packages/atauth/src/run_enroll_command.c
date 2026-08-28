@@ -81,19 +81,27 @@ int atauth_enroll_command(const char *atsign, const char *root_domain, const cha
     // the connection is then bridged to the atServer and every subsequent
     // command flows through. (The atServer still accepts unauthenticated
     // lookup/enroll verbs after a bare from:.)
-    const char *atsign_without_at = (atsign[0] == '@') ? atsign + 1 : atsign;
+    char *atsign_without_at = NULL;
+    ret = atclient_string_utils_atsign_without_at(atsign, &atsign_without_at);
+    if (ret != 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to strip the '@' from the atsign\n");
+      goto free_auth_options;
+    }
     const size_t from_cmd_size = strlen("from:") + strlen(atsign_without_at) + strlen("\r\n") + 1;
     char *from_cmd = malloc(from_cmd_size);
     if (from_cmd == NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for from_cmd\n");
+      free(atsign_without_at);
       ret = 1;
       goto free_auth_options;
     }
     snprintf(from_cmd, from_cmd_size, "from:%s\r\n", atsign_without_at);
-    unsigned char from_recv[256];
+    free(atsign_without_at);
+    const size_t from_recv_size = 256;
+    unsigned char from_recv[from_recv_size];
     size_t from_recv_len = 0;
     ret = atclient_connection_send(&atclient.atserver_connection, (unsigned char *)from_cmd, strlen(from_cmd),
-                                   from_recv, sizeof(from_recv), &from_recv_len);
+                                   from_recv, sizeof(unsigned char) * from_recv_size, &from_recv_len);
     free(from_cmd);
     if (ret != 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to route the connection via the reverse proxy\n");
