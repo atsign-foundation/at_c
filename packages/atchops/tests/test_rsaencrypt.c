@@ -44,13 +44,27 @@ int main() {
   }
   printf("atchops_rsa_key_populate_public_key (success): %d\n", ret);
 
-  ret = atchops_rsa_encrypt(&publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext);
+  ret = atchops_rsa_encrypt(&publickey, (const unsigned char *)plaintext, plaintextlen, ciphertext, ciphertextsize,
+                            NULL);
   if (ret != 0) {
     printf("atchops_rsa_encrypt (failed): %d\n", ret);
     goto ret;
   }
   printf("atchops_rsa_encrypt (success): %d\n", ret);
   printf("ciphertext (base64 encoded): \"%.*s\"\n", (int)ciphertextsize, ciphertext);
+
+  // A ciphertext buffer smaller than the key's modulus must be rejected
+  // without writing anything (issue #701)
+  unsigned char small_buffer[64];
+  ret = atchops_rsa_encrypt(&publickey, (const unsigned char *)plaintext, plaintextlen, small_buffer,
+                            sizeof(small_buffer), NULL);
+  if (ret == 0) {
+    printf("atchops_rsa_encrypt accepted an undersized ciphertext buffer (should have failed)\n");
+    ret = 1;
+    goto ret;
+  }
+  printf("atchops_rsa_encrypt correctly rejected an undersized ciphertext buffer\n");
+  ret = 0;
 
   goto ret;
 
