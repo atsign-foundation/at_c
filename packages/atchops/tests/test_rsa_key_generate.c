@@ -89,7 +89,8 @@ int main() {
   // use the public key to encrypt something
   // use the private key to decrypt it
 
-  if ((ret = atchops_rsa_encrypt(&public_key, (const unsigned char *)PLAINTEXT, strlen(PLAINTEXT), ciphertext)) != 0) {
+  if ((ret = atchops_rsa_encrypt(&public_key, (const unsigned char *)PLAINTEXT, strlen(PLAINTEXT), ciphertext,
+                                 ciphertext_size, NULL)) != 0) {
     atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encrypt plaintext\n");
     goto exit;
   }
@@ -240,7 +241,8 @@ static int test2_generate_base64() {
   }
 
   // 3b. use it to encrypt the plaintext
-  if ((ret = atchops_rsa_encrypt(&public_key, (const unsigned char *)PLAINTEXT, strlen(PLAINTEXT), ciphertext)) != 0) {
+  if ((ret = atchops_rsa_encrypt(&public_key, (const unsigned char *)PLAINTEXT, strlen(PLAINTEXT), ciphertext,
+                                 ciphertext_size, NULL)) != 0) {
     atlogger_log("test_rsa_generate", ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encrypt plaintext\n");
     goto exit;
   }

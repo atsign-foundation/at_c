@@ -46,11 +46,15 @@ int atchops_rsa_verify(const atchops_rsa_key_public_key *public_key, const atcho
  * @param public_key the public key struct to use for encryption, see atchops_rsa_key_populate_public_key
  * @param plaintext the plaintext to encrypt, in bytes
  * @param plaintext_len the length of the plaintext, most people use strlen() to find this length
- * @param ciphertext the ciphertext buffer to populate, assumed to be 256 bytes long for 2048 RSA modulus
+ * @param ciphertext the ciphertext buffer to populate (e.g. 256 bytes for a 2048 bit RSA modulus)
+ * @param ciphertext_size the size of the ciphertext buffer (allocated size); the operation fails without writing
+ * anything if the key's modulus is longer than this
+ * @param ciphertext_len the written length of the ciphertext (the key's modulus length), may be NULL
  * @return int 0 on success
  */
 int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsigned char *plaintext,
-                        const size_t plaintext_len, unsigned char *ciphertext);
+                        const size_t plaintext_len, unsigned char *ciphertext, const size_t ciphertext_size,
+                        size_t *ciphertext_len);
 
 /**
  * @brief Decrypt bytes with an RSA private key

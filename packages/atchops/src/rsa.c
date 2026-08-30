@@ -250,7 +250,8 @@ exit: {
 }
 
 int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsigned char *plaintext,
-                        const size_t plaintext_len, unsigned char *ciphertext) {
+                        const size_t plaintext_len, unsigned char *ciphertext, const size_t ciphertext_size,
+                        size_t *ciphertext_len) {
   int ret = 1;
 
   /*
@@ -278,6 +279,12 @@ int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsi
   if (ciphertext == NULL) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ciphertext is NULL\n");
+    return ret;
+  }
+
+  if (ciphertext_size <= 0) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "ciphertext_size is less than or equal to 0\n");
     return ret;
   }
 
@@ -325,14 +332,29 @@ int atchops_rsa_encrypt(const atchops_rsa_key_public_key *public_key, const unsi
   }
 
   /*
-   * 4. Encrypt the plaintext with RSA public key
+   * 4. Encrypt the plaintext with RSA public key. mbedtls writes exactly the
+   * key's modulus length into ciphertext, so refuse to encrypt (rather than
+   * overflow the caller's buffer) when the modulus is longer than the buffer
    */
+  const size_t output_len = mbedtls_rsa_get_len(&rsa);
+  if (output_len > ciphertext_size) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
+                 "ciphertext buffer (%zu bytes) is too small for the key's %zu byte modulus\n", ciphertext_size,
+                 output_len);
+    goto exit;
+  }
+
   if ((ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg_ctx,
 #ifdef ATCHOPS_MBEDTLS_VERSION_2
                                        MBEDTLS_RSA_PUBLIC,
 #endif
                                        plaintext_len, plaintext, ciphertext)) != 0) {
     goto exit;
+  }
+
+  if (ciphertext_len != NULL) {
+    *ciphertext_len = output_len;
   }
 
   ret = 0;

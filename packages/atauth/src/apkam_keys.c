@@ -47,7 +47,7 @@ int atauth_apkam_symmetric_key_generate(struct atauth_apkam_symmetric_key *key,
   }
 
   ret = atchops_rsa_encrypt(default_encryption_public_key, (unsigned char *)key->symmetric_key_base64,
-                            key->symmetric_key_base64_len, cipher_text);
+                            key->symmetric_key_base64_len, cipher_text, cipher_text_len, &cipher_text_len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to encrypt symmetric key: %d\n", ret);
     goto exit;
