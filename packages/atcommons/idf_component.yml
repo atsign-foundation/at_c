@@ -1,0 +1,7 @@
+version: "0.1.0"
+description: "Atsign technology common utilities and implementations"
+url: "https://github.com/atsign-foundation/at_c"
+license: "BSD-3-Clause"
+dependencies:
+  atsign-foundation/atlogger:
+    version: "0.1.0"

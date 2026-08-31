@@ -159,7 +159,7 @@ endfunction()
 # add an espidf component to the build
 function(add_atsdk_espidf_component)
   set(oneValueArgs PACKAGE_NAME PACKAGE_DESCRIPTION PACKAGE_VERSION)
-  set(multiValueArgs INCLUDE_DIR SOURCES DEPS)
+  set(multiValueArgs INCLUDE_DIR PACKAGE_SOURCES DEPS)
   set(options "")
   cmake_parse_arguments(
     PARSE_ARGV
@@ -171,7 +171,7 @@ function(add_atsdk_espidf_component)
   )
 
   idf_component_register(
-        SRCS ${arg_SOURCES}
+        SRCS ${arg_PACKAGE_SOURCES}
         INCLUDE_DIRS ${arg_INCLUDE_DIR}
         REQUIRES ${arg_DEPS}
   )
@@ -183,6 +183,8 @@ function(add_atsdk_espidf_component)
       ${CMAKE_COMMAND} -E copy_directory ${arg_INCLUDE_DIR}
       ${CMAKE_SOURCE_DIR}/include
     COMMAND
+      ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/lib
+    COMMAND
       ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_LIB}>
       ${CMAKE_SOURCE_DIR}/lib/lib${COMPONENT_NAME}.a
     COMMENT "Copying built archive file and header to lib directory..."
@@ -190,8 +192,8 @@ function(add_atsdk_espidf_component)
 
   project(
     ${arg_PACKAGE_NAME}
-    VERSION ${arg_VERSION}
-    DESCRIPTION ${arg_DESCRIPTION}
+    VERSION ${arg_PACKAGE_VERSION}
+    DESCRIPTION ${arg_PACKAGE_DESCRIPTION}
     HOMEPAGE_URL https://github.com/atsign-foundation/at_c
     LANGUAGES C
   )

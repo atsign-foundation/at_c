@@ -1,0 +1,4 @@
+version: "0.0.1"
+description: "argparse"
+url: "https://github.com/atsign-foundation/at_c"
+license: "BSD-3-Clause"

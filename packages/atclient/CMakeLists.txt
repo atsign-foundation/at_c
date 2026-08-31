@@ -49,7 +49,7 @@ if(ESP_PLATFORM)
     PACKAGE_VERSION 0.4.0
     INCLUDE_DIR ${ATCLIENT_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATCLIENT_SOURCES}
-    DEPS mbedtls atchops json
+    DEPS mbedtls atchops atlogger atcommons json
   )
   return()
 endif()

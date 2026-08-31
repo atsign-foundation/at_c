@@ -31,7 +31,7 @@ if(ESP_PLATFORM)
     PACKAGE_VERSION 0.4.0
     INCLUDE_DIR ${ATCHOPS_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATCHOPS_SOURCES}
-    DEPS mbedtls atlogger
+    DEPS mbedtls atlogger uuid4
   )
   return()
 endif()

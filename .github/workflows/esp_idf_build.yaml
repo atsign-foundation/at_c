@@ -1,0 +1,40 @@
+name: ESP-IDF Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+permissions: # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  esp-idf:
+    runs-on: "ubuntu-latest"
+    container:
+      image: espressif/idf:release-v5.3
+    env:
+      # Components are resolved locally via EXTRA_COMPONENT_DIRS; skip the
+      # component registry lookup declared in each package's idf_component.yml.
+      IDF_COMPONENT_MANAGER: "0"
+    steps:
+      - name: Checkout at_c
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: at_c
+
+      - name: Checkout uuid4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: atsign-foundation/uuid4
+          ref: 56708633f2788a049882f8282fd36eb9914c345d
+          path: uuid4
+
+      - name: Trust workspace for git
+        run: git config --global --add safe.directory '*'
+
+      - name: Build install_with_local_components
+        working-directory: at_c/examples/esp32/install_with_local_components
+        run: idf.py build
