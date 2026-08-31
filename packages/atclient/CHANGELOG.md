@@ -1,3 +1,9 @@
+## 0.4.0
+
+- fix: atchops_rsa_encrypt takes an output-buffer-size bound (**breaking API
+  change**: callers must pass ciphertext_size and may receive the written
+  length via a new optional ciphertext_len out-param)
+
 ## 0.3.11
 
 - fix: route the enroll connection through 'proxy:' root specs with from:

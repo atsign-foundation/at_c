@@ -8,7 +8,7 @@ from conan.tools.files import get
 
 class at_cRecipe(ConanFile):
     name = "at_c"
-    version = "0.3.11"
+    version = "0.4.0"
     package_type = "library"
 
     # Optional metadata
