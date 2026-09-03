@@ -172,7 +172,6 @@ free_encrypt_public_atkey:
 free_atkeys:
   atclient_connection_disconnect(&atclient.atserver_connection);
   atclient_atkeys_free(&atkeys);
-free_enroll_response:
   free_enroll_response(&response);
 free_apkam_keys:
   atauth_generated_first_enrollment_keys_free(&apkam_keys);
