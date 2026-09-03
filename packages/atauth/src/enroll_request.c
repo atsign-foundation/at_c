@@ -67,9 +67,12 @@ int atauth_send_enroll_request(atclient *atclient, const atauth_enroll_params_t 
   }
 
   unsigned char recv[300];
+  memset(recv, 0, sizeof(recv));
   size_t recv_len;
-  ret = atclient_connection_send(&atclient->atserver_connection, (unsigned char *)command, strlen(command), recv, 300,
-                                 &recv_len);
+  // sizeof - 1 keeps the buffer NUL-terminated even if the server reply fills
+  // it exactly; parse_enrollment_response treats recv as a C string
+  ret = atclient_connection_send(&atclient->atserver_connection, (unsigned char *)command, strlen(command), recv,
+                                 sizeof(recv) - 1, &recv_len);
   free(command);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send enroll command to atserver: %d\n", ret);

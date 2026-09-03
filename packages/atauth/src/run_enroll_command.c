@@ -18,6 +18,7 @@
 #include "enroll_response.h"
 #include "wait_for_enrollment.h"
 #include <atclient/json.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -302,15 +303,21 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   unsigned char recv[recv_size];
   memset(recv, 0, sizeof(char) * recv_size);
   size_t recv_len = 0;
-  ret = atclient_connection_send(conn, (unsigned char *)cmd, strlen(cmd), recv, recv_size, &recv_len);
+  // recv_size - 1 keeps the memset-provided NUL intact even if the server
+  // reply fills the buffer exactly
+  ret = atclient_connection_send(conn, (unsigned char *)cmd, strlen(cmd), recv, recv_size - 1, &recv_len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send keys:get verb for %s: %d\n", key_name, ret);
     return ret;
   }
 
+  // An error reply must not be mis-parsed as success just because it happens
+  // to contain "data:" somewhere in its message
+  char *error_pos = NULL;
   char *response_trimmed = NULL;
-  // below method points the response_trimmed variable to the position of 'data:' substring
-  if (atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  const bool has_error = atclient_string_utils_get_substring_position((char *)recv, "error:", &error_pos) == 0;
+  const bool has_data = atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &response_trimmed) == 0;
+  if (!has_data || (has_error && error_pos < response_trimmed)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
