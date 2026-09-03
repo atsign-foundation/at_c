@@ -168,9 +168,15 @@ int atauth_enroll_command(const char *atsign, const char *root_domain, const cha
     goto free_apkam_keys;
   }
 
-  int exp_ms = 0;
+  int64_t exp_ms = 0;
   if (expiry != NULL) {
-    exp_ms = atol(expiry);
+    exp_ms = atoll(expiry);
+    if (exp_ms <= 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid --expiry value: %s (expected a positive number of ms)\n",
+                   expiry);
+      ret = 1;
+      goto free_namespace_list;
+    }
   }
   // send enroll request
   atauth_enroll_params_t ep = {
