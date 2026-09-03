@@ -6,12 +6,14 @@
 #define TAG "test_enroll_response"
 
 static int test_1a_enroll_response();
+static int test_1b_malformed_responses();
 
 int main() {
   int ret = 0;
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_INFO);
 
   ret += test_1a_enroll_response();
+  ret += test_1b_malformed_responses();
 
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "%d tests failed\n", ret);
@@ -88,4 +90,25 @@ static int test_1a_enroll_response() {
 
   free_enroll_response(&response);
   return 0;
+}
+
+// well-formed JSON with missing or non-string mandatory fields must fail,
+// not return 0 with NULL fields the callers strlen unconditionally
+static int test_1b_malformed_responses() {
+  const char *malformed[] = {
+      "data:{\"status\":\"pending\"}",                            // missing enrollmentId
+      "data:{\"enrollmentId\":\"abc\"}",                          // missing status
+      "data:{\"enrollmentId\":42,\"status\":\"pending\"}",        // non-string enrollmentId
+      "data:{\"enrollmentId\":\"abc\",\"status\":null}",          // non-string status
+  };
+  int failures = 0;
+  for (size_t i = 0; i < sizeof(malformed) / sizeof(malformed[0]); i++) {
+    struct enroll_response response;
+    if (parse_enrollment_response(malformed[i], &response) == 0) {
+      atlogger_log(TAG " 1b", ATLOGGER_LOGGING_LEVEL_ERROR, "Expected parse failure for: %s\n", malformed[i]);
+      free_enroll_response(&response);
+      failures++;
+    }
+  }
+  return failures;
 }
