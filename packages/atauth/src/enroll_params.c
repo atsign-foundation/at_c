@@ -104,6 +104,10 @@ int atauth_enroll_params_to_json(const atauth_enroll_params_t *ep, char **json_s
     cJSON_AddStringToObject(json_object, ENCRYPTED_APKAM_SYMMETRIC_KEY,
                             (const char *)ep->encrypted_apkam_symmetric_key);
   }
+
+  if (ep->apkam_keys_expiry_in_millis > 0) {
+    cJSON_AddNumberToObject(json_object, APKAM_KEYS_EXPIRY, (double)ep->apkam_keys_expiry_in_millis);
+  }
   // pass memory ownership of the json string to the caller
   if (json_string != NULL) {
     *json_string = cJSON_PrintUnformatted(json_object);

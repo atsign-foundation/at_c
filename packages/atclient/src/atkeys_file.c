@@ -1,3 +1,10 @@
+// open(2) and fdopen(3) are POSIX, not C99; glibc hides fdopen's stdio.h
+// declaration under strict -std=c99 (used by CI) unless this is defined
+// before the first system header
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "atclient/atkeys_file.h"
 #include "atlogger/atlogger.h"
 #include <atchops/platform.h>
@@ -7,6 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 // represents buffer size of reading the entire atKeys file
 #define FILE_READ_BUFFER_SIZE 8192
@@ -292,9 +304,22 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
     goto exit;
   }
 
+  // The file holds private key material, so it must never be created with the
+  // default umask permissions (typically world-readable 0644)
+#ifdef _WIN32
   FILE *file = fopen(path, "w");
+#else
+  FILE *file = NULL;
+  const int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+  if (fd >= 0) {
+    file = fdopen(fd, "w");
+    if (file == NULL) {
+      close(fd);
+    }
+  }
+#endif
   if (file == NULL) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "fopen failed\n");
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "failed to open %s for writing\n", path);
     goto exit;
   }
 

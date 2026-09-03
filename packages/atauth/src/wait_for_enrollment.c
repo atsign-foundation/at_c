@@ -10,7 +10,7 @@
 int wait_for_enrollment(atclient *ctx, const char *atsign, const atclient_atkeys *atkeys,
                         const atclient_authenticate_options *opts) {
   int ret = 1;
-  char *err_msg;
+  char *err_msg = NULL;
 
   int max_tries = 50;
   for (int i = 0; i < max_tries; i++) {
@@ -21,17 +21,21 @@ int wait_for_enrollment(atclient *ctx, const char *atsign, const atclient_atkeys
     atlogger_set_logging_level(logging_level);
 
     if (ret == 0) {
+      free(err_msg);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "enrollment approved | APKAM auth success\n");
       return ret;
     }
 
     if (err_msg != NULL && is_enrollment_denied(err_msg)) {
+      free(err_msg);
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "enrollment id: %s has been denied\n", atkeys->enrollment_id);
       ret = 1;
       return ret;
     }
 
     if (err_msg != NULL && is_enrollment_pending(err_msg)) {
+      free(err_msg);
+      err_msg = NULL;
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "enrollment not approved yet | Retrying in %d secs\n",
                    ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL);
       sleep(ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL);
@@ -40,8 +44,15 @@ int wait_for_enrollment(atclient *ctx, const char *atsign, const atclient_atkeys
 
     if (err_msg != NULL) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Unexpected error: \n%s\n", err_msg);
+      free(err_msg);
     } else {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "An unknown error occurred, please contact support.\n");
+      // a transient failure with no server error message (e.g. a network blip
+      // while waiting for approval) - retry rather than aborting the wait
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN,
+                   "Could not reach the atServer to check enrollment status | Retrying in %d secs\n",
+                   ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL);
+      sleep(ATAUTH_DEFAULT_APKAM_RETRY_INTERVAL);
+      continue;
     }
     return 2;
   }
