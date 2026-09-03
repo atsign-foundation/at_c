@@ -9,13 +9,13 @@ static int determine_command(const char *argv1, enum atauth_command *command) {
 
   switch (argv1[0]) {
   case 'o':
-    if (strncmp(argv1, "onboard", strlen("onboard")) == 0) {
+    if (strcmp(argv1, "onboard") == 0) {
       *command = atauth_cmd_onboard;
       return 0;
     }
     return 2;
   case 'e':
-    if (strncmp(argv1, "enroll", strlen("enroll")) == 0) {
+    if (strcmp(argv1, "enroll") == 0) {
       *command = atauth_cmd_enroll;
       return 0;
     }
@@ -62,7 +62,7 @@ int parse_atauth_params(struct atauth_params *params, int argc, const char **arg
       exit(0);
     }
   case 1: // implicit onboard command
-    if (strncmp(argv[1], "-h", strlen("-h")) == 0 || strncmp(argv[1], "--help", strlen("--help")) == 0) {
+    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
       show_help();
       exit(0);
     }
@@ -174,7 +174,7 @@ static int parse_enroll_params(struct atauth_params *params, int argc, const cha
   }
 
   if (params->enroll.passcode == NULL) {
-    printf("-p, --passcode is a mandatory argument\n");
+    printf("-s, --passcode is a mandatory argument\n");
     argparse_help_cb(&argparse, options);
     return 1;
   }
