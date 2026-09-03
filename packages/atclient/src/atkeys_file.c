@@ -1,3 +1,10 @@
+// open(2) and fdopen(3) are POSIX, not C99; glibc hides fdopen's stdio.h
+// declaration under strict -std=c99 (used by CI) unless this is defined
+// before the first system header
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "atclient/atkeys_file.h"
 #include "atlogger/atlogger.h"
 #include <atchops/platform.h>
