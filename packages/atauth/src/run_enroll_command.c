@@ -344,6 +344,11 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   // use 0 iv if no iv was shared with us (legacy behavior)
   if (cJSON_HasObjectItem(json_server_resp, "iv")) {
     const cJSON *iv_json = cJSON_GetObjectItemCaseSensitive(json_server_resp, "iv");
+    if (!cJSON_IsString(iv_json)) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error: \"iv\" in server response JSON is not a string\n");
+      cJSON_Delete(json_server_resp);
+      return 1;
+    }
     char *iv_base64 = cJSON_GetStringValue(iv_json);
     size_t iv_base64_len = strlen(iv_base64);
     size_t iv_raw_len;
@@ -358,7 +363,7 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
                    "Unexpected size for base64 decoded iv (expected: %zu, actual: %zu)\n",
                    (size_t)ATCHOPS_IV_BUFFER_SIZE, iv_raw_len);
       cJSON_Delete(json_server_resp);
-      return ret;
+      return 1;
     }
   }
 
@@ -366,12 +371,17 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   unsigned char decrypted_key[decrypted_key_len + 1];
   ret = atchops_aes_ctr_decrypt(apkam_symmetric_key, ATCHOPS_AES_256, iv_raw, key_encrypted, key_encrypted_len,
                                 decrypted_key, decrypted_key_len, &decrypted_key_len);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt key: %d\n", ret);
+    cJSON_Delete(json_server_resp);
+    return ret;
+  }
   decrypted_key[decrypted_key_len] = 0;
   *key = malloc(sizeof(char) * (decrypted_key_len + 1));
   if (*key == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for key out\n");
     cJSON_Delete(json_server_resp);
-    return ret;
+    return 1;
   }
   memcpy(*key, decrypted_key, decrypted_key_len);
   (*key)[decrypted_key_len] = 0;
