@@ -92,7 +92,7 @@ int atauth_onboard_command(const char *atsign, const char *root_domain, const ch
   ret = atauth_generated_first_enrollment_keys_populate_atkeys(&apkam_keys, &atkeys);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to create the atkeys from the generated apkam keys\n");
-    goto free_enroll_response;
+    goto free_atkeys; // the partially populated atkeys holds heap copies of key material
   }
 
   ret = atclient_atkeys_set_enrollment_id(&atkeys, response.enrollment_id, strlen(response.enrollment_id));
