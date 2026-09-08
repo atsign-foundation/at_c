@@ -1,3 +1,26 @@
+## 0.4.1
+
+- fix: at_activate onboard no longer frees an uninitialized keys struct when
+  key generation fails
+- fix: atclient_pkam_authenticate returns a heap-allocated err_msg (as
+  documented) instead of a dangling stack pointer; wait_for_enrollment
+  initializes it and retries transient failures rather than aborting
+- fix: fetch_and_decrypt_key reports IV, decrypt and allocation failures
+  instead of writing garbage into the atKeys file
+- fix: enroll response parsing rejects missing/non-string enrollmentId and
+  status rather than crashing or returning success with NULL fields
+- fix: atKeys files are written with 0600 permissions (open + fchmod), so
+  existing world-readable key files are tightened on rewrite
+- fix: APKAM key material is zeroized before free; onboard populate-failure
+  path no longer leaks the partially populated atkeys
+- fix: enroll --expiry is sent to the atServer, widened to int64_t and
+  validated with strtoll (rejects "10ms", empty and out-of-range values)
+- fix: server-response parsing no longer treats an error reply containing
+  "data:" as success; receive buffers pass their full size to
+  atclient_connection_send
+- fix: at_activate rejects prefix-matched commands such as "onboardfoo", and
+  the missing-passcode error names the correct -s flag
+
 ## 0.4.0
 
 - fix: atchops_rsa_encrypt takes an output-buffer-size bound (**breaking API
