@@ -18,6 +18,8 @@
 #include "enroll_response.h"
 #include "wait_for_enrollment.h"
 #include <atclient/json.h>
+#include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -168,9 +170,21 @@ int atauth_enroll_command(const char *atsign, const char *root_domain, const cha
     goto free_apkam_keys;
   }
 
-  int exp_ms = 0;
+  int64_t exp_ms = 0;
   if (expiry != NULL) {
-    exp_ms = atol(expiry);
+    // strtoll rather than atoll so that trailing garbage ("10ms"), an empty
+    // string and out-of-range values are all rejected instead of silently
+    // truncated (same pattern as the port parsing in resolve_atserver.c)
+    char *expiry_end = NULL;
+    errno = 0;
+    const long long expiry_val = strtoll(expiry, &expiry_end, 10);
+    if (expiry_end == expiry || *expiry_end != '\0' || errno == ERANGE || expiry_val <= 0) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid --expiry value: %s (expected a positive number of ms)\n",
+                   expiry);
+      ret = 1;
+      goto free_namespace_list;
+    }
+    exp_ms = (int64_t)expiry_val;
   }
   // send enroll request
   atauth_enroll_params_t ep = {
@@ -296,15 +310,21 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   unsigned char recv[recv_size];
   memset(recv, 0, sizeof(char) * recv_size);
   size_t recv_len = 0;
+  // atclient_connection_send rejects replies larger than recv_size and always
+  // NUL-terminates recv (it overwrites the trailing '\n' with '\0')
   ret = atclient_connection_send(conn, (unsigned char *)cmd, strlen(cmd), recv, recv_size, &recv_len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send keys:get verb for %s: %d\n", key_name, ret);
     return ret;
   }
 
+  // An error reply must not be mis-parsed as success just because it happens
+  // to contain "data:" somewhere in its message
+  char *error_pos = NULL;
   char *response_trimmed = NULL;
-  // below method points the response_trimmed variable to the position of 'data:' substring
-  if (atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &response_trimmed) != 0) {
+  const bool has_error = atclient_string_utils_get_substring_position((char *)recv, "error:", &error_pos) == 0;
+  const bool has_data = atclient_string_utils_get_substring_position((char *)recv, ATCLIENT_DATA_TOKEN, &response_trimmed) == 0;
+  if (!has_data || (has_error && error_pos < response_trimmed)) {
     ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "recv was \"%.*s\" and did not have prefix \"data:\"\n",
                  (int)recv_len, recv);
@@ -344,6 +364,11 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   // use 0 iv if no iv was shared with us (legacy behavior)
   if (cJSON_HasObjectItem(json_server_resp, "iv")) {
     const cJSON *iv_json = cJSON_GetObjectItemCaseSensitive(json_server_resp, "iv");
+    if (!cJSON_IsString(iv_json)) {
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Error: \"iv\" in server response JSON is not a string\n");
+      cJSON_Delete(json_server_resp);
+      return 1;
+    }
     char *iv_base64 = cJSON_GetStringValue(iv_json);
     size_t iv_base64_len = strlen(iv_base64);
     size_t iv_raw_len;
@@ -358,7 +383,7 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
                    "Unexpected size for base64 decoded iv (expected: %zu, actual: %zu)\n",
                    (size_t)ATCHOPS_IV_BUFFER_SIZE, iv_raw_len);
       cJSON_Delete(json_server_resp);
-      return ret;
+      return 1;
     }
   }
 
@@ -366,12 +391,17 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   unsigned char decrypted_key[decrypted_key_len + 1];
   ret = atchops_aes_ctr_decrypt(apkam_symmetric_key, ATCHOPS_AES_256, iv_raw, key_encrypted, key_encrypted_len,
                                 decrypted_key, decrypted_key_len, &decrypted_key_len);
+  if (ret != 0) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to decrypt key: %d\n", ret);
+    cJSON_Delete(json_server_resp);
+    return ret;
+  }
   decrypted_key[decrypted_key_len] = 0;
   *key = malloc(sizeof(char) * (decrypted_key_len + 1));
   if (*key == NULL) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for key out\n");
     cJSON_Delete(json_server_resp);
-    return ret;
+    return 1;
   }
   memcpy(*key, decrypted_key, decrypted_key_len);
   (*key)[decrypted_key_len] = 0;

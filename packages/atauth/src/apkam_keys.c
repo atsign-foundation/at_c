@@ -4,11 +4,28 @@
 #include "atchops/rsa_key.h"
 #include "atclient/atkeys.h"
 #include "atlogger/atlogger.h"
+#include <mbedtls/platform_util.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define TAG "atauth_apkam"
+
+// Scrub key material before releasing it: freed heap pages holding raw keys
+// can otherwise surface in core dumps or later allocations.
+// mbedtls_platform_zeroize is guaranteed not to be optimized away.
+static void zero_free(void *ptr, size_t len) {
+  if (ptr != NULL) {
+    mbedtls_platform_zeroize(ptr, len);
+    free(ptr);
+  }
+}
+
+static void zero_free_str(char *str) {
+  if (str != NULL) {
+    zero_free(str, strlen(str));
+  }
+}
 
 // SYMMETRIC KEY
 
@@ -74,15 +91,9 @@ exit:
 }
 
 void atauth_apkam_symmetric_key_free(struct atauth_apkam_symmetric_key *key) {
-  if (key->symmetric_key_raw != NULL) {
-    free(key->symmetric_key_raw);
-  }
-  if (key->symmetric_key_base64 != NULL) {
-    free(key->symmetric_key_base64);
-  }
-  if (key->encrypted_symmetric_key_base64 != NULL) {
-    free(key->encrypted_symmetric_key_base64);
-  }
+  zero_free(key->symmetric_key_raw, key->symmetric_key_raw_len);
+  zero_free_str(key->symmetric_key_base64);
+  free(key->encrypted_symmetric_key_base64); // ciphertext, no need to scrub
   atauth_apkam_symmetric_key_init(key);
 }
 
@@ -198,23 +209,13 @@ int atauth_generated_first_enrollment_keys_populate_atkeys(
 }
 
 void atauth_generated_first_enrollment_keys_free(struct atauth_generated_first_enrollment_keys *keys) {
-  if (keys->apkam_public_key != NULL) {
-    free(keys->apkam_public_key);
-  }
-  if (keys->apkam_private_key != NULL) {
-    free(keys->apkam_private_key);
-  }
-  if (keys->encrypt_public_key != NULL) {
-    free(keys->encrypt_public_key);
-  }
-  if (keys->encrypt_private_key != NULL) {
-    free(keys->encrypt_private_key);
-  }
-  if (keys->self_encryption_key_raw != NULL) {
-    free(keys->self_encryption_key_raw);
-  }
+  free(keys->apkam_public_key);
+  zero_free_str(keys->apkam_private_key);
+  free(keys->encrypt_public_key);
+  zero_free_str(keys->encrypt_private_key);
+  zero_free(keys->self_encryption_key_raw, keys->self_encryption_key_raw_len);
   if (keys->self_encryption_key_base64 != NULL) {
-    free(keys->self_encryption_key_base64);
+    zero_free(keys->self_encryption_key_base64, keys->self_encryption_key_base64_len);
   }
   atauth_generated_first_enrollment_keys_init(keys);
 }
@@ -285,13 +286,9 @@ int atauth_generated_apkam_enrollment_keys_populate_atkeys(
 }
 
 void atauth_generated_apkam_enrollment_keys_free(struct atauth_generated_apkam_enrollment_keys *keys) {
-  if (keys->apkam_public_key != NULL) {
-    free(keys->apkam_public_key);
-    keys->apkam_public_key = NULL;
-  }
-  if (keys->apkam_private_key != NULL) {
-    free(keys->apkam_private_key);
-    keys->apkam_private_key = NULL;
-  }
+  free(keys->apkam_public_key);
+  keys->apkam_public_key = NULL;
+  zero_free_str(keys->apkam_private_key);
+  keys->apkam_private_key = NULL;
   atauth_apkam_symmetric_key_free(&keys->apkam_symmetric_key);
 }

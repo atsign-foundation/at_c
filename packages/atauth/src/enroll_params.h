@@ -3,6 +3,7 @@
 
 // #include "enroll_namespace.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 typedef struct {
   char *enrollment_id;
@@ -19,7 +20,7 @@ typedef struct {
   char *encrypted_self_encryption_key_iv;            // IV that has been used to encrypt the self encryption key
   char *encrypted_apkam_symmetric_key;
   char *encrypted_apkam_symmetric_key_iv;
-  int apkam_keys_expiry_in_millis;
+  int64_t apkam_keys_expiry_in_millis; // 0 means no expiry requested
 } atauth_enroll_params_t;
 
 /**

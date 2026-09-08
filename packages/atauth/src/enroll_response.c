@@ -29,34 +29,43 @@ int parse_enrollment_response(const char *buffer, struct enroll_response *respon
     return 1;
   }
 
-  if (cJSON_HasObjectItem(json, ENROLLMENT_ID)) {
-    char *temp = cJSON_GetStringValue(cJSON_GetObjectItem(json, ENROLLMENT_ID));
-    size_t temp_len = strlen(temp);
-    enrollment_id = malloc(sizeof(char) * (temp_len + 1));
-    if (enrollment_id == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for enrollment_id\n");
-      cJSON_Delete(json);
-      return 1;
-    }
-    memcpy(enrollment_id, temp, temp_len);
-    enrollment_id[temp_len] = 0;
+  // Both fields are mandatory: callers use response->enrollment_id and
+  // response->status unconditionally after a 0 return, so a missing or
+  // non-string field (the response comes from the server) must be an error,
+  // not a NULL in the output struct
+  char *temp = cJSON_GetStringValue(cJSON_GetObjectItem(json, ENROLLMENT_ID));
+  if (temp == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Enroll response is missing a valid \"%s\"\n", ENROLLMENT_ID);
+    cJSON_Delete(json);
+    return 1;
   }
+  size_t temp_len = strlen(temp);
+  enrollment_id = malloc(sizeof(char) * (temp_len + 1));
+  if (enrollment_id == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for enrollment_id\n");
+    cJSON_Delete(json);
+    return 1;
+  }
+  memcpy(enrollment_id, temp, temp_len);
+  enrollment_id[temp_len] = 0;
 
-  if (cJSON_HasObjectItem(json, STATUS)) {
-    char *temp = cJSON_GetStringValue(cJSON_GetObjectItem(json, STATUS));
-    size_t temp_len = strlen(temp);
-    status = malloc(sizeof(char) * (temp_len + 1));
-    if (status == NULL) {
-      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for status\n");
-      cJSON_Delete(json);
-      if (enrollment_id != NULL) {
-        free(enrollment_id);
-      }
-      return 1;
-    }
-    memcpy(status, temp, temp_len);
-    status[temp_len] = 0;
+  temp = cJSON_GetStringValue(cJSON_GetObjectItem(json, STATUS));
+  if (temp == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Enroll response is missing a valid \"%s\"\n", STATUS);
+    cJSON_Delete(json);
+    free(enrollment_id);
+    return 1;
   }
+  temp_len = strlen(temp);
+  status = malloc(sizeof(char) * (temp_len + 1));
+  if (status == NULL) {
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to allocate memory for status\n");
+    cJSON_Delete(json);
+    free(enrollment_id);
+    return 1;
+  }
+  memcpy(status, temp, temp_len);
+  status[temp_len] = 0;
 
   cJSON_Delete(json);
   *response = (struct enroll_response){
