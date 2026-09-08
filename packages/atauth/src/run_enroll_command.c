@@ -18,6 +18,7 @@
 #include "enroll_response.h"
 #include "wait_for_enrollment.h"
 #include <atclient/json.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -171,13 +172,19 @@ int atauth_enroll_command(const char *atsign, const char *root_domain, const cha
 
   int64_t exp_ms = 0;
   if (expiry != NULL) {
-    exp_ms = atoll(expiry);
-    if (exp_ms <= 0) {
+    // strtoll rather than atoll so that trailing garbage ("10ms"), an empty
+    // string and out-of-range values are all rejected instead of silently
+    // truncated (same pattern as the port parsing in resolve_atserver.c)
+    char *expiry_end = NULL;
+    errno = 0;
+    const long long expiry_val = strtoll(expiry, &expiry_end, 10);
+    if (expiry_end == expiry || *expiry_end != '\0' || errno == ERANGE || expiry_val <= 0) {
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Invalid --expiry value: %s (expected a positive number of ms)\n",
                    expiry);
       ret = 1;
       goto free_namespace_list;
     }
+    exp_ms = (int64_t)expiry_val;
   }
   // send enroll request
   atauth_enroll_params_t ep = {
@@ -303,9 +310,9 @@ static int fetch_and_decrypt_key(atclient_connection *conn, const char *key_name
   unsigned char recv[recv_size];
   memset(recv, 0, sizeof(char) * recv_size);
   size_t recv_len = 0;
-  // recv_size - 1 keeps the memset-provided NUL intact even if the server
-  // reply fills the buffer exactly
-  ret = atclient_connection_send(conn, (unsigned char *)cmd, strlen(cmd), recv, recv_size - 1, &recv_len);
+  // atclient_connection_send rejects replies larger than recv_size and always
+  // NUL-terminates recv (it overwrites the trailing '\n' with '\0')
+  ret = atclient_connection_send(conn, (unsigned char *)cmd, strlen(cmd), recv, recv_size, &recv_len);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to send keys:get verb for %s: %d\n", key_name, ret);
     return ret;

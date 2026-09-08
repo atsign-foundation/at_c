@@ -305,13 +305,21 @@ int atclient_atkeys_file_write_to_path(atclient_atkeys_file *atkeys_file, const 
   }
 
   // The file holds private key material, so it must never be created with the
-  // default umask permissions (typically world-readable 0644)
+  // default umask permissions (typically world-readable 0644). The mode passed
+  // to open() only applies when the file is created, so fchmod() is also used
+  // to tighten a pre-existing atKeys file that was written with broader
+  // permissions by an older SDK version or another tool.
 #ifdef _WIN32
   FILE *file = fopen(path, "w");
 #else
   FILE *file = NULL;
   const int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
   if (fd >= 0) {
+    if (fchmod(fd, S_IRUSR | S_IWUSR) != 0) {
+      // Not fatal: some filesystems (e.g. FAT/exFAT) do not support POSIX
+      // permissions at all, and the key material still needs to be written
+      atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_WARN, "failed to set 0600 permissions on %s\n", path);
+    }
     file = fdopen(fd, "w");
     if (file == NULL) {
       close(fd);
