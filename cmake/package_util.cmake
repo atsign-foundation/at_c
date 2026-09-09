@@ -190,8 +190,8 @@ function(add_atsdk_espidf_component)
 
   project(
     ${arg_PACKAGE_NAME}
-    VERSION ${arg_VERSION}
-    DESCRIPTION ${arg_DESCRIPTION}
+    VERSION ${arg_PACKAGE_VERSION}
+    DESCRIPTION ${arg_PACKAGE_DESCRIPTION}
     HOMEPAGE_URL https://github.com/atsign-foundation/at_c
     LANGUAGES C
   )

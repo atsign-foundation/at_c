@@ -32,7 +32,7 @@ if(ESP_PLATFORM)
   add_atsdk_espidf_component(
     PACKAGE_NAME atauth
     PACKAGE_DESCRIPTION "Atsign technology authentication library"
-    PACKAGE_VERSION 0.4.0
+    PACKAGE_VERSION 0.4.1
     INCLUDE_DIR ${ATAUTH_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATAUTH_SOURCES}
     DEPS json mbedtls atlogger atcommons atchops atclient
@@ -43,7 +43,7 @@ endif()
 build_atsdk_package(
     PACKAGE_NAME atauth
     PACKAGE_DESCRIPTION "Atsign technology authentication library"
-    PACKAGE_VERSION 0.4.0
+    PACKAGE_VERSION 0.4.1
     PACKAGE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     INCLUDE_DIR ${ATAUTH_INCLUDE_DIR}
     PACKAGE_SOURCES ${ATAUTH_SOURCES}
