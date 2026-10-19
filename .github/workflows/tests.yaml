@@ -12,7 +12,7 @@ permissions: # added using https://github.com/step-security/secure-repo
 
 jobs:
   unit-tests:
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-24.04"
     steps:
       # Pin cmake to <4.0.0
       - name: Setup cmake
@@ -57,7 +57,7 @@ jobs:
           - type: memcheck
             flags: "-T memcheck"
             valgrind: true
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-24.04"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -123,7 +123,7 @@ jobs:
           ctest ${{ matrix.flags }} --test-dir build --output-on-failure --timeout 90 -VV
 
   build-examples:
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-24.04"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
