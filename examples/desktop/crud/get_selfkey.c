@@ -31,10 +31,7 @@ int main() {
   char *atserver_host = NULL;
   int atserver_port = -1;
 
-  const size_t valuelen = 1024;
-  char value[valuelen];
-  memset(value, 0, valuelen);
-  size_t valueolen = 0;
+  char *value = NULL;
 
   atclient atclient;
   atclient_init(&atclient);
@@ -82,7 +79,7 @@ int main() {
     goto exit;
   }
 
-  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value.str (%lu): \"%.*s\"\n", valueolen, (int)valueolen, value);
+  atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_INFO, "value: \"%s\"\n", value);
 
   ret = 0;
   goto exit;
@@ -92,6 +89,7 @@ exit: {
   atclient_free(&atclient);
   atclient_authenticate_options_free(&options);
   free(atkeystr);
+  free(value);
   return ret;
 }
 }
