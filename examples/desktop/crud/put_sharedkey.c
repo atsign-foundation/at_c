@@ -28,10 +28,7 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const size_t valuesize = 2048;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valueolen = 0;
+
 
   atclient atclient;
   atclient_init(&atclient);
@@ -74,7 +71,7 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "Putting atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen,
                (int)atkeystrlen, atkeystr);
 
-  if ((ret = atclient_put_shared_key(&atclient, &atkey, ATKEY_VALUE, NULL, NULL) != 0)) {
+  if ((ret = atclient_put_shared_key(&atclient, &atkey, ATKEY_VALUE, NULL, NULL)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to put public key");
     goto exit;
   }

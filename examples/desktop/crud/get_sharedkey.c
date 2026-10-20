@@ -41,10 +41,7 @@ int main() {
 
   atlogger_set_logging_level(ATLOGGER_LOGGING_LEVEL_DEBUG);
 
-  const size_t valuesize = 1024;
-  char value[valuesize];
-  memset(value, 0, sizeof(char) * valuesize);
-  size_t valuelen;
+  char *value = NULL;
 
   char *atserver_host = NULL;
   int atserver_port = -1;
@@ -90,12 +87,13 @@ int main() {
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "atkeystr.str (%lu): \"%.*s\"\n", atkeystrlen, (int)atkeystrlen,
                atkeystr);
 
-  ret = atclient_get_shared_key(&atclient, &atkey, value, NULL);
+  ret = atclient_get_shared_key(&atclient, &atkey, &value, NULL);
   if (ret != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Failed to get shared key");
     goto exit;
   }
 
+  const size_t valuelen = strlen(value);
   atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_DEBUG, "value.str (%lu): \"%.*s\"\n", valuelen, (int)valuelen, value);
 
   const size_t value_hash_len = 32;
@@ -130,6 +128,7 @@ exit: {
   atclient_free(&atclient);
   atclient_authenticate_options_free(&options);
   free(atkeystr);
+  free(value);
   return ret;
 }
 }
