@@ -169,7 +169,12 @@ void atclient_stop_atserver_connection(atclient *ctx) {
   /*
    * 2. Stop the atserver connection
    */
-  if (atclient_is_atserver_connection_started(ctx)) {
+  // A connect that failed part-way left the connection enabled, holding its
+  // TLS contexts (and fd, past the TCP connect), without ever being marked
+  // started. Free by what the connection holds rather than by the started
+  // flag: zeroing an enabled connection leaked tens of KB, and an fd, on
+  // every reconnect attempt that failed after the first.
+  if (atclient_is_atserver_connection_started(ctx) || ctx->atserver_connection._is_connection_enabled) {
     atclient_connection_free(&ctx->atserver_connection);
   }
   memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));

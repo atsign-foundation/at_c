@@ -1,3 +1,13 @@
+## 0.4.2
+
+- fix: a connect that fails after the TLS socket is configured (TCP connect,
+  handshake, certificate check) now releases the socket, and
+  atclient_stop_atserver_connection frees an enabled connection whether or
+  not it was marked started. Before, every reconnect attempt that failed
+  after the first leaked the parsed CA chain, RNG and SSL contexts (tens of
+  KB) and, past the TCP connect, the socket fd, so a daemon retrying through
+  an outage grew without bound
+
 ## 0.4.1
 
 - fix: at_activate onboard no longer frees an uninitialized keys struct when
