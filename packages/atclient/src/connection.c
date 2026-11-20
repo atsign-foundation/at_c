@@ -266,13 +266,11 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     return ret;
   }
 
-  if (!atclient_connection_is_connection_enabled(ctx)) {
-    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
-    return ret;
-  }
-
   /*
    * 3. Call pre_send hook, if it exists
+   *
+   * Before the connection is checked: a pre_send hook that reconnects is how
+   * a connection that has been closed gets opened again.
    */
   bool try_hooks = atclient_connection_hooks_is_enabled(ctx) && !ctx->hooks->_is_nested_call;
   if (try_hooks && atclient_connection_hooks_is_pre_write_initialized(ctx)) {
@@ -291,6 +289,12 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
       atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "pre_send hook failed with exit code: %d\n", ret);
       goto exit;
     }
+  }
+
+  if (!atclient_connection_is_connection_enabled(ctx)) {
+    ret = 1;
+    atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "Connection is not enabled\n");
+    goto exit;
   }
 
   /*
@@ -399,6 +403,9 @@ int atclient_connection_send(atclient_connection *ctx, const unsigned char *src,
     goto exit;
   }
   if (read_n - read_i > recv_size) {
+    // ret is 0 here: without setting it the caller was told the send had
+    // worked, with nothing in recv and recv_len never written
+    ret = 1;
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR,
                  "Read amount exceeds the stack allocated limit (will be fixed in a future update)\n");
     free(read_buf);
@@ -509,7 +516,7 @@ bool atclient_connection_is_connected(atclient_connection *ctx) {
 
   const size_t recvsize = 64;
   unsigned char recv[recvsize];
-  size_t recv_len;
+  size_t recv_len = 0;
 
   int ret = atclient_connection_send(ctx, (unsigned char *)command, commandlen, recv, recvsize, &recv_len);
   if (ret != 0) {

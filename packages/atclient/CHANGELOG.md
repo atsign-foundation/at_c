@@ -1,3 +1,29 @@
+## 0.4.3
+
+- fix: connection hooks survive atclient_pkam_authenticate and
+  atclient_cram_authenticate. Since 0.1.0 a re-authentication freed the
+  hooks and left the connection pointing at them with hooks off, so no hook
+  was called again; an application that reconnects from a pre-write hook
+  stopped reconnecting after the first reconnect that failed, and hooks set
+  before authenticating never ran (#372)
+- fix: an authentication that fails after connecting closes the connection
+  it opened. Left open, it was later sent the reply the attempt had stopped
+  waiting for, answered a noop so atclient_is_connected said true, and each
+  command read the reply to the one before it
+- fix: atclient_connection_send calls the pre-write hook before checking
+  that the connection is open, so a hook that reconnects can reopen a
+  closed connection
+- fix: a client that was connected still counts as started when a later
+  connect fails. It was marked not started, and put, get, notify and
+  heartbeat refuse such a client before reaching the connection, so after
+  one reconnect made while the atServer was unreachable a reconnecting
+  pre-write hook was never called again
+- fix: atclient_connection_send returns non-zero when the reply is longer
+  than the caller's buffer; it returned 0 with nothing in recv and recv_len
+  unwritten
+- fix: atclient_stop_atserver_connection and atclient_free release what the
+  connection holds whether or not it is started or enabled
+
 ## 0.4.2
 
 - fix: a connect that fails after the TLS socket is configured (TCP connect,
