@@ -61,9 +61,9 @@ void atclient_free(atclient *ctx) {
     atclient_unset_atsign(ctx);
   }
 
-  if (atclient_is_atserver_connection_started(ctx)) {
-    atclient_stop_atserver_connection(ctx);
-  }
+  // whether or not the connection is started: one whose connect or
+  // authentication failed is not, and may still hold its hooks
+  atclient_stop_atserver_connection(ctx);
 }
 
 int atclient_set_atsign(atclient *ctx, const char *atsign) {
@@ -132,8 +132,18 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host
     return ret;
   }
 
-  // remove hooks to preserve them across resets
-  atclient_connection_hooks *conn_hooks = ctx->atserver_connection.hooks;
+  // Take the hooks off the connection so that they outlast the reset: both
+  // the struct and the flag that says it is in use. Stopping the connection
+  // frees the hooks it finds enabled, so putting back only the pointer
+  // afterwards, as this did, left the connection with freed memory for hooks
+  // and the flag cleared: no hook was called again, and the caller's next
+  // write from inside a hook went to the freed struct.
+  atclient_connection_hooks *conn_hooks = NULL;
+  if (atclient_connection_hooks_is_enabled(&ctx->atserver_connection)) {
+    conn_hooks = ctx->atserver_connection.hooks;
+  }
+  ctx->atserver_connection.hooks = NULL;
+  ctx->atserver_connection._is_hooks_enabled = false;
 
   // clear the atserver connection
   atclient_stop_atserver_connection(ctx);
@@ -143,6 +153,7 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host
 
   // add back hooks
   ctx->atserver_connection.hooks = conn_hooks;
+  ctx->atserver_connection._is_hooks_enabled = conn_hooks != NULL;
 
   if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondary_host, secondary_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
@@ -174,9 +185,12 @@ void atclient_stop_atserver_connection(atclient *ctx) {
   // started. Free by what the connection holds rather than by the started
   // flag: zeroing an enabled connection leaked tens of KB, and an fd, on
   // every reconnect attempt that failed after the first.
-  if (atclient_is_atserver_connection_started(ctx) || ctx->atserver_connection._is_connection_enabled) {
-    atclient_connection_free(&ctx->atserver_connection);
-  }
+  // Nor by whether it is enabled: a connection whose connect failed, or that
+  // a failed authentication closed, is neither started nor enabled and still
+  // holds its hooks. atclient_connection_free releases each thing the
+  // connection holds by that thing's own flag, and nothing of one that holds
+  // nothing.
+  atclient_connection_free(&ctx->atserver_connection);
   memset(&(ctx->atserver_connection), 0, sizeof(atclient_connection));
   atclient_set_atserver_connection_started(ctx, false);
 }
@@ -248,6 +262,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
   char *atsign_with_at = NULL;
 
   bool should_free_atserver_host = false;
+  bool connection_started = false;
 
   /*
    * 3. Ensure that the atsign has the @ symbol.
@@ -299,6 +314,7 @@ int atclient_pkam_authenticate(atclient *ctx, const char *atsign, const atclient
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
     goto exit;
   }
+  connection_started = true;
 
   /*
    * 7a. Build `from:` cmd
@@ -431,6 +447,14 @@ exit: {
   if (should_free_atserver_host) {
     free(atserver_host);
   }
+  if (ret != 0 && connection_started) {
+    // The connection this opened never finished authenticating, and the
+    // atServer may yet send the reply this stopped waiting for. Left open, it
+    // answers a noop like any other, so atclient_is_connected says true, and
+    // each command sent on it reads the reply to the one before. Close it; it
+    // keeps its hooks, so a pre-write hook that reconnects gets to try again.
+    atclient_connection_disconnect(&ctx->atserver_connection);
+  }
   return ret;
 }
 }
@@ -478,6 +502,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
   memset(digest, 0, sizeof(unsigned char) * SHA_512_DIGEST_SIZE);
   char *atsign_without_at = NULL;
   bool should_free_atserver_host = false;
+  bool connection_started = false;
   /*
    * 3. Ensure that the atsign has the @ symbol.
    */
@@ -528,6 +553,7 @@ int atclient_cram_authenticate(atclient *ctx, const char *atsign, const char *cr
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_start_atserver_connection: %d\n", ret);
     goto exit;
   }
+  connection_started = true;
 
   /*
    * 6a. Build `from:` noop_cmd
@@ -654,6 +680,14 @@ exit: {
   free(cram_cmd);
   if (should_free_atserver_host) {
     free(atserver_host);
+  }
+  if (ret != 0 && connection_started) {
+    // The connection this opened never finished authenticating, and the
+    // atServer may yet send the reply this stopped waiting for. Left open, it
+    // answers a noop like any other, so atclient_is_connected says true, and
+    // each command sent on it reads the reply to the one before. Close it; it
+    // keeps its hooks, so a pre-write hook that reconnects gets to try again.
+    atclient_connection_disconnect(&ctx->atserver_connection);
   }
   return ret;
 }
