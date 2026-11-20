@@ -49,6 +49,7 @@ static struct {
   bool authenticated;
   bool slow_pkam; // the atServer takes longer than the read timeout to answer the next pkam:
   bool open;
+  bool unreachable; // the network, or the atServer, is down: nothing connects
   int connects;
 } srv;
 
@@ -87,6 +88,9 @@ int atclient_tls_socket_connect(struct atclient_tls_socket *socket, const char *
   (void)socket;
   (void)host;
   (void)port;
+  if (srv.unreachable) {
+    return 1;
+  }
   srv.connects++;
   srv.open = true;
   srv.authenticated = false;
@@ -260,6 +264,21 @@ int main(void) {
   check(send("noop:0\r\n", reply, sizeof(reply)) != 0, "when the reconnect in her hook fails, then the command fails");
   check(send("noop:0\r\n", reply, sizeof(reply)) == 0 && strcmp(reply, "data:ok") == 0,
         "and her next command reconnects and reads its own reply");
+
+  printf("\n--- the atServer can't be reached\n");
+  atclient_connection_disconnect(&client.atserver_connection);
+  srv.unreachable = true;
+  check(send("noop:0\r\n", reply, sizeof(reply)) != 0 && send("noop:0\r\n", reply, sizeof(reply)) != 0,
+        "when the atServer can't be reached, then each command @alice sends fails");
+  check(atclient_connection_hooks_is_enabled(&client.atserver_connection), "and her hooks are still set");
+  check(atclient_send_heartbeat(&client) != 0, "and a heartbeat fails");
+  srv.unreachable = false;
+  // a heartbeat, as put, get and notify do, checks the client before it
+  // gets as far as the connection and its hooks
+  check(atclient_send_heartbeat(&client) == 0,
+        "when the atServer can be reached again, then her next heartbeat reconnects and is answered");
+  check(send("noop:0\r\n", reply, sizeof(reply)) == 0 && strcmp(reply, "data:ok") == 0,
+        "and her next command reads its own reply");
 
   atclient_free(&client);
   check(!atclient_connection_hooks_is_enabled(&client.atserver_connection) && !srv.open,

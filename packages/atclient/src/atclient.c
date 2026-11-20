@@ -138,6 +138,13 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host
   // afterwards, as this did, left the connection with freed memory for hooks
   // and the flag cleared: no hook was called again, and the caller's next
   // write from inside a hook went to the freed struct.
+  // Whether this client had a connection before. If it had, it keeps counting
+  // as started when the new connect fails: the commands (put, get, notify,
+  // heartbeat...) refuse a client that isn't started before they get as far
+  // as the connection, so a client marked not started could never reach the
+  // pre-write hook that would reconnect it.
+  const bool was_started = atclient_is_atserver_connection_started(ctx);
+
   atclient_connection_hooks *conn_hooks = NULL;
   if (atclient_connection_hooks_is_enabled(&ctx->atserver_connection)) {
     conn_hooks = ctx->atserver_connection.hooks;
@@ -157,6 +164,7 @@ int atclient_start_atserver_connection(atclient *ctx, const char *secondary_host
 
   if ((ret = atclient_connection_connect(&(ctx->atserver_connection), secondary_host, secondary_port)) != 0) {
     atlogger_log(TAG, ATLOGGER_LOGGING_LEVEL_ERROR, "atclient_connection_connect: %d\n", ret);
+    atclient_set_atserver_connection_started(ctx, was_started);
     goto exit;
   }
 

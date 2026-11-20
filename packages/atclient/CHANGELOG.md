@@ -13,6 +13,11 @@
 - fix: atclient_connection_send calls the pre-write hook before checking
   that the connection is open, so a hook that reconnects can reopen a
   closed connection
+- fix: a client that was connected still counts as started when a later
+  connect fails. It was marked not started, and put, get, notify and
+  heartbeat refuse such a client before reaching the connection, so after
+  one reconnect made while the atServer was unreachable a reconnecting
+  pre-write hook was never called again
 - fix: atclient_connection_send returns non-zero when the reply is longer
   than the caller's buffer; it returned 0 with nothing in recv and recv_len
   unwritten
