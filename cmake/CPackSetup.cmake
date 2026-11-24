@@ -1,7 +1,7 @@
 # package info
 set(CPACK_PACKAGE_NAME atsdk)
 set(CPACK_PACKAGE_DESCRIPTION "Atsign's atSDK library")
-set(CPACK_PACKAGE_VERSION 0.4.3)
+set(CPACK_PACKAGE_VERSION 0.4.4)
 set(CPACK_PACKAGE_VENDOR_NAME atsign-foundation)
 
 # cmake configuration
