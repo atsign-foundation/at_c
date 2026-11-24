@@ -1,3 +1,7 @@
+## 0.4.4
+
+- build(deps): Bump MbedTLS to 3.6.8
+
 ## 0.4.3
 
 - fix: connection hooks survive atclient_pkam_authenticate and
